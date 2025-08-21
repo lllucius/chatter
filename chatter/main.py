@@ -207,7 +207,7 @@ def create_app() -> FastAPI:
             )
 
     # --- DELAYED IMPORTS: Routers registered here only ---
-    from chatter.api import analytics, auth, chat, documents, health, profiles, toolserver
+    from chatter.api import analytics, auth, chat, documents, health, profiles, prompts, toolserver
 
     app.include_router(
         health.router,
@@ -236,6 +236,12 @@ def create_app() -> FastAPI:
         profiles.router,
         prefix=f"{settings.api_prefix}/profiles",
         tags=["Profiles"]
+    )
+
+    app.include_router(
+        prompts.router,
+        prefix=f"{settings.api_prefix}/prompts",
+        tags=["Prompts"]
     )
 
     app.include_router(

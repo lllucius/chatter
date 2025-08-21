@@ -95,12 +95,73 @@ app.add_typer(prompts_app, name="prompts")
 
 
 @prompts_app.command("list")
-def list_prompts() -> None:
+def list_prompts(
+    prompt_type: str = typer.Option(None, "--type", "-t", help="Filter by prompt type"),
+    category: str = typer.Option(None, "--category", "-c", help="Filter by category"),
+    tags: str = typer.Option(None, "--tags", help="Filter by tags (comma-separated)"),
+    public: bool = typer.Option(None, "--public", help="Filter by public status"),
+    chain: bool = typer.Option(None, "--chain", help="Filter by chain status"),
+    limit: int = typer.Option(20, "--limit", "-l", help="Maximum number of results"),
+    offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
+) -> None:
     """List available prompts."""
-    # TODO: Implement when prompts API is available
-    console.print("⚠️  Prompts API not yet implemented.")
-    console.print("💡 This feature requires implementing /api/v1/prompts endpoints.")
-    console.print("📋 Prompt model exists at: chatter/models/prompt.py")
+    async def _list():
+        api_client = get_api_client()
+        try:
+            params = {
+                "limit": limit,
+                "offset": offset,
+            }
+            if prompt_type:
+                params["prompt_type"] = prompt_type
+            if category:
+                params["category"] = category
+            if tags:
+                params["tags"] = tags
+            if public is not None:
+                params["is_public"] = public
+            if chain is not None:
+                params["is_chain"] = chain
+                
+            response = await api_client.request("GET", "/prompts", params=params)
+            
+            if not response or not response.get("prompts"):
+                console.print("📝 No prompts found.")
+                return
+                
+            # Create table
+            table = Table(title=f"Prompts ({response['total_count']} total)")
+            table.add_column("ID", style="dim", no_wrap=True)
+            table.add_column("Name", style="bold")
+            table.add_column("Type", style="cyan")
+            table.add_column("Category", style="yellow")
+            table.add_column("Usage", style="green")
+            table.add_column("Public", style="magenta")
+            table.add_column("Created", style="dim")
+            
+            for prompt in response["prompts"]:
+                table.add_row(
+                    prompt["id"][:8] + "...",
+                    prompt["name"],
+                    prompt["prompt_type"],
+                    prompt["category"],
+                    str(prompt.get("usage_count", 0)),
+                    "Yes" if prompt.get("is_public") else "No",
+                    prompt.get("created_at", "")[:10] if prompt.get("created_at") else "N/A"
+                )
+            
+            console.print(table)
+            
+            # Show pagination info
+            total = response["total_count"]
+            showing_from = offset + 1
+            showing_to = min(offset + limit, total)
+            console.print(f"\n📄 Showing {showing_from}-{showing_to} of {total} prompts")
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_list())
 
 
 @prompts_app.command("create")
@@ -109,12 +170,59 @@ def create_prompt(
     content: str = typer.Option(..., "--content", "-c", help="Prompt content"),
     category: str = typer.Option("general", "--category", help="Prompt category"),
     description: str = typer.Option(None, "--description", "-d", help="Prompt description"),
+    prompt_type: str = typer.Option("template", "--type", "-t", help="Prompt type"),
+    template_format: str = typer.Option("f-string", "--format", "-f", help="Template format"),
+    tags: str = typer.Option(None, "--tags", help="Tags (comma-separated)"),
+    public: bool = typer.Option(False, "--public", help="Make prompt public"),
+    interactive: bool = typer.Option(False, "--interactive", "-i", help="Interactive mode"),
 ) -> None:
     """Create a new prompt."""
-    # TODO: Implement when prompts API is available
-    console.print("⚠️  Prompts API not yet implemented.")
-    console.print("💡 This feature requires implementing /api/v1/prompts endpoints.")
-    console.print(f"📝 Would create prompt: '{name}' with content: '{content[:50]}...'")
+    
+    async def _create():
+        api_client = get_api_client()
+        try:
+            # Interactive mode
+            if interactive:
+                console.print("[bold]Creating new prompt[/bold]\\n")
+                name = Prompt.ask("Prompt name")
+                content = Prompt.ask("Prompt content")
+                description = Prompt.ask("Description", default="")
+                category = Prompt.ask("Category", default="general")
+                prompt_type = Prompt.ask("Type", default="template")
+                template_format = Prompt.ask("Template format", default="f-string")
+                tags_input = Prompt.ask("Tags (comma-separated)", default="")
+                public = Confirm.ask("Make public?", default=False)
+                tags = [tag.strip() for tag in tags_input.split(",") if tag.strip()] if tags_input else None
+            else:
+                tags = [tag.strip() for tag in tags.split(",") if tag.strip()] if tags else None
+            
+            # Prepare data
+            prompt_data = {
+                "name": name,
+                "content": content,
+                "category": category,
+                "prompt_type": prompt_type,
+                "template_format": template_format,
+                "is_public": public,
+            }
+            
+            if description:
+                prompt_data["description"] = description
+            if tags:
+                prompt_data["tags"] = tags
+                
+            response = await api_client.request("POST", "/prompts", json=prompt_data)
+            
+            console.print("✅ Prompt created successfully!")
+            console.print(f"📝 Prompt ID: {response['id']}")
+            console.print(f"🏷️  Name: {response['name']}")
+            console.print(f"📂 Category: {response['category']}")
+            console.print(f"🔧 Type: {response['prompt_type']}")
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_create())
 
 
 @prompts_app.command("show")
@@ -122,19 +230,182 @@ def show_prompt(
     prompt_id: str = typer.Argument(..., help="Prompt ID to show"),
 ) -> None:
     """Show prompt details."""
-    # TODO: Implement when prompts API is available
-    console.print("⚠️  Prompts API not yet implemented.")
-    console.print("💡 This feature requires implementing /api/v1/prompts endpoints.")
+    async def _show():
+        api_client = get_api_client()
+        try:
+            response = await api_client.request("GET", f"/prompts/{prompt_id}")
+            
+            if not response:
+                console.print(f"❌ Prompt {prompt_id} not found.")
+                return
+                
+            # Create detailed view
+            console.print(Panel.fit(f"[bold]Prompt: {response['name']}[/bold]"))
+            
+            # Basic info table
+            basic_table = Table(title="Basic Information", show_header=False)
+            basic_table.add_column("Field", style="cyan")
+            basic_table.add_column("Value", style="white")
+            
+            basic_table.add_row("ID", response["id"])
+            basic_table.add_row("Name", response["name"])
+            basic_table.add_row("Description", response.get("description", "N/A"))
+            basic_table.add_row("Type", response["prompt_type"])
+            basic_table.add_row("Category", response["category"])
+            basic_table.add_row("Format", response["template_format"])
+            basic_table.add_row("Public", "Yes" if response.get("is_public") else "No")
+            basic_table.add_row("Chain", "Yes" if response.get("is_chain") else "No")
+            basic_table.add_row("Created", response.get("created_at", "N/A"))
+            
+            console.print(basic_table)
+            
+            # Content
+            content_panel = Panel(
+                response["content"],
+                title="Content",
+                border_style="blue"
+            )
+            console.print(content_panel)
+            
+            # Usage stats table
+            stats_table = Table(title="Usage Statistics", show_header=False)
+            stats_table.add_column("Metric", style="cyan")
+            stats_table.add_column("Value", style="green")
+            
+            stats_table.add_row("Usage Count", str(response.get("usage_count", 0)))
+            stats_table.add_row("Total Tokens", str(response.get("total_tokens_used", 0)))
+            stats_table.add_row("Total Cost", f"${response.get('total_cost', 0):.4f}")
+            stats_table.add_row("Last Used", response.get("last_used_at", "Never")[:19] if response.get("last_used_at") else "Never")
+            
+            console.print(stats_table)
+            
+            # Variables and metadata
+            if response.get("variables"):
+                console.print(f"\\n🔧 Variables: {', '.join(response['variables'])}")
+            if response.get("tags"):
+                console.print(f"🏷️  Tags: {', '.join(response['tags'])}")
+                
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_show())
 
 
 @prompts_app.command("delete")
 def delete_prompt(
     prompt_id: str = typer.Argument(..., help="Prompt ID to delete"),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
 ) -> None:
     """Delete a prompt."""
-    # TODO: Implement when prompts API is available
-    console.print("⚠️  Prompts API not yet implemented.")
-    console.print("💡 This feature requires implementing /api/v1/prompts endpoints.")
+    async def _delete():
+        api_client = get_api_client()
+        try:
+            # Get prompt details first
+            prompt = await api_client.request("GET", f"/prompts/{prompt_id}")
+            
+            if not force:
+                console.print(f"Prompt: {prompt['name']}")
+                console.print(f"Type: {prompt['prompt_type']}")
+                console.print(f"Category: {prompt['category']}")
+                if not Confirm.ask("Are you sure you want to delete this prompt?"):
+                    console.print("❌ Deletion cancelled.")
+                    return
+            
+            await api_client.request("DELETE", f"/prompts/{prompt_id}")
+            console.print("✅ Prompt deleted successfully!")
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_delete())
+
+
+@prompts_app.command("test")
+def test_prompt(
+    prompt_id: str = typer.Argument(..., help="Prompt ID to test"),
+    variables: str = typer.Option(None, "--variables", "-v", help="Variables as JSON string"),
+    validate_only: bool = typer.Option(False, "--validate-only", help="Only validate, don't render"),
+) -> None:
+    """Test a prompt with variables."""
+    async def _test():
+        api_client = get_api_client()
+        try:
+            # Parse variables
+            test_variables = {}
+            if variables:
+                try:
+                    import json
+                    test_variables = json.loads(variables)
+                except json.JSONDecodeError:
+                    console.print("❌ Invalid JSON format for variables.")
+                    return
+            
+            test_data = {
+                "variables": test_variables,
+                "validate_only": validate_only
+            }
+            
+            response = await api_client.request("POST", f"/prompts/{prompt_id}/test", json=test_data)
+            
+            # Show validation results
+            validation = response["validation_result"]
+            if validation["valid"]:
+                console.print("✅ Validation passed!")
+            else:
+                console.print("❌ Validation failed!")
+                for error in validation.get("errors", []):
+                    console.print(f"  • {error}")
+            
+            # Show warnings
+            for warning in validation.get("warnings", []):
+                console.print(f"⚠️  {warning}")
+            
+            # Show rendered content
+            if response.get("rendered_content"):
+                content_panel = Panel(
+                    response["rendered_content"],
+                    title="Rendered Content",
+                    border_style="green"
+                )
+                console.print(content_panel)
+            
+            # Show stats
+            console.print(f"\\n⏱️  Test duration: {response['test_duration_ms']}ms")
+            if response.get("estimated_tokens"):
+                console.print(f"🔢 Estimated tokens: {response['estimated_tokens']}")
+                
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_test())
+
+
+@prompts_app.command("clone")
+def clone_prompt(
+    prompt_id: str = typer.Argument(..., help="Prompt ID to clone"),
+    name: str = typer.Option(..., "--name", "-n", help="Name for cloned prompt"),
+    description: str = typer.Option(None, "--description", "-d", help="Description for cloned prompt"),
+) -> None:
+    """Clone an existing prompt."""
+    async def _clone():
+        api_client = get_api_client()
+        try:
+            clone_data = {
+                "name": name,
+                "description": description
+            }
+            
+            response = await api_client.request("POST", f"/prompts/{prompt_id}/clone", json=clone_data)
+            
+            console.print("✅ Prompt cloned successfully!")
+            console.print(f"📝 New Prompt ID: {response['id']}")
+            console.print(f"🏷️  Name: {response['name']}")
+            console.print(f"📂 Category: {response['category']}")
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_clone())
 
 
 @app.command()

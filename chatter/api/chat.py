@@ -280,6 +280,7 @@ async def chat_stream(
         Streaming response with chat chunks
     """
     async def generate_stream():
+        """Generate streaming chat response chunks."""
         try:
             async for chunk in chat_service.chat_streaming(current_user.id, chat_request):
                 yield f"data: {json.dumps(chunk)}\n\n"

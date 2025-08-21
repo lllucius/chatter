@@ -40,6 +40,7 @@ class UserResponse(UserBase):
     last_login_at: datetime | None = Field(None, description="Last login date")
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
@@ -98,4 +99,5 @@ class APIKeyResponse(BaseModel):
     created_at: datetime = Field(..., description="Creation date")
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True

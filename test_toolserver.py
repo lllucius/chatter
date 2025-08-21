@@ -11,6 +11,7 @@ This script tests the new multi-tool server support including:
 
 import asyncio
 import sys
+import traceback
 from datetime import UTC
 from pathlib import Path
 
@@ -119,7 +120,6 @@ async def test_tool_server_functionality():
 
     except Exception as e:
         print(f"❌ Test failed: {e}")
-        import traceback
         traceback.print_exc()
 
 
@@ -161,7 +161,6 @@ async def test_mcp_integration():
 
     except Exception as e:
         print(f"❌ MCP integration test failed: {e}")
-        import traceback
         traceback.print_exc()
 
 
@@ -234,7 +233,6 @@ async def test_api_schemas():
 
     except Exception as e:
         print(f"❌ Schema test failed: {e}")
-        import traceback
         traceback.print_exc()
 
 

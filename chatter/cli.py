@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import subprocess
 import sys
 
 import typer
@@ -100,7 +101,6 @@ def db_check() -> None:
 def db_migrate() -> None:
     """Run database migrations."""
     try:
-        import subprocess
         result = subprocess.run(
             ["alembic", "upgrade", "head"],
             cwd=os.getcwd(),
@@ -132,7 +132,6 @@ def db_revision(
 ) -> None:
     """Create a new database migration."""
     try:
-        import subprocess
         cmd = ["alembic", "revision"]
 
         if autogenerate:
@@ -219,7 +218,8 @@ def config_test() -> None:
     issues = []
 
     # Test database URL
-    if not settings.database_url or settings.database_url == "postgresql+asyncpg://chatter:chatter_password@localhost:5432/chatter":
+    default_db_url = "postgresql+asyncpg://chatter:chatter_password@localhost:5432/chatter"
+    if not settings.database_url or settings.database_url == default_db_url:
         issues.append("⚠️  Using default database URL - update for production")
 
     # Test secret key

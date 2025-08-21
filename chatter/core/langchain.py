@@ -79,6 +79,7 @@ class LangChainOrchestrator:
         ])
 
         def format_docs(docs):
+            """Format retrieved documents for RAG context."""
             return "\n\n".join(doc.page_content for doc in docs)
 
         rag_chain = (
@@ -129,9 +130,11 @@ class LangChainOrchestrator:
         ])
 
         def format_docs(docs):
+            """Format retrieved documents for context."""
             return "\n\n".join(doc.page_content for doc in docs)
 
         def contextualized_question(input: dict):
+            """Generate contextualized question from chat history."""
             if input.get("chat_history"):
                 return contextualize_q_chain
             else:

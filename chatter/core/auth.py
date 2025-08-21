@@ -28,6 +28,7 @@ class AuthenticationError(HTTPException):
     """Authentication error exception."""
 
     def __init__(self, detail: str = "Authentication failed"):
+        """Initialize authentication error with custom detail."""
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=detail,
@@ -39,6 +40,7 @@ class AuthorizationError(HTTPException):
     """Authorization error exception."""
 
     def __init__(self, detail: str = "Access denied"):
+        """Initialize authorization error with custom detail."""
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=detail,
@@ -49,6 +51,7 @@ class UserAlreadyExistsError(HTTPException):
     """User already exists error."""
 
     def __init__(self, detail: str = "User already exists"):
+        """Initialize user already exists error with custom detail."""
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
             detail=detail,
@@ -59,6 +62,7 @@ class UserNotFoundError(HTTPException):
     """User not found error."""
 
     def __init__(self, detail: str = "User not found"):
+        """Initialize user not found error with custom detail."""
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=detail,

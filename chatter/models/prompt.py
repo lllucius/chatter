@@ -75,7 +75,9 @@ class Prompt(Base):
     variables: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
     # Template configuration
-    template_format: Mapped[str] = mapped_column(String(20), default="f-string", nullable=False)  # f-string, jinja2, mustache
+    template_format: Mapped[str] = mapped_column(
+        String(20), default="f-string", nullable=False
+    )  # f-string, jinja2, mustache
     input_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     output_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 

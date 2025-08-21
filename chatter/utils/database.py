@@ -49,6 +49,7 @@ def get_engine() -> AsyncEngine:
         if settings.debug_database_queries:
             @event.listens_for(_engine.sync_engine, "before_cursor_execute")
             def receive_before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+                """Log SQL queries when debug mode is enabled."""
                 logger.debug("SQL Query", statement=statement, parameters=parameters)
 
     return _engine
@@ -148,8 +149,13 @@ Please provide a detailed response that addresses all aspects of the task.""",
                 "variables": ["task", "requirements", "context"],
                 "examples": [
                     {
-                        "input": {"task": "Summarize the quarterly report", "requirements": "Keep it under 200 words, highlight key metrics", "context": "Q3 2024 financial data"},
-                        "output": "A concise summary focusing on revenue growth, expenses, and key performance indicators from Q3 2024."
+                        "input": {
+                            "task": "Summarize the quarterly report",
+                            "requirements": "Keep it under 200 words, highlight key metrics",
+                            "context": "Q3 2024 financial data"
+                        },
+                        "output": "A concise summary focusing on revenue growth, expenses, "
+                                  "and key performance indicators from Q3 2024."
                     }
                 ],
                 "suggested_temperature": 0.3,
@@ -176,7 +182,10 @@ Output: {example3_output}
 Now, please follow the same pattern for:
 Input: {new_input}
 Output:""",
-                "variables": ["example1_input", "example1_output", "example2_input", "example2_output", "example3_input", "example3_output", "new_input"],
+                "variables": [
+                    "example1_input", "example1_output", "example2_input", "example2_output",
+                    "example3_input", "example3_output", "new_input"
+                ],
                 "suggested_temperature": 0.2,
                 "suggested_max_tokens": 800
             },
@@ -516,6 +525,7 @@ class DatabaseManager:
     """Context manager for database operations."""
 
     def __init__(self):
+        """Initialize database session context."""
         self.session: AsyncSession | None = None
 
     async def __aenter__(self) -> AsyncSession:

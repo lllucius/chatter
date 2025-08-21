@@ -41,7 +41,7 @@ def setup_logging() -> None:
         handlers.append(logging.FileHandler(settings.log_file))
 
     logging.basicConfig(
-        format="%(message)s" if settings.log_json else "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+        format="%(message)s",
         level=getattr(logging, settings.log_level.upper()),
         handlers=handlers,
     )

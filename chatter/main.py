@@ -2,6 +2,7 @@
 
 import asyncio
 import time
+import traceback
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -34,20 +35,21 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         """Log requests and responses when debug logging is enabled."""
         start_time = time.time()
 
+        # Always capture request body for potential error logging
+        request_body = b""
+        if request.method in ["POST", "PUT", "PATCH"]:
+            request_body = await request.body()
+            # Re-create request with body for downstream processing
+            request._body = request_body
+
         # Log request if debug enabled
         if settings.debug_http_requests:
-            body = b""
-            if request.method in ["POST", "PUT", "PATCH"]:
-                body = await request.body()
-                # Re-create request with body for downstream processing
-                request._body = body
-
             logger.debug(
                 "HTTP Request",
                 method=request.method,
                 url=str(request.url),
                 headers=dict(request.headers),
-                body=body.decode('utf-8', errors='ignore') if body else None
+                body=request_body.decode('utf-8', errors='ignore') if request_body else None
             )
 
         response = await call_next(request)
@@ -55,8 +57,44 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         # Calculate request duration
         duration = time.time() - start_time
 
-        # Log response if debug enabled
-        if settings.debug_http_requests:
+        # Check if this is an error response (4xx or 5xx)
+        is_error = response.status_code >= 400
+
+        # For error responses, always log detailed information regardless of debug setting
+        if is_error:
+            # Try to capture response body for error cases
+            response_body = None
+            try:
+                # For streaming responses, we can't easily capture the body
+                # But for most error responses, we can try to read it
+                if hasattr(response, 'body') and response.body:
+                    response_body = response.body.decode('utf-8', errors='ignore')
+            except Exception:
+                # If we can't capture response body, that's okay
+                pass
+
+            # Capture current stack trace to help identify where the error originated
+            stack_trace = None
+            try:
+                # Get the current stack trace (this will show the call path through the middleware)
+                stack_trace = traceback.format_stack()
+            except Exception:
+                pass
+
+            logger.error(
+                "HTTP Error Response",
+                method=request.method,
+                url=str(request.url),
+                status_code=response.status_code,
+                duration=duration,
+                request_headers=dict(request.headers),
+                request_body=request_body.decode('utf-8', errors='ignore') if request_body else None,
+                response_headers=dict(response.headers),
+                response_body=response_body,
+                stack_trace=stack_trace
+            )
+        elif settings.debug_http_requests:
+            # Normal debug logging for non-error responses
             logger.debug(
                 "HTTP Response",
                 status_code=response.status_code,
@@ -64,7 +102,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 duration=duration
             )
         else:
-            # Always log basic request info
+            # Always log basic request info for non-errors
             logger.info(
                 "HTTP Request",
                 method=request.method,

@@ -5,6 +5,7 @@ from chatter.schemas.chat import *
 from chatter.schemas.document import *
 from chatter.schemas.profile import *
 from chatter.schemas.analytics import *
+from chatter.schemas.toolserver import *
 
 __all__ = [
     # Auth schemas
@@ -78,4 +79,22 @@ __all__ = [
     "AnalyticsExportRequest",
     "AnalyticsExportResponse",
     "DashboardResponse",
+    
+    # Tool server schemas
+    "ToolServerBase",
+    "ToolServerCreate",
+    "ToolServerUpdate",
+    "ToolServerResponse",
+    "ToolServerStatusUpdate",
+    "ServerToolBase",
+    "ServerToolUpdate",
+    "ServerToolResponse",
+    "ToolUsageCreate",
+    "ToolUsageResponse",
+    "ToolServerMetrics",
+    "ToolMetrics",
+    "ToolServerAnalytics",
+    "ToolServerHealthCheck",
+    "BulkToolServerOperation",
+    "BulkOperationResult",
 ]

@@ -1,6 +1,6 @@
 """API package for Chatter application."""
 
-from chatter.api import auth, chat, documents, analytics, health, profiles
+from chatter.api import auth, chat, documents, analytics, health, profiles, toolserver
 
 __all__ = [
     "auth",
@@ -9,4 +9,5 @@ __all__ = [
     "analytics",
     "health",
     "profiles",
+    "toolserver",
 ]

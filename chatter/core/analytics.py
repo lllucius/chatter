@@ -798,6 +798,328 @@ class AnalyticsService:
             logger.error("Failed to get system analytics", error=str(e))
             return {}
     
+    async def get_tool_server_analytics(
+        self,
+        user_id: Optional[str] = None,
+        time_range: Optional[AnalyticsTimeRange] = None
+    ) -> Dict[str, Any]:
+        """Get tool server analytics.
+        
+        Args:
+            user_id: User ID for user-specific analytics
+            time_range: Time range filter
+            
+        Returns:
+            Dictionary with tool server analytics
+        """
+        try:
+            from chatter.models.toolserver import ToolServer, ServerTool, ToolUsage, ServerStatus, ToolStatus
+            
+            time_filter = self._build_time_filter_for_table(time_range, ToolUsage, ToolUsage.called_at)
+            
+            # Overall server counts
+            total_servers_result = await self.session.execute(
+                select(func.count(ToolServer.id))
+            )
+            total_servers = total_servers_result.scalar() or 0
+            
+            active_servers_result = await self.session.execute(
+                select(func.count(ToolServer.id)).where(
+                    ToolServer.status == ServerStatus.ENABLED
+                )
+            )
+            active_servers = active_servers_result.scalar() or 0
+            
+            # Tool counts
+            total_tools_result = await self.session.execute(
+                select(func.count(ServerTool.id))
+            )
+            total_tools = total_tools_result.scalar() or 0
+            
+            enabled_tools_result = await self.session.execute(
+                select(func.count(ServerTool.id)).where(
+                    ServerTool.status == ToolStatus.ENABLED
+                )
+            )
+            enabled_tools = enabled_tools_result.scalar() or 0
+            
+            # Usage metrics
+            usage_filters = [time_filter] if time_filter is not None else []
+            if user_id:
+                usage_filters.append(ToolUsage.user_id == user_id)
+            
+            usage_where = and_(*usage_filters) if usage_filters else None
+            
+            # Daily usage counts
+            today = datetime.now(timezone.utc).date()
+            week_ago = today - timedelta(days=7)
+            month_ago = today - timedelta(days=30)
+            
+            calls_today_result = await self.session.execute(
+                select(func.count(ToolUsage.id)).where(
+                    and_(
+                        func.date(ToolUsage.called_at) == today,
+                        usage_where if usage_where is not None else True
+                    )
+                )
+            )
+            calls_today = calls_today_result.scalar() or 0
+            
+            calls_week_result = await self.session.execute(
+                select(func.count(ToolUsage.id)).where(
+                    and_(
+                        ToolUsage.called_at >= datetime.combine(week_ago, datetime.min.time()).replace(tzinfo=timezone.utc),
+                        usage_where if usage_where is not None else True
+                    )
+                )
+            )
+            calls_week = calls_week_result.scalar() or 0
+            
+            calls_month_result = await self.session.execute(
+                select(func.count(ToolUsage.id)).where(
+                    and_(
+                        ToolUsage.called_at >= datetime.combine(month_ago, datetime.min.time()).replace(tzinfo=timezone.utc),
+                        usage_where if usage_where is not None else True
+                    )
+                )
+            )
+            calls_month = calls_month_result.scalar() or 0
+            
+            # Error counts
+            errors_today_result = await self.session.execute(
+                select(func.count(ToolUsage.id)).where(
+                    and_(
+                        func.date(ToolUsage.called_at) == today,
+                        ToolUsage.success == False,
+                        usage_where if usage_where is not None else True
+                    )
+                )
+            )
+            errors_today = errors_today_result.scalar() or 0
+            
+            # Success rate
+            total_calls = calls_month
+            total_errors = await self.session.execute(
+                select(func.count(ToolUsage.id)).where(
+                    and_(
+                        ToolUsage.called_at >= datetime.combine(month_ago, datetime.min.time()).replace(tzinfo=timezone.utc),
+                        ToolUsage.success == False,
+                        usage_where if usage_where is not None else True
+                    )
+                )
+            )
+            total_errors = total_errors.scalar() or 0
+            overall_success_rate = (total_calls - total_errors) / total_calls if total_calls > 0 else 1.0
+            
+            # Performance metrics
+            avg_response_result = await self.session.execute(
+                select(func.avg(ToolUsage.response_time_ms)).where(
+                    and_(
+                        ToolUsage.response_time_ms.is_not(None),
+                        usage_where if usage_where is not None else True
+                    )
+                )
+            )
+            avg_response_time = float(avg_response_result.scalar() or 0)
+            
+            # P95 response time (approximation)
+            p95_response_result = await self.session.execute(
+                select(
+                    func.percentile_cont(0.95).within_group(ToolUsage.response_time_ms.asc())
+                ).where(
+                    and_(
+                        ToolUsage.response_time_ms.is_not(None),
+                        usage_where if usage_where is not None else True
+                    )
+                )
+            )
+            p95_response_time = float(p95_response_result.scalar() or 0)
+            
+            # Server metrics
+            server_metrics_result = await self.session.execute(
+                select(
+                    ToolServer.id,
+                    ToolServer.name,
+                    ToolServer.status,
+                    func.count(ServerTool.id).label('total_tools'),
+                    func.count(ServerTool.id).filter(ServerTool.status == ToolStatus.ENABLED).label('enabled_tools'),
+                    func.count(ToolUsage.id).label('total_calls'),
+                    func.count(ToolUsage.id).filter(ToolUsage.success == False).label('total_errors'),
+                    func.avg(ToolUsage.response_time_ms).label('avg_response_time'),
+                    func.max(ToolUsage.called_at).label('last_activity')
+                ).select_from(ToolServer)
+                .outerjoin(ServerTool)
+                .outerjoin(ToolUsage)
+                .group_by(ToolServer.id, ToolServer.name, ToolServer.status)
+            )
+            
+            server_metrics = []
+            for row in server_metrics_result.all():
+                total_calls = row.total_calls or 0
+                total_errors = row.total_errors or 0
+                success_rate = (total_calls - total_errors) / total_calls if total_calls > 0 else 1.0
+                
+                server_metrics.append({
+                    "server_id": row.id,
+                    "server_name": row.name,
+                    "status": row.status,
+                    "total_tools": row.total_tools or 0,
+                    "enabled_tools": row.enabled_tools or 0,
+                    "total_calls": total_calls,
+                    "total_errors": total_errors,
+                    "success_rate": success_rate,
+                    "avg_response_time_ms": float(row.avg_response_time) if row.avg_response_time else None,
+                    "last_activity": row.last_activity,
+                    "uptime_percentage": None  # Would need additional tracking
+                })
+            
+            # Top tools by usage
+            top_tools_result = await self.session.execute(
+                select(
+                    ServerTool.id,
+                    ServerTool.name,
+                    ToolServer.name.label('server_name'),
+                    ServerTool.status,
+                    func.count(ToolUsage.id).label('total_calls'),
+                    func.count(ToolUsage.id).filter(ToolUsage.success == False).label('total_errors'),
+                    func.avg(ToolUsage.response_time_ms).label('avg_response_time'),
+                    func.max(ToolUsage.called_at).label('last_called'),
+                    func.count(ToolUsage.id).filter(
+                        ToolUsage.called_at >= datetime.now(timezone.utc) - timedelta(hours=24)
+                    ).label('calls_last_24h'),
+                    func.count(ToolUsage.id).filter(
+                        and_(
+                            ToolUsage.called_at >= datetime.now(timezone.utc) - timedelta(hours=24),
+                            ToolUsage.success == False
+                        )
+                    ).label('errors_last_24h')
+                ).select_from(ServerTool)
+                .join(ToolServer)
+                .outerjoin(ToolUsage)
+                .where(usage_where if usage_where is not None else True)
+                .group_by(ServerTool.id, ServerTool.name, ToolServer.name, ServerTool.status)
+                .order_by(func.count(ToolUsage.id).desc())
+                .limit(10)
+            )
+            
+            top_tools = []
+            failing_tools = []
+            
+            for row in top_tools_result.all():
+                total_calls = row.total_calls or 0
+                total_errors = row.total_errors or 0
+                success_rate = (total_calls - total_errors) / total_calls if total_calls > 0 else 1.0
+                
+                tool_metrics = {
+                    "tool_id": row.id,
+                    "tool_name": row.name,
+                    "server_name": row.server_name,
+                    "status": row.status,
+                    "total_calls": total_calls,
+                    "total_errors": total_errors,
+                    "success_rate": success_rate,
+                    "avg_response_time_ms": float(row.avg_response_time) if row.avg_response_time else None,
+                    "last_called": row.last_called,
+                    "calls_last_24h": row.calls_last_24h or 0,
+                    "errors_last_24h": row.errors_last_24h or 0
+                }
+                
+                top_tools.append(tool_metrics)
+                
+                # Add to failing tools if error rate > 10%
+                if success_rate < 0.9 and total_calls > 5:
+                    failing_tools.append(tool_metrics)
+            
+            # Daily usage time series
+            daily_usage_result = await self.session.execute(
+                select(
+                    func.date(ToolUsage.called_at).label('date'),
+                    func.count(ToolUsage.id).label('calls'),
+                    func.count(ToolUsage.id).filter(ToolUsage.success == False).label('errors')
+                ).where(
+                    and_(
+                        ToolUsage.called_at >= datetime.now(timezone.utc) - timedelta(days=30),
+                        usage_where if usage_where is not None else True
+                    )
+                ).group_by(func.date(ToolUsage.called_at))
+                .order_by(func.date(ToolUsage.called_at))
+            )
+            
+            daily_usage = {}
+            daily_errors = {}
+            
+            for row in daily_usage_result.all():
+                date_str = row.date.isoformat()
+                daily_usage[date_str] = row.calls or 0
+                daily_errors[date_str] = row.errors or 0
+            
+            return {
+                "total_servers": total_servers,
+                "active_servers": active_servers,
+                "total_tools": total_tools,
+                "enabled_tools": enabled_tools,
+                "total_calls_today": calls_today,
+                "total_calls_week": calls_week,
+                "total_calls_month": calls_month,
+                "total_errors_today": errors_today,
+                "overall_success_rate": overall_success_rate,
+                "avg_response_time_ms": avg_response_time,
+                "p95_response_time_ms": p95_response_time,
+                "server_metrics": server_metrics,
+                "top_tools": top_tools,
+                "failing_tools": failing_tools,
+                "daily_usage": daily_usage,
+                "daily_errors": daily_errors,
+                "generated_at": datetime.now(timezone.utc)
+            }
+            
+        except Exception as e:
+            logger.error("Failed to get tool server analytics", error=str(e))
+            return {}
+    
+    def _build_time_filter_for_table(
+        self,
+        time_range: Optional[AnalyticsTimeRange],
+        table_class,
+        date_column
+    ):
+        """Build time filter for any table.
+        
+        Args:
+            time_range: Time range filter
+            table_class: SQLAlchemy table class
+            date_column: Date column to filter on
+            
+        Returns:
+            SQLAlchemy filter condition
+        """
+        if not time_range:
+            return None
+        
+        now = datetime.now(timezone.utc)
+        
+        if time_range.start_date and time_range.end_date:
+            return and_(
+                date_column >= time_range.start_date,
+                date_column <= time_range.end_date
+            )
+        
+        # Handle predefined periods
+        if time_range.period == "1h":
+            start_time = now - timedelta(hours=1)
+        elif time_range.period == "24h":
+            start_time = now - timedelta(hours=24)
+        elif time_range.period == "7d":
+            start_time = now - timedelta(days=7)
+        elif time_range.period == "30d":
+            start_time = now - timedelta(days=30)
+        elif time_range.period == "90d":
+            start_time = now - timedelta(days=90)
+        else:
+            start_time = now - timedelta(days=7)  # Default to 7 days
+        
+        return date_column >= start_time
+    
     async def get_dashboard_data(
         self,
         user_id: str,

@@ -1,0 +1,213 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "chatter"
+version = "0.1.0"
+description = "Advanced AI Chatbot Backend API Platform"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [
+    {name = "Chatter Team"},
+]
+keywords = ["ai", "chatbot", "api", "langchain", "langgraph", "fastapi", "postgres", "vector-store"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    # FastAPI and ASGI
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "hypercorn>=0.17.3",
+    "uvloop>=0.21.0",
+    
+    # Database and ORM
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    "psycopg2-binary>=2.9.9",
+    
+    # Vector Store and Search
+    "pgvector>=0.3.6",
+    "chromadb>=0.5.20",
+    "qdrant-client>=1.12.1",
+    "pinecone-client>=5.0.1",
+    
+    # LangChain ecosystem
+    "langchain>=0.3.7",
+    "langchain-community>=0.3.5",
+    "langchain-core>=0.3.15",
+    "langchain-openai>=0.2.8",
+    "langchain-anthropic>=0.2.4",
+    "langchain-postgres>=0.0.12",
+    "langgraph>=0.2.45",
+    "langsmith>=0.1.143",
+    
+    # Document processing
+    "unstructured[all-docs]>=0.16.5",
+    "langchain-unstructured>=0.1.2",
+    "pypdf>=5.1.0",
+    "python-multipart>=0.0.12",
+    
+    # Authentication and Security
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.12",
+    
+    # Configuration and Environment
+    "pydantic>=2.9.2",
+    "pydantic-settings>=2.6.1",
+    "python-dotenv>=1.0.1",
+    
+    # HTTP and Async
+    "httpx>=0.28.0",
+    "aiofiles>=24.1.0",
+    "asyncio-mqtt>=0.16.2",
+    
+    # Monitoring and Logging
+    "structlog>=24.4.0",
+    "prometheus-client>=0.21.0",
+    "opentelemetry-api>=1.28.2",
+    "opentelemetry-sdk>=1.28.2",
+    
+    # Rate limiting and caching
+    "slowapi>=0.1.9",
+    "redis>=5.2.0",
+    "aioredis>=2.0.1",
+    
+    # Utilities
+    "typer>=0.14.0",
+    "rich>=13.9.4",
+    "click>=8.1.7",
+    "pendulum>=3.0.0",
+    "orjson>=3.10.11",
+    
+    # MCP and tools
+    "mcp>=1.0.0",
+    "httpx-sse>=0.4.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing
+    "pytest>=8.3.4",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "pytest-mock>=3.14.0",
+    "httpx>=0.28.0",
+    
+    # Code quality
+    "ruff>=0.8.4",
+    "mypy>=1.13.0",
+    "black>=24.10.0",
+    "isort>=5.13.2",
+    
+    # Documentation
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.5.45",
+    "mkdocstrings[python]>=0.27.1",
+]
+
+[project.scripts]
+chatter = "chatter.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/lllucius/chatter"
+Repository = "https://github.com/lllucius/chatter"
+Documentation = "https://github.com/lllucius/chatter#readme"
+"Bug Tracker" = "https://github.com/lllucius/chatter/issues"
+
+[tool.hatch.version]
+path = "chatter/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["chatter"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.pyupgrade]
+keep-runtime-typing = true
+
+[tool.black]
+target-version = ["py311"]
+line-length = 120
+skip-string-normalization = true
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 120
+known_first_party = ["chatter"]
+
+[tool.mypy]
+python_version = "3.11"
+check_untyped_defs = true
+disallow_any_generics = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+
+[[tool.mypy.overrides]]
+module = [
+    "unstructured.*",
+    "chromadb.*",
+    "qdrant_client.*",
+    "pinecone.*",
+    "mcp.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=chatter",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+asyncio_mode = "auto"
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]

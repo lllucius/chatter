@@ -34,6 +34,7 @@ class MessageResponse(MessageBase):
     created_at: datetime = Field(..., description="Creation timestamp")
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 
@@ -76,6 +77,7 @@ class ConversationResponse(ConversationBase):
     last_message_at: datetime | None = Field(None, description="Last message timestamp")
 
     class Config:
+        """Pydantic configuration."""
         from_attributes = True
 
 

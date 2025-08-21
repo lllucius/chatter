@@ -73,7 +73,10 @@ class EmbeddingService:
                     model=settings.google_embedding_model,
                     google_api_key=settings.google_api_key,
                 )
-                logger.info("Google Generative AI embedding provider initialized", model=settings.google_embedding_model)
+                logger.info(
+                    "Google Generative AI embedding provider initialized",
+                    model=settings.google_embedding_model
+                )
             except Exception as e:
                 logger.warning("Failed to initialize Google Generative AI embedding provider", error=str(e))
 

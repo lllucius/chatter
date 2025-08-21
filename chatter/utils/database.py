@@ -49,6 +49,7 @@ def get_engine() -> AsyncEngine:
         if settings.debug_database_queries:
             @event.listens_for(_engine.sync_engine, "before_cursor_execute")
             def receive_before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+                """Log SQL queries when debug mode is enabled."""
                 logger.debug("SQL Query", statement=statement, parameters=parameters)
 
     return _engine
@@ -524,6 +525,7 @@ class DatabaseManager:
     """Context manager for database operations."""
 
     def __init__(self):
+        """Initialize database session context."""
         self.session: AsyncSession | None = None
 
     async def __aenter__(self) -> AsyncSession:

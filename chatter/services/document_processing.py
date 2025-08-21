@@ -268,6 +268,7 @@ class DocumentProcessingService:
 
             # Extract text from JSON structure
             def extract_text_from_json(obj):
+                """Recursively extract text from JSON objects."""
                 if isinstance(obj, str):
                     return obj
                 elif isinstance(obj, dict):

@@ -396,6 +396,7 @@ class BuiltInTools:
             }
 
             def eval_expr(node):
+                """Safely evaluate an AST node."""
                 if isinstance(node, ast.Num):
                     return node.n
                 elif isinstance(node, ast.BinOp):

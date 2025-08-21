@@ -5,7 +5,6 @@ import time
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-import uvloop
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -195,6 +194,7 @@ def create_app() -> FastAPI:
     if settings.security_headers_enabled:
         @app.middleware("http")
         async def add_security_headers(request: Request, call_next):
+            """Add security headers to all responses."""
             response = await call_next(request)
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["X-Frame-Options"] = "DENY"

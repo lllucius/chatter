@@ -79,6 +79,7 @@ class LangChainOrchestrator:
         ])
 
         def format_docs(docs):
+            """Format retrieved documents for RAG context."""
             return "\n\n".join(doc.page_content for doc in docs)
 
         rag_chain = (

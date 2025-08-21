@@ -14,6 +14,10 @@ from chatter.models.conversation import Conversation
 from chatter.models.profile import Profile
 from chatter.utils.logging import get_logger
 
+# Delayed imports to avoid circular dependencies - moved to module level
+from chatter.core.langchain import orchestrator
+from chatter.services.mcp import BuiltInTools, mcp_service
+
 logger = get_logger(__name__)
 
 
@@ -317,8 +321,6 @@ class LLMService:
         include_history: bool = True
     ):
         """Create a conversation chain using LangChain orchestrator."""
-        from chatter.core.langchain import orchestrator
-
         provider = self.get_provider(provider_name)
         return orchestrator.create_chat_chain(
             llm=provider,
@@ -333,8 +335,6 @@ class LLMService:
         system_message: str | None = None
     ):
         """Create a RAG chain using LangChain orchestrator."""
-        from chatter.core.langchain import orchestrator
-
         provider = self.get_provider(provider_name)
         return orchestrator.create_rag_chain(
             llm=provider,
@@ -355,7 +355,6 @@ class LLMService:
 
         # Get MCP tools if none provided
         if tools is None:
-            from chatter.services.mcp import BuiltInTools, mcp_service
             tools = await mcp_service.get_tools()
             tools.extend(BuiltInTools.create_builtin_tools())
 
@@ -416,7 +415,6 @@ class LLMService:
             )
         elif workflow_type == "tools":
             if not tools:
-                from chatter.services.mcp import BuiltInTools, mcp_service
                 tools = await mcp_service.get_tools()
                 tools.extend(BuiltInTools.create_builtin_tools())
             return workflow_manager.create_tool_calling_workflow(

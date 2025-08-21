@@ -39,10 +39,6 @@ def get_engine() -> AsyncEngine:
         engine_kwargs = {
             "echo": settings.debug_database_queries,
             "future": True,
-            "pool_size": settings.db_pool_size,
-            "max_overflow": settings.db_max_overflow,
-            "pool_pre_ping": settings.db_pool_pre_ping,
-            "pool_recycle": settings.db_pool_recycle,
         }
         
         # Use StaticPool for SQLite databases (testing)
@@ -50,6 +46,14 @@ def get_engine() -> AsyncEngine:
             engine_kwargs.update({
                 "poolclass": StaticPool,
                 "connect_args": {"check_same_thread": False},
+            })
+        else:
+            # PostgreSQL-specific settings
+            engine_kwargs.update({
+                "pool_size": settings.db_pool_size,
+                "max_overflow": settings.db_max_overflow,
+                "pool_pre_ping": settings.db_pool_pre_ping,
+                "pool_recycle": settings.db_pool_recycle,
             })
         
         _engine = create_async_engine(database_url, **engine_kwargs)
@@ -206,7 +210,11 @@ async def health_check() -> dict:
         
         # Test query performance
         async with DatabaseManager() as session:
-            await session.execute(text("SELECT version()"))
+            # Use a database-agnostic query
+            if "sqlite" in settings.database_url_for_env:
+                await session.execute(text("SELECT sqlite_version()"))
+            else:
+                await session.execute(text("SELECT version()"))
         
         end_time = asyncio.get_event_loop().time()
         response_time = round((end_time - start_time) * 1000, 2)  # ms

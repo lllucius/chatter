@@ -4,11 +4,11 @@ import os
 from functools import lru_cache
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseSettings, Field, validator
-from pydantic_settings import BaseSettings as PydanticBaseSettings
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings
 
 
-class Settings(PydanticBaseSettings):
+class Settings(BaseSettings):
     """Application settings with environment variable support."""
     
     # =============================================================================
@@ -282,42 +282,48 @@ class Settings(PydanticBaseSettings):
         env_file_encoding = "utf-8"
         case_sensitive = False
         
-    @validator("cors_origins", pre=True)
+    @field_validator("cors_origins", mode="before")
+    @classmethod
     def parse_cors_origins(cls, v: Any) -> List[str]:
         """Parse CORS origins from string or list."""
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
     
-    @validator("cors_allow_methods", pre=True)
+    @field_validator("cors_allow_methods", mode="before")
+    @classmethod
     def parse_cors_methods(cls, v: Any) -> List[str]:
         """Parse CORS methods from string or list."""
         if isinstance(v, str):
             return [method.strip() for method in v.split(",") if method.strip()]
         return v
     
-    @validator("cors_allow_headers", pre=True)
+    @field_validator("cors_allow_headers", mode="before")
+    @classmethod
     def parse_cors_headers(cls, v: Any) -> List[str]:
         """Parse CORS headers from string or list."""
         if isinstance(v, str):
             return [header.strip() for header in v.split(",") if header.strip()]
         return v
     
-    @validator("trusted_hosts", pre=True)
+    @field_validator("trusted_hosts", mode="before")
+    @classmethod
     def parse_trusted_hosts(cls, v: Any) -> List[str]:
         """Parse trusted hosts from string or list."""
         if isinstance(v, str):
             return [host.strip() for host in v.split(",") if host.strip()]
         return v
     
-    @validator("allowed_file_types", pre=True)
+    @field_validator("allowed_file_types", mode="before")
+    @classmethod
     def parse_allowed_file_types(cls, v: Any) -> List[str]:
         """Parse allowed file types from string or list."""
         if isinstance(v, str):
             return [file_type.strip() for file_type in v.split(",") if file_type.strip()]
         return v
     
-    @validator("mcp_servers", pre=True)
+    @field_validator("mcp_servers", mode="before")
+    @classmethod
     def parse_mcp_servers(cls, v: Any) -> List[str]:
         """Parse MCP servers from string or list."""
         if isinstance(v, str):

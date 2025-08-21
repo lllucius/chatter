@@ -21,8 +21,11 @@ from chatter.utils.database import init_database, close_database
 from chatter.api import auth, chat, documents, analytics, health
 
 # Set up uvloop for better async performance
-if not asyncio.get_event_loop().is_running():
+try:
+    import uvloop
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+except ImportError:
+    pass  # uvloop not available
 
 # Set up logging
 logger = get_logger(__name__)

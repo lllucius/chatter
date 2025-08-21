@@ -36,18 +36,14 @@ def setup_logging() -> None:
     )
     
     # Configure standard library logging
+    handlers = [logging.StreamHandler(sys.stdout)]
+    if settings.log_file:
+        handlers.append(logging.FileHandler(settings.log_file))
+    
     logging.basicConfig(
         format="%(message)s" if settings.log_json else "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
         level=getattr(logging, settings.log_level.upper()),
-        stream=sys.stdout,
-        handlers=[
-            logging.StreamHandler(sys.stdout),
-            *(
-                [logging.FileHandler(settings.log_file)]
-                if settings.log_file
-                else []
-            ),
-        ],
+        handlers=handlers,
     )
     
     # Set specific logger levels

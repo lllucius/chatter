@@ -1,7 +1,7 @@
 """Chat endpoints."""
 
 import json
-from typing import List
+from typing import List, Dict, Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -301,3 +301,183 @@ async def chat_stream(
             "Connection": "keep-alive",
         }
     )
+
+
+# New LangGraph workflow endpoints
+
+@router.post("/workflows/basic")
+async def create_basic_workflow(
+    chat_request: ChatRequest,
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service)
+) -> ChatResponse:
+    """Create and run a basic conversation workflow with LangGraph.
+    
+    Args:
+        chat_request: Chat request data
+        current_user: Current authenticated user
+        chat_service: Chat service
+        
+    Returns:
+        Chat response from workflow
+    """
+    try:
+        conversation, assistant_message = await chat_service.chat_with_workflow(
+            current_user.id,
+            chat_request,
+            workflow_type="basic"
+        )
+        
+        return ChatResponse(
+            conversation_id=conversation.id,
+            message=MessageResponse.model_validate(assistant_message),
+            conversation=ConversationResponse.model_validate(conversation)
+        )
+    except (ConversationNotFoundError, ChatError) as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.post("/workflows/rag")
+async def create_rag_workflow(
+    chat_request: ChatRequest,
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service)
+) -> ChatResponse:
+    """Create and run a RAG workflow with document retrieval.
+    
+    Args:
+        chat_request: Chat request data
+        current_user: Current authenticated user
+        chat_service: Chat service
+        
+    Returns:
+        Chat response from RAG workflow
+    """
+    try:
+        conversation, assistant_message = await chat_service.chat_with_workflow(
+            current_user.id,
+            chat_request,
+            workflow_type="rag"
+        )
+        
+        return ChatResponse(
+            conversation_id=conversation.id,
+            message=MessageResponse.model_validate(assistant_message),
+            conversation=ConversationResponse.model_validate(conversation)
+        )
+    except (ConversationNotFoundError, ChatError) as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.post("/workflows/tools")
+async def create_tools_workflow(
+    chat_request: ChatRequest,
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service)
+) -> ChatResponse:
+    """Create and run a workflow with tool calling capabilities.
+    
+    Args:
+        chat_request: Chat request data
+        current_user: Current authenticated user
+        chat_service: Chat service
+        
+    Returns:
+        Chat response from tools workflow
+    """
+    try:
+        conversation, assistant_message = await chat_service.chat_with_workflow(
+            current_user.id,
+            chat_request,
+            workflow_type="tools"
+        )
+        
+        return ChatResponse(
+            conversation_id=conversation.id,
+            message=MessageResponse.model_validate(assistant_message),
+            conversation=ConversationResponse.model_validate(conversation)
+        )
+    except (ConversationNotFoundError, ChatError) as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.get("/tools/available")
+async def get_available_tools(
+    current_user: User = Depends(get_current_user)
+) -> List[Dict[str, Any]]:
+    """Get list of available MCP tools.
+    
+    Args:
+        current_user: Current authenticated user
+        
+    Returns:
+        List of available tools
+    """
+    from chatter.services.mcp import mcp_service
+    from chatter.services.mcp import BuiltInTools
+    
+    try:
+        # Get MCP tools
+        mcp_tools = await mcp_service.get_tools()
+        
+        # Get built-in tools
+        builtin_tools = BuiltInTools.create_builtin_tools()
+        
+        all_tools = []
+        
+        # Add MCP tools
+        for tool in mcp_tools:
+            all_tools.append({
+                "name": tool.name,
+                "description": tool.description,
+                "type": "mcp",
+                "args_schema": getattr(tool, "args_schema", {})
+            })
+        
+        # Add built-in tools
+        for tool in builtin_tools:
+            all_tools.append({
+                "name": tool.name,
+                "description": tool.description,
+                "type": "builtin",
+                "args_schema": getattr(tool, "args_schema", {})
+            })
+        
+        return all_tools
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get available tools: {str(e)}"
+        )
+
+
+@router.get("/mcp/status")
+async def get_mcp_status(
+    current_user: User = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """Get MCP service status.
+    
+    Args:
+        current_user: Current authenticated user
+        
+    Returns:
+        MCP service status
+    """
+    from chatter.services.mcp import mcp_service
+    
+    try:
+        return await mcp_service.health_check()
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get MCP status: {str(e)}"
+        )

@@ -188,16 +188,51 @@ Performance metrics:
 chatter analytics performance
 ```
 
-### Prompts Management (Planned)
+### Prompts Management
 
-**Note:** These commands are implemented but require the prompts API to be built first.
+**Note:** ✅ Prompts API is now fully implemented and functional!
 
+List prompts:
 ```bash
-# Will be available once /api/v1/prompts endpoints are implemented
 chatter prompts list
-chatter prompts create --name "Code Review" --content "Review this code..."
+chatter prompts list --category technical --limit 10
+chatter prompts list --type template --public
+```
+
+Create prompts:
+```bash
+# Interactive mode
+chatter prompts create --interactive
+
+# Command line mode
+chatter prompts create \
+  --name "Code Review" \
+  --content "Review this code for: {criteria}. Code: {code}" \
+  --description "Technical code review prompt" \
+  --category technical \
+  --tags "code,review,quality"
+```
+
+Show prompt details:
+```bash
 chatter prompts show <prompt_id>
+```
+
+Test prompts:
+```bash
+chatter prompts test <prompt_id> --variables '{"criteria": "security", "code": "def login(user, pass): ..."}'
+chatter prompts test <prompt_id> --validate-only
+```
+
+Clone prompts:
+```bash
+chatter prompts clone <prompt_id> --name "My Code Review" --description "Customized version"
+```
+
+Delete prompts:
+```bash
 chatter prompts delete <prompt_id>
+chatter prompts delete <prompt_id> --force  # Skip confirmation
 ```
 
 ## Configuration

@@ -141,6 +141,12 @@ DEBUG_HTTP_REQUESTS=false
 - `PUT /profiles/{profile_id}` - Update profile
 - `GET /prompts` - List prompts
 - `POST /prompts` - Create prompt
+- `GET /prompts/{prompt_id}` - Get prompt details
+- `PUT /prompts/{prompt_id}` - Update prompt
+- `DELETE /prompts/{prompt_id}` - Delete prompt
+- `POST /prompts/{prompt_id}/test` - Test prompt with variables
+- `POST /prompts/{prompt_id}/clone` - Clone prompt
+- `GET /prompts/stats/overview` - Get prompt statistics
 
 #### Analytics
 - `GET /analytics/conversations` - Conversation statistics

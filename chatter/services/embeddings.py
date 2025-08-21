@@ -15,11 +15,18 @@ except ImportError:
     ANTHROPIC_EMBEDDINGS_AVAILABLE = False
 
 try:
-    from langchain_huggingface import HuggingFaceEmbeddings
-    HUGGINGFACE_AVAILABLE = True
+    from langchain_google_genai import GoogleGenerativeAIEmbeddings
+    GOOGLE_AVAILABLE = True
 except ImportError:
-    HuggingFaceEmbeddings = None
-    HUGGINGFACE_AVAILABLE = False
+    GoogleGenerativeAIEmbeddings = None
+    GOOGLE_AVAILABLE = False
+
+try:
+    from langchain_cohere import CohereEmbeddings
+    COHERE_AVAILABLE = True
+except ImportError:
+    CohereEmbeddings = None
+    COHERE_AVAILABLE = False
 
 from chatter.config import get_settings
 from chatter.utils.logging import get_logger
@@ -59,17 +66,27 @@ class EmbeddingService:
             except Exception as e:
                 logger.warning("Failed to initialize Anthropic embedding provider", error=str(e))
         
-        # HuggingFace
-        if HUGGINGFACE_AVAILABLE and settings.huggingface_embedding_model:
+        # Google Generative AI
+        if settings.google_api_key and GOOGLE_AVAILABLE:
             try:
-                self._providers["huggingface"] = HuggingFaceEmbeddings(
-                    model_name=settings.huggingface_embedding_model,
-                    model_kwargs={"device": "cpu"},  # Use CPU by default
-                    encode_kwargs={"normalize_embeddings": True}
+                self._providers["google"] = GoogleGenerativeAIEmbeddings(
+                    model=settings.google_embedding_model,
+                    google_api_key=settings.google_api_key,
                 )
-                logger.info("HuggingFace embedding provider initialized", model=settings.huggingface_embedding_model)
+                logger.info("Google Generative AI embedding provider initialized", model=settings.google_embedding_model)
             except Exception as e:
-                logger.warning("Failed to initialize HuggingFace embedding provider", error=str(e))
+                logger.warning("Failed to initialize Google Generative AI embedding provider", error=str(e))
+        
+        # Cohere
+        if settings.cohere_api_key and COHERE_AVAILABLE:
+            try:
+                self._providers["cohere"] = CohereEmbeddings(
+                    model=settings.cohere_embedding_model,
+                    cohere_api_key=settings.cohere_api_key,
+                )
+                logger.info("Cohere embedding provider initialized", model=settings.cohere_embedding_model)
+            except Exception as e:
+                logger.warning("Failed to initialize Cohere embedding provider", error=str(e))
         
         if not self._providers:
             logger.warning("No embedding providers available")
@@ -136,10 +153,15 @@ class EmbeddingService:
                 "dimensions": settings.openai_embedding_dimensions,
                 "chunk_size": settings.openai_embedding_chunk_size,
             })
-        elif provider_name == "huggingface":
+        elif provider_name == "google":
             info.update({
-                "model": settings.huggingface_embedding_model,
-                "dimensions": settings.huggingface_embedding_dimensions,
+                "model": settings.google_embedding_model,
+                "dimensions": settings.google_embedding_dimensions,
+            })
+        elif provider_name == "cohere":
+            info.update({
+                "model": settings.cohere_embedding_model,
+                "dimensions": settings.cohere_embedding_dimensions,
             })
         
         return info
@@ -285,8 +307,10 @@ class EmbeddingService:
         """Get provider name from provider instance."""
         if isinstance(provider, OpenAIEmbeddings):
             return "openai"
-        elif HUGGINGFACE_AVAILABLE and HuggingFaceEmbeddings and isinstance(provider, HuggingFaceEmbeddings):
-            return "huggingface"
+        elif GOOGLE_AVAILABLE and GoogleGenerativeAIEmbeddings and isinstance(provider, GoogleGenerativeAIEmbeddings):
+            return "google"
+        elif COHERE_AVAILABLE and CohereEmbeddings and isinstance(provider, CohereEmbeddings):
+            return "cohere"
         else:
             return "unknown"
     
@@ -294,8 +318,10 @@ class EmbeddingService:
         """Get model name for provider."""
         if provider_name == "openai":
             return settings.openai_embedding_model
-        elif provider_name == "huggingface":
-            return settings.huggingface_embedding_model
+        elif provider_name == "google":
+            return settings.google_embedding_model
+        elif provider_name == "cohere":
+            return settings.cohere_embedding_model
         else:
             return "unknown"
 

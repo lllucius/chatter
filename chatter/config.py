@@ -309,6 +309,9 @@ class Settings(BaseSettings):
     def parse_cors_origins(cls, v: Any) -> list[str]:
         """Parse CORS origins from string or list."""
         if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
             return [origin.strip() for origin in v.split(",") if origin.strip()]
         return v
 
@@ -317,6 +320,9 @@ class Settings(BaseSettings):
     def parse_cors_methods(cls, v: Any) -> list[str]:
         """Parse CORS methods from string or list."""
         if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
             return [method.strip() for method in v.split(",") if method.strip()]
         return v
 
@@ -325,6 +331,9 @@ class Settings(BaseSettings):
     def parse_cors_headers(cls, v: Any) -> list[str]:
         """Parse CORS headers from string or list."""
         if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
             return [header.strip() for header in v.split(",") if header.strip()]
         return v
 
@@ -333,6 +342,9 @@ class Settings(BaseSettings):
     def parse_trusted_hosts(cls, v: Any) -> list[str]:
         """Parse trusted hosts from string or list."""
         if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
             return [host.strip() for host in v.split(",") if host.strip()]
         return v
 
@@ -341,6 +353,9 @@ class Settings(BaseSettings):
     def parse_allowed_file_types(cls, v: Any) -> list[str]:
         """Parse allowed file types from string or list."""
         if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
             return [file_type.strip() for file_type in v.split(",") if file_type.strip()]
         return v
 
@@ -349,6 +364,9 @@ class Settings(BaseSettings):
     def parse_mcp_servers(cls, v: Any) -> list[str]:
         """Parse MCP servers from string or list."""
         if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
             return [server.strip() for server in v.split(",") if server.strip()]
         return v
 

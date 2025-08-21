@@ -531,3 +531,132 @@ class ChatService:
                 "error": f"Failed to generate response: {str(e)}",
                 "conversation_id": conversation.id,
             }
+    
+    async def chat_with_workflow(
+        self,
+        user_id: str,
+        chat_request: ChatRequest,
+        workflow_type: str = "basic"
+    ) -> Tuple[Conversation, Message]:
+        """Send a chat message using LangGraph workflows.
+        
+        Args:
+            user_id: User ID
+            chat_request: Chat request data
+            workflow_type: Type of workflow ("basic", "rag", "tools")
+            
+        Returns:
+            Tuple of conversation and assistant message
+        """
+        from chatter.core.langgraph import ConversationState, workflow_manager
+        from chatter.services.embeddings import EmbeddingService
+        from chatter.core.vector_store import vector_store_manager
+        
+        # Get conversation
+        conversation = await self._get_conversation(chat_request.conversation_id, user_id)
+        
+        # Create user message
+        user_message = Message(
+            conversation_id=conversation.id,
+            role=MessageRole.USER,
+            content=chat_request.message,
+            metadata={"workflow_type": workflow_type}
+        )
+        self.session.add(user_message)
+        await self.session.flush()
+        
+        try:
+            # Get provider
+            provider_name = conversation.llm_provider or "openai"
+            
+            # Build conversation history
+            conversation_messages = await self._build_conversation_messages(
+                conversation, chat_request.message
+            )
+            
+            # Create workflow based on type
+            if workflow_type == "rag":
+                # Create retriever for RAG workflow
+                embedding_service = EmbeddingService()
+                embeddings = embedding_service.get_default_embeddings()
+                vector_store = vector_store_manager.get_default_store(embeddings)
+                retriever = vector_store.as_retriever(search_kwargs={"k": 5})
+                
+                workflow = await self.llm_service.create_langgraph_workflow(
+                    provider_name=provider_name,
+                    workflow_type="rag",
+                    system_message=conversation.system_prompt,
+                    retriever=retriever
+                )
+            else:
+                workflow = await self.llm_service.create_langgraph_workflow(
+                    provider_name=provider_name,
+                    workflow_type=workflow_type,
+                    system_message=conversation.system_prompt
+                )
+            
+            # Prepare initial state
+            initial_state: ConversationState = {
+                "messages": conversation_messages,
+                "user_id": user_id,
+                "conversation_id": str(conversation.id),
+                "retrieval_context": None,
+                "tool_calls": [],
+                "metadata": {
+                    "workflow_type": workflow_type,
+                    "provider": provider_name
+                }
+            }
+            
+            # Run workflow
+            result_state = await workflow_manager.run_workflow(
+                workflow=workflow,
+                initial_state=initial_state,
+                thread_id=f"{conversation.id}_{workflow_type}"
+            )
+            
+            # Extract assistant response
+            assistant_response = result_state["messages"][-1]
+            
+            # Create assistant message
+            assistant_message = Message(
+                conversation_id=conversation.id,
+                role=MessageRole.ASSISTANT,
+                content=assistant_response.content,
+                metadata={
+                    "workflow_type": workflow_type,
+                    "tool_calls": result_state.get("tool_calls", []),
+                    "retrieval_context": result_state.get("retrieval_context")
+                },
+                provider_used=provider_name,
+            )
+            self.session.add(assistant_message)
+            
+            # Update conversation stats
+            conversation.message_count += 2  # user + assistant
+            conversation.updated_at = datetime.now(timezone.utc)
+            
+            await self.session.commit()
+            
+            logger.info(
+                "Workflow chat completed",
+                conversation_id=conversation.id,
+                workflow_type=workflow_type,
+                user_id=user_id
+            )
+            
+            return conversation, assistant_message
+            
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(
+                "Workflow chat failed",
+                error=str(e),
+                conversation_id=conversation.id,
+                workflow_type=workflow_type
+            )
+            raise ChatError(f"Workflow chat failed: {str(e)}")
+        
+        finally:
+            # Clean up any resources if needed
+            pass

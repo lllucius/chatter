@@ -1,3 +1,7 @@
 """External services integration."""
 
-__all__ = []
+from .mcp import mcp_service
+
+__all__ = [
+    "mcp_service"
+]

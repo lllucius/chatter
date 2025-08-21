@@ -308,3 +308,125 @@ class LLMService:
             "model": getattr(provider, "model_name", "unknown"),
             "available": True,
         }
+    
+    def create_conversation_chain(
+        self,
+        provider_name: str,
+        system_message: Optional[str] = None,
+        include_history: bool = True
+    ):
+        """Create a conversation chain using LangChain orchestrator."""
+        from chatter.core.langchain import orchestrator
+        
+        provider = self.get_provider(provider_name)
+        return orchestrator.create_chat_chain(
+            llm=provider,
+            system_message=system_message,
+            include_history=include_history
+        )
+    
+    def create_rag_chain(
+        self,
+        provider_name: str,
+        retriever,
+        system_message: Optional[str] = None
+    ):
+        """Create a RAG chain using LangChain orchestrator."""
+        from chatter.core.langchain import orchestrator
+        
+        provider = self.get_provider(provider_name)
+        return orchestrator.create_rag_chain(
+            llm=provider,
+            retriever=retriever,
+            system_message=system_message
+        )
+    
+    async def generate_with_tools(
+        self,
+        messages: List[BaseMessage],
+        tools: List[Any] = None,
+        provider: Optional[BaseChatModel] = None,
+        **kwargs
+    ) -> Tuple[str, Dict[str, Any]]:
+        """Generate response with tool calling capabilities."""
+        if not provider:
+            provider = self.get_default_provider()
+        
+        # Get MCP tools if none provided
+        if tools is None:
+            from chatter.services.mcp import mcp_service
+            from chatter.services.mcp import BuiltInTools
+            tools = await mcp_service.get_tools()
+            tools.extend(BuiltInTools.create_builtin_tools())
+        
+        if tools:
+            # Bind tools to the provider
+            provider_with_tools = provider.bind_tools(tools)
+        else:
+            provider_with_tools = provider
+        
+        try:
+            start_time = asyncio.get_event_loop().time()
+            response = await provider_with_tools.ainvoke(messages)
+            response_time_ms = int((asyncio.get_event_loop().time() - start_time) * 1000)
+            
+            usage_info = {
+                "response_time_ms": response_time_ms,
+                "model": getattr(provider, "model_name", "unknown"),
+                "provider": provider.__class__.__name__.lower().replace("chat", ""),
+                "tools_available": len(tools) if tools else 0,
+            }
+            
+            # Try to extract token usage if available
+            if hasattr(response, "response_metadata"):
+                token_usage = response.response_metadata.get("token_usage", {})
+                if token_usage:
+                    usage_info.update({
+                        "prompt_tokens": token_usage.get("prompt_tokens"),
+                        "completion_tokens": token_usage.get("completion_tokens"),
+                        "total_tokens": token_usage.get("total_tokens"),
+                    })
+            
+            return response.content, usage_info
+            
+        except Exception as e:
+            logger.error("LLM generation with tools failed", error=str(e), provider=provider.__class__.__name__)
+            raise LLMProviderError(f"Generation with tools failed: {str(e)}")
+    
+    async def create_langgraph_workflow(
+        self,
+        provider_name: str,
+        workflow_type: str = "basic",
+        system_message: Optional[str] = None,
+        retriever=None,
+        tools: List[Any] = None
+    ):
+        """Create a LangGraph workflow."""
+        from chatter.core.langgraph import workflow_manager
+        
+        provider = self.get_provider(provider_name)
+        
+        if workflow_type == "rag":
+            if not retriever:
+                raise LLMProviderError("Retriever required for RAG workflow")
+            return workflow_manager.create_rag_conversation_workflow(
+                llm=provider,
+                retriever=retriever,
+                system_message=system_message
+            )
+        elif workflow_type == "tools":
+            if not tools:
+                from chatter.services.mcp import mcp_service
+                from chatter.services.mcp import BuiltInTools
+                tools = await mcp_service.get_tools()
+                tools.extend(BuiltInTools.create_builtin_tools())
+            return workflow_manager.create_tool_calling_workflow(
+                llm=provider,
+                tools=tools,
+                system_message=system_message
+            )
+        else:  # basic
+            return workflow_manager.create_basic_conversation_workflow(
+                llm=provider,
+                system_message=system_message
+            )

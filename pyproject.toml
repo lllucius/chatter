@@ -186,6 +186,8 @@ module = [
     "qdrant_client.*",
     "pinecone.*",
     "mcp.*",
+    "google.generativeai.*",
+    "cohere.*",
 ]
 ignore_missing_imports = true
 

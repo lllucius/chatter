@@ -11,7 +11,6 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.pool import StaticPool
 
 from chatter.config import settings
 from chatter.utils.logging import get_logger
@@ -41,20 +40,13 @@ def get_engine() -> AsyncEngine:
             "future": True,
         }
         
-        # Use StaticPool for SQLite databases (testing)
-        if database_url.startswith("sqlite"):
-            engine_kwargs.update({
-                "poolclass": StaticPool,
-                "connect_args": {"check_same_thread": False},
-            })
-        else:
-            # PostgreSQL-specific settings
-            engine_kwargs.update({
-                "pool_size": settings.db_pool_size,
-                "max_overflow": settings.db_max_overflow,
-                "pool_pre_ping": settings.db_pool_pre_ping,
-                "pool_recycle": settings.db_pool_recycle,
-            })
+        # PostgreSQL-specific settings
+        engine_kwargs.update({
+            "pool_size": settings.db_pool_size,
+            "max_overflow": settings.db_max_overflow,
+            "pool_pre_ping": settings.db_pool_pre_ping,
+            "pool_recycle": settings.db_pool_recycle,
+        })
         
         _engine = create_async_engine(database_url, **engine_kwargs)
         
@@ -116,13 +108,12 @@ async def init_database() -> None:
     logger.info("Creating database tables")
     
     # For PostgreSQL, ensure pgvector extension is installed
-    if "postgresql" in settings.database_url_for_env:
-        async with engine.begin() as conn:
-            try:
-                await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-                logger.info("Ensured pgvector extension is installed")
-            except Exception as e:
-                logger.warning("Could not install pgvector extension", error=str(e))
+    async with engine.begin() as conn:
+        try:
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            logger.info("Ensured pgvector extension is installed")
+        except Exception as e:
+            logger.warning("Could not install pgvector extension", error=str(e))
     
     # Create all tables
     async with engine.begin() as conn:
@@ -210,11 +201,7 @@ async def health_check() -> dict:
         
         # Test query performance
         async with DatabaseManager() as session:
-            # Use a database-agnostic query
-            if "sqlite" in settings.database_url_for_env:
-                await session.execute(text("SELECT sqlite_version()"))
-            else:
-                await session.execute(text("SELECT version()"))
+            await session.execute(text("SELECT version()"))
         
         end_time = asyncio.get_event_loop().time()
         response_time = round((end_time - start_time) * 1000, 2)  # ms

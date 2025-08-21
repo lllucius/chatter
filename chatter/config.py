@@ -141,12 +141,21 @@ class Settings(BaseSettings):
     anthropic_temperature: float = Field(default=0.7, description="Anthropic temperature")
     anthropic_timeout: int = Field(default=60, description="Anthropic timeout")
     
-    # HuggingFace
-    huggingface_embedding_model: str = Field(
-        default="sentence-transformers/all-MiniLM-L6-v2", 
-        description="HuggingFace embedding model"
+    # Google Generative AI
+    google_api_key: Optional[str] = Field(default=None, description="Google API key")
+    google_embedding_model: str = Field(
+        default="models/embedding-001",
+        description="Google embedding model"
     )
-    huggingface_embedding_dimensions: int = Field(default=384, description="HuggingFace embedding dimensions")
+    google_embedding_dimensions: int = Field(default=768, description="Google embedding dimensions")
+    
+    # Cohere
+    cohere_api_key: Optional[str] = Field(default=None, description="Cohere API key")
+    cohere_embedding_model: str = Field(
+        default="embed-english-light-v3.0",
+        description="Cohere embedding model"
+    )
+    cohere_embedding_dimensions: int = Field(default=384, description="Cohere embedding dimensions")
     
     # Default providers
     default_llm_provider: str = Field(default="openai", description="Default LLM provider")

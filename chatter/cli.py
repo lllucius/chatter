@@ -1,14 +1,21 @@
 """Command-line interface for Chatter."""
 
 import asyncio
+import json
 import os
 import subprocess
 import sys
+from datetime import datetime
+from pathlib import Path
 
 import typer
 import uvicorn
 from rich.console import Console
 from rich.table import Table
+from rich.prompt import Prompt, Confirm
+from rich.panel import Panel
+from rich.text import Text
+import httpx
 
 from chatter.config import settings
 from chatter.utils.database import check_database_connection, init_database
@@ -21,6 +28,113 @@ app = typer.Typer(
 )
 console = Console()
 logger = get_logger(__name__)
+
+
+class APIClient:
+    """HTTP client for interacting with Chatter API."""
+    
+    def __init__(self, base_url: str = None, access_token: str = None):
+        self.base_url = base_url or f"http://{settings.host}:{settings.port}"
+        self.access_token = access_token
+        self.client = httpx.AsyncClient(timeout=30.0)
+        
+    async def close(self):
+        """Close the HTTP client."""
+        await self.client.aclose()
+        
+    def _get_headers(self):
+        """Get request headers with authentication."""
+        headers = {"Content-Type": "application/json"}
+        if self.access_token:
+            headers["Authorization"] = f"Bearer {self.access_token}"
+        return headers
+        
+    async def request(self, method: str, endpoint: str, **kwargs):
+        """Make an HTTP request to the API."""
+        url = f"{self.base_url}{settings.api_prefix}{endpoint}"
+        headers = self._get_headers()
+        
+        try:
+            response = await self.client.request(
+                method, url, headers=headers, **kwargs
+            )
+            response.raise_for_status()
+            return response.json() if response.content else None
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 401:
+                console.print("❌ Authentication required. Please login first.")
+                raise typer.Exit(1)
+            elif e.response.status_code == 403:
+                console.print("❌ Access denied. Insufficient permissions.")
+                raise typer.Exit(1)
+            else:
+                try:
+                    error_detail = e.response.json().get("detail", str(e))
+                except:
+                    error_detail = str(e)
+                console.print(f"❌ API Error ({e.response.status_code}): {error_detail}")
+                raise typer.Exit(1)
+        except httpx.RequestError as e:
+            console.print(f"❌ Connection error: {e}")
+            console.print("💡 Make sure the Chatter server is running.")
+            raise typer.Exit(1)
+
+
+def get_api_client() -> APIClient:
+    """Get API client with configuration."""
+    # Try to get access token from environment or config file
+    token = os.getenv("CHATTER_ACCESS_TOKEN")
+    base_url = os.getenv("CHATTER_BASE_URL", f"http://{settings.host}:{settings.port}")
+    
+    return APIClient(base_url=base_url, access_token=token)
+
+
+# Prompts commands (Note: Requires prompts API to be implemented)
+prompts_app = typer.Typer(help="Prompt management commands")
+app.add_typer(prompts_app, name="prompts")
+
+
+@prompts_app.command("list")
+def list_prompts() -> None:
+    """List available prompts."""
+    # TODO: Implement when prompts API is available
+    console.print("⚠️  Prompts API not yet implemented.")
+    console.print("💡 This feature requires implementing /api/v1/prompts endpoints.")
+    console.print("📋 Prompt model exists at: chatter/models/prompt.py")
+
+
+@prompts_app.command("create")
+def create_prompt(
+    name: str = typer.Option(..., "--name", "-n", help="Prompt name"),
+    content: str = typer.Option(..., "--content", "-c", help="Prompt content"),
+    category: str = typer.Option("general", "--category", help="Prompt category"),
+    description: str = typer.Option(None, "--description", "-d", help="Prompt description"),
+) -> None:
+    """Create a new prompt."""
+    # TODO: Implement when prompts API is available
+    console.print("⚠️  Prompts API not yet implemented.")
+    console.print("💡 This feature requires implementing /api/v1/prompts endpoints.")
+    console.print(f"📝 Would create prompt: '{name}' with content: '{content[:50]}...'")
+
+
+@prompts_app.command("show")
+def show_prompt(
+    prompt_id: str = typer.Argument(..., help="Prompt ID to show"),
+) -> None:
+    """Show prompt details."""
+    # TODO: Implement when prompts API is available
+    console.print("⚠️  Prompts API not yet implemented.")
+    console.print("💡 This feature requires implementing /api/v1/prompts endpoints.")
+
+
+@prompts_app.command("delete")
+def delete_prompt(
+    prompt_id: str = typer.Argument(..., help="Prompt ID to delete"),
+) -> None:
+    """Delete a prompt."""
+    # TODO: Implement when prompts API is available
+    console.print("⚠️  Prompts API not yet implemented.")
+    console.print("💡 This feature requires implementing /api/v1/prompts endpoints.")
 
 
 @app.command()
@@ -425,6 +539,866 @@ def version() -> None:
 
     console.print(table)
     console.print(f"\n{__description__}")
+
+
+# Profiles commands
+profiles_app = typer.Typer(help="Profile management commands")
+app.add_typer(profiles_app, name="profiles")
+
+
+@profiles_app.command("list")
+def list_profiles(
+    profile_type: str = typer.Option(None, "--type", "-t", help="Filter by profile type"),
+    llm_provider: str = typer.Option(None, "--provider", "-p", help="Filter by LLM provider"),
+    tags: str = typer.Option(None, "--tags", help="Filter by tags (comma-separated)"),
+    public: bool = typer.Option(None, "--public", help="Filter by public status"),
+    limit: int = typer.Option(20, "--limit", "-l", help="Maximum number of results"),
+    offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
+) -> None:
+    """List LLM profiles."""
+    async def _list():
+        api_client = get_api_client()
+        try:
+            params = {
+                "limit": limit,
+                "offset": offset,
+            }
+            if profile_type:
+                params["profile_type"] = profile_type
+            if llm_provider:
+                params["llm_provider"] = llm_provider
+            if tags:
+                params["tags"] = tags
+            if public is not None:
+                params["is_public"] = public
+                
+            response = await api_client.request("GET", "/profiles", params=params)
+            
+            if not response or not response.get("profiles"):
+                console.print("📝 No profiles found.")
+                return
+                
+            profiles = response["profiles"]
+            total = response.get("total_count", len(profiles))
+            
+            table = Table(title=f"LLM Profiles ({len(profiles)} of {total})")
+            table.add_column("ID", style="cyan", no_wrap=True)
+            table.add_column("Name", style="bright_white")
+            table.add_column("Provider", style="green")
+            table.add_column("Model", style="blue")
+            table.add_column("Type", style="yellow")
+            table.add_column("Public", style="magenta")
+            table.add_column("Created", style="dim")
+            
+            for profile in profiles:
+                table.add_row(
+                    profile["id"][:8] + "...",
+                    profile["name"],
+                    profile["llm_provider"],
+                    profile["llm_model"],
+                    profile["profile_type"],
+                    "✓" if profile.get("is_public") else "✗",
+                    profile["created_at"][:10] if profile.get("created_at") else "N/A"
+                )
+                
+            console.print(table)
+            
+            if total > len(profiles):
+                console.print(f"\n💡 Showing {offset + 1}-{offset + len(profiles)} of {total} profiles")
+                console.print(f"Use --offset {offset + limit} to see more")
+                
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_list())
+
+
+@profiles_app.command("show")
+def show_profile(
+    profile_id: str = typer.Argument(..., help="Profile ID to show"),
+) -> None:
+    """Show profile details."""
+    async def _show():
+        api_client = get_api_client()
+        try:
+            response = await api_client.request("GET", f"/profiles/{profile_id}")
+            
+            if not response:
+                console.print(f"❌ Profile {profile_id} not found.")
+                return
+                
+            # Create detailed view
+            console.print(Panel.fit(f"[bold]Profile: {response['name']}[/bold]"))
+            
+            # Basic info table
+            basic_table = Table(title="Basic Information", show_header=False)
+            basic_table.add_column("Field", style="cyan")
+            basic_table.add_column("Value", style="white")
+            
+            basic_table.add_row("ID", response["id"])
+            basic_table.add_row("Name", response["name"])
+            basic_table.add_row("Description", response.get("description", "N/A"))
+            basic_table.add_row("Type", response["profile_type"])
+            basic_table.add_row("Public", "Yes" if response.get("is_public") else "No")
+            basic_table.add_row("Created", response.get("created_at", "N/A"))
+            
+            # LLM config table
+            llm_table = Table(title="LLM Configuration", show_header=False)
+            llm_table.add_column("Parameter", style="cyan")
+            llm_table.add_column("Value", style="white")
+            
+            llm_table.add_row("Provider", response["llm_provider"])
+            llm_table.add_row("Model", response["llm_model"])
+            llm_table.add_row("Temperature", str(response.get("temperature", "N/A")))
+            llm_table.add_row("Max Tokens", str(response.get("max_tokens", "N/A")))
+            llm_table.add_row("Top P", str(response.get("top_p", "N/A")))
+            llm_table.add_row("Top K", str(response.get("top_k", "N/A")))
+            
+            console.print(basic_table)
+            console.print()
+            console.print(llm_table)
+            
+            # System prompt
+            if response.get("system_prompt"):
+                console.print("\n[bold]System Prompt:[/bold]")
+                console.print(Panel(response["system_prompt"], expand=False))
+                
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_show())
+
+
+@profiles_app.command("create")
+def create_profile(
+    name: str = typer.Option(..., "--name", "-n", help="Profile name"),
+    description: str = typer.Option(None, "--description", "-d", help="Profile description"),
+    provider: str = typer.Option("openai", "--provider", "-p", help="LLM provider"),
+    model: str = typer.Option("gpt-4", "--model", "-m", help="LLM model"),
+    temperature: float = typer.Option(0.7, "--temperature", "-t", help="Temperature (0.0-2.0)"),
+    max_tokens: int = typer.Option(4096, "--max-tokens", help="Maximum tokens"),
+    system_prompt: str = typer.Option(None, "--system-prompt", help="System prompt"),
+    public: bool = typer.Option(False, "--public", help="Make profile public"),
+    interactive: bool = typer.Option(False, "--interactive", "-i", help="Interactive mode"),
+) -> None:
+    """Create a new LLM profile."""
+    
+    async def _create():
+        api_client = get_api_client()
+        try:
+            # Interactive mode
+            if interactive:
+                console.print("[bold]Creating new LLM profile[/bold]\n")
+                name = Prompt.ask("Profile name")
+                description = Prompt.ask("Description", default="")
+                provider = Prompt.ask("LLM provider", default="openai")
+                model = Prompt.ask("LLM model", default="gpt-4")
+                temperature = float(Prompt.ask("Temperature", default="0.7"))
+                max_tokens = int(Prompt.ask("Max tokens", default="4096"))
+                system_prompt = Prompt.ask("System prompt (optional)", default="")
+                public = Confirm.ask("Make public?", default=False)
+            
+            # Prepare data
+            profile_data = {
+                "name": name,
+                "llm_provider": provider,
+                "llm_model": model,
+                "temperature": temperature,
+                "max_tokens": max_tokens,
+                "is_public": public,
+            }
+            
+            if description:
+                profile_data["description"] = description
+            if system_prompt:
+                profile_data["system_prompt"] = system_prompt
+                
+            response = await api_client.request("POST", "/profiles", json=profile_data)
+            
+            console.print("✅ Profile created successfully!")
+            console.print(f"📝 Profile ID: {response['id']}")
+            console.print(f"🏷️  Name: {response['name']}")
+            console.print(f"🤖 Provider: {response['llm_provider']}")
+            console.print(f"🧠 Model: {response['llm_model']}")
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_create())
+
+
+@profiles_app.command("delete")
+def delete_profile(
+    profile_id: str = typer.Argument(..., help="Profile ID to delete"),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+) -> None:
+    """Delete a profile."""
+    async def _delete():
+        api_client = get_api_client()
+        try:
+            # Get profile details first
+            profile = await api_client.request("GET", f"/profiles/{profile_id}")
+            
+            if not force:
+                console.print(f"Profile: {profile['name']}")
+                if not Confirm.ask("Are you sure you want to delete this profile?"):
+                    console.print("❌ Deletion cancelled.")
+                    return
+            
+            await api_client.request("DELETE", f"/profiles/{profile_id}")
+            console.print("✅ Profile deleted successfully!")
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_delete())
+
+
+# Conversations commands
+conversations_app = typer.Typer(help="Conversation management commands")
+app.add_typer(conversations_app, name="conversations")
+
+
+@conversations_app.command("list")
+def list_conversations(
+    limit: int = typer.Option(20, "--limit", "-l", help="Maximum number of results"),
+    offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
+) -> None:
+    """List conversations."""
+    async def _list():
+        api_client = get_api_client()
+        try:
+            params = {"limit": limit, "offset": offset}
+            response = await api_client.request("GET", "/chat/conversations", params=params)
+            
+            if not response or not response.get("conversations"):
+                console.print("💬 No conversations found.")
+                return
+                
+            conversations = response["conversations"]
+            total = response.get("total_count", len(conversations))
+            
+            table = Table(title=f"Conversations ({len(conversations)} of {total})")
+            table.add_column("ID", style="cyan", no_wrap=True)
+            table.add_column("Title", style="bright_white")
+            table.add_column("Messages", style="green")
+            table.add_column("Created", style="blue")
+            table.add_column("Updated", style="yellow")
+            
+            for conv in conversations:
+                table.add_row(
+                    conv["id"][:8] + "...",
+                    conv.get("title", "Untitled")[:50],
+                    str(conv.get("message_count", 0)),
+                    conv["created_at"][:10] if conv.get("created_at") else "N/A",
+                    conv["updated_at"][:10] if conv.get("updated_at") else "N/A"
+                )
+                
+            console.print(table)
+            
+            if total > len(conversations):
+                console.print(f"\n💡 Showing {offset + 1}-{offset + len(conversations)} of {total} conversations")
+                console.print(f"Use --offset {offset + limit} to see more")
+                
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_list())
+
+
+@conversations_app.command("show")
+def show_conversation(
+    conversation_id: str = typer.Argument(..., help="Conversation ID to show"),
+    messages: bool = typer.Option(True, "--messages/--no-messages", help="Show messages"),
+    limit: int = typer.Option(10, "--limit", "-l", help="Number of messages to show"),
+) -> None:
+    """Show conversation details."""
+    async def _show():
+        api_client = get_api_client()
+        try:
+            # Get conversation details
+            conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
+            
+            console.print(Panel.fit(f"[bold]Conversation: {conv.get('title', 'Untitled')}[/bold]"))
+            
+            # Basic info
+            info_table = Table(title="Information", show_header=False)
+            info_table.add_column("Field", style="cyan")
+            info_table.add_column("Value", style="white")
+            
+            info_table.add_row("ID", conv["id"])
+            info_table.add_row("Title", conv.get("title", "Untitled"))
+            info_table.add_row("Messages", str(conv.get("message_count", 0)))
+            info_table.add_row("Created", conv.get("created_at", "N/A"))
+            info_table.add_row("Updated", conv.get("updated_at", "N/A"))
+            
+            console.print(info_table)
+            
+            if messages:
+                # Get messages
+                msg_response = await api_client.request(
+                    "GET", 
+                    f"/chat/conversations/{conversation_id}/messages",
+                    params={"limit": limit}
+                )
+                
+                if msg_response and msg_response.get("messages"):
+                    console.print(f"\n[bold]Recent Messages (last {limit}):[/bold]")
+                    
+                    for msg in msg_response["messages"][-limit:]:
+                        role = msg.get("role", "unknown")
+                        content = msg.get("content", "")
+                        timestamp = msg.get("created_at", "")[:19] if msg.get("created_at") else ""
+                        
+                        role_color = "blue" if role == "user" else "green" if role == "assistant" else "yellow"
+                        
+                        console.print(f"\n[{role_color}]●[/{role_color}] [bold]{role.title()}[/bold] {timestamp}")
+                        console.print(Panel(content, expand=False, border_style=role_color))
+                        
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_show())
+
+
+@conversations_app.command("delete")
+def delete_conversation(
+    conversation_id: str = typer.Argument(..., help="Conversation ID to delete"),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+) -> None:
+    """Delete a conversation."""
+    async def _delete():
+        api_client = get_api_client()
+        try:
+            # Get conversation details first
+            conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
+            
+            if not force:
+                console.print(f"Conversation: {conv.get('title', 'Untitled')}")
+                console.print(f"Messages: {conv.get('message_count', 0)}")
+                if not Confirm.ask("Are you sure you want to delete this conversation?"):
+                    console.print("❌ Deletion cancelled.")
+                    return
+            
+            await api_client.request("DELETE", f"/chat/conversations/{conversation_id}")
+            console.print("✅ Conversation deleted successfully!")
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_delete())
+
+
+@conversations_app.command("export")
+def export_conversation(
+    conversation_id: str = typer.Argument(..., help="Conversation ID to export"),
+    output_file: str = typer.Option(None, "--output", "-o", help="Output file path"),
+    format: str = typer.Option("json", "--format", "-f", help="Export format (json, txt, md)"),
+) -> None:
+    """Export a conversation."""
+    async def _export():
+        api_client = get_api_client()
+        try:
+            # Get conversation and messages
+            conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
+            messages = await api_client.request(
+                "GET", 
+                f"/chat/conversations/{conversation_id}/messages"
+            )
+            
+            # Generate filename if not provided
+            if not output_file:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                title = conv.get("title", "conversation").replace(" ", "_")
+                output_file = f"{title}_{timestamp}.{format}"
+            
+            # Export based on format
+            if format == "json":
+                export_data = {
+                    "conversation": conv,
+                    "messages": messages.get("messages", [])
+                }
+                with open(output_file, "w") as f:
+                    json.dump(export_data, f, indent=2, default=str)
+                    
+            elif format == "txt":
+                with open(output_file, "w") as f:
+                    f.write(f"Conversation: {conv.get('title', 'Untitled')}\n")
+                    f.write(f"Created: {conv.get('created_at', 'N/A')}\n")
+                    f.write("=" * 50 + "\n\n")
+                    
+                    for msg in messages.get("messages", []):
+                        f.write(f"{msg.get('role', 'unknown').upper()}: {msg.get('content', '')}\n\n")
+                        
+            elif format == "md":
+                with open(output_file, "w") as f:
+                    f.write(f"# {conv.get('title', 'Untitled')}\n\n")
+                    f.write(f"**Created:** {conv.get('created_at', 'N/A')}\n\n")
+                    f.write("---\n\n")
+                    
+                    for msg in messages.get("messages", []):
+                        role = msg.get("role", "unknown")
+                        content = msg.get("content", "")
+                        
+                        if role == "user":
+                            f.write(f"**👤 User:** {content}\n\n")
+                        elif role == "assistant":
+                            f.write(f"**🤖 Assistant:** {content}\n\n")
+                        else:
+                            f.write(f"**{role.title()}:** {content}\n\n")
+            
+            console.print(f"✅ Conversation exported to: {output_file}")
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_export())
+
+
+# Documents commands
+documents_app = typer.Typer(help="Document management commands")
+app.add_typer(documents_app, name="documents")
+
+
+@documents_app.command("list")
+def list_documents(
+    limit: int = typer.Option(20, "--limit", "-l", help="Maximum number of results"),
+    offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
+    file_type: str = typer.Option(None, "--type", "-t", help="Filter by file type"),
+) -> None:
+    """List uploaded documents."""
+    async def _list():
+        api_client = get_api_client()
+        try:
+            params = {"limit": limit, "offset": offset}
+            if file_type:
+                params["file_type"] = file_type
+                
+            response = await api_client.request("GET", "/documents", params=params)
+            
+            if not response or not response.get("documents"):
+                console.print("📄 No documents found.")
+                return
+                
+            documents = response["documents"]
+            total = response.get("total_count", len(documents))
+            
+            table = Table(title=f"Documents ({len(documents)} of {total})")
+            table.add_column("ID", style="cyan", no_wrap=True)
+            table.add_column("Title", style="bright_white")
+            table.add_column("Type", style="green")
+            table.add_column("Size", style="blue")
+            table.add_column("Status", style="yellow")
+            table.add_column("Uploaded", style="dim")
+            
+            for doc in documents:
+                size_mb = doc.get("file_size", 0) / (1024 * 1024) if doc.get("file_size") else 0
+                table.add_row(
+                    doc["id"][:8] + "...",
+                    doc.get("title", "Untitled")[:40],
+                    doc.get("file_type", "unknown"),
+                    f"{size_mb:.1f}MB" if size_mb > 0 else "N/A",
+                    doc.get("status", "unknown"),
+                    doc["created_at"][:10] if doc.get("created_at") else "N/A"
+                )
+                
+            console.print(table)
+            
+            if total > len(documents):
+                console.print(f"\n💡 Showing {offset + 1}-{offset + len(documents)} of {total} documents")
+                console.print(f"Use --offset {offset + limit} to see more")
+                
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_list())
+
+
+@documents_app.command("upload")
+def upload_document(
+    file_path: str = typer.Argument(..., help="Path to document file"),
+    title: str = typer.Option(None, "--title", "-t", help="Document title"),
+    description: str = typer.Option(None, "--description", "-d", help="Document description"),
+    tags: str = typer.Option(None, "--tags", help="Tags (comma-separated)"),
+) -> None:
+    """Upload a document."""
+    async def _upload():
+        api_client = get_api_client()
+        try:
+            file_path_obj = Path(file_path)
+            
+            if not file_path_obj.exists():
+                console.print(f"❌ File not found: {file_path}")
+                return
+                
+            if not title:
+                title = file_path_obj.stem
+                
+            console.print(f"📤 Uploading: {file_path_obj.name}")
+            
+            # Prepare multipart form data
+            files = {
+                "file": (file_path_obj.name, open(file_path_obj, "rb"))
+            }
+            
+            data = {"title": title}
+            if description:
+                data["description"] = description
+            if tags:
+                data["tags"] = tags
+                
+            # Remove Content-Type header to let httpx set it for multipart
+            headers = {}
+            if api_client.access_token:
+                headers["Authorization"] = f"Bearer {api_client.access_token}"
+                
+            url = f"{api_client.base_url}{settings.api_prefix}/documents/upload"
+            response = await api_client.client.post(url, headers=headers, files=files, data=data)
+            response.raise_for_status()
+            
+            result = response.json()
+            
+            console.print("✅ Document uploaded successfully!")
+            console.print(f"📝 Document ID: {result['id']}")
+            console.print(f"🏷️  Title: {result['title']}")
+            console.print(f"📊 Status: {result.get('status', 'processing')}")
+            
+        except Exception as e:
+            console.print(f"❌ Upload failed: {e}")
+        finally:
+            if 'files' in locals():
+                files["file"][1].close()
+            await api_client.close()
+    
+    asyncio.run(_upload())
+
+
+@documents_app.command("show")
+def show_document(
+    document_id: str = typer.Argument(..., help="Document ID to show"),
+) -> None:
+    """Show document details."""
+    async def _show():
+        api_client = get_api_client()
+        try:
+            response = await api_client.request("GET", f"/documents/{document_id}")
+            
+            console.print(Panel.fit(f"[bold]Document: {response.get('title', 'Untitled')}[/bold]"))
+            
+            table = Table(title="Document Information", show_header=False)
+            table.add_column("Field", style="cyan")
+            table.add_column("Value", style="white")
+            
+            table.add_row("ID", response["id"])
+            table.add_row("Title", response.get("title", "Untitled"))
+            table.add_row("Description", response.get("description", "N/A"))
+            table.add_row("File Type", response.get("file_type", "N/A"))
+            table.add_row("File Size", f"{response.get('file_size', 0) / (1024*1024):.1f}MB")
+            table.add_row("Status", response.get("status", "N/A"))
+            table.add_row("Chunks", str(response.get("chunk_count", 0)))
+            table.add_row("Uploaded", response.get("created_at", "N/A"))
+            
+            if response.get("tags"):
+                table.add_row("Tags", ", ".join(response["tags"]))
+                
+            console.print(table)
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_show())
+
+
+@documents_app.command("search")
+def search_documents(
+    query: str = typer.Argument(..., help="Search query"),
+    limit: int = typer.Option(10, "--limit", "-l", help="Number of results"),
+    threshold: float = typer.Option(0.7, "--threshold", "-t", help="Similarity threshold"),
+) -> None:
+    """Search documents using vector similarity."""
+    async def _search():
+        api_client = get_api_client()
+        try:
+            search_data = {
+                "query": query,
+                "limit": limit,
+                "score_threshold": threshold
+            }
+            
+            response = await api_client.request("POST", "/documents/search", json=search_data)
+            
+            if not response or not response.get("results"):
+                console.print("🔍 No documents found matching your query.")
+                return
+                
+            results = response["results"]
+            
+            console.print(f"[bold]Search Results for: '{query}'[/bold]\n")
+            
+            for i, result in enumerate(results, 1):
+                score = result.get("score", 0)
+                content = result.get("content", "")[:200] + "..." if len(result.get("content", "")) > 200 else result.get("content", "")
+                doc_title = result.get("document_title", "Unknown")
+                
+                console.print(f"[bold]{i}. {doc_title}[/bold] (Score: {score:.3f})")
+                console.print(Panel(content, expand=False, border_style="dim"))
+                console.print()
+                
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_search())
+
+
+@documents_app.command("delete")
+def delete_document(
+    document_id: str = typer.Argument(..., help="Document ID to delete"),
+    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+) -> None:
+    """Delete a document."""
+    async def _delete():
+        api_client = get_api_client()
+        try:
+            # Get document details first
+            doc = await api_client.request("GET", f"/documents/{document_id}")
+            
+            if not force:
+                console.print(f"Document: {doc.get('title', 'Untitled')}")
+                console.print(f"Type: {doc.get('file_type', 'unknown')}")
+                if not Confirm.ask("Are you sure you want to delete this document?"):
+                    console.print("❌ Deletion cancelled.")
+                    return
+            
+            await api_client.request("DELETE", f"/documents/{document_id}")
+            console.print("✅ Document deleted successfully!")
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_delete())
+
+
+# Authentication commands
+auth_app = typer.Typer(help="Authentication management commands")
+app.add_typer(auth_app, name="auth")
+
+
+@auth_app.command("login")
+def login(
+    email: str = typer.Option(..., "--email", "-e", help="Email address"),
+    password: str = typer.Option(None, "--password", "-p", help="Password (will prompt if not provided)"),
+    save_token: bool = typer.Option(True, "--save/--no-save", help="Save access token"),
+) -> None:
+    """Login to get access token."""
+    async def _login():
+        if not password:
+            password = Prompt.ask("Password", password=True)
+            
+        # Create client without token for login
+        api_client = APIClient()
+        try:
+            login_data = {"email": email, "password": password}
+            response = await api_client.request("POST", "/auth/login", json=login_data)
+            
+            access_token = response.get("access_token")
+            if not access_token:
+                console.print("❌ Login failed: No access token received")
+                return
+                
+            console.print("✅ Login successful!")
+            console.print(f"🔑 Access token: {access_token}")
+            
+            if save_token:
+                # Save to environment file or config
+                env_file = Path(".env")
+                
+                # Read existing .env or create new
+                env_content = ""
+                if env_file.exists():
+                    env_content = env_file.read_text()
+                    
+                # Update or add token
+                lines = env_content.split('\n')
+                token_line = f"CHATTER_ACCESS_TOKEN={access_token}"
+                
+                # Check if token line exists
+                token_updated = False
+                for i, line in enumerate(lines):
+                    if line.startswith("CHATTER_ACCESS_TOKEN="):
+                        lines[i] = token_line
+                        token_updated = True
+                        break
+                        
+                if not token_updated:
+                    lines.append(token_line)
+                    
+                env_file.write_text('\n'.join(lines))
+                console.print("💾 Access token saved to .env file")
+                console.print("💡 You can now use other CLI commands without authentication")
+                
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_login())
+
+
+@auth_app.command("whoami")
+def whoami() -> None:
+    """Show current user information."""
+    async def _whoami():
+        api_client = get_api_client()
+        try:
+            response = await api_client.request("GET", "/auth/me")
+            
+            console.print(Panel.fit("[bold]Current User[/bold]"))
+            
+            table = Table(title="User Information", show_header=False)
+            table.add_column("Field", style="cyan")
+            table.add_column("Value", style="white")
+            
+            table.add_row("ID", response["id"])
+            table.add_row("Email", response["email"])
+            table.add_row("Name", response.get("full_name", "N/A"))
+            table.add_row("Active", "Yes" if response.get("is_active") else "No")
+            table.add_row("Superuser", "Yes" if response.get("is_superuser") else "No")
+            table.add_row("Created", response.get("created_at", "N/A"))
+            
+            console.print(table)
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_whoami())
+
+
+@auth_app.command("logout")
+def logout() -> None:
+    """Logout and remove saved token."""
+    env_file = Path(".env")
+    
+    if env_file.exists():
+        content = env_file.read_text()
+        lines = [line for line in content.split('\n') if not line.startswith("CHATTER_ACCESS_TOKEN=")]
+        env_file.write_text('\n'.join(lines))
+        console.print("✅ Logged out successfully!")
+        console.print("🗑️  Access token removed from .env file")
+    else:
+        console.print("💡 No saved token found")
+
+
+# Analytics commands
+analytics_app = typer.Typer(help="Analytics and metrics commands")
+app.add_typer(analytics_app, name="analytics")
+
+
+@analytics_app.command("dashboard")
+def show_dashboard() -> None:
+    """Show analytics dashboard."""
+    async def _dashboard():
+        api_client = get_api_client()
+        try:
+            response = await api_client.request("GET", "/analytics/dashboard")
+            
+            console.print(Panel.fit("[bold]Analytics Dashboard[/bold]"))
+            
+            # Conversations stats
+            conv_table = Table(title="Conversations")
+            conv_table.add_column("Metric", style="cyan")
+            conv_table.add_column("Value", style="white")
+            
+            conv_stats = response.get("conversations", {})
+            conv_table.add_row("Total Conversations", str(conv_stats.get("total_conversations", 0)))
+            conv_table.add_row("Active Today", str(conv_stats.get("active_conversations_today", 0)))
+            conv_table.add_row("Messages Today", str(conv_stats.get("total_messages_today", 0)))
+            conv_table.add_row("Avg Messages/Conv", f"{conv_stats.get('avg_messages_per_conversation', 0):.1f}")
+            
+            # Usage stats
+            usage_table = Table(title="Usage")
+            usage_table.add_column("Metric", style="cyan")
+            usage_table.add_column("Value", style="white")
+            
+            usage_stats = response.get("usage", {})
+            usage_table.add_row("Total Tokens", str(usage_stats.get("total_tokens_used", 0)))
+            usage_table.add_row("Prompt Tokens", str(usage_stats.get("total_prompt_tokens", 0)))
+            usage_table.add_row("Completion Tokens", str(usage_stats.get("total_completion_tokens", 0)))
+            usage_table.add_row("API Requests", str(usage_stats.get("total_api_requests", 0)))
+            
+            console.print(conv_table)
+            console.print()
+            console.print(usage_table)
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_dashboard())
+
+
+@analytics_app.command("usage")
+def show_usage(
+    days: int = typer.Option(7, "--days", "-d", help="Number of days to analyze"),
+) -> None:
+    """Show usage metrics."""
+    async def _usage():
+        api_client = get_api_client()
+        try:
+            params = {"days": days}
+            response = await api_client.request("GET", "/analytics/usage", params=params)
+            
+            console.print(Panel.fit(f"[bold]Usage Metrics (Last {days} days)[/bold]"))
+            
+            table = Table(title="Usage Statistics")
+            table.add_column("Metric", style="cyan")
+            table.add_column("Value", style="white")
+            table.add_column("Daily Average", style="green")
+            
+            metrics = [
+                ("API Requests", "total_api_requests"),
+                ("LLM Requests", "total_llm_requests"),
+                ("Tokens Used", "total_tokens_used"),
+                ("Documents Processed", "documents_processed"),
+                ("Active Users", "active_users"),
+            ]
+            
+            for metric_name, metric_key in metrics:
+                total = response.get(metric_key, 0)
+                daily_avg = total / days if days > 0 else 0
+                table.add_row(metric_name, str(total), f"{daily_avg:.1f}")
+            
+            console.print(table)
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_usage())
+
+
+@analytics_app.command("performance")
+def show_performance() -> None:
+    """Show performance metrics."""
+    async def _performance():
+        api_client = get_api_client()
+        try:
+            response = await api_client.request("GET", "/analytics/performance")
+            
+            console.print(Panel.fit("[bold]Performance Metrics[/bold]"))
+            
+            table = Table(title="Response Times & Performance")
+            table.add_column("Metric", style="cyan")
+            table.add_column("Value", style="white")
+            
+            table.add_row("Avg API Response Time", f"{response.get('avg_api_response_time', 0):.3f}s")
+            table.add_row("Avg LLM Response Time", f"{response.get('avg_llm_response_time', 0):.3f}s")
+            table.add_row("P95 Response Time", f"{response.get('p95_response_time', 0):.3f}s")
+            table.add_row("Error Rate", f"{response.get('error_rate', 0):.2%}")
+            table.add_row("Success Rate", f"{response.get('success_rate', 0):.2%}")
+            table.add_row("Cache Hit Rate", f"{response.get('cache_hit_rate', 0):.2%}")
+            
+            console.print(table)
+            
+        finally:
+            await api_client.close()
+    
+    asyncio.run(_performance())
 
 
 if __name__ == "__main__":

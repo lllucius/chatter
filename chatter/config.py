@@ -1,11 +1,12 @@
 """Configuration management for Chatter application."""
 
 from functools import lru_cache
-from typing import Any
+from typing import Any, Union
 
-from pydantic import Field, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
+import ast
 
 class Settings(BaseSettings):
     """Application settings with environment variable support."""
@@ -54,7 +55,7 @@ class Settings(BaseSettings):
     cors_allow_headers: list[str] = Field(default=["*"], description="CORS allowed headers")
 
     # Security
-    trusted_hosts: list[str] = Field(
+    trusted_hosts: Union[str, list[str]] = Field(
         default=["localhost", "127.0.0.1"],
         description="Trusted hosts"
     )
@@ -239,7 +240,6 @@ class Settings(BaseSettings):
     # MONITORING & METRICS
     # =============================================================================
 
-    enable_metrics: bool = Field(default=True, description="Enable Prometheus metrics")
     metrics_path: str = Field(default="/metrics", description="Metrics endpoint path")
     enable_health_checks: bool = Field(default=True, description="Enable health checks")
     health_check_interval: int = Field(default=30, description="Health check interval")
@@ -298,77 +298,11 @@ class Settings(BaseSettings):
 
     skip_slow_tests: bool = Field(default=False, description="Skip slow tests")
 
-    class Config:
-        """Pydantic configuration."""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-
-    @field_validator("cors_origins", mode="before")
-    @classmethod
-    def parse_cors_origins(cls, v: Any) -> list[str]:
-        """Parse CORS origins from string or list."""
-        if isinstance(v, str):
-            v = v.strip()
-            if not v:
-                return []
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
-
-    @field_validator("cors_allow_methods", mode="before")
-    @classmethod
-    def parse_cors_methods(cls, v: Any) -> list[str]:
-        """Parse CORS methods from string or list."""
-        if isinstance(v, str):
-            v = v.strip()
-            if not v:
-                return []
-            return [method.strip() for method in v.split(",") if method.strip()]
-        return v
-
-    @field_validator("cors_allow_headers", mode="before")
-    @classmethod
-    def parse_cors_headers(cls, v: Any) -> list[str]:
-        """Parse CORS headers from string or list."""
-        if isinstance(v, str):
-            v = v.strip()
-            if not v:
-                return []
-            return [header.strip() for header in v.split(",") if header.strip()]
-        return v
-
-    @field_validator("trusted_hosts", mode="before")
-    @classmethod
-    def parse_trusted_hosts(cls, v: Any) -> list[str]:
-        """Parse trusted hosts from string or list."""
-        if isinstance(v, str):
-            v = v.strip()
-            if not v:
-                return []
-            return [host.strip() for host in v.split(",") if host.strip()]
-        return v
-
-    @field_validator("allowed_file_types", mode="before")
-    @classmethod
-    def parse_allowed_file_types(cls, v: Any) -> list[str]:
-        """Parse allowed file types from string or list."""
-        if isinstance(v, str):
-            v = v.strip()
-            if not v:
-                return []
-            return [file_type.strip() for file_type in v.split(",") if file_type.strip()]
-        return v
-
-    @field_validator("mcp_servers", mode="before")
-    @classmethod
-    def parse_mcp_servers(cls, v: Any) -> list[str]:
-        """Parse MCP servers from string or list."""
-        if isinstance(v, str):
-            v = v.strip()
-            if not v:
-                return []
-            return [server.strip() for server in v.split(",") if server.strip()]
-        return v
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False,
+    }
 
     @property
     def is_development(self) -> bool:
@@ -399,12 +333,10 @@ class Settings(BaseSettings):
             return self.test_redis_url
         return self.redis_url
 
-
 @lru_cache
 def get_settings() -> Settings:
     """Get cached settings instance."""
     return Settings()
-
 
 # Global settings instance
 settings = get_settings()

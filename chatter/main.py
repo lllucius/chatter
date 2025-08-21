@@ -10,11 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-from chatter.api import analytics, auth, chat, documents, health, profiles, toolserver
 from chatter.config import settings
 from chatter.utils.database import close_database, init_database
 from chatter.utils.logging import get_logger, setup_logging
@@ -28,49 +26,6 @@ except ImportError:
 
 # Set up logging
 logger = get_logger(__name__)
-
-# Prometheus metrics
-REQUEST_COUNT = Counter(
-    'http_requests_total',
-    'Total number of HTTP requests',
-    ['method', 'endpoint', 'status_code']
-)
-
-REQUEST_DURATION = Histogram(
-    'http_request_duration_seconds',
-    'HTTP request duration in seconds',
-    ['method', 'endpoint']
-)
-
-
-class MetricsMiddleware(BaseHTTPMiddleware):
-    """Middleware to collect Prometheus metrics."""
-
-    async def dispatch(self, request: Request, call_next) -> Response:
-        """Collect metrics for each request."""
-        start_time = time.time()
-
-        response = await call_next(request)
-
-        # Extract endpoint from route
-        endpoint = request.url.path
-        if hasattr(request, 'route') and request.route:
-            endpoint = request.route.path
-
-        # Record metrics
-        REQUEST_COUNT.labels(
-            method=request.method,
-            endpoint=endpoint,
-            status_code=response.status_code
-        ).inc()
-
-        REQUEST_DURATION.labels(
-            method=request.method,
-            endpoint=endpoint
-        ).observe(time.time() - start_time)
-
-        return response
-
 
 class LoggingMiddleware(BaseHTTPMiddleware):
     """Middleware for request/response logging."""
@@ -225,9 +180,6 @@ def create_app() -> FastAPI:
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
 
-    if settings.enable_metrics:
-        app.add_middleware(MetricsMiddleware)
-
     # Add exception handler
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
@@ -254,17 +206,9 @@ def create_app() -> FastAPI:
                 content={"error": "Internal server error"}
             )
 
-    # Add Prometheus metrics endpoint
-    if settings.enable_metrics:
-        @app.get(settings.metrics_path, include_in_schema=False)
-        async def metrics():
-            """Prometheus metrics endpoint."""
-            return Response(
-                generate_latest(),
-                media_type=CONTENT_TYPE_LATEST
-            )
+    # --- DELAYED IMPORTS: Routers registered here only ---
+    from chatter.api import analytics, auth, chat, documents, health, profiles, toolserver
 
-    # Include API routers
     app.include_router(
         health.router,
         tags=["Health"]

@@ -273,6 +273,143 @@ def health_check() -> None:
     asyncio.run(_check())
 
 
+# Documentation and SDK commands
+docs_app = typer.Typer(help="Documentation and SDK generation commands")
+app.add_typer(docs_app, name="docs")
+
+
+@docs_app.command("generate")
+def generate_docs(
+    output_dir: str = typer.Option("docs/api", "--output", "-o", help="Output directory"),
+    format: str = typer.Option("all", "--format", "-f", help="Format: json, yaml, or all"),
+) -> None:
+    """Generate OpenAPI documentation."""
+    import sys
+    from pathlib import Path
+    
+    # Add project root to path and import the generation script
+    project_root = Path(__file__).parent.parent
+    sys.path.insert(0, str(project_root))
+    
+    try:
+        from scripts.generate_openapi import generate_openapi_spec, export_openapi_json, export_openapi_yaml
+        
+        console.print("🚀 Generating OpenAPI documentation...")
+        
+        # Create output directory
+        output_path = Path(output_dir)
+        output_path.mkdir(parents=True, exist_ok=True)
+        
+        # Generate OpenAPI spec
+        spec = generate_openapi_spec()
+        
+        # Export in requested formats
+        if format in ["json", "all"]:
+            export_openapi_json(spec, output_path / "openapi.json")
+            version = spec.get("info", {}).get("version", "unknown")
+            export_openapi_json(spec, output_path / f"openapi-v{version}.json")
+        
+        if format in ["yaml", "all"]:
+            export_openapi_yaml(spec, output_path / "openapi.yaml")
+            version = spec.get("info", {}).get("version", "unknown")
+            export_openapi_yaml(spec, output_path / f"openapi-v{version}.yaml")
+        
+        console.print(f"✅ Documentation generated in: {output_path}")
+        console.print(f"📊 Total endpoints: {len([path for path in spec.get('paths', {}).keys()])}")
+        console.print(f"🏷️  Total schemas: {len(spec.get('components', {}).get('schemas', {}))}")
+        
+    except Exception as e:
+        console.print(f"❌ Failed to generate documentation: {e}")
+        raise typer.Exit(1)
+
+
+@docs_app.command("sdk")
+def generate_sdk(
+    language: str = typer.Option("python", "--language", "-l", help="SDK language (currently supports: python)"),
+    output_dir: str = typer.Option("sdk", "--output", "-o", help="Output directory"),
+) -> None:
+    """Generate SDK from OpenAPI specification."""
+    if language != "python":
+        console.print(f"❌ Unsupported language: {language}. Currently only 'python' is supported.")
+        raise typer.Exit(1)
+    
+    import sys
+    from pathlib import Path
+    
+    # Add project root to path and import the generation script
+    project_root = Path(__file__).parent.parent
+    sys.path.insert(0, str(project_root))
+    
+    try:
+        from scripts.generate_sdk import generate_python_sdk
+        
+        console.print(f"🐍 Generating {language} SDK...")
+        
+        # Override the output directory in the script
+        import scripts.generate_sdk as sdk_module
+        original_project_root = sdk_module.project_root
+        sdk_module.project_root = project_root
+        
+        # Set custom output directory
+        sdk_output_dir = Path(output_dir) / language
+        sdk_output_dir.mkdir(parents=True, exist_ok=True)
+        
+        success = generate_python_sdk()
+        
+        # Restore original project root
+        sdk_module.project_root = original_project_root
+        
+        if success:
+            console.print(f"✅ {language.title()} SDK generated successfully!")
+            console.print(f"📁 SDK location: {project_root / 'sdk' / language}")
+            console.print("\n📋 Next steps:")
+            console.print("1. Review the generated SDK code")
+            console.print("2. Test the examples")
+            console.print(f"3. Install the SDK: pip install -e ./{project_root / 'sdk' / language}")
+            console.print("4. Package for distribution: python -m build")
+        else:
+            raise typer.Exit(1)
+            
+    except Exception as e:
+        console.print(f"❌ Failed to generate SDK: {e}")
+        raise typer.Exit(1)
+
+
+@docs_app.command("serve")
+def serve_docs(
+    port: int = typer.Option(8080, "--port", "-p", help="Port to serve documentation"),
+    docs_dir: str = typer.Option("docs/api", "--dir", "-d", help="Documentation directory"),
+) -> None:
+    """Serve generated documentation locally."""
+    import http.server
+    import socketserver
+    from pathlib import Path
+    
+    docs_path = Path(docs_dir)
+    if not docs_path.exists():
+        console.print(f"❌ Documentation directory not found: {docs_path}")
+        console.print("💡 Run 'chatter docs generate' first to create documentation.")
+        raise typer.Exit(1)
+    
+    # Change to the docs directory
+    os.chdir(docs_path)
+    
+    # Create a simple HTTP server
+    handler = http.server.SimpleHTTPRequestHandler
+    
+    try:
+        with socketserver.TCPServer(("", port), handler) as httpd:
+            console.print(f"📚 Serving documentation at http://localhost:{port}")
+            console.print("📄 Available files:")
+            for file in docs_path.glob("*"):
+                if file.is_file():
+                    console.print(f"  - http://localhost:{port}/{file.name}")
+            console.print("\n🛑 Press Ctrl+C to stop the server")
+            httpd.serve_forever()
+    except KeyboardInterrupt:
+        console.print("\n👋 Documentation server stopped")
+
+
 @app.command("version")
 def version() -> None:
     """Show version information."""

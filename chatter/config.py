@@ -125,8 +125,11 @@ class Settings(BaseSettings):
         default="text-embedding-3-small",
         description="OpenAI embedding model"
     )
+    openai_embedding_dimensions: int = Field(default=1536, description="OpenAI embedding dimensions")
+    openai_embedding_chunk_size: int = Field(default=1000, description="OpenAI embedding chunk size")
     openai_max_tokens: int = Field(default=4096, description="OpenAI max tokens")
     openai_temperature: float = Field(default=0.7, description="OpenAI temperature")
+    openai_timeout: int = Field(default=60, description="OpenAI timeout")
     
     # Anthropic
     anthropic_api_key: Optional[str] = Field(default=None, description="Anthropic API key")
@@ -136,6 +139,14 @@ class Settings(BaseSettings):
     )
     anthropic_max_tokens: int = Field(default=4096, description="Anthropic max tokens")
     anthropic_temperature: float = Field(default=0.7, description="Anthropic temperature")
+    anthropic_timeout: int = Field(default=60, description="Anthropic timeout")
+    
+    # HuggingFace
+    huggingface_embedding_model: str = Field(
+        default="sentence-transformers/all-MiniLM-L6-v2", 
+        description="HuggingFace embedding model"
+    )
+    huggingface_embedding_dimensions: int = Field(default=384, description="HuggingFace embedding dimensions")
     
     # Default providers
     default_llm_provider: str = Field(default="openai", description="Default LLM provider")
@@ -143,6 +154,9 @@ class Settings(BaseSettings):
         default="openai",
         description="Default embedding provider"
     )
+    
+    # Embedding settings
+    embedding_batch_size: int = Field(default=10, description="Embedding batch size")
     
     # =============================================================================
     # AUTHENTICATION & SECURITY

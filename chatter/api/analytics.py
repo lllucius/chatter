@@ -298,3 +298,30 @@ async def get_dashboard(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to get dashboard data"
         )
+
+
+@router.get("/toolservers")
+async def get_tool_server_analytics(
+    time_range: AnalyticsTimeRange = Depends(parse_time_range),
+    current_user: User = Depends(get_current_user),
+    analytics_service: AnalyticsService = Depends(get_analytics_service)
+) -> dict:
+    """Get tool server analytics.
+    
+    Args:
+        time_range: Time range for analytics
+        current_user: Current authenticated user
+        analytics_service: Analytics service
+        
+    Returns:
+        Tool server analytics data
+    """
+    try:
+        return await analytics_service.get_tool_server_analytics(current_user.id, time_range)
+        
+    except Exception as e:
+        logger.error("Failed to get tool server analytics", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to get tool server analytics"
+        )

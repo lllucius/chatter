@@ -18,7 +18,7 @@ from starlette.responses import Response
 from chatter.config import settings
 from chatter.utils.logging import setup_logging, get_logger
 from chatter.utils.database import init_database, close_database
-from chatter.api import auth, chat, documents, analytics, health, profiles
+from chatter.api import auth, chat, documents, analytics, health, profiles, toolserver
 
 # Set up uvloop for better async performance
 try:
@@ -131,6 +131,28 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     await init_database()
     logger.info("Database initialized")
     
+    # Initialize built-in tool servers
+    try:
+        from chatter.services.toolserver import ToolServerService
+        from chatter.utils.database import get_session_factory
+        
+        async_session = get_session_factory()
+        async with async_session() as session:
+            service = ToolServerService(session)
+            await service.initialize_builtin_servers()
+        
+        logger.info("Built-in tool servers initialized")
+    except Exception as e:
+        logger.error("Failed to initialize built-in tool servers", error=str(e))
+    
+    # Start background scheduler
+    try:
+        from chatter.services.scheduler import start_scheduler
+        await start_scheduler()
+        logger.info("Tool server scheduler started")
+    except Exception as e:
+        logger.error("Failed to start scheduler", error=str(e))
+    
     # Application startup complete
     logger.info("Chatter application started successfully")
     
@@ -138,6 +160,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     
     # Cleanup on shutdown
     logger.info("Shutting down Chatter application")
+    
+    # Stop scheduler
+    try:
+        from chatter.services.scheduler import stop_scheduler
+        await stop_scheduler()
+        logger.info("Tool server scheduler stopped")
+    except Exception as e:
+        logger.error("Failed to stop scheduler", error=str(e))
+    
     await close_database()
     logger.info("Chatter application shutdown complete")
 
@@ -267,6 +298,12 @@ def create_app() -> FastAPI:
         analytics.router,
         prefix=f"{settings.api_prefix}/analytics",
         tags=["Analytics"]
+    )
+    
+    app.include_router(
+        toolserver.router,
+        prefix=f"{settings.api_prefix}/toolservers",
+        tags=["Tool Servers"]
     )
     
     @app.get("/")

@@ -6,6 +6,7 @@ from chatter.models.document import Document, DocumentChunk
 from chatter.models.profile import Profile
 from chatter.models.prompt import Prompt
 from chatter.models.analytics import ConversationStats, DocumentStats, PromptStats, ProfileStats
+from chatter.models.toolserver import ToolServer, ServerTool, ToolUsage
 
 __all__ = [
     "User",
@@ -19,4 +20,7 @@ __all__ = [
     "DocumentStats", 
     "PromptStats",
     "ProfileStats",
+    "ToolServer",
+    "ServerTool",
+    "ToolUsage",
 ]

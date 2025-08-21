@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import time
 from typing import Any, Dict, List, Optional, Union, Callable
 from dataclasses import dataclass
 
@@ -162,28 +163,133 @@ class MCPToolService:
         self,
         tool_name: str,
         arguments: Dict[str, Any],
-        server_name: Optional[str] = None
+        server_name: Optional[str] = None,
+        user_id: Optional[str] = None,
+        conversation_id: Optional[str] = None
     ) -> Dict[str, Any]:
-        """Call a specific MCP tool."""
+        """Call a specific MCP tool with usage tracking.
+        
+        Args:
+            tool_name: Name of the tool to call
+            arguments: Tool arguments
+            server_name: Specific server name (optional)
+            user_id: User ID for tracking
+            conversation_id: Conversation ID for tracking
+            
+        Returns:
+            Tool result with success/error information
+        """
+        start_time = time.time()
         tool = await self.get_tool_by_name(tool_name)
         
         if not tool:
             raise MCPServiceError(f"Tool not found: {tool_name}")
         
+        # Find which server provides this tool
+        found_server = None
+        for server_name_check, tools in self.tools_cache.items():
+            if any(t.name == tool_name for t in tools):
+                found_server = server_name_check
+                break
+        
+        if not found_server:
+            raise MCPServiceError(f"Server not found for tool: {tool_name}")
+        
         try:
             result = await tool.arun(arguments)
+            response_time_ms = (time.time() - start_time) * 1000
+            
+            # Track usage (async, don't block)
+            asyncio.create_task(self._track_tool_usage(
+                found_server, tool_name, arguments, result, 
+                response_time_ms, True, None, user_id, conversation_id
+            ))
+            
             return {
                 "success": True,
                 "result": result,
-                "tool": tool_name
+                "tool": tool_name,
+                "server": found_server,
+                "response_time_ms": response_time_ms
             }
         except Exception as e:
-            logger.error("Tool call failed", tool=tool_name, error=str(e))
+            response_time_ms = (time.time() - start_time) * 1000
+            error_msg = str(e)
+            
+            logger.error("Tool call failed", tool=tool_name, server=found_server, error=error_msg)
+            
+            # Track usage error (async, don't block)
+            asyncio.create_task(self._track_tool_usage(
+                found_server, tool_name, arguments, None, 
+                response_time_ms, False, error_msg, user_id, conversation_id
+            ))
+            
             return {
                 "success": False,
-                "error": str(e),
-                "tool": tool_name
+                "error": error_msg,
+                "tool": tool_name,
+                "server": found_server,
+                "response_time_ms": response_time_ms
             }
+    
+    async def _track_tool_usage(
+        self,
+        server_name: str,
+        tool_name: str,
+        arguments: Dict[str, Any],
+        result: Any,
+        response_time_ms: float,
+        success: bool,
+        error_message: Optional[str],
+        user_id: Optional[str],
+        conversation_id: Optional[str]
+    ) -> None:
+        """Track tool usage in the database.
+        
+        Args:
+            server_name: Server name
+            tool_name: Tool name
+            arguments: Tool arguments
+            result: Tool result
+            response_time_ms: Response time in milliseconds
+            success: Whether the call was successful
+            error_message: Error message if failed
+            user_id: User ID
+            conversation_id: Conversation ID
+        """
+        try:
+            from chatter.utils.database import get_session_factory
+            from chatter.services.toolserver import ToolServerService
+            from chatter.schemas.toolserver import ToolUsageCreate
+            
+            # Get database session
+            async_session = get_session_factory()
+            async with async_session() as session:
+                tool_server_service = ToolServerService(session)
+                
+                # Find server by name
+                server = await tool_server_service.get_server_by_name(server_name)
+                if not server:
+                    logger.warning("Server not found for usage tracking", server_name=server_name)
+                    return
+                
+                # Create usage record
+                usage_data = ToolUsageCreate(
+                    tool_name=tool_name,
+                    arguments=arguments,
+                    result={"data": result} if result is not None else None,
+                    response_time_ms=response_time_ms,
+                    success=success,
+                    error_message=error_message,
+                    user_id=user_id,
+                    conversation_id=conversation_id
+                )
+                
+                await tool_server_service.record_tool_usage(server.id, tool_name, usage_data)
+                
+        except Exception as e:
+            logger.error("Failed to track tool usage", error=str(e))
+            # Don't raise - usage tracking shouldn't break tool calls
     
     def create_custom_tool(
         self,

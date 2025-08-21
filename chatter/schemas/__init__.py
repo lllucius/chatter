@@ -3,6 +3,8 @@
 from chatter.schemas.auth import *
 from chatter.schemas.chat import *
 from chatter.schemas.document import *
+from chatter.schemas.profile import *
+from chatter.schemas.analytics import *
 
 __all__ = [
     # Auth schemas
@@ -49,4 +51,31 @@ __all__ = [
     "DocumentProcessingRequest",
     "DocumentProcessingResponse",
     "DocumentStatsResponse",
+    
+    # Profile schemas
+    "ProfileBase",
+    "ProfileCreate",
+    "ProfileUpdate",
+    "ProfileResponse",
+    "ProfileListRequest",
+    "ProfileListResponse",
+    "ProfileStatsResponse",
+    "ProfileTestRequest",
+    "ProfileTestResponse",
+    "ProfileCloneRequest",
+    "ProfileImportRequest",
+    "ProfileExportResponse",
+    
+    # Analytics schemas
+    "ConversationStatsResponse",
+    "UsageMetricsResponse",
+    "PerformanceMetricsResponse",
+    "DocumentAnalyticsResponse",
+    "PromptAnalyticsResponse",
+    "ProfileAnalyticsResponse",
+    "SystemAnalyticsResponse",
+    "AnalyticsTimeRange",
+    "AnalyticsExportRequest",
+    "AnalyticsExportResponse",
+    "DashboardResponse",
 ]

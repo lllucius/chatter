@@ -18,7 +18,7 @@ from starlette.responses import Response
 from chatter.config import settings
 from chatter.utils.logging import setup_logging, get_logger
 from chatter.utils.database import init_database, close_database
-from chatter.api import auth, chat, documents, analytics, health
+from chatter.api import auth, chat, documents, analytics, health, profiles
 
 # Set up uvloop for better async performance
 try:
@@ -255,6 +255,12 @@ def create_app() -> FastAPI:
         documents.router,
         prefix=f"{settings.api_prefix}/documents",
         tags=["Documents"]
+    )
+    
+    app.include_router(
+        profiles.router,
+        prefix=f"{settings.api_prefix}/profiles",
+        tags=["Profiles"]
     )
     
     app.include_router(

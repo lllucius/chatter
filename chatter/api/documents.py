@@ -1,26 +1,25 @@
 """Document management endpoints."""
 
-from typing import List
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.core.documents import DocumentService, DocumentError
+from chatter.core.documents import DocumentError, DocumentService
 from chatter.models.user import User
 from chatter.schemas.document import (
+    DocumentChunkResponse,
     DocumentCreate,
-    DocumentUpdate,
-    DocumentResponse,
     DocumentListRequest,
     DocumentListResponse,
+    DocumentProcessingRequest,
+    DocumentProcessingResponse,
+    DocumentResponse,
     DocumentSearchRequest,
     DocumentSearchResponse,
     DocumentSearchResult,
-    DocumentChunkResponse,
-    DocumentProcessingRequest,
-    DocumentProcessingResponse,
     DocumentStatsResponse,
+    DocumentUpdate,
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
@@ -47,7 +46,7 @@ async def upload_document(
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentResponse:
     """Upload a document.
-    
+
     Args:
         file: Document file to upload
         title: Document title
@@ -58,7 +57,7 @@ async def upload_document(
         is_public: Whether document is public
         current_user: Current authenticated user
         document_service: Document service
-        
+
     Returns:
         Created document information
     """
@@ -72,7 +71,7 @@ async def upload_document(
             except json.JSONDecodeError:
                 # Fallback: split by comma
                 parsed_tags = [tag.strip() for tag in tags.split(",") if tag.strip()]
-        
+
         # Create document data
         document_data = DocumentCreate(
             title=title,
@@ -82,14 +81,14 @@ async def upload_document(
             chunk_overlap=chunk_overlap,
             is_public=is_public,
         )
-        
+
         # Create document
         document = await document_service.create_document(
             current_user.id, file, document_data
         )
-        
+
         return DocumentResponse.model_validate(document)
-        
+
     except DocumentError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -116,7 +115,7 @@ async def list_documents(
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentListResponse:
     """List user's documents.
-    
+
     Args:
         status_filter: Filter by document status
         document_type: Filter by document type
@@ -127,7 +126,7 @@ async def list_documents(
         sort_order: Sort order (asc/desc)
         current_user: Current authenticated user
         document_service: Document service
-        
+
     Returns:
         List of documents with pagination info
     """
@@ -136,7 +135,7 @@ async def list_documents(
         parsed_tags = None
         if tags:
             parsed_tags = [tag.strip() for tag in tags.split(",") if tag.strip()]
-        
+
         # Create list request
         list_request = DocumentListRequest(
             status=status_filter,
@@ -147,19 +146,19 @@ async def list_documents(
             sort_by=sort_by,
             sort_order=sort_order,
         )
-        
+
         # Get documents
         documents, total_count = await document_service.list_documents(
             current_user.id, list_request
         )
-        
+
         return DocumentListResponse(
             documents=[DocumentResponse.model_validate(doc) for doc in documents],
             total_count=total_count,
             limit=limit,
             offset=offset,
         )
-        
+
     except Exception as e:
         logger.error("Failed to list documents", error=str(e))
         raise HTTPException(
@@ -175,26 +174,26 @@ async def get_document(
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentResponse:
     """Get document details.
-    
+
     Args:
         document_id: Document ID
         current_user: Current authenticated user
         document_service: Document service
-        
+
     Returns:
         Document information
     """
     try:
         document = await document_service.get_document(document_id, current_user.id)
-        
+
         if not document:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found"
             )
-        
+
         return DocumentResponse.model_validate(document)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -213,13 +212,13 @@ async def update_document(
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentResponse:
     """Update document metadata.
-    
+
     Args:
         document_id: Document ID
         update_data: Update data
         current_user: Current authenticated user
         document_service: Document service
-        
+
     Returns:
         Updated document information
     """
@@ -227,15 +226,15 @@ async def update_document(
         document = await document_service.update_document(
             document_id, current_user.id, update_data
         )
-        
+
         if not document:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found"
             )
-        
+
         return DocumentResponse.model_validate(document)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -253,26 +252,26 @@ async def delete_document(
     document_service: DocumentService = Depends(get_document_service)
 ) -> dict:
     """Delete document.
-    
+
     Args:
         document_id: Document ID
         current_user: Current authenticated user
         document_service: Document service
-        
+
     Returns:
         Success message
     """
     try:
         success = await document_service.delete_document(document_id, current_user.id)
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found"
             )
-        
+
         return {"message": "Document deleted successfully"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -290,12 +289,12 @@ async def search_documents(
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentSearchResponse:
     """Search documents using vector similarity.
-    
+
     Args:
         search_request: Search request
         current_user: Current authenticated user
         document_service: Document service
-        
+
     Returns:
         Search results
     """
@@ -304,7 +303,7 @@ async def search_documents(
         search_results = await document_service.search_documents(
             current_user.id, search_request
         )
-        
+
         # Format results
         results = []
         for chunk, score, document in search_results:
@@ -317,14 +316,14 @@ async def search_documents(
                 document=DocumentResponse.model_validate(document)
             )
             results.append(result)
-        
+
         return DocumentSearchResponse(
             results=results,
             total_results=len(results),
             query=search_request.query,
             score_threshold=search_request.score_threshold,
         )
-        
+
     except Exception as e:
         logger.error("Document search failed", error=str(e))
         raise HTTPException(
@@ -333,27 +332,27 @@ async def search_documents(
         )
 
 
-@router.get("/{document_id}/chunks", response_model=List[DocumentChunkResponse])
+@router.get("/{document_id}/chunks", response_model=list[DocumentChunkResponse])
 async def get_document_chunks(
     document_id: str,
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
-) -> List[DocumentChunkResponse]:
+) -> list[DocumentChunkResponse]:
     """Get document chunks.
-    
+
     Args:
         document_id: Document ID
         current_user: Current authenticated user
         document_service: Document service
-        
+
     Returns:
         List of document chunks
     """
     try:
         chunks = await document_service.get_document_chunks(document_id, current_user.id)
-        
+
         return [DocumentChunkResponse.model_validate(chunk) for chunk in chunks]
-        
+
     except Exception as e:
         logger.error("Failed to get document chunks", document_id=document_id, error=str(e))
         raise HTTPException(
@@ -370,13 +369,13 @@ async def process_document(
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentProcessingResponse:
     """Trigger document processing.
-    
+
     Args:
         document_id: Document ID
         processing_request: Processing request
         current_user: Current authenticated user
         document_service: Document service
-        
+
     Returns:
         Processing status
     """
@@ -384,20 +383,20 @@ async def process_document(
         success = await document_service.process_document(
             document_id, current_user.id, processing_request
         )
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found or processing failed"
             )
-        
+
         return DocumentProcessingResponse(
             document_id=document_id,
             status="processing",
             message="Document processing started successfully",
             processing_started_at=None,  # Would be filled by service
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -414,17 +413,17 @@ async def get_document_stats(
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentStatsResponse:
     """Get document statistics.
-    
+
     Args:
         current_user: Current authenticated user
         document_service: Document service
-        
+
     Returns:
         Document statistics
     """
     try:
         stats = await document_service.get_document_stats(current_user.id)
-        
+
         return DocumentStatsResponse(
             total_documents=stats.get("total_documents", 0),
             total_chunks=stats.get("total_chunks", 0),
@@ -433,7 +432,7 @@ async def get_document_stats(
             documents_by_type=stats.get("type_counts", {}),
             processing_stats=stats.get("processing_stats", {}),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get document stats", error=str(e))
         raise HTTPException(

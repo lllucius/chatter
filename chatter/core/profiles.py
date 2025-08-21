@@ -1,17 +1,14 @@
 """Profile management service."""
 
-import uuid
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import UTC, datetime
+from typing import Any
 
-from sqlalchemy import select, func, and_, or_, desc, asc
+from sqlalchemy import and_, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import get_settings
 from chatter.models.profile import Profile, ProfileType
-from chatter.schemas.profile import (
-    ProfileCreate, ProfileUpdate, ProfileListRequest, ProfileTestRequest
-)
+from chatter.schemas.profile import ProfileCreate, ProfileListRequest, ProfileTestRequest, ProfileUpdate
 from chatter.services.llm import LLMService
 from chatter.utils.logging import get_logger
 
@@ -21,30 +18,30 @@ logger = get_logger(__name__)
 
 class ProfileService:
     """Service for profile management operations."""
-    
+
     def __init__(self, session: AsyncSession):
         """Initialize profile service.
-        
+
         Args:
             session: Database session
         """
         self.session = session
         self.llm_service = LLMService()
-    
+
     async def create_profile(
         self,
         user_id: str,
         profile_data: ProfileCreate
     ) -> Profile:
         """Create a new profile.
-        
+
         Args:
             user_id: Owner user ID
             profile_data: Profile creation data
-            
+
         Returns:
             Created profile
-            
+
         Raises:
             ProfileError: If profile creation fails
         """
@@ -59,10 +56,10 @@ class ProfileService:
                 )
             )
             existing_profile = existing_result.scalar_one_or_none()
-            
+
             if existing_profile:
                 raise ProfileError("Profile with this name already exists")
-            
+
             # Validate LLM provider
             available_providers = self.llm_service.list_available_providers()
             if profile_data.llm_provider not in available_providers:
@@ -71,17 +68,17 @@ class ProfileService:
                     provider=profile_data.llm_provider,
                     available_providers=available_providers
                 )
-            
+
             # Create profile
             profile = Profile(
                 owner_id=user_id,
                 **profile_data.model_dump()
             )
-            
+
             self.session.add(profile)
             await self.session.commit()
             await self.session.refresh(profile)
-            
+
             logger.info(
                 "Profile created",
                 profile_id=profile.id,
@@ -90,26 +87,26 @@ class ProfileService:
                 llm_provider=profile.llm_provider,
                 llm_model=profile.llm_model
             )
-            
+
             return profile
-            
+
         except ProfileError:
             raise
         except Exception as e:
             logger.error("Profile creation failed", error=str(e))
             raise ProfileError(f"Failed to create profile: {str(e)}")
-    
+
     async def get_profile(
         self,
         profile_id: str,
         user_id: str
-    ) -> Optional[Profile]:
+    ) -> Profile | None:
         """Get profile by ID with access control.
-        
+
         Args:
             profile_id: Profile ID
             user_id: Requesting user ID
-            
+
         Returns:
             Profile if found and accessible, None otherwise
         """
@@ -120,29 +117,29 @@ class ProfileService:
                         Profile.id == profile_id,
                         or_(
                             Profile.owner_id == user_id,
-                            Profile.is_public == True,
+                            Profile.is_public is True,
                             Profile.shared_with_users.contains([user_id])
                         )
                     )
                 )
             )
             return result.scalar_one_or_none()
-            
+
         except Exception as e:
             logger.error("Failed to get profile", profile_id=profile_id, error=str(e))
             return None
-    
+
     async def list_profiles(
         self,
         user_id: str,
         list_request: ProfileListRequest
-    ) -> Tuple[List[Profile], int]:
+    ) -> tuple[list[Profile], int]:
         """List profiles with filtering and pagination.
-        
+
         Args:
             user_id: Requesting user ID
             list_request: List request parameters
-            
+
         Returns:
             Tuple of (profiles list, total count)
         """
@@ -151,63 +148,63 @@ class ProfileService:
             query = select(Profile).where(
                 or_(
                     Profile.owner_id == user_id,
-                    Profile.is_public == True,
+                    Profile.is_public is True,
                     Profile.shared_with_users.contains([user_id])
                 )
             )
-            
+
             # Add filters
             if list_request.profile_type:
                 query = query.where(Profile.profile_type == list_request.profile_type)
-            
+
             if list_request.llm_provider:
                 query = query.where(Profile.llm_provider == list_request.llm_provider)
-            
+
             if list_request.tags:
                 for tag in list_request.tags:
                     query = query.where(Profile.tags.contains([tag]))
-            
+
             if list_request.is_public is not None:
                 query = query.where(Profile.is_public == list_request.is_public)
-            
+
             # Get total count
             count_query = select(func.count()).select_from(query.subquery())
             count_result = await self.session.execute(count_query)
             total_count = count_result.scalar()
-            
+
             # Add sorting
             sort_column = getattr(Profile, list_request.sort_by, Profile.created_at)
             if list_request.sort_order == "desc":
                 query = query.order_by(desc(sort_column))
             else:
                 query = query.order_by(asc(sort_column))
-            
+
             # Add pagination
             query = query.offset(list_request.offset).limit(list_request.limit)
-            
+
             # Execute query
             result = await self.session.execute(query)
             profiles = result.scalars().all()
-            
+
             return list(profiles), total_count
-            
+
         except Exception as e:
             logger.error("Failed to list profiles", error=str(e))
             return [], 0
-    
+
     async def update_profile(
         self,
         profile_id: str,
         user_id: str,
         update_data: ProfileUpdate
-    ) -> Optional[Profile]:
+    ) -> Profile | None:
         """Update profile.
-        
+
         Args:
             profile_id: Profile ID
             user_id: Requesting user ID
             update_data: Update data
-            
+
         Returns:
             Updated profile if successful, None otherwise
         """
@@ -222,10 +219,10 @@ class ProfileService:
                 )
             )
             profile = result.scalar_one_or_none()
-            
+
             if not profile:
                 return None
-            
+
             # Check for name conflicts if name is being updated
             if update_data.name and update_data.name != profile.name:
                 existing_result = await self.session.execute(
@@ -238,38 +235,38 @@ class ProfileService:
                     )
                 )
                 existing_profile = existing_result.scalar_one_or_none()
-                
+
                 if existing_profile:
                     raise ProfileError("Profile with this name already exists")
-            
+
             # Update fields
             update_dict = update_data.model_dump(exclude_unset=True)
             for field, value in update_dict.items():
                 setattr(profile, field, value)
-            
+
             await self.session.commit()
             await self.session.refresh(profile)
-            
+
             logger.info("Profile updated", profile_id=profile_id, user_id=user_id)
             return profile
-            
+
         except ProfileError:
             raise
         except Exception as e:
             logger.error("Failed to update profile", profile_id=profile_id, error=str(e))
             raise ProfileError(f"Failed to update profile: {str(e)}")
-    
+
     async def delete_profile(
         self,
         profile_id: str,
         user_id: str
     ) -> bool:
         """Delete profile.
-        
+
         Args:
             profile_id: Profile ID
             user_id: Requesting user ID
-            
+
         Returns:
             True if deleted successfully, False otherwise
         """
@@ -284,37 +281,37 @@ class ProfileService:
                 )
             )
             profile = result.scalar_one_or_none()
-            
+
             if not profile:
                 return False
-            
+
             # Check if profile is in use by conversations
             # This would require checking conversations table if we want to prevent deletion
             # For now, we'll allow deletion and let foreign key constraints handle it
-            
+
             await self.session.delete(profile)
             await self.session.commit()
-            
+
             logger.info("Profile deleted", profile_id=profile_id, user_id=user_id)
             return True
-            
+
         except Exception as e:
             logger.error("Failed to delete profile", profile_id=profile_id, error=str(e))
             return False
-    
+
     async def test_profile(
         self,
         profile_id: str,
         user_id: str,
         test_request: ProfileTestRequest
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Test profile with a sample message.
-        
+
         Args:
             profile_id: Profile ID
             user_id: Requesting user ID
             test_request: Test request parameters
-            
+
         Returns:
             Test results
         """
@@ -323,41 +320,41 @@ class ProfileService:
             profile = await self.get_profile(profile_id, user_id)
             if not profile:
                 raise ProfileError("Profile not found")
-            
+
             # Create LLM provider from profile
             provider = self.llm_service.create_provider_from_profile(profile)
             if not provider:
                 raise ProfileError("Failed to create LLM provider from profile")
-            
+
             # Prepare messages
-            from langchain_core.messages import SystemMessage, HumanMessage
-            
+            from langchain_core.messages import HumanMessage, SystemMessage
+
             messages = []
             if profile.system_prompt:
                 messages.append(SystemMessage(content=profile.system_prompt))
             messages.append(HumanMessage(content=test_request.test_message))
-            
+
             # Generate response
-            start_time = datetime.now(timezone.utc)
-            
+            start_time = datetime.now(UTC)
+
             generation_config = profile.get_generation_config()
             response_content, usage_info = await self.llm_service.generate_response(
                 messages, provider, **generation_config
             )
-            
-            end_time = datetime.now(timezone.utc)
+
+            end_time = datetime.now(UTC)
             response_time_ms = int((end_time - start_time).total_seconds() * 1000)
-            
+
             # Update profile usage stats
             profile.usage_count += 1
             if usage_info.get("total_tokens"):
                 profile.total_tokens_used += usage_info["total_tokens"]
             if usage_info.get("cost"):
                 profile.total_cost += usage_info["cost"]
-            profile.last_used_at = datetime.now(timezone.utc)
-            
+            profile.last_used_at = datetime.now(UTC)
+
             await self.session.commit()
-            
+
             result = {
                 "profile_id": profile_id,
                 "test_message": test_request.test_message,
@@ -365,51 +362,51 @@ class ProfileService:
                 "usage_info": usage_info,
                 "response_time_ms": response_time_ms,
             }
-            
+
             # Add retrieval results if enabled
             if test_request.include_retrieval and profile.enable_retrieval:
                 # This would integrate with document service for retrieval
                 # For now, return placeholder
                 result["retrieval_results"] = []
-            
+
             # Add tools used if enabled
             if test_request.include_tools and profile.enable_tools:
                 # This would integrate with MCP service for tool calling
                 # For now, return placeholder
                 result["tools_used"] = []
-            
+
             logger.info(
                 "Profile test completed",
                 profile_id=profile_id,
                 response_time_ms=response_time_ms,
                 tokens_used=usage_info.get("total_tokens", 0)
             )
-            
+
             return result
-            
+
         except ProfileError:
             raise
         except Exception as e:
             logger.error("Profile test failed", profile_id=profile_id, error=str(e))
             raise ProfileError(f"Profile test failed: {str(e)}")
-    
+
     async def clone_profile(
         self,
         profile_id: str,
         user_id: str,
         new_name: str,
-        description: Optional[str] = None,
-        modifications: Optional[ProfileUpdate] = None
+        description: str | None = None,
+        modifications: ProfileUpdate | None = None
     ) -> Profile:
         """Clone an existing profile.
-        
+
         Args:
             profile_id: Source profile ID
             user_id: Requesting user ID
             new_name: Name for the cloned profile
             description: Description for the cloned profile
             modifications: Modifications to apply to the cloned profile
-            
+
         Returns:
             Cloned profile
         """
@@ -418,7 +415,7 @@ class ProfileService:
             source_profile = await self.get_profile(profile_id, user_id)
             if not source_profile:
                 raise ProfileError("Source profile not found")
-            
+
             # Check for name conflicts
             existing_result = await self.session.execute(
                 select(Profile).where(
@@ -429,10 +426,10 @@ class ProfileService:
                 )
             )
             existing_profile = existing_result.scalar_one_or_none()
-            
+
             if existing_profile:
                 raise ProfileError("Profile with this name already exists")
-            
+
             # Create profile data from source
             profile_data = ProfileCreate(
                 name=new_name,
@@ -470,37 +467,37 @@ class ProfileService:
                 tags=source_profile.tags.copy() if source_profile.tags else None,
                 extra_metadata=source_profile.extra_metadata.copy() if source_profile.extra_metadata else None,
             )
-            
+
             # Apply modifications if provided
             if modifications:
                 modification_dict = modifications.model_dump(exclude_unset=True)
                 for field, value in modification_dict.items():
                     setattr(profile_data, field, value)
-            
+
             # Create the cloned profile
             cloned_profile = await self.create_profile(user_id, profile_data)
-            
+
             logger.info(
                 "Profile cloned",
                 source_profile_id=profile_id,
                 cloned_profile_id=cloned_profile.id,
                 user_id=user_id
             )
-            
+
             return cloned_profile
-            
+
         except ProfileError:
             raise
         except Exception as e:
             logger.error("Profile cloning failed", profile_id=profile_id, error=str(e))
             raise ProfileError(f"Failed to clone profile: {str(e)}")
-    
-    async def get_profile_stats(self, user_id: str) -> Dict[str, Any]:
+
+    async def get_profile_stats(self, user_id: str) -> dict[str, Any]:
         """Get profile statistics for user.
-        
+
         Args:
             user_id: User ID
-            
+
         Returns:
             Dictionary with profile statistics
         """
@@ -517,7 +514,7 @@ class ProfileService:
                     )
                 )
                 type_counts[profile_type.value] = result.scalar()
-            
+
             # Count profiles by provider
             provider_result = await self.session.execute(
                 select(
@@ -527,8 +524,8 @@ class ProfileService:
                     Profile.owner_id == user_id
                 ).group_by(Profile.llm_provider)
             )
-            provider_counts = {provider: count for provider, count in provider_result.all()}
-            
+            provider_counts = dict(provider_result.all())
+
             # Get most used profiles
             most_used_result = await self.session.execute(
                 select(Profile).where(
@@ -536,7 +533,7 @@ class ProfileService:
                 ).order_by(desc(Profile.usage_count)).limit(5)
             )
             most_used_profiles = most_used_result.scalars().all()
-            
+
             # Get recent profiles
             recent_result = await self.session.execute(
                 select(Profile).where(
@@ -544,7 +541,7 @@ class ProfileService:
                 ).order_by(desc(Profile.created_at)).limit(5)
             )
             recent_profiles = recent_result.scalars().all()
-            
+
             # Get usage totals
             usage_result = await self.session.execute(
                 select(
@@ -554,7 +551,7 @@ class ProfileService:
                 ).where(Profile.owner_id == user_id)
             )
             total_usage, total_tokens, total_cost = usage_result.first()
-            
+
             return {
                 "total_profiles": sum(type_counts.values()),
                 "profiles_by_type": type_counts,
@@ -567,29 +564,29 @@ class ProfileService:
                     "total_cost": float(total_cost or 0),
                 },
             }
-            
+
         except Exception as e:
             logger.error("Failed to get profile stats", error=str(e))
             return {}
-    
-    async def get_available_providers(self) -> Dict[str, Any]:
+
+    async def get_available_providers(self) -> dict[str, Any]:
         """Get available LLM providers and their information.
-        
+
         Returns:
             Dictionary with provider information
         """
         try:
             providers = {}
-            
+
             for provider_name in self.llm_service.list_available_providers():
                 provider_info = self.llm_service.get_provider_info(provider_name)
                 providers[provider_name] = provider_info
-            
+
             return {
                 "providers": providers,
                 "default_provider": settings.default_llm_provider,
             }
-            
+
         except Exception as e:
             logger.error("Failed to get available providers", error=str(e))
             return {}

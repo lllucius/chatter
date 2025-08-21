@@ -3,23 +3,26 @@
 import hashlib
 import mimetypes
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from fastapi import UploadFile
-from sqlalchemy import select, func, and_, or_, desc, asc
+from sqlalchemy import and_, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import get_settings
 from chatter.models.document import Document, DocumentChunk, DocumentStatus, DocumentType
 from chatter.schemas.document import (
-    DocumentCreate, DocumentUpdate, DocumentListRequest, DocumentSearchRequest,
-    DocumentProcessingRequest
+    DocumentCreate,
+    DocumentListRequest,
+    DocumentProcessingRequest,
+    DocumentSearchRequest,
+    DocumentUpdate,
 )
 from chatter.services.document_processing import DocumentProcessingService
-from chatter.services.vector_store import VectorStoreService
 from chatter.services.embeddings import EmbeddingService
+from chatter.services.vector_store import VectorStoreService
 from chatter.utils.logging import get_logger
 
 settings = get_settings()
@@ -28,10 +31,10 @@ logger = get_logger(__name__)
 
 class DocumentService:
     """Service for document management operations."""
-    
+
     def __init__(self, session: AsyncSession):
         """Initialize document service.
-        
+
         Args:
             session: Database session
         """
@@ -41,7 +44,7 @@ class DocumentService:
         self.embedding_service = EmbeddingService()
         self.storage_path = Path(settings.document_storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
-    
+
     async def create_document(
         self,
         user_id: str,
@@ -49,15 +52,15 @@ class DocumentService:
         document_data: DocumentCreate
     ) -> Document:
         """Create a new document from uploaded file.
-        
+
         Args:
             user_id: Owner user ID
             upload_file: Uploaded file
             document_data: Document creation data
-            
+
         Returns:
             Created document
-            
+
         Raises:
             DocumentError: If document creation fails
         """
@@ -65,14 +68,14 @@ class DocumentService:
             # Read file content
             file_content = await upload_file.read()
             file_size = len(file_content)
-            
+
             # Validate file size
             if file_size > settings.max_file_size:
                 raise DocumentError(f"File size exceeds maximum allowed size of {settings.max_file_size} bytes")
-            
+
             # Calculate file hash
             file_hash = hashlib.sha256(file_content).hexdigest()
-            
+
             # Check for duplicate files
             existing_doc_result = await self.session.execute(
                 select(Document).where(
@@ -83,27 +86,27 @@ class DocumentService:
                 )
             )
             existing_doc = existing_doc_result.scalar_one_or_none()
-            
+
             if existing_doc:
                 raise DocumentError("Document with identical content already exists")
-            
+
             # Detect MIME type and document type
             mime_type = upload_file.content_type or mimetypes.guess_type(upload_file.filename)[0] or "application/octet-stream"
             document_type = self.processing_service.detect_document_type(upload_file.filename, mime_type)
-            
+
             # Validate file type
             file_ext = Path(upload_file.filename).suffix.lower().lstrip('.')
             if file_ext not in settings.allowed_file_types:
                 raise DocumentError(f"File type '{file_ext}' is not allowed")
-            
+
             # Generate unique filename
             unique_filename = f"{uuid.uuid4()}.{file_ext}"
-            
+
             # Save file to storage
             file_path = self.storage_path / unique_filename
             with open(file_path, "wb") as f:
                 f.write(file_content)
-            
+
             # Create document record
             document = Document(
                 owner_id=user_id,
@@ -124,14 +127,14 @@ class DocumentService:
                 shared_with_users=document_data.shared_with_users,
                 status=DocumentStatus.PENDING,
             )
-            
+
             self.session.add(document)
             await self.session.commit()
             await self.session.refresh(document)
-            
+
             # Start background processing
             await self._process_document_async(document.id, file_content)
-            
+
             logger.info(
                 "Document created",
                 document_id=document.id,
@@ -139,22 +142,22 @@ class DocumentService:
                 file_size=file_size,
                 user_id=user_id
             )
-            
+
             return document
-            
+
         except DocumentError:
             raise
         except Exception as e:
             logger.error("Document creation failed", error=str(e))
             raise DocumentError(f"Failed to create document: {str(e)}")
-    
-    async def get_document(self, document_id: str, user_id: str) -> Optional[Document]:
+
+    async def get_document(self, document_id: str, user_id: str) -> Document | None:
         """Get document by ID with access control.
-        
+
         Args:
             document_id: Document ID
             user_id: Requesting user ID
-            
+
         Returns:
             Document if found and accessible, None otherwise
         """
@@ -165,37 +168,37 @@ class DocumentService:
                         Document.id == document_id,
                         or_(
                             Document.owner_id == user_id,
-                            Document.is_public == True,
+                            Document.is_public is True,
                             Document.shared_with_users.contains([user_id])
                         )
                     )
                 )
             )
             document = result.scalar_one_or_none()
-            
+
             if document:
                 # Update view count and last accessed time
                 document.view_count += 1
-                document.last_accessed_at = datetime.now(timezone.utc)
+                document.last_accessed_at = datetime.now(UTC)
                 await self.session.commit()
-            
+
             return document
-            
+
         except Exception as e:
             logger.error("Failed to get document", document_id=document_id, error=str(e))
             return None
-    
+
     async def list_documents(
         self,
         user_id: str,
         list_request: DocumentListRequest
-    ) -> Tuple[List[Document], int]:
+    ) -> tuple[list[Document], int]:
         """List documents with filtering and pagination.
-        
+
         Args:
             user_id: Requesting user ID
             list_request: List request parameters
-            
+
         Returns:
             Tuple of (documents list, total count)
         """
@@ -204,64 +207,64 @@ class DocumentService:
             query = select(Document).where(
                 or_(
                     Document.owner_id == user_id,
-                    Document.is_public == True,
+                    Document.is_public is True,
                     Document.shared_with_users.contains([user_id])
                 )
             )
-            
+
             # Add filters
             if list_request.status:
                 query = query.where(Document.status == list_request.status)
-            
+
             if list_request.document_type:
                 query = query.where(Document.document_type == list_request.document_type)
-            
+
             if list_request.tags:
                 for tag in list_request.tags:
                     query = query.where(Document.tags.contains([tag]))
-            
+
             if list_request.owner_id:
                 # Only allow filtering by owner_id if user is admin (simplified check)
                 query = query.where(Document.owner_id == list_request.owner_id)
-            
+
             # Get total count
             count_query = select(func.count()).select_from(query.subquery())
             count_result = await self.session.execute(count_query)
             total_count = count_result.scalar()
-            
+
             # Add sorting
             sort_column = getattr(Document, list_request.sort_by, Document.created_at)
             if list_request.sort_order == "desc":
                 query = query.order_by(desc(sort_column))
             else:
                 query = query.order_by(asc(sort_column))
-            
+
             # Add pagination
             query = query.offset(list_request.offset).limit(list_request.limit)
-            
+
             # Execute query
             result = await self.session.execute(query)
             documents = result.scalars().all()
-            
+
             return list(documents), total_count
-            
+
         except Exception as e:
             logger.error("Failed to list documents", error=str(e))
             return [], 0
-    
+
     async def update_document(
         self,
         document_id: str,
         user_id: str,
         update_data: DocumentUpdate
-    ) -> Optional[Document]:
+    ) -> Document | None:
         """Update document metadata.
-        
+
         Args:
             document_id: Document ID
             user_id: Requesting user ID
             update_data: Update data
-            
+
         Returns:
             Updated document if successful, None otherwise
         """
@@ -276,32 +279,32 @@ class DocumentService:
                 )
             )
             document = result.scalar_one_or_none()
-            
+
             if not document:
                 return None
-            
+
             # Update fields
             update_dict = update_data.model_dump(exclude_unset=True)
             for field, value in update_dict.items():
                 setattr(document, field, value)
-            
+
             await self.session.commit()
             await self.session.refresh(document)
-            
+
             logger.info("Document updated", document_id=document_id, user_id=user_id)
             return document
-            
+
         except Exception as e:
             logger.error("Failed to update document", document_id=document_id, error=str(e))
             return None
-    
+
     async def delete_document(self, document_id: str, user_id: str) -> bool:
         """Delete document and its chunks.
-        
+
         Args:
             document_id: Document ID
             user_id: Requesting user ID
-            
+
         Returns:
             True if deleted successfully, False otherwise
         """
@@ -316,61 +319,61 @@ class DocumentService:
                 )
             )
             document = result.scalar_one_or_none()
-            
+
             if not document:
                 return False
-            
+
             # Delete file from storage
             if document.file_path and Path(document.file_path).exists():
                 try:
                     Path(document.file_path).unlink()
                 except OSError as e:
                     logger.warning("Failed to delete file", file_path=document.file_path, error=str(e))
-            
+
             # Delete document (cascades to chunks)
             await self.session.delete(document)
             await self.session.commit()
-            
+
             logger.info("Document deleted", document_id=document_id, user_id=user_id)
             return True
-            
+
         except Exception as e:
             logger.error("Failed to delete document", document_id=document_id, error=str(e))
             return False
-    
+
     async def search_documents(
         self,
         user_id: str,
         search_request: DocumentSearchRequest
-    ) -> List[Tuple[DocumentChunk, float, Document]]:
+    ) -> list[tuple[DocumentChunk, float, Document]]:
         """Search documents using vector similarity.
-        
+
         Args:
             user_id: Requesting user ID
             search_request: Search request parameters
-            
+
         Returns:
             List of (chunk, similarity_score, document) tuples
         """
         try:
             # Generate query embedding
             query_embedding, _ = await self.embedding_service.generate_embedding(search_request.query)
-            
+
             # Get accessible document IDs
             accessible_docs_result = await self.session.execute(
                 select(Document.id).where(
                     or_(
                         Document.owner_id == user_id,
-                        Document.is_public == True,
+                        Document.is_public is True,
                         Document.shared_with_users.contains([user_id])
                     )
                 )
             )
             accessible_doc_ids = [doc_id for doc_id, in accessible_docs_result.all()]
-            
+
             if not accessible_doc_ids:
                 return []
-            
+
             # Apply document type filter
             if search_request.document_types:
                 filtered_docs_result = await self.session.execute(
@@ -382,7 +385,7 @@ class DocumentService:
                     )
                 )
                 accessible_doc_ids = [doc_id for doc_id, in filtered_docs_result.all()]
-            
+
             # Apply tags filter
             if search_request.tags:
                 for tag in search_request.tags:
@@ -395,10 +398,10 @@ class DocumentService:
                         )
                     )
                     accessible_doc_ids = [doc_id for doc_id, in filtered_docs_result.all()]
-            
+
             if not accessible_doc_ids:
                 return []
-            
+
             # Perform vector search
             similar_chunks = await self.vector_store_service.similarity_search(
                 query_embedding=query_embedding,
@@ -406,30 +409,30 @@ class DocumentService:
                 score_threshold=search_request.score_threshold,
                 document_ids=accessible_doc_ids
             )
-            
+
             # Get document information for each chunk
             results = []
             for chunk, score in similar_chunks:
                 # Increment search count
                 chunk.document.search_count += 1
-                
+
                 results.append((chunk, score, chunk.document))
-            
+
             await self.session.commit()
-            
+
             logger.info(
                 "Document search completed",
                 query=search_request.query,
                 results_count=len(results),
                 user_id=user_id
             )
-            
+
             return results
-            
+
         except Exception as e:
             logger.error("Document search failed", error=str(e))
             return []
-    
+
     async def process_document(
         self,
         document_id: str,
@@ -437,12 +440,12 @@ class DocumentService:
         processing_request: DocumentProcessingRequest
     ) -> bool:
         """Manually trigger document processing.
-        
+
         Args:
             document_id: Document ID
             user_id: Requesting user ID
             processing_request: Processing request parameters
-            
+
         Returns:
             True if processing started successfully, False otherwise
         """
@@ -457,49 +460,49 @@ class DocumentService:
                 )
             )
             document = result.scalar_one_or_none()
-            
+
             if not document:
                 return False
-            
+
             # Update chunk settings if provided
             if processing_request.chunk_size:
                 document.chunk_size = processing_request.chunk_size
             if processing_request.chunk_overlap:
                 document.chunk_overlap = processing_request.chunk_overlap
-            
+
             await self.session.commit()
-            
+
             # Load file content
             if not document.file_path or not Path(document.file_path).exists():
                 logger.error("Document file not found", document_id=document_id)
                 return False
-            
+
             with open(document.file_path, "rb") as f:
                 file_content = f.read()
-            
+
             # Start processing
             success = await self.processing_service.process_document(
                 document_id, file_content, processing_request.reprocess
             )
-            
+
             logger.info("Document processing triggered", document_id=document_id, success=success)
             return success
-            
+
         except Exception as e:
             logger.error("Failed to trigger document processing", document_id=document_id, error=str(e))
             return False
-    
+
     async def get_document_chunks(
         self,
         document_id: str,
         user_id: str
-    ) -> List[DocumentChunk]:
+    ) -> list[DocumentChunk]:
         """Get chunks for a document.
-        
+
         Args:
             document_id: Document ID
             user_id: Requesting user ID
-            
+
         Returns:
             List of document chunks
         """
@@ -508,7 +511,7 @@ class DocumentService:
             document = await self.get_document(document_id, user_id)
             if not document:
                 return []
-            
+
             # Get chunks
             result = await self.session.execute(
                 select(DocumentChunk)
@@ -516,19 +519,19 @@ class DocumentService:
                 .order_by(DocumentChunk.chunk_index)
             )
             chunks = result.scalars().all()
-            
+
             return list(chunks)
-            
+
         except Exception as e:
             logger.error("Failed to get document chunks", document_id=document_id, error=str(e))
             return []
-    
-    async def get_document_stats(self, user_id: str) -> Dict[str, Any]:
+
+    async def get_document_stats(self, user_id: str) -> dict[str, Any]:
         """Get document statistics for user.
-        
+
         Args:
             user_id: User ID
-            
+
         Returns:
             Dictionary with document statistics
         """
@@ -545,7 +548,7 @@ class DocumentService:
                     )
                 )
                 status_counts[status.value] = result.scalar()
-            
+
             # Count documents by type
             type_counts = {}
             for doc_type in DocumentType:
@@ -558,13 +561,13 @@ class DocumentService:
                     )
                 )
                 type_counts[doc_type.value] = result.scalar()
-            
+
             # Get total storage used
             storage_result = await self.session.execute(
                 select(func.sum(Document.file_size)).where(Document.owner_id == user_id)
             )
             total_storage = storage_result.scalar() or 0
-            
+
             # Get total chunks
             chunks_result = await self.session.execute(
                 select(func.count(DocumentChunk.id))
@@ -573,7 +576,7 @@ class DocumentService:
                 .where(Document.owner_id == user_id)
             )
             total_chunks = chunks_result.scalar()
-            
+
             return {
                 "total_documents": sum(status_counts.values()),
                 "status_counts": status_counts,
@@ -583,14 +586,14 @@ class DocumentService:
                 "processing_stats": await self.processing_service.get_processing_stats(),
                 "embedding_stats": await self.vector_store_service.get_embedding_stats(),
             }
-            
+
         except Exception as e:
             logger.error("Failed to get document stats", error=str(e))
             return {}
-    
+
     async def _process_document_async(self, document_id: str, file_content: bytes) -> None:
         """Process document asynchronously.
-        
+
         Args:
             document_id: Document ID
             file_content: File content bytes

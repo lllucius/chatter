@@ -1,15 +1,13 @@
 """Vector store operations and abstractions."""
 
-from typing import Any, Dict, List, Optional, Tuple, Union
-from abc import ABC, abstractmethod
 import asyncio
+from abc import ABC, abstractmethod
+from typing import Any
 
+from langchain_community.vectorstores import Chroma
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_core.vectorstores import VectorStore
 from langchain_postgres import PGVector
-from langchain_community.vectorstores import Chroma
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
 from chatter.utils.logging import get_logger
@@ -24,50 +22,50 @@ class VectorStoreError(Exception):
 
 class AbstractVectorStore(ABC):
     """Abstract base class for vector store operations."""
-    
+
     @abstractmethod
     async def add_documents(
         self,
-        documents: List[Document],
-        embeddings: Optional[List[List[float]]] = None,
-        ids: Optional[List[str]] = None,
+        documents: list[Document],
+        embeddings: list[list[float]] | None = None,
+        ids: list[str] | None = None,
         **kwargs
-    ) -> List[str]:
+    ) -> list[str]:
         """Add documents to the vector store."""
         pass
-    
+
     @abstractmethod
     async def similarity_search(
         self,
         query: str,
         k: int = 4,
-        filter: Optional[Dict[str, Any]] = None,
+        filter: dict[str, Any] | None = None,
         **kwargs
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Perform similarity search."""
         pass
-    
+
     @abstractmethod
     async def similarity_search_with_score(
         self,
         query: str,
         k: int = 4,
-        filter: Optional[Dict[str, Any]] = None,
+        filter: dict[str, Any] | None = None,
         **kwargs
-    ) -> List[Tuple[Document, float]]:
+    ) -> list[tuple[Document, float]]:
         """Perform similarity search with scores."""
         pass
-    
+
     @abstractmethod
-    async def delete(self, ids: List[str]) -> bool:
+    async def delete(self, ids: list[str]) -> bool:
         """Delete documents by IDs."""
         pass
-    
+
     @abstractmethod
     async def update_documents(
         self,
-        ids: List[str],
-        documents: List[Document]
+        ids: list[str],
+        documents: list[Document]
     ) -> bool:
         """Update documents by IDs."""
         pass
@@ -75,26 +73,26 @@ class AbstractVectorStore(ABC):
 
 class PGVectorStore(AbstractVectorStore):
     """PostgreSQL + pgvector implementation."""
-    
+
     def __init__(
         self,
         embeddings: Embeddings,
         collection_name: str = "documents",
-        connection_string: Optional[str] = None,
+        connection_string: str | None = None,
         **kwargs
     ):
         """Initialize PGVector store."""
         self.embeddings = embeddings
         self.collection_name = collection_name
         self.connection_string = connection_string or settings.database_url
-        
+
         # Remove async driver from connection string for pgvector
         if "+asyncpg" in self.connection_string:
             self.connection_string = self.connection_string.replace("+asyncpg", "")
-        
+
         self._store = None
         self._initialize_store()
-    
+
     def _initialize_store(self) -> None:
         """Initialize the PGVector store."""
         try:
@@ -108,14 +106,14 @@ class PGVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Failed to initialize PGVector store", error=str(e))
             raise VectorStoreError(f"PGVector initialization failed: {str(e)}")
-    
+
     async def add_documents(
         self,
-        documents: List[Document],
-        embeddings: Optional[List[List[float]]] = None,
-        ids: Optional[List[str]] = None,
+        documents: list[Document],
+        embeddings: list[list[float]] | None = None,
+        ids: list[str] | None = None,
         **kwargs
-    ) -> List[str]:
+    ) -> list[str]:
         """Add documents to PGVector."""
         try:
             if embeddings:
@@ -134,14 +132,14 @@ class PGVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Failed to add documents to PGVector", error=str(e))
             raise VectorStoreError(f"Add documents failed: {str(e)}")
-    
+
     async def similarity_search(
         self,
         query: str,
         k: int = 4,
-        filter: Optional[Dict[str, Any]] = None,
+        filter: dict[str, Any] | None = None,
         **kwargs
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Perform similarity search in PGVector."""
         try:
             return await asyncio.to_thread(
@@ -154,14 +152,14 @@ class PGVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Similarity search failed", error=str(e))
             raise VectorStoreError(f"Similarity search failed: {str(e)}")
-    
+
     async def similarity_search_with_score(
         self,
         query: str,
         k: int = 4,
-        filter: Optional[Dict[str, Any]] = None,
+        filter: dict[str, Any] | None = None,
         **kwargs
-    ) -> List[Tuple[Document, float]]:
+    ) -> list[tuple[Document, float]]:
         """Perform similarity search with scores in PGVector."""
         try:
             return await asyncio.to_thread(
@@ -174,19 +172,19 @@ class PGVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Similarity search with score failed", error=str(e))
             raise VectorStoreError(f"Similarity search with score failed: {str(e)}")
-    
-    async def delete(self, ids: List[str]) -> bool:
+
+    async def delete(self, ids: list[str]) -> bool:
         """Delete documents by IDs."""
         try:
             return await asyncio.to_thread(self._store.delete, ids)
         except Exception as e:
             logger.error("Delete documents failed", error=str(e))
             raise VectorStoreError(f"Delete failed: {str(e)}")
-    
+
     async def update_documents(
         self,
-        ids: List[str],
-        documents: List[Document]
+        ids: list[str],
+        documents: list[Document]
     ) -> bool:
         """Update documents by IDs."""
         try:
@@ -197,7 +195,7 @@ class PGVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Update documents failed", error=str(e))
             raise VectorStoreError(f"Update failed: {str(e)}")
-    
+
     def as_retriever(self, **kwargs) -> Any:
         """Get retriever interface."""
         return self._store.as_retriever(**kwargs)
@@ -205,22 +203,22 @@ class PGVectorStore(AbstractVectorStore):
 
 class ChromaVectorStore(AbstractVectorStore):
     """ChromaDB implementation for development/testing."""
-    
+
     def __init__(
         self,
         embeddings: Embeddings,
         collection_name: str = "documents",
-        persist_directory: Optional[str] = None,
+        persist_directory: str | None = None,
         **kwargs
     ):
         """Initialize Chroma store."""
         self.embeddings = embeddings
         self.collection_name = collection_name
         self.persist_directory = persist_directory
-        
+
         self._store = None
         self._initialize_store()
-    
+
     def _initialize_store(self) -> None:
         """Initialize the Chroma store."""
         try:
@@ -233,14 +231,14 @@ class ChromaVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Failed to initialize Chroma store", error=str(e))
             raise VectorStoreError(f"Chroma initialization failed: {str(e)}")
-    
+
     async def add_documents(
         self,
-        documents: List[Document],
-        embeddings: Optional[List[List[float]]] = None,
-        ids: Optional[List[str]] = None,
+        documents: list[Document],
+        embeddings: list[list[float]] | None = None,
+        ids: list[str] | None = None,
         **kwargs
-    ) -> List[str]:
+    ) -> list[str]:
         """Add documents to Chroma."""
         try:
             return await asyncio.to_thread(
@@ -251,14 +249,14 @@ class ChromaVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Failed to add documents to Chroma", error=str(e))
             raise VectorStoreError(f"Add documents failed: {str(e)}")
-    
+
     async def similarity_search(
         self,
         query: str,
         k: int = 4,
-        filter: Optional[Dict[str, Any]] = None,
+        filter: dict[str, Any] | None = None,
         **kwargs
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Perform similarity search in Chroma."""
         try:
             return await asyncio.to_thread(
@@ -271,14 +269,14 @@ class ChromaVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Similarity search failed", error=str(e))
             raise VectorStoreError(f"Similarity search failed: {str(e)}")
-    
+
     async def similarity_search_with_score(
         self,
         query: str,
         k: int = 4,
-        filter: Optional[Dict[str, Any]] = None,
+        filter: dict[str, Any] | None = None,
         **kwargs
-    ) -> List[Tuple[Document, float]]:
+    ) -> list[tuple[Document, float]]:
         """Perform similarity search with scores in Chroma."""
         try:
             return await asyncio.to_thread(
@@ -291,8 +289,8 @@ class ChromaVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Similarity search with score failed", error=str(e))
             raise VectorStoreError(f"Similarity search with score failed: {str(e)}")
-    
-    async def delete(self, ids: List[str]) -> bool:
+
+    async def delete(self, ids: list[str]) -> bool:
         """Delete documents by IDs."""
         try:
             self._store.delete(ids)
@@ -300,11 +298,11 @@ class ChromaVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Delete documents failed", error=str(e))
             raise VectorStoreError(f"Delete failed: {str(e)}")
-    
+
     async def update_documents(
         self,
-        ids: List[str],
-        documents: List[Document]
+        ids: list[str],
+        documents: list[Document]
     ) -> bool:
         """Update documents by IDs."""
         try:
@@ -315,7 +313,7 @@ class ChromaVectorStore(AbstractVectorStore):
         except Exception as e:
             logger.error("Update documents failed", error=str(e))
             raise VectorStoreError(f"Update failed: {str(e)}")
-    
+
     def as_retriever(self, **kwargs) -> Any:
         """Get retriever interface."""
         return self._store.as_retriever(**kwargs)
@@ -323,11 +321,11 @@ class ChromaVectorStore(AbstractVectorStore):
 
 class VectorStoreManager:
     """Manager for vector store operations."""
-    
+
     def __init__(self):
         """Initialize the vector store manager."""
-        self._stores: Dict[str, AbstractVectorStore] = {}
-    
+        self._stores: dict[str, AbstractVectorStore] = {}
+
     def create_store(
         self,
         store_type: str,
@@ -337,10 +335,10 @@ class VectorStoreManager:
     ) -> AbstractVectorStore:
         """Create a vector store instance."""
         store_key = f"{store_type}_{collection_name}"
-        
+
         if store_key in self._stores:
             return self._stores[store_key]
-        
+
         if store_type.lower() == "pgvector":
             store = PGVectorStore(
                 embeddings=embeddings,
@@ -355,15 +353,15 @@ class VectorStoreManager:
             )
         else:
             raise VectorStoreError(f"Unsupported vector store type: {store_type}")
-        
+
         self._stores[store_key] = store
         return store
-    
-    def get_store(self, store_type: str, collection_name: str = "documents") -> Optional[AbstractVectorStore]:
+
+    def get_store(self, store_type: str, collection_name: str = "documents") -> AbstractVectorStore | None:
         """Get an existing vector store instance."""
         store_key = f"{store_type}_{collection_name}"
         return self._stores.get(store_key)
-    
+
     def get_default_store(self, embeddings: Embeddings, **kwargs) -> AbstractVectorStore:
         """Get the default vector store based on configuration."""
         # Prefer PGVector for production, fallback to Chroma for development

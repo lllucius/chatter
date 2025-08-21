@@ -2,8 +2,8 @@
 
 import asyncio
 import time
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator
 
 import uvloop
 from fastapi import FastAPI, Request, status
@@ -11,14 +11,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
-from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
+from chatter.api import analytics, auth, chat, documents, health, profiles, toolserver
 from chatter.config import settings
-from chatter.utils.logging import setup_logging, get_logger
-from chatter.utils.database import init_database, close_database
-from chatter.api import auth, chat, documents, analytics, health, profiles, toolserver
+from chatter.utils.database import close_database, init_database
+from chatter.utils.logging import get_logger, setup_logging
 
 # Set up uvloop for better async performance
 try:
@@ -46,40 +46,40 @@ REQUEST_DURATION = Histogram(
 
 class MetricsMiddleware(BaseHTTPMiddleware):
     """Middleware to collect Prometheus metrics."""
-    
+
     async def dispatch(self, request: Request, call_next) -> Response:
         """Collect metrics for each request."""
         start_time = time.time()
-        
+
         response = await call_next(request)
-        
+
         # Extract endpoint from route
         endpoint = request.url.path
         if hasattr(request, 'route') and request.route:
             endpoint = request.route.path
-        
+
         # Record metrics
         REQUEST_COUNT.labels(
             method=request.method,
             endpoint=endpoint,
             status_code=response.status_code
         ).inc()
-        
+
         REQUEST_DURATION.labels(
             method=request.method,
             endpoint=endpoint
         ).observe(time.time() - start_time)
-        
+
         return response
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
     """Middleware for request/response logging."""
-    
+
     async def dispatch(self, request: Request, call_next) -> Response:
         """Log requests and responses when debug logging is enabled."""
         start_time = time.time()
-        
+
         # Log request if debug enabled
         if settings.debug_http_requests:
             body = b""
@@ -87,7 +87,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 body = await request.body()
                 # Re-create request with body for downstream processing
                 request._body = body
-            
+
             logger.debug(
                 "HTTP Request",
                 method=request.method,
@@ -95,12 +95,12 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 headers=dict(request.headers),
                 body=body.decode('utf-8', errors='ignore') if body else None
             )
-        
+
         response = await call_next(request)
-        
+
         # Calculate request duration
         duration = time.time() - start_time
-        
+
         # Log response if debug enabled
         if settings.debug_http_requests:
             logger.debug(
@@ -118,7 +118,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 status_code=response.status_code,
                 duration=duration
             )
-        
+
         return response
 
 
@@ -126,25 +126,25 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager."""
     logger.info("Starting Chatter application", version=settings.app_version)
-    
+
     # Initialize database
     await init_database()
     logger.info("Database initialized")
-    
+
     # Initialize built-in tool servers
     try:
         from chatter.services.toolserver import ToolServerService
         from chatter.utils.database import get_session_factory
-        
+
         async_session = get_session_factory()
         async with async_session() as session:
             service = ToolServerService(session)
             await service.initialize_builtin_servers()
-        
+
         logger.info("Built-in tool servers initialized")
     except Exception as e:
         logger.error("Failed to initialize built-in tool servers", error=str(e))
-    
+
     # Start background scheduler
     try:
         from chatter.services.scheduler import start_scheduler
@@ -152,15 +152,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info("Tool server scheduler started")
     except Exception as e:
         logger.error("Failed to start scheduler", error=str(e))
-    
+
     # Application startup complete
     logger.info("Chatter application started successfully")
-    
+
     yield
-    
+
     # Cleanup on shutdown
     logger.info("Shutting down Chatter application")
-    
+
     # Stop scheduler
     try:
         from chatter.services.scheduler import stop_scheduler
@@ -168,17 +168,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info("Tool server scheduler stopped")
     except Exception as e:
         logger.error("Failed to stop scheduler", error=str(e))
-    
+
     await close_database()
     logger.info("Chatter application shutdown complete")
 
 
 def create_app() -> FastAPI:
     """Create and configure FastAPI application."""
-    
+
     # Set up logging first
     setup_logging()
-    
+
     # Create FastAPI app
     app = FastAPI(
         title=settings.api_title,
@@ -190,7 +190,7 @@ def create_app() -> FastAPI:
         redoc_url="/redoc" if settings.is_development else None,
         openapi_url="/openapi.json" if settings.is_development else None,
     )
-    
+
     # Add security middleware
     if settings.security_headers_enabled:
         @app.middleware("http")
@@ -202,7 +202,7 @@ def create_app() -> FastAPI:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
             response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
             return response
-    
+
     # Add CORS middleware
     app.add_middleware(
         CORSMiddleware,
@@ -211,23 +211,23 @@ def create_app() -> FastAPI:
         allow_methods=settings.cors_allow_methods,
         allow_headers=settings.cors_allow_headers,
     )
-    
+
     # Add trusted host middleware
     if settings.trusted_hosts:
         app.add_middleware(
             TrustedHostMiddleware,
             allowed_hosts=settings.trusted_hosts
         )
-    
+
     # Add compression middleware
     app.add_middleware(GZipMiddleware, minimum_size=1000)
-    
+
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
-    
+
     if settings.enable_metrics:
         app.add_middleware(MetricsMiddleware)
-    
+
     # Add exception handler
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
@@ -238,7 +238,7 @@ def create_app() -> FastAPI:
             method=request.method,
             exception=str(exc)
         )
-        
+
         if settings.is_development:
             return JSONResponse(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -253,7 +253,7 @@ def create_app() -> FastAPI:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 content={"error": "Internal server error"}
             )
-    
+
     # Add Prometheus metrics endpoint
     if settings.enable_metrics:
         @app.get(settings.metrics_path, include_in_schema=False)
@@ -263,49 +263,49 @@ def create_app() -> FastAPI:
                 generate_latest(),
                 media_type=CONTENT_TYPE_LATEST
             )
-    
+
     # Include API routers
     app.include_router(
         health.router,
         tags=["Health"]
     )
-    
+
     app.include_router(
         auth.router,
         prefix=f"{settings.api_prefix}/auth",
         tags=["Authentication"]
     )
-    
+
     app.include_router(
         chat.router,
         prefix=f"{settings.api_prefix}/chat",
         tags=["Chat"]
     )
-    
+
     app.include_router(
         documents.router,
         prefix=f"{settings.api_prefix}/documents",
         tags=["Documents"]
     )
-    
+
     app.include_router(
         profiles.router,
         prefix=f"{settings.api_prefix}/profiles",
         tags=["Profiles"]
     )
-    
+
     app.include_router(
         analytics.router,
         prefix=f"{settings.api_prefix}/analytics",
         tags=["Analytics"]
     )
-    
+
     app.include_router(
         toolserver.router,
         prefix=f"{settings.api_prefix}/toolservers",
         tags=["Tool Servers"]
     )
-    
+
     @app.get("/")
     async def root():
         """Root endpoint."""
@@ -314,7 +314,7 @@ def create_app() -> FastAPI:
             "version": settings.app_version,
             "docs": "/docs" if settings.is_development else None,
         }
-    
+
     return app
 
 
@@ -324,7 +324,7 @@ app = create_app()
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "chatter.main:app",
         host=settings.host,

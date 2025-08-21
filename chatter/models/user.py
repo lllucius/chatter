@@ -1,10 +1,9 @@
 """User model for authentication and user management."""
 
 import uuid
-from datetime import datetime, timezone
-from typing import List, Optional
+from datetime import UTC, datetime
 
-from sqlalchemy import Boolean, DateTime, String, Text, UUID
+from sqlalchemy import UUID, Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.utils.database import Base
@@ -12,9 +11,9 @@ from chatter.utils.database import Base
 
 class User(Base):
     """User model for authentication and profile management."""
-    
+
     __tablename__ = "users"
-    
+
     # Primary key
     id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
@@ -22,90 +21,90 @@ class User(Base):
         default=lambda: str(uuid.uuid4()),
         index=True
     )
-    
+
     # Authentication fields
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
     username: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
-    
+
     # Profile fields
-    full_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    bio: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    avatar_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
-    
+    full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    bio: Mapped[str | None] = mapped_column(Text, nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
     # Status fields
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    
+
     # API access
-    api_key: Mapped[Optional[str]] = mapped_column(String(255), unique=True, nullable=True, index=True)
-    api_key_name: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    
+    api_key: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True, index=True)
+    api_key_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
     # Preferences
-    default_llm_provider: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    default_profile_id: Mapped[Optional[str]] = mapped_column(
-        UUID(as_uuid=False), 
+    default_llm_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    default_profile_id: Mapped[str | None] = mapped_column(
+        UUID(as_uuid=False),
         nullable=True,
         index=True
     )
-    
+
     # Usage limits
-    daily_message_limit: Mapped[Optional[int]] = mapped_column(nullable=True)
-    monthly_message_limit: Mapped[Optional[int]] = mapped_column(nullable=True)
-    max_file_size_mb: Mapped[Optional[int]] = mapped_column(nullable=True)
-    
+    daily_message_limit: Mapped[int | None] = mapped_column(nullable=True)
+    monthly_message_limit: Mapped[int | None] = mapped_column(nullable=True)
+    max_file_size_mb: Mapped[int | None] = mapped_column(nullable=True)
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
         nullable=False
     )
-    last_login_at: Mapped[Optional[datetime]] = mapped_column(
+    last_login_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True
     )
-    
+
     # Relationships
-    conversations: Mapped[List["Conversation"]] = relationship(
+    conversations: Mapped[list["Conversation"]] = relationship(
         "Conversation",
         back_populates="user",
         cascade="all, delete-orphan"
     )
-    
-    documents: Mapped[List["Document"]] = relationship(
+
+    documents: Mapped[list["Document"]] = relationship(
         "Document",
         back_populates="owner",
         cascade="all, delete-orphan"
     )
-    
-    profiles: Mapped[List["Profile"]] = relationship(
+
+    profiles: Mapped[list["Profile"]] = relationship(
         "Profile",
         back_populates="owner",
         cascade="all, delete-orphan"
     )
-    
-    prompts: Mapped[List["Prompt"]] = relationship(
+
+    prompts: Mapped[list["Prompt"]] = relationship(
         "Prompt",
         back_populates="owner",
         cascade="all, delete-orphan"
     )
-    
+
     def __repr__(self) -> str:
         """String representation of user."""
         return f"<User(id={self.id}, email={self.email}, username={self.username})>"
-    
+
     @property
     def display_name(self) -> str:
         """Get display name for the user."""
         return self.full_name or self.username
-    
+
     def to_dict(self) -> dict:
         """Convert user to dictionary (excluding sensitive data)."""
         return {

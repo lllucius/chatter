@@ -1,18 +1,22 @@
 """Tool server management API endpoints."""
 
-from typing import List, Dict, Any, Optional
+from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
+from chatter.models.toolserver import ServerStatus
 from chatter.models.user import User
-from chatter.models.toolserver import ServerStatus, ToolStatus
 from chatter.schemas.toolserver import (
-    ToolServerCreate, ToolServerUpdate, ToolServerResponse,
-    ToolServerStatusUpdate, ServerToolResponse, ServerToolUpdate,
-    ToolUsageResponse, ToolServerMetrics, ToolServerAnalytics,
-    ToolServerHealthCheck, BulkToolServerOperation, BulkOperationResult
+    BulkOperationResult,
+    BulkToolServerOperation,
+    ServerToolResponse,
+    ToolServerCreate,
+    ToolServerHealthCheck,
+    ToolServerMetrics,
+    ToolServerResponse,
+    ToolServerUpdate,
 )
 from chatter.services.toolserver import ToolServerService, ToolServerServiceError
 from chatter.utils.database import get_session
@@ -26,10 +30,10 @@ async def get_tool_server_service(
     session: AsyncSession = Depends(get_session)
 ) -> ToolServerService:
     """Get tool server service instance.
-    
+
     Args:
         session: Database session
-        
+
     Returns:
         ToolServerService instance
     """
@@ -45,12 +49,12 @@ async def create_tool_server(
     service: ToolServerService = Depends(get_tool_server_service)
 ) -> ToolServerResponse:
     """Create a new tool server.
-    
+
     Args:
         server_data: Server creation data
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Created server response
     """
@@ -69,21 +73,21 @@ async def create_tool_server(
         )
 
 
-@router.get("/servers", response_model=List[ToolServerResponse])
+@router.get("/servers", response_model=list[ToolServerResponse])
 async def list_tool_servers(
-    status_filter: Optional[ServerStatus] = Query(None, alias="status"),
+    status_filter: ServerStatus | None = Query(None, alias="status"),
     include_builtin: bool = Query(True, description="Include built-in servers"),
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service)
-) -> List[ToolServerResponse]:
+) -> list[ToolServerResponse]:
     """List tool servers with optional filtering.
-    
+
     Args:
         status_filter: Filter by server status
         include_builtin: Whether to include built-in servers
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         List of server responses
     """
@@ -107,12 +111,12 @@ async def get_tool_server(
     service: ToolServerService = Depends(get_tool_server_service)
 ) -> ToolServerResponse:
     """Get a tool server by ID.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Server response
     """
@@ -133,13 +137,13 @@ async def update_tool_server(
     service: ToolServerService = Depends(get_tool_server_service)
 ) -> ToolServerResponse:
     """Update a tool server.
-    
+
     Args:
         server_id: Server ID
         update_data: Update data
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Updated server response
     """
@@ -171,7 +175,7 @@ async def delete_tool_server(
     service: ToolServerService = Depends(get_tool_server_service)
 ) -> None:
     """Delete a tool server.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
@@ -204,14 +208,14 @@ async def start_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Start a tool server.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Operation result
     """
@@ -239,14 +243,14 @@ async def stop_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Stop a tool server.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Operation result
     """
@@ -274,14 +278,14 @@ async def restart_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Restart a tool server.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Operation result
     """
@@ -309,14 +313,14 @@ async def enable_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Enable a tool server.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Operation result
     """
@@ -344,14 +348,14 @@ async def disable_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Disable a tool server.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Operation result
     """
@@ -376,19 +380,19 @@ async def disable_tool_server(
 
 # Tool Management
 
-@router.get("/servers/{server_id}/tools", response_model=List[ServerToolResponse])
+@router.get("/servers/{server_id}/tools", response_model=list[ServerToolResponse])
 async def get_server_tools(
     server_id: str,
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service)
-) -> List[ServerToolResponse]:
+) -> list[ServerToolResponse]:
     """Get tools for a specific server.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         List of server tools
     """
@@ -407,14 +411,14 @@ async def enable_tool(
     tool_id: str,
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Enable a specific tool.
-    
+
     Args:
         tool_id: Tool ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Operation result
     """
@@ -437,14 +441,14 @@ async def disable_tool(
     tool_id: str,
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Disable a specific tool.
-    
+
     Args:
         tool_id: Tool ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Operation result
     """
@@ -471,12 +475,12 @@ async def get_server_metrics(
     service: ToolServerService = Depends(get_tool_server_service)
 ) -> ToolServerMetrics:
     """Get analytics for a specific server.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Server metrics
     """
@@ -505,12 +509,12 @@ async def check_server_health(
     service: ToolServerService = Depends(get_tool_server_service)
 ) -> ToolServerHealthCheck:
     """Perform health check on a server.
-    
+
     Args:
         server_id: Server ID
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Health check result
     """
@@ -538,12 +542,12 @@ async def bulk_server_operation(
     service: ToolServerService = Depends(get_tool_server_service)
 ) -> BulkOperationResult:
     """Perform bulk operations on multiple servers.
-    
+
     Args:
         operation_data: Bulk operation data
         current_user: Current authenticated user
         service: Tool server service
-        
+
     Returns:
         Bulk operation result
     """
@@ -553,7 +557,7 @@ async def bulk_server_operation(
         failed = 0
         results = []
         errors = []
-        
+
         for server_id in operation_data.server_ids:
             try:
                 if operation_data.operation == "start":
@@ -568,7 +572,7 @@ async def bulk_server_operation(
                     success = await service.disable_server(server_id)
                 else:
                     raise ValueError(f"Unknown operation: {operation_data.operation}")
-                
+
                 if success:
                     successful += 1
                     results.append({
@@ -583,7 +587,7 @@ async def bulk_server_operation(
                         "success": False,
                         "message": f"{operation_data.operation.title()} failed"
                     })
-                    
+
             except Exception as e:
                 failed += 1
                 error_msg = f"Server {server_id}: {str(e)}"
@@ -593,7 +597,7 @@ async def bulk_server_operation(
                     "success": False,
                     "message": str(e)
                 })
-        
+
         return BulkOperationResult(
             total_requested=total_requested,
             successful=successful,
@@ -601,7 +605,7 @@ async def bulk_server_operation(
             results=results,
             errors=errors
         )
-        
+
     except Exception as e:
         logger.error("Failed to perform bulk server operation", error=str(e))
         raise HTTPException(

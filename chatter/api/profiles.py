@@ -1,25 +1,22 @@
 """Profile management endpoints."""
 
-from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.core.profiles import ProfileService, ProfileError
+from chatter.core.profiles import ProfileError, ProfileService
 from chatter.models.user import User
 from chatter.schemas.profile import (
+    ProfileCloneRequest,
     ProfileCreate,
-    ProfileUpdate,
-    ProfileResponse,
     ProfileListRequest,
     ProfileListResponse,
+    ProfileResponse,
     ProfileStatsResponse,
     ProfileTestRequest,
     ProfileTestResponse,
-    ProfileCloneRequest,
-    ProfileImportRequest,
-    ProfileExportResponse,
+    ProfileUpdate,
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
@@ -40,19 +37,19 @@ async def create_profile(
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileResponse:
     """Create a new LLM profile.
-    
+
     Args:
         profile_data: Profile creation data
         current_user: Current authenticated user
         profile_service: Profile service
-        
+
     Returns:
         Created profile information
     """
     try:
         profile = await profile_service.create_profile(current_user.id, profile_data)
         return ProfileResponse.model_validate(profile)
-        
+
     except ProfileError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -80,7 +77,7 @@ async def list_profiles(
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileListResponse:
     """List user's profiles.
-    
+
     Args:
         profile_type: Filter by profile type
         llm_provider: Filter by LLM provider
@@ -92,7 +89,7 @@ async def list_profiles(
         sort_order: Sort order (asc/desc)
         current_user: Current authenticated user
         profile_service: Profile service
-        
+
     Returns:
         List of profiles with pagination info
     """
@@ -101,7 +98,7 @@ async def list_profiles(
         parsed_tags = None
         if tags:
             parsed_tags = [tag.strip() for tag in tags.split(",") if tag.strip()]
-        
+
         # Create list request
         list_request = ProfileListRequest(
             profile_type=profile_type,
@@ -113,19 +110,19 @@ async def list_profiles(
             sort_by=sort_by,
             sort_order=sort_order,
         )
-        
+
         # Get profiles
         profiles, total_count = await profile_service.list_profiles(
             current_user.id, list_request
         )
-        
+
         return ProfileListResponse(
             profiles=[ProfileResponse.model_validate(profile) for profile in profiles],
             total_count=total_count,
             limit=limit,
             offset=offset,
         )
-        
+
     except Exception as e:
         logger.error("Failed to list profiles", error=str(e))
         raise HTTPException(
@@ -141,26 +138,26 @@ async def get_profile(
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileResponse:
     """Get profile details.
-    
+
     Args:
         profile_id: Profile ID
         current_user: Current authenticated user
         profile_service: Profile service
-        
+
     Returns:
         Profile information
     """
     try:
         profile = await profile_service.get_profile(profile_id, current_user.id)
-        
+
         if not profile:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Profile not found"
             )
-        
+
         return ProfileResponse.model_validate(profile)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -179,13 +176,13 @@ async def update_profile(
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileResponse:
     """Update profile.
-    
+
     Args:
         profile_id: Profile ID
         update_data: Update data
         current_user: Current authenticated user
         profile_service: Profile service
-        
+
     Returns:
         Updated profile information
     """
@@ -193,15 +190,15 @@ async def update_profile(
         profile = await profile_service.update_profile(
             profile_id, current_user.id, update_data
         )
-        
+
         if not profile:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Profile not found"
             )
-        
+
         return ProfileResponse.model_validate(profile)
-        
+
     except ProfileError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -224,26 +221,26 @@ async def delete_profile(
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> dict:
     """Delete profile.
-    
+
     Args:
         profile_id: Profile ID
         current_user: Current authenticated user
         profile_service: Profile service
-        
+
     Returns:
         Success message
     """
     try:
         success = await profile_service.delete_profile(profile_id, current_user.id)
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Profile not found"
             )
-        
+
         return {"message": "Profile deleted successfully"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -262,13 +259,13 @@ async def test_profile(
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileTestResponse:
     """Test profile with a sample message.
-    
+
     Args:
         profile_id: Profile ID
         test_request: Test request
         current_user: Current authenticated user
         profile_service: Profile service
-        
+
     Returns:
         Test results
     """
@@ -276,9 +273,9 @@ async def test_profile(
         result = await profile_service.test_profile(
             profile_id, current_user.id, test_request
         )
-        
+
         return ProfileTestResponse(**result)
-        
+
     except ProfileError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -300,13 +297,13 @@ async def clone_profile(
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileResponse:
     """Clone an existing profile.
-    
+
     Args:
         profile_id: Source profile ID
         clone_request: Clone request
         current_user: Current authenticated user
         profile_service: Profile service
-        
+
     Returns:
         Cloned profile information
     """
@@ -318,9 +315,9 @@ async def clone_profile(
             clone_request.description,
             clone_request.modifications
         )
-        
+
         return ProfileResponse.model_validate(cloned_profile)
-        
+
     except ProfileError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -340,32 +337,32 @@ async def get_profile_stats(
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileStatsResponse:
     """Get profile statistics.
-    
+
     Args:
         current_user: Current authenticated user
         profile_service: Profile service
-        
+
     Returns:
         Profile statistics
     """
     try:
         stats = await profile_service.get_profile_stats(current_user.id)
-        
+
         return ProfileStatsResponse(
             total_profiles=stats.get("total_profiles", 0),
             profiles_by_type=stats.get("profiles_by_type", {}),
             profiles_by_provider=stats.get("profiles_by_provider", {}),
             most_used_profiles=[
-                ProfileResponse.model_validate(profile) 
+                ProfileResponse.model_validate(profile)
                 for profile in stats.get("most_used_profiles", [])
             ],
             recent_profiles=[
-                ProfileResponse.model_validate(profile) 
+                ProfileResponse.model_validate(profile)
                 for profile in stats.get("recent_profiles", [])
             ],
             usage_stats=stats.get("usage_stats", {}),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get profile stats", error=str(e))
         raise HTTPException(
@@ -380,18 +377,18 @@ async def get_available_providers(
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> dict:
     """Get available LLM providers.
-    
+
     Args:
         current_user: Current authenticated user
         profile_service: Profile service
-        
+
     Returns:
         Available providers information
     """
     try:
         providers_info = await profile_service.get_available_providers()
         return providers_info
-        
+
     except Exception as e:
         logger.error("Failed to get available providers", error=str(e))
         raise HTTPException(

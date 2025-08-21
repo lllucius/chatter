@@ -1,18 +1,17 @@
 """Authentication schemas for request/response models."""
 
 from datetime import datetime
-from typing import Optional
 
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class UserBase(BaseModel):
     """Base user schema with common fields."""
     email: EmailStr = Field(..., description="User email address")
     username: str = Field(..., min_length=3, max_length=50, description="Username")
-    full_name: Optional[str] = Field(None, max_length=255, description="Full name")
-    bio: Optional[str] = Field(None, max_length=1000, description="User bio")
-    avatar_url: Optional[str] = Field(None, max_length=500, description="Avatar URL")
+    full_name: str | None = Field(None, max_length=255, description="Full name")
+    bio: str | None = Field(None, max_length=1000, description="User bio")
+    avatar_url: str | None = Field(None, max_length=500, description="Avatar URL")
 
 
 class UserCreate(UserBase):
@@ -22,11 +21,11 @@ class UserCreate(UserBase):
 
 class UserUpdate(BaseModel):
     """Schema for user profile updates."""
-    full_name: Optional[str] = Field(None, max_length=255, description="Full name")
-    bio: Optional[str] = Field(None, max_length=1000, description="User bio")
-    avatar_url: Optional[str] = Field(None, max_length=500, description="Avatar URL")
-    default_llm_provider: Optional[str] = Field(None, description="Default LLM provider")
-    default_profile_id: Optional[str] = Field(None, description="Default profile ID")
+    full_name: str | None = Field(None, max_length=255, description="Full name")
+    bio: str | None = Field(None, max_length=1000, description="User bio")
+    avatar_url: str | None = Field(None, max_length=500, description="Avatar URL")
+    default_llm_provider: str | None = Field(None, description="Default LLM provider")
+    default_profile_id: str | None = Field(None, description="Default profile ID")
 
 
 class UserResponse(UserBase):
@@ -34,11 +33,11 @@ class UserResponse(UserBase):
     id: str = Field(..., description="User ID")
     is_active: bool = Field(..., description="Is user active")
     is_verified: bool = Field(..., description="Is user email verified")
-    default_llm_provider: Optional[str] = Field(None, description="Default LLM provider")
-    default_profile_id: Optional[str] = Field(None, description="Default profile ID")
+    default_llm_provider: str | None = Field(None, description="Default LLM provider")
+    default_profile_id: str | None = Field(None, description="Default profile ID")
     created_at: datetime = Field(..., description="Account creation date")
     updated_at: datetime = Field(..., description="Last update date")
-    last_login_at: Optional[datetime] = Field(None, description="Last login date")
+    last_login_at: datetime | None = Field(None, description="Last login date")
 
     class Config:
         from_attributes = True

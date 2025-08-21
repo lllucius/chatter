@@ -1,22 +1,21 @@
 """Analytics and statistics endpoints."""
 
-from datetime import datetime, timezone, timedelta
-from typing import Optional
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.core.analytics import AnalyticsService, AnalyticsError
+from chatter.core.analytics import AnalyticsService
 from chatter.models.user import User
 from chatter.schemas.analytics import (
-    ConversationStatsResponse,
-    UsageMetricsResponse,
-    PerformanceMetricsResponse,
-    DocumentAnalyticsResponse,
-    SystemAnalyticsResponse,
-    DashboardResponse,
     AnalyticsTimeRange,
+    ConversationStatsResponse,
+    DashboardResponse,
+    DocumentAnalyticsResponse,
+    PerformanceMetricsResponse,
+    SystemAnalyticsResponse,
+    UsageMetricsResponse,
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
@@ -31,8 +30,8 @@ async def get_analytics_service(session: AsyncSession = Depends(get_session)) ->
 
 
 def parse_time_range(
-    start_date: Optional[datetime] = Query(None, description="Start date for analytics"),
-    end_date: Optional[datetime] = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(None, description="Start date for analytics"),
+    end_date: datetime | None = Query(None, description="End date for analytics"),
     period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)")
 ) -> AnalyticsTimeRange:
     """Parse time range parameters."""
@@ -50,18 +49,18 @@ async def get_conversation_stats(
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> ConversationStatsResponse:
     """Get conversation statistics.
-    
+
     Args:
         time_range: Time range filter
         current_user: Current authenticated user
         analytics_service: Analytics service
-        
+
     Returns:
         Conversation statistics
     """
     try:
         stats = await analytics_service.get_conversation_stats(current_user.id, time_range)
-        
+
         return ConversationStatsResponse(
             total_conversations=stats.get("total_conversations", 0),
             conversations_by_status=stats.get("conversations_by_status", {}),
@@ -76,7 +75,7 @@ async def get_conversation_stats(
             popular_models=stats.get("popular_models", {}),
             popular_providers=stats.get("popular_providers", {}),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get conversation stats", error=str(e))
         raise HTTPException(
@@ -92,18 +91,18 @@ async def get_usage_metrics(
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> UsageMetricsResponse:
     """Get usage metrics.
-    
+
     Args:
         time_range: Time range filter
         current_user: Current authenticated user
         analytics_service: Analytics service
-        
+
     Returns:
         Usage metrics
     """
     try:
         metrics = await analytics_service.get_usage_metrics(current_user.id, time_range)
-        
+
         return UsageMetricsResponse(
             total_prompt_tokens=metrics.get("total_prompt_tokens", 0),
             total_completion_tokens=metrics.get("total_completion_tokens", 0),
@@ -121,7 +120,7 @@ async def get_usage_metrics(
             peak_usage_hour=metrics.get("peak_usage_hour", 0),
             conversations_per_day=metrics.get("conversations_per_day", 0.0),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get usage metrics", error=str(e))
         raise HTTPException(
@@ -137,18 +136,18 @@ async def get_performance_metrics(
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> PerformanceMetricsResponse:
     """Get performance metrics.
-    
+
     Args:
         time_range: Time range filter
         current_user: Current authenticated user
         analytics_service: Analytics service
-        
+
     Returns:
         Performance metrics
     """
     try:
         metrics = await analytics_service.get_performance_metrics(current_user.id, time_range)
-        
+
         return PerformanceMetricsResponse(
             avg_response_time_ms=metrics.get("avg_response_time_ms", 0.0),
             median_response_time_ms=metrics.get("median_response_time_ms", 0.0),
@@ -165,7 +164,7 @@ async def get_performance_metrics(
             vector_search_time_ms=metrics.get("vector_search_time_ms", 0.0),
             embedding_generation_time_ms=metrics.get("embedding_generation_time_ms", 0.0),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get performance metrics", error=str(e))
         raise HTTPException(
@@ -181,18 +180,18 @@ async def get_document_analytics(
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> DocumentAnalyticsResponse:
     """Get document analytics.
-    
+
     Args:
         time_range: Time range filter
         current_user: Current authenticated user
         analytics_service: Analytics service
-        
+
     Returns:
         Document analytics
     """
     try:
         analytics = await analytics_service.get_document_analytics(current_user.id, time_range)
-        
+
         return DocumentAnalyticsResponse(
             total_documents=analytics.get("total_documents", 0),
             documents_by_status=analytics.get("documents_by_status", {}),
@@ -211,7 +210,7 @@ async def get_document_analytics(
             most_viewed_documents=analytics.get("most_viewed_documents", []),
             documents_by_access_level=analytics.get("documents_by_access_level", {}),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get document analytics", error=str(e))
         raise HTTPException(
@@ -226,17 +225,17 @@ async def get_system_analytics(
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> SystemAnalyticsResponse:
     """Get system analytics.
-    
+
     Args:
         current_user: Current authenticated user
         analytics_service: Analytics service
-        
+
     Returns:
         System analytics
     """
     try:
         analytics = await analytics_service.get_system_analytics()
-        
+
         return SystemAnalyticsResponse(
             total_users=analytics.get("total_users", 0),
             active_users_today=analytics.get("active_users_today", 0),
@@ -254,7 +253,7 @@ async def get_system_analytics(
             vector_database_size_bytes=analytics.get("vector_database_size_bytes", 0),
             cache_hit_rate=analytics.get("cache_hit_rate", 0.0),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get system analytics", error=str(e))
         raise HTTPException(
@@ -270,18 +269,18 @@ async def get_dashboard(
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> DashboardResponse:
     """Get comprehensive dashboard data.
-    
+
     Args:
         time_range: Time range filter
         current_user: Current authenticated user
         analytics_service: Analytics service
-        
+
     Returns:
         Complete dashboard data
     """
     try:
         dashboard_data = await analytics_service.get_dashboard_data(current_user.id, time_range)
-        
+
         return DashboardResponse(
             conversation_stats=ConversationStatsResponse(**dashboard_data.get("conversation_stats", {})),
             usage_metrics=UsageMetricsResponse(**dashboard_data.get("usage_metrics", {})),
@@ -289,9 +288,9 @@ async def get_dashboard(
             document_analytics=DocumentAnalyticsResponse(**dashboard_data.get("document_analytics", {})),
             system_health=SystemAnalyticsResponse(**dashboard_data.get("system_health", {})),
             custom_metrics=dashboard_data.get("custom_metrics", []),
-            generated_at=dashboard_data.get("generated_at", datetime.now(timezone.utc)),
+            generated_at=dashboard_data.get("generated_at", datetime.now(UTC)),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get dashboard data", error=str(e))
         raise HTTPException(
@@ -307,18 +306,18 @@ async def get_tool_server_analytics(
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> dict:
     """Get tool server analytics.
-    
+
     Args:
         time_range: Time range for analytics
         current_user: Current authenticated user
         analytics_service: Analytics service
-        
+
     Returns:
         Tool server analytics data
     """
     try:
         return await analytics_service.get_tool_server_analytics(current_user.id, time_range)
-        
+
     except Exception as e:
         logger.error("Failed to get tool server analytics", error=str(e))
         raise HTTPException(

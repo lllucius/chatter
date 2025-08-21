@@ -3,7 +3,6 @@
 import asyncio
 import os
 import sys
-from typing import Optional
 
 import typer
 import uvicorn
@@ -11,7 +10,7 @@ from rich.console import Console
 from rich.table import Table
 
 from chatter.config import settings
-from chatter.utils.database import init_database, check_database_connection
+from chatter.utils.database import check_database_connection, init_database
 from chatter.utils.logging import get_logger
 
 app = typer.Typer(
@@ -32,7 +31,7 @@ def serve(
     debug: bool = typer.Option(None, "--debug", "-d", help="Enable debug mode"),
 ) -> None:
     """Start the Chatter API server."""
-    
+
     # Override settings with CLI arguments
     if host:
         settings.host = host
@@ -44,11 +43,11 @@ def serve(
         settings.reload = reload
     if debug is not None:
         settings.debug = debug
-    
+
     console.print(f"🚀 Starting Chatter API server on {settings.host}:{settings.port}")
     console.print(f"📚 API documentation: http://{settings.host}:{settings.port}/docs")
     console.print(f"🔍 Environment: {settings.environment}")
-    
+
     uvicorn.run(
         "chatter.main:app",
         host=settings.host,
@@ -75,7 +74,7 @@ def db_init() -> None:
         except Exception as e:
             console.print(f"❌ Failed to initialize database: {e}")
             sys.exit(1)
-    
+
     asyncio.run(_init())
 
 
@@ -93,7 +92,7 @@ def db_check() -> None:
         except Exception as e:
             console.print(f"❌ Database connection error: {e}")
             sys.exit(1)
-    
+
     asyncio.run(_check())
 
 
@@ -108,7 +107,7 @@ def db_migrate() -> None:
             capture_output=True,
             text=True
         )
-        
+
         if result.returncode == 0:
             console.print("✅ Database migrations completed successfully")
             if result.stdout:
@@ -135,19 +134,19 @@ def db_revision(
     try:
         import subprocess
         cmd = ["alembic", "revision"]
-        
+
         if autogenerate:
             cmd.append("--autogenerate")
-        
+
         cmd.extend(["-m", message])
-        
+
         result = subprocess.run(
             cmd,
             cwd=os.getcwd(),
             capture_output=True,
             text=True
         )
-        
+
         if result.returncode == 0:
             console.print(f"✅ Created migration: {message}")
             if result.stdout:
@@ -172,43 +171,43 @@ app.add_typer(config_app, name="config")
 
 @config_app.command("show")
 def config_show(
-    section: Optional[str] = typer.Argument(None, help="Configuration section to show")
+    section: str | None = typer.Argument(None, help="Configuration section to show")
 ) -> None:
     """Show current configuration."""
-    
+
     def format_value(value):
         """Format configuration value for display."""
         if isinstance(value, str) and any(key in value.lower() for key in ['key', 'secret', 'password', 'token']):
             return "***HIDDEN***" if value else "Not Set"
         return str(value)
-    
+
     if section:
         # Show specific section
         section_attrs = [attr for attr in dir(settings) if attr.startswith(section.lower())]
         if not section_attrs:
             console.print(f"❌ Configuration section '{section}' not found")
             sys.exit(1)
-        
+
         table = Table(title=f"Configuration - {section.title()}")
         table.add_column("Setting", style="cyan", no_wrap=True)
         table.add_column("Value", style="magenta")
-        
+
         for attr in sorted(section_attrs):
             value = getattr(settings, attr)
             table.add_row(attr, format_value(value))
-        
+
         console.print(table)
     else:
         # Show all configuration
         table = Table(title="Chatter Configuration")
         table.add_column("Setting", style="cyan", no_wrap=True)
         table.add_column("Value", style="magenta")
-        
+
         for attr in sorted(dir(settings)):
             if not attr.startswith('_') and not callable(getattr(settings, attr)):
                 value = getattr(settings, attr)
                 table.add_row(attr, format_value(value))
-        
+
         console.print(table)
 
 
@@ -216,25 +215,25 @@ def config_show(
 def config_test() -> None:
     """Test configuration and dependencies."""
     console.print("🔍 Testing Chatter configuration...")
-    
+
     issues = []
-    
+
     # Test database URL
     if not settings.database_url or settings.database_url == "postgresql+asyncpg://chatter:chatter_password@localhost:5432/chatter":
         issues.append("⚠️  Using default database URL - update for production")
-    
+
     # Test secret key
     if settings.secret_key == "your_super_secret_key_here_change_this_in_production":
         issues.append("🔒 Using default secret key - CHANGE THIS for production")
-    
+
     # Test LLM providers
     if not settings.openai_api_key and not settings.anthropic_api_key:
         issues.append("🤖 No LLM provider API keys configured")
-    
+
     # Test environment
     if settings.is_production and settings.debug:
         issues.append("🚨 Debug mode enabled in production environment")
-    
+
     if issues:
         console.print("\n❌ Configuration Issues Found:")
         for issue in issues:
@@ -254,7 +253,7 @@ def health_check() -> None:
     """Perform health checks."""
     async def _check():
         console.print("🔍 Performing health checks...")
-        
+
         # Check database
         try:
             is_db_connected = await check_database_connection()
@@ -264,29 +263,29 @@ def health_check() -> None:
                 console.print("❌ Database: Connection failed")
         except Exception as e:
             console.print(f"❌ Database: Error - {e}")
-        
+
         # TODO: Add more health checks as services are implemented
         # - Redis connection
-        # - Vector store connection  
+        # - Vector store connection
         # - LLM provider connectivity
         # - External service dependencies
-    
+
     asyncio.run(_check())
 
 
 @app.command("version")
 def version() -> None:
     """Show version information."""
-    from chatter import __version__, __description__
-    
+    from chatter import __description__, __version__
+
     table = Table(title="Chatter Version Information")
     table.add_column("Component", style="cyan")
     table.add_column("Version", style="magenta")
-    
+
     table.add_row("Chatter", __version__)
     table.add_row("Environment", settings.environment)
     table.add_row("Python", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
-    
+
     console.print(table)
     console.print(f"\n{__description__}")
 

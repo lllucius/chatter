@@ -1,30 +1,23 @@
 """Document processing service for text extraction, chunking, and indexing."""
 
-import asyncio
 import hashlib
-import mimetypes
 import os
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
-from sqlalchemy import select, update, func, and_
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from langchain_text_splitters import (
-    RecursiveCharacterTextSplitter,
-    TokenTextSplitter,
-    CharacterTextSplitter,
-)
 
 try:
     import unstructured
     from unstructured.partition.auto import partition
-    from unstructured.partition.text import partition_text
-    from unstructured.partition.pdf import partition_pdf
     from unstructured.partition.docx import partition_docx
     from unstructured.partition.html import partition_html
+    from unstructured.partition.pdf import partition_pdf
+    from unstructured.partition.text import partition_text
     UNSTRUCTURED_AVAILABLE = True
 except ImportError:
     UNSTRUCTURED_AVAILABLE = False
@@ -37,7 +30,7 @@ except ImportError:
 
 from chatter.config import get_settings
 from chatter.models.document import Document, DocumentChunk, DocumentStatus, DocumentType
-from chatter.services.embeddings import EmbeddingService, EmbeddingError
+from chatter.services.embeddings import EmbeddingError, EmbeddingService
 from chatter.services.vector_store import VectorStoreService
 from chatter.utils.logging import get_logger
 
@@ -47,10 +40,10 @@ logger = get_logger(__name__)
 
 class DocumentProcessingService:
     """Service for processing documents and generating chunks with embeddings."""
-    
+
     def __init__(self, session: AsyncSession):
         """Initialize document processing service.
-        
+
         Args:
             session: Database session
         """
@@ -59,7 +52,7 @@ class DocumentProcessingService:
         self.vector_store_service = VectorStoreService(session)
         self.storage_path = Path(settings.document_storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
-    
+
     async def process_document(
         self,
         document_id: str,
@@ -67,12 +60,12 @@ class DocumentProcessingService:
         force_reprocess: bool = False
     ) -> bool:
         """Process a document: extract text, create chunks, and generate embeddings.
-        
+
         Args:
             document_id: Document ID
             file_content: Document file content
             force_reprocess: Force reprocessing even if already processed
-            
+
         Returns:
             True if processing successful, False otherwise
         """
@@ -82,78 +75,78 @@ class DocumentProcessingService:
                 select(Document).where(Document.id == document_id)
             )
             document = result.scalar_one_or_none()
-            
+
             if not document:
                 logger.error("Document not found", document_id=document_id)
                 return False
-            
+
             # Check if already processed
             if document.status == DocumentStatus.PROCESSED and not force_reprocess:
                 logger.info("Document already processed", document_id=document_id)
                 return True
-            
+
             # Update status to processing
             document.status = DocumentStatus.PROCESSING
-            document.processing_started_at = datetime.now(timezone.utc)
+            document.processing_started_at = datetime.now(UTC)
             document.processing_error = None
             await self.session.commit()
-            
+
             logger.info("Starting document processing", document_id=document_id, filename=document.filename)
-            
+
             # Extract text from document
             extracted_text = await self._extract_text(document, file_content)
             if not extracted_text:
                 await self._mark_processing_failed(document, "Failed to extract text from document")
                 return False
-            
+
             # Update document with extracted text
             document.extracted_text = extracted_text
             await self.session.commit()
-            
+
             # Create chunks
             chunks = await self._create_chunks(document, extracted_text)
             if not chunks:
                 await self._mark_processing_failed(document, "Failed to create chunks from text")
                 return False
-            
+
             # Store chunks in database
             chunk_objects = await self._store_chunks(document, chunks)
             if not chunk_objects:
                 await self._mark_processing_failed(document, "Failed to store chunks")
                 return False
-            
+
             # Generate embeddings for chunks
             embedding_success = await self._generate_embeddings(chunk_objects)
             if not embedding_success:
                 logger.warning("Failed to generate embeddings for some chunks", document_id=document_id)
-            
+
             # Update document status
             document.status = DocumentStatus.PROCESSED
-            document.processing_completed_at = datetime.now(timezone.utc)
+            document.processing_completed_at = datetime.now(UTC)
             document.chunk_count = len(chunk_objects)
             await self.session.commit()
-            
+
             logger.info(
                 "Document processing completed",
                 document_id=document_id,
                 chunks_created=len(chunk_objects),
                 text_length=len(extracted_text)
             )
-            
+
             return True
-            
+
         except Exception as e:
             logger.error("Document processing failed", document_id=document_id, error=str(e))
             await self._mark_processing_failed(document, f"Processing error: {str(e)}")
             return False
-    
-    async def _extract_text(self, document: Document, file_content: bytes) -> Optional[str]:
+
+    async def _extract_text(self, document: Document, file_content: bytes) -> str | None:
         """Extract text from document based on its type.
-        
+
         Args:
             document: Document object
             file_content: Document file content
-            
+
         Returns:
             Extracted text or None if extraction failed
         """
@@ -162,10 +155,10 @@ class DocumentProcessingService:
             with tempfile.NamedTemporaryFile(delete=False, suffix=f".{document.document_type.value}") as temp_file:
                 temp_file.write(file_content)
                 temp_file_path = temp_file.name
-            
+
             try:
                 extracted_text = None
-                
+
                 if document.document_type == DocumentType.TEXT:
                     extracted_text = await self._extract_text_plain(file_content)
                 elif document.document_type == DocumentType.PDF:
@@ -182,21 +175,21 @@ class DocumentProcessingService:
                     # Try using unstructured for unknown formats
                     if UNSTRUCTURED_AVAILABLE:
                         extracted_text = await self._extract_text_unstructured(temp_file_path)
-                
+
                 return extracted_text
-                
+
             finally:
                 # Clean up temporary file
                 try:
                     os.unlink(temp_file_path)
                 except OSError:
                     pass
-            
+
         except Exception as e:
             logger.error("Text extraction failed", document_id=document.id, error=str(e))
             return None
-    
-    async def _extract_text_plain(self, file_content: bytes) -> Optional[str]:
+
+    async def _extract_text_plain(self, file_content: bytes) -> str | None:
         """Extract text from plain text file."""
         try:
             # Try different encodings
@@ -209,8 +202,8 @@ class DocumentProcessingService:
         except Exception as e:
             logger.error("Plain text extraction failed", error=str(e))
             return None
-    
-    async def _extract_text_pdf(self, file_path: str, file_content: bytes) -> Optional[str]:
+
+    async def _extract_text_pdf(self, file_path: str, file_content: bytes) -> str | None:
         """Extract text from PDF file."""
         try:
             # First try pypdf
@@ -223,19 +216,19 @@ class DocumentProcessingService:
                     return "\n".join(text_parts)
                 except Exception as e:
                     logger.warning("PyPDF extraction failed, trying unstructured", error=str(e))
-            
+
             # Fallback to unstructured
             if UNSTRUCTURED_AVAILABLE:
                 elements = partition_pdf(filename=file_path)
                 return "\n".join([element.text for element in elements if hasattr(element, 'text')])
-            
+
             return None
-            
+
         except Exception as e:
             logger.error("PDF text extraction failed", error=str(e))
             return None
-    
-    async def _extract_text_docx(self, file_path: str) -> Optional[str]:
+
+    async def _extract_text_docx(self, file_path: str) -> str | None:
         """Extract text from DOCX file."""
         try:
             if UNSTRUCTURED_AVAILABLE:
@@ -245,8 +238,8 @@ class DocumentProcessingService:
         except Exception as e:
             logger.error("DOCX text extraction failed", error=str(e))
             return None
-    
-    async def _extract_text_html(self, file_content: bytes) -> Optional[str]:
+
+    async def _extract_text_html(self, file_content: bytes) -> str | None:
         """Extract text from HTML file."""
         try:
             if UNSTRUCTURED_AVAILABLE:
@@ -257,8 +250,8 @@ class DocumentProcessingService:
         except Exception as e:
             logger.error("HTML text extraction failed", error=str(e))
             return None
-    
-    async def _extract_text_markdown(self, file_content: bytes) -> Optional[str]:
+
+    async def _extract_text_markdown(self, file_content: bytes) -> str | None:
         """Extract text from Markdown file."""
         try:
             # For markdown, we can just return the text as-is
@@ -266,13 +259,13 @@ class DocumentProcessingService:
         except Exception as e:
             logger.error("Markdown text extraction failed", error=str(e))
             return None
-    
-    async def _extract_text_json(self, file_content: bytes) -> Optional[str]:
+
+    async def _extract_text_json(self, file_content: bytes) -> str | None:
         """Extract text from JSON file."""
         try:
             import json
             data = json.loads(file_content.decode('utf-8'))
-            
+
             # Extract text from JSON structure
             def extract_text_from_json(obj):
                 if isinstance(obj, str):
@@ -283,14 +276,14 @@ class DocumentProcessingService:
                     return " ".join([extract_text_from_json(item) for item in obj])
                 else:
                     return str(obj)
-            
+
             return extract_text_from_json(data)
-            
+
         except Exception as e:
             logger.error("JSON text extraction failed", error=str(e))
             return None
-    
-    async def _extract_text_unstructured(self, file_path: str) -> Optional[str]:
+
+    async def _extract_text_unstructured(self, file_path: str) -> str | None:
         """Extract text using unstructured library."""
         try:
             if UNSTRUCTURED_AVAILABLE:
@@ -300,14 +293,14 @@ class DocumentProcessingService:
         except Exception as e:
             logger.error("Unstructured text extraction failed", error=str(e))
             return None
-    
-    async def _create_chunks(self, document: Document, text: str) -> List[str]:
+
+    async def _create_chunks(self, document: Document, text: str) -> list[str]:
         """Create text chunks from extracted text.
-        
+
         Args:
             document: Document object
             text: Extracted text
-            
+
         Returns:
             List of text chunks
         """
@@ -332,13 +325,13 @@ class DocumentProcessingService:
                     chunk_overlap=document.chunk_overlap,
                     separators=["\n\n", "\n", ".", "!", "?", ";", " "]
                 )
-            
+
             chunks = splitter.split_text(text)
-            
+
             # Filter out very short chunks
             min_chunk_length = max(50, document.chunk_size // 10)
             chunks = [chunk.strip() for chunk in chunks if len(chunk.strip()) >= min_chunk_length]
-            
+
             logger.debug(
                 "Text chunks created",
                 document_id=document.id,
@@ -346,30 +339,30 @@ class DocumentProcessingService:
                 chunk_size=document.chunk_size,
                 chunk_overlap=document.chunk_overlap
             )
-            
+
             return chunks
-            
+
         except Exception as e:
             logger.error("Chunk creation failed", document_id=document.id, error=str(e))
             return []
-    
-    async def _store_chunks(self, document: Document, chunks: List[str]) -> List[DocumentChunk]:
+
+    async def _store_chunks(self, document: Document, chunks: list[str]) -> list[DocumentChunk]:
         """Store text chunks in the database.
-        
+
         Args:
             document: Document object
             chunks: List of text chunks
-            
+
         Returns:
             List of DocumentChunk objects
         """
         try:
             chunk_objects = []
-            
+
             for i, chunk_text in enumerate(chunks):
                 # Calculate content hash
                 content_hash = hashlib.sha256(chunk_text.encode('utf-8')).hexdigest()
-                
+
                 # Create chunk object
                 chunk = DocumentChunk(
                     document_id=document.id,
@@ -378,30 +371,30 @@ class DocumentProcessingService:
                     content_hash=content_hash,
                     token_count=len(chunk_text.split()),  # Simple token count approximation
                 )
-                
+
                 chunk_objects.append(chunk)
                 self.session.add(chunk)
-            
+
             await self.session.commit()
-            
+
             # Refresh objects to get IDs
             for chunk in chunk_objects:
                 await self.session.refresh(chunk)
-            
+
             logger.debug("Chunks stored in database", document_id=document.id, chunk_count=len(chunk_objects))
             return chunk_objects
-            
+
         except Exception as e:
             await self.session.rollback()
             logger.error("Chunk storage failed", document_id=document.id, error=str(e))
             return []
-    
-    async def _generate_embeddings(self, chunks: List[DocumentChunk]) -> bool:
+
+    async def _generate_embeddings(self, chunks: list[DocumentChunk]) -> bool:
         """Generate embeddings for document chunks.
-        
+
         Args:
             chunks: List of DocumentChunk objects
-            
+
         Returns:
             True if embeddings generated successfully for all chunks
         """
@@ -410,19 +403,19 @@ class DocumentProcessingService:
             if not self.embedding_service.list_available_providers():
                 logger.warning("No embedding providers available, skipping embedding generation")
                 return False
-            
+
             # Process chunks in batches
             batch_size = settings.embedding_batch_size if hasattr(settings, 'embedding_batch_size') else 10
             success_count = 0
-            
+
             for i in range(0, len(chunks), batch_size):
                 batch = chunks[i:i + batch_size]
                 batch_texts = [chunk.content for chunk in batch]
-                
+
                 try:
                     # Generate embeddings for batch
                     embeddings, usage_info = await self.embedding_service.generate_embeddings(batch_texts)
-                    
+
                     # Store embeddings
                     for chunk, embedding in zip(batch, embeddings):
                         embedding_metadata = {
@@ -430,28 +423,28 @@ class DocumentProcessingService:
                             "provider": usage_info.get("provider"),
                             "dimensions": len(embedding),
                         }
-                        
+
                         # Update chunk with embedding metadata
                         chunk.embedding_model = usage_info.get("model")
                         chunk.embedding_provider = usage_info.get("provider")
-                        chunk.embedding_created_at = datetime.now(timezone.utc)
-                        
+                        chunk.embedding_created_at = datetime.now(UTC)
+
                         # Store embedding in vector store
                         success = await self.vector_store_service.store_embedding(
                             chunk.id, embedding, embedding_metadata
                         )
-                        
+
                         if success:
                             success_count += 1
                         else:
                             logger.warning("Failed to store embedding", chunk_id=chunk.id)
-                    
+
                     await self.session.commit()
-                    
+
                 except EmbeddingError as e:
                     logger.error("Embedding generation failed for batch", error=str(e))
                     continue
-            
+
             success_rate = success_count / len(chunks) if chunks else 0
             logger.info(
                 "Embedding generation completed",
@@ -459,44 +452,44 @@ class DocumentProcessingService:
                 successful_embeddings=success_count,
                 success_rate=success_rate
             )
-            
+
             return success_rate > 0.5  # Consider successful if >50% of embeddings generated
-            
+
         except Exception as e:
             logger.error("Embedding generation failed", error=str(e))
             return False
-    
+
     async def _mark_processing_failed(self, document: Document, error_message: str) -> None:
         """Mark document processing as failed.
-        
+
         Args:
             document: Document object
             error_message: Error message
         """
         try:
             document.status = DocumentStatus.FAILED
-            document.processing_completed_at = datetime.now(timezone.utc)
+            document.processing_completed_at = datetime.now(UTC)
             document.processing_error = error_message
             await self.session.commit()
-            
+
             logger.error("Document processing marked as failed", document_id=document.id, error=error_message)
-            
+
         except Exception as e:
             logger.error("Failed to mark processing as failed", document_id=document.id, error=str(e))
-    
+
     def detect_document_type(self, filename: str, mime_type: str) -> DocumentType:
         """Detect document type from filename and MIME type.
-        
+
         Args:
             filename: Original filename
             mime_type: MIME type
-            
+
         Returns:
             Detected document type
         """
         # Get file extension
         file_ext = Path(filename).suffix.lower()
-        
+
         # Map extensions to document types
         extension_map = {
             '.txt': DocumentType.TEXT,
@@ -514,11 +507,11 @@ class DocumentProcessingService:
             '.json': DocumentType.JSON,
             '.xml': DocumentType.XML,
         }
-        
+
         # Check extension first
         if file_ext in extension_map:
             return extension_map[file_ext]
-        
+
         # Check MIME type
         if mime_type:
             if mime_type.startswith('text/'):
@@ -536,12 +529,12 @@ class DocumentProcessingService:
                 return DocumentType.JSON
             elif 'xml' in mime_type:
                 return DocumentType.XML
-        
+
         return DocumentType.OTHER
-    
-    async def get_processing_stats(self) -> Dict[str, Any]:
+
+    async def get_processing_stats(self) -> dict[str, Any]:
         """Get document processing statistics.
-        
+
         Returns:
             Dictionary with processing statistics
         """
@@ -553,7 +546,7 @@ class DocumentProcessingService:
                     select(func.count(Document.id)).where(Document.status == status)
                 )
                 status_counts[status.value] = result.scalar()
-            
+
             # Get processing times
             processing_times_result = await self.session.execute(
                 select(Document.processing_started_at, Document.processing_completed_at)
@@ -564,27 +557,27 @@ class DocumentProcessingService:
                     )
                 )
             )
-            
+
             processing_times = []
             for start_time, end_time in processing_times_result.all():
                 if start_time and end_time:
                     duration = (end_time - start_time).total_seconds()
                     processing_times.append(duration)
-            
+
             avg_processing_time = sum(processing_times) / len(processing_times) if processing_times else 0
-            
+
             return {
                 "status_counts": status_counts,
                 "total_documents": sum(status_counts.values()),
                 "processing_success_rate": (
-                    status_counts.get("processed", 0) / 
+                    status_counts.get("processed", 0) /
                     sum(status_counts.values()) if sum(status_counts.values()) > 0 else 0
                 ),
                 "average_processing_time_seconds": avg_processing_time,
                 "unstructured_available": UNSTRUCTURED_AVAILABLE,
                 "pypdf_available": PYPDF_AVAILABLE,
             }
-            
+
         except Exception as e:
             logger.error("Failed to get processing stats", error=str(e))
             return {

@@ -1,23 +1,23 @@
 """Database models for Chatter application."""
 
-from chatter.models.user import User
+from chatter.models.analytics import ConversationStats, DocumentStats, ProfileStats, PromptStats
 from chatter.models.conversation import Conversation, Message
 from chatter.models.document import Document, DocumentChunk
 from chatter.models.profile import Profile
 from chatter.models.prompt import Prompt
-from chatter.models.analytics import ConversationStats, DocumentStats, PromptStats, ProfileStats
-from chatter.models.toolserver import ToolServer, ServerTool, ToolUsage
+from chatter.models.toolserver import ServerTool, ToolServer, ToolUsage
+from chatter.models.user import User
 
 __all__ = [
     "User",
-    "Conversation", 
+    "Conversation",
     "Message",
     "Document",
-    "DocumentChunk", 
+    "DocumentChunk",
     "Profile",
     "Prompt",
     "ConversationStats",
-    "DocumentStats", 
+    "DocumentStats",
     "PromptStats",
     "ProfileStats",
     "ToolServer",

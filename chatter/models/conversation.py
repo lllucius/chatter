@@ -1,14 +1,12 @@
 """Conversation and message models."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
-from sqlalchemy import (
-    Boolean, DateTime, Enum as SQLEnum, ForeignKey, Integer, 
-    JSON, String, Text, UUID, Float
-)
+from sqlalchemy import JSON, UUID, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.utils.database import Base
@@ -31,9 +29,9 @@ class ConversationStatus(str, Enum):
 
 class Conversation(Base):
     """Conversation model for chat sessions."""
-    
+
     __tablename__ = "conversations"
-    
+
     # Primary key
     id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
@@ -41,7 +39,7 @@ class Conversation(Base):
         default=lambda: str(uuid.uuid4()),
         index=True
     )
-    
+
     # Foreign keys
     user_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
@@ -49,81 +47,81 @@ class Conversation(Base):
         nullable=False,
         index=True
     )
-    
-    profile_id: Mapped[Optional[str]] = mapped_column(
+
+    profile_id: Mapped[str | None] = mapped_column(
         UUID(as_uuid=False),
         ForeignKey("profiles.id"),
         nullable=True,
         index=True
     )
-    
+
     # Conversation metadata
     title: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[ConversationStatus] = mapped_column(
         SQLEnum(ConversationStatus),
         default=ConversationStatus.ACTIVE,
         nullable=False,
         index=True
     )
-    
+
     # Configuration
-    llm_provider: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    llm_model: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    temperature: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    max_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    system_prompt: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    
+    llm_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    llm_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    temperature: Mapped[float | None] = mapped_column(Float, nullable=True)
+    max_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    system_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     # Context and memory
     context_window: Mapped[int] = mapped_column(Integer, default=4096, nullable=False)
     memory_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    memory_strategy: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    
+    memory_strategy: Mapped[str | None] = mapped_column(String(50), nullable=True)
+
     # Vector search configuration
     enable_retrieval: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     retrieval_limit: Mapped[int] = mapped_column(Integer, default=5, nullable=False)
     retrieval_score_threshold: Mapped[float] = mapped_column(Float, default=0.7, nullable=False)
-    
+
     # Statistics
     message_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     total_tokens: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     total_cost: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
-    
+
     # Metadata
-    tags: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
-    extra_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column("extra_metadata", JSON, nullable=True)
-    
+    tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
         nullable=False
     )
-    last_message_at: Mapped[Optional[datetime]] = mapped_column(
+    last_message_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True
     )
-    
+
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="conversations")
     profile: Mapped[Optional["Profile"]] = relationship("Profile", back_populates="conversations")
-    messages: Mapped[List["Message"]] = relationship(
+    messages: Mapped[list["Message"]] = relationship(
         "Message",
         back_populates="conversation",
         cascade="all, delete-orphan",
         order_by="Message.created_at"
     )
-    
+
     def __repr__(self) -> str:
         """String representation of conversation."""
         return f"<Conversation(id={self.id}, title={self.title}, user_id={self.user_id})>"
-    
+
     def to_dict(self) -> dict:
         """Convert conversation to dictionary."""
         return {
@@ -157,9 +155,9 @@ class Conversation(Base):
 
 class Message(Base):
     """Message model for individual chat messages."""
-    
+
     __tablename__ = "messages"
-    
+
     # Primary key
     id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
@@ -167,7 +165,7 @@ class Message(Base):
         default=lambda: str(uuid.uuid4()),
         index=True
     )
-    
+
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
@@ -175,7 +173,7 @@ class Message(Base):
         nullable=False,
         index=True
     )
-    
+
     # Message content
     role: Mapped[MessageRole] = mapped_column(
         SQLEnum(MessageRole),
@@ -183,59 +181,59 @@ class Message(Base):
         index=True
     )
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    
+
     # Tool calling
-    tool_calls: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(JSON, nullable=True)
-    tool_call_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    
+    tool_calls: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
+    tool_call_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+
     # Token usage
-    prompt_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    completion_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    total_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    
+    prompt_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    completion_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    total_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
     # Response metadata
-    model_used: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    provider_used: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    finish_reason: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    response_time_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    cost: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    
+    model_used: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    provider_used: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    finish_reason: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    cost: Mapped[float | None] = mapped_column(Float, nullable=True)
+
     # Error handling
-    error_message: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     retry_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    
+
     # Context and retrieval
-    retrieved_documents: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
-    context_used: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    
+    retrieved_documents: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    context_used: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     # Metadata
-    extra_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column("extra_metadata", JSON, nullable=True)
-    
+    extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
+
     # Message ordering
     sequence_number: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
-    
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
         index=True
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
         nullable=False
     )
-    
+
     # Relationships
     conversation: Mapped["Conversation"] = relationship("Conversation", back_populates="messages")
-    
+
     def __repr__(self) -> str:
         """String representation of message."""
         content_preview = self.content[:50] + "..." if len(self.content) > 50 else self.content
         return f"<Message(id={self.id}, role={self.role}, content={content_preview})>"
-    
+
     def to_dict(self) -> dict:
         """Convert message to dictionary."""
         return {

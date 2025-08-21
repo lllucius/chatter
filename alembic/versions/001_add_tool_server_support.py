@@ -1,13 +1,14 @@
 """Add tool server support
 
 Revision ID: add_tool_server_support
-Revises: 
+Revises:
 Create Date: 2024-01-01 12:00:00.000000
 
 """
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = 'add_tool_server_support'
@@ -21,7 +22,7 @@ def upgrade() -> None:
         CREATE TYPE serverstatus AS ENUM ('enabled', 'disabled', 'error', 'starting', 'stopping');
         CREATE TYPE toolstatus AS ENUM ('enabled', 'disabled', 'unavailable', 'error');
     """)
-    
+
     # Create tool_servers table
     op.create_table('tool_servers',
         sa.Column('id', sa.UUID(), nullable=False, index=True),
@@ -47,7 +48,7 @@ def upgrade() -> None:
         sa.UniqueConstraint('name'),
         sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
     )
-    
+
     # Create server_tools table
     op.create_table('server_tools',
         sa.Column('id', sa.UUID(), nullable=False, index=True),
@@ -70,7 +71,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['server_id'], ['tool_servers.id'], ),
         sa.UniqueConstraint('server_id', 'name', name='uix_server_tool_name'),
     )
-    
+
     # Create tool_usage table
     op.create_table('tool_usage',
         sa.Column('id', sa.UUID(), nullable=False, index=True),
@@ -91,7 +92,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
         sa.ForeignKeyConstraint(['conversation_id'], ['conversations.id'], ),
     )
-    
+
     # Create indexes for performance
     op.create_index('ix_tool_usage_called_at_desc', 'tool_usage', ['called_at'], postgresql_using='btree', postgresql_ops={'called_at': 'DESC'})
     op.create_index('ix_tool_usage_server_tool', 'tool_usage', ['server_id', 'tool_id'])
@@ -103,7 +104,7 @@ def downgrade() -> None:
     op.drop_table('tool_usage')
     op.drop_table('server_tools')
     op.drop_table('tool_servers')
-    
+
     # Drop enum types
     op.execute("""
         DROP TYPE IF EXISTS toolstatus;

@@ -1,14 +1,12 @@
 """Prompt model for prompt template management."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
-from sqlalchemy import (
-    Boolean, DateTime, Enum as SQLEnum, ForeignKey, Float,
-    Integer, JSON, String, Text, UUID
-)
+from sqlalchemy import JSON, UUID, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.utils.database import Base
@@ -37,9 +35,9 @@ class PromptCategory(str, Enum):
 
 class Prompt(Base):
     """Prompt model for template management."""
-    
+
     __tablename__ = "prompts"
-    
+
     # Primary key
     id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
@@ -47,7 +45,7 @@ class Prompt(Base):
         default=lambda: str(uuid.uuid4()),
         index=True
     )
-    
+
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False),
@@ -55,10 +53,10 @@ class Prompt(Base):
         nullable=False,
         index=True
     )
-    
+
     # Prompt metadata
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
     prompt_type: Mapped[PromptType] = mapped_column(
         SQLEnum(PromptType),
         default=PromptType.TEMPLATE,
@@ -71,90 +69,90 @@ class Prompt(Base):
         nullable=False,
         index=True
     )
-    
+
     # Prompt content
     content: Mapped[str] = mapped_column(Text, nullable=False)
-    variables: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
-    
+    variables: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+
     # Template configuration
     template_format: Mapped[str] = mapped_column(String(20), default="f-string", nullable=False)  # f-string, jinja2, mustache
-    input_schema: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
-    output_schema: Mapped[Optional[Dict[str, Any]]] = mapped_column(JSON, nullable=True)
-    
+    input_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+    output_schema: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
+
     # Validation and constraints
-    max_length: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    min_length: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    required_variables: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
-    
+    max_length: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    min_length: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    required_variables: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+
     # Examples and testing
-    examples: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(JSON, nullable=True)
-    test_cases: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(JSON, nullable=True)
-    
+    examples: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
+    test_cases: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
+
     # LLM configuration hints
-    suggested_temperature: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    suggested_max_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    suggested_providers: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
-    
+    suggested_temperature: Mapped[float | None] = mapped_column(Float, nullable=True)
+    suggested_max_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    suggested_providers: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+
     # Chain configuration (for multi-step prompts)
     is_chain: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    chain_steps: Mapped[Optional[List[Dict[str, Any]]]] = mapped_column(JSON, nullable=True)
-    parent_prompt_id: Mapped[Optional[str]] = mapped_column(
+    chain_steps: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
+    parent_prompt_id: Mapped[str | None] = mapped_column(
         UUID(as_uuid=False),
         ForeignKey("prompts.id"),
         nullable=True,
         index=True
     )
-    
+
     # Version control
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     is_latest: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    changelog: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    
+    changelog: Mapped[str | None] = mapped_column(Text, nullable=True)
+
     # Access control
     is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    shared_with_users: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
-    
+    shared_with_users: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+
     # Quality and ratings
-    rating: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    rating: Mapped[float | None] = mapped_column(Float, nullable=True)
     rating_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    
+
     # Usage statistics
     usage_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    success_rate: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    avg_response_time_ms: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    last_used_at: Mapped[Optional[datetime]] = mapped_column(
+    success_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
+    avg_response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    last_used_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True
     )
-    
+
     # Performance metrics
     total_tokens_used: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     total_cost: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
-    avg_tokens_per_use: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
-    
+    avg_tokens_per_use: Mapped[float | None] = mapped_column(Float, nullable=True)
+
     # Metadata and tags
-    tags: Mapped[Optional[List[str]]] = mapped_column(JSON, nullable=True)
-    extra_metadata: Mapped[Optional[Dict[str, Any]]] = mapped_column("extra_metadata", JSON, nullable=True)
-    
+    tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
+
     # Content analysis
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
-    estimated_tokens: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
-    language: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
-    
+    estimated_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    language: Mapped[str | None] = mapped_column(String(10), nullable=True)
+
     # Timestamps
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
         nullable=False,
         index=True
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
         nullable=False
     )
-    
+
     # Relationships
     owner: Mapped["User"] = relationship("User", back_populates="prompts")
     parent_prompt: Mapped[Optional["Prompt"]] = relationship(
@@ -162,21 +160,21 @@ class Prompt(Base):
         remote_side="Prompt.id",
         back_populates="child_prompts"
     )
-    child_prompts: Mapped[List["Prompt"]] = relationship(
+    child_prompts: Mapped[list["Prompt"]] = relationship(
         "Prompt",
         back_populates="parent_prompt"
     )
-    
+
     def __repr__(self) -> str:
         """String representation of prompt."""
         return f"<Prompt(id={self.id}, name={self.name}, type={self.prompt_type})>"
-    
+
     def render(self, **kwargs: Any) -> str:
         """Render prompt template with provided variables.
-        
+
         Args:
             **kwargs: Variables to substitute in the template
-            
+
         Returns:
             Rendered prompt string
         """
@@ -204,13 +202,13 @@ class Prompt(Base):
             for key, value in kwargs.items():
                 result = result.replace(f"{{{key}}}", str(value))
             return result
-    
-    def validate_variables(self, **kwargs: Any) -> Dict[str, Any]:
+
+    def validate_variables(self, **kwargs: Any) -> dict[str, Any]:
         """Validate provided variables against prompt requirements.
-        
+
         Args:
             **kwargs: Variables to validate
-            
+
         Returns:
             Validation result with errors and warnings
         """
@@ -221,7 +219,7 @@ class Prompt(Base):
             "missing_required": [],
             "unexpected": []
         }
-        
+
         # Check required variables
         if self.required_variables:
             for var in self.required_variables:
@@ -229,27 +227,27 @@ class Prompt(Base):
                     result["valid"] = False
                     result["errors"].append(f"Missing required variable: {var}")
                     result["missing_required"].append(var)
-        
+
         # Check for unexpected variables
         if self.variables:
             for var in kwargs:
                 if var not in self.variables:
                     result["warnings"].append(f"Unexpected variable: {var}")
                     result["unexpected"].append(var)
-        
+
         # Validate input schema if provided
         if self.input_schema:
             # TODO: Implement JSON schema validation
             pass
-        
+
         return result
-    
-    def get_example_output(self, example_index: int = 0) -> Optional[str]:
+
+    def get_example_output(self, example_index: int = 0) -> str | None:
         """Get example output for given example index.
-        
+
         Args:
             example_index: Index of example to get output for
-            
+
         Returns:
             Example output if available
         """
@@ -258,7 +256,7 @@ class Prompt(Base):
             if "output" in example:
                 return example["output"]
         return None
-    
+
     def to_dict(self) -> dict:
         """Convert prompt to dictionary."""
         return {

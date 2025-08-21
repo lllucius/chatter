@@ -1,16 +1,15 @@
 """Analytics service for generating statistics and insights."""
 
 import asyncio
-from datetime import datetime, timezone, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
-from sqlalchemy import select, func, and_, or_, desc, text
+from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import get_settings
 from chatter.models.conversation import Conversation, Message, MessageRole
-from chatter.models.document import Document, DocumentChunk, DocumentStatus
-from chatter.models.profile import Profile
+from chatter.models.document import Document, DocumentStatus
 from chatter.models.user import User
 from chatter.schemas.analytics import AnalyticsTimeRange
 from chatter.utils.logging import get_logger
@@ -21,33 +20,33 @@ logger = get_logger(__name__)
 
 class AnalyticsService:
     """Service for analytics and statistics generation."""
-    
+
     def __init__(self, session: AsyncSession):
         """Initialize analytics service.
-        
+
         Args:
             session: Database session
         """
         self.session = session
-    
+
     async def get_conversation_stats(
         self,
         user_id: str,
-        time_range: Optional[AnalyticsTimeRange] = None
-    ) -> Dict[str, Any]:
+        time_range: AnalyticsTimeRange | None = None
+    ) -> dict[str, Any]:
         """Get conversation statistics.
-        
+
         Args:
             user_id: User ID
             time_range: Time range filter
-            
+
         Returns:
             Dictionary with conversation statistics
         """
         try:
             # Build time filter
             time_filter = self._build_time_filter(time_range)
-            
+
             # Total conversations
             total_conversations_result = await self.session.execute(
                 select(func.count(Conversation.id)).where(
@@ -58,7 +57,7 @@ class AnalyticsService:
                 )
             )
             total_conversations = total_conversations_result.scalar()
-            
+
             # Conversations by status
             status_result = await self.session.execute(
                 select(
@@ -71,8 +70,8 @@ class AnalyticsService:
                     )
                 ).group_by(Conversation.status)
             )
-            conversations_by_status = {status: count for status, count in status_result.all()}
-            
+            conversations_by_status = dict(status_result.all())
+
             # Total messages
             total_messages_result = await self.session.execute(
                 select(func.count(Message.id))
@@ -86,7 +85,7 @@ class AnalyticsService:
                 )
             )
             total_messages = total_messages_result.scalar()
-            
+
             # Messages by role
             role_result = await self.session.execute(
                 select(
@@ -102,7 +101,7 @@ class AnalyticsService:
                 ).group_by(Message.role)
             )
             messages_by_role = {role.value: count for role, count in role_result.all()}
-            
+
             # Token usage
             token_stats_result = await self.session.execute(
                 select(
@@ -121,14 +120,14 @@ class AnalyticsService:
                     )
                 )
             )
-            
+
             token_stats = token_stats_result.first()
-            total_prompt_tokens = token_stats[0] or 0
-            total_completion_tokens = token_stats[1] or 0
+            token_stats[0] or 0
+            token_stats[1] or 0
             total_tokens = token_stats[2] or 0
             total_cost = float(token_stats[3] or 0)
             avg_response_time = float(token_stats[4] or 0)
-            
+
             # Conversations by date
             date_result = await self.session.execute(
                 select(
@@ -143,7 +142,7 @@ class AnalyticsService:
                 .order_by(func.date(Conversation.created_at))
             )
             conversations_by_date = {str(date): count for date, count in date_result.all()}
-            
+
             # Most active hours
             hour_result = await self.session.execute(
                 select(
@@ -157,7 +156,7 @@ class AnalyticsService:
                 ).group_by(func.extract('hour', Conversation.created_at))
             )
             most_active_hours = {str(int(hour)): count for hour, count in hour_result.all()}
-            
+
             # Popular models and providers
             model_result = await self.session.execute(
                 select(
@@ -174,7 +173,7 @@ class AnalyticsService:
                 ).group_by(Message.model_used)
             )
             popular_models = {model: count for model, count in model_result.all() if model}
-            
+
             provider_result = await self.session.execute(
                 select(
                     Message.provider_used,
@@ -190,7 +189,7 @@ class AnalyticsService:
                 ).group_by(Message.provider_used)
             )
             popular_providers = {provider: count for provider, count in provider_result.all() if provider}
-            
+
             return {
                 "total_conversations": total_conversations,
                 "conversations_by_status": conversations_by_status,
@@ -205,28 +204,28 @@ class AnalyticsService:
                 "popular_models": popular_models,
                 "popular_providers": popular_providers,
             }
-            
+
         except Exception as e:
             logger.error("Failed to get conversation stats", error=str(e))
             return {}
-    
+
     async def get_usage_metrics(
         self,
         user_id: str,
-        time_range: Optional[AnalyticsTimeRange] = None
-    ) -> Dict[str, Any]:
+        time_range: AnalyticsTimeRange | None = None
+    ) -> dict[str, Any]:
         """Get usage metrics.
-        
+
         Args:
             user_id: User ID
             time_range: Time range filter
-            
+
         Returns:
             Dictionary with usage metrics
         """
         try:
             time_filter = self._build_time_filter(time_range)
-            
+
             # Token usage totals
             total_usage_result = await self.session.execute(
                 select(
@@ -244,13 +243,13 @@ class AnalyticsService:
                     )
                 )
             )
-            
+
             usage_totals = total_usage_result.first()
             total_prompt_tokens = usage_totals[0] or 0
             total_completion_tokens = usage_totals[1] or 0
             total_tokens = usage_totals[2] or 0
             total_cost = float(usage_totals[3] or 0)
-            
+
             # Usage by model
             model_usage_result = await self.session.execute(
                 select(
@@ -267,14 +266,14 @@ class AnalyticsService:
                     )
                 ).group_by(Message.model_used)
             )
-            
+
             tokens_by_model = {}
             cost_by_model = {}
             for model, tokens, cost in model_usage_result.all():
                 if model:
                     tokens_by_model[model] = tokens or 0
                     cost_by_model[model] = float(cost or 0)
-            
+
             # Usage by provider
             provider_usage_result = await self.session.execute(
                 select(
@@ -291,14 +290,14 @@ class AnalyticsService:
                     )
                 ).group_by(Message.provider_used)
             )
-            
+
             tokens_by_provider = {}
             cost_by_provider = {}
             for provider, tokens, cost in provider_usage_result.all():
                 if provider:
                     tokens_by_provider[provider] = tokens or 0
                     cost_by_provider[provider] = float(cost or 0)
-            
+
             # Daily usage (last 30 days)
             daily_usage_result = await self.session.execute(
                 select(
@@ -311,19 +310,19 @@ class AnalyticsService:
                     and_(
                         Conversation.user_id == user_id,
                         Message.role == MessageRole.ASSISTANT,
-                        Message.created_at >= datetime.now(timezone.utc) - timedelta(days=30)
+                        Message.created_at >= datetime.now(UTC) - timedelta(days=30)
                     )
                 ).group_by(func.date(Message.created_at))
                 .order_by(func.date(Message.created_at))
             )
-            
+
             daily_usage = {}
             daily_cost = {}
             for date, tokens, cost in daily_usage_result.all():
                 date_str = str(date)
                 daily_usage[date_str] = tokens or 0
                 daily_cost[date_str] = float(cost or 0)
-            
+
             # Performance metrics
             response_time_result = await self.session.execute(
                 select(
@@ -340,7 +339,7 @@ class AnalyticsService:
                 )
             )
             avg_response_time = float(response_time_result.scalar() or 0)
-            
+
             # Response times by model
             model_response_result = await self.session.execute(
                 select(
@@ -360,7 +359,7 @@ class AnalyticsService:
             response_times_by_model = {
                 model: float(time) for model, time in model_response_result.all() if model
             }
-            
+
             # Activity metrics
             activity_result = await self.session.execute(
                 select(
@@ -374,12 +373,12 @@ class AnalyticsService:
                     )
                 )
             )
-            
+
             activity_stats = activity_result.first()
             active_days = activity_stats[0] or 0
             peak_usage_hour = int(activity_stats[1] or 0)
             conversations_per_day = float(activity_stats[2] or 0)
-            
+
             return {
                 "total_prompt_tokens": total_prompt_tokens,
                 "total_completion_tokens": total_completion_tokens,
@@ -397,28 +396,28 @@ class AnalyticsService:
                 "peak_usage_hour": peak_usage_hour,
                 "conversations_per_day": conversations_per_day,
             }
-            
+
         except Exception as e:
             logger.error("Failed to get usage metrics", error=str(e))
             return {}
-    
+
     async def get_performance_metrics(
         self,
         user_id: str,
-        time_range: Optional[AnalyticsTimeRange] = None
-    ) -> Dict[str, Any]:
+        time_range: AnalyticsTimeRange | None = None
+    ) -> dict[str, Any]:
         """Get performance metrics.
-        
+
         Args:
             user_id: User ID
             time_range: Time range filter
-            
+
         Returns:
             Dictionary with performance metrics
         """
         try:
             time_filter = self._build_time_filter(time_range)
-            
+
             # Response time statistics
             response_stats_result = await self.session.execute(
                 select(
@@ -437,13 +436,13 @@ class AnalyticsService:
                     )
                 )
             )
-            
+
             response_stats = response_stats_result.first()
             avg_response_time = float(response_stats[0] or 0)
             median_response_time = float(response_stats[1] or 0)
             p95_response_time = float(response_stats[2] or 0)
             p99_response_time = float(response_stats[3] or 0)
-            
+
             # Throughput metrics
             throughput_result = await self.session.execute(
                 select(
@@ -459,21 +458,21 @@ class AnalyticsService:
                     )
                 )
             )
-            
+
             throughput_stats = throughput_result.first()
             total_requests = throughput_stats[0] or 0
             total_tokens = throughput_stats[1] or 0
-            
+
             # Calculate per-minute rates (assuming time range)
             time_range_minutes = self._get_time_range_minutes(time_range)
             requests_per_minute = total_requests / time_range_minutes if time_range_minutes > 0 else 0
             tokens_per_minute = total_tokens / time_range_minutes if time_range_minutes > 0 else 0
-            
+
             # Error metrics (placeholder - would need error tracking)
             total_errors = 0
             error_rate = 0.0
             errors_by_type = {}
-            
+
             # Performance by model
             model_performance_result = await self.session.execute(
                 select(
@@ -492,7 +491,7 @@ class AnalyticsService:
                     )
                 ).group_by(Message.model_used)
             )
-            
+
             performance_by_model = {}
             for model, avg_time, count, tokens in model_performance_result.all():
                 if model:
@@ -502,7 +501,7 @@ class AnalyticsService:
                         "total_tokens": tokens or 0,
                         "tokens_per_request": (tokens or 0) / count if count > 0 else 0
                     }
-            
+
             # Performance by provider
             provider_performance_result = await self.session.execute(
                 select(
@@ -521,7 +520,7 @@ class AnalyticsService:
                     )
                 ).group_by(Message.provider_used)
             )
-            
+
             performance_by_provider = {}
             for provider, avg_time, count, tokens in provider_performance_result.all():
                 if provider:
@@ -531,7 +530,7 @@ class AnalyticsService:
                         "total_tokens": tokens or 0,
                         "tokens_per_request": (tokens or 0) / count if count > 0 else 0
                     }
-            
+
             return {
                 "avg_response_time_ms": avg_response_time,
                 "median_response_time_ms": median_response_time,
@@ -548,28 +547,28 @@ class AnalyticsService:
                 "vector_search_time_ms": 0.0,  # Placeholder
                 "embedding_generation_time_ms": 0.0,  # Placeholder
             }
-            
+
         except Exception as e:
             logger.error("Failed to get performance metrics", error=str(e))
             return {}
-    
+
     async def get_document_analytics(
         self,
         user_id: str,
-        time_range: Optional[AnalyticsTimeRange] = None
-    ) -> Dict[str, Any]:
+        time_range: AnalyticsTimeRange | None = None
+    ) -> dict[str, Any]:
         """Get document analytics.
-        
+
         Args:
             user_id: User ID
             time_range: Time range filter
-            
+
         Returns:
             Dictionary with document analytics
         """
         try:
             time_filter = self._build_time_filter(time_range, "Document")
-            
+
             # Document counts
             total_docs_result = await self.session.execute(
                 select(func.count(Document.id)).where(
@@ -580,7 +579,7 @@ class AnalyticsService:
                 )
             )
             total_documents = total_docs_result.scalar()
-            
+
             # Documents by status
             status_result = await self.session.execute(
                 select(
@@ -594,7 +593,7 @@ class AnalyticsService:
                 ).group_by(Document.status)
             )
             documents_by_status = {status.value: count for status, count in status_result.all()}
-            
+
             # Documents by type
             type_result = await self.session.execute(
                 select(
@@ -608,7 +607,7 @@ class AnalyticsService:
                 ).group_by(Document.document_type)
             )
             documents_by_type = {doc_type.value: count for doc_type, count in type_result.all()}
-            
+
             # Processing metrics
             processing_result = await self.session.execute(
                 select(
@@ -628,16 +627,16 @@ class AnalyticsService:
                     )
                 )
             )
-            
+
             processing_stats = processing_result.first()
             avg_processing_time = float(processing_stats[0] or 0)
             processed_docs = processing_stats[1] or 0
             total_docs = processing_stats[2] or 0
             total_chunks = processing_stats[3] or 0
             avg_chunks = float(processing_stats[4] or 0)
-            
+
             processing_success_rate = processed_docs / total_docs if total_docs > 0 else 0
-            
+
             # Storage metrics
             storage_result = await self.session.execute(
                 select(
@@ -650,11 +649,11 @@ class AnalyticsService:
                     )
                 )
             )
-            
+
             storage_stats = storage_result.first()
             total_storage = storage_stats[0] or 0
             avg_size = float(storage_stats[1] or 0)
-            
+
             # Storage by type
             storage_by_type_result = await self.session.execute(
                 select(
@@ -668,7 +667,7 @@ class AnalyticsService:
                 ).group_by(Document.document_type)
             )
             storage_by_type = {doc_type.value: size for doc_type, size in storage_by_type_result.all()}
-            
+
             # Search and access metrics
             search_result = await self.session.execute(
                 select(
@@ -681,11 +680,11 @@ class AnalyticsService:
                     )
                 )
             )
-            
+
             search_stats = search_result.first()
             total_searches = search_stats[0] or 0
             total_views = search_stats[1] or 0
-            
+
             # Most viewed documents
             most_viewed_result = await self.session.execute(
                 select(
@@ -700,7 +699,7 @@ class AnalyticsService:
                 ).order_by(desc(Document.view_count))
                 .limit(10)
             )
-            
+
             most_viewed_documents = [
                 {
                     "id": doc_id,
@@ -709,7 +708,7 @@ class AnalyticsService:
                 }
                 for doc_id, filename, view_count in most_viewed_result.all()
             ]
-            
+
             return {
                 "total_documents": total_documents,
                 "documents_by_status": documents_by_status,
@@ -732,14 +731,14 @@ class AnalyticsService:
                     "shared": 0
                 }
             }
-            
+
         except Exception as e:
             logger.error("Failed to get document analytics", error=str(e))
             return {}
-    
-    async def get_system_analytics(self) -> Dict[str, Any]:
+
+    async def get_system_analytics(self) -> dict[str, Any]:
         """Get system-wide analytics.
-        
+
         Returns:
             Dictionary with system analytics
         """
@@ -748,18 +747,18 @@ class AnalyticsService:
             user_activity_result = await self.session.execute(
                 select(
                     func.count(User.id),
-                    func.count(User.id).filter(User.last_login_at >= datetime.now(timezone.utc) - timedelta(days=1)),
-                    func.count(User.id).filter(User.last_login_at >= datetime.now(timezone.utc) - timedelta(days=7)),
-                    func.count(User.id).filter(User.last_login_at >= datetime.now(timezone.utc) - timedelta(days=30))
+                    func.count(User.id).filter(User.last_login_at >= datetime.now(UTC) - timedelta(days=1)),
+                    func.count(User.id).filter(User.last_login_at >= datetime.now(UTC) - timedelta(days=7)),
+                    func.count(User.id).filter(User.last_login_at >= datetime.now(UTC) - timedelta(days=30))
                 )
             )
-            
+
             user_stats = user_activity_result.first()
             total_users = user_stats[0] or 0
             active_users_today = user_stats[1] or 0
             active_users_week = user_stats[2] or 0
             active_users_month = user_stats[3] or 0
-            
+
             # System health (placeholder values)
             system_health = {
                 "system_uptime_seconds": 0.0,
@@ -767,7 +766,7 @@ class AnalyticsService:
                 "avg_memory_usage": 0.0,
                 "database_connections": 0,
             }
-            
+
             # API metrics (placeholder values)
             api_metrics = {
                 "total_api_requests": 0,
@@ -775,13 +774,13 @@ class AnalyticsService:
                 "avg_api_response_time": 0.0,
                 "api_error_rate": 0.0,
             }
-            
+
             # Resource usage
             storage_result = await self.session.execute(
                 select(func.sum(Document.file_size))
             )
             storage_usage = storage_result.scalar() or 0
-            
+
             return {
                 "total_users": total_users,
                 "active_users_today": active_users_today,
@@ -793,68 +792,68 @@ class AnalyticsService:
                 "vector_database_size_bytes": 0,  # Placeholder
                 "cache_hit_rate": 0.0,  # Placeholder
             }
-            
+
         except Exception as e:
             logger.error("Failed to get system analytics", error=str(e))
             return {}
-    
+
     async def get_tool_server_analytics(
         self,
-        user_id: Optional[str] = None,
-        time_range: Optional[AnalyticsTimeRange] = None
-    ) -> Dict[str, Any]:
+        user_id: str | None = None,
+        time_range: AnalyticsTimeRange | None = None
+    ) -> dict[str, Any]:
         """Get tool server analytics.
-        
+
         Args:
             user_id: User ID for user-specific analytics
             time_range: Time range filter
-            
+
         Returns:
             Dictionary with tool server analytics
         """
         try:
-            from chatter.models.toolserver import ToolServer, ServerTool, ToolUsage, ServerStatus, ToolStatus
-            
+            from chatter.models.toolserver import ServerStatus, ServerTool, ToolServer, ToolStatus, ToolUsage
+
             time_filter = self._build_time_filter_for_table(time_range, ToolUsage, ToolUsage.called_at)
-            
+
             # Overall server counts
             total_servers_result = await self.session.execute(
                 select(func.count(ToolServer.id))
             )
             total_servers = total_servers_result.scalar() or 0
-            
+
             active_servers_result = await self.session.execute(
                 select(func.count(ToolServer.id)).where(
                     ToolServer.status == ServerStatus.ENABLED
                 )
             )
             active_servers = active_servers_result.scalar() or 0
-            
+
             # Tool counts
             total_tools_result = await self.session.execute(
                 select(func.count(ServerTool.id))
             )
             total_tools = total_tools_result.scalar() or 0
-            
+
             enabled_tools_result = await self.session.execute(
                 select(func.count(ServerTool.id)).where(
                     ServerTool.status == ToolStatus.ENABLED
                 )
             )
             enabled_tools = enabled_tools_result.scalar() or 0
-            
+
             # Usage metrics
             usage_filters = [time_filter] if time_filter is not None else []
             if user_id:
                 usage_filters.append(ToolUsage.user_id == user_id)
-            
+
             usage_where = and_(*usage_filters) if usage_filters else None
-            
+
             # Daily usage counts
-            today = datetime.now(timezone.utc).date()
+            today = datetime.now(UTC).date()
             week_ago = today - timedelta(days=7)
             month_ago = today - timedelta(days=30)
-            
+
             calls_today_result = await self.session.execute(
                 select(func.count(ToolUsage.id)).where(
                     and_(
@@ -864,53 +863,53 @@ class AnalyticsService:
                 )
             )
             calls_today = calls_today_result.scalar() or 0
-            
+
             calls_week_result = await self.session.execute(
                 select(func.count(ToolUsage.id)).where(
                     and_(
-                        ToolUsage.called_at >= datetime.combine(week_ago, datetime.min.time()).replace(tzinfo=timezone.utc),
+                        ToolUsage.called_at >= datetime.combine(week_ago, datetime.min.time()).replace(tzinfo=UTC),
                         usage_where if usage_where is not None else True
                     )
                 )
             )
             calls_week = calls_week_result.scalar() or 0
-            
+
             calls_month_result = await self.session.execute(
                 select(func.count(ToolUsage.id)).where(
                     and_(
-                        ToolUsage.called_at >= datetime.combine(month_ago, datetime.min.time()).replace(tzinfo=timezone.utc),
+                        ToolUsage.called_at >= datetime.combine(month_ago, datetime.min.time()).replace(tzinfo=UTC),
                         usage_where if usage_where is not None else True
                     )
                 )
             )
             calls_month = calls_month_result.scalar() or 0
-            
+
             # Error counts
             errors_today_result = await self.session.execute(
                 select(func.count(ToolUsage.id)).where(
                     and_(
                         func.date(ToolUsage.called_at) == today,
-                        ToolUsage.success == False,
+                        ToolUsage.success is False,
                         usage_where if usage_where is not None else True
                     )
                 )
             )
             errors_today = errors_today_result.scalar() or 0
-            
+
             # Success rate
             total_calls = calls_month
             total_errors = await self.session.execute(
                 select(func.count(ToolUsage.id)).where(
                     and_(
-                        ToolUsage.called_at >= datetime.combine(month_ago, datetime.min.time()).replace(tzinfo=timezone.utc),
-                        ToolUsage.success == False,
+                        ToolUsage.called_at >= datetime.combine(month_ago, datetime.min.time()).replace(tzinfo=UTC),
+                        ToolUsage.success is False,
                         usage_where if usage_where is not None else True
                     )
                 )
             )
             total_errors = total_errors.scalar() or 0
             overall_success_rate = (total_calls - total_errors) / total_calls if total_calls > 0 else 1.0
-            
+
             # Performance metrics
             avg_response_result = await self.session.execute(
                 select(func.avg(ToolUsage.response_time_ms)).where(
@@ -921,7 +920,7 @@ class AnalyticsService:
                 )
             )
             avg_response_time = float(avg_response_result.scalar() or 0)
-            
+
             # P95 response time (approximation)
             p95_response_result = await self.session.execute(
                 select(
@@ -934,7 +933,7 @@ class AnalyticsService:
                 )
             )
             p95_response_time = float(p95_response_result.scalar() or 0)
-            
+
             # Server metrics
             server_metrics_result = await self.session.execute(
                 select(
@@ -944,7 +943,7 @@ class AnalyticsService:
                     func.count(ServerTool.id).label('total_tools'),
                     func.count(ServerTool.id).filter(ServerTool.status == ToolStatus.ENABLED).label('enabled_tools'),
                     func.count(ToolUsage.id).label('total_calls'),
-                    func.count(ToolUsage.id).filter(ToolUsage.success == False).label('total_errors'),
+                    func.count(ToolUsage.id).filter(ToolUsage.success is False).label('total_errors'),
                     func.avg(ToolUsage.response_time_ms).label('avg_response_time'),
                     func.max(ToolUsage.called_at).label('last_activity')
                 ).select_from(ToolServer)
@@ -952,13 +951,13 @@ class AnalyticsService:
                 .outerjoin(ToolUsage)
                 .group_by(ToolServer.id, ToolServer.name, ToolServer.status)
             )
-            
+
             server_metrics = []
             for row in server_metrics_result.all():
                 total_calls = row.total_calls or 0
                 total_errors = row.total_errors or 0
                 success_rate = (total_calls - total_errors) / total_calls if total_calls > 0 else 1.0
-                
+
                 server_metrics.append({
                     "server_id": row.id,
                     "server_name": row.name,
@@ -972,7 +971,7 @@ class AnalyticsService:
                     "last_activity": row.last_activity,
                     "uptime_percentage": None  # Would need additional tracking
                 })
-            
+
             # Top tools by usage
             top_tools_result = await self.session.execute(
                 select(
@@ -981,16 +980,16 @@ class AnalyticsService:
                     ToolServer.name.label('server_name'),
                     ServerTool.status,
                     func.count(ToolUsage.id).label('total_calls'),
-                    func.count(ToolUsage.id).filter(ToolUsage.success == False).label('total_errors'),
+                    func.count(ToolUsage.id).filter(ToolUsage.success is False).label('total_errors'),
                     func.avg(ToolUsage.response_time_ms).label('avg_response_time'),
                     func.max(ToolUsage.called_at).label('last_called'),
                     func.count(ToolUsage.id).filter(
-                        ToolUsage.called_at >= datetime.now(timezone.utc) - timedelta(hours=24)
+                        ToolUsage.called_at >= datetime.now(UTC) - timedelta(hours=24)
                     ).label('calls_last_24h'),
                     func.count(ToolUsage.id).filter(
                         and_(
-                            ToolUsage.called_at >= datetime.now(timezone.utc) - timedelta(hours=24),
-                            ToolUsage.success == False
+                            ToolUsage.called_at >= datetime.now(UTC) - timedelta(hours=24),
+                            ToolUsage.success is False
                         )
                     ).label('errors_last_24h')
                 ).select_from(ServerTool)
@@ -1001,15 +1000,15 @@ class AnalyticsService:
                 .order_by(func.count(ToolUsage.id).desc())
                 .limit(10)
             )
-            
+
             top_tools = []
             failing_tools = []
-            
+
             for row in top_tools_result.all():
                 total_calls = row.total_calls or 0
                 total_errors = row.total_errors or 0
                 success_rate = (total_calls - total_errors) / total_calls if total_calls > 0 else 1.0
-                
+
                 tool_metrics = {
                     "tool_id": row.id,
                     "tool_name": row.name,
@@ -1023,36 +1022,36 @@ class AnalyticsService:
                     "calls_last_24h": row.calls_last_24h or 0,
                     "errors_last_24h": row.errors_last_24h or 0
                 }
-                
+
                 top_tools.append(tool_metrics)
-                
+
                 # Add to failing tools if error rate > 10%
                 if success_rate < 0.9 and total_calls > 5:
                     failing_tools.append(tool_metrics)
-            
+
             # Daily usage time series
             daily_usage_result = await self.session.execute(
                 select(
                     func.date(ToolUsage.called_at).label('date'),
                     func.count(ToolUsage.id).label('calls'),
-                    func.count(ToolUsage.id).filter(ToolUsage.success == False).label('errors')
+                    func.count(ToolUsage.id).filter(ToolUsage.success is False).label('errors')
                 ).where(
                     and_(
-                        ToolUsage.called_at >= datetime.now(timezone.utc) - timedelta(days=30),
+                        ToolUsage.called_at >= datetime.now(UTC) - timedelta(days=30),
                         usage_where if usage_where is not None else True
                     )
                 ).group_by(func.date(ToolUsage.called_at))
                 .order_by(func.date(ToolUsage.called_at))
             )
-            
+
             daily_usage = {}
             daily_errors = {}
-            
+
             for row in daily_usage_result.all():
                 date_str = row.date.isoformat()
                 daily_usage[date_str] = row.calls or 0
                 daily_errors[date_str] = row.errors or 0
-            
+
             return {
                 "total_servers": total_servers,
                 "active_servers": active_servers,
@@ -1070,40 +1069,40 @@ class AnalyticsService:
                 "failing_tools": failing_tools,
                 "daily_usage": daily_usage,
                 "daily_errors": daily_errors,
-                "generated_at": datetime.now(timezone.utc)
+                "generated_at": datetime.now(UTC)
             }
-            
+
         except Exception as e:
             logger.error("Failed to get tool server analytics", error=str(e))
             return {}
-    
+
     def _build_time_filter_for_table(
         self,
-        time_range: Optional[AnalyticsTimeRange],
+        time_range: AnalyticsTimeRange | None,
         table_class,
         date_column
     ):
         """Build time filter for any table.
-        
+
         Args:
             time_range: Time range filter
             table_class: SQLAlchemy table class
             date_column: Date column to filter on
-            
+
         Returns:
             SQLAlchemy filter condition
         """
         if not time_range:
             return None
-        
-        now = datetime.now(timezone.utc)
-        
+
+        now = datetime.now(UTC)
+
         if time_range.start_date and time_range.end_date:
             return and_(
                 date_column >= time_range.start_date,
                 date_column <= time_range.end_date
             )
-        
+
         # Handle predefined periods
         if time_range.period == "1h":
             start_time = now - timedelta(hours=1)
@@ -1117,20 +1116,20 @@ class AnalyticsService:
             start_time = now - timedelta(days=90)
         else:
             start_time = now - timedelta(days=7)  # Default to 7 days
-        
+
         return date_column >= start_time
-    
+
     async def get_dashboard_data(
         self,
         user_id: str,
-        time_range: Optional[AnalyticsTimeRange] = None
-    ) -> Dict[str, Any]:
+        time_range: AnalyticsTimeRange | None = None
+    ) -> dict[str, Any]:
         """Get comprehensive dashboard data.
-        
+
         Args:
             user_id: User ID
             time_range: Time range filter
-            
+
         Returns:
             Dictionary with all dashboard data
         """
@@ -1141,12 +1140,12 @@ class AnalyticsService:
             performance_task = self.get_performance_metrics(user_id, time_range)
             document_task = self.get_document_analytics(user_id, time_range)
             system_task = self.get_system_analytics()
-            
+
             # Wait for all tasks to complete
             conversation_stats, usage_metrics, performance_metrics, document_analytics, system_health = await asyncio.gather(
                 conversation_task, usage_task, performance_task, document_task, system_task
             )
-            
+
             return {
                 "conversation_stats": conversation_stats,
                 "usage_metrics": usage_metrics,
@@ -1154,44 +1153,44 @@ class AnalyticsService:
                 "document_analytics": document_analytics,
                 "system_health": system_health,
                 "custom_metrics": [],  # Placeholder for custom metrics
-                "generated_at": datetime.now(timezone.utc)
+                "generated_at": datetime.now(UTC)
             }
-            
+
         except Exception as e:
             logger.error("Failed to get dashboard data", error=str(e))
             return {}
-    
+
     def _build_time_filter(
         self,
-        time_range: Optional[AnalyticsTimeRange],
+        time_range: AnalyticsTimeRange | None,
         table_alias: str = "Conversation"
     ):
         """Build time filter for queries.
-        
+
         Args:
             time_range: Time range filter
             table_alias: Table alias for time field
-            
+
         Returns:
             SQLAlchemy filter condition
         """
         if not time_range:
             return True
-        
+
         # Get the appropriate table
         if table_alias == "Document":
             time_field = Document.created_at
         else:
             time_field = Conversation.created_at
-        
+
         if time_range.start_date and time_range.end_date:
             return and_(
                 time_field >= time_range.start_date,
                 time_field <= time_range.end_date
             )
-        
+
         # Handle predefined periods
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         if time_range.period == "1h":
             start_time = now - timedelta(hours=1)
         elif time_range.period == "24h":
@@ -1204,25 +1203,25 @@ class AnalyticsService:
             start_time = now - timedelta(days=90)
         else:
             start_time = now - timedelta(days=7)  # Default to 7 days
-        
+
         return time_field >= start_time
-    
-    def _get_time_range_minutes(self, time_range: Optional[AnalyticsTimeRange]) -> float:
+
+    def _get_time_range_minutes(self, time_range: AnalyticsTimeRange | None) -> float:
         """Get time range in minutes.
-        
+
         Args:
             time_range: Time range filter
-            
+
         Returns:
             Time range in minutes
         """
         if not time_range:
             return 60 * 24 * 7  # Default 7 days in minutes
-        
+
         if time_range.start_date and time_range.end_date:
             delta = time_range.end_date - time_range.start_date
             return delta.total_seconds() / 60
-        
+
         # Handle predefined periods
         if time_range.period == "1h":
             return 60

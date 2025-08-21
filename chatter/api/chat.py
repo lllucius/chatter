@@ -1,24 +1,24 @@
 """Chat endpoints."""
 
 import json
-from typing import List, Dict, Any
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.core.chat import ChatService, ConversationNotFoundError, ChatError
+from chatter.core.chat import ChatError, ChatService, ConversationNotFoundError
 from chatter.models.user import User
 from chatter.schemas.chat import (
-    ConversationCreate,
-    ConversationUpdate,
-    ConversationResponse,
-    ConversationWithMessages,
-    ConversationSearchRequest,
-    ConversationSearchResponse,
     ChatRequest,
     ChatResponse,
+    ConversationCreate,
+    ConversationResponse,
+    ConversationSearchRequest,
+    ConversationSearchResponse,
+    ConversationUpdate,
+    ConversationWithMessages,
     MessageResponse,
 )
 from chatter.services.llm import LLMService
@@ -31,10 +31,10 @@ router = APIRouter()
 
 async def get_chat_service(session: AsyncSession = Depends(get_session)) -> ChatService:
     """Get chat service instance.
-    
+
     Args:
         session: Database session
-        
+
     Returns:
         ChatService instance
     """
@@ -49,12 +49,12 @@ async def create_conversation(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ConversationResponse:
     """Create a new conversation.
-    
+
     Args:
         conversation_data: Conversation creation data
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         Created conversation
     """
@@ -75,12 +75,12 @@ async def list_conversations(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ConversationSearchResponse:
     """List user's conversations.
-    
+
     Args:
         search: Search parameters
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         List of conversations with pagination
     """
@@ -89,7 +89,7 @@ async def list_conversations(
         limit=search.limit,
         offset=search.offset
     )
-    
+
     return ConversationSearchResponse(
         conversations=[ConversationResponse.model_validate(c) for c in conversations],
         total=total,
@@ -105,12 +105,12 @@ async def get_conversation(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ConversationWithMessages:
     """Get conversation details with messages.
-    
+
     Args:
         conversation_id: Conversation ID
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         Conversation with messages
     """
@@ -119,17 +119,17 @@ async def get_conversation(
         current_user.id,
         include_messages=True
     )
-    
+
     if not conversation:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Conversation not found"
         )
-    
+
     # Convert to response format
     conversation_response = ConversationResponse.model_validate(conversation)
     messages = [MessageResponse.model_validate(m) for m in conversation.messages]
-    
+
     return ConversationWithMessages(
         **conversation_response.model_dump(),
         messages=messages
@@ -144,13 +144,13 @@ async def update_conversation(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ConversationResponse:
     """Update conversation.
-    
+
     Args:
         conversation_id: Conversation ID
         update_data: Update data
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         Updated conversation
     """
@@ -175,12 +175,12 @@ async def delete_conversation(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> dict:
     """Delete conversation.
-    
+
     Args:
         conversation_id: Conversation ID
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         Success message
     """
@@ -194,19 +194,19 @@ async def delete_conversation(
         )
 
 
-@router.get("/conversations/{conversation_id}/messages", response_model=List[MessageResponse])
+@router.get("/conversations/{conversation_id}/messages", response_model=list[MessageResponse])
 async def get_conversation_messages(
     conversation_id: str,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service)
-) -> List[MessageResponse]:
+) -> list[MessageResponse]:
     """Get conversation messages.
-    
+
     Args:
         conversation_id: Conversation ID
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         List of messages
     """
@@ -230,12 +230,12 @@ async def chat(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ChatResponse:
     """Send a chat message and get response.
-    
+
     Args:
         chat_request: Chat request data
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         Chat response with assistant message
     """
@@ -244,13 +244,13 @@ async def chat(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Use /chat/stream for streaming responses"
         )
-    
+
     try:
         conversation, assistant_message = await chat_service.chat(
             current_user.id,
             chat_request
         )
-        
+
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
@@ -270,12 +270,12 @@ async def chat_stream(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> StreamingResponse:
     """Send a chat message and get streaming response.
-    
+
     Args:
         chat_request: Chat request data
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         Streaming response with chat chunks
     """
@@ -292,7 +292,7 @@ async def chat_stream(
         finally:
             # Send end-of-stream marker
             yield "data: [DONE]\n\n"
-    
+
     return StreamingResponse(
         generate_stream(),
         media_type="text/event-stream",
@@ -312,12 +312,12 @@ async def create_basic_workflow(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ChatResponse:
     """Create and run a basic conversation workflow with LangGraph.
-    
+
     Args:
         chat_request: Chat request data
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         Chat response from workflow
     """
@@ -327,7 +327,7 @@ async def create_basic_workflow(
             chat_request,
             workflow_type="basic"
         )
-        
+
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
@@ -347,12 +347,12 @@ async def create_rag_workflow(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ChatResponse:
     """Create and run a RAG workflow with document retrieval.
-    
+
     Args:
         chat_request: Chat request data
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         Chat response from RAG workflow
     """
@@ -362,7 +362,7 @@ async def create_rag_workflow(
             chat_request,
             workflow_type="rag"
         )
-        
+
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
@@ -382,12 +382,12 @@ async def create_tools_workflow(
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ChatResponse:
     """Create and run a workflow with tool calling capabilities.
-    
+
     Args:
         chat_request: Chat request data
         current_user: Current authenticated user
         chat_service: Chat service
-        
+
     Returns:
         Chat response from tools workflow
     """
@@ -397,7 +397,7 @@ async def create_tools_workflow(
             chat_request,
             workflow_type="tools"
         )
-        
+
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
@@ -413,27 +413,26 @@ async def create_tools_workflow(
 @router.get("/tools/available")
 async def get_available_tools(
     current_user: User = Depends(get_current_user)
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Get list of available MCP tools.
-    
+
     Args:
         current_user: Current authenticated user
-        
+
     Returns:
         List of available tools
     """
-    from chatter.services.mcp import mcp_service
-    from chatter.services.mcp import BuiltInTools
-    
+    from chatter.services.mcp import BuiltInTools, mcp_service
+
     try:
         # Get MCP tools
         mcp_tools = await mcp_service.get_tools()
-        
+
         # Get built-in tools
         builtin_tools = BuiltInTools.create_builtin_tools()
-        
+
         all_tools = []
-        
+
         # Add MCP tools
         for tool in mcp_tools:
             all_tools.append({
@@ -442,7 +441,7 @@ async def get_available_tools(
                 "type": "mcp",
                 "args_schema": getattr(tool, "args_schema", {})
             })
-        
+
         # Add built-in tools
         for tool in builtin_tools:
             all_tools.append({
@@ -451,7 +450,7 @@ async def get_available_tools(
                 "type": "builtin",
                 "args_schema": getattr(tool, "args_schema", {})
             })
-        
+
         return all_tools
     except Exception as e:
         raise HTTPException(
@@ -463,17 +462,17 @@ async def get_available_tools(
 @router.get("/mcp/status")
 async def get_mcp_status(
     current_user: User = Depends(get_current_user)
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get MCP service status.
-    
+
     Args:
         current_user: Current authenticated user
-        
+
     Returns:
         MCP service status
     """
     from chatter.services.mcp import mcp_service
-    
+
     try:
         return await mcp_service.health_check()
     except Exception as e:

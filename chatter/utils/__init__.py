@@ -2,7 +2,7 @@
 
 __all__ = [
     "setup_logging",
-    "get_logger", 
+    "get_logger",
     "init_database",
     "get_database",
     "hash_password",

@@ -20,6 +20,13 @@ class Base(DeclarativeBase):
     - created_at / updated_at timestamps
     """
 
+    @declared_attr.directive
+    def __tablename__(cls) -> str:
+        """Generate table name from class name using snake_case."""
+        # Convert CamelCase to snake_case
+        name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls.__name__)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+
     # ----------------------------------------------------------------
     # Monotonic distributed ID generator
     # ----------------------------------------------------------------

@@ -1,14 +1,14 @@
 """Conversation and message models."""
 
-from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Float, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base
+from chatter.models.tables import fk_conversation, fk_profile, fk_user
 
 
 class MessageRole(str, Enum):
@@ -32,14 +32,14 @@ class Conversation(Base):
     # Foreign keys
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("users.id"),
+        ForeignKey(fk_user()),
         nullable=False,
         index=True
     )
 
     profile_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey("profiles.id"),
+        ForeignKey(fk_profile()),
         nullable=True,
         index=True
     )
@@ -121,7 +121,6 @@ class Conversation(Base):
             "metadata": self.extra_metadata,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-            "last_message_at": self.last_message_at.isoformat() if self.last_message_at else None,
         }
 
 
@@ -131,7 +130,7 @@ class Message(Base):
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("conversations.id"),
+        ForeignKey(fk_conversation()),
         nullable=False,
         index=True
     )

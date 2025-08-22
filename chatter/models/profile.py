@@ -9,6 +9,7 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base
+from chatter.models.tables import fk_user
 
 
 class ProfileType(str, Enum):
@@ -26,7 +27,7 @@ class Profile(Base):
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("users.id"),
+        ForeignKey(fk_user()),
         nullable=False,
         index=True
     )
@@ -103,7 +104,11 @@ class Profile(Base):
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
 
     # Relationships
-    owner: Mapped["User"] = relationship("User", back_populates="profiles")
+    owner: Mapped["User"] = relationship(
+        "User", 
+        back_populates="profiles",
+        foreign_keys=[owner_id]
+    )
     conversations: Mapped[list["Conversation"]] = relationship(
         "Conversation",
         back_populates="profile"

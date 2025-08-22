@@ -10,6 +10,7 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from chatter.models.base import Base
+from chatter.models.tables import fk_prompt, fk_user
 
 
 class PromptType(str, Enum):
@@ -39,7 +40,7 @@ class Prompt(Base):
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("users.id"),
+        ForeignKey(fk_user()),
         nullable=False,
         index=True
     )
@@ -90,7 +91,7 @@ class Prompt(Base):
     chain_steps: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
     parent_prompt_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey("prompts.id"),
+        ForeignKey(fk_prompt()),
         nullable=True,
         index=True
     )
@@ -134,7 +135,7 @@ class Prompt(Base):
     owner: Mapped["User"] = relationship("User", back_populates="prompts")
     parent_prompt: Mapped[Optional["Prompt"]] = relationship(
         "Prompt",
-        remote_side="prompts.id",
+        remote_side="Prompt.id",
         back_populates="child_prompts"
     )
     child_prompts: Mapped[list["Prompt"]] = relationship(
@@ -164,20 +165,20 @@ class Prompt(Base):
             try:
                 return self.content.format(**kwargs)
             except KeyError as e:
-                raise ValueError(f"Missing required variable: {e}")
+                raise ValueError(f"Missing required variable: {e}") from e
         elif self.template_format == "jinja2":
             try:
                 from jinja2 import Template
                 template = Template(self.content)
                 return template.render(**kwargs)
-            except ImportError:
-                raise ValueError("Jinja2 not installed for template rendering")
+            except ImportError as e:
+                raise ValueError("Jinja2 not installed for template rendering") from e
         elif self.template_format == "mustache":
             try:
                 import pystache
                 return pystache.render(self.content, kwargs)
-            except ImportError:
-                raise ValueError("Pystache not installed for mustache template rendering")
+            except ImportError as e:
+                raise ValueError("Pystache not installed for mustache template rendering") from e
         else:
             # Simple string replacement for basic templates
             result = self.content

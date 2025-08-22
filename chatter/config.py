@@ -43,6 +43,7 @@ class Settings(BaseSettings):
     )
     api_version: str = Field(default="0.1.0", description="API version")
     api_prefix: str = Field(default="/api/v1", description="API prefix")
+    api_base_url: str = Field(default="http://localhost:8000", description="API base URL for problem type URIs")
 
     # CORS settings
     cors_origins: list[str] = Field(

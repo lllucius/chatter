@@ -10,6 +10,12 @@ from chatter.config import settings
 from chatter.models.user import User
 from chatter.schemas.auth import UserCreate, UserUpdate
 from chatter.utils.logging import get_logger
+from chatter.utils.problem import (
+    AuthenticationProblem,
+    AuthorizationProblem,
+    ConflictProblem,
+    NotFoundProblem
+)
 from chatter.utils.security import (
     create_access_token,
     create_refresh_token,
@@ -24,50 +30,17 @@ from chatter.utils.security import (
 logger = get_logger(__name__)
 
 
-class AuthenticationError(HTTPException):
-    """Authentication error exception."""
-
-    def __init__(self, detail: str = "Authentication failed"):
-        """Initialize authentication error with custom detail."""
-        super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=detail,
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-
-class AuthorizationError(HTTPException):
-    """Authorization error exception."""
-
-    def __init__(self, detail: str = "Access denied"):
-        """Initialize authorization error with custom detail."""
-        asdf
-        super().__init__(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=detail,
-        )
-
-
-class UserAlreadyExistsError(HTTPException):
-    """User already exists error."""
-
-    def __init__(self, detail: str = "User already exists"):
-        """Initialize user already exists error with custom detail."""
-        super().__init__(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=detail,
-        )
-
-
-class UserNotFoundError(HTTPException):
-    """User not found error."""
-
-    def __init__(self, detail: str = "User not found"):
-        """Initialize user not found error with custom detail."""
-        super().__init__(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=detail,
-        )
+# Use RFC 9457 compliant problem classes instead of HTTPException subclasses
+AuthenticationError = AuthenticationProblem
+AuthorizationError = AuthorizationProblem  
+UserAlreadyExistsError = lambda detail="User already exists": ConflictProblem(
+    detail=detail, 
+    conflicting_resource="user"
+)
+UserNotFoundError = lambda detail="User not found": NotFoundProblem(
+    detail=detail,
+    resource_type="user"
+)
 
 
 class AuthService:

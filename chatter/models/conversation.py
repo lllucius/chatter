@@ -32,7 +32,7 @@ class Conversation(Base):
     # Foreign keys
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )
@@ -81,8 +81,8 @@ class Conversation(Base):
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
 
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="Conversations")
-    profile: Mapped[Optional["Profile"]] = relationship("Profile", back_populates="Conversations")
+    user: Mapped["User"] = relationship("User", back_populates="conversations")
+    profile: Mapped[Optional["Profile"]] = relationship("Profile", back_populates="conversations")
     messages: Mapped[list["Message"]] = relationship(
         "Message",
         back_populates="conversation",

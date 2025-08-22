@@ -50,7 +50,7 @@ class Document(Base):
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )
@@ -129,7 +129,7 @@ class Document(Base):
     )
     parent_document: Mapped[Optional["Document"]] = relationship(
         "Document",
-        remote_side="Document.id",
+        remote_side="documents.id",
         back_populates="child_documents"
     )
     child_documents: Mapped[list["Document"]] = relationship(

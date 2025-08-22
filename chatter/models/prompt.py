@@ -39,7 +39,7 @@ class Prompt(Base):
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )
@@ -134,7 +134,7 @@ class Prompt(Base):
     owner: Mapped["User"] = relationship("User", back_populates="prompts")
     parent_prompt: Mapped[Optional["Prompt"]] = relationship(
         "Prompt",
-        remote_side="Prompt.id",
+        remote_side="prompts.id",
         back_populates="child_prompts"
     )
     child_prompts: Mapped[list["Prompt"]] = relationship(

@@ -62,7 +62,7 @@ class ToolServer(Base):
     # Metadata
     created_by: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=True,
         index=True
     )
@@ -148,7 +148,7 @@ class ToolUsage(Base):
     )
     user_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=True,
         index=True
     )

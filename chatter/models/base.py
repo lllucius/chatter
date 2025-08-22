@@ -22,10 +22,24 @@ class Base(DeclarativeBase):
 
     @declared_attr.directive
     def __tablename__(cls) -> str:
-        """Generate table name from class name using snake_case."""
+        """Generate table name from class name using snake_case and plural form."""
         # Convert CamelCase to snake_case
         name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls.__name__)
-        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+        name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+        
+        # Handle pluralization
+        if name.endswith('s'):
+            return name  # Already plural
+        elif name.endswith('y'):
+            return name[:-1] + 'ies'  # e.g., 'category' -> 'categories'
+        elif name.endswith(('ch', 'sh', 'x', 'z')):
+            return name + 'es'  # e.g., 'box' -> 'boxes'
+        elif name.endswith('f'):
+            return name[:-1] + 'ves'  # e.g., 'shelf' -> 'shelves'
+        elif name.endswith('fe'):
+            return name[:-2] + 'ves'  # e.g., 'life' -> 'lives'
+        else:
+            return name + 's'  # Default: add 's'
 
     # ----------------------------------------------------------------
     # Monotonic distributed ID generator

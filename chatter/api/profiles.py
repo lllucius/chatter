@@ -48,7 +48,7 @@ async def create_profile(
     """
     try:
         profile = await profile_service.create_profile(current_user.id, profile_data)
-        return ProfileResponse.model_validate(profile)
+        return ProfileResponse.from_profile(profile)
 
     except ProfileError as e:
         raise HTTPException(
@@ -117,7 +117,7 @@ async def list_profiles(
         )
 
         return ProfileListResponse(
-            profiles=[ProfileResponse.model_validate(profile) for profile in profiles],
+            profiles=[ProfileResponse.from_profile(profile) for profile in profiles],
             total_count=total_count,
             limit=limit,
             offset=offset,
@@ -156,7 +156,7 @@ async def get_profile(
                 detail="Profile not found"
             )
 
-        return ProfileResponse.model_validate(profile)
+        return ProfileResponse.from_profile(profile)
 
     except HTTPException:
         raise
@@ -197,7 +197,7 @@ async def update_profile(
                 detail="Profile not found"
             )
 
-        return ProfileResponse.model_validate(profile)
+        return ProfileResponse.from_profile(profile)
 
     except ProfileError as e:
         raise HTTPException(
@@ -353,11 +353,11 @@ async def get_profile_stats(
             profiles_by_type=stats.get("profiles_by_type", {}),
             profiles_by_provider=stats.get("profiles_by_provider", {}),
             most_used_profiles=[
-                ProfileResponse.model_validate(profile)
+                ProfileResponse.from_profile(profile)
                 for profile in stats.get("most_used_profiles", [])
             ],
             recent_profiles=[
-                ProfileResponse.model_validate(profile)
+                ProfileResponse.from_profile(profile)
                 for profile in stats.get("recent_profiles", [])
             ],
             usage_stats=stats.get("usage_stats", {}),

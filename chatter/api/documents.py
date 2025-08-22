@@ -87,7 +87,7 @@ async def upload_document(
             current_user.id, file, document_data
         )
 
-        return DocumentResponse.model_validate(document)
+        return DocumentResponse.from_document(document)
 
     except DocumentError as e:
         raise HTTPException(
@@ -153,7 +153,7 @@ async def list_documents(
         )
 
         return DocumentListResponse(
-            documents=[DocumentResponse.model_validate(doc) for doc in documents],
+            documents=[DocumentResponse.from_document(doc) for doc in documents],
             total_count=total_count,
             limit=limit,
             offset=offset,
@@ -192,7 +192,7 @@ async def get_document(
                 detail="Document not found"
             )
 
-        return DocumentResponse.model_validate(document)
+        return DocumentResponse.from_document(document)
 
     except HTTPException:
         raise
@@ -233,7 +233,7 @@ async def update_document(
                 detail="Document not found"
             )
 
-        return DocumentResponse.model_validate(document)
+        return DocumentResponse.from_document(document)
 
     except HTTPException:
         raise
@@ -313,7 +313,7 @@ async def search_documents(
                 score=score,
                 content=chunk.content,
                 metadata=chunk.extra_metadata,
-                document=DocumentResponse.model_validate(document)
+                document=DocumentResponse.from_document(document)
             )
             results.append(result)
 

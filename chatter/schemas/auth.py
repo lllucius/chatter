@@ -43,6 +43,29 @@ class UserResponse(UserBase):
         """Pydantic configuration."""
         from_attributes = True
 
+    @classmethod  
+    def model_validate_user(cls, user) -> "UserResponse":
+        """Safely validate a User object for UserResponse.
+        
+        This is a replacement for model_validate that ensures all attributes
+        are loaded before Pydantic tries to access them, preventing
+        MissingGreenlet errors in async SQLAlchemy contexts.
+        
+        Args:
+            user: SQLAlchemy User object
+            
+        Returns:
+            UserResponse instance
+        """
+        # Force loading of all attributes by accessing them first
+        # This ensures they're available when Pydantic tries to read them
+        _ = (user.email, user.username, user.full_name, user.bio, user.avatar_url,
+             user.id, user.is_active, user.is_verified, user.default_llm_provider,
+             user.default_profile_id, user.created_at, user.updated_at, user.last_login_at)
+        
+        # Now use the standard model_validate which should work safely
+        return cls.model_validate(user)
+
 
 class UserLogin(BaseModel):
     """Schema for user login."""

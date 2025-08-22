@@ -73,7 +73,7 @@ async def register(
 
     return TokenResponse(
         **tokens,
-        user=UserResponse.model_validate(user)
+        user=UserResponse.model_validate_user(user)
     )
 
 
@@ -103,7 +103,7 @@ async def login(
 
     return TokenResponse(
         **tokens,
-        user=UserResponse.model_validate(user)
+        user=UserResponse.model_validate_user(user)
     )
 
 
@@ -134,7 +134,7 @@ async def get_current_user_info(current_user = Depends(get_current_user)) -> Use
     Returns:
         Current user data
     """
-    return UserResponse.model_validate(current_user)
+    return UserResponse.model_validate_user(current_user)
 
 
 @router.put("/me", response_model=UserResponse)
@@ -154,7 +154,7 @@ async def update_profile(
         Updated user data
     """
     updated_user = await auth_service.update_user(current_user.id, user_data)
-    return UserResponse.model_validate(updated_user)
+    return UserResponse.model_validate_user(updated_user)
 
 
 @router.post("/change-password")
@@ -199,12 +199,15 @@ async def create_api_key(
         Created API key
     """
     api_key = await auth_service.create_api_key(current_user.id, key_data.name)
+    
+    # Access the timestamp while user is still in session context
+    creation_time = current_user.updated_at
 
     return APIKeyResponse(
         id=current_user.id,
         api_key=api_key,
         api_key_name=key_data.name,
-        created_at=current_user.updated_at
+        created_at=creation_time
     )
 
 

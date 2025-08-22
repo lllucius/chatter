@@ -63,6 +63,49 @@ class DocumentResponse(DocumentBase):
     created_at: datetime = Field(..., description="Creation time")
     updated_at: datetime = Field(..., description="Last update time")
 
+    @classmethod
+    def from_document(cls, document) -> "DocumentResponse":
+        """Safely create DocumentResponse from SQLAlchemy Document object.
+        
+        This method ensures all attributes are accessed while the document object
+        is still attached to a session, preventing MissingGreenlet errors.
+        
+        Args:
+            document: SQLAlchemy Document object
+            
+        Returns:
+            DocumentResponse instance
+        """
+        # Access all required attributes to ensure they're loaded
+        return cls(
+            title=document.title,
+            description=document.description,
+            tags=document.tags,
+            is_public=document.is_public,
+            id=document.id,
+            owner_id=document.owner_id,
+            filename=document.filename,
+            original_filename=document.original_filename,
+            file_size=document.file_size,
+            file_hash=document.file_hash,
+            mime_type=document.mime_type,
+            document_type=document.document_type,
+            status=document.status,
+            processing_started_at=document.processing_started_at,
+            processing_completed_at=document.processing_completed_at,
+            processing_error=document.processing_error,
+            chunk_size=document.chunk_size,
+            chunk_overlap=document.chunk_overlap,
+            chunk_count=document.chunk_count,
+            version=document.version,
+            parent_document_id=document.parent_document_id,
+            view_count=document.view_count,
+            search_count=document.search_count,
+            last_accessed_at=document.last_accessed_at,
+            created_at=document.created_at,
+            updated_at=document.updated_at,
+        )
+
 
 class DocumentSearchRequest(BaseModel):
     """Schema for document search request."""

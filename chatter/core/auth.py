@@ -41,7 +41,6 @@ class AuthorizationError(HTTPException):
 
     def __init__(self, detail: str = "Access denied"):
         """Initialize authorization error with custom detail."""
-        asdf
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=detail,

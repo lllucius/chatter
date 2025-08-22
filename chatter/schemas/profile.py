@@ -147,6 +147,47 @@ class ProfileResponse(ProfileBase):
     created_at: datetime = Field(..., description="Creation time")
     updated_at: datetime = Field(..., description="Last update time")
 
+    @classmethod
+    def from_profile(cls, profile) -> "ProfileResponse":
+        """Safely create ProfileResponse from SQLAlchemy Profile object.
+        
+        This method ensures all attributes are accessed while the profile object
+        is still attached to a session, preventing MissingGreenlet errors.
+        
+        Args:
+            profile: SQLAlchemy Profile object
+            
+        Returns:
+            ProfileResponse instance
+        """
+        # Access all required attributes to ensure they're loaded
+        return cls(
+            name=profile.name,
+            description=profile.description,
+            profile_type=profile.profile_type,
+            llm_provider=profile.llm_provider,
+            llm_model=profile.llm_model,
+            temperature=profile.temperature,
+            max_tokens=profile.max_tokens,
+            top_p=profile.top_p,
+            top_k=profile.top_k,
+            frequency_penalty=profile.frequency_penalty,
+            presence_penalty=profile.presence_penalty,
+            stop_sequences=profile.stop_sequences,
+            system_prompt=profile.system_prompt,
+            enable_tools=profile.enable_tools,
+            is_public=profile.is_public,
+            tags=profile.tags,
+            id=profile.id,
+            owner_id=profile.owner_id,
+            usage_count=profile.usage_count,
+            total_tokens_used=profile.total_tokens_used,
+            total_cost=profile.total_cost,
+            last_used_at=profile.last_used_at,
+            created_at=profile.created_at,
+            updated_at=profile.updated_at,
+        )
+
 
 class ProfileListRequest(BaseModel):
     """Schema for profile list request."""

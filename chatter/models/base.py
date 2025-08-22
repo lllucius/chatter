@@ -62,16 +62,6 @@ class Base(DeclarativeBase):
             return cls._encode_base62(combined, length=12)
 
     # ----------------------------------------------------------------
-    # Automatic tablename in snake_case
-    # ----------------------------------------------------------------
-    @declared_attr.directive
-    def __tablename__(cls) -> str:
-        name = cls.__name__
-        # CamelCase -> snake_case
-        # name = re.sub(r'(?<!^)(?=[A-Z])', '_', name).lower()
-        return name
-
-    # ----------------------------------------------------------------
     # Common columns
     # ----------------------------------------------------------------
     id: Mapped[str] = mapped_column(

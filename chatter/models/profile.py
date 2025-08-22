@@ -1,11 +1,10 @@
 """Profile model for LLM configuration management."""
 
-import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from sqlalchemy import JSON, UUID, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -27,7 +26,7 @@ class Profile(Base):
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )

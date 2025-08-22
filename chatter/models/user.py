@@ -1,9 +1,8 @@
 """User model for authentication and user management."""
 
-import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 
-from sqlalchemy import UUID, Boolean, DateTime, String, Text
+from sqlalchemy import Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base

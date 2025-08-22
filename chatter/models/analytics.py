@@ -1,9 +1,8 @@
 """Analytics models for usage statistics and performance metrics."""
 
-import uuid
-from datetime import UTC, date, datetime
+from datetime import date, datetime
 
-from sqlalchemy import JSON, UUID, Date, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import JSON, Date, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base
@@ -22,7 +21,7 @@ class ConversationStats(Base):
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )
@@ -94,7 +93,7 @@ class DocumentStats(Base):
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )
@@ -148,7 +147,7 @@ class PromptStats(Base):
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )
@@ -201,7 +200,7 @@ class ProfileStats(Base):
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )

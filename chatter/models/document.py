@@ -1,11 +1,10 @@
 """Document and document chunk models for knowledge base."""
 
-import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
-from sqlalchemy import JSON, UUID, Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -51,7 +50,7 @@ class Document(Base):
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )
@@ -130,7 +129,7 @@ class Document(Base):
     )
     parent_document: Mapped[Optional["Document"]] = relationship(
         "Document",
-        remote_side="Document.id",
+        remote_side="documents.id",
         back_populates="child_documents"
     )
     child_documents: Mapped[list["Document"]] = relationship(

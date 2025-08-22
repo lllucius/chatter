@@ -1,12 +1,11 @@
 """Prompt model for prompt template management."""
 
 import hashlib
-import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import Enum
 from typing import Any, Optional
 
-from sqlalchemy import JSON, UUID, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
@@ -40,7 +39,7 @@ class Prompt(Base):
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True
     )
@@ -135,7 +134,7 @@ class Prompt(Base):
     owner: Mapped["User"] = relationship("User", back_populates="prompts")
     parent_prompt: Mapped[Optional["Prompt"]] = relationship(
         "Prompt",
-        remote_side="Prompt.id",
+        remote_side="prompts.id",
         back_populates="child_prompts"
     )
     child_prompts: Mapped[list["Prompt"]] = relationship(

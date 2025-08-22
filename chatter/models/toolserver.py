@@ -1,11 +1,10 @@
 """Tool server models for MCP server management and analytics."""
 
-import uuid
-from datetime import UTC, datetime
+from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from sqlalchemy import JSON, UUID, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -63,7 +62,7 @@ class ToolServer(Base):
     # Metadata
     created_by: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=True,
         index=True
     )
@@ -149,7 +148,7 @@ class ToolUsage(Base):
     )
     user_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey("User.id"),
+        ForeignKey("users.id"),
         nullable=True,
         index=True
     )

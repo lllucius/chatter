@@ -23,6 +23,7 @@ from chatter.schemas.document import (
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
+from chatter.utils.problem import NotFoundProblem, ValidationProblem, InternalServerProblem
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -187,20 +188,21 @@ async def get_document(
         document = await document_service.get_document(document_id, current_user.id)
 
         if not document:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document not found"
+            raise NotFoundProblem(
+                detail="Document not found",
+                resource_type="document",
+                resource_id=document_id
             )
 
         return DocumentResponse.model_validate(document)
 
-    except HTTPException:
+    except (NotFoundProblem, ValidationProblem):
         raise
     except Exception as e:
         logger.error("Failed to get document", document_id=document_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get document"
+        raise InternalServerProblem(
+            detail="Failed to get document",
+            error_id=document_id
         )
 
 

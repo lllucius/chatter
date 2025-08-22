@@ -26,7 +26,6 @@ class Base(DeclarativeBase):
         # Convert CamelCase to snake_case
         name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls.__name__)
         name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
-        
         # Handle pluralization
         if name.endswith('s'):
             return name  # Already plural

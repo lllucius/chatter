@@ -17,6 +17,7 @@ except ImportError:
     PGVECTOR_AVAILABLE = False
 
 from chatter.models.base import Base
+from chatter.models.tables import fk_document, fk_user
 
 
 class DocumentStatus(str, Enum):
@@ -50,7 +51,7 @@ class Document(Base):
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("users.id"),
+        ForeignKey(fk_user()),
         nullable=False,
         index=True
     )
@@ -104,7 +105,7 @@ class Document(Base):
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     parent_document_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey("documents.id"),
+        ForeignKey(fk_document()),
         nullable=True,
         index=True
     )
@@ -129,7 +130,7 @@ class Document(Base):
     )
     parent_document: Mapped[Optional["Document"]] = relationship(
         "Document",
-        remote_side="documents.id",
+        remote_side="Document.id",
         back_populates="child_documents"
     )
     child_documents: Mapped[list["Document"]] = relationship(
@@ -193,7 +194,7 @@ class DocumentChunk(Base):
     # Foreign keys
     document_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("documents.id"),
+        ForeignKey(fk_document()),
         nullable=False,
         index=True
     )

@@ -1,11 +1,12 @@
 """Analytics models for usage statistics and performance metrics."""
 
-from datetime import date, datetime
+from datetime import date
 
-from sqlalchemy import JSON, Date, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import JSON, Date, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base
+from chatter.models.tables import fk_conversation, fk_document, fk_profile, fk_prompt, fk_user
 
 
 class ConversationStats(Base):
@@ -14,14 +15,14 @@ class ConversationStats(Base):
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("conversations.id"),
+        ForeignKey(fk_conversation()),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("users.id"),
+        ForeignKey(fk_user()),
         nullable=False,
         index=True
     )
@@ -86,14 +87,14 @@ class DocumentStats(Base):
     # Foreign keys
     document_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("documents.id"),
+        ForeignKey(fk_document()),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("users.id"),
+        ForeignKey(fk_user()),
         nullable=False,
         index=True
     )
@@ -140,14 +141,14 @@ class PromptStats(Base):
     # Foreign keys
     prompt_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("prompts.id"),
+        ForeignKey(fk_prompt()),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("users.id"),
+        ForeignKey(fk_user()),
         nullable=False,
         index=True
     )
@@ -193,14 +194,14 @@ class ProfileStats(Base):
     # Foreign keys
     profile_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("profiles.id"),
+        ForeignKey(fk_profile()),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey("users.id"),
+        ForeignKey(fk_user()),
         nullable=False,
         index=True
     )

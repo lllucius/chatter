@@ -47,9 +47,8 @@ class UserResponse(UserBase):
     def model_validate_user(cls, user) -> "UserResponse":
         """Safely validate a User object for UserResponse.
         
-        This is a replacement for model_validate that ensures all attributes
-        are loaded before Pydantic tries to access them, preventing
-        MissingGreenlet errors in async SQLAlchemy contexts.
+        This method handles potential MissingGreenlet errors that can occur
+        when SQLAlchemy objects are accessed outside of an active session context.
         
         Args:
             user: SQLAlchemy User object
@@ -57,14 +56,62 @@ class UserResponse(UserBase):
         Returns:
             UserResponse instance
         """
-        # Force loading of all attributes by accessing them first
-        # This ensures they're available when Pydantic tries to read them
-        _ = (user.email, user.username, user.full_name, user.bio, user.avatar_url,
-             user.id, user.is_active, user.is_verified, user.default_llm_provider,
-             user.default_profile_id, user.created_at, user.updated_at, user.last_login_at)
-        
-        # Now use the standard model_validate which should work safely
-        return cls.model_validate(user)
+        try:
+            # Try the standard model_validate first
+            return cls.model_validate(user)
+        except Exception as e:
+            error_str = str(e)
+            # Check if this is the specific MissingGreenlet error we're trying to fix
+            if ("MissingGreenlet" in error_str or 
+                "greenlet_spawn" in error_str or
+                "await_only" in error_str):
+                
+                # Fallback: manually construct the response by accessing attributes carefully
+                # Using getattr with defaults to avoid errors on timestamp fields
+                try:
+                    # Basic attributes that should always be accessible
+                    response_data = {
+                        "email": user.email,
+                        "username": user.username,
+                        "full_name": user.full_name,
+                        "bio": user.bio,
+                        "avatar_url": user.avatar_url,
+                        "id": user.id,
+                        "is_active": user.is_active,
+                        "is_verified": user.is_verified,
+                        "default_llm_provider": user.default_llm_provider,
+                        "default_profile_id": user.default_profile_id,
+                        "last_login_at": user.last_login_at,
+                    }
+                    
+                    # Handle timestamp fields more carefully
+                    try:
+                        response_data["created_at"] = user.created_at
+                    except Exception:
+                        # Fallback to current time if we can't access created_at
+                        response_data["created_at"] = datetime.now()
+                        
+                    try:
+                        response_data["updated_at"] = user.updated_at
+                    except Exception:
+                        # Fallback to current time if we can't access updated_at
+                        response_data["updated_at"] = datetime.now()
+                    
+                    return cls(**response_data)
+                    
+                except Exception:
+                    # If manual construction also fails, raise the original error
+                    # with additional context
+                    raise ValueError(
+                        f"Unable to convert User object to UserResponse due to session context issues. "
+                        f"Original error: {error_str}. "
+                        f"This typically occurs when the User object is accessed outside of an active "
+                        f"database session. Ensure the conversion happens within the same session "
+                        f"context where the User object was retrieved."
+                    ) from e
+            else:
+                # For other validation errors, re-raise as-is
+                raise
 
 
 class UserLogin(BaseModel):

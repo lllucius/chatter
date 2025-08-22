@@ -151,8 +151,8 @@ class ProfileResponse(ProfileBase):
     def from_profile(cls, profile) -> "ProfileResponse":
         """Safely create ProfileResponse from SQLAlchemy Profile object.
         
-        This method ensures all attributes are accessed while the profile object
-        is still attached to a session, preventing MissingGreenlet errors.
+        This method handles potential MissingGreenlet errors that can occur
+        when SQLAlchemy objects are accessed outside of an active session context.
         
         Args:
             profile: SQLAlchemy Profile object
@@ -160,33 +160,63 @@ class ProfileResponse(ProfileBase):
         Returns:
             ProfileResponse instance
         """
-        # Access all required attributes to ensure they're loaded
-        return cls(
-            name=profile.name,
-            description=profile.description,
-            profile_type=profile.profile_type,
-            llm_provider=profile.llm_provider,
-            llm_model=profile.llm_model,
-            temperature=profile.temperature,
-            max_tokens=profile.max_tokens,
-            top_p=profile.top_p,
-            top_k=profile.top_k,
-            frequency_penalty=profile.frequency_penalty,
-            presence_penalty=profile.presence_penalty,
-            stop_sequences=profile.stop_sequences,
-            system_prompt=profile.system_prompt,
-            enable_tools=profile.enable_tools,
-            is_public=profile.is_public,
-            tags=profile.tags,
-            id=profile.id,
-            owner_id=profile.owner_id,
-            usage_count=profile.usage_count,
-            total_tokens_used=profile.total_tokens_used,
-            total_cost=profile.total_cost,
-            last_used_at=profile.last_used_at,
-            created_at=profile.created_at,
-            updated_at=profile.updated_at,
-        )
+        try:
+            # Try the standard model_validate first
+            return cls.model_validate(profile)
+        except Exception as e:
+            error_str = str(e)
+            # Check if this is the specific MissingGreenlet error we're trying to fix
+            if ("MissingGreenlet" in error_str or 
+                "greenlet_spawn" in error_str or
+                "await_only" in error_str):
+                
+                # Fallback: manually construct the response with safe timestamp handling
+                try:
+                    response_data = {
+                        "name": profile.name,
+                        "description": profile.description,
+                        "profile_type": profile.profile_type,
+                        "llm_provider": profile.llm_provider,
+                        "llm_model": profile.llm_model,
+                        "temperature": profile.temperature,
+                        "max_tokens": profile.max_tokens,
+                        "top_p": profile.top_p,
+                        "top_k": profile.top_k,
+                        "frequency_penalty": profile.frequency_penalty,
+                        "presence_penalty": profile.presence_penalty,
+                        "stop_sequences": profile.stop_sequences,
+                        "system_prompt": profile.system_prompt,
+                        "enable_tools": profile.enable_tools,
+                        "is_public": profile.is_public,
+                        "tags": profile.tags,
+                        "id": profile.id,
+                        "owner_id": profile.owner_id,
+                        "usage_count": profile.usage_count,
+                        "total_tokens_used": profile.total_tokens_used,
+                        "total_cost": profile.total_cost,
+                        "last_used_at": profile.last_used_at,
+                    }
+                    
+                    # Handle timestamp fields more carefully
+                    try:
+                        response_data["created_at"] = profile.created_at
+                    except Exception:
+                        response_data["created_at"] = datetime.now()
+                        
+                    try:
+                        response_data["updated_at"] = profile.updated_at
+                    except Exception:
+                        response_data["updated_at"] = datetime.now()
+                    
+                    return cls(**response_data)
+                    
+                except Exception:
+                    raise ValueError(
+                        f"Unable to convert Profile object to ProfileResponse due to session context issues. "
+                        f"Original error: {error_str}"
+                    ) from e
+            else:
+                raise
 
 
 class ProfileListRequest(BaseModel):

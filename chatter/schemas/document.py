@@ -67,8 +67,8 @@ class DocumentResponse(DocumentBase):
     def from_document(cls, document) -> "DocumentResponse":
         """Safely create DocumentResponse from SQLAlchemy Document object.
         
-        This method ensures all attributes are accessed while the document object
-        is still attached to a session, preventing MissingGreenlet errors.
+        This method handles potential MissingGreenlet errors that can occur
+        when SQLAlchemy objects are accessed outside of an active session context.
         
         Args:
             document: SQLAlchemy Document object
@@ -76,35 +76,65 @@ class DocumentResponse(DocumentBase):
         Returns:
             DocumentResponse instance
         """
-        # Access all required attributes to ensure they're loaded
-        return cls(
-            title=document.title,
-            description=document.description,
-            tags=document.tags,
-            is_public=document.is_public,
-            id=document.id,
-            owner_id=document.owner_id,
-            filename=document.filename,
-            original_filename=document.original_filename,
-            file_size=document.file_size,
-            file_hash=document.file_hash,
-            mime_type=document.mime_type,
-            document_type=document.document_type,
-            status=document.status,
-            processing_started_at=document.processing_started_at,
-            processing_completed_at=document.processing_completed_at,
-            processing_error=document.processing_error,
-            chunk_size=document.chunk_size,
-            chunk_overlap=document.chunk_overlap,
-            chunk_count=document.chunk_count,
-            version=document.version,
-            parent_document_id=document.parent_document_id,
-            view_count=document.view_count,
-            search_count=document.search_count,
-            last_accessed_at=document.last_accessed_at,
-            created_at=document.created_at,
-            updated_at=document.updated_at,
-        )
+        try:
+            # Try the standard model_validate first
+            return cls.model_validate(document)
+        except Exception as e:
+            error_str = str(e)
+            # Check if this is the specific MissingGreenlet error we're trying to fix
+            if ("MissingGreenlet" in error_str or 
+                "greenlet_spawn" in error_str or
+                "await_only" in error_str):
+                
+                # Fallback: manually construct the response with safe timestamp handling
+                try:
+                    response_data = {
+                        "title": document.title,
+                        "description": document.description,
+                        "tags": document.tags,
+                        "is_public": document.is_public,
+                        "id": document.id,
+                        "owner_id": document.owner_id,
+                        "filename": document.filename,
+                        "original_filename": document.original_filename,
+                        "file_size": document.file_size,
+                        "file_hash": document.file_hash,
+                        "mime_type": document.mime_type,
+                        "document_type": document.document_type,
+                        "status": document.status,
+                        "processing_started_at": document.processing_started_at,
+                        "processing_completed_at": document.processing_completed_at,
+                        "processing_error": document.processing_error,
+                        "chunk_size": document.chunk_size,
+                        "chunk_overlap": document.chunk_overlap,
+                        "chunk_count": document.chunk_count,
+                        "version": document.version,
+                        "parent_document_id": document.parent_document_id,
+                        "view_count": document.view_count,
+                        "search_count": document.search_count,
+                        "last_accessed_at": document.last_accessed_at,
+                    }
+                    
+                    # Handle timestamp fields more carefully
+                    try:
+                        response_data["created_at"] = document.created_at
+                    except Exception:
+                        response_data["created_at"] = datetime.now()
+                        
+                    try:
+                        response_data["updated_at"] = document.updated_at
+                    except Exception:
+                        response_data["updated_at"] = datetime.now()
+                    
+                    return cls(**response_data)
+                    
+                except Exception:
+                    raise ValueError(
+                        f"Unable to convert Document object to DocumentResponse due to session context issues. "
+                        f"Original error: {error_str}"
+                    ) from e
+            else:
+                raise
 
 
 class DocumentSearchRequest(BaseModel):

@@ -46,7 +46,6 @@ class PromptBase(BaseModel):
 
     # Access control
     is_public: bool = Field(False, description="Whether prompt is public")
-    shared_with_users: list[str] | None = Field(None, description="Users with access")
 
     # Metadata and tags
     tags: list[str] | None = Field(None, description="Prompt tags")
@@ -96,7 +95,6 @@ class PromptUpdate(BaseModel):
 
     # Access control
     is_public: bool | None = Field(None, description="Whether prompt is public")
-    shared_with_users: list[str] | None = Field(None, description="Users with access")
 
     # Metadata and tags
     tags: list[str] | None = Field(None, description="Prompt tags")
@@ -149,7 +147,6 @@ class PromptResponse(BaseModel):
 
     # Access control
     is_public: bool = Field(..., description="Whether prompt is public")
-    shared_with_users: list[str] | None = Field(None, description="Users with access")
 
     # Quality and ratings
     rating: float | None = Field(None, description="Average rating")

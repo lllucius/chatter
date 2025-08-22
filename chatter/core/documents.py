@@ -124,7 +124,6 @@ class DocumentService:
                 chunk_size=document_data.chunk_size,
                 chunk_overlap=document_data.chunk_overlap,
                 is_public=document_data.is_public,
-                shared_with_users=document_data.shared_with_users,
                 status=DocumentStatus.PENDING,
             )
 
@@ -169,7 +168,6 @@ class DocumentService:
                         or_(
                             Document.owner_id == user_id,
                             Document.is_public is True,
-                            Document.shared_with_users.contains([user_id])
                         )
                     )
                 )
@@ -208,7 +206,6 @@ class DocumentService:
                 or_(
                     Document.owner_id == user_id,
                     Document.is_public is True,
-                    Document.shared_with_users.contains([user_id])
                 )
             )
 
@@ -365,7 +362,6 @@ class DocumentService:
                     or_(
                         Document.owner_id == user_id,
                         Document.is_public is True,
-                        Document.shared_with_users.contains([user_id])
                     )
                 )
             )

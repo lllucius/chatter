@@ -4,9 +4,8 @@ from functools import lru_cache
 from typing import Any, Union
 
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-import ast
 
 class Settings(BaseSettings):
     """Application settings with environment variable support."""
@@ -297,12 +296,17 @@ class Settings(BaseSettings):
     # =============================================================================
 
     skip_slow_tests: bool = Field(default=False, description="Skip slow tests")
+    chatter_access_token: str | None = Field(default=None, description="CLI access token")
 
-    model_config = {
-        "env_file": ".env",
-        "env_file_encoding": "utf-8",
-        "case_sensitive": False,
-    }
+    # -----------------------------------------------------------------------------
+    # Pydantic v2 Settings Config
+    # -----------------------------------------------------------------------------
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore"
+    )
 
     @property
     def is_development(self) -> bool:
@@ -333,10 +337,12 @@ class Settings(BaseSettings):
             return self.test_redis_url
         return self.redis_url
 
+
 @lru_cache
 def get_settings() -> Settings:
     """Get cached settings instance."""
     return Settings()
+
 
 # Global settings instance
 settings = get_settings()

@@ -9,7 +9,7 @@ from sqlalchemy import JSON, UUID, Boolean, DateTime, Float, ForeignKey, Integer
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chatter.utils.database import Base
+from chatter.models.base import Base
 
 
 class ProfileType(str, Enum):
@@ -24,20 +24,10 @@ class ProfileType(str, Enum):
 class Profile(Base):
     """Profile model for LLM parameter management."""
 
-    __tablename__ = "profiles"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=False,
         index=True
     )
@@ -99,7 +89,6 @@ class Profile(Base):
 
     # Access control
     is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    shared_with_users: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
     # Usage statistics
     usage_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -113,20 +102,6 @@ class Profile(Base):
     # Metadata and tags
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False,
-        index=True
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
 
     # Relationships
     owner: Mapped["User"] = relationship("User", back_populates="profiles")
@@ -205,7 +180,6 @@ class Profile(Base):
             "embedding_provider": self.embedding_provider,
             "embedding_model": self.embedding_model,
             "is_public": self.is_public,
-            "shared_with_users": self.shared_with_users,
             "usage_count": self.usage_count,
             "total_tokens_used": self.total_tokens_used,
             "total_cost": self.total_cost,

@@ -35,8 +35,8 @@ class APIClient:
     
     def __init__(self, base_url: str = None, access_token: str = None):
         self.base_url = base_url or f"http://{settings.host}:{settings.port}"
-        self.access_token = access_token
-        self.client = httpx.AsyncClient(timeout=30.0)
+        self.access_token = access_token or settings.chatter_access_token
+        self.client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
         
     async def close(self):
         """Close the HTTP client."""
@@ -1461,7 +1461,7 @@ def login(
     save_token: bool = typer.Option(True, "--save/--no-save", help="Save access token"),
 ) -> None:
     """Login to get access token."""
-    async def _login():
+    async def _login(email: str, password: str, save_token:bool ):
         if not password:
             password = Prompt.ask("Password", password=True)
             
@@ -1510,7 +1510,7 @@ def login(
         finally:
             await api_client.close()
     
-    asyncio.run(_login())
+    asyncio.run(_login(email, password, save_token))
 
 
 @auth_app.command("whoami")

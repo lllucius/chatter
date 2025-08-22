@@ -16,7 +16,6 @@ class DocumentBase(BaseModel):
     tags: list[str] | None = Field(None, description="Document tags")
     extra_metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
     is_public: bool = Field(False, description="Whether document is public")
-    shared_with_users: list[str] | None = Field(None, description="Users with access")
 
 
 class DocumentCreate(DocumentBase):
@@ -34,7 +33,6 @@ class DocumentUpdate(BaseModel):
     tags: list[str] | None = Field(None, description="Document tags")
     extra_metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
     is_public: bool | None = Field(None, description="Whether document is public")
-    shared_with_users: list[str] | None = Field(None, description="Users with access")
 
 
 class DocumentResponse(DocumentBase):

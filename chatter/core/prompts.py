@@ -116,7 +116,6 @@ class PromptService:
                         or_(
                             Prompt.owner_id == user_id,
                             Prompt.is_public is True,
-                            Prompt.shared_with_users.contains([user_id])
                         )
                     )
                 )
@@ -147,7 +146,6 @@ class PromptService:
                 or_(
                     Prompt.owner_id == user_id,
                     Prompt.is_public is True,
-                    Prompt.shared_with_users.contains([user_id])
                 )
             )
 

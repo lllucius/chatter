@@ -9,7 +9,7 @@ from sqlalchemy import JSON, UUID, Boolean, DateTime, Float, ForeignKey, Integer
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chatter.utils.database import Base
+from chatter.models.base import Base
 
 
 class MessageRole(str, Enum):
@@ -30,26 +30,16 @@ class ConversationStatus(str, Enum):
 class Conversation(Base):
     """Conversation model for chat sessions."""
 
-    __tablename__ = "conversations"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=False,
         index=True
     )
 
     profile_id: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("profiles.id"),
         nullable=True,
         index=True
@@ -91,26 +81,9 @@ class Conversation(Base):
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    last_message_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
-
     # Relationships
-    user: Mapped["User"] = relationship("User", back_populates="conversations")
-    profile: Mapped[Optional["Profile"]] = relationship("Profile", back_populates="conversations")
+    user: Mapped["User"] = relationship("User", back_populates="Conversations")
+    profile: Mapped[Optional["Profile"]] = relationship("Profile", back_populates="Conversations")
     messages: Mapped[list["Message"]] = relationship(
         "Message",
         back_populates="conversation",
@@ -156,19 +129,9 @@ class Conversation(Base):
 class Message(Base):
     """Message model for individual chat messages."""
 
-    __tablename__ = "messages"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("conversations.id"),
         nullable=False,
         index=True
@@ -211,20 +174,6 @@ class Message(Base):
 
     # Message ordering
     sequence_number: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False,
-        index=True
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
 
     # Relationships
     conversation: Mapped["Conversation"] = relationship("Conversation", back_populates="messages")

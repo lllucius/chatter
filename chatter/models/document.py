@@ -17,7 +17,7 @@ except ImportError:
     Vector = Text
     PGVECTOR_AVAILABLE = False
 
-from chatter.utils.database import Base
+from chatter.models.base import Base
 
 
 class DocumentStatus(str, Enum):
@@ -48,20 +48,10 @@ class DocumentType(str, Enum):
 class Document(Base):
     """Document model for knowledge base files."""
 
-    __tablename__ = "documents"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=False,
         index=True
     )
@@ -114,7 +104,7 @@ class Document(Base):
     # Version control
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     parent_document_id: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("documents.id"),
         nullable=True,
         index=True
@@ -122,7 +112,6 @@ class Document(Base):
 
     # Access control
     is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    shared_with_users: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
     # Usage statistics
     view_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -130,20 +119,6 @@ class Document(Base):
     last_accessed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True
-    )
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False,
-        index=True
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
     )
 
     # Relationships
@@ -205,7 +180,6 @@ class Document(Base):
             "version": self.version,
             "parent_document_id": self.parent_document_id,
             "is_public": self.is_public,
-            "shared_with_users": self.shared_with_users,
             "view_count": self.view_count,
             "search_count": self.search_count,
             "last_accessed_at": self.last_accessed_at.isoformat() if self.last_accessed_at else None,
@@ -217,19 +191,9 @@ class Document(Base):
 class DocumentChunk(Base):
     """Document chunk model for vector storage."""
 
-    __tablename__ = "document_chunks"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     document_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("documents.id"),
         nullable=False,
         index=True
@@ -264,20 +228,6 @@ class DocumentChunk(Base):
 
     # Search optimization
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False,
-        index=True
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
 
     # Relationships
     document: Mapped["Document"] = relationship("Document", back_populates="chunks")

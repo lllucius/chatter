@@ -62,7 +62,6 @@ class ProfileBase(BaseModel):
 
     # Access control
     is_public: bool = Field(False, description="Whether profile is public")
-    shared_with_users: list[str] | None = Field(None, description="Users with access")
 
     # Metadata and tags
     tags: list[str] | None = Field(None, description="Profile tags")
@@ -128,7 +127,6 @@ class ProfileUpdate(BaseModel):
 
     # Access control
     is_public: bool | None = Field(None, description="Whether profile is public")
-    shared_with_users: list[str] | None = Field(None, description="Users with access")
 
     # Metadata and tags
     tags: list[str] | None = Field(None, description="Profile tags")

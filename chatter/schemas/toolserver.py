@@ -94,7 +94,7 @@ class ServerToolResponse(ServerToolBase):
     last_called: datetime | None = Field(None, description="Last call timestamp")
     last_error: str | None = Field(None, description="Last error message")
     avg_response_time_ms: float | None = Field(None, description="Average response time")
-    discovered_at: datetime = Field(..., description="Discovery timestamp")
+    created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(..., description="Last update timestamp")
 
 

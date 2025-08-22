@@ -3,36 +3,26 @@
 import uuid
 from datetime import UTC, date, datetime
 
-from sqlalchemy import JSON, UUID, Date, DateTime, Float, ForeignKey, Integer
+from sqlalchemy import JSON, UUID, Date, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chatter.utils.database import Base
+from chatter.models.base import Base
 
 
 class ConversationStats(Base):
     """Model for conversation-level statistics."""
 
-    __tablename__ = "conversation_stats"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("conversations.id"),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=False,
         index=True
     )
@@ -82,19 +72,6 @@ class ConversationStats(Base):
     provider_usage: Mapped[dict[str, int] | None] = mapped_column(JSON, nullable=True)
     model_usage: Mapped[dict[str, int] | None] = mapped_column(JSON, nullable=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
-
     # Relationships
     conversation: Mapped["Conversation"] = relationship("Conversation")
     user: Mapped["User"] = relationship("User")
@@ -107,27 +84,17 @@ class ConversationStats(Base):
 class DocumentStats(Base):
     """Model for document-level statistics."""
 
-    __tablename__ = "document_stats"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     document_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("documents.id"),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=False,
         index=True
     )
@@ -159,19 +126,6 @@ class DocumentStats(Base):
     user_feedback_score: Mapped[float | None] = mapped_column(Float, nullable=True)
     feedback_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
-
     # Relationships
     document: Mapped["Document"] = relationship("Document")
     user: Mapped["User"] = relationship("User")
@@ -184,27 +138,17 @@ class DocumentStats(Base):
 class PromptStats(Base):
     """Model for prompt usage statistics."""
 
-    __tablename__ = "prompt_stats"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     prompt_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("prompts.id"),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=False,
         index=True
     )
@@ -235,19 +179,6 @@ class PromptStats(Base):
     provider_usage: Mapped[dict[str, int] | None] = mapped_column(JSON, nullable=True)
     model_usage: Mapped[dict[str, int] | None] = mapped_column(JSON, nullable=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
-
     # Relationships
     prompt: Mapped["Prompt"] = relationship("Prompt")
     user: Mapped["User"] = relationship("User")
@@ -260,27 +191,17 @@ class PromptStats(Base):
 class ProfileStats(Base):
     """Model for profile usage statistics."""
 
-    __tablename__ = "profile_stats"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     profile_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("profiles.id"),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=False,
         index=True
     )
@@ -310,19 +231,6 @@ class ProfileStats(Base):
     # Usage patterns
     peak_usage_hour: Mapped[int | None] = mapped_column(Integer, nullable=True)
     avg_session_duration_minutes: Mapped[float | None] = mapped_column(Float, nullable=True)
-
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
 
     # Relationships
     profile: Mapped["Profile"] = relationship("Profile")

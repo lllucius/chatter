@@ -1,6 +1,7 @@
 """Main FastAPI application for Chatter."""
 
 import asyncio
+import json
 import time
 import traceback
 from collections.abc import AsyncGenerator
@@ -53,6 +54,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             )
 
         response = await call_next(request)
+        print("TYPE", type(response))
 
         # Calculate request duration
         duration = time.time() - start_time
@@ -89,9 +91,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 duration=duration,
                 request_headers=dict(request.headers),
                 request_body=request_body.decode('utf-8', errors='ignore') if request_body else None,
-                response_headers=dict(response.headers),
-                response_body=response_body,
-                stack_trace=stack_trace
+                response_headers=json.dumps(dict(response.headers), indent=4),
+                response_body=response_body
+                #stack_trace=json.dumps(stack_trace)
             )
         elif settings.debug_http_requests:
             # Normal debug logging for non-error responses
@@ -217,7 +219,7 @@ def create_app() -> FastAPI:
 
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
-
+    
     # Add exception handler
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:

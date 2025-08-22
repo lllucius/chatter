@@ -118,7 +118,6 @@ class ProfileService:
                         or_(
                             Profile.owner_id == user_id,
                             Profile.is_public is True,
-                            Profile.shared_with_users.contains([user_id])
                         )
                     )
                 )
@@ -149,7 +148,6 @@ class ProfileService:
                 or_(
                     Profile.owner_id == user_id,
                     Profile.is_public is True,
-                    Profile.shared_with_users.contains([user_id])
                 )
             )
 
@@ -463,7 +461,6 @@ class ProfileService:
                 embedding_provider=source_profile.embedding_provider,
                 embedding_model=source_profile.embedding_model,
                 is_public=False,  # Cloned profiles are private by default
-                shared_with_users=None,
                 tags=source_profile.tags.copy() if source_profile.tags else None,
                 extra_metadata=source_profile.extra_metadata.copy() if source_profile.extra_metadata else None,
             )

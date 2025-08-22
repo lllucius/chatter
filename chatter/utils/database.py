@@ -5,9 +5,9 @@ from collections.abc import AsyncGenerator
 
 from sqlalchemy import event, text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
 
 from chatter.config import settings
+from chatter.models.base import Base
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -15,11 +15,6 @@ logger = get_logger(__name__)
 # Global database engine and session maker
 _engine: AsyncEngine | None = None
 _session_maker: async_sessionmaker[AsyncSession] | None = None
-
-
-class Base(DeclarativeBase):
-    """Base class for all database models."""
-    pass
 
 
 def get_engine() -> AsyncEngine:
@@ -115,7 +110,7 @@ async def initialize_default_data() -> None:
 
         # Create admin user
         admin_user = User(
-            email="admin@chatter.local",
+            email="admin@admin.net",
             username="admin",
             hashed_password=hash_password("admin123"),
             full_name="System Administrator",

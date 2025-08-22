@@ -1,5 +1,6 @@
 """Prompt model for prompt template management."""
 
+import hashlib
 import uuid
 from datetime import UTC, datetime
 from enum import Enum
@@ -7,9 +8,9 @@ from typing import Any, Optional
 
 from sqlalchemy import JSON, UUID, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
-from chatter.utils.database import Base
+from chatter.models.base import Base
 
 
 class PromptType(str, Enum):
@@ -36,20 +37,10 @@ class PromptCategory(str, Enum):
 class Prompt(Base):
     """Prompt model for template management."""
 
-    __tablename__ = "prompts"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=False,
         index=True
     )
@@ -99,7 +90,7 @@ class Prompt(Base):
     is_chain: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     chain_steps: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
     parent_prompt_id: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("prompts.id"),
         nullable=True,
         index=True
@@ -112,7 +103,6 @@ class Prompt(Base):
 
     # Access control
     is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    shared_with_users: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
     # Quality and ratings
     rating: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -141,20 +131,6 @@ class Prompt(Base):
     estimated_tokens: Mapped[int | None] = mapped_column(Integer, nullable=True)
     language: Mapped[str | None] = mapped_column(String(10), nullable=True)
 
-    # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False,
-        index=True
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
-
     # Relationships
     owner: Mapped["User"] = relationship("User", back_populates="prompts")
     parent_prompt: Mapped[Optional["Prompt"]] = relationship(
@@ -166,6 +142,11 @@ class Prompt(Base):
         "Prompt",
         back_populates="parent_prompt"
     )
+
+    @validates("content")
+    def _set_content_and_hash(self, key, value):
+        self.content_hash = hashlib.sha256(value.encode("utf-8")).hexdigest()
+        return value
 
     def __repr__(self) -> str:
         """String representation of prompt."""
@@ -288,7 +269,6 @@ class Prompt(Base):
             "is_latest": self.is_latest,
             "changelog": self.changelog,
             "is_public": self.is_public,
-            "shared_with_users": self.shared_with_users,
             "rating": self.rating,
             "rating_count": self.rating_count,
             "usage_count": self.usage_count,

@@ -6,21 +6,11 @@ from datetime import UTC, datetime
 from sqlalchemy import UUID, Boolean, DateTime, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chatter.utils.database import Base
+from chatter.models.base import Base
 
 
 class User(Base):
     """User model for authentication and profile management."""
-
-    __tablename__ = "users"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
 
     # Authentication fields
     email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
@@ -44,7 +34,7 @@ class User(Base):
     # Preferences
     default_llm_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
     default_profile_id: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         nullable=True,
         index=True
     )
@@ -55,17 +45,6 @@ class User(Base):
     max_file_size_mb: Mapped[int | None] = mapped_column(nullable=True)
 
     # Timestamps
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
     last_login_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True),
         nullable=True

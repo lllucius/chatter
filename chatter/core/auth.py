@@ -41,6 +41,7 @@ class AuthorizationError(HTTPException):
 
     def __init__(self, detail: str = "Access denied"):
         """Initialize authorization error with custom detail."""
+        asdf
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=detail,
@@ -404,6 +405,7 @@ class AuthService:
         Raises:
             AuthenticationError: If token is invalid or user not found
         """
+        print("TOKEN", token)
         payload = verify_token(token)
         if not payload:
             raise AuthenticationError("Invalid token")

@@ -9,7 +9,7 @@ from sqlalchemy import JSON, UUID, Boolean, DateTime, Float, ForeignKey, Integer
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chatter.utils.database import Base
+from chatter.models.base import Base
 
 
 class ServerStatus(str, Enum):
@@ -31,16 +31,6 @@ class ToolStatus(str, Enum):
 
 class ToolServer(Base):
     """Tool server model for MCP server configurations."""
-
-    __tablename__ = "tool_servers"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
 
     # Server identification
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
@@ -71,20 +61,9 @@ class ToolServer(Base):
     max_failures: Mapped[int] = mapped_column(Integer, default=3, nullable=False)
 
     # Metadata
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
     created_by: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=True,
         index=True
     )
@@ -105,19 +84,9 @@ class ToolServer(Base):
 class ServerTool(Base):
     """Individual tool model for tools provided by servers."""
 
-    __tablename__ = "server_tools"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     server_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("tool_servers.id"),
         nullable=False,
         index=True
@@ -148,19 +117,6 @@ class ServerTool(Base):
     last_error: Mapped[str | None] = mapped_column(Text, nullable=True)
     avg_response_time_ms: Mapped[float | None] = mapped_column(Float, nullable=True)
 
-    # Metadata
-    discovered_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        nullable=False
-    )
-    updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-        onupdate=lambda: datetime.now(UTC),
-        nullable=False
-    )
-
     # Relationships
     server: Mapped["ToolServer"] = relationship("ToolServer", back_populates="tools")
     usage_records: Mapped[list["ToolUsage"]] = relationship(
@@ -178,37 +134,27 @@ class ServerTool(Base):
 class ToolUsage(Base):
     """Tool usage tracking model for analytics."""
 
-    __tablename__ = "tool_usage"
-
-    # Primary key
-    id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
-        primary_key=True,
-        default=lambda: str(uuid.uuid4()),
-        index=True
-    )
-
     # Foreign keys
     server_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("tool_servers.id"),
         nullable=False,
         index=True
     )
     tool_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("server_tools.id"),
         nullable=False,
         index=True
     )
     user_id: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False),
-        ForeignKey("users.id"),
+        String(12),
+        ForeignKey("User.id"),
         nullable=True,
         index=True
     )
     conversation_id: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False),
+        String(12),
         ForeignKey("conversations.id"),
         nullable=True,
         index=True

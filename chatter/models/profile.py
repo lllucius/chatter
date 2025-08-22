@@ -104,7 +104,11 @@ class Profile(Base):
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
 
     # Relationships
-    owner: Mapped["User"] = relationship("User", back_populates="profiles")
+    owner: Mapped["User"] = relationship(
+        "User", 
+        back_populates="profiles",
+        foreign_keys=[owner_id]
+    )
     conversations: Mapped[list["Conversation"]] = relationship(
         "Conversation",
         back_populates="profile"

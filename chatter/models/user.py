@@ -1,6 +1,7 @@
 """User model for authentication and user management."""
 
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -67,6 +68,7 @@ class User(Base):
     profiles: Mapped[list["Profile"]] = relationship(
         "Profile",
         back_populates="owner",
+        foreign_keys="Profile.owner_id",
         cascade="all, delete-orphan"
     )
 
@@ -74,6 +76,12 @@ class User(Base):
         "Prompt",
         back_populates="owner",
         cascade="all, delete-orphan"
+    )
+
+    default_profile: Mapped[Optional["Profile"]] = relationship(
+        "Profile",
+        foreign_keys=[default_profile_id],
+        post_update=True
     )
 
     def __repr__(self) -> str:

@@ -7,8 +7,7 @@ from sqlalchemy import JSON, Boolean, Float, ForeignKey, Integer, String, Text
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chatter.models.base import Base
-from chatter.models.tables import fk_conversation, fk_profile, fk_user
+from chatter.models.base import Base, Keys
 
 
 class MessageRole(str, Enum):
@@ -32,14 +31,14 @@ class Conversation(Base):
     # Foreign keys
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_user()),
+        ForeignKey(Keys.USERS),
         nullable=False,
         index=True
     )
 
     profile_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey(fk_profile()),
+        ForeignKey(Keys.PROFILES),
         nullable=True,
         index=True
     )
@@ -130,7 +129,7 @@ class Message(Base):
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_conversation()),
+        ForeignKey(Keys.CONVERSATIONS),
         nullable=False,
         index=True
     )

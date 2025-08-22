@@ -8,8 +8,7 @@ from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, Stri
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chatter.models.base import Base
-from chatter.models.tables import fk_conversation, fk_server_tool, fk_tool_server, fk_user
+from chatter.models.base import Base, Keys
 
 
 class ServerStatus(str, Enum):
@@ -63,7 +62,7 @@ class ToolServer(Base):
     # Metadata
     created_by: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey(fk_user()),
+        ForeignKey(Keys.USERS),
         nullable=True,
         index=True
     )
@@ -137,25 +136,25 @@ class ToolUsage(Base):
     # Foreign keys
     server_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_tool_server()),
+        ForeignKey(Keys.TOOL_SERVERS),
         nullable=False,
         index=True
     )
     tool_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_server_tool()),
+        ForeignKey(Keys.SERVER_TOOLS),
         nullable=False,
         index=True
     )
     user_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey(fk_user()),
+        ForeignKey(Keys.USERS),
         nullable=True,
         index=True
     )
     conversation_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey(fk_conversation()),
+        ForeignKey(Keys.CONVERSATIONS),
         nullable=True,
         index=True
     )

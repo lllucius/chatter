@@ -7,6 +7,7 @@ import string
 import threading
 import time
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import DateTime, String, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
@@ -102,4 +103,23 @@ class Base(DeclarativeBase):
         onupdate=func.now(),
         nullable=False,
     )
+
+
+class Keys(str, Enum):
+    """Centralized foreign key references."""
+
+    USERS = "users.id"
+    CONVERSATIONS = "conversations.id"
+    MESSAGES = "messages.id"
+    DOCUMENTS = "documents.id"
+    DOCUMENT_CHUNKS = "document_chunks.id"
+    PROFILES = "profiles.id"
+    PROMPTS = "prompts.id"
+    TOOL_SERVERS = "tool_servers.id"
+    SERVER_TOOLS = "server_tools.id"
+    TOOL_USAGE = "tool_usage.id"
+    CONVERSATION_STATS = "conversation_stats.id"
+    DOCUMENT_STATS = "document_stats.id"
+    PROMPT_STATS = "prompt_stats.id"
+    PROFILE_STATS = "profile_stats.id"
 

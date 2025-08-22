@@ -9,8 +9,7 @@ from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, Stri
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
-from chatter.models.base import Base
-from chatter.models.tables import fk_prompt, fk_user
+from chatter.models.base import Base, Keys
 
 
 class PromptType(str, Enum):
@@ -40,7 +39,7 @@ class Prompt(Base):
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_user()),
+        ForeignKey(Keys.USERS),
         nullable=False,
         index=True
     )
@@ -91,7 +90,7 @@ class Prompt(Base):
     chain_steps: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
     parent_prompt_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey(fk_prompt()),
+        ForeignKey(Keys.PROMPTS),
         nullable=True,
         index=True
     )

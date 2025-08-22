@@ -193,6 +193,9 @@ module = [
 ]
 ignore_missing_imports = true
 
+[tool.pylint.MASTER]
+load-plugins = "pylint_pydantic"
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

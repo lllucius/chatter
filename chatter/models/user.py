@@ -6,8 +6,7 @@ from typing import Optional
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chatter.models.base import Base
-from chatter.models.tables import fk_profile
+from chatter.models.base import Base, Keys
 
 
 class User(Base):
@@ -36,7 +35,7 @@ class User(Base):
     default_llm_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
     default_profile_id: Mapped[str | None] = mapped_column(
         String(12),
-        ForeignKey(fk_profile()),
+        ForeignKey(Keys.PROFILES),
         nullable=True,
         index=True
     )

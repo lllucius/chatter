@@ -5,8 +5,7 @@ from datetime import date
 from sqlalchemy import JSON, Date, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from chatter.models.base import Base
-from chatter.models.tables import fk_conversation, fk_document, fk_profile, fk_prompt, fk_user
+from chatter.models.base import Base, Keys
 
 
 class ConversationStats(Base):
@@ -15,14 +14,14 @@ class ConversationStats(Base):
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_conversation()),
+        ForeignKey(Keys.CONVERSATIONS),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_user()),
+        ForeignKey(Keys.USERS),
         nullable=False,
         index=True
     )
@@ -87,14 +86,14 @@ class DocumentStats(Base):
     # Foreign keys
     document_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_document()),
+        ForeignKey(Keys.DOCUMENTS),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_user()),
+        ForeignKey(Keys.USERS),
         nullable=False,
         index=True
     )
@@ -141,14 +140,14 @@ class PromptStats(Base):
     # Foreign keys
     prompt_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_prompt()),
+        ForeignKey(Keys.PROMPTS),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_user()),
+        ForeignKey(Keys.USERS),
         nullable=False,
         index=True
     )
@@ -194,14 +193,14 @@ class ProfileStats(Base):
     # Foreign keys
     profile_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_profile()),
+        ForeignKey(Keys.PROFILES),
         nullable=False,
         index=True
     )
 
     user_id: Mapped[str] = mapped_column(
         String(12),
-        ForeignKey(fk_user()),
+        ForeignKey(Keys.USERS),
         nullable=False,
         index=True
     )

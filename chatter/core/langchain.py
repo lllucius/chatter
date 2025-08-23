@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 class LangChainOrchestrator:
     """Central orchestrator for LangChain operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the orchestrator."""
         self.setup_tracing()
 
@@ -95,7 +95,7 @@ class LangChainOrchestrator:
             ]
         )
 
-        def format_docs(docs):
+        def format_docs(docs: list[Any]) -> str:
             """Format retrieved documents for RAG context."""
             return "\n\n".join(doc.page_content for doc in docs)
 
@@ -155,11 +155,11 @@ class LangChainOrchestrator:
             ]
         )
 
-        def format_docs(docs):
+        def format_docs(docs: list[Any]) -> str:
             """Format retrieved documents for context."""
             return "\n\n".join(doc.page_content for doc in docs)
 
-        def contextualized_question(input: dict):
+        def contextualized_question(input: dict[str, Any]) -> Any:
             """Generate contextualized question from chat history."""
             if input.get("chat_history"):
                 return contextualize_q_chain

@@ -5,6 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.auth import AuthService
+from chatter.models.user import User
 from chatter.schemas.auth import (
     AccountDeactivateResponse,
     APIKeyCreate,
@@ -46,7 +47,7 @@ async def get_auth_service(
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     auth_service: AuthService = Depends(get_auth_service),
-):
+) -> User:
     """Get current authenticated user.
 
     Args:

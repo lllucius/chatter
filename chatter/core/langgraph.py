@@ -35,7 +35,7 @@ class ConversationState(TypedDict):
 class LangGraphWorkflowManager:
     """Manager for LangGraph conversation workflows."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the workflow manager."""
         self.checkpointer = None
         self._setup_checkpointer()
@@ -328,7 +328,7 @@ class LangGraphWorkflowManager:
         workflow: Pregel,
         initial_state: ConversationState,
         thread_id: str | None = None,
-    ):
+    ) -> Any:
         """Stream workflow execution for real-time updates."""
         if not thread_id:
             thread_id = str(uuid4())

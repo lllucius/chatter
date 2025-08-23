@@ -1076,7 +1076,7 @@ def list_profiles(
 ) -> None:
     """List LLM profiles."""
 
-    async def _list():
+    async def _list() -> None:
         api_client = get_api_client()
         try:
             params: dict[str, str | int | bool] = {
@@ -1650,7 +1650,7 @@ def list_documents(
 ) -> None:
     """List uploaded documents."""
 
-    async def _list():
+    async def _list() -> None:
         api_client = get_api_client()
         try:
             params: dict[str, str | int] = {"limit": limit, "offset": offset}

@@ -333,6 +333,18 @@ class PromptListRequest(ListRequestBase):
     is_chain: bool | None = Field(
         None, description="Filter by chain status"
     )
+    
+    # Pagination and sorting fields
+    limit: int = Field(
+        50, ge=1, le=100, description="Maximum number of results"
+    )
+    offset: int = Field(
+        0, ge=0, description="Number of results to skip"
+    )
+    sort_by: str = Field("created_at", description="Sort field")
+    sort_order: str = Field(
+        "desc", pattern="^(asc|desc)$", description="Sort order"
+    )
 
 
 class PromptGetRequest(GetRequestBase):

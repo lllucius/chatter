@@ -98,9 +98,17 @@ async def list_prompts(
         List of prompts with pagination info
     """
     try:
+        # Merge pagination and sorting into request
+        merged_request = request.model_copy(update={
+            'limit': pagination.limit,
+            'offset': pagination.offset,
+            'sort_by': sorting.sort_by,
+            'sort_order': sorting.sort_order,
+        })
+        
         # Get prompts
         prompts, total_count = await prompt_service.list_prompts(
-            current_user.id, request, pagination, sorting
+            current_user.id, merged_request
         )
 
         return PromptListResponse(

@@ -30,7 +30,7 @@ class AbstractVectorStore(ABC):
         documents: list[Document],
         embeddings: list[list[float]] | None = None,
         ids: list[str] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> list[str]:
         """Add documents to the vector store."""
         pass
@@ -41,7 +41,7 @@ class AbstractVectorStore(ABC):
         query: str,
         k: int = 4,
         filter: dict[str, Any] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> list[Document]:
         """Perform similarity search."""
         pass
@@ -52,7 +52,7 @@ class AbstractVectorStore(ABC):
         query: str,
         k: int = 4,
         filter: dict[str, Any] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> list[tuple[Document, float]]:
         """Perform similarity search with scores."""
         pass
@@ -78,8 +78,8 @@ class PGVectorStore(AbstractVectorStore):
         embeddings: Embeddings,
         collection_name: str = "documents",
         connection_string: str | None = None,
-        **kwargs,
-    ):
+        **kwargs: Any,
+    ) -> None:
         """Initialize PGVector store."""
         self.embeddings = embeddings
         self.collection_name = collection_name
@@ -93,7 +93,7 @@ class PGVectorStore(AbstractVectorStore):
                 "+asyncpg", ""
             )
 
-        self._store = None
+        self._store: PGVector | None = None
         self._initialize_store()
 
     def _initialize_store(self) -> None:
@@ -122,10 +122,11 @@ class PGVectorStore(AbstractVectorStore):
         documents: list[Document],
         embeddings: list[list[float]] | None = None,
         ids: list[str] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> list[str]:
         """Add documents to PGVector."""
         try:
+            assert self._store is not None, "PGVector store not initialized"
             if embeddings:
                 return await asyncio.to_thread(
                     self._store.add_embeddings,
@@ -140,6 +141,7 @@ class PGVectorStore(AbstractVectorStore):
                     ids,
                 )
             else:
+                assert self._store is not None, "PGVector store not initialized"
                 return await asyncio.to_thread(
                     self._store.add_documents, documents, ids
                 )

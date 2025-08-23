@@ -471,7 +471,7 @@ class VectorStoreService:
             text_chunks = text_result.scalars().all()
 
             # Combine results
-            combined_scores = {}
+            combined_scores: dict[str, dict[str, DocumentChunk | float]] = {}
 
             # Add semantic scores
             for chunk, score in semantic_results:
@@ -499,15 +499,22 @@ class VectorStoreService:
             # Calculate combined scores
             results = []
             for chunk_data in combined_scores.values():
+                semantic_score = chunk_data["semantic_score"]
+                text_score = chunk_data["text_score"]
+                chunk_obj = chunk_data["chunk"]
+                
+                # Type assertions to help mypy
+                assert isinstance(semantic_score, float)
+                assert isinstance(text_score, float)
+                assert isinstance(chunk_obj, DocumentChunk)
+                
                 combined_score = (
-                    semantic_weight * chunk_data["semantic_score"]
-                    + text_weight * chunk_data["text_score"]
+                    semantic_weight * semantic_score
+                    + text_weight * text_score
                 )
 
                 if combined_score >= score_threshold:
-                    results.append(
-                        (chunk_data["chunk"], combined_score)
-                    )
+                    results.append((chunk_obj, combined_score))
 
             # Sort by combined score and limit
             results.sort(key=lambda x: x[1], reverse=True)

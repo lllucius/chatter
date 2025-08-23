@@ -259,7 +259,7 @@ def validate_password_strength(password: str) -> dict[str, Any]:
     Returns:
         Dictionary with validation results
     """
-    result = {
+    result: dict[str, Any] = {
         "valid": True,
         "errors": [],
         "score": 0,

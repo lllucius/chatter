@@ -6,28 +6,29 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
+from chatter.schemas.health import HealthCheckResponse, LivenessCheckResponse, ReadinessCheckResponse
 from chatter.utils.database import get_session, health_check
 
 router = APIRouter()
 
 
-@router.get("/healthz")
-async def health_check_endpoint() -> dict[str, Any]:
+@router.get("/healthz", response_model=HealthCheckResponse)
+async def health_check_endpoint() -> HealthCheckResponse:
     """Basic health check endpoint.
 
     Returns:
         Health status
     """
-    return {
-        "status": "healthy",
-        "service": "chatter",
-        "version": settings.app_version,
-        "environment": settings.environment,
-    }
+    return HealthCheckResponse(
+        status="healthy",
+        service="chatter",
+        version=settings.app_version,
+        environment=settings.environment,
+    )
 
 
-@router.get("/readyz")
-async def readiness_check(session: AsyncSession = Depends(get_session)) -> dict[str, Any]:
+@router.get("/readyz", response_model=ReadinessCheckResponse)
+async def readiness_check(session: AsyncSession = Depends(get_session)) -> ReadinessCheckResponse:
     """Readiness check endpoint with database connectivity.
 
     Args:
@@ -46,20 +47,20 @@ async def readiness_check(session: AsyncSession = Depends(get_session)) -> dict[
     # Determine overall status
     all_healthy = all(check.get("status") == "healthy" for check in checks.values())
 
-    return {
-        "status": "ready" if all_healthy else "not_ready",
-        "service": "chatter",
-        "version": settings.app_version,
-        "environment": settings.environment,
-        "checks": checks,
-    }
+    return ReadinessCheckResponse(
+        status="ready" if all_healthy else "not_ready",
+        service="chatter",
+        version=settings.app_version,
+        environment=settings.environment,
+        checks=checks,
+    )
 
 
-@router.get("/live")
-async def liveness_check() -> dict[str, str]:
+@router.get("/live", response_model=LivenessCheckResponse)
+async def liveness_check() -> LivenessCheckResponse:
     """Liveness check endpoint for Kubernetes.
 
     Returns:
         Simple liveness status
     """
-    return {"status": "alive"}
+    return LivenessCheckResponse(status="alive")

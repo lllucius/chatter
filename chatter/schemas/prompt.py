@@ -250,3 +250,9 @@ class PromptStatsResponse(BaseModel):
     most_used_prompts: list[PromptResponse] = Field(..., description="Most used prompts")
     recent_prompts: list[PromptResponse] = Field(..., description="Recently created prompts")
     usage_stats: dict[str, Any] = Field(..., description="Usage statistics")
+
+
+class PromptDeleteResponse(BaseModel):
+    """Schema for prompt delete response."""
+
+    message: str = Field(..., description="Success message")

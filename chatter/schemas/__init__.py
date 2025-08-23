@@ -6,6 +6,7 @@ from chatter.schemas.auth import *  # noqa: F403
 from chatter.schemas.chat import *  # noqa: F403
 from chatter.schemas.common import *  # noqa: F403
 from chatter.schemas.document import *  # noqa: F403
+from chatter.schemas.health import *  # noqa: F403
 from chatter.schemas.profile import *  # noqa: F403
 from chatter.schemas.prompt import *  # noqa: F403
 from chatter.schemas.toolserver import *  # noqa: F403
@@ -32,6 +33,10 @@ __all__ = [
     "EmailVerification",
     "APIKeyCreate",
     "APIKeyResponse",
+    "TokenRefreshResponse",
+    "PasswordChangeResponse",
+    "APIKeyRevokeResponse",
+    "AccountDeactivateResponse",
     # Chat schemas
     "MessageBase",
     "MessageCreate",
@@ -51,6 +56,10 @@ __all__ = [
     "ConversationMessagesRequest",
     "AvailableToolsRequest",
     "McpStatusRequest",
+    "ConversationDeleteResponse",
+    "AvailableToolResponse",
+    "AvailableToolsResponse",
+    "McpStatusResponse",
     # Document schemas
     "DocumentBase",
     "DocumentCreate",
@@ -68,6 +77,13 @@ __all__ = [
     "DocumentGetRequest",
     "DocumentDeleteRequest",
     "DocumentStatsRequest",
+    "DocumentUploadRequest",
+    "DocumentChunksResponse",
+    # Health schemas
+    "HealthCheckResponse",
+    "DatabaseHealthCheck",
+    "ReadinessCheckResponse",
+    "LivenessCheckResponse",
     # Profile schemas
     "ProfileBase",
     "ProfileCreate",
@@ -85,6 +101,8 @@ __all__ = [
     "ProfileDeleteRequest",
     "ProfileStatsRequest",
     "ProfileProvidersRequest",
+    "ProfileDeleteResponse",
+    "AvailableProvidersResponse",
     # Prompt schemas
     "PromptBase",
     "PromptCreate",
@@ -99,6 +117,7 @@ __all__ = [
     "PromptGetRequest",
     "PromptDeleteRequest",
     "PromptStatsRequest",
+    "PromptDeleteResponse",
     # Analytics schemas
     "ConversationStatsResponse",
     "UsageMetricsResponse",
@@ -135,4 +154,10 @@ __all__ = [
     "ToolServerHealthCheck",
     "BulkToolServerOperation",
     "BulkOperationResult",
+    "ToolServerListRequest",
+    "ToolServerDeleteResponse",
+    "ToolServerOperationResponse",
+    "ServerToolsRequest",
+    "ServerToolsResponse",
+    "ToolOperationResponse",
 ]

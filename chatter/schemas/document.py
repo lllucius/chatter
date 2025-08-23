@@ -26,6 +26,17 @@ class DocumentCreate(DocumentBase):
     chunk_overlap: int = Field(200, ge=0, le=2000, description="Overlap between chunks")
 
 
+class DocumentUploadRequest(BaseModel):
+    """Schema for document upload request."""
+
+    title: str | None = Field(None, description="Document title")
+    description: str | None = Field(None, description="Document description")
+    tags: list[str] | None = Field(None, description="Document tags")
+    chunk_size: int = Field(1000, ge=100, le=10000, description="Chunk size for text splitting")
+    chunk_overlap: int = Field(200, ge=0, le=2000, description="Overlap between chunks")
+    is_public: bool = Field(False, description="Whether document is public")
+
+
 class DocumentUpdate(BaseModel):
     """Schema for updating a document."""
 
@@ -182,3 +193,12 @@ class DocumentStatsResponse(BaseModel):
     documents_by_status: dict[str, int] = Field(..., description="Documents grouped by status")
     documents_by_type: dict[str, int] = Field(..., description="Documents grouped by type")
     processing_stats: dict[str, Any] = Field(..., description="Processing statistics")
+
+
+class DocumentChunksResponse(BaseModel):
+    """Schema for document chunks response with pagination."""
+
+    chunks: list[DocumentChunkResponse] = Field(..., description="List of document chunks")
+    total_count: int = Field(..., description="Total number of chunks")
+    limit: int = Field(..., description="Applied limit")
+    offset: int = Field(..., description="Applied offset")

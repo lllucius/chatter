@@ -1,7 +1,5 @@
 """Authentication endpoints."""
 
-from typing import Any
-
 from fastapi import APIRouter, Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,8 +8,12 @@ from chatter.core.auth import AuthService
 from chatter.schemas.auth import (
     APIKeyCreate,
     APIKeyResponse,
+    APIKeyRevokeResponse,
+    AccountDeactivateResponse,
     PasswordChange,
+    PasswordChangeResponse,
     TokenRefresh,
+    TokenRefreshResponse,
     TokenResponse,
     UserCreate,
     UserLogin,
@@ -91,10 +93,10 @@ async def login(user_data: UserLogin, auth_service: AuthService = Depends(get_au
     return TokenResponse(**tokens, user=UserResponse.model_validate(user))
 
 
-@router.post("/refresh", response_model=dict[str, Any])
+@router.post("/refresh", response_model=TokenRefreshResponse)
 async def refresh_token(
     token_data: TokenRefresh, auth_service: AuthService = Depends(get_auth_service)
-) -> dict[str, Any]:
+) -> TokenRefreshResponse:
     """Refresh access token.
 
     Args:
@@ -104,7 +106,8 @@ async def refresh_token(
     Returns:
         New access and refresh tokens
     """
-    return await auth_service.refresh_access_token(token_data.refresh_token)
+    result = await auth_service.refresh_access_token(token_data.refresh_token)
+    return TokenRefreshResponse(**result)
 
 
 @router.get("/me", response_model=UserResponse)
@@ -138,12 +141,12 @@ async def update_profile(
     return UserResponse.model_validate(updated_user)
 
 
-@router.post("/change-password")
+@router.post("/change-password", response_model=PasswordChangeResponse)
 async def change_password(
     password_data: PasswordChange,
     current_user=Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
-) -> dict[str, str]:
+) -> PasswordChangeResponse:
     """Change user password.
 
     Args:
@@ -156,7 +159,7 @@ async def change_password(
     """
     await auth_service.change_password(current_user.id, password_data.current_password, password_data.new_password)
 
-    return {"message": "Password changed successfully"}
+    return PasswordChangeResponse(message="Password changed successfully")
 
 
 @router.post("/api-key", response_model=APIKeyResponse)
@@ -182,10 +185,10 @@ async def create_api_key(
     )
 
 
-@router.delete("/api-key")
+@router.delete("/api-key", response_model=APIKeyRevokeResponse)
 async def revoke_api_key(
     current_user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
-) -> dict[str, str]:
+) -> APIKeyRevokeResponse:
     """Revoke current user's API key.
 
     Args:
@@ -196,13 +199,13 @@ async def revoke_api_key(
         Success message
     """
     await auth_service.revoke_api_key(current_user.id)
-    return {"message": "API key revoked successfully"}
+    return APIKeyRevokeResponse(message="API key revoked successfully")
 
 
-@router.delete("/account")
+@router.delete("/account", response_model=AccountDeactivateResponse)
 async def deactivate_account(
     current_user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
-) -> dict[str, str]:
+) -> AccountDeactivateResponse:
     """Deactivate current user account.
 
     Args:
@@ -213,4 +216,4 @@ async def deactivate_account(
         Success message
     """
     await auth_service.deactivate_user(current_user.id)
-    return {"message": "Account deactivated successfully"}
+    return AccountDeactivateResponse(message="Account deactivated successfully")

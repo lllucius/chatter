@@ -9,6 +9,7 @@ from chatter.models.user import User
 from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.document import (
     DocumentChunkResponse,
+    DocumentChunksResponse,
     DocumentCreate,
     DocumentDeleteRequest,
     DocumentGetRequest,
@@ -291,28 +292,41 @@ async def search_documents(
         raise InternalServerProblem(detail="Document search failed") from None
 
 
-@router.get("/{document_id}/chunks", response_model=list[DocumentChunkResponse])
+@router.get("/{document_id}/chunks", response_model=DocumentChunksResponse)
 async def get_document_chunks(
     document_id: str,
     request: DocumentGetRequest = Depends(),
+    pagination: PaginationRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
-) -> list[DocumentChunkResponse]:
+) -> DocumentChunksResponse:
     """Get document chunks.
 
     Args:
         document_id: Document ID
         request: Get request parameters
+        pagination: Pagination parameters
         current_user: Current authenticated user
         document_service: Document service
 
     Returns:
-        List of document chunks
+        List of document chunks with pagination
     """
     try:
         chunks = await document_service.get_document_chunks(document_id, current_user.id)
+        
+        # Apply pagination manually for now
+        total_count = len(chunks)
+        start_index = pagination.offset
+        end_index = start_index + pagination.limit
+        paginated_chunks = chunks[start_index:end_index]
 
-        return [DocumentChunkResponse.model_validate(chunk) for chunk in chunks]
+        return DocumentChunksResponse(
+            chunks=[DocumentChunkResponse.model_validate(chunk) for chunk in paginated_chunks],
+            total_count=total_count,
+            limit=pagination.limit,
+            offset=pagination.offset,
+        )
 
     except Exception as e:
         logger.error("Failed to get document chunks", document_id=document_id, error=str(e))

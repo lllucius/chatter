@@ -11,11 +11,14 @@ from chatter.api.auth import get_current_user
 from chatter.core.chat import ChatError, ChatService, ConversationNotFoundError
 from chatter.models.user import User
 from chatter.schemas.chat import (
+    AvailableToolResponse,
     AvailableToolsRequest,
+    AvailableToolsResponse,
     ChatRequest,
     ChatResponse,
     ConversationCreate,
     ConversationDeleteRequest,
+    ConversationDeleteResponse,
     ConversationGetRequest,
     ConversationMessagesRequest,
     ConversationResponse,
@@ -24,6 +27,7 @@ from chatter.schemas.chat import (
     ConversationUpdate,
     ConversationWithMessages,
     McpStatusRequest,
+    McpStatusResponse,
     MessageResponse,
 )
 from chatter.schemas.common import PaginationRequest, SortingRequest
@@ -157,13 +161,13 @@ async def update_conversation(
         raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
 
 
-@router.delete("/conversations/{conversation_id}")
+@router.delete("/conversations/{conversation_id}", response_model=ConversationDeleteResponse)
 async def delete_conversation(
     conversation_id: str,
     request: ConversationDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
-) -> dict:
+) -> ConversationDeleteResponse:
     """Delete conversation.
 
     Args:
@@ -177,7 +181,7 @@ async def delete_conversation(
     """
     try:
         await chat_service.delete_conversation(conversation_id, current_user.id)
-        return {"message": "Conversation deleted successfully"}
+        return ConversationDeleteResponse(message="Conversation deleted successfully")
     except ConversationNotFoundError:
         raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
 
@@ -370,10 +374,10 @@ async def create_tools_workflow(
         raise BadRequestProblem(detail=str(e)) from None
 
 
-@router.get("/tools/available")
+@router.get("/tools/available", response_model=AvailableToolsResponse)
 async def get_available_tools(
     request: AvailableToolsRequest = Depends(), current_user: User = Depends(get_current_user)
-) -> list[dict[str, Any]]:
+) -> AvailableToolsResponse:
     """Get list of available MCP tools.
 
     Args:
@@ -397,34 +401,34 @@ async def get_available_tools(
         # Add MCP tools
         for tool in mcp_tools:
             all_tools.append(
-                {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "type": "mcp",
-                    "args_schema": getattr(tool, "args_schema", {}),
-                }
+                AvailableToolResponse(
+                    name=tool.name,
+                    description=tool.description,
+                    type="mcp",
+                    args_schema=getattr(tool, "args_schema", {}),
+                )
             )
 
         # Add built-in tools
         for tool in builtin_tools:
             all_tools.append(
-                {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "type": "builtin",
-                    "args_schema": getattr(tool, "args_schema", {}),
-                }
+                AvailableToolResponse(
+                    name=tool.name,
+                    description=tool.description,
+                    type="builtin",
+                    args_schema=getattr(tool, "args_schema", {}),
+                )
             )
 
-        return all_tools
+        return AvailableToolsResponse(tools=all_tools)
     except Exception as e:
         raise InternalServerProblem(detail=f"Failed to get available tools: {str(e)}") from None
 
 
-@router.get("/mcp/status")
+@router.get("/mcp/status", response_model=McpStatusResponse)
 async def get_mcp_status(
     request: McpStatusRequest = Depends(), current_user: User = Depends(get_current_user)
-) -> dict[str, Any]:
+) -> McpStatusResponse:
     """Get MCP service status.
 
     Args:
@@ -437,6 +441,7 @@ async def get_mcp_status(
     from chatter.services.mcp import mcp_service
 
     try:
-        return await mcp_service.health_check()
+        result = await mcp_service.health_check()
+        return McpStatusResponse(**result)
     except Exception as e:
         raise InternalServerProblem(detail=f"Failed to get MCP status: {str(e)}") from None

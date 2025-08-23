@@ -11,6 +11,7 @@ from chatter.schemas.prompt import (
     PromptCloneRequest,
     PromptCreate,
     PromptDeleteRequest,
+    PromptDeleteResponse,
     PromptGetRequest,
     PromptListRequest,
     PromptListResponse,
@@ -165,13 +166,13 @@ async def update_prompt(
         raise InternalServerProblem(detail="Failed to update prompt") from None
 
 
-@router.delete("/{prompt_id}")
+@router.delete("/{prompt_id}", response_model=PromptDeleteResponse)
 async def delete_prompt(
     prompt_id: str,
     request: PromptDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service),
-) -> dict:
+) -> PromptDeleteResponse:
     """Delete prompt.
 
     Args:
@@ -189,7 +190,7 @@ async def delete_prompt(
         if not success:
             raise NotFoundProblem(detail="Prompt not found", resource_type="prompt", resource_id=prompt_id) from None
 
-        return {"message": "Prompt deleted successfully"}
+        return PromptDeleteResponse(message="Prompt deleted successfully")
 
     except ProblemException:
         raise

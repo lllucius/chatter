@@ -1,7 +1,5 @@
 """Authentication endpoints."""
 
-from typing import Any
-
 from fastapi import APIRouter, Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession

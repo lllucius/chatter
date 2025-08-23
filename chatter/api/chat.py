@@ -11,6 +11,7 @@ from chatter.api.auth import get_current_user
 from chatter.core.chat import ChatError, ChatService, ConversationNotFoundError
 from chatter.models.user import User
 from chatter.schemas.chat import (
+    AvailableToolResponse,
     AvailableToolsRequest,
     AvailableToolsResponse,
     ChatRequest,
@@ -400,23 +401,23 @@ async def get_available_tools(
         # Add MCP tools
         for tool in mcp_tools:
             all_tools.append(
-                {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "type": "mcp",
-                    "args_schema": getattr(tool, "args_schema", {}),
-                }
+                AvailableToolResponse(
+                    name=tool.name,
+                    description=tool.description,
+                    type="mcp",
+                    args_schema=getattr(tool, "args_schema", {}),
+                )
             )
 
         # Add built-in tools
         for tool in builtin_tools:
             all_tools.append(
-                {
-                    "name": tool.name,
-                    "description": tool.description,
-                    "type": "builtin",
-                    "args_schema": getattr(tool, "args_schema", {}),
-                }
+                AvailableToolResponse(
+                    name=tool.name,
+                    description=tool.description,
+                    type="builtin",
+                    args_schema=getattr(tool, "args_schema", {}),
+                )
             )
 
         return AvailableToolsResponse(tools=all_tools)

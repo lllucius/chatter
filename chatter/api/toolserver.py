@@ -341,9 +341,16 @@ async def get_server_tools(
         List of server tools with pagination
     """
     try:
-        tools, total_count = await service.get_server_tools_paginated(server_id, request)
+        tools = await service.get_server_tools(server_id)
+        
+        # Apply pagination manually for now
+        total_count = len(tools)
+        start_index = request.offset
+        end_index = start_index + request.limit
+        paginated_tools = tools[start_index:end_index]
+        
         return ServerToolsResponse(
-            tools=tools, total_count=total_count, limit=request.limit, offset=request.offset
+            tools=paginated_tools, total_count=total_count, limit=request.limit, offset=request.offset
         )
     except Exception as e:
         logger.error("Failed to get server tools", server_id=server_id, error=str(e))

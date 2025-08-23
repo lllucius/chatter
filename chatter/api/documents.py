@@ -313,12 +313,16 @@ async def get_document_chunks(
         List of document chunks with pagination
     """
     try:
-        chunks, total_count = await document_service.get_document_chunks_paginated(
-            document_id, current_user.id, pagination
-        )
+        chunks = await document_service.get_document_chunks(document_id, current_user.id)
+        
+        # Apply pagination manually for now
+        total_count = len(chunks)
+        start_index = pagination.offset
+        end_index = start_index + pagination.limit
+        paginated_chunks = chunks[start_index:end_index]
 
         return DocumentChunksResponse(
-            chunks=[DocumentChunkResponse.model_validate(chunk) for chunk in chunks],
+            chunks=[DocumentChunkResponse.model_validate(chunk) for chunk in paginated_chunks],
             total_count=total_count,
             limit=pagination.limit,
             offset=pagination.offset,

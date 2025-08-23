@@ -30,7 +30,7 @@ class ReadinessCheckResponse(BaseModel):
     service: str = Field(..., description="Service name")
     version: str = Field(..., description="Service version")
     environment: str = Field(..., description="Environment")
-    checks: dict[str, DatabaseHealthCheck] = Field(..., description="Health check results")
+    checks: dict[str, Any] = Field(..., description="Health check results")
 
 
 class LivenessCheckResponse(BaseModel):

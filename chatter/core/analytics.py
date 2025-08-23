@@ -4,7 +4,7 @@ import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import and_, desc, func, select
+from sqlalchemy import and_, desc, func, literal, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import get_settings
@@ -55,7 +55,7 @@ class AnalyticsService:
                     and_(Conversation.user_id == user_id, time_filter)
                 )
             )
-            total_conversations = total_conversations_result.scalar()
+            total_conversations = total_conversations_result.scalar() or 0
 
             # Conversations by status
             status_result = await self.session.execute(
@@ -65,7 +65,7 @@ class AnalyticsService:
                 )
                 .group_by(Conversation.status)
             )
-            conversations_by_status = dict(status_result.all())
+            conversations_by_status = {status: count for status, count in status_result.all()}
 
             # Total messages
             total_messages_result = await self.session.execute(
@@ -76,7 +76,7 @@ class AnalyticsService:
                     and_(Conversation.user_id == user_id, time_filter)
                 )
             )
-            total_messages = total_messages_result.scalar()
+            total_messages = total_messages_result.scalar() or 0
 
             # Messages by role
             role_result = await self.session.execute(
@@ -113,11 +113,15 @@ class AnalyticsService:
             )
 
             token_stats = token_stats_result.first()
-            token_stats[0] or 0
-            token_stats[1] or 0
-            total_tokens = token_stats[2] or 0
-            total_cost = float(token_stats[3] or 0)
-            avg_response_time = float(token_stats[4] or 0)
+            if token_stats:
+                prompt_tokens = token_stats[0] or 0
+                completion_tokens = token_stats[1] or 0
+                total_tokens = token_stats[2] or 0
+                total_cost = float(token_stats[3] or 0)
+                avg_response_time = float(token_stats[4] or 0)
+            else:
+                prompt_tokens = completion_tokens = total_tokens = 0
+                total_cost = avg_response_time = 0.0
 
             # Conversations by date
             date_result = await self.session.execute(
@@ -1336,7 +1340,7 @@ class AnalyticsService:
             SQLAlchemy filter condition
         """
         if not time_range:
-            return True
+            return literal(True)
 
         # Get the appropriate table
         if table_alias == "Document":

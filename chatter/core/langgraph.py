@@ -35,7 +35,7 @@ class ConversationState(TypedDict):
 class LangGraphWorkflowManager:
     """Manager for LangGraph conversation workflows."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the workflow manager."""
         self.checkpointer = None
         self._setup_checkpointer()
@@ -277,7 +277,8 @@ class LangGraphWorkflowManager:
                 and last_message.tool_calls
             ):
                 return "execute_tools"
-            return END
+            end_result: str = str(END)
+            return end_result
 
         # Build workflow
         workflow = StateGraph(ConversationState)
@@ -314,7 +315,8 @@ class LangGraphWorkflowManager:
             result = await workflow.ainvoke(
                 initial_state, config=config
             )
-            return result
+            typed_result: ConversationState = result
+            return typed_result
         except Exception as e:
             logger.error(
                 "Workflow execution failed",
@@ -328,7 +330,7 @@ class LangGraphWorkflowManager:
         workflow: Pregel,
         initial_state: ConversationState,
         thread_id: str | None = None,
-    ):
+    ) -> Any:
         """Stream workflow execution for real-time updates."""
         if not thread_id:
             thread_id = str(uuid4())

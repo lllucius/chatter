@@ -35,7 +35,7 @@ class LLMProviderError(Exception):
 class LLMService:
     """Service for LLM interactions using LangChain."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize LLM service."""
         self._providers: dict[str, BaseChatModel] = {}
         self._initialize_providers()
@@ -367,7 +367,7 @@ class LLMService:
         provider_name: str,
         system_message: str | None = None,
         include_history: bool = True,
-    ):
+    ) -> Any:
         """Create a conversation chain using LangChain orchestrator."""
         provider = self.get_provider(provider_name)
         return orchestrator.create_chat_chain(
@@ -379,9 +379,9 @@ class LLMService:
     def create_rag_chain(
         self,
         provider_name: str,
-        retriever,
+        retriever: Any,
         system_message: str | None = None,
-    ):
+    ) -> Any:
         """Create a RAG chain using LangChain orchestrator."""
         provider = self.get_provider(provider_name)
         return orchestrator.create_rag_chain(

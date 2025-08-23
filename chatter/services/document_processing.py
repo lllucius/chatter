@@ -366,7 +366,7 @@ class DocumentProcessingService:
             data = json.loads(file_content.decode("utf-8"))
 
             # Extract text from JSON structure
-            def extract_text_from_json(obj):
+            def extract_text_from_json(obj: Any) -> str:
                 """Recursively extract text from JSON objects."""
                 if isinstance(obj, str):
                     return obj
@@ -384,7 +384,8 @@ class DocumentProcessingService:
                 else:
                     return str(obj)
 
-            return extract_text_from_json(data)
+            text_result: str = extract_text_from_json(data)
+            return text_result
 
         except Exception as e:
             logger.error("JSON text extraction failed", error=str(e))
@@ -488,7 +489,8 @@ class DocumentProcessingService:
                 chunk_overlap=document.chunk_overlap,
             )
 
-            return chunks
+            result_chunks: list[str] = chunks
+            return result_chunks
 
         except Exception as e:
             logger.error(

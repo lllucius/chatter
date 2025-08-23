@@ -42,7 +42,7 @@ class MCPServer:
 class MCPToolService:
     """Service for MCP tool calling integration."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize MCP tool service."""
         self.enabled = settings.mcp_enabled
         self.servers: dict[str, MCPServer] = {}

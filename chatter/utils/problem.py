@@ -127,7 +127,7 @@ class BadRequestProblem(ProblemException):
     def __init__(
         self,
         detail: str = "The request contains invalid data or parameters",
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -145,7 +145,7 @@ class ValidationProblem(ProblemException):
         self,
         detail: str = "The request contains invalid data",
         validation_errors: list[Any] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -161,7 +161,7 @@ class AuthenticationProblem(ProblemException):
     """Authentication error problem."""
 
     def __init__(
-        self, detail: str = "Authentication failed", **kwargs
+        self, detail: str = "Authentication failed", **kwargs: Any
     ) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -180,7 +180,7 @@ class AuthorizationProblem(ProblemException):
         self,
         detail: str = "Access denied",
         required_permissions: list[str] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -200,9 +200,9 @@ class NotFoundProblem(ProblemException):
         detail: str = "The requested resource was not found",
         resource_type: str | None = None,
         resource_id: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
-        extra_fields = {}
+        extra_fields: dict[str, Any] = {}
         if resource_type:
             extra_fields["resourceType"] = resource_type
         if resource_id:
@@ -225,9 +225,9 @@ class ConflictProblem(ProblemException):
         self,
         detail: str = "The request could not be completed due to a conflict",
         conflicting_resource: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
-        extra_fields = {}
+        extra_fields: dict[str, Any] = {}
         if conflicting_resource:
             extra_fields["conflictingResource"] = conflicting_resource
 
@@ -248,7 +248,7 @@ class RateLimitProblem(ProblemException):
         self,
         detail: str = "Rate limit exceeded",
         retry_after: int | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
         headers = {}
         if retry_after:
@@ -272,9 +272,9 @@ class InternalServerProblem(ProblemException):
         self,
         detail: str = "An internal server error occurred",
         error_id: str | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> None:
-        extra_fields = {}
+        extra_fields: dict[str, Any] = {}
         if error_id:
             extra_fields["errorId"] = error_id
 

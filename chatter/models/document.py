@@ -176,7 +176,8 @@ class Document(Base):
     @property
     def is_processed(self) -> bool:
         """Check if document is fully processed."""
-        return self.status == DocumentStatus.PROCESSED
+        processed: bool = self.status == DocumentStatus.PROCESSED
+        return processed
 
     @property
     def processing_duration(self) -> float | None:
@@ -186,7 +187,8 @@ class Document(Base):
                 self.processing_completed_at
                 - self.processing_started_at
             )
-            return delta.total_seconds()
+            duration: float = delta.total_seconds()
+            return duration
         return None
 
     def to_dict(self) -> dict[str, Any]:

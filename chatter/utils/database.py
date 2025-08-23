@@ -608,7 +608,7 @@ async def close_database() -> None:
 class DatabaseManager:
     """Context manager for database operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize database session context."""
         self.session: AsyncSession | None = None
 

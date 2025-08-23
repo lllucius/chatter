@@ -41,7 +41,7 @@ logger = get_logger(__name__)
 class EmbeddingService:
     """Service for generating text embeddings."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize embedding service."""
         self._providers: dict[str, Embeddings] = {}
         self._initialize_providers()

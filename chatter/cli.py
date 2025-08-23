@@ -1076,10 +1076,10 @@ def list_profiles(
 ) -> None:
     """List LLM profiles."""
 
-    async def _list():
+    async def _list() -> None:
         api_client = get_api_client()
         try:
-            params = {
+            params: dict[str, str | int | bool] = {
                 "limit": limit,
                 "offset": offset,
             }
@@ -1650,10 +1650,10 @@ def list_documents(
 ) -> None:
     """List uploaded documents."""
 
-    async def _list():
+    async def _list() -> None:
         api_client = get_api_client()
         try:
-            params = {"limit": limit, "offset": offset}
+            params: dict[str, str | int] = {"limit": limit, "offset": offset}
             if file_type:
                 params["file_type"] = file_type
 

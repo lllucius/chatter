@@ -17,7 +17,12 @@ from chatter.schemas.profile import (
     ProfileTestRequest,
     ProfileTestResponse,
     ProfileUpdate,
+    ProfileGetRequest,
+    ProfileDeleteRequest,
+    ProfileStatsRequest,
+    ProfileProvidersRequest,
 )
+from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
@@ -64,28 +69,18 @@ async def create_profile(
 
 @router.get("/", response_model=ProfileListResponse)
 async def list_profiles(
-    profile_type: str = None,
-    llm_provider: str = None,
-    tags: str = None,  # Comma-separated
-    is_public: bool = None,
-    limit: int = 50,
-    offset: int = 0,
-    sort_by: str = "created_at",
-    sort_order: str = "desc",
+    request: ProfileListRequest,
+    pagination: PaginationRequest = Depends(),
+    sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileListResponse:
     """List user's profiles.
 
     Args:
-        profile_type: Filter by profile type
-        llm_provider: Filter by LLM provider
-        tags: Filter by tags (comma-separated)
-        is_public: Filter by public status
-        limit: Maximum number of results
-        offset: Number of results to skip
-        sort_by: Sort field
-        sort_order: Sort order (asc/desc)
+        request: List request parameters
+        pagination: Pagination parameters
+        sorting: Sorting parameters
         current_user: Current authenticated user
         profile_service: Profile service
 
@@ -93,33 +88,16 @@ async def list_profiles(
         List of profiles with pagination info
     """
     try:
-        # Parse tags
-        parsed_tags = None
-        if tags:
-            parsed_tags = [tag.strip() for tag in tags.split(",") if tag.strip()]
-
-        # Create list request
-        list_request = ProfileListRequest(
-            profile_type=profile_type,
-            llm_provider=llm_provider,
-            tags=parsed_tags,
-            is_public=is_public,
-            limit=limit,
-            offset=offset,
-            sort_by=sort_by,
-            sort_order=sort_order,
-        )
-
         # Get profiles
         profiles, total_count = await profile_service.list_profiles(
-            current_user.id, list_request
+            current_user.id, request, pagination, sorting
         )
 
         return ProfileListResponse(
             profiles=[ProfileResponse.model_validate(profile) for profile in profiles],
             total_count=total_count,
-            limit=limit,
-            offset=offset,
+            limit=pagination.limit,
+            offset=pagination.offset,
         )
 
     except Exception as e:
@@ -132,6 +110,7 @@ async def list_profiles(
 @router.get("/{profile_id}", response_model=ProfileResponse)
 async def get_profile(
     profile_id: str,
+    request: ProfileGetRequest,
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileResponse:
@@ -139,6 +118,7 @@ async def get_profile(
 
     Args:
         profile_id: Profile ID
+        request: Get request parameters
         current_user: Current authenticated user
         profile_service: Profile service
 
@@ -214,6 +194,7 @@ async def update_profile(
 @router.delete("/{profile_id}")
 async def delete_profile(
     profile_id: str,
+    request: ProfileDeleteRequest,
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> dict:
@@ -221,6 +202,7 @@ async def delete_profile(
 
     Args:
         profile_id: Profile ID
+        request: Delete request parameters
         current_user: Current authenticated user
         profile_service: Profile service
 
@@ -326,12 +308,14 @@ async def clone_profile(
 
 @router.get("/stats/overview", response_model=ProfileStatsResponse)
 async def get_profile_stats(
+    request: ProfileStatsRequest,
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileStatsResponse:
     """Get profile statistics.
 
     Args:
+        request: Stats request parameters
         current_user: Current authenticated user
         profile_service: Profile service
 
@@ -365,12 +349,14 @@ async def get_profile_stats(
 
 @router.get("/providers/available")
 async def get_available_providers(
+    request: ProfileProvidersRequest,
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> dict:
     """Get available LLM providers.
 
     Args:
+        request: Providers request parameters
         current_user: Current authenticated user
         profile_service: Profile service
 

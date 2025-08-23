@@ -16,6 +16,13 @@ from chatter.schemas.analytics import (
     PerformanceMetricsResponse,
     SystemAnalyticsResponse,
     UsageMetricsResponse,
+    ConversationStatsRequest,
+    UsageMetricsRequest,
+    PerformanceMetricsRequest,
+    DocumentAnalyticsRequest,
+    SystemAnalyticsRequest,
+    DashboardRequest,
+    ToolServerAnalyticsRequest,
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
@@ -30,29 +37,16 @@ async def get_analytics_service(session: AsyncSession = Depends(get_session)) ->
     return AnalyticsService(session)
 
 
-def parse_time_range(
-    start_date: datetime | None = Query(None, description="Start date for analytics"),
-    end_date: datetime | None = Query(None, description="End date for analytics"),
-    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)")
-) -> AnalyticsTimeRange:
-    """Parse time range parameters."""
-    return AnalyticsTimeRange(
-        start_date=start_date,
-        end_date=end_date,
-        period=period
-    )
-
-
 @router.get("/conversations", response_model=ConversationStatsResponse)
 async def get_conversation_stats(
-    time_range: AnalyticsTimeRange = Depends(parse_time_range),
+    request: ConversationStatsRequest,
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> ConversationStatsResponse:
     """Get conversation statistics.
 
     Args:
-        time_range: Time range filter
+        request: Conversation stats request parameters
         current_user: Current authenticated user
         analytics_service: Analytics service
 
@@ -60,7 +54,7 @@ async def get_conversation_stats(
         Conversation statistics
     """
     try:
-        stats = await analytics_service.get_conversation_stats(current_user.id, time_range)
+        stats = await analytics_service.get_conversation_stats(current_user.id, request.time_range)
 
         return ConversationStatsResponse(
             total_conversations=stats.get("total_conversations", 0),
@@ -86,14 +80,14 @@ async def get_conversation_stats(
 
 @router.get("/usage", response_model=UsageMetricsResponse)
 async def get_usage_metrics(
-    time_range: AnalyticsTimeRange = Depends(parse_time_range),
+    request: UsageMetricsRequest,
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> UsageMetricsResponse:
     """Get usage metrics.
 
     Args:
-        time_range: Time range filter
+        request: Usage metrics request parameters
         current_user: Current authenticated user
         analytics_service: Analytics service
 
@@ -101,7 +95,7 @@ async def get_usage_metrics(
         Usage metrics
     """
     try:
-        metrics = await analytics_service.get_usage_metrics(current_user.id, time_range)
+        metrics = await analytics_service.get_usage_metrics(current_user.id, request.time_range)
 
         return UsageMetricsResponse(
             total_prompt_tokens=metrics.get("total_prompt_tokens", 0),
@@ -130,14 +124,14 @@ async def get_usage_metrics(
 
 @router.get("/performance", response_model=PerformanceMetricsResponse)
 async def get_performance_metrics(
-    time_range: AnalyticsTimeRange = Depends(parse_time_range),
+    request: PerformanceMetricsRequest,
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> PerformanceMetricsResponse:
     """Get performance metrics.
 
     Args:
-        time_range: Time range filter
+        request: Performance metrics request parameters
         current_user: Current authenticated user
         analytics_service: Analytics service
 
@@ -145,7 +139,7 @@ async def get_performance_metrics(
         Performance metrics
     """
     try:
-        metrics = await analytics_service.get_performance_metrics(current_user.id, time_range)
+        metrics = await analytics_service.get_performance_metrics(current_user.id, request.time_range)
 
         return PerformanceMetricsResponse(
             avg_response_time_ms=metrics.get("avg_response_time_ms", 0.0),
@@ -173,14 +167,14 @@ async def get_performance_metrics(
 
 @router.get("/documents", response_model=DocumentAnalyticsResponse)
 async def get_document_analytics(
-    time_range: AnalyticsTimeRange = Depends(parse_time_range),
+    request: DocumentAnalyticsRequest,
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> DocumentAnalyticsResponse:
     """Get document analytics.
 
     Args:
-        time_range: Time range filter
+        request: Document analytics request parameters
         current_user: Current authenticated user
         analytics_service: Analytics service
 
@@ -188,7 +182,7 @@ async def get_document_analytics(
         Document analytics
     """
     try:
-        analytics = await analytics_service.get_document_analytics(current_user.id, time_range)
+        analytics = await analytics_service.get_document_analytics(current_user.id, request.time_range)
 
         return DocumentAnalyticsResponse(
             total_documents=analytics.get("total_documents", 0),
@@ -218,12 +212,14 @@ async def get_document_analytics(
 
 @router.get("/system", response_model=SystemAnalyticsResponse)
 async def get_system_analytics(
+    request: SystemAnalyticsRequest,
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> SystemAnalyticsResponse:
     """Get system analytics.
 
     Args:
+        request: System analytics request parameters
         current_user: Current authenticated user
         analytics_service: Analytics service
 
@@ -260,14 +256,14 @@ async def get_system_analytics(
 
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
-    time_range: AnalyticsTimeRange = Depends(parse_time_range),
+    request: DashboardRequest,
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> DashboardResponse:
     """Get comprehensive dashboard data.
 
     Args:
-        time_range: Time range filter
+        request: Dashboard request parameters
         current_user: Current authenticated user
         analytics_service: Analytics service
 
@@ -275,7 +271,7 @@ async def get_dashboard(
         Complete dashboard data
     """
     try:
-        dashboard_data = await analytics_service.get_dashboard_data(current_user.id, time_range)
+        dashboard_data = await analytics_service.get_dashboard_data(current_user.id, request.time_range)
 
         return DashboardResponse(
             conversation_stats=ConversationStatsResponse(**dashboard_data.get("conversation_stats", {})),
@@ -296,14 +292,14 @@ async def get_dashboard(
 
 @router.get("/toolservers")
 async def get_tool_server_analytics(
-    time_range: AnalyticsTimeRange = Depends(parse_time_range),
+    request: ToolServerAnalyticsRequest,
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> dict:
     """Get tool server analytics.
 
     Args:
-        time_range: Time range for analytics
+        request: Tool server analytics request parameters
         current_user: Current authenticated user
         analytics_service: Analytics service
 
@@ -311,7 +307,7 @@ async def get_tool_server_analytics(
         Tool server analytics data
     """
     try:
-        return await analytics_service.get_tool_server_analytics(current_user.id, time_range)
+        return await analytics_service.get_tool_server_analytics(current_user.id, request.time_range)
 
     except Exception as e:
         logger.error("Failed to get tool server analytics", error=str(e))

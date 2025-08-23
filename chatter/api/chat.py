@@ -20,7 +20,13 @@ from chatter.schemas.chat import (
     ConversationUpdate,
     ConversationWithMessages,
     MessageResponse,
+    ConversationGetRequest,
+    ConversationDeleteRequest,
+    ConversationMessagesRequest,
+    AvailableToolsRequest,
+    McpStatusRequest,
 )
+from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.services.llm import LLMService
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
@@ -71,14 +77,18 @@ async def create_conversation(
 
 @router.get("/conversations", response_model=ConversationSearchResponse)
 async def list_conversations(
-    search: ConversationSearchRequest = Depends(),
+    request: ConversationSearchRequest,
+    pagination: PaginationRequest = Depends(),
+    sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ConversationSearchResponse:
     """List user's conversations.
 
     Args:
-        search: Search parameters
+        request: Search request parameters
+        pagination: Pagination parameters
+        sorting: Sorting parameters
         current_user: Current authenticated user
         chat_service: Chat service
 
@@ -87,21 +97,23 @@ async def list_conversations(
     """
     conversations, total = await chat_service.list_conversations(
         current_user.id,
-        limit=search.limit,
-        offset=search.offset
+        request,
+        pagination,
+        sorting
     )
 
     return ConversationSearchResponse(
         conversations=[ConversationResponse.model_validate(c) for c in conversations],
         total=total,
-        limit=search.limit,
-        offset=search.offset
+        limit=pagination.limit,
+        offset=pagination.offset
     )
 
 
 @router.get("/conversations/{conversation_id}", response_model=ConversationWithMessages)
 async def get_conversation(
     conversation_id: str,
+    request: ConversationGetRequest,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ConversationWithMessages:
@@ -109,6 +121,7 @@ async def get_conversation(
 
     Args:
         conversation_id: Conversation ID
+        request: Get request parameters
         current_user: Current authenticated user
         chat_service: Chat service
 
@@ -172,6 +185,7 @@ async def update_conversation(
 @router.delete("/conversations/{conversation_id}")
 async def delete_conversation(
     conversation_id: str,
+    request: ConversationDeleteRequest,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service)
 ) -> dict:
@@ -179,6 +193,7 @@ async def delete_conversation(
 
     Args:
         conversation_id: Conversation ID
+        request: Delete request parameters
         current_user: Current authenticated user
         chat_service: Chat service
 
@@ -198,6 +213,7 @@ async def delete_conversation(
 @router.get("/conversations/{conversation_id}/messages", response_model=list[MessageResponse])
 async def get_conversation_messages(
     conversation_id: str,
+    request: ConversationMessagesRequest,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service)
 ) -> list[MessageResponse]:
@@ -205,6 +221,7 @@ async def get_conversation_messages(
 
     Args:
         conversation_id: Conversation ID
+        request: Messages request parameters
         current_user: Current authenticated user
         chat_service: Chat service
 
@@ -409,11 +426,13 @@ async def create_tools_workflow(
 
 @router.get("/tools/available")
 async def get_available_tools(
+    request: AvailableToolsRequest,
     current_user: User = Depends(get_current_user)
 ) -> list[dict[str, Any]]:
     """Get list of available MCP tools.
 
     Args:
+        request: Available tools request parameters
         current_user: Current authenticated user
 
     Returns:
@@ -457,11 +476,13 @@ async def get_available_tools(
 
 @router.get("/mcp/status")
 async def get_mcp_status(
+    request: McpStatusRequest,
     current_user: User = Depends(get_current_user)
 ) -> dict[str, Any]:
     """Get MCP service status.
 
     Args:
+        request: MCP status request parameters
         current_user: Current authenticated user
 
     Returns:

@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime, timedelta
 
-from fastapi import HTTPException, status
+from fastapi import status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,6 +13,7 @@ from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     AuthenticationProblem,
     AuthorizationProblem,
+    BadRequestProblem,
     ConflictProblem,
     NotFoundProblem
 )
@@ -69,20 +70,16 @@ class AuthService:
         """
         # Validate email format
         if not validate_email(user_data.email):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+            raise BadRequestProblem(
                 detail="Invalid email format"
             )
 
         # Validate password strength
         password_validation = validate_password_strength(user_data.password)
         if not password_validation["valid"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "message": "Password does not meet requirements",
-                    "errors": password_validation["errors"]
-                }
+            raise BadRequestProblem(
+                detail="Password does not meet requirements",
+                errors=password_validation["errors"]
             )
 
         # Check if user already exists
@@ -250,12 +247,9 @@ class AuthService:
         # Validate new password
         password_validation = validate_password_strength(new_password)
         if not password_validation["valid"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "message": "New password does not meet requirements",
-                    "errors": password_validation["errors"]
-                }
+            raise BadRequestProblem(
+                detail="New password does not meet requirements",
+                errors=password_validation["errors"]
             )
 
         # Update password

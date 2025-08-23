@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -39,7 +39,7 @@ async def get_analytics_service(session: AsyncSession = Depends(get_session)) ->
 
 @router.get("/conversations", response_model=ConversationStatsResponse)
 async def get_conversation_stats(
-    request: ConversationStatsRequest,
+    request: ConversationStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> ConversationStatsResponse:
@@ -80,10 +80,11 @@ async def get_conversation_stats(
 
 @router.get("/usage", response_model=UsageMetricsResponse)
 async def get_usage_metrics(
-    request: UsageMetricsRequest,
+    request: UsageMetricsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> UsageMetricsResponse:
+
     """Get usage metrics.
 
     Args:
@@ -124,7 +125,7 @@ async def get_usage_metrics(
 
 @router.get("/performance", response_model=PerformanceMetricsResponse)
 async def get_performance_metrics(
-    request: PerformanceMetricsRequest,
+    request: PerformanceMetricsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> PerformanceMetricsResponse:
@@ -167,7 +168,7 @@ async def get_performance_metrics(
 
 @router.get("/documents", response_model=DocumentAnalyticsResponse)
 async def get_document_analytics(
-    request: DocumentAnalyticsRequest,
+    request: DocumentAnalyticsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> DocumentAnalyticsResponse:
@@ -212,7 +213,7 @@ async def get_document_analytics(
 
 @router.get("/system", response_model=SystemAnalyticsResponse)
 async def get_system_analytics(
-    request: SystemAnalyticsRequest,
+    request: SystemAnalyticsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> SystemAnalyticsResponse:
@@ -256,7 +257,7 @@ async def get_system_analytics(
 
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
-    request: DashboardRequest,
+    request: DashboardRequest = Depends(),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> DashboardResponse:
@@ -292,7 +293,7 @@ async def get_dashboard(
 
 @router.get("/toolservers")
 async def get_tool_server_analytics(
-    request: ToolServerAnalyticsRequest,
+    request: ToolServerAnalyticsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service)
 ) -> dict:

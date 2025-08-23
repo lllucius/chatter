@@ -67,7 +67,7 @@ async def create_prompt(
 
 @router.get("/", response_model=PromptListResponse)
 async def list_prompts(
-    request: PromptListRequest,
+    request: PromptListRequest = Depends(),
     pagination: PaginationRequest = Depends(),
     sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
@@ -108,7 +108,7 @@ async def list_prompts(
 @router.get("/{prompt_id}", response_model=PromptResponse)
 async def get_prompt(
     prompt_id: str,
-    request: PromptGetRequest,
+    request: PromptGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service)
 ) -> PromptResponse:
@@ -192,7 +192,7 @@ async def update_prompt(
 @router.delete("/{prompt_id}")
 async def delete_prompt(
     prompt_id: str,
-    request: PromptDeleteRequest,
+    request: PromptDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service)
 ) -> dict:
@@ -306,7 +306,7 @@ async def clone_prompt(
 
 @router.get("/stats/overview", response_model=PromptStatsResponse)
 async def get_prompt_stats(
-    request: PromptStatsRequest,
+    request: PromptStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service)
 ) -> PromptStatsResponse:

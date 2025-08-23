@@ -69,7 +69,7 @@ async def create_profile(
 
 @router.get("/", response_model=ProfileListResponse)
 async def list_profiles(
-    request: ProfileListRequest,
+    request: ProfileListRequest = Depends(),
     pagination: PaginationRequest = Depends(),
     sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
@@ -110,7 +110,7 @@ async def list_profiles(
 @router.get("/{profile_id}", response_model=ProfileResponse)
 async def get_profile(
     profile_id: str,
-    request: ProfileGetRequest,
+    request: ProfileGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileResponse:
@@ -194,7 +194,7 @@ async def update_profile(
 @router.delete("/{profile_id}")
 async def delete_profile(
     profile_id: str,
-    request: ProfileDeleteRequest,
+    request: ProfileDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> dict:
@@ -308,7 +308,7 @@ async def clone_profile(
 
 @router.get("/stats/overview", response_model=ProfileStatsResponse)
 async def get_profile_stats(
-    request: ProfileStatsRequest,
+    request: ProfileStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> ProfileStatsResponse:
@@ -349,7 +349,7 @@ async def get_profile_stats(
 
 @router.get("/providers/available")
 async def get_available_providers(
-    request: ProfileProvidersRequest,
+    request: ProfileProvidersRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service)
 ) -> dict:

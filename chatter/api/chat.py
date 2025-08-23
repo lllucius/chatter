@@ -77,7 +77,7 @@ async def create_conversation(
 
 @router.get("/conversations", response_model=ConversationSearchResponse)
 async def list_conversations(
-    request: ConversationSearchRequest,
+    request: ConversationSearchRequest = Depends(),
     pagination: PaginationRequest = Depends(),
     sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
@@ -113,7 +113,7 @@ async def list_conversations(
 @router.get("/conversations/{conversation_id}", response_model=ConversationWithMessages)
 async def get_conversation(
     conversation_id: str,
-    request: ConversationGetRequest,
+    request: ConversationGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service)
 ) -> ConversationWithMessages:
@@ -185,7 +185,7 @@ async def update_conversation(
 @router.delete("/conversations/{conversation_id}")
 async def delete_conversation(
     conversation_id: str,
-    request: ConversationDeleteRequest,
+    request: ConversationDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service)
 ) -> dict:
@@ -213,7 +213,7 @@ async def delete_conversation(
 @router.get("/conversations/{conversation_id}/messages", response_model=list[MessageResponse])
 async def get_conversation_messages(
     conversation_id: str,
-    request: ConversationMessagesRequest,
+    request: ConversationMessagesRequest = Depends(),
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service)
 ) -> list[MessageResponse]:
@@ -426,7 +426,7 @@ async def create_tools_workflow(
 
 @router.get("/tools/available")
 async def get_available_tools(
-    request: AvailableToolsRequest,
+    request: AvailableToolsRequest = Depends(),
     current_user: User = Depends(get_current_user)
 ) -> list[dict[str, Any]]:
     """Get list of available MCP tools.
@@ -476,7 +476,7 @@ async def get_available_tools(
 
 @router.get("/mcp/status")
 async def get_mcp_status(
-    request: McpStatusRequest,
+    request: McpStatusRequest = Depends(),
     current_user: User = Depends(get_current_user)
 ) -> dict[str, Any]:
     """Get MCP service status.

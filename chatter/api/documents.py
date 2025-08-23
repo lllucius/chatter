@@ -107,7 +107,7 @@ async def upload_document(
 
 @router.get("/", response_model=DocumentListResponse)
 async def list_documents(
-    request: DocumentListRequest,
+    request: DocumentListRequest = Depends(),
     pagination: PaginationRequest = Depends(),
     sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
@@ -148,7 +148,7 @@ async def list_documents(
 @router.get("/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: str,
-    request: DocumentGetRequest,
+    request: DocumentGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentResponse:
@@ -229,7 +229,7 @@ async def update_document(
 @router.delete("/{document_id}")
 async def delete_document(
     document_id: str,
-    request: DocumentDeleteRequest,
+    request: DocumentDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
 ) -> dict:
@@ -317,7 +317,7 @@ async def search_documents(
 @router.get("/{document_id}/chunks", response_model=list[DocumentChunkResponse])
 async def get_document_chunks(
     document_id: str,
-    request: DocumentGetRequest,
+    request: DocumentGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
 ) -> list[DocumentChunkResponse]:
@@ -392,7 +392,7 @@ async def process_document(
 
 @router.get("/stats/overview", response_model=DocumentStatsResponse)
 async def get_document_stats(
-    request: DocumentStatsRequest,
+    request: DocumentStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentStatsResponse:

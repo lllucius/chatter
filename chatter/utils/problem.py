@@ -52,7 +52,7 @@ class ProblemException(HTTPException):
         instance: str | None = None,
         headers: dict[str, Any] | None = None,
         **extra_fields: Any
-    ):
+    ) -> None:
         """Initialize a problem exception.
 
         Args:
@@ -107,7 +107,7 @@ class ProblemException(HTTPException):
             content=problem.model_dump(exclude_none=True),
             headers={
                 "Content-Type": "application/problem+json",
-                **(self.headers or {})
+                **dict(self.headers or {})
             }
         )
 
@@ -120,7 +120,7 @@ class BadRequestProblem(ProblemException):
         self,
         detail: str = "The request contains invalid data or parameters",
         **kwargs
-    ):
+    ) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             title="Bad Request",
@@ -136,9 +136,9 @@ class ValidationProblem(ProblemException):
     def __init__(
         self,
         detail: str = "The request contains invalid data",
-        validation_errors: list | None = None,
+        validation_errors: list[Any] | None = None,
         **kwargs
-    ):
+    ) -> None:
         super().__init__(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             title="Validation Failed",
@@ -156,7 +156,7 @@ class AuthenticationProblem(ProblemException):
         self,
         detail: str = "Authentication failed",
         **kwargs
-    ):
+    ) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             title="Authentication Required",
@@ -173,9 +173,9 @@ class AuthorizationProblem(ProblemException):
     def __init__(
         self,
         detail: str = "Access denied",
-        required_permissions: list | None = None,
+        required_permissions: list[str] | None = None,
         **kwargs
-    ):
+    ) -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             title="Access Forbidden",
@@ -195,7 +195,7 @@ class NotFoundProblem(ProblemException):
         resource_type: str | None = None,
         resource_id: str | None = None,
         **kwargs
-    ):
+    ) -> None:
         extra_fields = {}
         if resource_type:
             extra_fields["resourceType"] = resource_type
@@ -220,7 +220,7 @@ class ConflictProblem(ProblemException):
         detail: str = "The request could not be completed due to a conflict",
         conflicting_resource: str | None = None,
         **kwargs
-    ):
+    ) -> None:
         extra_fields = {}
         if conflicting_resource:
             extra_fields["conflictingResource"] = conflicting_resource
@@ -243,7 +243,7 @@ class RateLimitProblem(ProblemException):
         detail: str = "Rate limit exceeded",
         retry_after: int | None = None,
         **kwargs
-    ):
+    ) -> None:
         headers = {}
         if retry_after:
             headers["Retry-After"] = str(retry_after)
@@ -267,7 +267,7 @@ class InternalServerProblem(ProblemException):
         detail: str = "An internal server error occurred",
         error_id: str | None = None,
         **kwargs
-    ):
+    ) -> None:
         extra_fields = {}
         if error_id:
             extra_fields["errorId"] = error_id

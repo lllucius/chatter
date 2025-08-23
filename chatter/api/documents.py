@@ -103,12 +103,12 @@ async def upload_document(
     except DocumentError as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
     except Exception as e:
         logger.error("Document upload failed", error=str(e))
         raise InternalServerProblem(
             detail="Failed to upload document"
-        )
+        ) from None
 
 
 @router.get("/", response_model=DocumentListResponse)
@@ -148,7 +148,7 @@ async def list_documents(
         logger.error("Failed to list documents", error=str(e))
         raise InternalServerProblem(
             detail="Failed to list documents"
-        )
+        ) from None
 
 
 @router.get("/{document_id}", response_model=DocumentResponse)
@@ -177,7 +177,7 @@ async def get_document(
                 detail="Document not found",
                 resource_type="document",
                 resource_id=document_id
-            )
+            ) from None
 
         return DocumentResponse.model_validate(document)
 
@@ -188,7 +188,7 @@ async def get_document(
         raise InternalServerProblem(
             detail="Failed to get document",
             error_id=document_id
-        )
+        ) from None
 
 
 @router.put("/{document_id}", response_model=DocumentResponse)
@@ -219,7 +219,7 @@ async def update_document(
                 detail="Document not found",
                 resource_type="document",
                 resource_id=document_id
-            )
+            ) from None
 
         return DocumentResponse.model_validate(document)
 
@@ -229,7 +229,7 @@ async def update_document(
         logger.error("Failed to update document", document_id=document_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to update document"
-        )
+        ) from None
 
 
 @router.delete("/{document_id}")
@@ -258,7 +258,7 @@ async def delete_document(
                 detail="Document not found",
                 resource_type="document",
                 resource_id=document_id
-            )
+            ) from None
 
         return {"message": "Document deleted successfully"}
 
@@ -268,7 +268,7 @@ async def delete_document(
         logger.error("Failed to delete document", document_id=document_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to delete document"
-        )
+        ) from None
 
 
 @router.post("/search", response_model=DocumentSearchResponse)
@@ -317,7 +317,7 @@ async def search_documents(
         logger.error("Document search failed", error=str(e))
         raise InternalServerProblem(
             detail="Document search failed"
-        )
+        ) from None
 
 
 @router.get("/{document_id}/chunks", response_model=list[DocumentChunkResponse])
@@ -347,7 +347,7 @@ async def get_document_chunks(
         logger.error("Failed to get document chunks", document_id=document_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to get document chunks"
-        )
+        ) from None
 
 
 @router.post("/{document_id}/process", response_model=DocumentProcessingResponse)
@@ -378,7 +378,7 @@ async def process_document(
                 detail="Document not found or processing failed",
                 resource_type="document",
                 resource_id=document_id
-            )
+            ) from None
 
         return DocumentProcessingResponse(
             document_id=document_id,
@@ -393,7 +393,7 @@ async def process_document(
         logger.error("Failed to process document", document_id=document_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to process document"
-        )
+        ) from None
 
 
 @router.get("/stats/overview", response_model=DocumentStatsResponse)
@@ -428,4 +428,4 @@ async def get_document_stats(
         logger.error("Failed to get document stats", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get document stats"
-        )
+        ) from None

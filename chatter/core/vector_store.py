@@ -105,7 +105,7 @@ class PGVectorStore(AbstractVectorStore):
             logger.info("PGVector store initialized", collection=self.collection_name)
         except Exception as e:
             logger.error("Failed to initialize PGVector store", error=str(e))
-            raise VectorStoreError(f"PGVector initialization failed: {str(e)}")
+            raise VectorStoreError(f"PGVector initialization failed: {str(e)}") from e
 
     async def add_documents(
         self,
@@ -131,7 +131,7 @@ class PGVectorStore(AbstractVectorStore):
                 )
         except Exception as e:
             logger.error("Failed to add documents to PGVector", error=str(e))
-            raise VectorStoreError(f"Add documents failed: {str(e)}")
+            raise VectorStoreError(f"Add documents failed: {str(e)}") from e
 
     async def similarity_search(
         self,
@@ -151,7 +151,7 @@ class PGVectorStore(AbstractVectorStore):
             )
         except Exception as e:
             logger.error("Similarity search failed", error=str(e))
-            raise VectorStoreError(f"Similarity search failed: {str(e)}")
+            raise VectorStoreError(f"Similarity search failed: {str(e)}") from e
 
     async def similarity_search_with_score(
         self,
@@ -171,7 +171,7 @@ class PGVectorStore(AbstractVectorStore):
             )
         except Exception as e:
             logger.error("Similarity search with score failed", error=str(e))
-            raise VectorStoreError(f"Similarity search with score failed: {str(e)}")
+            raise VectorStoreError(f"Similarity search with score failed: {str(e)}") from e
 
     async def delete(self, ids: list[str]) -> bool:
         """Delete documents by IDs."""
@@ -179,7 +179,7 @@ class PGVectorStore(AbstractVectorStore):
             return await asyncio.to_thread(self._store.delete, ids)
         except Exception as e:
             logger.error("Delete documents failed", error=str(e))
-            raise VectorStoreError(f"Delete failed: {str(e)}")
+            raise VectorStoreError(f"Delete failed: {str(e)}") from e
 
     async def update_documents(
         self,
@@ -194,7 +194,7 @@ class PGVectorStore(AbstractVectorStore):
             return True
         except Exception as e:
             logger.error("Update documents failed", error=str(e))
-            raise VectorStoreError(f"Update failed: {str(e)}")
+            raise VectorStoreError(f"Update failed: {str(e)}") from e
 
     def as_retriever(self, **kwargs) -> Any:
         """Get retriever interface."""
@@ -230,7 +230,7 @@ class ChromaVectorStore(AbstractVectorStore):
             logger.info("Chroma store initialized", collection=self.collection_name)
         except Exception as e:
             logger.error("Failed to initialize Chroma store", error=str(e))
-            raise VectorStoreError(f"Chroma initialization failed: {str(e)}")
+            raise VectorStoreError(f"Chroma initialization failed: {str(e)}") from e
 
     async def add_documents(
         self,
@@ -248,7 +248,7 @@ class ChromaVectorStore(AbstractVectorStore):
             )
         except Exception as e:
             logger.error("Failed to add documents to Chroma", error=str(e))
-            raise VectorStoreError(f"Add documents failed: {str(e)}")
+            raise VectorStoreError(f"Add documents failed: {str(e)}") from e
 
     async def similarity_search(
         self,
@@ -268,7 +268,7 @@ class ChromaVectorStore(AbstractVectorStore):
             )
         except Exception as e:
             logger.error("Similarity search failed", error=str(e))
-            raise VectorStoreError(f"Similarity search failed: {str(e)}")
+            raise VectorStoreError(f"Similarity search failed: {str(e)}") from e
 
     async def similarity_search_with_score(
         self,
@@ -288,7 +288,7 @@ class ChromaVectorStore(AbstractVectorStore):
             )
         except Exception as e:
             logger.error("Similarity search with score failed", error=str(e))
-            raise VectorStoreError(f"Similarity search with score failed: {str(e)}")
+            raise VectorStoreError(f"Similarity search with score failed: {str(e)}") from e
 
     async def delete(self, ids: list[str]) -> bool:
         """Delete documents by IDs."""
@@ -297,7 +297,7 @@ class ChromaVectorStore(AbstractVectorStore):
             return True
         except Exception as e:
             logger.error("Delete documents failed", error=str(e))
-            raise VectorStoreError(f"Delete failed: {str(e)}")
+            raise VectorStoreError(f"Delete failed: {str(e)}") from e
 
     async def update_documents(
         self,
@@ -312,7 +312,7 @@ class ChromaVectorStore(AbstractVectorStore):
             return True
         except Exception as e:
             logger.error("Update documents failed", error=str(e))
-            raise VectorStoreError(f"Update failed: {str(e)}")
+            raise VectorStoreError(f"Update failed: {str(e)}") from e
 
     def as_retriever(self, **kwargs) -> Any:
         """Get retriever interface."""

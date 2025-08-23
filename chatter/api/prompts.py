@@ -57,12 +57,12 @@ async def create_prompt(
     except PromptError as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
     except Exception as e:
         logger.error("Prompt creation failed", error=str(e))
         raise InternalServerProblem(
             detail="Failed to create prompt"
-        )
+        ) from None
 
 
 @router.get("/", response_model=PromptListResponse)
@@ -102,7 +102,7 @@ async def list_prompts(
         logger.error("Failed to list prompts", error=str(e))
         raise InternalServerProblem(
             detail="Failed to list prompts"
-        )
+        ) from None
 
 
 @router.get("/{prompt_id}", response_model=PromptResponse)
@@ -131,7 +131,7 @@ async def get_prompt(
             detail="Prompt not found",
             resource_type="prompt",
             resource_id=prompt_id
-        )
+        ) from None
 
         return PromptResponse.model_validate(prompt)
 
@@ -141,7 +141,7 @@ async def get_prompt(
         logger.error("Failed to get prompt", prompt_id=prompt_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to get prompt"
-        )
+        ) from None
 
 
 @router.put("/{prompt_id}", response_model=PromptResponse)
@@ -172,21 +172,21 @@ async def update_prompt(
             detail="Prompt not found",
             resource_type="prompt",
             resource_id=prompt_id
-        )
+        ) from None
 
         return PromptResponse.model_validate(prompt)
 
     except PromptError as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
     except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to update prompt", prompt_id=prompt_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to update prompt"
-        )
+        ) from None
 
 
 @router.delete("/{prompt_id}")
@@ -215,7 +215,7 @@ async def delete_prompt(
             detail="Prompt not found",
             resource_type="prompt",
             resource_id=prompt_id
-        )
+        ) from None
 
         return {"message": "Prompt deleted successfully"}
 
@@ -225,7 +225,7 @@ async def delete_prompt(
         logger.error("Failed to delete prompt", prompt_id=prompt_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to delete prompt"
-        )
+        ) from None
 
 
 @router.post("/{prompt_id}/test", response_model=PromptTestResponse)
@@ -256,12 +256,12 @@ async def test_prompt(
     except PromptError as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
     except Exception as e:
         logger.error("Prompt test failed", prompt_id=prompt_id, error=str(e))
         raise InternalServerProblem(
             detail="Prompt test failed"
-        )
+        ) from None
 
 
 @router.post("/{prompt_id}/clone", response_model=PromptResponse)
@@ -296,12 +296,12 @@ async def clone_prompt(
     except PromptError as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
     except Exception as e:
         logger.error("Prompt cloning failed", prompt_id=prompt_id, error=str(e))
         raise InternalServerProblem(
             detail="Prompt cloning failed"
-        )
+        ) from None
 
 
 @router.get("/stats/overview", response_model=PromptStatsResponse)
@@ -342,4 +342,4 @@ async def get_prompt_stats(
         logger.error("Failed to get prompt stats", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get prompt stats"
-        )
+        ) from None

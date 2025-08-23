@@ -78,7 +78,7 @@ class LLMService:
             available = list(self._providers.keys())
             raise LLMProviderError(
                 f"Provider '{provider_name}' not available. Available providers: {available}"
-            )
+            ) from None
 
         return self._providers[provider_name]
 
@@ -226,7 +226,7 @@ class LLMService:
 
         except Exception as e:
             logger.error("LLM generation failed", error=str(e), provider=provider.__class__.__name__)
-            raise LLMProviderError(f"Generation failed: {str(e)}")
+            raise LLMProviderError(f"Generation failed: {str(e)}") from e
 
     async def generate_streaming_response(
         self,
@@ -390,7 +390,7 @@ class LLMService:
 
         except Exception as e:
             logger.error("LLM generation with tools failed", error=str(e), provider=provider.__class__.__name__)
-            raise LLMProviderError(f"Generation with tools failed: {str(e)}")
+            raise LLMProviderError(f"Generation with tools failed: {str(e)}") from e
 
     async def create_langgraph_workflow(
         self,

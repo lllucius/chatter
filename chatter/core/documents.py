@@ -148,7 +148,7 @@ class DocumentService:
             raise
         except Exception as e:
             logger.error("Document creation failed", error=str(e))
-            raise DocumentError(f"Failed to create document: {str(e)}")
+            raise DocumentError(f"Failed to create document: {str(e)}") from e
 
     async def get_document(self, document_id: str, user_id: str) -> Document | None:
         """Get document by ID with access control.

@@ -230,7 +230,7 @@ class EmbeddingService:
                 text_length=len(text),
                 error=str(e)
             )
-            raise EmbeddingError(f"Failed to generate embedding: {str(e)}")
+            raise EmbeddingError(f"Failed to generate embedding: {str(e)}") from e
 
     async def generate_embeddings(
         self,
@@ -304,7 +304,7 @@ class EmbeddingService:
                 text_count=len(texts),
                 error=str(e)
             )
-            raise EmbeddingError(f"Failed to generate embeddings: {str(e)}")
+            raise EmbeddingError(f"Failed to generate embeddings: {str(e)}") from e
 
     def _get_provider_name(self, provider: Embeddings) -> str:
         """Get provider name from provider instance."""

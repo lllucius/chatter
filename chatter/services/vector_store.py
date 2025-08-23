@@ -7,8 +7,8 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
-    from pgvector.sqlalchemy import Vector
-    from sqlalchemy import text
+    from pgvector.sqlalchemy import Vector  # noqa: F401
+    from sqlalchemy import text  # noqa: F401
     PGVECTOR_AVAILABLE = True
 except ImportError:
     PGVECTOR_AVAILABLE = False

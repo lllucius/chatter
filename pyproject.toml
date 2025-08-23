@@ -162,6 +162,10 @@ ignore = [
 [tool.ruff.lint.pyupgrade]
 keep-runtime-typing = true
 
+[tool.ruff.lint.per-file-ignores]
+"chatter/schemas/__init__.py" = ["F405"]  # Allow star imports for convenience re-export module
+"chatter/models/*.py" = ["F821"]  # Allow forward references in SQLAlchemy models
+
 [tool.black]
 target-version = ["py311"]
 line-length = 120

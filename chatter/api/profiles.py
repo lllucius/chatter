@@ -59,12 +59,12 @@ async def create_profile(
     except ProfileError as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
     except Exception as e:
         logger.error("Profile creation failed", error=str(e))
         raise InternalServerProblem(
             detail="Failed to create profile"
-        )
+        ) from None
 
 
 @router.get("/", response_model=ProfileListResponse)
@@ -104,7 +104,7 @@ async def list_profiles(
         logger.error("Failed to list profiles", error=str(e))
         raise InternalServerProblem(
             detail="Failed to list profiles"
-        )
+        ) from None
 
 
 @router.get("/{profile_id}", response_model=ProfileResponse)
@@ -133,7 +133,7 @@ async def get_profile(
                 detail="Profile not found",
                 resource_type="profile",
                 resource_id=profile_id
-            )
+            ) from None
 
         return ProfileResponse.model_validate(profile)
 
@@ -143,7 +143,7 @@ async def get_profile(
         logger.error("Failed to get profile", profile_id=profile_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to get profile"
-        )
+        ) from None
 
 
 @router.put("/{profile_id}", response_model=ProfileResponse)
@@ -174,21 +174,21 @@ async def update_profile(
                 detail="Profile not found",
                 resource_type="profile",
                 resource_id=profile_id
-            )
+            ) from None
 
         return ProfileResponse.model_validate(profile)
 
     except ProfileError as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
     except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to update profile", profile_id=profile_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to update profile"
-        )
+        ) from None
 
 
 @router.delete("/{profile_id}")
@@ -217,7 +217,7 @@ async def delete_profile(
                 detail="Profile not found",
                 resource_type="profile",
                 resource_id=profile_id
-            )
+            ) from None
 
         return {"message": "Profile deleted successfully"}
 
@@ -227,7 +227,7 @@ async def delete_profile(
         logger.error("Failed to delete profile", profile_id=profile_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to delete profile"
-        )
+        ) from None
 
 
 @router.post("/{profile_id}/test", response_model=ProfileTestResponse)
@@ -258,12 +258,12 @@ async def test_profile(
     except ProfileError as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
     except Exception as e:
         logger.error("Profile test failed", profile_id=profile_id, error=str(e))
         raise InternalServerProblem(
             detail="Profile test failed"
-        )
+        ) from None
 
 
 @router.post("/{profile_id}/clone", response_model=ProfileResponse)
@@ -298,12 +298,12 @@ async def clone_profile(
     except ProfileError as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
     except Exception as e:
         logger.error("Profile cloning failed", profile_id=profile_id, error=str(e))
         raise InternalServerProblem(
             detail="Profile cloning failed"
-        )
+        ) from None
 
 
 @router.get("/stats/overview", response_model=ProfileStatsResponse)
@@ -344,7 +344,7 @@ async def get_profile_stats(
         logger.error("Failed to get profile stats", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get profile stats"
-        )
+        ) from None
 
 
 @router.get("/providers/available")
@@ -371,4 +371,4 @@ async def get_available_providers(
         logger.error("Failed to get available providers", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get available providers"
-        )
+        ) from None

@@ -96,7 +96,7 @@ async def login(
     if not user:
         raise AuthenticationProblem(
             detail="Invalid email or password"
-        )
+        ) from None
 
     tokens = auth_service.create_tokens(user)
 

@@ -62,12 +62,12 @@ async def create_tool_server(
     try:
         return await service.create_server(server_data, current_user.id)
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to create tool server", error=str(e))
         raise InternalServerProblem(
             detail="Failed to create tool server"
-        )
+        ) from None
 
 
 @router.get("/servers", response_model=list[ToolServerResponse])
@@ -97,7 +97,7 @@ async def list_tool_servers(
         logger.error("Failed to list tool servers", error=str(e))
         raise InternalServerProblem(
             detail="Failed to list tool servers"
-        )
+        ) from None
 
 
 @router.get("/servers/{server_id}", response_model=ToolServerResponse)
@@ -121,7 +121,7 @@ async def get_tool_server(
         raise NotFoundProblem(
             detail="Tool server not found",
             resource_type="tool_server"
-        )
+        ) from None
     return server
 
 
@@ -149,15 +149,15 @@ async def update_tool_server(
             raise NotFoundProblem(
             detail="Tool server not found",
             resource_type="tool_server"
-        )
+        ) from None
         return server
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to update tool server", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to update tool server"
-        )
+        ) from None
 
 
 @router.delete("/servers/{server_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -179,14 +179,14 @@ async def delete_tool_server(
             raise NotFoundProblem(
             detail="Tool server not found",
             resource_type="tool_server"
-        )
+        ) from None
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to delete tool server", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to delete tool server"
-        )
+        ) from None
 
 
 # Server Control Operations
@@ -214,12 +214,12 @@ async def start_tool_server(
             "message": "Server started successfully" if success else "Failed to start server"
         }
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to start tool server", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to start tool server"
-        )
+        ) from None
 
 
 @router.post("/servers/{server_id}/stop")
@@ -245,12 +245,12 @@ async def stop_tool_server(
             "message": "Server stopped successfully" if success else "Failed to stop server"
         }
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to stop tool server", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to stop tool server"
-        )
+        ) from None
 
 
 @router.post("/servers/{server_id}/restart")
@@ -276,12 +276,12 @@ async def restart_tool_server(
             "message": "Server restarted successfully" if success else "Failed to restart server"
         }
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to restart tool server", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to restart tool server"
-        )
+        ) from None
 
 
 @router.post("/servers/{server_id}/enable")
@@ -307,12 +307,12 @@ async def enable_tool_server(
             "message": "Server enabled successfully" if success else "Failed to enable server"
         }
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to enable tool server", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to enable tool server"
-        )
+        ) from None
 
 
 @router.post("/servers/{server_id}/disable")
@@ -338,12 +338,12 @@ async def disable_tool_server(
             "message": "Server disabled successfully" if success else "Failed to disable server"
         }
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to disable tool server", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to disable tool server"
-        )
+        ) from None
 
 
 # Tool Management
@@ -370,7 +370,7 @@ async def get_server_tools(
         logger.error("Failed to get server tools", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to get server tools"
-        )
+        ) from None
 
 
 @router.post("/tools/{tool_id}/enable")
@@ -399,7 +399,7 @@ async def enable_tool(
         logger.error("Failed to enable tool", tool_id=tool_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to enable tool"
-        )
+        ) from None
 
 
 @router.post("/tools/{tool_id}/disable")
@@ -428,7 +428,7 @@ async def disable_tool(
         logger.error("Failed to disable tool", tool_id=tool_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to disable tool"
-        )
+        ) from None
 
 
 # Analytics and Health
@@ -455,7 +455,7 @@ async def get_server_metrics(
             raise NotFoundProblem(
             detail="Server not found",
             resource_type="tool_server"
-        )
+        ) from None
         return metrics
     except ProblemException:
         raise
@@ -463,7 +463,7 @@ async def get_server_metrics(
         logger.error("Failed to get server metrics", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to get server metrics"
-        )
+        ) from None
 
 
 @router.get("/servers/{server_id}/health", response_model=ToolServerHealthCheck)
@@ -488,12 +488,12 @@ async def check_server_health(
         raise NotFoundProblem(
             detail=str(e),
             resource_type="tool_server"
-        )
+        ) from None
     except Exception as e:
         logger.error("Failed to check server health", server_id=server_id, error=str(e))
         raise InternalServerProblem(
             detail="Failed to check server health"
-        )
+        ) from None
 
 
 # Bulk Operations
@@ -573,4 +573,4 @@ async def bulk_server_operation(
         logger.error("Failed to perform bulk server operation", error=str(e))
         raise InternalServerProblem(
             detail="Failed to perform bulk server operation"
-        )
+        ) from None

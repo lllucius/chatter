@@ -404,7 +404,7 @@ class ChatService:
 
         except LLMProviderError as e:
             logger.error("LLM generation failed", error=str(e), conversation_id=conversation.id)
-            raise ChatError(f"Failed to generate response: {str(e)}")
+            raise ChatError(f"Failed to generate response: {str(e)}") from e
 
     async def chat_streaming(
         self,
@@ -654,7 +654,7 @@ class ChatService:
                 conversation_id=conversation.id,
                 workflow_type=workflow_type
             )
-            raise ChatError(f"Workflow chat failed: {str(e)}")
+            raise ChatError(f"Workflow chat failed: {str(e)}") from e
 
         finally:
             # Clean up any resources if needed

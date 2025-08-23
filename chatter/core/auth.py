@@ -73,7 +73,7 @@ class AuthService:
         if not validate_email(user_data.email):
             raise BadRequestProblem(
                 detail="Invalid email format"
-            )
+            ) from None
 
         # Validate password strength
         password_validation = validate_password_strength(user_data.password)
@@ -81,7 +81,7 @@ class AuthService:
             raise BadRequestProblem(
                 detail="Password does not meet requirements",
                 errors=password_validation["errors"]
-            )
+            ) from None
 
         # Check if user already exists
         existing_user = await self.get_user_by_email(user_data.email)
@@ -251,7 +251,7 @@ class AuthService:
             raise BadRequestProblem(
                 detail="New password does not meet requirements",
                 errors=password_validation["errors"]
-            )
+            ) from None
 
         # Update password
         user.hashed_password = hash_password(new_password)

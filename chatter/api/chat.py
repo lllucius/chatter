@@ -138,7 +138,7 @@ async def get_conversation(
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation"
-        )
+        ) from None
 
     # Convert to response format
     conversation_response = ConversationResponse.model_validate(conversation)
@@ -207,7 +207,7 @@ async def delete_conversation(
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation"
-        )
+        ) from None
 
 
 @router.get("/conversations/{conversation_id}/messages", response_model=list[MessageResponse])
@@ -238,7 +238,7 @@ async def get_conversation_messages(
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation"
-        )
+        ) from None
 
 
 @router.post("/chat", response_model=ChatResponse)
@@ -260,7 +260,7 @@ async def chat(
     if chat_request.stream:
         raise BadRequestProblem(
             detail="Use /chat/stream for streaming responses"
-        )
+        ) from None
 
     try:
         conversation, assistant_message = await chat_service.chat(
@@ -276,7 +276,7 @@ async def chat(
     except (ConversationNotFoundError, ChatError) as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
 
 
 @router.post("/chat/stream")
@@ -353,7 +353,7 @@ async def create_basic_workflow(
     except (ConversationNotFoundError, ChatError) as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
 
 
 @router.post("/workflows/rag")
@@ -387,7 +387,7 @@ async def create_rag_workflow(
     except (ConversationNotFoundError, ChatError) as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
 
 
 @router.post("/workflows/tools")
@@ -421,7 +421,7 @@ async def create_tools_workflow(
     except (ConversationNotFoundError, ChatError) as e:
         raise BadRequestProblem(
             detail=str(e)
-        )
+        ) from None
 
 
 @router.get("/tools/available")
@@ -471,7 +471,7 @@ async def get_available_tools(
     except Exception as e:
         raise InternalServerProblem(
             detail=f"Failed to get available tools: {str(e)}"
-        )
+        ) from None
 
 
 @router.get("/mcp/status")
@@ -495,4 +495,4 @@ async def get_mcp_status(
     except Exception as e:
         raise InternalServerProblem(
             detail=f"Failed to get MCP status: {str(e)}"
-        )
+        ) from None

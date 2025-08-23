@@ -21,8 +21,8 @@ os.environ.setdefault('DATABASE_URL', 'sqlite+aiosqlite:///test.db')
 os.environ.setdefault('ENVIRONMENT', 'development')
 os.environ.setdefault('OPENAI_API_KEY', 'fake-key-for-testing')
 
-from chatter.config import settings
-from chatter.main import app
+from chatter.config import settings  # noqa: E402
+from chatter.main import app  # noqa: E402
 
 
 def generate_openapi_spec() -> dict[str, Any]:

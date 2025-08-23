@@ -1,13 +1,14 @@
 """Pydantic schemas for API request/response models."""
 
-from chatter.schemas.analytics import *
-from chatter.schemas.auth import *
-from chatter.schemas.chat import *
-from chatter.schemas.common import *
-from chatter.schemas.document import *
-from chatter.schemas.profile import *
-from chatter.schemas.prompt import *
-from chatter.schemas.toolserver import *
+# Star imports are intentional for convenience re-export of all schemas
+from chatter.schemas.analytics import *  # noqa: F403
+from chatter.schemas.auth import *  # noqa: F403
+from chatter.schemas.chat import *  # noqa: F403
+from chatter.schemas.common import *  # noqa: F403
+from chatter.schemas.document import *  # noqa: F403
+from chatter.schemas.profile import *  # noqa: F403
+from chatter.schemas.prompt import *  # noqa: F403
+from chatter.schemas.toolserver import *  # noqa: F403
 
 __all__ = [
     # Common schemas

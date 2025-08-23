@@ -13,7 +13,7 @@ from typing import Any
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from scripts.generate_openapi import generate_openapi_spec
+from scripts.generate_openapi import generate_openapi_spec  # noqa: E402
 
 
 def generate_python_sdk():

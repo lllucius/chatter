@@ -12,12 +12,12 @@ from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
-    import unstructured
+    import unstructured  # noqa: F401
     from unstructured.partition.auto import partition
     from unstructured.partition.docx import partition_docx
     from unstructured.partition.html import partition_html
     from unstructured.partition.pdf import partition_pdf
-    from unstructured.partition.text import partition_text
+    from unstructured.partition.text import partition_text  # noqa: F401
     UNSTRUCTURED_AVAILABLE = True
 except ImportError:
     UNSTRUCTURED_AVAILABLE = False

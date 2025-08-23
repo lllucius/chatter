@@ -69,7 +69,7 @@ class APIClient:
             else:
                 try:
                     error_detail = e.response.json().get("detail", str(e))
-                except:
+                except Exception:
                     error_detail = str(e)
                 console.print(f"❌ API Error ({e.response.status_code}): {error_detail}")
                 raise typer.Exit(1) from None
@@ -1167,6 +1167,7 @@ def export_conversation(
 ) -> None:
     """Export a conversation."""
     async def _export():
+        nonlocal output_file
         api_client = get_api_client()
         try:
             # Get conversation and messages
@@ -1293,6 +1294,7 @@ def upload_document(
 ) -> None:
     """Upload a document."""
     async def _upload():
+        nonlocal title
         api_client = get_api_client()
         try:
             file_path_obj = Path(file_path)

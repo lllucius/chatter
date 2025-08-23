@@ -92,7 +92,7 @@ class PromptService:
             raise
         except Exception as e:
             logger.error("Prompt creation failed", error=str(e))
-            raise PromptError(f"Failed to create prompt: {str(e)}")
+            raise PromptError(f"Failed to create prompt: {str(e)}") from e
 
     async def get_prompt(
         self,
@@ -257,7 +257,7 @@ class PromptService:
             raise
         except Exception as e:
             logger.error("Failed to update prompt", prompt_id=prompt_id, error=str(e))
-            raise PromptError(f"Failed to update prompt: {str(e)}")
+            raise PromptError(f"Failed to update prompt: {str(e)}") from e
 
     async def delete_prompt(
         self,
@@ -367,7 +367,7 @@ class PromptService:
             raise
         except Exception as e:
             logger.error("Prompt test failed", prompt_id=prompt_id, error=str(e))
-            raise PromptError(f"Prompt test failed: {str(e)}")
+            raise PromptError(f"Prompt test failed: {str(e)}") from e
 
     async def clone_prompt(
         self,
@@ -459,7 +459,7 @@ class PromptService:
             raise
         except Exception as e:
             logger.error("Failed to clone prompt", prompt_id=prompt_id, error=str(e))
-            raise PromptError(f"Failed to clone prompt: {str(e)}")
+            raise PromptError(f"Failed to clone prompt: {str(e)}") from e
 
     async def get_prompt_stats(
         self,

@@ -94,7 +94,7 @@ class ProfileService:
             raise
         except Exception as e:
             logger.error("Profile creation failed", error=str(e))
-            raise ProfileError(f"Failed to create profile: {str(e)}")
+            raise ProfileError(f"Failed to create profile: {str(e)}") from e
 
     async def get_profile(
         self,
@@ -252,7 +252,7 @@ class ProfileService:
             raise
         except Exception as e:
             logger.error("Failed to update profile", profile_id=profile_id, error=str(e))
-            raise ProfileError(f"Failed to update profile: {str(e)}")
+            raise ProfileError(f"Failed to update profile: {str(e)}") from e
 
     async def delete_profile(
         self,
@@ -386,7 +386,7 @@ class ProfileService:
             raise
         except Exception as e:
             logger.error("Profile test failed", profile_id=profile_id, error=str(e))
-            raise ProfileError(f"Profile test failed: {str(e)}")
+            raise ProfileError(f"Profile test failed: {str(e)}") from e
 
     async def clone_profile(
         self,
@@ -487,7 +487,7 @@ class ProfileService:
             raise
         except Exception as e:
             logger.error("Profile cloning failed", profile_id=profile_id, error=str(e))
-            raise ProfileError(f"Failed to clone profile: {str(e)}")
+            raise ProfileError(f"Failed to clone profile: {str(e)}") from e
 
     async def get_profile_stats(self, user_id: str) -> dict[str, Any]:
         """Get profile statistics for user.

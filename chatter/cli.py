@@ -7,6 +7,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import httpx
 import typer
@@ -35,7 +36,7 @@ logger = get_logger(__name__)
 class APIClient:
     """HTTP client for interacting with Chatter API."""
 
-    def __init__(self, base_url: str = None, access_token: str = None):
+    def __init__(self, base_url: str | None = None, access_token: str | None = None):
         self.base_url = (
             base_url or f"http://{settings.host}:{settings.port}"
         )
@@ -141,7 +142,7 @@ def list_prompts(
     async def _list():
         api_client = get_api_client()
         try:
-            params = {
+            params: dict[str, Any] = {
                 "limit": limit,
                 "offset": offset,
             }
@@ -238,6 +239,9 @@ def create_prompt(
     async def _create():
         api_client = get_api_client()
         try:
+            # Initialize all variables to avoid unbound variable errors  
+            parsed_tags = None
+            
             # Interactive mode
             if interactive:
                 console.print("[bold]Creating new prompt[/bold]\\n")
@@ -253,7 +257,7 @@ def create_prompt(
                     "Tags (comma-separated)", default=""
                 )
                 public = Confirm.ask("Make public?", default=False)
-                tags = (
+                parsed_tags = (
                     [
                         tag.strip()
                         for tag in tags_input.split(",")
@@ -262,8 +266,19 @@ def create_prompt(
                     if tags_input
                     else None
                 )
-            else:
-                tags = (
+            
+            # For non-interactive mode, use function parameters
+            # (In interactive mode, they're overridden above)
+            if not interactive:
+                # Validate required parameters
+                if not name:
+                    console.print("[red]Error: Name is required[/red]")
+                    raise typer.Exit(1)
+                if not content:
+                    console.print("[red]Error: Content is required[/red]")
+                    raise typer.Exit(1)
+                    
+                parsed_tags = (
                     [
                         tag.strip()
                         for tag in tags.split(",")
@@ -285,15 +300,18 @@ def create_prompt(
 
             if description:
                 prompt_data["description"] = description
-            if tags:
-                prompt_data["tags"] = tags
+            if parsed_tags:
+                prompt_data["tags"] = parsed_tags
 
             response = await api_client.request(
                 "POST", "/prompts", json=prompt_data
             )
 
             console.print("✅ Prompt created successfully!")
-            console.print(f"📝 Prompt ID: {response['id']}")
+            if response and "id" in response:
+                console.print(f"📝 Prompt ID: {response['id']}")
+            else:
+                console.print("📝 Prompt created (no ID returned)")
             console.print(f"🏷️  Name: {response['name']}")
             console.print(f"📂 Category: {response['category']}")
             console.print(f"🔧 Type: {response['prompt_type']}")

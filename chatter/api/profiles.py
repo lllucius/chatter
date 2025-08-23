@@ -100,9 +100,17 @@ async def list_profiles(
         List of profiles with pagination info
     """
     try:
+        # Merge pagination and sorting into request
+        merged_request = request.model_copy(update={
+            'limit': pagination.limit,
+            'offset': pagination.offset,
+            'sort_by': sorting.sort_by,
+            'sort_order': sorting.sort_order,
+        })
+        
         # Get profiles
         profiles, total_count = await profile_service.list_profiles(
-            current_user.id, request, pagination, sorting
+            current_user.id, merged_request
         )
 
         return ProfileListResponse(

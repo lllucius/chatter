@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.core.documents import DocumentError, DocumentService
+from chatter.models.document import DocumentStatus
 from chatter.models.user import User
 from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.document import (
@@ -99,6 +100,7 @@ async def upload_document(
             title=title,
             description=description,
             tags=parsed_tags,
+            extra_metadata=None,  # Add missing parameter
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
             is_public=is_public,
@@ -141,9 +143,17 @@ async def list_documents(
         List of documents with pagination info
     """
     try:
+        # Merge pagination and sorting into request
+        merged_request = request.model_copy(update={
+            'limit': pagination.limit,
+            'offset': pagination.offset,
+            'sort_by': sorting.sort_by,
+            'sort_order': sorting.sort_order,
+        })
+        
         # Get documents
         documents, total_count = await document_service.list_documents(
-            current_user.id, request, pagination, sorting
+            current_user.id, merged_request
         )
 
         return DocumentListResponse(
@@ -435,7 +445,7 @@ async def process_document(
 
         return DocumentProcessingResponse(
             document_id=document_id,
-            status="processing",
+            status=DocumentStatus.PROCESSING,
             message="Document processing started successfully",
             processing_started_at=None,  # Would be filled by service
         )

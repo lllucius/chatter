@@ -112,7 +112,7 @@ async def list_conversations(
         List of conversations with pagination
     """
     conversations, total = await chat_service.list_conversations(
-        current_user.id, request, pagination, sorting
+        current_user.id, pagination.limit, pagination.offset
     )
 
     return ConversationSearchResponse(

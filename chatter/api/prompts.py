@@ -16,7 +16,11 @@ from chatter.schemas.prompt import (
     PromptTestRequest,
     PromptTestResponse,
     PromptUpdate,
+    PromptGetRequest,
+    PromptDeleteRequest,
+    PromptStatsRequest,
 )
+from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
@@ -63,30 +67,18 @@ async def create_prompt(
 
 @router.get("/", response_model=PromptListResponse)
 async def list_prompts(
-    prompt_type: str = None,
-    category: str = None,
-    tags: str = None,  # Comma-separated
-    is_public: bool = None,
-    is_chain: bool = None,
-    limit: int = 50,
-    offset: int = 0,
-    sort_by: str = "created_at",
-    sort_order: str = "desc",
+    request: PromptListRequest = Depends(),
+    pagination: PaginationRequest = Depends(),
+    sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service)
 ) -> PromptListResponse:
     """List user's prompts.
 
     Args:
-        prompt_type: Filter by prompt type
-        category: Filter by category
-        tags: Filter by tags (comma-separated)
-        is_public: Filter by public status
-        is_chain: Filter by chain status
-        limit: Maximum number of results
-        offset: Number of results to skip
-        sort_by: Sort field
-        sort_order: Sort order (asc/desc)
+        request: List request parameters
+        pagination: Pagination parameters
+        sorting: Sorting parameters
         current_user: Current authenticated user
         prompt_service: Prompt service
 
@@ -94,34 +86,16 @@ async def list_prompts(
         List of prompts with pagination info
     """
     try:
-        # Parse tags
-        parsed_tags = None
-        if tags:
-            parsed_tags = [tag.strip() for tag in tags.split(",") if tag.strip()]
-
-        # Create list request
-        list_request = PromptListRequest(
-            prompt_type=prompt_type,
-            category=category,
-            tags=parsed_tags,
-            is_public=is_public,
-            is_chain=is_chain,
-            limit=limit,
-            offset=offset,
-            sort_by=sort_by,
-            sort_order=sort_order,
-        )
-
         # Get prompts
         prompts, total_count = await prompt_service.list_prompts(
-            current_user.id, list_request
+            current_user.id, request, pagination, sorting
         )
 
         return PromptListResponse(
             prompts=[PromptResponse.model_validate(prompt) for prompt in prompts],
             total_count=total_count,
-            limit=limit,
-            offset=offset,
+            limit=pagination.limit,
+            offset=pagination.offset,
         )
 
     except Exception as e:
@@ -134,6 +108,7 @@ async def list_prompts(
 @router.get("/{prompt_id}", response_model=PromptResponse)
 async def get_prompt(
     prompt_id: str,
+    request: PromptGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service)
 ) -> PromptResponse:
@@ -141,6 +116,7 @@ async def get_prompt(
 
     Args:
         prompt_id: Prompt ID
+        request: Get request parameters  
         current_user: Current authenticated user
         prompt_service: Prompt service
 
@@ -216,6 +192,7 @@ async def update_prompt(
 @router.delete("/{prompt_id}")
 async def delete_prompt(
     prompt_id: str,
+    request: PromptDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service)
 ) -> dict:
@@ -223,6 +200,7 @@ async def delete_prompt(
 
     Args:
         prompt_id: Prompt ID
+        request: Delete request parameters
         current_user: Current authenticated user
         prompt_service: Prompt service
 
@@ -328,12 +306,14 @@ async def clone_prompt(
 
 @router.get("/stats/overview", response_model=PromptStatsResponse)
 async def get_prompt_stats(
+    request: PromptStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service)
 ) -> PromptStatsResponse:
     """Get prompt statistics.
 
     Args:
+        request: Stats request parameters
         current_user: Current authenticated user
         prompt_service: Prompt service
 

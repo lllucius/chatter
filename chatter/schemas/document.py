@@ -6,6 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from chatter.models.document import DocumentStatus, DocumentType
+from chatter.schemas.common import ListRequestBase, GetRequestBase, DeleteRequestBase
 
 
 class DocumentBase(BaseModel):
@@ -95,17 +96,28 @@ class DocumentSearchResponse(BaseModel):
     score_threshold: float = Field(..., description="Applied score threshold")
 
 
-class DocumentListRequest(BaseModel):
+class DocumentListRequest(ListRequestBase):
     """Schema for document list request."""
 
     status: DocumentStatus | None = Field(None, description="Filter by status")
     document_type: DocumentType | None = Field(None, description="Filter by document type")
     tags: list[str] | None = Field(None, description="Filter by tags")
     owner_id: str | None = Field(None, description="Filter by owner (admin only)")
-    limit: int = Field(50, ge=1, le=100, description="Maximum number of results")
-    offset: int = Field(0, ge=0, description="Number of results to skip")
-    sort_by: str = Field("created_at", description="Sort field")
-    sort_order: str = Field("desc", pattern="^(asc|desc)$", description="Sort order")
+
+
+class DocumentGetRequest(GetRequestBase):
+    """Schema for document get request."""
+    pass
+
+
+class DocumentDeleteRequest(DeleteRequestBase):
+    """Schema for document delete request."""
+    pass
+
+
+class DocumentStatsRequest(GetRequestBase):
+    """Schema for document stats request."""
+    pass
 
 
 class DocumentListResponse(BaseModel):

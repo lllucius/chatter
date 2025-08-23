@@ -6,6 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from chatter.models.prompt import PromptCategory, PromptType
+from chatter.schemas.common import ListRequestBase, GetRequestBase, DeleteRequestBase
 
 
 class PromptBase(BaseModel):
@@ -177,7 +178,7 @@ class PromptResponse(BaseModel):
     updated_at: datetime = Field(..., description="Last update timestamp")
 
 
-class PromptListRequest(BaseModel):
+class PromptListRequest(ListRequestBase):
     """Schema for prompt list request."""
 
     prompt_type: PromptType | None = Field(None, description="Filter by prompt type")
@@ -185,10 +186,21 @@ class PromptListRequest(BaseModel):
     tags: list[str] | None = Field(None, description="Filter by tags")
     is_public: bool | None = Field(None, description="Filter by public status")
     is_chain: bool | None = Field(None, description="Filter by chain status")
-    limit: int = Field(50, ge=1, le=100, description="Maximum number of results")
-    offset: int = Field(0, ge=0, description="Number of results to skip")
-    sort_by: str = Field("created_at", description="Sort field")
-    sort_order: str = Field("desc", description="Sort order (asc/desc)")
+
+
+class PromptGetRequest(GetRequestBase):
+    """Schema for prompt get request."""
+    pass
+
+
+class PromptDeleteRequest(DeleteRequestBase):
+    """Schema for prompt delete request."""
+    pass
+
+
+class PromptStatsRequest(GetRequestBase):
+    """Schema for prompt stats request."""
+    pass
 
 
 class PromptListResponse(BaseModel):

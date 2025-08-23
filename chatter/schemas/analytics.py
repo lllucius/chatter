@@ -5,6 +5,8 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from chatter.schemas.common import GetRequestBase
+
 
 class ConversationStatsResponse(BaseModel):
     """Schema for conversation statistics response."""
@@ -189,6 +191,47 @@ class AnalyticsTimeRange(BaseModel):
     start_date: datetime | None = Field(None, description="Start date for analytics")
     end_date: datetime | None = Field(None, description="End date for analytics")
     period: str = Field("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)")
+
+
+class ConversationStatsRequest(GetRequestBase):
+    """Schema for conversation stats request."""
+    
+    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+
+
+class UsageMetricsRequest(GetRequestBase):
+    """Schema for usage metrics request."""
+    
+    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+
+
+class PerformanceMetricsRequest(GetRequestBase):
+    """Schema for performance metrics request."""
+    
+    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+
+
+class DocumentAnalyticsRequest(GetRequestBase):
+    """Schema for document analytics request."""
+    
+    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+
+
+class SystemAnalyticsRequest(GetRequestBase):
+    """Schema for system analytics request."""
+    pass
+
+
+class DashboardRequest(GetRequestBase):
+    """Schema for dashboard request."""
+    
+    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+
+
+class ToolServerAnalyticsRequest(GetRequestBase):
+    """Schema for tool server analytics request."""
+    
+    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
 
 
 class AnalyticsExportRequest(BaseModel):

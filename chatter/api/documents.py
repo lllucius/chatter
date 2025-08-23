@@ -20,7 +20,11 @@ from chatter.schemas.document import (
     DocumentSearchResult,
     DocumentStatsResponse,
     DocumentUpdate,
+    DocumentGetRequest,
+    DocumentDeleteRequest,
+    DocumentStatsRequest,
 )
+from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import NotFoundProblem, ValidationProblem, InternalServerProblem, BadRequestProblem, ProblemException
@@ -103,26 +107,18 @@ async def upload_document(
 
 @router.get("/", response_model=DocumentListResponse)
 async def list_documents(
-    status_filter: str = None,
-    document_type: str = None,
-    tags: str = None,  # Comma-separated
-    limit: int = 50,
-    offset: int = 0,
-    sort_by: str = "created_at",
-    sort_order: str = "desc",
+    request: DocumentListRequest = Depends(),
+    pagination: PaginationRequest = Depends(),
+    sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentListResponse:
     """List user's documents.
 
     Args:
-        status_filter: Filter by document status
-        document_type: Filter by document type
-        tags: Filter by tags (comma-separated)
-        limit: Maximum number of results
-        offset: Number of results to skip
-        sort_by: Sort field
-        sort_order: Sort order (asc/desc)
+        request: List request parameters
+        pagination: Pagination parameters
+        sorting: Sorting parameters
         current_user: Current authenticated user
         document_service: Document service
 
@@ -130,32 +126,16 @@ async def list_documents(
         List of documents with pagination info
     """
     try:
-        # Parse tags
-        parsed_tags = None
-        if tags:
-            parsed_tags = [tag.strip() for tag in tags.split(",") if tag.strip()]
-
-        # Create list request
-        list_request = DocumentListRequest(
-            status=status_filter,
-            document_type=document_type,
-            tags=parsed_tags,
-            limit=limit,
-            offset=offset,
-            sort_by=sort_by,
-            sort_order=sort_order,
-        )
-
         # Get documents
         documents, total_count = await document_service.list_documents(
-            current_user.id, list_request
+            current_user.id, request, pagination, sorting
         )
 
         return DocumentListResponse(
             documents=[DocumentResponse.model_validate(doc) for doc in documents],
             total_count=total_count,
-            limit=limit,
-            offset=offset,
+            limit=pagination.limit,
+            offset=pagination.offset,
         )
 
     except Exception as e:
@@ -168,6 +148,7 @@ async def list_documents(
 @router.get("/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: str,
+    request: DocumentGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentResponse:
@@ -175,6 +156,7 @@ async def get_document(
 
     Args:
         document_id: Document ID
+        request: Get request parameters
         current_user: Current authenticated user
         document_service: Document service
 
@@ -247,6 +229,7 @@ async def update_document(
 @router.delete("/{document_id}")
 async def delete_document(
     document_id: str,
+    request: DocumentDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
 ) -> dict:
@@ -254,6 +237,7 @@ async def delete_document(
 
     Args:
         document_id: Document ID
+        request: Delete request parameters
         current_user: Current authenticated user
         document_service: Document service
 
@@ -333,6 +317,7 @@ async def search_documents(
 @router.get("/{document_id}/chunks", response_model=list[DocumentChunkResponse])
 async def get_document_chunks(
     document_id: str,
+    request: DocumentGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
 ) -> list[DocumentChunkResponse]:
@@ -340,6 +325,7 @@ async def get_document_chunks(
 
     Args:
         document_id: Document ID
+        request: Get request parameters
         current_user: Current authenticated user
         document_service: Document service
 
@@ -406,12 +392,14 @@ async def process_document(
 
 @router.get("/stats/overview", response_model=DocumentStatsResponse)
 async def get_document_stats(
+    request: DocumentStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service)
 ) -> DocumentStatsResponse:
     """Get document statistics.
 
     Args:
+        request: Stats request parameters
         current_user: Current authenticated user
         document_service: Document service
 

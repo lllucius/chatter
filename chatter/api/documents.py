@@ -1,7 +1,7 @@
 """Document management endpoints."""
 
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -23,7 +23,7 @@ from chatter.schemas.document import (
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import NotFoundProblem, ValidationProblem, InternalServerProblem
+from chatter.utils.problem import NotFoundProblem, ValidationProblem, InternalServerProblem, BadRequestProblem, ProblemException
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -91,14 +91,12 @@ async def upload_document(
         return DocumentResponse.model_validate(document)
 
     except DocumentError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
     except Exception as e:
         logger.error("Document upload failed", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to upload document"
         )
 
@@ -162,8 +160,7 @@ async def list_documents(
 
     except Exception as e:
         logger.error("Failed to list documents", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to list documents"
         )
 
@@ -230,19 +227,19 @@ async def update_document(
         )
 
         if not document:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document not found"
+            raise NotFoundProblem(
+                detail="Document not found",
+                resource_type="document",
+                resource_id=document_id
             )
 
         return DocumentResponse.model_validate(document)
 
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to update document", document_id=document_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to update document"
         )
 
@@ -267,19 +264,19 @@ async def delete_document(
         success = await document_service.delete_document(document_id, current_user.id)
 
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document not found"
+            raise NotFoundProblem(
+                detail="Document not found",
+                resource_type="document", 
+                resource_id=document_id
             )
 
         return {"message": "Document deleted successfully"}
 
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to delete document", document_id=document_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to delete document"
         )
 
@@ -328,8 +325,7 @@ async def search_documents(
 
     except Exception as e:
         logger.error("Document search failed", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Document search failed"
         )
 
@@ -357,8 +353,7 @@ async def get_document_chunks(
 
     except Exception as e:
         logger.error("Failed to get document chunks", document_id=document_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get document chunks"
         )
 
@@ -387,9 +382,10 @@ async def process_document(
         )
 
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document not found or processing failed"
+            raise NotFoundProblem(
+                detail="Document not found or processing failed",
+                resource_type="document",
+                resource_id=document_id
             )
 
         return DocumentProcessingResponse(
@@ -399,12 +395,11 @@ async def process_document(
             processing_started_at=None,  # Would be filled by service
         )
 
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to process document", document_id=document_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to process document"
         )
 
@@ -437,7 +432,6 @@ async def get_document_stats(
 
     except Exception as e:
         logger.error("Failed to get document stats", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get document stats"
         )

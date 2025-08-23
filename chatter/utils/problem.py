@@ -114,6 +114,23 @@ class ProblemException(HTTPException):
 
 
 # Common problem types
+class BadRequestProblem(ProblemException):
+    """Bad request problem."""
+    
+    def __init__(
+        self,
+        detail: str = "The request contains invalid data or parameters",
+        **kwargs
+    ):
+        super().__init__(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            title="Bad Request",
+            detail=detail,
+            type_suffix="bad-request",
+            **kwargs
+        )
+
+
 class ValidationProblem(ProblemException):
     """Validation error problem."""
     

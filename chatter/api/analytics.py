@@ -2,27 +2,26 @@
 
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.core.analytics import AnalyticsService
 from chatter.models.user import User
 from chatter.schemas.analytics import (
-    AnalyticsTimeRange,
-    ConversationStatsResponse,
-    DashboardResponse,
-    DocumentAnalyticsResponse,
-    PerformanceMetricsResponse,
-    SystemAnalyticsResponse,
-    UsageMetricsResponse,
     ConversationStatsRequest,
-    UsageMetricsRequest,
-    PerformanceMetricsRequest,
-    DocumentAnalyticsRequest,
-    SystemAnalyticsRequest,
+    ConversationStatsResponse,
     DashboardRequest,
+    DashboardResponse,
+    DocumentAnalyticsRequest,
+    DocumentAnalyticsResponse,
+    PerformanceMetricsRequest,
+    PerformanceMetricsResponse,
+    SystemAnalyticsRequest,
+    SystemAnalyticsResponse,
     ToolServerAnalyticsRequest,
+    UsageMetricsRequest,
+    UsageMetricsResponse,
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
@@ -75,7 +74,7 @@ async def get_conversation_stats(
         logger.error("Failed to get conversation stats", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get conversation statistics"
-        )
+        ) from e
 
 
 @router.get("/usage", response_model=UsageMetricsResponse)
@@ -120,7 +119,7 @@ async def get_usage_metrics(
         logger.error("Failed to get usage metrics", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get usage metrics"
-        )
+        ) from e
 
 
 @router.get("/performance", response_model=PerformanceMetricsResponse)
@@ -163,7 +162,7 @@ async def get_performance_metrics(
         logger.error("Failed to get performance metrics", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get performance metrics"
-        )
+        ) from e
 
 
 @router.get("/documents", response_model=DocumentAnalyticsResponse)
@@ -208,7 +207,7 @@ async def get_document_analytics(
         logger.error("Failed to get document analytics", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get document analytics"
-        )
+        ) from e
 
 
 @router.get("/system", response_model=SystemAnalyticsResponse)
@@ -252,7 +251,7 @@ async def get_system_analytics(
         logger.error("Failed to get system analytics", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get system analytics"
-        )
+        ) from e
 
 
 @router.get("/dashboard", response_model=DashboardResponse)
@@ -288,7 +287,7 @@ async def get_dashboard(
         logger.error("Failed to get dashboard data", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get dashboard data"
-        )
+        ) from e
 
 
 @router.get("/toolservers")
@@ -314,4 +313,4 @@ async def get_tool_server_analytics(
         logger.error("Failed to get tool server analytics", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get tool server analytics"
-        )
+        ) from e

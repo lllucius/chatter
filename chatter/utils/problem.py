@@ -4,8 +4,7 @@ This module provides utilities for creating RFC 9457 compliant error responses
 for the Chatter API.
 """
 
-from typing import Any, Dict, Optional
-from urllib.parse import urljoin
+from typing import Any
 
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
@@ -16,7 +15,7 @@ from chatter.config import settings
 
 class ProblemDetail(BaseModel):
     """RFC 9457 Problem Detail model."""
-    
+
     type: str = Field(
         default="about:blank",
         description="A URI reference that identifies the problem type"
@@ -27,15 +26,15 @@ class ProblemDetail(BaseModel):
     status: int = Field(
         description="The HTTP status code"
     )
-    detail: Optional[str] = Field(
+    detail: str | None = Field(
         default=None,
         description="A human-readable explanation specific to this occurrence"
     )
-    instance: Optional[str] = Field(
+    instance: str | None = Field(
         default=None,
         description="A URI reference that identifies the specific occurrence"
     )
-    
+
     # Additional fields can be included for context
     class Config:
         extra = "allow"
@@ -43,19 +42,19 @@ class ProblemDetail(BaseModel):
 
 class ProblemException(HTTPException):
     """Base exception class for RFC 9457 compliant problems."""
-    
+
     def __init__(
         self,
         status_code: int,
         title: str,
-        detail: Optional[str] = None,
-        type_suffix: Optional[str] = None,
-        instance: Optional[str] = None,
-        headers: Optional[Dict[str, Any]] = None,
+        detail: str | None = None,
+        type_suffix: str | None = None,
+        instance: str | None = None,
+        headers: dict[str, Any] | None = None,
         **extra_fields: Any
     ):
         """Initialize a problem exception.
-        
+
         Args:
             status_code: HTTP status code
             title: Human-readable summary of the problem type
@@ -71,21 +70,21 @@ class ProblemException(HTTPException):
         self.type_suffix = type_suffix
         self.instance = instance
         self.extra_fields = extra_fields
-        
+
         # Generate problem type URI
         if type_suffix:
             self.type_uri = f"{settings.api_base_url}/problems/{type_suffix}"
         else:
             self.type_uri = "about:blank"
-        
+
         super().__init__(status_code=status_code, detail=detail, headers=headers)
-    
-    def to_problem_detail(self, request: Optional[Request] = None) -> ProblemDetail:
+
+    def to_problem_detail(self, request: Request | None = None) -> ProblemDetail:
         """Convert to ProblemDetail model."""
         instance = self.instance
         if not instance and request:
             instance = str(request.url)
-        
+
         problem_data = {
             "type": self.type_uri,
             "title": self.title,
@@ -94,13 +93,13 @@ class ProblemException(HTTPException):
             "instance": instance,
             **self.extra_fields
         }
-        
+
         # Remove None values
         problem_data = {k: v for k, v in problem_data.items() if v is not None}
-        
+
         return ProblemDetail(**problem_data)
-    
-    def to_response(self, request: Optional[Request] = None) -> JSONResponse:
+
+    def to_response(self, request: Request | None = None) -> JSONResponse:
         """Convert to JSONResponse with RFC 9457 format."""
         problem = self.to_problem_detail(request)
         return JSONResponse(
@@ -116,7 +115,7 @@ class ProblemException(HTTPException):
 # Common problem types
 class BadRequestProblem(ProblemException):
     """Bad request problem."""
-    
+
     def __init__(
         self,
         detail: str = "The request contains invalid data or parameters",
@@ -133,11 +132,11 @@ class BadRequestProblem(ProblemException):
 
 class ValidationProblem(ProblemException):
     """Validation error problem."""
-    
+
     def __init__(
         self,
         detail: str = "The request contains invalid data",
-        validation_errors: Optional[list] = None,
+        validation_errors: list | None = None,
         **kwargs
     ):
         super().__init__(
@@ -152,7 +151,7 @@ class ValidationProblem(ProblemException):
 
 class AuthenticationProblem(ProblemException):
     """Authentication error problem."""
-    
+
     def __init__(
         self,
         detail: str = "Authentication failed",
@@ -170,11 +169,11 @@ class AuthenticationProblem(ProblemException):
 
 class AuthorizationProblem(ProblemException):
     """Authorization error problem."""
-    
+
     def __init__(
         self,
         detail: str = "Access denied",
-        required_permissions: Optional[list] = None,
+        required_permissions: list | None = None,
         **kwargs
     ):
         super().__init__(
@@ -189,12 +188,12 @@ class AuthorizationProblem(ProblemException):
 
 class NotFoundProblem(ProblemException):
     """Resource not found problem."""
-    
+
     def __init__(
         self,
         detail: str = "The requested resource was not found",
-        resource_type: Optional[str] = None,
-        resource_id: Optional[str] = None,
+        resource_type: str | None = None,
+        resource_id: str | None = None,
         **kwargs
     ):
         extra_fields = {}
@@ -202,7 +201,7 @@ class NotFoundProblem(ProblemException):
             extra_fields["resourceType"] = resource_type
         if resource_id:
             extra_fields["resourceId"] = resource_id
-        
+
         super().__init__(
             status_code=status.HTTP_404_NOT_FOUND,
             title="Resource Not Found",
@@ -215,17 +214,17 @@ class NotFoundProblem(ProblemException):
 
 class ConflictProblem(ProblemException):
     """Resource conflict problem."""
-    
+
     def __init__(
         self,
         detail: str = "The request could not be completed due to a conflict",
-        conflicting_resource: Optional[str] = None,
+        conflicting_resource: str | None = None,
         **kwargs
     ):
         extra_fields = {}
         if conflicting_resource:
             extra_fields["conflictingResource"] = conflicting_resource
-        
+
         super().__init__(
             status_code=status.HTTP_409_CONFLICT,
             title="Resource Conflict",
@@ -238,17 +237,17 @@ class ConflictProblem(ProblemException):
 
 class RateLimitProblem(ProblemException):
     """Rate limit exceeded problem."""
-    
+
     def __init__(
         self,
         detail: str = "Rate limit exceeded",
-        retry_after: Optional[int] = None,
+        retry_after: int | None = None,
         **kwargs
     ):
         headers = {}
         if retry_after:
             headers["Retry-After"] = str(retry_after)
-        
+
         super().__init__(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             title="Rate Limit Exceeded",
@@ -262,17 +261,17 @@ class RateLimitProblem(ProblemException):
 
 class InternalServerProblem(ProblemException):
     """Internal server error problem."""
-    
+
     def __init__(
         self,
         detail: str = "An internal server error occurred",
-        error_id: Optional[str] = None,
+        error_id: str | None = None,
         **kwargs
     ):
         extra_fields = {}
         if error_id:
             extra_fields["errorId"] = error_id
-        
+
         super().__init__(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             title="Internal Server Error",
@@ -286,13 +285,13 @@ class InternalServerProblem(ProblemException):
 def create_problem_response(
     status_code: int,
     title: str,
-    detail: Optional[str] = None,
-    type_suffix: Optional[str] = None,
-    request: Optional[Request] = None,
+    detail: str | None = None,
+    type_suffix: str | None = None,
+    request: Request | None = None,
     **extra_fields: Any
 ) -> JSONResponse:
     """Create a RFC 9457 compliant problem response.
-    
+
     Args:
         status_code: HTTP status code
         title: Human-readable summary of the problem type
@@ -300,7 +299,7 @@ def create_problem_response(
         type_suffix: Suffix to append to the base problem type URI
         request: FastAPI request object for instance URI
         **extra_fields: Additional problem details
-    
+
     Returns:
         JSONResponse with RFC 9457 format
     """

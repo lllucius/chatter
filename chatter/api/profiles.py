@@ -7,25 +7,25 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from chatter.api.auth import get_current_user
 from chatter.core.profiles import ProfileError, ProfileService
 from chatter.models.user import User
+from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.profile import (
     ProfileCloneRequest,
     ProfileCreate,
+    ProfileDeleteRequest,
+    ProfileGetRequest,
     ProfileListRequest,
     ProfileListResponse,
+    ProfileProvidersRequest,
     ProfileResponse,
+    ProfileStatsRequest,
     ProfileStatsResponse,
     ProfileTestRequest,
     ProfileTestResponse,
     ProfileUpdate,
-    ProfileGetRequest,
-    ProfileDeleteRequest,
-    ProfileStatsRequest,
-    ProfileProvidersRequest,
 )
-from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
+from chatter.utils.problem import BadRequestProblem, InternalServerProblem, NotFoundProblem, ProblemException
 
 logger = get_logger(__name__)
 router = APIRouter()

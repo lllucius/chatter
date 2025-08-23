@@ -6,7 +6,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from chatter.models.conversation import ConversationStatus, MessageRole
-from chatter.schemas.common import ListRequestBase, GetRequestBase, DeleteRequestBase
+from chatter.schemas.common import DeleteRequestBase, GetRequestBase, ListRequestBase
 
 
 class MessageBase(BaseModel):

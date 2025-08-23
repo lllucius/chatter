@@ -60,7 +60,7 @@ class PromptService:
             existing_prompt = existing_result.scalar_one_or_none()
 
             if existing_prompt:
-                raise PromptError("Prompt with this name already exists")
+                raise PromptError("Prompt with this name already exists") from None
 
             # Generate content hash
             content_hash = hashlib.sha256(prompt_data.content.encode()).hexdigest()
@@ -236,7 +236,7 @@ class PromptService:
                 existing_prompt = existing_result.scalar_one_or_none()
 
                 if existing_prompt:
-                    raise PromptError("Prompt with this name already exists")
+                    raise PromptError("Prompt with this name already exists") from None
 
             # Update fields
             update_dict = update_data.model_dump(exclude_unset=True)
@@ -318,7 +318,7 @@ class PromptService:
             # Get prompt
             prompt = await self.get_prompt(prompt_id, user_id)
             if not prompt:
-                raise PromptError("Prompt not found")
+                raise PromptError("Prompt not found") from None
 
             start_time = datetime.now(UTC)
 
@@ -396,7 +396,7 @@ class PromptService:
             # Get source prompt
             source_prompt = await self.get_prompt(prompt_id, user_id)
             if not source_prompt:
-                raise PromptError("Source prompt not found")
+                raise PromptError("Source prompt not found") from None
 
             # Check for name conflicts
             existing_result = await self.session.execute(
@@ -410,11 +410,11 @@ class PromptService:
             existing_prompt = existing_result.scalar_one_or_none()
 
             if existing_prompt:
-                raise PromptError("Prompt with this name already exists")
+                raise PromptError("Prompt with this name already exists") from None
 
             # Create new prompt from source
             prompt_dict = source_prompt.to_dict()
-            
+
             # Remove fields that should not be copied
             fields_to_remove = [
                 'id', 'owner_id', 'created_at', 'updated_at', 'content_hash',

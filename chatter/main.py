@@ -7,7 +7,7 @@ import traceback
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -18,7 +18,7 @@ from starlette.responses import Response
 from chatter.config import settings
 from chatter.utils.database import close_database, init_database
 from chatter.utils.logging import get_logger, setup_logging
-from chatter.utils.problem import ProblemException, InternalServerProblem
+from chatter.utils.problem import InternalServerProblem, ProblemException
 
 # Set up uvloop for better async performance
 try:
@@ -77,10 +77,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 pass
 
             # Capture current stack trace to help identify where the error originated
-            stack_trace = None
             try:
                 # Get the current stack trace (this will show the call path through the middleware)
-                stack_trace = traceback.format_stack()
+                traceback.format_stack()
             except Exception:
                 pass
 
@@ -220,10 +219,10 @@ def create_app() -> FastAPI:
 
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
-    
+
     # Add exception handlers
     from fastapi.exceptions import RequestValidationError
-    
+
     @app.exception_handler(ProblemException)
     async def problem_exception_handler(request: Request, exc: ProblemException) -> JSONResponse:
         """Handle ProblemException instances."""
@@ -236,7 +235,7 @@ def create_app() -> FastAPI:
             detail=exc.detail
         )
         return exc.to_response(request)
-    
+
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
         """Handle validation errors with RFC 9457 format."""
@@ -252,7 +251,7 @@ def create_app() -> FastAPI:
             validation_errors=exc.errors()
         )
         return validation_problem.to_response(request)
-    
+
     @app.exception_handler(Exception)
     async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
         """Global exception handler."""
@@ -271,7 +270,7 @@ def create_app() -> FastAPI:
             )
         else:
             problem = InternalServerProblem()
-        
+
         return problem.to_response(request)
 
     # --- DELAYED IMPORTS: Routers registered here only ---

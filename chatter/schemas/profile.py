@@ -6,7 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from chatter.models.profile import ProfileType
-from chatter.schemas.common import ListRequestBase, GetRequestBase, DeleteRequestBase
+from chatter.schemas.common import DeleteRequestBase, GetRequestBase, ListRequestBase
 
 
 class ProfileBase(BaseModel):

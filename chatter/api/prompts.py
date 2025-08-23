@@ -6,24 +6,24 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from chatter.api.auth import get_current_user
 from chatter.core.prompts import PromptError, PromptService
 from chatter.models.user import User
+from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.prompt import (
     PromptCloneRequest,
     PromptCreate,
+    PromptDeleteRequest,
+    PromptGetRequest,
     PromptListRequest,
     PromptListResponse,
     PromptResponse,
+    PromptStatsRequest,
     PromptStatsResponse,
     PromptTestRequest,
     PromptTestResponse,
     PromptUpdate,
-    PromptGetRequest,
-    PromptDeleteRequest,
-    PromptStatsRequest,
 )
-from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
+from chatter.utils.problem import BadRequestProblem, InternalServerProblem, NotFoundProblem, ProblemException
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -116,7 +116,7 @@ async def get_prompt(
 
     Args:
         prompt_id: Prompt ID
-        request: Get request parameters  
+        request: Get request parameters
         current_user: Current authenticated user
         prompt_service: Prompt service
 

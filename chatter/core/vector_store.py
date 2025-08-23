@@ -119,7 +119,7 @@ class PGVectorStore(AbstractVectorStore):
             if embeddings:
                 return await asyncio.to_thread(
                     self._store.add_embeddings,
-                    list(zip([doc.page_content for doc in documents], embeddings)),
+                    list(zip([doc.page_content for doc in documents], embeddings, strict=False)),
                     [doc.metadata for doc in documents],
                     ids
                 )
@@ -352,7 +352,7 @@ class VectorStoreManager:
                 **kwargs
             )
         else:
-            raise VectorStoreError(f"Unsupported vector store type: {store_type}")
+            raise VectorStoreError(f"Unsupported vector store type: {store_type}") from None
 
         self._stores[store_key] = store
         return store

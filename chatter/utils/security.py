@@ -1,9 +1,9 @@
 """Security utilities for authentication and password handling."""
 
-import bcrypt
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+import bcrypt
 from jose import JWTError, jwt
 
 from chatter.config import settings

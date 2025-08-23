@@ -64,7 +64,7 @@ class ToolServerService:
                 select(ToolServer).where(ToolServer.name == server_data.name)
             )
             if existing.scalar_one_or_none():
-                raise ToolServerServiceError(f"Server with name '{server_data.name}' already exists")
+                raise ToolServerServiceError(f"Server with name '{server_data.name}' already exists") from None
 
             # Create server model
             server = ToolServer(
@@ -270,7 +270,7 @@ class ToolServerService:
             server = result.scalar_one_or_none()
 
             if not server:
-                raise ToolServerServiceError(f"Server not found: {server_id}")
+                raise ToolServerServiceError(f"Server not found: {server_id}") from None
 
             success = await self._start_server_internal(server)
             await self.session.commit()
@@ -298,7 +298,7 @@ class ToolServerService:
             server = result.scalar_one_or_none()
 
             if not server:
-                raise ToolServerServiceError(f"Server not found: {server_id}")
+                raise ToolServerServiceError(f"Server not found: {server_id}") from None
 
             success = await self._stop_server_internal(server)
             await self.session.commit()
@@ -619,7 +619,7 @@ class ToolServerService:
         server = result.scalar_one_or_none()
 
         if not server:
-            raise ToolServerServiceError(f"Server not found: {server_id}")
+            raise ToolServerServiceError(f"Server not found: {server_id}") from None
 
         # Check if we need to perform health check
         now = datetime.now(UTC)

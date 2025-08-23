@@ -4,11 +4,10 @@ Script to generate Python SDK from OpenAPI specification.
 """
 
 import json
-import shutil
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 # Add the project root to Python path
 project_root = Path(__file__).parent.parent
@@ -20,19 +19,19 @@ from scripts.generate_openapi import generate_openapi_spec
 def generate_python_sdk():
     """Generate Python SDK using OpenAPI Generator."""
     print("🐍 Generating Python SDK...")
-    
+
     # Create output directories
     sdk_output_dir = project_root / "sdk" / "python"
     sdk_output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Generate fresh OpenAPI spec
     spec = generate_openapi_spec()
-    
+
     # Save the spec to a temporary file
     temp_spec_path = sdk_output_dir / "temp_openapi.json"
     with open(temp_spec_path, 'w', encoding='utf-8') as f:
         json.dump(spec, f, indent=2, ensure_ascii=False)
-    
+
     # Configuration for the SDK generation
     config = {
         "packageName": "chatter_sdk",
@@ -50,12 +49,12 @@ def generate_python_sdk():
         "library": "asyncio",
         "useAsyncio": True,
     }
-    
+
     # Save config to a file
     config_path = sdk_output_dir / "generator_config.json"
     with open(config_path, 'w', encoding='utf-8') as f:
         json.dump(config, f, indent=2)
-    
+
     try:
         # Generate the SDK using openapi-generator-cli
         cmd = [
@@ -67,40 +66,40 @@ def generate_python_sdk():
             "--additional-properties", f"pythonPackageName={config['packageName']}",
             "--skip-validate-spec"
         ]
-        
+
         print(f"🔧 Running command: {' '.join(cmd)}")
         result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(project_root))
-        
+
         if result.returncode != 0:
-            print(f"❌ SDK generation failed:")
+            print("❌ SDK generation failed:")
             print(f"stdout: {result.stdout}")
             print(f"stderr: {result.stderr}")
             return False
-        
-        print(f"✅ Python SDK generated successfully!")
+
+        print("✅ Python SDK generated successfully!")
         print(f"📁 SDK location: {sdk_output_dir}")
-        
+
         # Clean up temporary files
         temp_spec_path.unlink(missing_ok=True)
         config_path.unlink(missing_ok=True)
-        
+
         # Create a proper setup.py with better metadata
         create_enhanced_setup_py(sdk_output_dir, config)
-        
+
         # Create examples
         create_sdk_examples(sdk_output_dir)
-        
+
         # Create README for the SDK
         create_sdk_readme(sdk_output_dir, config)
-        
+
         return True
-        
+
     except Exception as e:
         print(f"❌ Error generating SDK: {e}")
         return False
 
 
-def create_enhanced_setup_py(sdk_dir: Path, config: Dict[str, Any]):
+def create_enhanced_setup_py(sdk_dir: Path, config: dict[str, Any]):
     """Create an enhanced setup.py file for the SDK."""
     setup_py_content = f'''"""Setup configuration for Chatter Python SDK."""
 
@@ -160,11 +159,11 @@ setup(
     zip_safe=False,
 )
 '''
-    
+
     setup_py_path = sdk_dir / "setup.py"
     with open(setup_py_path, 'w', encoding='utf-8') as f:
         f.write(setup_py_content)
-    
+
     print(f"✅ Enhanced setup.py created at: {setup_py_path}")
 
 
@@ -172,7 +171,7 @@ def create_sdk_examples(sdk_dir: Path):
     """Create example usage files for the SDK."""
     examples_dir = sdk_dir / "examples"
     examples_dir.mkdir(exist_ok=True)
-    
+
     # Basic usage example
     basic_example = '''"""Basic usage example for Chatter SDK."""
 
@@ -183,13 +182,13 @@ from chatter_sdk.models import UserCreate, ChatRequest
 
 async def main():
     """Example of basic SDK usage."""
-    
+
     # Initialize the client
     client = ChatterClient(
         base_url="http://localhost:8000",
         # access_token="your_token_here"  # Optional if registering/logging in
     )
-    
+
     try:
         # Register a new user
         user_data = UserCreate(
@@ -197,35 +196,35 @@ async def main():
             username="testuser",
             password="securepassword123"
         )
-        
+
         auth_response = await client.auth.register(user_data)
         print(f"User registered: {auth_response.user.username}")
-        
+
         # The client is now authenticated automatically
-        
+
         # Create a conversation
         conversation = await client.chat.create_conversation({
             "title": "My First Conversation",
             "description": "Testing the SDK"
         })
         print(f"Conversation created: {conversation.id}")
-        
+
         # Send a chat message
         chat_request = ChatRequest(
             message="Hello, how are you?",
             conversation_id=conversation.id
         )
-        
+
         response = await client.chat.chat(chat_request)
         print(f"Assistant: {response.message.content}")
-        
+
         # List conversations
         conversations = await client.chat.list_conversations()
         print(f"Total conversations: {conversations.total}")
-        
+
     except Exception as e:
         print(f"Error: {e}")
-    
+
     finally:
         await client.close()
 
@@ -233,10 +232,10 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 '''
-    
+
     with open(examples_dir / "basic_usage.py", 'w', encoding='utf-8') as f:
         f.write(basic_example)
-    
+
     # Advanced example with documents and profiles
     advanced_example = '''"""Advanced usage example with document upload and profiles."""
 
@@ -248,12 +247,12 @@ from chatter_sdk.models import ProfileCreate, DocumentSearchRequest
 
 async def main():
     """Example of advanced SDK features."""
-    
+
     client = ChatterClient(
         base_url="http://localhost:8000",
         access_token="your_access_token_here"  # Assume already authenticated
     )
-    
+
     try:
         # Create a custom LLM profile
         profile = await client.profiles.create_profile(ProfileCreate(
@@ -266,7 +265,7 @@ async def main():
             system_prompt="You are a helpful technical assistant specializing in software development."
         ))
         print(f"Profile created: {profile.name}")
-        
+
         # Upload a document (if you have a file)
         # with open("sample.pdf", "rb") as f:
         #     document = await client.documents.upload_document(
@@ -275,7 +274,7 @@ async def main():
         #         description="A sample PDF for testing"
         #     )
         #     print(f"Document uploaded: {document.title}")
-        
+
         # Search documents
         search_request = DocumentSearchRequest(
             query="technical documentation",
@@ -283,14 +282,14 @@ async def main():
         )
         search_results = await client.documents.search_documents(search_request)
         print(f"Found {len(search_results.results)} documents")
-        
+
         # Start a conversation with the custom profile and retrieval
         conversation = await client.chat.create_conversation({
             "title": "Technical Discussion",
             "profile_id": profile.id,
             "enable_retrieval": True
         })
-        
+
         # Chat with retrieval enabled
         response = await client.chat.chat({
             "message": "Explain the benefits of async programming in Python",
@@ -298,14 +297,14 @@ async def main():
             "enable_retrieval": True
         })
         print(f"Response with context: {response.message.content}")
-        
+
         # Get analytics
         analytics = await client.analytics.get_conversation_stats()
         print(f"Total conversations: {analytics.total_conversations}")
-        
+
     except Exception as e:
         print(f"Error: {e}")
-    
+
     finally:
         await client.close()
 
@@ -313,14 +312,14 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 '''
-    
+
     with open(examples_dir / "advanced_usage.py", 'w', encoding='utf-8') as f:
         f.write(advanced_example)
-    
+
     print(f"✅ SDK examples created in: {examples_dir}")
 
 
-def create_sdk_readme(sdk_dir: Path, config: Dict[str, Any]):
+def create_sdk_readme(sdk_dir: Path, config: dict[str, Any]):
     """Create a comprehensive README for the SDK."""
     readme_content = f'''# Chatter Python SDK
 
@@ -342,7 +341,7 @@ from chatter_sdk.models import UserCreate, ChatRequest
 async def main():
     # Initialize the client
     client = ChatterClient(base_url="http://localhost:8000")
-    
+
     try:
         # Register and authenticate
         user_data = UserCreate(
@@ -351,13 +350,13 @@ async def main():
             password="securepassword"
         )
         auth_response = await client.auth.register(user_data)
-        
+
         # Start chatting
         response = await client.chat.chat(ChatRequest(
             message="Hello, how can you help me today?"
         ))
         print(f"Assistant: {{response.message.content}}")
-        
+
     finally:
         await client.close()
 
@@ -426,18 +425,18 @@ from chatter_sdk import ChatterClient
 
 async def basic_chat():
     client = ChatterClient(base_url="http://localhost:8000")
-    
+
     # Login with existing credentials
     await client.auth.login({{
         "email": "user@example.com",
         "password": "password"
     }})
-    
+
     # Send a message
     response = await client.chat.chat({{
         "message": "What's the weather like today?"
     }})
-    
+
     print(response.message.content)
     await client.close()
 
@@ -452,7 +451,7 @@ from chatter_sdk import ChatterClient
 
 async def document_example():
     client = ChatterClient(access_token="your_token")
-    
+
     # Upload a document
     with open("document.pdf", "rb") as f:
         document = await client.documents.upload_document(
@@ -460,16 +459,16 @@ async def document_example():
             title="Important Document",
             description="Company policy document"
         )
-    
+
     # Search documents
     results = await client.documents.search_documents({{
         "query": "vacation policy",
         "limit": 5
     }})
-    
+
     for result in results.results:
         print(f"Found: {{result.document.title}} (score: {{result.score}})")
-    
+
     await client.close()
 
 asyncio.run(document_example())
@@ -483,7 +482,7 @@ from chatter_sdk import ChatterClient
 
 async def profile_example():
     client = ChatterClient(access_token="your_token")
-    
+
     # Create a custom profile
     profile = await client.profiles.create_profile({{
         "name": "Code Assistant",
@@ -492,13 +491,13 @@ async def profile_example():
         "temperature": 0.1,
         "system_prompt": "You are a senior software engineer assistant."
     }})
-    
+
     # Use the profile in a conversation
     response = await client.chat.chat({{
         "message": "Explain async/await in Python",
         "profile_id": profile.id
     }})
-    
+
     print(response.message.content)
     await client.close()
 
@@ -520,7 +519,7 @@ from chatter_sdk.exceptions import (
 
 async def error_handling_example():
     client = ChatterClient()
-    
+
     try:
         await client.auth.login({{
             "email": "invalid@email.com",
@@ -578,18 +577,18 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Documentation: {config['packageUrl']}#readme
 - Email: {config['infoEmail']}
 '''
-    
+
     readme_path = sdk_dir / "README.md"
     with open(readme_path, 'w', encoding='utf-8') as f:
         f.write(readme_content)
-    
+
     print(f"✅ SDK README created at: {readme_path}")
 
 
 def main():
     """Main function to generate the Python SDK."""
     success = generate_python_sdk()
-    
+
     if success:
         print("\n🎉 Python SDK generated successfully!")
         print("\n📋 Next steps:")

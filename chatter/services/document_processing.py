@@ -418,7 +418,7 @@ class DocumentProcessingService:
                     embeddings, usage_info = await self.embedding_service.generate_embeddings(batch_texts)
 
                     # Store embeddings
-                    for chunk, embedding in zip(batch, embeddings):
+                    for chunk, embedding in zip(batch, embeddings, strict=False):
                         embedding_metadata = {
                             "model": usage_info.get("model"),
                             "provider": usage_info.get("provider"),

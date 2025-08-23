@@ -21,7 +21,7 @@ from chatter.schemas.toolserver import (
 from chatter.services.toolserver import ToolServerService, ToolServerServiceError
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
+from chatter.utils.problem import BadRequestProblem, InternalServerProblem, NotFoundProblem, ProblemException
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -534,7 +534,7 @@ async def bulk_server_operation(
                 elif operation_data.operation == "disable":
                     success = await service.disable_server(server_id)
                 else:
-                    raise ValueError(f"Unknown operation: {operation_data.operation}")
+                    raise ValueError(f"Unknown operation: {operation_data.operation}") from None
 
                 if success:
                     successful += 1

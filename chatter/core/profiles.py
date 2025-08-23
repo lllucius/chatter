@@ -58,7 +58,7 @@ class ProfileService:
             existing_profile = existing_result.scalar_one_or_none()
 
             if existing_profile:
-                raise ProfileError("Profile with this name already exists")
+                raise ProfileError("Profile with this name already exists") from None
 
             # Validate LLM provider
             available_providers = self.llm_service.list_available_providers()
@@ -235,7 +235,7 @@ class ProfileService:
                 existing_profile = existing_result.scalar_one_or_none()
 
                 if existing_profile:
-                    raise ProfileError("Profile with this name already exists")
+                    raise ProfileError("Profile with this name already exists") from None
 
             # Update fields
             update_dict = update_data.model_dump(exclude_unset=True)
@@ -317,12 +317,12 @@ class ProfileService:
             # Get profile
             profile = await self.get_profile(profile_id, user_id)
             if not profile:
-                raise ProfileError("Profile not found")
+                raise ProfileError("Profile not found") from None
 
             # Create LLM provider from profile
             provider = self.llm_service.create_provider_from_profile(profile)
             if not provider:
-                raise ProfileError("Failed to create LLM provider from profile")
+                raise ProfileError("Failed to create LLM provider from profile") from None
 
             # Prepare messages
             from langchain_core.messages import HumanMessage, SystemMessage
@@ -412,7 +412,7 @@ class ProfileService:
             # Get source profile
             source_profile = await self.get_profile(profile_id, user_id)
             if not source_profile:
-                raise ProfileError("Source profile not found")
+                raise ProfileError("Source profile not found") from None
 
             # Check for name conflicts
             existing_result = await self.session.execute(
@@ -426,7 +426,7 @@ class ProfileService:
             existing_profile = existing_result.scalar_one_or_none()
 
             if existing_profile:
-                raise ProfileError("Profile with this name already exists")
+                raise ProfileError("Profile with this name already exists") from None
 
             # Create profile data from source
             profile_data = ProfileCreate(

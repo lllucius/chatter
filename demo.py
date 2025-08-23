@@ -95,7 +95,7 @@ class ChatterAPIDemo:
             Headers with authorization
         """
         if not self.token:
-            raise ValueError("Not authenticated. Please login first.")
+            raise ValueError("Not authenticated. Please login first.") from None
 
         return {"Authorization": f"Bearer {self.token}"}
 

@@ -12,7 +12,7 @@ from chatter.schemas.toolserver import *
 __all__ = [
     # Common schemas
     "PaginationRequest",
-    "SortingRequest", 
+    "SortingRequest",
     "PaginatedRequest",
     "ListRequestBase",
     "GetRequestBase",
@@ -48,7 +48,7 @@ __all__ = [
     "ConversationSearchRequest",
     "ConversationSearchResponse",
     "ConversationGetRequest",
-    "ConversationDeleteRequest", 
+    "ConversationDeleteRequest",
     "ConversationMessagesRequest",
     "AvailableToolsRequest",
     "McpStatusRequest",

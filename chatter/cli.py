@@ -8,14 +8,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+import httpx
 import typer
 import uvicorn
 from rich.console import Console
-from rich.table import Table
-from rich.prompt import Prompt, Confirm
 from rich.panel import Panel
-from rich.text import Text
-import httpx
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
 
 from chatter.config import settings
 from chatter.utils.database import check_database_connection, init_database
@@ -32,28 +31,28 @@ logger = get_logger(__name__)
 
 class APIClient:
     """HTTP client for interacting with Chatter API."""
-    
+
     def __init__(self, base_url: str = None, access_token: str = None):
         self.base_url = base_url or f"http://{settings.host}:{settings.port}"
         self.access_token = access_token or settings.chatter_access_token
         self.client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
-        
+
     async def close(self):
         """Close the HTTP client."""
         await self.client.aclose()
-        
+
     def _get_headers(self):
         """Get request headers with authentication."""
         headers = {"Content-Type": "application/json"}
         if self.access_token:
             headers["Authorization"] = f"Bearer {self.access_token}"
         return headers
-        
+
     async def request(self, method: str, endpoint: str, **kwargs):
         """Make an HTTP request to the API."""
         url = f"{self.base_url}{settings.api_prefix}{endpoint}"
         headers = self._get_headers()
-        
+
         try:
             response = await self.client.request(
                 method, url, headers=headers, **kwargs
@@ -63,21 +62,21 @@ class APIClient:
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
                 console.print("❌ Authentication required. Please login first.")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from None
             elif e.response.status_code == 403:
                 console.print("❌ Access denied. Insufficient permissions.")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from None
             else:
                 try:
                     error_detail = e.response.json().get("detail", str(e))
                 except:
                     error_detail = str(e)
                 console.print(f"❌ API Error ({e.response.status_code}): {error_detail}")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from None
         except httpx.RequestError as e:
             console.print(f"❌ Connection error: {e}")
             console.print("💡 Make sure the Chatter server is running.")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from None
 
 
 def get_api_client() -> APIClient:
@@ -85,7 +84,7 @@ def get_api_client() -> APIClient:
     # Try to get access token from environment or config file
     token = os.getenv("CHATTER_ACCESS_TOKEN")
     base_url = os.getenv("CHATTER_BASE_URL", f"http://{settings.host}:{settings.port}")
-    
+
     return APIClient(base_url=base_url, access_token=token)
 
 
@@ -122,13 +121,13 @@ def list_prompts(
                 params["is_public"] = public
             if chain is not None:
                 params["is_chain"] = chain
-                
+
             response = await api_client.request("GET", "/prompts", params=params)
-            
+
             if not response or not response.get("prompts"):
                 console.print("📝 No prompts found.")
                 return
-                
+
             # Create table
             table = Table(title=f"Prompts ({response['total_count']} total)")
             table.add_column("ID", style="dim", no_wrap=True)
@@ -138,7 +137,7 @@ def list_prompts(
             table.add_column("Usage", style="green")
             table.add_column("Public", style="magenta")
             table.add_column("Created", style="dim")
-            
+
             for prompt in response["prompts"]:
                 table.add_row(
                     prompt["id"][:8] + "...",
@@ -149,18 +148,18 @@ def list_prompts(
                     "Yes" if prompt.get("is_public") else "No",
                     prompt.get("created_at", "")[:10] if prompt.get("created_at") else "N/A"
                 )
-            
+
             console.print(table)
-            
+
             # Show pagination info
             total = response["total_count"]
             showing_from = offset + 1
             showing_to = min(offset + limit, total)
             console.print(f"\n📄 Showing {showing_from}-{showing_to} of {total} prompts")
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_list())
 
 
@@ -177,7 +176,7 @@ def create_prompt(
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Interactive mode"),
 ) -> None:
     """Create a new prompt."""
-    
+
     async def _create():
         api_client = get_api_client()
         try:
@@ -195,7 +194,7 @@ def create_prompt(
                 tags = [tag.strip() for tag in tags_input.split(",") if tag.strip()] if tags_input else None
             else:
                 tags = [tag.strip() for tag in tags.split(",") if tag.strip()] if tags else None
-            
+
             # Prepare data
             prompt_data = {
                 "name": name,
@@ -205,23 +204,23 @@ def create_prompt(
                 "template_format": template_format,
                 "is_public": public,
             }
-            
+
             if description:
                 prompt_data["description"] = description
             if tags:
                 prompt_data["tags"] = tags
-                
+
             response = await api_client.request("POST", "/prompts", json=prompt_data)
-            
+
             console.print("✅ Prompt created successfully!")
             console.print(f"📝 Prompt ID: {response['id']}")
             console.print(f"🏷️  Name: {response['name']}")
             console.print(f"📂 Category: {response['category']}")
             console.print(f"🔧 Type: {response['prompt_type']}")
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_create())
 
 
@@ -234,19 +233,19 @@ def show_prompt(
         api_client = get_api_client()
         try:
             response = await api_client.request("GET", f"/prompts/{prompt_id}")
-            
+
             if not response:
                 console.print(f"❌ Prompt {prompt_id} not found.")
                 return
-                
+
             # Create detailed view
             console.print(Panel.fit(f"[bold]Prompt: {response['name']}[/bold]"))
-            
+
             # Basic info table
             basic_table = Table(title="Basic Information", show_header=False)
             basic_table.add_column("Field", style="cyan")
             basic_table.add_column("Value", style="white")
-            
+
             basic_table.add_row("ID", response["id"])
             basic_table.add_row("Name", response["name"])
             basic_table.add_row("Description", response.get("description", "N/A"))
@@ -256,9 +255,9 @@ def show_prompt(
             basic_table.add_row("Public", "Yes" if response.get("is_public") else "No")
             basic_table.add_row("Chain", "Yes" if response.get("is_chain") else "No")
             basic_table.add_row("Created", response.get("created_at", "N/A"))
-            
+
             console.print(basic_table)
-            
+
             # Content
             content_panel = Panel(
                 response["content"],
@@ -266,28 +265,28 @@ def show_prompt(
                 border_style="blue"
             )
             console.print(content_panel)
-            
+
             # Usage stats table
             stats_table = Table(title="Usage Statistics", show_header=False)
             stats_table.add_column("Metric", style="cyan")
             stats_table.add_column("Value", style="green")
-            
+
             stats_table.add_row("Usage Count", str(response.get("usage_count", 0)))
             stats_table.add_row("Total Tokens", str(response.get("total_tokens_used", 0)))
             stats_table.add_row("Total Cost", f"${response.get('total_cost', 0):.4f}")
             stats_table.add_row("Last Used", response.get("last_used_at", "Never")[:19] if response.get("last_used_at") else "Never")
-            
+
             console.print(stats_table)
-            
+
             # Variables and metadata
             if response.get("variables"):
                 console.print(f"\\n🔧 Variables: {', '.join(response['variables'])}")
             if response.get("tags"):
                 console.print(f"🏷️  Tags: {', '.join(response['tags'])}")
-                
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_show())
 
 
@@ -302,7 +301,7 @@ def delete_prompt(
         try:
             # Get prompt details first
             prompt = await api_client.request("GET", f"/prompts/{prompt_id}")
-            
+
             if not force:
                 console.print(f"Prompt: {prompt['name']}")
                 console.print(f"Type: {prompt['prompt_type']}")
@@ -310,13 +309,13 @@ def delete_prompt(
                 if not Confirm.ask("Are you sure you want to delete this prompt?"):
                     console.print("❌ Deletion cancelled.")
                     return
-            
+
             await api_client.request("DELETE", f"/prompts/{prompt_id}")
             console.print("✅ Prompt deleted successfully!")
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_delete())
 
 
@@ -339,14 +338,14 @@ def test_prompt(
                 except json.JSONDecodeError:
                     console.print("❌ Invalid JSON format for variables.")
                     return
-            
+
             test_data = {
                 "variables": test_variables,
                 "validate_only": validate_only
             }
-            
+
             response = await api_client.request("POST", f"/prompts/{prompt_id}/test", json=test_data)
-            
+
             # Show validation results
             validation = response["validation_result"]
             if validation["valid"]:
@@ -355,11 +354,11 @@ def test_prompt(
                 console.print("❌ Validation failed!")
                 for error in validation.get("errors", []):
                     console.print(f"  • {error}")
-            
+
             # Show warnings
             for warning in validation.get("warnings", []):
                 console.print(f"⚠️  {warning}")
-            
+
             # Show rendered content
             if response.get("rendered_content"):
                 content_panel = Panel(
@@ -368,15 +367,15 @@ def test_prompt(
                     border_style="green"
                 )
                 console.print(content_panel)
-            
+
             # Show stats
             console.print(f"\\n⏱️  Test duration: {response['test_duration_ms']}ms")
             if response.get("estimated_tokens"):
                 console.print(f"🔢 Estimated tokens: {response['estimated_tokens']}")
-                
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_test())
 
 
@@ -394,17 +393,17 @@ def clone_prompt(
                 "name": name,
                 "description": description
             }
-            
+
             response = await api_client.request("POST", f"/prompts/{prompt_id}/clone", json=clone_data)
-            
+
             console.print("✅ Prompt cloned successfully!")
             console.print(f"📝 New Prompt ID: {response['id']}")
             console.print(f"🏷️  Name: {response['name']}")
             console.print(f"📂 Category: {response['category']}")
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_clone())
 
 
@@ -671,41 +670,41 @@ def generate_docs(
     """Generate OpenAPI documentation."""
     import sys
     from pathlib import Path
-    
+
     # Add project root to path and import the generation script
     project_root = Path(__file__).parent.parent
     sys.path.insert(0, str(project_root))
-    
+
     try:
-        from scripts.generate_openapi import generate_openapi_spec, export_openapi_json, export_openapi_yaml
-        
+        from scripts.generate_openapi import export_openapi_json, export_openapi_yaml, generate_openapi_spec
+
         console.print("🚀 Generating OpenAPI documentation...")
-        
+
         # Create output directory
         output_path = Path(output_dir)
         output_path.mkdir(parents=True, exist_ok=True)
-        
+
         # Generate OpenAPI spec
         spec = generate_openapi_spec()
-        
+
         # Export in requested formats
         if format in ["json", "all"]:
             export_openapi_json(spec, output_path / "openapi.json")
             version = spec.get("info", {}).get("version", "unknown")
             export_openapi_json(spec, output_path / f"openapi-v{version}.json")
-        
+
         if format in ["yaml", "all"]:
             export_openapi_yaml(spec, output_path / "openapi.yaml")
             version = spec.get("info", {}).get("version", "unknown")
             export_openapi_yaml(spec, output_path / f"openapi-v{version}.yaml")
-        
+
         console.print(f"✅ Documentation generated in: {output_path}")
-        console.print(f"📊 Total endpoints: {len([path for path in spec.get('paths', {}).keys()])}")
+        console.print(f"📊 Total endpoints: {len(list(spec.get('paths', {}).keys()))}")
         console.print(f"🏷️  Total schemas: {len(spec.get('components', {}).get('schemas', {}))}")
-        
+
     except Exception as e:
         console.print(f"❌ Failed to generate documentation: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
 
 @docs_app.command("sdk")
@@ -716,34 +715,34 @@ def generate_sdk(
     """Generate SDK from OpenAPI specification."""
     if language != "python":
         console.print(f"❌ Unsupported language: {language}. Currently only 'python' is supported.")
-        raise typer.Exit(1)
-    
+        raise typer.Exit(1) from None
+
     import sys
     from pathlib import Path
-    
+
     # Add project root to path and import the generation script
     project_root = Path(__file__).parent.parent
     sys.path.insert(0, str(project_root))
-    
+
     try:
         from scripts.generate_sdk import generate_python_sdk
-        
+
         console.print(f"🐍 Generating {language} SDK...")
-        
+
         # Override the output directory in the script
         import scripts.generate_sdk as sdk_module
         original_project_root = sdk_module.project_root
         sdk_module.project_root = project_root
-        
+
         # Set custom output directory
         sdk_output_dir = Path(output_dir) / language
         sdk_output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         success = generate_python_sdk()
-        
+
         # Restore original project root
         sdk_module.project_root = original_project_root
-        
+
         if success:
             console.print(f"✅ {language.title()} SDK generated successfully!")
             console.print(f"📁 SDK location: {project_root / 'sdk' / language}")
@@ -753,11 +752,11 @@ def generate_sdk(
             console.print(f"3. Install the SDK: pip install -e ./{project_root / 'sdk' / language}")
             console.print("4. Package for distribution: python -m build")
         else:
-            raise typer.Exit(1)
-            
+            raise typer.Exit(1) from None
+
     except Exception as e:
         console.print(f"❌ Failed to generate SDK: {e}")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from None
 
 
 @docs_app.command("serve")
@@ -769,19 +768,19 @@ def serve_docs(
     import http.server
     import socketserver
     from pathlib import Path
-    
+
     docs_path = Path(docs_dir)
     if not docs_path.exists():
         console.print(f"❌ Documentation directory not found: {docs_path}")
         console.print("💡 Run 'chatter docs generate' first to create documentation.")
-        raise typer.Exit(1)
-    
+        raise typer.Exit(1) from None
+
     # Change to the docs directory
     os.chdir(docs_path)
-    
+
     # Create a simple HTTP server
     handler = http.server.SimpleHTTPRequestHandler
-    
+
     try:
         with socketserver.TCPServer(("", port), handler) as httpd:
             console.print(f"📚 Serving documentation at http://localhost:{port}")
@@ -842,16 +841,16 @@ def list_profiles(
                 params["tags"] = tags
             if public is not None:
                 params["is_public"] = public
-                
+
             response = await api_client.request("GET", "/profiles", params=params)
-            
+
             if not response or not response.get("profiles"):
                 console.print("📝 No profiles found.")
                 return
-                
+
             profiles = response["profiles"]
             total = response.get("total_count", len(profiles))
-            
+
             table = Table(title=f"LLM Profiles ({len(profiles)} of {total})")
             table.add_column("ID", style="cyan", no_wrap=True)
             table.add_column("Name", style="bright_white")
@@ -860,7 +859,7 @@ def list_profiles(
             table.add_column("Type", style="yellow")
             table.add_column("Public", style="magenta")
             table.add_column("Created", style="dim")
-            
+
             for profile in profiles:
                 table.add_row(
                     profile["id"][:8] + "...",
@@ -871,16 +870,16 @@ def list_profiles(
                     "✓" if profile.get("is_public") else "✗",
                     profile["created_at"][:10] if profile.get("created_at") else "N/A"
                 )
-                
+
             console.print(table)
-            
+
             if total > len(profiles):
                 console.print(f"\n💡 Showing {offset + 1}-{offset + len(profiles)} of {total} profiles")
                 console.print(f"Use --offset {offset + limit} to see more")
-                
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_list())
 
 
@@ -893,50 +892,50 @@ def show_profile(
         api_client = get_api_client()
         try:
             response = await api_client.request("GET", f"/profiles/{profile_id}")
-            
+
             if not response:
                 console.print(f"❌ Profile {profile_id} not found.")
                 return
-                
+
             # Create detailed view
             console.print(Panel.fit(f"[bold]Profile: {response['name']}[/bold]"))
-            
+
             # Basic info table
             basic_table = Table(title="Basic Information", show_header=False)
             basic_table.add_column("Field", style="cyan")
             basic_table.add_column("Value", style="white")
-            
+
             basic_table.add_row("ID", response["id"])
             basic_table.add_row("Name", response["name"])
             basic_table.add_row("Description", response.get("description", "N/A"))
             basic_table.add_row("Type", response["profile_type"])
             basic_table.add_row("Public", "Yes" if response.get("is_public") else "No")
             basic_table.add_row("Created", response.get("created_at", "N/A"))
-            
+
             # LLM config table
             llm_table = Table(title="LLM Configuration", show_header=False)
             llm_table.add_column("Parameter", style="cyan")
             llm_table.add_column("Value", style="white")
-            
+
             llm_table.add_row("Provider", response["llm_provider"])
             llm_table.add_row("Model", response["llm_model"])
             llm_table.add_row("Temperature", str(response.get("temperature", "N/A")))
             llm_table.add_row("Max Tokens", str(response.get("max_tokens", "N/A")))
             llm_table.add_row("Top P", str(response.get("top_p", "N/A")))
             llm_table.add_row("Top K", str(response.get("top_k", "N/A")))
-            
+
             console.print(basic_table)
             console.print()
             console.print(llm_table)
-            
+
             # System prompt
             if response.get("system_prompt"):
                 console.print("\n[bold]System Prompt:[/bold]")
                 console.print(Panel(response["system_prompt"], expand=False))
-                
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_show())
 
 
@@ -953,7 +952,7 @@ def create_profile(
     interactive: bool = typer.Option(False, "--interactive", "-i", help="Interactive mode"),
 ) -> None:
     """Create a new LLM profile."""
-    
+
     async def _create():
         api_client = get_api_client()
         try:
@@ -968,7 +967,7 @@ def create_profile(
                 max_tokens = int(Prompt.ask("Max tokens", default="4096"))
                 system_prompt = Prompt.ask("System prompt (optional)", default="")
                 public = Confirm.ask("Make public?", default=False)
-            
+
             # Prepare data
             profile_data = {
                 "name": name,
@@ -978,23 +977,23 @@ def create_profile(
                 "max_tokens": max_tokens,
                 "is_public": public,
             }
-            
+
             if description:
                 profile_data["description"] = description
             if system_prompt:
                 profile_data["system_prompt"] = system_prompt
-                
+
             response = await api_client.request("POST", "/profiles", json=profile_data)
-            
+
             console.print("✅ Profile created successfully!")
             console.print(f"📝 Profile ID: {response['id']}")
             console.print(f"🏷️  Name: {response['name']}")
             console.print(f"🤖 Provider: {response['llm_provider']}")
             console.print(f"🧠 Model: {response['llm_model']}")
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_create())
 
 
@@ -1009,19 +1008,19 @@ def delete_profile(
         try:
             # Get profile details first
             profile = await api_client.request("GET", f"/profiles/{profile_id}")
-            
+
             if not force:
                 console.print(f"Profile: {profile['name']}")
                 if not Confirm.ask("Are you sure you want to delete this profile?"):
                     console.print("❌ Deletion cancelled.")
                     return
-            
+
             await api_client.request("DELETE", f"/profiles/{profile_id}")
             console.print("✅ Profile deleted successfully!")
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_delete())
 
 
@@ -1041,21 +1040,21 @@ def list_conversations(
         try:
             params = {"limit": limit, "offset": offset}
             response = await api_client.request("GET", "/chat/conversations", params=params)
-            
+
             if not response or not response.get("conversations"):
                 console.print("💬 No conversations found.")
                 return
-                
+
             conversations = response["conversations"]
             total = response.get("total_count", len(conversations))
-            
+
             table = Table(title=f"Conversations ({len(conversations)} of {total})")
             table.add_column("ID", style="cyan", no_wrap=True)
             table.add_column("Title", style="bright_white")
             table.add_column("Messages", style="green")
             table.add_column("Created", style="blue")
             table.add_column("Updated", style="yellow")
-            
+
             for conv in conversations:
                 table.add_row(
                     conv["id"][:8] + "...",
@@ -1064,16 +1063,16 @@ def list_conversations(
                     conv["created_at"][:10] if conv.get("created_at") else "N/A",
                     conv["updated_at"][:10] if conv.get("updated_at") else "N/A"
                 )
-                
+
             console.print(table)
-            
+
             if total > len(conversations):
                 console.print(f"\n💡 Showing {offset + 1}-{offset + len(conversations)} of {total} conversations")
                 console.print(f"Use --offset {offset + limit} to see more")
-                
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_list())
 
 
@@ -1089,46 +1088,46 @@ def show_conversation(
         try:
             # Get conversation details
             conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
-            
+
             console.print(Panel.fit(f"[bold]Conversation: {conv.get('title', 'Untitled')}[/bold]"))
-            
+
             # Basic info
             info_table = Table(title="Information", show_header=False)
             info_table.add_column("Field", style="cyan")
             info_table.add_column("Value", style="white")
-            
+
             info_table.add_row("ID", conv["id"])
             info_table.add_row("Title", conv.get("title", "Untitled"))
             info_table.add_row("Messages", str(conv.get("message_count", 0)))
             info_table.add_row("Created", conv.get("created_at", "N/A"))
             info_table.add_row("Updated", conv.get("updated_at", "N/A"))
-            
+
             console.print(info_table)
-            
+
             if messages:
                 # Get messages
                 msg_response = await api_client.request(
-                    "GET", 
+                    "GET",
                     f"/chat/conversations/{conversation_id}/messages",
                     params={"limit": limit}
                 )
-                
+
                 if msg_response and msg_response.get("messages"):
                     console.print(f"\n[bold]Recent Messages (last {limit}):[/bold]")
-                    
+
                     for msg in msg_response["messages"][-limit:]:
                         role = msg.get("role", "unknown")
                         content = msg.get("content", "")
                         timestamp = msg.get("created_at", "")[:19] if msg.get("created_at") else ""
-                        
+
                         role_color = "blue" if role == "user" else "green" if role == "assistant" else "yellow"
-                        
+
                         console.print(f"\n[{role_color}]●[/{role_color}] [bold]{role.title()}[/bold] {timestamp}")
                         console.print(Panel(content, expand=False, border_style=role_color))
-                        
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_show())
 
 
@@ -1143,20 +1142,20 @@ def delete_conversation(
         try:
             # Get conversation details first
             conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
-            
+
             if not force:
                 console.print(f"Conversation: {conv.get('title', 'Untitled')}")
                 console.print(f"Messages: {conv.get('message_count', 0)}")
                 if not Confirm.ask("Are you sure you want to delete this conversation?"):
                     console.print("❌ Deletion cancelled.")
                     return
-            
+
             await api_client.request("DELETE", f"/chat/conversations/{conversation_id}")
             console.print("✅ Conversation deleted successfully!")
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_delete())
 
 
@@ -1173,16 +1172,16 @@ def export_conversation(
             # Get conversation and messages
             conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
             messages = await api_client.request(
-                "GET", 
+                "GET",
                 f"/chat/conversations/{conversation_id}/messages"
             )
-            
+
             # Generate filename if not provided
             if not output_file:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
                 title = conv.get("title", "conversation").replace(" ", "_")
                 output_file = f"{title}_{timestamp}.{format}"
-            
+
             # Export based on format
             if format == "json":
                 export_data = {
@@ -1191,38 +1190,38 @@ def export_conversation(
                 }
                 with open(output_file, "w") as f:
                     json.dump(export_data, f, indent=2, default=str)
-                    
+
             elif format == "txt":
                 with open(output_file, "w") as f:
                     f.write(f"Conversation: {conv.get('title', 'Untitled')}\n")
                     f.write(f"Created: {conv.get('created_at', 'N/A')}\n")
                     f.write("=" * 50 + "\n\n")
-                    
+
                     for msg in messages.get("messages", []):
                         f.write(f"{msg.get('role', 'unknown').upper()}: {msg.get('content', '')}\n\n")
-                        
+
             elif format == "md":
                 with open(output_file, "w") as f:
                     f.write(f"# {conv.get('title', 'Untitled')}\n\n")
                     f.write(f"**Created:** {conv.get('created_at', 'N/A')}\n\n")
                     f.write("---\n\n")
-                    
+
                     for msg in messages.get("messages", []):
                         role = msg.get("role", "unknown")
                         content = msg.get("content", "")
-                        
+
                         if role == "user":
                             f.write(f"**👤 User:** {content}\n\n")
                         elif role == "assistant":
                             f.write(f"**🤖 Assistant:** {content}\n\n")
                         else:
                             f.write(f"**{role.title()}:** {content}\n\n")
-            
+
             console.print(f"✅ Conversation exported to: {output_file}")
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_export())
 
 
@@ -1244,16 +1243,16 @@ def list_documents(
             params = {"limit": limit, "offset": offset}
             if file_type:
                 params["file_type"] = file_type
-                
+
             response = await api_client.request("GET", "/documents", params=params)
-            
+
             if not response or not response.get("documents"):
                 console.print("📄 No documents found.")
                 return
-                
+
             documents = response["documents"]
             total = response.get("total_count", len(documents))
-            
+
             table = Table(title=f"Documents ({len(documents)} of {total})")
             table.add_column("ID", style="cyan", no_wrap=True)
             table.add_column("Title", style="bright_white")
@@ -1261,7 +1260,7 @@ def list_documents(
             table.add_column("Size", style="blue")
             table.add_column("Status", style="yellow")
             table.add_column("Uploaded", style="dim")
-            
+
             for doc in documents:
                 size_mb = doc.get("file_size", 0) / (1024 * 1024) if doc.get("file_size") else 0
                 table.add_row(
@@ -1272,16 +1271,16 @@ def list_documents(
                     doc.get("status", "unknown"),
                     doc["created_at"][:10] if doc.get("created_at") else "N/A"
                 )
-                
+
             console.print(table)
-            
+
             if total > len(documents):
                 console.print(f"\n💡 Showing {offset + 1}-{offset + len(documents)} of {total} documents")
                 console.print(f"Use --offset {offset + limit} to see more")
-                
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_list())
 
 
@@ -1297,50 +1296,50 @@ def upload_document(
         api_client = get_api_client()
         try:
             file_path_obj = Path(file_path)
-            
+
             if not file_path_obj.exists():
                 console.print(f"❌ File not found: {file_path}")
                 return
-                
+
             if not title:
                 title = file_path_obj.stem
-                
+
             console.print(f"📤 Uploading: {file_path_obj.name}")
-            
+
             # Prepare multipart form data
             files = {
                 "file": (file_path_obj.name, open(file_path_obj, "rb"))
             }
-            
+
             data = {"title": title}
             if description:
                 data["description"] = description
             if tags:
                 data["tags"] = tags
-                
+
             # Remove Content-Type header to let httpx set it for multipart
             headers = {}
             if api_client.access_token:
                 headers["Authorization"] = f"Bearer {api_client.access_token}"
-                
+
             url = f"{api_client.base_url}{settings.api_prefix}/documents/upload"
             response = await api_client.client.post(url, headers=headers, files=files, data=data)
             response.raise_for_status()
-            
+
             result = response.json()
-            
+
             console.print("✅ Document uploaded successfully!")
             console.print(f"📝 Document ID: {result['id']}")
             console.print(f"🏷️  Title: {result['title']}")
             console.print(f"📊 Status: {result.get('status', 'processing')}")
-            
+
         except Exception as e:
             console.print(f"❌ Upload failed: {e}")
         finally:
             if 'files' in locals():
                 files["file"][1].close()
             await api_client.close()
-    
+
     asyncio.run(_upload())
 
 
@@ -1353,13 +1352,13 @@ def show_document(
         api_client = get_api_client()
         try:
             response = await api_client.request("GET", f"/documents/{document_id}")
-            
+
             console.print(Panel.fit(f"[bold]Document: {response.get('title', 'Untitled')}[/bold]"))
-            
+
             table = Table(title="Document Information", show_header=False)
             table.add_column("Field", style="cyan")
             table.add_column("Value", style="white")
-            
+
             table.add_row("ID", response["id"])
             table.add_row("Title", response.get("title", "Untitled"))
             table.add_row("Description", response.get("description", "N/A"))
@@ -1368,15 +1367,15 @@ def show_document(
             table.add_row("Status", response.get("status", "N/A"))
             table.add_row("Chunks", str(response.get("chunk_count", 0)))
             table.add_row("Uploaded", response.get("created_at", "N/A"))
-            
+
             if response.get("tags"):
                 table.add_row("Tags", ", ".join(response["tags"]))
-                
+
             console.print(table)
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_show())
 
 
@@ -1395,29 +1394,29 @@ def search_documents(
                 "limit": limit,
                 "score_threshold": threshold
             }
-            
+
             response = await api_client.request("POST", "/documents/search", json=search_data)
-            
+
             if not response or not response.get("results"):
                 console.print("🔍 No documents found matching your query.")
                 return
-                
+
             results = response["results"]
-            
+
             console.print(f"[bold]Search Results for: '{query}'[/bold]\n")
-            
+
             for i, result in enumerate(results, 1):
                 score = result.get("score", 0)
                 content = result.get("content", "")[:200] + "..." if len(result.get("content", "")) > 200 else result.get("content", "")
                 doc_title = result.get("document_title", "Unknown")
-                
+
                 console.print(f"[bold]{i}. {doc_title}[/bold] (Score: {score:.3f})")
                 console.print(Panel(content, expand=False, border_style="dim"))
                 console.print()
-                
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_search())
 
 
@@ -1432,20 +1431,20 @@ def delete_document(
         try:
             # Get document details first
             doc = await api_client.request("GET", f"/documents/{document_id}")
-            
+
             if not force:
                 console.print(f"Document: {doc.get('title', 'Untitled')}")
                 console.print(f"Type: {doc.get('file_type', 'unknown')}")
                 if not Confirm.ask("Are you sure you want to delete this document?"):
                     console.print("❌ Deletion cancelled.")
                     return
-            
+
             await api_client.request("DELETE", f"/documents/{document_id}")
             console.print("✅ Document deleted successfully!")
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_delete())
 
 
@@ -1464,34 +1463,34 @@ def login(
     async def _login(email: str, password: str, save_token:bool ):
         if not password:
             password = Prompt.ask("Password", password=True)
-            
+
         # Create client without token for login
         api_client = APIClient()
         try:
             login_data = {"email": email, "password": password}
             response = await api_client.request("POST", "/auth/login", json=login_data)
-            
+
             access_token = response.get("access_token")
             if not access_token:
                 console.print("❌ Login failed: No access token received")
                 return
-                
+
             console.print("✅ Login successful!")
             console.print(f"🔑 Access token: {access_token}")
-            
+
             if save_token:
                 # Save to environment file or config
                 env_file = Path(".env")
-                
+
                 # Read existing .env or create new
                 env_content = ""
                 if env_file.exists():
                     env_content = env_file.read_text()
-                    
+
                 # Update or add token
                 lines = env_content.split('\n')
                 token_line = f"CHATTER_ACCESS_TOKEN={access_token}"
-                
+
                 # Check if token line exists
                 token_updated = False
                 for i, line in enumerate(lines):
@@ -1499,17 +1498,17 @@ def login(
                         lines[i] = token_line
                         token_updated = True
                         break
-                        
+
                 if not token_updated:
                     lines.append(token_line)
-                    
+
                 env_file.write_text('\n'.join(lines))
                 console.print("💾 Access token saved to .env file")
                 console.print("💡 You can now use other CLI commands without authentication")
-                
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_login(email, password, save_token))
 
 
@@ -1520,25 +1519,25 @@ def whoami() -> None:
         api_client = get_api_client()
         try:
             response = await api_client.request("GET", "/auth/me")
-            
+
             console.print(Panel.fit("[bold]Current User[/bold]"))
-            
+
             table = Table(title="User Information", show_header=False)
             table.add_column("Field", style="cyan")
             table.add_column("Value", style="white")
-            
+
             table.add_row("ID", response["id"])
             table.add_row("Email", response["email"])
             table.add_row("Name", response.get("full_name", "N/A"))
             table.add_row("Active", "Yes" if response.get("is_active") else "No")
             table.add_row("Superuser", "Yes" if response.get("is_superuser") else "No")
             table.add_row("Created", response.get("created_at", "N/A"))
-            
+
             console.print(table)
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_whoami())
 
 
@@ -1546,7 +1545,7 @@ def whoami() -> None:
 def logout() -> None:
     """Logout and remove saved token."""
     env_file = Path(".env")
-    
+
     if env_file.exists():
         content = env_file.read_text()
         lines = [line for line in content.split('\n') if not line.startswith("CHATTER_ACCESS_TOKEN=")]
@@ -1569,38 +1568,38 @@ def show_dashboard() -> None:
         api_client = get_api_client()
         try:
             response = await api_client.request("GET", "/analytics/dashboard")
-            
+
             console.print(Panel.fit("[bold]Analytics Dashboard[/bold]"))
-            
+
             # Conversations stats
             conv_table = Table(title="Conversations")
             conv_table.add_column("Metric", style="cyan")
             conv_table.add_column("Value", style="white")
-            
+
             conv_stats = response.get("conversations", {})
             conv_table.add_row("Total Conversations", str(conv_stats.get("total_conversations", 0)))
             conv_table.add_row("Active Today", str(conv_stats.get("active_conversations_today", 0)))
             conv_table.add_row("Messages Today", str(conv_stats.get("total_messages_today", 0)))
             conv_table.add_row("Avg Messages/Conv", f"{conv_stats.get('avg_messages_per_conversation', 0):.1f}")
-            
+
             # Usage stats
             usage_table = Table(title="Usage")
             usage_table.add_column("Metric", style="cyan")
             usage_table.add_column("Value", style="white")
-            
+
             usage_stats = response.get("usage", {})
             usage_table.add_row("Total Tokens", str(usage_stats.get("total_tokens_used", 0)))
             usage_table.add_row("Prompt Tokens", str(usage_stats.get("total_prompt_tokens", 0)))
             usage_table.add_row("Completion Tokens", str(usage_stats.get("total_completion_tokens", 0)))
             usage_table.add_row("API Requests", str(usage_stats.get("total_api_requests", 0)))
-            
+
             console.print(conv_table)
             console.print()
             console.print(usage_table)
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_dashboard())
 
 
@@ -1614,14 +1613,14 @@ def show_usage(
         try:
             params = {"days": days}
             response = await api_client.request("GET", "/analytics/usage", params=params)
-            
+
             console.print(Panel.fit(f"[bold]Usage Metrics (Last {days} days)[/bold]"))
-            
+
             table = Table(title="Usage Statistics")
             table.add_column("Metric", style="cyan")
             table.add_column("Value", style="white")
             table.add_column("Daily Average", style="green")
-            
+
             metrics = [
                 ("API Requests", "total_api_requests"),
                 ("LLM Requests", "total_llm_requests"),
@@ -1629,17 +1628,17 @@ def show_usage(
                 ("Documents Processed", "documents_processed"),
                 ("Active Users", "active_users"),
             ]
-            
+
             for metric_name, metric_key in metrics:
                 total = response.get(metric_key, 0)
                 daily_avg = total / days if days > 0 else 0
                 table.add_row(metric_name, str(total), f"{daily_avg:.1f}")
-            
+
             console.print(table)
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_usage())
 
 
@@ -1650,25 +1649,25 @@ def show_performance() -> None:
         api_client = get_api_client()
         try:
             response = await api_client.request("GET", "/analytics/performance")
-            
+
             console.print(Panel.fit("[bold]Performance Metrics[/bold]"))
-            
+
             table = Table(title="Response Times & Performance")
             table.add_column("Metric", style="cyan")
             table.add_column("Value", style="white")
-            
+
             table.add_row("Avg API Response Time", f"{response.get('avg_api_response_time', 0):.3f}s")
             table.add_row("Avg LLM Response Time", f"{response.get('avg_llm_response_time', 0):.3f}s")
             table.add_row("P95 Response Time", f"{response.get('p95_response_time', 0):.3f}s")
             table.add_row("Error Rate", f"{response.get('error_rate', 0):.2%}")
             table.add_row("Success Rate", f"{response.get('success_rate', 0):.2%}")
             table.add_row("Cache Hit Rate", f"{response.get('cache_hit_rate', 0):.2%}")
-            
+
             console.print(table)
-            
+
         finally:
             await api_client.close()
-    
+
     asyncio.run(_performance())
 
 

@@ -195,25 +195,25 @@ class AnalyticsTimeRange(BaseModel):
 
 class ConversationStatsRequest(GetRequestBase):
     """Schema for conversation stats request."""
-    
+
     time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
 
 
 class UsageMetricsRequest(GetRequestBase):
     """Schema for usage metrics request."""
-    
+
     time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
 
 
 class PerformanceMetricsRequest(GetRequestBase):
     """Schema for performance metrics request."""
-    
+
     time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
 
 
 class DocumentAnalyticsRequest(GetRequestBase):
     """Schema for document analytics request."""
-    
+
     time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
 
 
@@ -224,13 +224,13 @@ class SystemAnalyticsRequest(GetRequestBase):
 
 class DashboardRequest(GetRequestBase):
     """Schema for dashboard request."""
-    
+
     time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
 
 
 class ToolServerAnalyticsRequest(GetRequestBase):
     """Schema for tool server analytics request."""
-    
+
     time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
 
 

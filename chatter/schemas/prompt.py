@@ -6,7 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from chatter.models.prompt import PromptCategory, PromptType
-from chatter.schemas.common import ListRequestBase, GetRequestBase, DeleteRequestBase
+from chatter.schemas.common import DeleteRequestBase, GetRequestBase, ListRequestBase
 
 
 class PromptBase(BaseModel):

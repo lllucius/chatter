@@ -7,9 +7,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from chatter.api.auth import get_current_user
 from chatter.core.documents import DocumentError, DocumentService
 from chatter.models.user import User
+from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.document import (
     DocumentChunkResponse,
     DocumentCreate,
+    DocumentDeleteRequest,
+    DocumentGetRequest,
     DocumentListRequest,
     DocumentListResponse,
     DocumentProcessingRequest,
@@ -18,16 +21,19 @@ from chatter.schemas.document import (
     DocumentSearchRequest,
     DocumentSearchResponse,
     DocumentSearchResult,
+    DocumentStatsRequest,
     DocumentStatsResponse,
     DocumentUpdate,
-    DocumentGetRequest,
-    DocumentDeleteRequest,
-    DocumentStatsRequest,
 )
-from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import NotFoundProblem, ValidationProblem, InternalServerProblem, BadRequestProblem, ProblemException
+from chatter.utils.problem import (
+    BadRequestProblem,
+    InternalServerProblem,
+    NotFoundProblem,
+    ProblemException,
+    ValidationProblem,
+)
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -250,7 +256,7 @@ async def delete_document(
         if not success:
             raise NotFoundProblem(
                 detail="Document not found",
-                resource_type="document", 
+                resource_type="document",
                 resource_id=document_id
             )
 

@@ -192,11 +192,11 @@ class EmbeddingService:
         if provider_name:
             provider = self.get_provider(provider_name)
             if not provider:
-                raise EmbeddingError(f"Provider '{provider_name}' not available")
+                raise EmbeddingError(f"Provider '{provider_name}' not available") from None
         else:
             provider = self.get_default_provider()
             if not provider:
-                raise EmbeddingError("No embedding providers available")
+                raise EmbeddingError("No embedding providers available") from None
             provider_name = self._get_provider_name(provider)
 
         try:
@@ -257,11 +257,11 @@ class EmbeddingService:
         if provider_name:
             provider = self.get_provider(provider_name)
             if not provider:
-                raise EmbeddingError(f"Provider '{provider_name}' not available")
+                raise EmbeddingError(f"Provider '{provider_name}' not available") from None
         else:
             provider = self.get_default_provider()
             if not provider:
-                raise EmbeddingError("No embedding providers available")
+                raise EmbeddingError("No embedding providers available") from None
             provider_name = self._get_provider_name(provider)
 
         try:

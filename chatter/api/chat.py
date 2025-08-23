@@ -11,26 +11,26 @@ from chatter.api.auth import get_current_user
 from chatter.core.chat import ChatError, ChatService, ConversationNotFoundError
 from chatter.models.user import User
 from chatter.schemas.chat import (
+    AvailableToolsRequest,
     ChatRequest,
     ChatResponse,
     ConversationCreate,
+    ConversationDeleteRequest,
+    ConversationGetRequest,
+    ConversationMessagesRequest,
     ConversationResponse,
     ConversationSearchRequest,
     ConversationSearchResponse,
     ConversationUpdate,
     ConversationWithMessages,
-    MessageResponse,
-    ConversationGetRequest,
-    ConversationDeleteRequest,
-    ConversationMessagesRequest,
-    AvailableToolsRequest,
     McpStatusRequest,
+    MessageResponse,
 )
 from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.services.llm import LLMService
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
+from chatter.utils.problem import BadRequestProblem, InternalServerProblem, NotFoundProblem
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -72,7 +72,7 @@ async def create_conversation(
         )
         return ConversationResponse.model_validate(conversation)
     except ChatError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
 
 
 @router.get("/conversations", response_model=ConversationSearchResponse)
@@ -179,7 +179,7 @@ async def update_conversation(
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation"
-        )
+        ) from None
 
 
 @router.delete("/conversations/{conversation_id}")

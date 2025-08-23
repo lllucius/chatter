@@ -182,7 +182,7 @@ class MCPToolService:
         tool = await self.get_tool_by_name(tool_name)
 
         if not tool:
-            raise MCPServiceError(f"Tool not found: {tool_name}")
+            raise MCPServiceError(f"Tool not found: {tool_name}") from None
 
         # Find which server provides this tool
         found_server = None
@@ -192,7 +192,7 @@ class MCPToolService:
                 break
 
         if not found_server:
-            raise MCPServiceError(f"Server not found for tool: {tool_name}")
+            raise MCPServiceError(f"Server not found for tool: {tool_name}") from None
 
         try:
             result = await tool.arun(arguments)
@@ -404,7 +404,7 @@ class BuiltInTools:
                 elif isinstance(node, ast.UnaryOp):
                     return ops[type(node.op)](eval_expr(node.operand))
                 else:
-                    raise TypeError(node)
+                    raise TypeError(node) from None
 
             return eval_expr(ast.parse(expression, mode='eval').body)
         except Exception as e:

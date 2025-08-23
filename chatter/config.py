@@ -1,7 +1,6 @@
 """Configuration management for Chatter application."""
 
 from functools import lru_cache
-from typing import Any, Union
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -55,7 +54,7 @@ class Settings(BaseSettings):
     cors_allow_headers: list[str] = Field(default=["*"], description="CORS allowed headers")
 
     # Security
-    trusted_hosts: Union[str, list[str]] = Field(
+    trusted_hosts: str | list[str] = Field(
         default=["localhost", "127.0.0.1"],
         description="Trusted hosts"
     )

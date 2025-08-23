@@ -71,7 +71,7 @@ class DocumentService:
 
             # Validate file size
             if file_size > settings.max_file_size:
-                raise DocumentError(f"File size exceeds maximum allowed size of {settings.max_file_size} bytes")
+                raise DocumentError(f"File size exceeds maximum allowed size of {settings.max_file_size} bytes") from None
 
             # Calculate file hash
             file_hash = hashlib.sha256(file_content).hexdigest()
@@ -88,7 +88,7 @@ class DocumentService:
             existing_doc = existing_doc_result.scalar_one_or_none()
 
             if existing_doc:
-                raise DocumentError("Document with identical content already exists")
+                raise DocumentError("Document with identical content already exists") from None
 
             # Detect MIME type and document type
             mime_type = upload_file.content_type or mimetypes.guess_type(upload_file.filename)[0] or "application/octet-stream"
@@ -97,7 +97,7 @@ class DocumentService:
             # Validate file type
             file_ext = Path(upload_file.filename).suffix.lower().lstrip('.')
             if file_ext not in settings.allowed_file_types:
-                raise DocumentError(f"File type '{file_ext}' is not allowed")
+                raise DocumentError(f"File type '{file_ext}' is not allowed") from None
 
             # Generate unique filename
             unique_filename = f"{uuid.uuid4()}.{file_ext}"

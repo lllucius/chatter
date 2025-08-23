@@ -65,7 +65,7 @@ class ChatService:
             )
             profile = result.scalar_one_or_none()
             if not profile:
-                raise ChatError("Profile not found or not accessible")
+                raise ChatError("Profile not found or not accessible") from None
 
         # Create conversation
         conversation = Conversation(
@@ -180,7 +180,7 @@ class ChatService:
         """
         conversation = await self.get_conversation(conversation_id, user_id)
         if not conversation:
-            raise ConversationNotFoundError("Conversation not found")
+            raise ConversationNotFoundError("Conversation not found") from None
 
         # Update fields
         update_dict = update_data.model_dump(exclude_unset=True)
@@ -208,7 +208,7 @@ class ChatService:
         """
         conversation = await self.get_conversation(conversation_id, user_id)
         if not conversation:
-            raise ConversationNotFoundError("Conversation not found")
+            raise ConversationNotFoundError("Conversation not found") from None
 
         await self.session.delete(conversation)
         await self.session.commit()
@@ -241,7 +241,7 @@ class ChatService:
         """
         conversation = await self.get_conversation(conversation_id, user_id)
         if not conversation:
-            raise ConversationNotFoundError("Conversation not found")
+            raise ConversationNotFoundError("Conversation not found") from None
 
         # Get next sequence number
         last_message_result = await self.session.execute(
@@ -294,7 +294,7 @@ class ChatService:
         """
         conversation = await self.get_conversation(conversation_id, user_id)
         if not conversation:
-            raise ConversationNotFoundError("Conversation not found")
+            raise ConversationNotFoundError("Conversation not found") from None
 
         query = (
             select(Message)
@@ -326,7 +326,7 @@ class ChatService:
         if chat_request.conversation_id:
             conversation = await self.get_conversation(chat_request.conversation_id, user_id)
             if not conversation:
-                raise ConversationNotFoundError("Conversation not found")
+                raise ConversationNotFoundError("Conversation not found") from None
         else:
             # Create new conversation
             conversation_data = ConversationCreate(
@@ -424,7 +424,7 @@ class ChatService:
         if chat_request.conversation_id:
             conversation = await self.get_conversation(chat_request.conversation_id, user_id)
             if not conversation:
-                raise ConversationNotFoundError("Conversation not found")
+                raise ConversationNotFoundError("Conversation not found") from None
         else:
             # Create new conversation
             conversation_data = ConversationCreate(

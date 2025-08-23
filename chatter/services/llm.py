@@ -10,13 +10,13 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, System
 from langchain_openai import ChatOpenAI
 
 from chatter.config import settings
-from chatter.models.conversation import Conversation
-from chatter.models.profile import Profile
-from chatter.utils.logging import get_logger
 
 # Delayed imports to avoid circular dependencies - moved to module level
 from chatter.core.langchain import orchestrator
+from chatter.models.conversation import Conversation
+from chatter.models.profile import Profile
 from chatter.services.mcp import BuiltInTools, mcp_service
+from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -92,7 +92,7 @@ class LLMService:
             LLMProviderError: If no providers available
         """
         if not self._providers:
-            raise LLMProviderError("No LLM providers available")
+            raise LLMProviderError("No LLM providers available") from None
 
         # Try to get the configured default provider
         default_provider = settings.default_llm_provider
@@ -303,7 +303,7 @@ class LLMService:
             Provider information
         """
         if provider_name not in self._providers:
-            raise LLMProviderError(f"Provider '{provider_name}' not available")
+            raise LLMProviderError(f"Provider '{provider_name}' not available") from None
 
         provider = self._providers[provider_name]
 
@@ -407,7 +407,7 @@ class LLMService:
 
         if workflow_type == "rag":
             if not retriever:
-                raise LLMProviderError("Retriever required for RAG workflow")
+                raise LLMProviderError("Retriever required for RAG workflow") from None
             return workflow_manager.create_rag_conversation_workflow(
                 llm=provider,
                 retriever=retriever,

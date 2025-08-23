@@ -333,7 +333,7 @@ class VectorStoreService:
                 return 0.0
 
             # Calculate dot product
-            dot_product = sum(a * b for a, b in zip(vec1, vec2))
+            dot_product = sum(a * b for a, b in zip(vec1, vec2, strict=False))
 
             # Calculate magnitudes
             magnitude1 = math.sqrt(sum(a * a for a in vec1))

@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -19,6 +19,7 @@ from chatter.schemas.analytics import (
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
+from chatter.utils.problem import InternalServerProblem
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -78,8 +79,7 @@ async def get_conversation_stats(
 
     except Exception as e:
         logger.error("Failed to get conversation stats", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get conversation statistics"
         )
 
@@ -123,8 +123,7 @@ async def get_usage_metrics(
 
     except Exception as e:
         logger.error("Failed to get usage metrics", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get usage metrics"
         )
 
@@ -167,8 +166,7 @@ async def get_performance_metrics(
 
     except Exception as e:
         logger.error("Failed to get performance metrics", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get performance metrics"
         )
 
@@ -213,8 +211,7 @@ async def get_document_analytics(
 
     except Exception as e:
         logger.error("Failed to get document analytics", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get document analytics"
         )
 
@@ -256,8 +253,7 @@ async def get_system_analytics(
 
     except Exception as e:
         logger.error("Failed to get system analytics", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get system analytics"
         )
 
@@ -293,8 +289,7 @@ async def get_dashboard(
 
     except Exception as e:
         logger.error("Failed to get dashboard data", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get dashboard data"
         )
 
@@ -320,7 +315,6 @@ async def get_tool_server_analytics(
 
     except Exception as e:
         logger.error("Failed to get tool server analytics", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get tool server analytics"
         )

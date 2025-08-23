@@ -3,11 +3,21 @@
 from chatter.schemas.analytics import *
 from chatter.schemas.auth import *
 from chatter.schemas.chat import *
+from chatter.schemas.common import *
 from chatter.schemas.document import *
 from chatter.schemas.profile import *
+from chatter.schemas.prompt import *
 from chatter.schemas.toolserver import *
 
 __all__ = [
+    # Common schemas
+    "PaginationRequest",
+    "SortingRequest", 
+    "PaginatedRequest",
+    "ListRequestBase",
+    "GetRequestBase",
+    "DeleteRequestBase",
+
     # Auth schemas
     "UserBase",
     "UserCreate",
@@ -37,6 +47,11 @@ __all__ = [
     "StreamingChatChunk",
     "ConversationSearchRequest",
     "ConversationSearchResponse",
+    "ConversationGetRequest",
+    "ConversationDeleteRequest", 
+    "ConversationMessagesRequest",
+    "AvailableToolsRequest",
+    "McpStatusRequest",
 
     # Document schemas
     "DocumentBase",
@@ -52,6 +67,9 @@ __all__ = [
     "DocumentProcessingRequest",
     "DocumentProcessingResponse",
     "DocumentStatsResponse",
+    "DocumentGetRequest",
+    "DocumentDeleteRequest",
+    "DocumentStatsRequest",
 
     # Profile schemas
     "ProfileBase",
@@ -66,6 +84,25 @@ __all__ = [
     "ProfileCloneRequest",
     "ProfileImportRequest",
     "ProfileExportResponse",
+    "ProfileGetRequest",
+    "ProfileDeleteRequest",
+    "ProfileStatsRequest",
+    "ProfileProvidersRequest",
+
+    # Prompt schemas
+    "PromptBase",
+    "PromptCreate",
+    "PromptUpdate",
+    "PromptResponse",
+    "PromptListRequest",
+    "PromptListResponse",
+    "PromptStatsResponse",
+    "PromptTestRequest",
+    "PromptTestResponse",
+    "PromptCloneRequest",
+    "PromptGetRequest",
+    "PromptDeleteRequest",
+    "PromptStatsRequest",
 
     # Analytics schemas
     "ConversationStatsResponse",
@@ -79,6 +116,13 @@ __all__ = [
     "AnalyticsExportRequest",
     "AnalyticsExportResponse",
     "DashboardResponse",
+    "ConversationStatsRequest",
+    "UsageMetricsRequest",
+    "PerformanceMetricsRequest",
+    "DocumentAnalyticsRequest",
+    "SystemAnalyticsRequest",
+    "DashboardRequest",
+    "ToolServerAnalyticsRequest",
 
     # Tool server schemas
     "ToolServerBase",

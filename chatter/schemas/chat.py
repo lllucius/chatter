@@ -6,6 +6,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from chatter.models.conversation import ConversationStatus, MessageRole
+from chatter.schemas.common import ListRequestBase, GetRequestBase, DeleteRequestBase
 
 
 class MessageBase(BaseModel):
@@ -115,12 +116,35 @@ class StreamingChatChunk(BaseModel):
     message_id: str | None = Field(None, description="Message ID")
 
 
-class ConversationSearchRequest(BaseModel):
+class ConversationSearchRequest(ListRequestBase):
     """Schema for conversation search."""
     query: str | None = Field(None, description="Search query")
     status: ConversationStatus | None = Field(None, description="Filter by status")
-    limit: int = Field(default=20, ge=1, le=100, description="Number of results")
-    offset: int = Field(default=0, ge=0, description="Offset for pagination")
+
+
+class ConversationGetRequest(GetRequestBase):
+    """Schema for conversation get request."""
+    pass
+
+
+class ConversationDeleteRequest(DeleteRequestBase):
+    """Schema for conversation delete request."""
+    pass
+
+
+class ConversationMessagesRequest(GetRequestBase):
+    """Schema for conversation messages request."""
+    pass
+
+
+class AvailableToolsRequest(GetRequestBase):
+    """Schema for available tools request."""
+    pass
+
+
+class McpStatusRequest(GetRequestBase):
+    """Schema for MCP status request."""
+    pass
 
 
 class ConversationSearchResponse(BaseModel):

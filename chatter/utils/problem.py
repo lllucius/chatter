@@ -16,24 +16,11 @@ from chatter.config import settings
 class ProblemDetail(BaseModel):
     """RFC 9457 Problem Detail model."""
 
-    type: str = Field(
-        default="about:blank",
-        description="A URI reference that identifies the problem type"
-    )
-    title: str = Field(
-        description="A short, human-readable summary of the problem type"
-    )
-    status: int = Field(
-        description="The HTTP status code"
-    )
-    detail: str | None = Field(
-        default=None,
-        description="A human-readable explanation specific to this occurrence"
-    )
-    instance: str | None = Field(
-        default=None,
-        description="A URI reference that identifies the specific occurrence"
-    )
+    type: str = Field(default="about:blank", description="A URI reference that identifies the problem type")
+    title: str = Field(description="A short, human-readable summary of the problem type")
+    status: int = Field(description="The HTTP status code")
+    detail: str | None = Field(default=None, description="A human-readable explanation specific to this occurrence")
+    instance: str | None = Field(default=None, description="A URI reference that identifies the specific occurrence")
 
     # Additional fields can be included for context
     class Config:
@@ -51,7 +38,7 @@ class ProblemException(HTTPException):
         type_suffix: str | None = None,
         instance: str | None = None,
         headers: dict[str, Any] | None = None,
-        **extra_fields: Any
+        **extra_fields: Any,
     ) -> None:
         """Initialize a problem exception.
 
@@ -91,7 +78,7 @@ class ProblemException(HTTPException):
             "status": self.status_code,
             "detail": self.detail,
             "instance": instance,
-            **self.extra_fields
+            **self.extra_fields,
         }
 
         # Remove None values
@@ -105,10 +92,7 @@ class ProblemException(HTTPException):
         return JSONResponse(
             status_code=self.status_code,
             content=problem.model_dump(exclude_none=True),
-            headers={
-                "Content-Type": "application/problem+json",
-                **dict(self.headers or {})
-            }
+            headers={"Content-Type": "application/problem+json", **dict(self.headers or {})},
         )
 
 
@@ -116,17 +100,13 @@ class ProblemException(HTTPException):
 class BadRequestProblem(ProblemException):
     """Bad request problem."""
 
-    def __init__(
-        self,
-        detail: str = "The request contains invalid data or parameters",
-        **kwargs
-    ) -> None:
+    def __init__(self, detail: str = "The request contains invalid data or parameters", **kwargs) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             title="Bad Request",
             detail=detail,
             type_suffix="bad-request",
-            **kwargs
+            **kwargs,
         )
 
 
@@ -134,10 +114,7 @@ class ValidationProblem(ProblemException):
     """Validation error problem."""
 
     def __init__(
-        self,
-        detail: str = "The request contains invalid data",
-        validation_errors: list[Any] | None = None,
-        **kwargs
+        self, detail: str = "The request contains invalid data", validation_errors: list[Any] | None = None, **kwargs
     ) -> None:
         super().__init__(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -145,44 +122,35 @@ class ValidationProblem(ProblemException):
             detail=detail,
             type_suffix="validation-failed",
             errors=validation_errors or [],
-            **kwargs
+            **kwargs,
         )
 
 
 class AuthenticationProblem(ProblemException):
     """Authentication error problem."""
 
-    def __init__(
-        self,
-        detail: str = "Authentication failed",
-        **kwargs
-    ) -> None:
+    def __init__(self, detail: str = "Authentication failed", **kwargs) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             title="Authentication Required",
             detail=detail,
             type_suffix="authentication-required",
             headers={"WWW-Authenticate": "Bearer"},
-            **kwargs
+            **kwargs,
         )
 
 
 class AuthorizationProblem(ProblemException):
     """Authorization error problem."""
 
-    def __init__(
-        self,
-        detail: str = "Access denied",
-        required_permissions: list[str] | None = None,
-        **kwargs
-    ) -> None:
+    def __init__(self, detail: str = "Access denied", required_permissions: list[str] | None = None, **kwargs) -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             title="Access Forbidden",
             detail=detail,
             type_suffix="access-forbidden",
             required_permissions=required_permissions or [],
-            **kwargs
+            **kwargs,
         )
 
 
@@ -194,7 +162,7 @@ class NotFoundProblem(ProblemException):
         detail: str = "The requested resource was not found",
         resource_type: str | None = None,
         resource_id: str | None = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         extra_fields = {}
         if resource_type:
@@ -208,7 +176,7 @@ class NotFoundProblem(ProblemException):
             detail=detail,
             type_suffix="resource-not-found",
             **extra_fields,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -219,7 +187,7 @@ class ConflictProblem(ProblemException):
         self,
         detail: str = "The request could not be completed due to a conflict",
         conflicting_resource: str | None = None,
-        **kwargs
+        **kwargs,
     ) -> None:
         extra_fields = {}
         if conflicting_resource:
@@ -231,19 +199,14 @@ class ConflictProblem(ProblemException):
             detail=detail,
             type_suffix="resource-conflict",
             **extra_fields,
-            **kwargs
+            **kwargs,
         )
 
 
 class RateLimitProblem(ProblemException):
     """Rate limit exceeded problem."""
 
-    def __init__(
-        self,
-        detail: str = "Rate limit exceeded",
-        retry_after: int | None = None,
-        **kwargs
-    ) -> None:
+    def __init__(self, detail: str = "Rate limit exceeded", retry_after: int | None = None, **kwargs) -> None:
         headers = {}
         if retry_after:
             headers["Retry-After"] = str(retry_after)
@@ -255,7 +218,7 @@ class RateLimitProblem(ProblemException):
             type_suffix="rate-limit-exceeded",
             headers=headers,
             retryAfter=retry_after,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -263,10 +226,7 @@ class InternalServerProblem(ProblemException):
     """Internal server error problem."""
 
     def __init__(
-        self,
-        detail: str = "An internal server error occurred",
-        error_id: str | None = None,
-        **kwargs
+        self, detail: str = "An internal server error occurred", error_id: str | None = None, **kwargs
     ) -> None:
         extra_fields = {}
         if error_id:
@@ -278,7 +238,7 @@ class InternalServerProblem(ProblemException):
             detail=detail,
             type_suffix="internal-server-error",
             **extra_fields,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -288,7 +248,7 @@ def create_problem_response(
     detail: str | None = None,
     type_suffix: str | None = None,
     request: Request | None = None,
-    **extra_fields: Any
+    **extra_fields: Any,
 ) -> JSONResponse:
     """Create a RFC 9457 compliant problem response.
 
@@ -304,10 +264,6 @@ def create_problem_response(
         JSONResponse with RFC 9457 format
     """
     problem = ProblemException(
-        status_code=status_code,
-        title=title,
-        detail=detail,
-        type_suffix=type_suffix,
-        **extra_fields
+        status_code=status_code, title=title, detail=detail, type_suffix=type_suffix, **extra_fields
     )
     return problem.to_response(request)

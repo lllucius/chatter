@@ -71,6 +71,7 @@ class ProfileBase(BaseModel):
 
 class ProfileCreate(ProfileBase):
     """Schema for creating a profile."""
+
     pass
 
 
@@ -160,21 +161,25 @@ class ProfileListRequest(ListRequestBase):
 
 class ProfileGetRequest(GetRequestBase):
     """Schema for profile get request."""
+
     pass
 
 
 class ProfileDeleteRequest(DeleteRequestBase):
     """Schema for profile delete request."""
+
     pass
 
 
 class ProfileStatsRequest(GetRequestBase):
     """Schema for profile stats request."""
+
     pass
 
 
 class ProfileProvidersRequest(GetRequestBase):
     """Schema for profile providers request."""
+
     pass
 
 

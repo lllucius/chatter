@@ -25,6 +25,7 @@ class ToolServerBase(BaseModel):
 
 class ToolServerCreate(ToolServerBase):
     """Schema for creating a tool server."""
+
     pass
 
 

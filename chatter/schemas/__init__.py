@@ -18,7 +18,6 @@ __all__ = [
     "ListRequestBase",
     "GetRequestBase",
     "DeleteRequestBase",
-
     # Auth schemas
     "UserBase",
     "UserCreate",
@@ -33,7 +32,6 @@ __all__ = [
     "EmailVerification",
     "APIKeyCreate",
     "APIKeyResponse",
-
     # Chat schemas
     "MessageBase",
     "MessageCreate",
@@ -53,7 +51,6 @@ __all__ = [
     "ConversationMessagesRequest",
     "AvailableToolsRequest",
     "McpStatusRequest",
-
     # Document schemas
     "DocumentBase",
     "DocumentCreate",
@@ -71,7 +68,6 @@ __all__ = [
     "DocumentGetRequest",
     "DocumentDeleteRequest",
     "DocumentStatsRequest",
-
     # Profile schemas
     "ProfileBase",
     "ProfileCreate",
@@ -89,7 +85,6 @@ __all__ = [
     "ProfileDeleteRequest",
     "ProfileStatsRequest",
     "ProfileProvidersRequest",
-
     # Prompt schemas
     "PromptBase",
     "PromptCreate",
@@ -104,7 +99,6 @@ __all__ = [
     "PromptGetRequest",
     "PromptDeleteRequest",
     "PromptStatsRequest",
-
     # Analytics schemas
     "ConversationStatsResponse",
     "UsageMetricsResponse",
@@ -124,7 +118,6 @@ __all__ = [
     "SystemAnalyticsRequest",
     "DashboardRequest",
     "ToolServerAnalyticsRequest",
-
     # Tool server schemas
     "ToolServerBase",
     "ToolServerCreate",

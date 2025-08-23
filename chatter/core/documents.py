@@ -45,12 +45,7 @@ class DocumentService:
         self.storage_path = Path(settings.document_storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
-    async def create_document(
-        self,
-        user_id: str,
-        upload_file: UploadFile,
-        document_data: DocumentCreate
-    ) -> Document:
+    async def create_document(self, user_id: str, upload_file: UploadFile, document_data: DocumentCreate) -> Document:
         """Create a new document from uploaded file.
 
         Args:
@@ -71,19 +66,16 @@ class DocumentService:
 
             # Validate file size
             if file_size > settings.max_file_size:
-                raise DocumentError(f"File size exceeds maximum allowed size of {settings.max_file_size} bytes") from None
+                raise DocumentError(
+                    f"File size exceeds maximum allowed size of {settings.max_file_size} bytes"
+                ) from None
 
             # Calculate file hash
             file_hash = hashlib.sha256(file_content).hexdigest()
 
             # Check for duplicate files
             existing_doc_result = await self.session.execute(
-                select(Document).where(
-                    and_(
-                        Document.owner_id == user_id,
-                        Document.file_hash == file_hash
-                    )
-                )
+                select(Document).where(and_(Document.owner_id == user_id, Document.file_hash == file_hash))
             )
             existing_doc = existing_doc_result.scalar_one_or_none()
 
@@ -91,7 +83,9 @@ class DocumentService:
                 raise DocumentError("Document with identical content already exists") from None
 
             # Detect MIME type and document type
-            mime_type = upload_file.content_type or mimetypes.guess_type(upload_file.filename)[0] or "application/octet-stream"
+            mime_type = (
+                upload_file.content_type or mimetypes.guess_type(upload_file.filename)[0] or "application/octet-stream"
+            )
             document_type = self.processing_service.detect_document_type(upload_file.filename, mime_type)
 
             # Validate file type
@@ -139,7 +133,7 @@ class DocumentService:
                 document_id=document.id,
                 filename=upload_file.filename,
                 file_size=file_size,
-                user_id=user_id
+                user_id=user_id,
             )
 
             return document
@@ -168,7 +162,7 @@ class DocumentService:
                         or_(
                             Document.owner_id == user_id,
                             Document.is_public is True,
-                        )
+                        ),
                     )
                 )
             )
@@ -186,11 +180,7 @@ class DocumentService:
             logger.error("Failed to get document", document_id=document_id, error=str(e))
             return None
 
-    async def list_documents(
-        self,
-        user_id: str,
-        list_request: DocumentListRequest
-    ) -> tuple[list[Document], int]:
+    async def list_documents(self, user_id: str, list_request: DocumentListRequest) -> tuple[list[Document], int]:
         """List documents with filtering and pagination.
 
         Args:
@@ -249,12 +239,7 @@ class DocumentService:
             logger.error("Failed to list documents", error=str(e))
             return [], 0
 
-    async def update_document(
-        self,
-        document_id: str,
-        user_id: str,
-        update_data: DocumentUpdate
-    ) -> Document | None:
+    async def update_document(self, document_id: str, user_id: str, update_data: DocumentUpdate) -> Document | None:
         """Update document metadata.
 
         Args:
@@ -268,12 +253,7 @@ class DocumentService:
         try:
             # Get document with ownership check
             result = await self.session.execute(
-                select(Document).where(
-                    and_(
-                        Document.id == document_id,
-                        Document.owner_id == user_id
-                    )
-                )
+                select(Document).where(and_(Document.id == document_id, Document.owner_id == user_id))
             )
             document = result.scalar_one_or_none()
 
@@ -308,12 +288,7 @@ class DocumentService:
         try:
             # Get document with ownership check
             result = await self.session.execute(
-                select(Document).where(
-                    and_(
-                        Document.id == document_id,
-                        Document.owner_id == user_id
-                    )
-                )
+                select(Document).where(and_(Document.id == document_id, Document.owner_id == user_id))
             )
             document = result.scalar_one_or_none()
 
@@ -339,9 +314,7 @@ class DocumentService:
             return False
 
     async def search_documents(
-        self,
-        user_id: str,
-        search_request: DocumentSearchRequest
+        self, user_id: str, search_request: DocumentSearchRequest
     ) -> list[tuple[DocumentChunk, float, Document]]:
         """Search documents using vector similarity.
 
@@ -376,7 +349,7 @@ class DocumentService:
                     select(Document.id).where(
                         and_(
                             Document.id.in_(accessible_doc_ids),
-                            Document.document_type.in_(search_request.document_types)
+                            Document.document_type.in_(search_request.document_types),
                         )
                     )
                 )
@@ -387,10 +360,7 @@ class DocumentService:
                 for tag in search_request.tags:
                     filtered_docs_result = await self.session.execute(
                         select(Document.id).where(
-                            and_(
-                                Document.id.in_(accessible_doc_ids),
-                                Document.tags.contains([tag])
-                            )
+                            and_(Document.id.in_(accessible_doc_ids), Document.tags.contains([tag]))
                         )
                     )
                     accessible_doc_ids = [doc_id for doc_id, in filtered_docs_result.all()]
@@ -403,7 +373,7 @@ class DocumentService:
                 query_embedding=query_embedding,
                 limit=search_request.limit,
                 score_threshold=search_request.score_threshold,
-                document_ids=accessible_doc_ids
+                document_ids=accessible_doc_ids,
             )
 
             # Get document information for each chunk
@@ -417,10 +387,7 @@ class DocumentService:
             await self.session.commit()
 
             logger.info(
-                "Document search completed",
-                query=search_request.query,
-                results_count=len(results),
-                user_id=user_id
+                "Document search completed", query=search_request.query, results_count=len(results), user_id=user_id
             )
 
             return results
@@ -430,10 +397,7 @@ class DocumentService:
             return []
 
     async def process_document(
-        self,
-        document_id: str,
-        user_id: str,
-        processing_request: DocumentProcessingRequest
+        self, document_id: str, user_id: str, processing_request: DocumentProcessingRequest
     ) -> bool:
         """Manually trigger document processing.
 
@@ -448,12 +412,7 @@ class DocumentService:
         try:
             # Get document with ownership check
             result = await self.session.execute(
-                select(Document).where(
-                    and_(
-                        Document.id == document_id,
-                        Document.owner_id == user_id
-                    )
-                )
+                select(Document).where(and_(Document.id == document_id, Document.owner_id == user_id))
             )
             document = result.scalar_one_or_none()
 
@@ -488,11 +447,7 @@ class DocumentService:
             logger.error("Failed to trigger document processing", document_id=document_id, error=str(e))
             return False
 
-    async def get_document_chunks(
-        self,
-        document_id: str,
-        user_id: str
-    ) -> list[DocumentChunk]:
+    async def get_document_chunks(self, document_id: str, user_id: str) -> list[DocumentChunk]:
         """Get chunks for a document.
 
         Args:
@@ -536,12 +491,7 @@ class DocumentService:
             status_counts = {}
             for status in DocumentStatus:
                 result = await self.session.execute(
-                    select(func.count(Document.id)).where(
-                        and_(
-                            Document.owner_id == user_id,
-                            Document.status == status
-                        )
-                    )
+                    select(func.count(Document.id)).where(and_(Document.owner_id == user_id, Document.status == status))
                 )
                 status_counts[status.value] = result.scalar()
 
@@ -550,10 +500,7 @@ class DocumentService:
             for doc_type in DocumentType:
                 result = await self.session.execute(
                     select(func.count(Document.id)).where(
-                        and_(
-                            Document.owner_id == user_id,
-                            Document.document_type == doc_type
-                        )
+                        and_(Document.owner_id == user_id, Document.document_type == doc_type)
                     )
                 )
                 type_counts[doc_type.value] = result.scalar()
@@ -604,4 +551,5 @@ class DocumentService:
 
 class DocumentError(Exception):
     """Document operation error."""
+
     pass

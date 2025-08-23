@@ -13,6 +13,7 @@ from chatter.models.base import Base, Keys
 
 class ProfileType(str, Enum):
     """Enumeration for profile types."""
+
     CONVERSATIONAL = "conversational"
     ANALYTICAL = "analytical"
     CREATIVE = "creative"
@@ -24,21 +25,13 @@ class Profile(Base):
     """Profile model for LLM parameter management."""
 
     # Foreign keys
-    owner_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=False,
-        index=True
-    )
+    owner_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=False, index=True)
 
     # Profile metadata
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     profile_type: Mapped[ProfileType] = mapped_column(
-        SQLEnum(ProfileType),
-        default=ProfileType.CUSTOM,
-        nullable=False,
-        index=True
+        SQLEnum(ProfileType), default=ProfileType.CUSTOM, nullable=False, index=True
     )
 
     # LLM Configuration
@@ -93,25 +86,15 @@ class Profile(Base):
     usage_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     total_tokens_used: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     total_cost: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
-    last_used_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Metadata and tags
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
 
     # Relationships
-    owner: Mapped["User"] = relationship(
-        "User",
-        back_populates="profiles",
-        foreign_keys=[owner_id]
-    )
-    conversations: Mapped[list["Conversation"]] = relationship(
-        "Conversation",
-        back_populates="profile"
-    )
+    owner: Mapped["User"] = relationship("User", back_populates="profiles", foreign_keys=[owner_id])
+    conversations: Mapped[list["Conversation"]] = relationship("Conversation", back_populates="profile")
 
     def __repr__(self) -> str:
         """String representation of profile."""
@@ -147,7 +130,7 @@ class Profile(Base):
 
         return config
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert profile to dictionary."""
         return {
             "id": self.id,

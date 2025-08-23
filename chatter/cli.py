@@ -54,9 +54,7 @@ class APIClient:
         headers = self._get_headers()
 
         try:
-            response = await self.client.request(
-                method, url, headers=headers, **kwargs
-            )
+            response = await self.client.request(method, url, headers=headers, **kwargs)
             response.raise_for_status()
             return response.json() if response.content else None
         except httpx.HTTPStatusError as e:
@@ -104,6 +102,7 @@ def list_prompts(
     offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
 ) -> None:
     """List available prompts."""
+
     async def _list():
         api_client = get_api_client()
         try:
@@ -146,7 +145,7 @@ def list_prompts(
                     prompt["category"],
                     str(prompt.get("usage_count", 0)),
                     "Yes" if prompt.get("is_public") else "No",
-                    prompt.get("created_at", "")[:10] if prompt.get("created_at") else "N/A"
+                    prompt.get("created_at", "")[:10] if prompt.get("created_at") else "N/A",
                 )
 
             console.print(table)
@@ -229,6 +228,7 @@ def show_prompt(
     prompt_id: str = typer.Argument(..., help="Prompt ID to show"),
 ) -> None:
     """Show prompt details."""
+
     async def _show():
         api_client = get_api_client()
         try:
@@ -259,11 +259,7 @@ def show_prompt(
             console.print(basic_table)
 
             # Content
-            content_panel = Panel(
-                response["content"],
-                title="Content",
-                border_style="blue"
-            )
+            content_panel = Panel(response["content"], title="Content", border_style="blue")
             console.print(content_panel)
 
             # Usage stats table
@@ -274,7 +270,9 @@ def show_prompt(
             stats_table.add_row("Usage Count", str(response.get("usage_count", 0)))
             stats_table.add_row("Total Tokens", str(response.get("total_tokens_used", 0)))
             stats_table.add_row("Total Cost", f"${response.get('total_cost', 0):.4f}")
-            stats_table.add_row("Last Used", response.get("last_used_at", "Never")[:19] if response.get("last_used_at") else "Never")
+            stats_table.add_row(
+                "Last Used", response.get("last_used_at", "Never")[:19] if response.get("last_used_at") else "Never"
+            )
 
             console.print(stats_table)
 
@@ -296,6 +294,7 @@ def delete_prompt(
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
 ) -> None:
     """Delete a prompt."""
+
     async def _delete():
         api_client = get_api_client()
         try:
@@ -326,6 +325,7 @@ def test_prompt(
     validate_only: bool = typer.Option(False, "--validate-only", help="Only validate, don't render"),
 ) -> None:
     """Test a prompt with variables."""
+
     async def _test():
         api_client = get_api_client()
         try:
@@ -334,15 +334,13 @@ def test_prompt(
             if variables:
                 try:
                     import json
+
                     test_variables = json.loads(variables)
                 except json.JSONDecodeError:
                     console.print("❌ Invalid JSON format for variables.")
                     return
 
-            test_data = {
-                "variables": test_variables,
-                "validate_only": validate_only
-            }
+            test_data = {"variables": test_variables, "validate_only": validate_only}
 
             response = await api_client.request("POST", f"/prompts/{prompt_id}/test", json=test_data)
 
@@ -361,11 +359,7 @@ def test_prompt(
 
             # Show rendered content
             if response.get("rendered_content"):
-                content_panel = Panel(
-                    response["rendered_content"],
-                    title="Rendered Content",
-                    border_style="green"
-                )
+                content_panel = Panel(response["rendered_content"], title="Rendered Content", border_style="green")
                 console.print(content_panel)
 
             # Show stats
@@ -386,13 +380,11 @@ def clone_prompt(
     description: str = typer.Option(None, "--description", "-d", help="Description for cloned prompt"),
 ) -> None:
     """Clone an existing prompt."""
+
     async def _clone():
         api_client = get_api_client()
         try:
-            clone_data = {
-                "name": name,
-                "description": description
-            }
+            clone_data = {"name": name, "description": description}
 
             response = await api_client.request("POST", f"/prompts/{prompt_id}/clone", json=clone_data)
 
@@ -452,6 +444,7 @@ app.add_typer(db_app, name="db")
 @db_app.command("init")
 def db_init() -> None:
     """Initialize the database."""
+
     async def _init():
         try:
             await init_database()
@@ -466,6 +459,7 @@ def db_init() -> None:
 @db_app.command("check")
 def db_check() -> None:
     """Check database connection."""
+
     async def _check():
         try:
             is_connected = await check_database_connection()
@@ -485,12 +479,7 @@ def db_check() -> None:
 def db_migrate() -> None:
     """Run database migrations."""
     try:
-        result = subprocess.run(
-            ["alembic", "upgrade", "head"],
-            cwd=os.getcwd(),
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(["alembic", "upgrade", "head"], cwd=os.getcwd(), capture_output=True, text=True)
 
         if result.returncode == 0:
             console.print("✅ Database migrations completed successfully")
@@ -523,12 +512,7 @@ def db_revision(
 
         cmd.extend(["-m", message])
 
-        result = subprocess.run(
-            cmd,
-            cwd=os.getcwd(),
-            capture_output=True,
-            text=True
-        )
+        result = subprocess.run(cmd, cwd=os.getcwd(), capture_output=True, text=True)
 
         if result.returncode == 0:
             console.print(f"✅ Created migration: {message}")
@@ -553,9 +537,7 @@ app.add_typer(config_app, name="config")
 
 
 @config_app.command("show")
-def config_show(
-    section: str | None = typer.Argument(None, help="Configuration section to show")
-) -> None:
+def config_show(section: str | None = typer.Argument(None, help="Configuration section to show")) -> None:
     """Show current configuration."""
 
     def format_value(value):
@@ -635,6 +617,7 @@ app.add_typer(health_app, name="health")
 @health_app.command("check")
 def health_check() -> None:
     """Perform health checks."""
+
     async def _check():
         console.print("🔍 Performing health checks...")
 
@@ -731,6 +714,7 @@ def generate_sdk(
 
         # Override the output directory in the script
         import scripts.generate_sdk as sdk_module
+
         original_project_root = sdk_module.project_root
         sdk_module.project_root = project_root
 
@@ -826,6 +810,7 @@ def list_profiles(
     offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
 ) -> None:
     """List LLM profiles."""
+
     async def _list():
         api_client = get_api_client()
         try:
@@ -868,7 +853,7 @@ def list_profiles(
                     profile["llm_model"],
                     profile["profile_type"],
                     "✓" if profile.get("is_public") else "✗",
-                    profile["created_at"][:10] if profile.get("created_at") else "N/A"
+                    profile["created_at"][:10] if profile.get("created_at") else "N/A",
                 )
 
             console.print(table)
@@ -888,6 +873,7 @@ def show_profile(
     profile_id: str = typer.Argument(..., help="Profile ID to show"),
 ) -> None:
     """Show profile details."""
+
     async def _show():
         api_client = get_api_client()
         try:
@@ -1003,6 +989,7 @@ def delete_profile(
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
 ) -> None:
     """Delete a profile."""
+
     async def _delete():
         api_client = get_api_client()
         try:
@@ -1035,6 +1022,7 @@ def list_conversations(
     offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
 ) -> None:
     """List conversations."""
+
     async def _list():
         api_client = get_api_client()
         try:
@@ -1061,7 +1049,7 @@ def list_conversations(
                     conv.get("title", "Untitled")[:50],
                     str(conv.get("message_count", 0)),
                     conv["created_at"][:10] if conv.get("created_at") else "N/A",
-                    conv["updated_at"][:10] if conv.get("updated_at") else "N/A"
+                    conv["updated_at"][:10] if conv.get("updated_at") else "N/A",
                 )
 
             console.print(table)
@@ -1083,6 +1071,7 @@ def show_conversation(
     limit: int = typer.Option(10, "--limit", "-l", help="Number of messages to show"),
 ) -> None:
     """Show conversation details."""
+
     async def _show():
         api_client = get_api_client()
         try:
@@ -1107,9 +1096,7 @@ def show_conversation(
             if messages:
                 # Get messages
                 msg_response = await api_client.request(
-                    "GET",
-                    f"/chat/conversations/{conversation_id}/messages",
-                    params={"limit": limit}
+                    "GET", f"/chat/conversations/{conversation_id}/messages", params={"limit": limit}
                 )
 
                 if msg_response and msg_response.get("messages"):
@@ -1137,6 +1124,7 @@ def delete_conversation(
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
 ) -> None:
     """Delete a conversation."""
+
     async def _delete():
         api_client = get_api_client()
         try:
@@ -1166,16 +1154,14 @@ def export_conversation(
     format: str = typer.Option("json", "--format", "-f", help="Export format (json, txt, md)"),
 ) -> None:
     """Export a conversation."""
+
     async def _export():
         nonlocal output_file
         api_client = get_api_client()
         try:
             # Get conversation and messages
             conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
-            messages = await api_client.request(
-                "GET",
-                f"/chat/conversations/{conversation_id}/messages"
-            )
+            messages = await api_client.request("GET", f"/chat/conversations/{conversation_id}/messages")
 
             # Generate filename if not provided
             if not output_file:
@@ -1185,10 +1171,7 @@ def export_conversation(
 
             # Export based on format
             if format == "json":
-                export_data = {
-                    "conversation": conv,
-                    "messages": messages.get("messages", [])
-                }
+                export_data = {"conversation": conv, "messages": messages.get("messages", [])}
                 with open(output_file, "w") as f:
                     json.dump(export_data, f, indent=2, default=str)
 
@@ -1238,6 +1221,7 @@ def list_documents(
     file_type: str = typer.Option(None, "--type", "-t", help="Filter by file type"),
 ) -> None:
     """List uploaded documents."""
+
     async def _list():
         api_client = get_api_client()
         try:
@@ -1270,7 +1254,7 @@ def list_documents(
                     doc.get("file_type", "unknown"),
                     f"{size_mb:.1f}MB" if size_mb > 0 else "N/A",
                     doc.get("status", "unknown"),
-                    doc["created_at"][:10] if doc.get("created_at") else "N/A"
+                    doc["created_at"][:10] if doc.get("created_at") else "N/A",
                 )
 
             console.print(table)
@@ -1293,6 +1277,7 @@ def upload_document(
     tags: str = typer.Option(None, "--tags", help="Tags (comma-separated)"),
 ) -> None:
     """Upload a document."""
+
     async def _upload():
         nonlocal title
         api_client = get_api_client()
@@ -1309,9 +1294,7 @@ def upload_document(
             console.print(f"📤 Uploading: {file_path_obj.name}")
 
             # Prepare multipart form data
-            files = {
-                "file": (file_path_obj.name, open(file_path_obj, "rb"))
-            }
+            files = {"file": (file_path_obj.name, open(file_path_obj, "rb"))}
 
             data = {"title": title}
             if description:
@@ -1350,6 +1333,7 @@ def show_document(
     document_id: str = typer.Argument(..., help="Document ID to show"),
 ) -> None:
     """Show document details."""
+
     async def _show():
         api_client = get_api_client()
         try:
@@ -1388,14 +1372,11 @@ def search_documents(
     threshold: float = typer.Option(0.7, "--threshold", "-t", help="Similarity threshold"),
 ) -> None:
     """Search documents using vector similarity."""
+
     async def _search():
         api_client = get_api_client()
         try:
-            search_data = {
-                "query": query,
-                "limit": limit,
-                "score_threshold": threshold
-            }
+            search_data = {"query": query, "limit": limit, "score_threshold": threshold}
 
             response = await api_client.request("POST", "/documents/search", json=search_data)
 
@@ -1409,7 +1390,11 @@ def search_documents(
 
             for i, result in enumerate(results, 1):
                 score = result.get("score", 0)
-                content = result.get("content", "")[:200] + "..." if len(result.get("content", "")) > 200 else result.get("content", "")
+                content = (
+                    result.get("content", "")[:200] + "..."
+                    if len(result.get("content", "")) > 200
+                    else result.get("content", "")
+                )
                 doc_title = result.get("document_title", "Unknown")
 
                 console.print(f"[bold]{i}. {doc_title}[/bold] (Score: {score:.3f})")
@@ -1428,6 +1413,7 @@ def delete_document(
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
 ) -> None:
     """Delete a document."""
+
     async def _delete():
         api_client = get_api_client()
         try:
@@ -1462,7 +1448,8 @@ def login(
     save_token: bool = typer.Option(True, "--save/--no-save", help="Save access token"),
 ) -> None:
     """Login to get access token."""
-    async def _login(email: str, password: str, save_token:bool ):
+
+    async def _login(email: str, password: str, save_token: bool):
         if not password:
             password = Prompt.ask("Password", password=True)
 
@@ -1517,6 +1504,7 @@ def login(
 @auth_app.command("whoami")
 def whoami() -> None:
     """Show current user information."""
+
     async def _whoami():
         api_client = get_api_client()
         try:
@@ -1566,6 +1554,7 @@ app.add_typer(analytics_app, name="analytics")
 @analytics_app.command("dashboard")
 def show_dashboard() -> None:
     """Show analytics dashboard."""
+
     async def _dashboard():
         api_client = get_api_client()
         try:
@@ -1610,6 +1599,7 @@ def show_usage(
     days: int = typer.Option(7, "--days", "-d", help="Number of days to analyze"),
 ) -> None:
     """Show usage metrics."""
+
     async def _usage():
         api_client = get_api_client()
         try:
@@ -1647,6 +1637,7 @@ def show_usage(
 @analytics_app.command("performance")
 def show_performance() -> None:
     """Show performance metrics."""
+
     async def _performance():
         api_client = get_api_client()
         try:

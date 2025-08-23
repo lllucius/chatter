@@ -23,6 +23,7 @@ logger = get_logger(__name__)
 
 class LLMProviderError(Exception):
     """LLM provider error."""
+
     pass
 
 
@@ -146,11 +147,7 @@ class LLMService:
             # you'd need more sophisticated provider configuration
             return provider
 
-    def convert_conversation_to_messages(
-        self,
-        conversation: Conversation,
-        messages: list[Any]
-    ) -> list[BaseMessage]:
+    def convert_conversation_to_messages(self, conversation: Conversation, messages: list[Any]) -> list[BaseMessage]:
         """Convert conversation messages to LangChain format.
 
         Args:
@@ -178,10 +175,7 @@ class LLMService:
         return langchain_messages
 
     async def generate_response(
-        self,
-        messages: list[BaseMessage],
-        provider: BaseChatModel | None = None,
-        **kwargs
+        self, messages: list[BaseMessage], provider: BaseChatModel | None = None, **kwargs
     ) -> tuple[str, dict[str, Any]]:
         """Generate response using LLM.
 
@@ -216,11 +210,13 @@ class LLMService:
             if hasattr(response, "response_metadata"):
                 token_usage = response.response_metadata.get("token_usage", {})
                 if token_usage:
-                    usage_info.update({
-                        "prompt_tokens": token_usage.get("prompt_tokens"),
-                        "completion_tokens": token_usage.get("completion_tokens"),
-                        "total_tokens": token_usage.get("total_tokens"),
-                    })
+                    usage_info.update(
+                        {
+                            "prompt_tokens": token_usage.get("prompt_tokens"),
+                            "completion_tokens": token_usage.get("completion_tokens"),
+                            "total_tokens": token_usage.get("total_tokens"),
+                        }
+                    )
 
             return response.content, usage_info
 
@@ -229,10 +225,7 @@ class LLMService:
             raise LLMProviderError(f"Generation failed: {str(e)}") from e
 
     async def generate_streaming_response(
-        self,
-        messages: list[BaseMessage],
-        provider: BaseChatModel | None = None,
-        **kwargs
+        self, messages: list[BaseMessage], provider: BaseChatModel | None = None, **kwargs
     ) -> AsyncGenerator[dict[str, Any], None]:
         """Generate streaming response using LLM.
 
@@ -270,20 +263,15 @@ class LLMService:
                     "model": getattr(provider, "model_name", "unknown"),
                     "provider": provider.__class__.__name__.lower().replace("chat", ""),
                     "full_content": full_content,
-                }
+                },
             }
 
             # Send end marker
-            yield {
-                "type": "end"
-            }
+            yield {"type": "end"}
 
         except Exception as e:
             logger.error("Streaming generation failed", error=str(e), provider=provider.__class__.__name__)
-            yield {
-                "type": "error",
-                "error": str(e)
-            }
+            yield {"type": "error", "error": str(e)}
 
     def list_available_providers(self) -> list[str]:
         """List available LLM providers.
@@ -315,39 +303,21 @@ class LLMService:
         }
 
     def create_conversation_chain(
-        self,
-        provider_name: str,
-        system_message: str | None = None,
-        include_history: bool = True
+        self, provider_name: str, system_message: str | None = None, include_history: bool = True
     ):
         """Create a conversation chain using LangChain orchestrator."""
         provider = self.get_provider(provider_name)
         return orchestrator.create_chat_chain(
-            llm=provider,
-            system_message=system_message,
-            include_history=include_history
+            llm=provider, system_message=system_message, include_history=include_history
         )
 
-    def create_rag_chain(
-        self,
-        provider_name: str,
-        retriever,
-        system_message: str | None = None
-    ):
+    def create_rag_chain(self, provider_name: str, retriever, system_message: str | None = None):
         """Create a RAG chain using LangChain orchestrator."""
         provider = self.get_provider(provider_name)
-        return orchestrator.create_rag_chain(
-            llm=provider,
-            retriever=retriever,
-            system_message=system_message
-        )
+        return orchestrator.create_rag_chain(llm=provider, retriever=retriever, system_message=system_message)
 
     async def generate_with_tools(
-        self,
-        messages: list[BaseMessage],
-        tools: list[Any] = None,
-        provider: BaseChatModel | None = None,
-        **kwargs
+        self, messages: list[BaseMessage], tools: list[Any] = None, provider: BaseChatModel | None = None, **kwargs
     ) -> tuple[str, dict[str, Any]]:
         """Generate response with tool calling capabilities."""
         if not provider:
@@ -380,11 +350,13 @@ class LLMService:
             if hasattr(response, "response_metadata"):
                 token_usage = response.response_metadata.get("token_usage", {})
                 if token_usage:
-                    usage_info.update({
-                        "prompt_tokens": token_usage.get("prompt_tokens"),
-                        "completion_tokens": token_usage.get("completion_tokens"),
-                        "total_tokens": token_usage.get("total_tokens"),
-                    })
+                    usage_info.update(
+                        {
+                            "prompt_tokens": token_usage.get("prompt_tokens"),
+                            "completion_tokens": token_usage.get("completion_tokens"),
+                            "total_tokens": token_usage.get("total_tokens"),
+                        }
+                    )
 
             return response.content, usage_info
 
@@ -398,7 +370,7 @@ class LLMService:
         workflow_type: str = "basic",
         system_message: str | None = None,
         retriever=None,
-        tools: list[Any] = None
+        tools: list[Any] = None,
     ):
         """Create a LangGraph workflow."""
         from chatter.core.langgraph import workflow_manager
@@ -409,21 +381,14 @@ class LLMService:
             if not retriever:
                 raise LLMProviderError("Retriever required for RAG workflow") from None
             return workflow_manager.create_rag_conversation_workflow(
-                llm=provider,
-                retriever=retriever,
-                system_message=system_message
+                llm=provider, retriever=retriever, system_message=system_message
             )
         elif workflow_type == "tools":
             if not tools:
                 tools = await mcp_service.get_tools()
                 tools.extend(BuiltInTools.create_builtin_tools())
             return workflow_manager.create_tool_calling_workflow(
-                llm=provider,
-                tools=tools,
-                system_message=system_message
+                llm=provider, tools=tools, system_message=system_message
             )
         else:  # basic
-            return workflow_manager.create_basic_conversation_workflow(
-                llm=provider,
-                system_message=system_message
-            )
+            return workflow_manager.create_basic_conversation_workflow(llm=provider, system_message=system_message)

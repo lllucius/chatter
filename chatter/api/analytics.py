@@ -40,7 +40,7 @@ async def get_analytics_service(session: AsyncSession = Depends(get_session)) ->
 async def get_conversation_stats(
     request: ConversationStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service)
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
 ) -> ConversationStatsResponse:
     """Get conversation statistics.
 
@@ -72,18 +72,15 @@ async def get_conversation_stats(
 
     except Exception as e:
         logger.error("Failed to get conversation stats", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get conversation statistics"
-        ) from e
+        raise InternalServerProblem(detail="Failed to get conversation statistics") from e
 
 
 @router.get("/usage", response_model=UsageMetricsResponse)
 async def get_usage_metrics(
     request: UsageMetricsRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service)
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
 ) -> UsageMetricsResponse:
-
     """Get usage metrics.
 
     Args:
@@ -117,16 +114,14 @@ async def get_usage_metrics(
 
     except Exception as e:
         logger.error("Failed to get usage metrics", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get usage metrics"
-        ) from e
+        raise InternalServerProblem(detail="Failed to get usage metrics") from e
 
 
 @router.get("/performance", response_model=PerformanceMetricsResponse)
 async def get_performance_metrics(
     request: PerformanceMetricsRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service)
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
 ) -> PerformanceMetricsResponse:
     """Get performance metrics.
 
@@ -160,16 +155,14 @@ async def get_performance_metrics(
 
     except Exception as e:
         logger.error("Failed to get performance metrics", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get performance metrics"
-        ) from e
+        raise InternalServerProblem(detail="Failed to get performance metrics") from e
 
 
 @router.get("/documents", response_model=DocumentAnalyticsResponse)
 async def get_document_analytics(
     request: DocumentAnalyticsRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service)
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
 ) -> DocumentAnalyticsResponse:
     """Get document analytics.
 
@@ -205,16 +198,14 @@ async def get_document_analytics(
 
     except Exception as e:
         logger.error("Failed to get document analytics", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get document analytics"
-        ) from e
+        raise InternalServerProblem(detail="Failed to get document analytics") from e
 
 
 @router.get("/system", response_model=SystemAnalyticsResponse)
 async def get_system_analytics(
     request: SystemAnalyticsRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service)
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
 ) -> SystemAnalyticsResponse:
     """Get system analytics.
 
@@ -249,16 +240,14 @@ async def get_system_analytics(
 
     except Exception as e:
         logger.error("Failed to get system analytics", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get system analytics"
-        ) from e
+        raise InternalServerProblem(detail="Failed to get system analytics") from e
 
 
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
     request: DashboardRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service)
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
 ) -> DashboardResponse:
     """Get comprehensive dashboard data.
 
@@ -285,16 +274,14 @@ async def get_dashboard(
 
     except Exception as e:
         logger.error("Failed to get dashboard data", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get dashboard data"
-        ) from e
+        raise InternalServerProblem(detail="Failed to get dashboard data") from e
 
 
 @router.get("/toolservers")
 async def get_tool_server_analytics(
     request: ToolServerAnalyticsRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service)
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
 ) -> dict:
     """Get tool server analytics.
 
@@ -311,6 +298,4 @@ async def get_tool_server_analytics(
 
     except Exception as e:
         logger.error("Failed to get tool server analytics", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get tool server analytics"
-        ) from e
+        raise InternalServerProblem(detail="Failed to get tool server analytics") from e

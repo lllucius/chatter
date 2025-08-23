@@ -109,21 +109,20 @@ class ToolServerScheduler:
 
                         # Handle server issues
                         if not health.is_running and server.auto_start:
-                            logger.info("Auto-restarting unresponsive server",
-                                      server_id=server.id, server_name=server.name)
+                            logger.info(
+                                "Auto-restarting unresponsive server", server_id=server.id, server_name=server.name
+                            )
                             await service.start_server(server.id)
 
                         elif not health.is_responsive:
-                            logger.warning("Server not responsive",
-                                         server_id=server.id, server_name=server.name)
+                            logger.warning("Server not responsive", server_id=server.id, server_name=server.name)
 
                             # Try to restart if auto-start is enabled
                             if server.auto_start:
                                 await service.restart_server(server.id)
 
                     except Exception as e:
-                        logger.error("Health check failed for server",
-                                   server_id=server.id, error=str(e))
+                        logger.error("Health check failed for server", server_id=server.id, error=str(e))
 
                 logger.debug("Health checks completed", server_count=len(servers))
 
@@ -144,15 +143,15 @@ class ToolServerScheduler:
                 for server in auto_update_servers:
                     try:
                         if server.status == ServerStatus.ENABLED:
-                            logger.info("Auto-updating server capabilities",
-                                      server_id=server.id, server_name=server.name)
+                            logger.info(
+                                "Auto-updating server capabilities", server_id=server.id, server_name=server.name
+                            )
 
                             # Restart server to discover new tools
                             await service.restart_server(server.id)
 
                     except Exception as e:
-                        logger.error("Auto-update failed for server",
-                                   server_id=server.id, error=str(e))
+                        logger.error("Auto-update failed for server", server_id=server.id, error=str(e))
 
                 logger.debug("Auto-updates completed", server_count=len(auto_update_servers))
 
@@ -171,9 +170,7 @@ class ToolServerScheduler:
                 # Delete usage records older than 90 days
                 cutoff_date = datetime.now(UTC) - timedelta(days=90)
 
-                result = await session.execute(
-                    delete(ToolUsage).where(ToolUsage.called_at < cutoff_date)
-                )
+                result = await session.execute(delete(ToolUsage).where(ToolUsage.called_at < cutoff_date))
 
                 deleted_count = result.rowcount
                 await session.commit()

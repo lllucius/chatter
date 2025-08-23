@@ -12,19 +12,9 @@ class ConversationStats(Base):
     """Model for conversation-level statistics."""
 
     # Foreign keys
-    conversation_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.CONVERSATIONS),
-        nullable=False,
-        index=True
-    )
+    conversation_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.CONVERSATIONS), nullable=False, index=True)
 
-    user_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=False,
-        index=True
-    )
+    user_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=False, index=True)
 
     # Time period
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
@@ -84,19 +74,9 @@ class DocumentStats(Base):
     """Model for document-level statistics."""
 
     # Foreign keys
-    document_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.DOCUMENTS),
-        nullable=False,
-        index=True
-    )
+    document_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.DOCUMENTS), nullable=False, index=True)
 
-    user_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=False,
-        index=True
-    )
+    user_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=False, index=True)
 
     # Time period
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
@@ -138,19 +118,9 @@ class PromptStats(Base):
     """Model for prompt usage statistics."""
 
     # Foreign keys
-    prompt_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.PROMPTS),
-        nullable=False,
-        index=True
-    )
+    prompt_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.PROMPTS), nullable=False, index=True)
 
-    user_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=False,
-        index=True
-    )
+    user_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=False, index=True)
 
     # Time period
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
@@ -191,19 +161,9 @@ class ProfileStats(Base):
     """Model for profile usage statistics."""
 
     # Foreign keys
-    profile_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.PROFILES),
-        nullable=False,
-        index=True
-    )
+    profile_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.PROFILES), nullable=False, index=True)
 
-    user_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=False,
-        index=True
-    )
+    user_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=False, index=True)
 
     # Time period
     date: Mapped[date] = mapped_column(Date, nullable=False, index=True)

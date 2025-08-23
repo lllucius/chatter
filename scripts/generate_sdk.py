@@ -58,13 +58,19 @@ def generate_python_sdk():
     try:
         # Generate the SDK using openapi-generator-cli
         cmd = [
-            "openapi-generator-cli", "generate",
-            "-i", str(temp_spec_path),
-            "-g", "python",
-            "-o", str(sdk_output_dir),
-            "-c", str(config_path),
-            "--additional-properties", f"pythonPackageName={config['packageName']}",
-            "--skip-validate-spec"
+            "openapi-generator-cli",
+            "generate",
+            "-i",
+            str(temp_spec_path),
+            "-g",
+            "python",
+            "-o",
+            str(sdk_output_dir),
+            "-c",
+            str(config_path),
+            "--additional-properties",
+            f"pythonPackageName={config['packageName']}",
+            "--skip-validate-spec",
         ]
 
         print(f"🔧 Running command: {' '.join(cmd)}")

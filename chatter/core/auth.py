@@ -33,16 +33,14 @@ logger = get_logger(__name__)
 # Use RFC 9457 compliant problem classes instead of HTTPException subclasses
 AuthenticationError = AuthenticationProblem
 AuthorizationError = AuthorizationProblem
+
+
 def UserAlreadyExistsError(detail="User already exists"):
-    return ConflictProblem(
-    detail=detail,
-    conflicting_resource="user"
-)
+    return ConflictProblem(detail=detail, conflicting_resource="user")
+
+
 def UserNotFoundError(detail="User not found"):
-    return NotFoundProblem(
-    detail=detail,
-    resource_type="user"
-)
+    return NotFoundProblem(detail=detail, resource_type="user")
 
 
 class AuthService:
@@ -71,16 +69,13 @@ class AuthService:
         """
         # Validate email format
         if not validate_email(user_data.email):
-            raise BadRequestProblem(
-                detail="Invalid email format"
-            ) from None
+            raise BadRequestProblem(detail="Invalid email format") from None
 
         # Validate password strength
         password_validation = validate_password_strength(user_data.password)
         if not password_validation["valid"]:
             raise BadRequestProblem(
-                detail="Password does not meet requirements",
-                errors=password_validation["errors"]
+                detail="Password does not meet requirements", errors=password_validation["errors"]
             ) from None
 
         # Check if user already exists
@@ -146,9 +141,7 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.id == user_id)
-        )
+        result = await self.session.execute(select(User).where(User.id == user_id))
         return result.scalar_one_or_none()
 
     async def get_user_by_email(self, email: str) -> User | None:
@@ -160,9 +153,7 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.email == email)
-        )
+        result = await self.session.execute(select(User).where(User.email == email))
         return result.scalar_one_or_none()
 
     async def get_user_by_username(self, username: str) -> User | None:
@@ -174,9 +165,7 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.username == username)
-        )
+        result = await self.session.execute(select(User).where(User.username == username))
         return result.scalar_one_or_none()
 
     async def get_user_by_api_key(self, api_key: str) -> User | None:
@@ -188,9 +177,7 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.api_key == api_key)
-        )
+        result = await self.session.execute(select(User).where(User.api_key == api_key))
         return result.scalar_one_or_none()
 
     async def update_user(self, user_id: str, user_data: UserUpdate) -> User:
@@ -249,8 +236,7 @@ class AuthService:
         password_validation = validate_password_strength(new_password)
         if not password_validation["valid"]:
             raise BadRequestProblem(
-                detail="New password does not meet requirements",
-                errors=password_validation["errors"]
+                detail="New password does not meet requirements", errors=password_validation["errors"]
             ) from None
 
         # Update password
@@ -345,13 +331,11 @@ class AuthService:
         refresh_token_expires = timedelta(days=settings.refresh_token_expire_days)
 
         access_token = create_access_token(
-            data={"sub": user.id, "email": user.email},
-            expires_delta=access_token_expires
+            data={"sub": user.id, "email": user.email}, expires_delta=access_token_expires
         )
 
         refresh_token = create_refresh_token(
-            data={"sub": user.id, "email": user.email},
-            expires_delta=refresh_token_expires
+            data={"sub": user.id, "email": user.email}, expires_delta=refresh_token_expires
         )
 
         return {

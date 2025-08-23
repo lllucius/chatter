@@ -29,35 +29,14 @@ def run_command(cmd: list, description: str) -> bool:
 
 def main():
     """Main workflow function."""
-    parser = argparse.ArgumentParser(
-        description="Automated OpenAPI docs and SDK generation workflow"
-    )
+    parser = argparse.ArgumentParser(description="Automated OpenAPI docs and SDK generation workflow")
+    parser.add_argument("--docs-only", action="store_true", help="Generate only documentation, skip SDK")
+    parser.add_argument("--sdk-only", action="store_true", help="Generate only SDK, skip documentation")
+    parser.add_argument("--output-dir", default="./", help="Base output directory (default: current directory)")
     parser.add_argument(
-        "--docs-only",
-        action="store_true",
-        help="Generate only documentation, skip SDK"
+        "--docs-format", choices=["json", "yaml", "all"], default="all", help="Documentation format to generate"
     )
-    parser.add_argument(
-        "--sdk-only",
-        action="store_true",
-        help="Generate only SDK, skip documentation"
-    )
-    parser.add_argument(
-        "--output-dir",
-        default="./",
-        help="Base output directory (default: current directory)"
-    )
-    parser.add_argument(
-        "--docs-format",
-        choices=["json", "yaml", "all"],
-        default="all",
-        help="Documentation format to generate"
-    )
-    parser.add_argument(
-        "--clean",
-        action="store_true",
-        help="Clean output directories before generating"
-    )
+    parser.add_argument("--clean", action="store_true", help="Clean output directories before generating")
 
     args = parser.parse_args()
 
@@ -79,11 +58,13 @@ def main():
 
         if docs_dir.exists():
             import shutil
+
             shutil.rmtree(docs_dir)
             print(f"   Cleaned: {docs_dir}")
 
         if sdk_dir.exists():
             import shutil
+
             shutil.rmtree(sdk_dir)
             print(f"   Cleaned: {sdk_dir}")
 
@@ -93,9 +74,15 @@ def main():
 
         docs_output = Path(args.output_dir) / "docs" / "api"
         cmd = [
-            sys.executable, "-m", "chatter", "docs", "generate",
-            "--output", str(docs_output),
-            "--format", args.docs_format
+            sys.executable,
+            "-m",
+            "chatter",
+            "docs",
+            "generate",
+            "--output",
+            str(docs_output),
+            "--format",
+            args.docs_format,
         ]
 
         if not run_command(cmd, "OpenAPI documentation generation"):
@@ -122,9 +109,15 @@ def main():
         print("\n🐍 Generating Python SDK...")
 
         cmd = [
-            sys.executable, "-m", "chatter", "docs", "sdk",
-            "--language", "python",
-            "--output", str(Path(args.output_dir) / "sdk")
+            sys.executable,
+            "-m",
+            "chatter",
+            "docs",
+            "sdk",
+            "--language",
+            "python",
+            "--output",
+            str(Path(args.output_dir) / "sdk"),
         ]
 
         if not run_command(cmd, "Python SDK generation"):
@@ -133,8 +126,11 @@ def main():
         # Verify SDK files were created
         sdk_dir = project_root / "sdk" / "python"  # The CLI uses project_root internally
         expected_sdk_files = [
-            "setup.py", "README.md", "requirements.txt",
-            "chatter_sdk/__init__.py", "examples/basic_usage.py"
+            "setup.py",
+            "README.md",
+            "requirements.txt",
+            "chatter_sdk/__init__.py",
+            "examples/basic_usage.py",
         ]
 
         for file in expected_sdk_files:
@@ -152,7 +148,7 @@ def main():
                 success = False
 
     # Summary
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     if success:
         print("🎉 Workflow completed successfully!")
 

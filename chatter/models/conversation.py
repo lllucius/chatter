@@ -12,6 +12,7 @@ from chatter.models.base import Base, Keys
 
 class MessageRole(str, Enum):
     """Enumeration for message roles."""
+
     USER = "user"
     ASSISTANT = "assistant"
     SYSTEM = "system"
@@ -20,6 +21,7 @@ class MessageRole(str, Enum):
 
 class ConversationStatus(str, Enum):
     """Enumeration for conversation status."""
+
     ACTIVE = "active"
     ARCHIVED = "archived"
     DELETED = "deleted"
@@ -29,28 +31,15 @@ class Conversation(Base):
     """Conversation model for chat sessions."""
 
     # Foreign keys
-    user_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=False,
-        index=True
-    )
+    user_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=False, index=True)
 
-    profile_id: Mapped[str | None] = mapped_column(
-        String(12),
-        ForeignKey(Keys.PROFILES),
-        nullable=True,
-        index=True
-    )
+    profile_id: Mapped[str | None] = mapped_column(String(12), ForeignKey(Keys.PROFILES), nullable=True, index=True)
 
     # Conversation metadata
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[ConversationStatus] = mapped_column(
-        SQLEnum(ConversationStatus),
-        default=ConversationStatus.ACTIVE,
-        nullable=False,
-        index=True
+        SQLEnum(ConversationStatus), default=ConversationStatus.ACTIVE, nullable=False, index=True
     )
 
     # Configuration
@@ -83,17 +72,14 @@ class Conversation(Base):
     user: Mapped["User"] = relationship("User", back_populates="conversations")
     profile: Mapped[Optional["Profile"]] = relationship("Profile", back_populates="conversations")
     messages: Mapped[list["Message"]] = relationship(
-        "Message",
-        back_populates="conversation",
-        cascade="all, delete-orphan",
-        order_by="Message.created_at"
+        "Message", back_populates="conversation", cascade="all, delete-orphan", order_by="Message.created_at"
     )
 
     def __repr__(self) -> str:
         """String representation of conversation."""
         return f"<Conversation(id={self.id}, title={self.title}, user_id={self.user_id})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert conversation to dictionary."""
         return {
             "id": self.id,
@@ -127,19 +113,10 @@ class Message(Base):
     """Message model for individual chat messages."""
 
     # Foreign keys
-    conversation_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.CONVERSATIONS),
-        nullable=False,
-        index=True
-    )
+    conversation_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.CONVERSATIONS), nullable=False, index=True)
 
     # Message content
-    role: Mapped[MessageRole] = mapped_column(
-        SQLEnum(MessageRole),
-        nullable=False,
-        index=True
-    )
+    role: Mapped[MessageRole] = mapped_column(SQLEnum(MessageRole), nullable=False, index=True)
     content: Mapped[str] = mapped_column(Text, nullable=False)
 
     # Tool calling
@@ -180,7 +157,7 @@ class Message(Base):
         content_preview = self.content[:50] + "..." if len(self.content) > 50 else self.content
         return f"<Message(id={self.id}, role={self.role}, content={content_preview})>"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert message to dictionary."""
         return {
             "id": self.id,

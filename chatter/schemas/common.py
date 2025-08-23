@@ -26,14 +26,17 @@ class PaginatedRequest(BaseModel):
 
 class ListRequestBase(BaseModel):
     """Base schema for list requests without pagination."""
+
     pass
 
 
 class GetRequestBase(BaseModel):
     """Base schema for get requests."""
+
     pass
 
 
 class DeleteRequestBase(BaseModel):
     """Base schema for delete requests."""
+
     pass

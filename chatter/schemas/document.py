@@ -107,16 +107,19 @@ class DocumentListRequest(ListRequestBase):
 
 class DocumentGetRequest(GetRequestBase):
     """Schema for document get request."""
+
     pass
 
 
 class DocumentDeleteRequest(DeleteRequestBase):
     """Schema for document delete request."""
+
     pass
 
 
 class DocumentStatsRequest(GetRequestBase):
     """Schema for document stats request."""
+
     pass
 
 

@@ -28,11 +28,7 @@ class ProfileService:
         self.session = session
         self.llm_service = LLMService()
 
-    async def create_profile(
-        self,
-        user_id: str,
-        profile_data: ProfileCreate
-    ) -> Profile:
+    async def create_profile(self, user_id: str, profile_data: ProfileCreate) -> Profile:
         """Create a new profile.
 
         Args:
@@ -48,12 +44,7 @@ class ProfileService:
         try:
             # Check for duplicate profile names for this user
             existing_result = await self.session.execute(
-                select(Profile).where(
-                    and_(
-                        Profile.owner_id == user_id,
-                        Profile.name == profile_data.name
-                    )
-                )
+                select(Profile).where(and_(Profile.owner_id == user_id, Profile.name == profile_data.name))
             )
             existing_profile = existing_result.scalar_one_or_none()
 
@@ -66,14 +57,11 @@ class ProfileService:
                 logger.warning(
                     "LLM provider not available, profile will be created but may not work",
                     provider=profile_data.llm_provider,
-                    available_providers=available_providers
+                    available_providers=available_providers,
                 )
 
             # Create profile
-            profile = Profile(
-                owner_id=user_id,
-                **profile_data.model_dump()
-            )
+            profile = Profile(owner_id=user_id, **profile_data.model_dump())
 
             self.session.add(profile)
             await self.session.commit()
@@ -85,7 +73,7 @@ class ProfileService:
                 name=profile.name,
                 user_id=user_id,
                 llm_provider=profile.llm_provider,
-                llm_model=profile.llm_model
+                llm_model=profile.llm_model,
             )
 
             return profile
@@ -96,11 +84,7 @@ class ProfileService:
             logger.error("Profile creation failed", error=str(e))
             raise ProfileError(f"Failed to create profile: {str(e)}") from e
 
-    async def get_profile(
-        self,
-        profile_id: str,
-        user_id: str
-    ) -> Profile | None:
+    async def get_profile(self, profile_id: str, user_id: str) -> Profile | None:
         """Get profile by ID with access control.
 
         Args:
@@ -118,7 +102,7 @@ class ProfileService:
                         or_(
                             Profile.owner_id == user_id,
                             Profile.is_public is True,
-                        )
+                        ),
                     )
                 )
             )
@@ -128,11 +112,7 @@ class ProfileService:
             logger.error("Failed to get profile", profile_id=profile_id, error=str(e))
             return None
 
-    async def list_profiles(
-        self,
-        user_id: str,
-        list_request: ProfileListRequest
-    ) -> tuple[list[Profile], int]:
+    async def list_profiles(self, user_id: str, list_request: ProfileListRequest) -> tuple[list[Profile], int]:
         """List profiles with filtering and pagination.
 
         Args:
@@ -190,12 +170,7 @@ class ProfileService:
             logger.error("Failed to list profiles", error=str(e))
             return [], 0
 
-    async def update_profile(
-        self,
-        profile_id: str,
-        user_id: str,
-        update_data: ProfileUpdate
-    ) -> Profile | None:
+    async def update_profile(self, profile_id: str, user_id: str, update_data: ProfileUpdate) -> Profile | None:
         """Update profile.
 
         Args:
@@ -209,12 +184,7 @@ class ProfileService:
         try:
             # Get profile with ownership check
             result = await self.session.execute(
-                select(Profile).where(
-                    and_(
-                        Profile.id == profile_id,
-                        Profile.owner_id == user_id
-                    )
-                )
+                select(Profile).where(and_(Profile.id == profile_id, Profile.owner_id == user_id))
             )
             profile = result.scalar_one_or_none()
 
@@ -225,11 +195,7 @@ class ProfileService:
             if update_data.name and update_data.name != profile.name:
                 existing_result = await self.session.execute(
                     select(Profile).where(
-                        and_(
-                            Profile.owner_id == user_id,
-                            Profile.name == update_data.name,
-                            Profile.id != profile_id
-                        )
+                        and_(Profile.owner_id == user_id, Profile.name == update_data.name, Profile.id != profile_id)
                     )
                 )
                 existing_profile = existing_result.scalar_one_or_none()
@@ -254,11 +220,7 @@ class ProfileService:
             logger.error("Failed to update profile", profile_id=profile_id, error=str(e))
             raise ProfileError(f"Failed to update profile: {str(e)}") from e
 
-    async def delete_profile(
-        self,
-        profile_id: str,
-        user_id: str
-    ) -> bool:
+    async def delete_profile(self, profile_id: str, user_id: str) -> bool:
         """Delete profile.
 
         Args:
@@ -271,12 +233,7 @@ class ProfileService:
         try:
             # Get profile with ownership check
             result = await self.session.execute(
-                select(Profile).where(
-                    and_(
-                        Profile.id == profile_id,
-                        Profile.owner_id == user_id
-                    )
-                )
+                select(Profile).where(and_(Profile.id == profile_id, Profile.owner_id == user_id))
             )
             profile = result.scalar_one_or_none()
 
@@ -297,12 +254,7 @@ class ProfileService:
             logger.error("Failed to delete profile", profile_id=profile_id, error=str(e))
             return False
 
-    async def test_profile(
-        self,
-        profile_id: str,
-        user_id: str,
-        test_request: ProfileTestRequest
-    ) -> dict[str, Any]:
+    async def test_profile(self, profile_id: str, user_id: str, test_request: ProfileTestRequest) -> dict[str, Any]:
         """Test profile with a sample message.
 
         Args:
@@ -377,7 +329,7 @@ class ProfileService:
                 "Profile test completed",
                 profile_id=profile_id,
                 response_time_ms=response_time_ms,
-                tokens_used=usage_info.get("total_tokens", 0)
+                tokens_used=usage_info.get("total_tokens", 0),
             )
 
             return result
@@ -394,7 +346,7 @@ class ProfileService:
         user_id: str,
         new_name: str,
         description: str | None = None,
-        modifications: ProfileUpdate | None = None
+        modifications: ProfileUpdate | None = None,
     ) -> Profile:
         """Clone an existing profile.
 
@@ -416,12 +368,7 @@ class ProfileService:
 
             # Check for name conflicts
             existing_result = await self.session.execute(
-                select(Profile).where(
-                    and_(
-                        Profile.owner_id == user_id,
-                        Profile.name == new_name
-                    )
-                )
+                select(Profile).where(and_(Profile.owner_id == user_id, Profile.name == new_name))
             )
             existing_profile = existing_result.scalar_one_or_none()
 
@@ -475,10 +422,7 @@ class ProfileService:
             cloned_profile = await self.create_profile(user_id, profile_data)
 
             logger.info(
-                "Profile cloned",
-                source_profile_id=profile_id,
-                cloned_profile_id=cloned_profile.id,
-                user_id=user_id
+                "Profile cloned", source_profile_id=profile_id, cloned_profile_id=cloned_profile.id, user_id=user_id
             )
 
             return cloned_profile
@@ -504,47 +448,35 @@ class ProfileService:
             for profile_type in ProfileType:
                 result = await self.session.execute(
                     select(func.count(Profile.id)).where(
-                        and_(
-                            Profile.owner_id == user_id,
-                            Profile.profile_type == profile_type
-                        )
+                        and_(Profile.owner_id == user_id, Profile.profile_type == profile_type)
                     )
                 )
                 type_counts[profile_type.value] = result.scalar()
 
             # Count profiles by provider
             provider_result = await self.session.execute(
-                select(
-                    Profile.llm_provider,
-                    func.count(Profile.id)
-                ).where(
-                    Profile.owner_id == user_id
-                ).group_by(Profile.llm_provider)
+                select(Profile.llm_provider, func.count(Profile.id))
+                .where(Profile.owner_id == user_id)
+                .group_by(Profile.llm_provider)
             )
             provider_counts = dict(provider_result.all())
 
             # Get most used profiles
             most_used_result = await self.session.execute(
-                select(Profile).where(
-                    Profile.owner_id == user_id
-                ).order_by(desc(Profile.usage_count)).limit(5)
+                select(Profile).where(Profile.owner_id == user_id).order_by(desc(Profile.usage_count)).limit(5)
             )
             most_used_profiles = most_used_result.scalars().all()
 
             # Get recent profiles
             recent_result = await self.session.execute(
-                select(Profile).where(
-                    Profile.owner_id == user_id
-                ).order_by(desc(Profile.created_at)).limit(5)
+                select(Profile).where(Profile.owner_id == user_id).order_by(desc(Profile.created_at)).limit(5)
             )
             recent_profiles = recent_result.scalars().all()
 
             # Get usage totals
             usage_result = await self.session.execute(
                 select(
-                    func.sum(Profile.usage_count),
-                    func.sum(Profile.total_tokens_used),
-                    func.sum(Profile.total_cost)
+                    func.sum(Profile.usage_count), func.sum(Profile.total_tokens_used), func.sum(Profile.total_cost)
                 ).where(Profile.owner_id == user_id)
             )
             total_usage, total_tokens, total_cost = usage_result.first()
@@ -591,4 +523,5 @@ class ProfileService:
 
 class ProfileError(Exception):
     """Profile operation error."""
+
     pass

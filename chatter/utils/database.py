@@ -31,17 +31,20 @@ def get_engine() -> AsyncEngine:
         }
 
         # PostgreSQL-specific settings
-        engine_kwargs.update({
-            "pool_size": settings.db_pool_size,
-            "max_overflow": settings.db_max_overflow,
-            "pool_pre_ping": settings.db_pool_pre_ping,
-            "pool_recycle": settings.db_pool_recycle,
-        })
+        engine_kwargs.update(
+            {
+                "pool_size": settings.db_pool_size,
+                "max_overflow": settings.db_max_overflow,
+                "pool_pre_ping": settings.db_pool_pre_ping,
+                "pool_recycle": settings.db_pool_recycle,
+            }
+        )
 
         _engine = create_async_engine(database_url, **engine_kwargs)
 
         # Add query logging event listener
         if settings.debug_database_queries:
+
             @event.listens_for(_engine.sync_engine, "before_cursor_execute")
             def receive_before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
                 """Log SQL queries when debug mode is enabled."""
@@ -117,7 +120,7 @@ async def initialize_default_data() -> None:
             is_active=True,
             is_verified=True,
             is_superuser=True,
-            bio="Default system administrator account"
+            bio="Default system administrator account",
         )
         session.add(admin_user)
         await session.commit()
@@ -147,14 +150,14 @@ Please provide a detailed response that addresses all aspects of the task.""",
                         "input": {
                             "task": "Summarize the quarterly report",
                             "requirements": "Keep it under 200 words, highlight key metrics",
-                            "context": "Q3 2024 financial data"
+                            "context": "Q3 2024 financial data",
                         },
                         "output": "A concise summary focusing on revenue growth, expenses, "
-                                  "and key performance indicators from Q3 2024."
+                        "and key performance indicators from Q3 2024.",
                     }
                 ],
                 "suggested_temperature": 0.3,
-                "suggested_max_tokens": 1000
+                "suggested_max_tokens": 1000,
             },
             {
                 "name": "Few-Shot Learning Template",
@@ -178,11 +181,16 @@ Now, please follow the same pattern for:
 Input: {new_input}
 Output:""",
                 "variables": [
-                    "example1_input", "example1_output", "example2_input", "example2_output",
-                    "example3_input", "example3_output", "new_input"
+                    "example1_input",
+                    "example1_output",
+                    "example2_input",
+                    "example2_output",
+                    "example3_input",
+                    "example3_output",
+                    "new_input",
                 ],
                 "suggested_temperature": 0.2,
-                "suggested_max_tokens": 800
+                "suggested_max_tokens": 800,
             },
             {
                 "name": "Chain-of-Thought Reasoning",
@@ -207,7 +215,7 @@ Step 4: Let me verify my reasoning.
 Final Answer: {conclusion}""",
                 "variables": ["problem", "understanding", "key_info", "reasoning_steps", "verification", "conclusion"],
                 "suggested_temperature": 0.4,
-                "suggested_max_tokens": 1500
+                "suggested_max_tokens": 1500,
             },
             {
                 "name": "Role and Persona Template",
@@ -229,9 +237,21 @@ Speaking style: {speaking_style}
 
 Now, please respond to the following as this character:
 {prompt}""",
-                "variables": ["role", "experience", "field", "trait1", "trait2", "trait3", "expertise1", "expertise2", "expertise3", "speaking_style", "prompt"],
+                "variables": [
+                    "role",
+                    "experience",
+                    "field",
+                    "trait1",
+                    "trait2",
+                    "trait3",
+                    "expertise1",
+                    "expertise2",
+                    "expertise3",
+                    "speaking_style",
+                    "prompt",
+                ],
                 "suggested_temperature": 0.8,
-                "suggested_max_tokens": 1200
+                "suggested_max_tokens": 1200,
             },
             {
                 "name": "Context and Question Template",
@@ -253,7 +273,7 @@ Question: {question}
 Please provide a comprehensive answer that takes into account all the context provided above.""",
                 "variables": ["context_background", "detail1", "detail2", "detail3", "current_situation", "question"],
                 "suggested_temperature": 0.5,
-                "suggested_max_tokens": 1000
+                "suggested_max_tokens": 1000,
             },
             {
                 "name": "Format-Constrained Response",
@@ -275,9 +295,16 @@ Constraints:
 - {constraint3}
 
 Please ensure your response strictly follows the specified format.""",
-                "variables": ["request", "format_requirements", "output_format", "constraint1", "constraint2", "constraint3"],
+                "variables": [
+                    "request",
+                    "format_requirements",
+                    "output_format",
+                    "constraint1",
+                    "constraint2",
+                    "constraint3",
+                ],
                 "suggested_temperature": 0.1,
-                "suggested_max_tokens": 800
+                "suggested_max_tokens": 800,
             },
             {
                 "name": "Delimited Input Template",
@@ -302,7 +329,7 @@ Please ensure your response strictly follows the specified format.""",
 Based on the delimited sections above, please provide your analysis.""",
                 "variables": ["main_content", "additional_context", "requirements", "constraints"],
                 "suggested_temperature": 0.3,
-                "suggested_max_tokens": 1200
+                "suggested_max_tokens": 1200,
             },
             {
                 "name": "Meta Prompt Engineering Pattern",
@@ -328,10 +355,21 @@ Enhancement Strategy:
 - {strategy3}
 
 Please create an improved prompt that addresses these meta-considerations.""",
-                "variables": ["objective", "audience", "outcome", "original_prompt", "clarity_issues", "specificity_issues", "context_issues", "strategy1", "strategy2", "strategy3"],
+                "variables": [
+                    "objective",
+                    "audience",
+                    "outcome",
+                    "original_prompt",
+                    "clarity_issues",
+                    "specificity_issues",
+                    "context_issues",
+                    "strategy1",
+                    "strategy2",
+                    "strategy3",
+                ],
                 "suggested_temperature": 0.6,
-                "suggested_max_tokens": 1500
-            }
+                "suggested_max_tokens": 1500,
+            },
         ]
 
         for prompt_data in default_prompts:
@@ -346,7 +384,7 @@ Please create an improved prompt that addresses these meta-considerations.""",
                 examples=prompt_data.get("examples"),
                 suggested_temperature=prompt_data.get("suggested_temperature"),
                 suggested_max_tokens=prompt_data.get("suggested_max_tokens"),
-                is_public=True
+                is_public=True,
             )
             session.add(prompt)
 
@@ -363,7 +401,7 @@ Please create an improved prompt that addresses these meta-considerations.""",
                 "top_p": 0.9,
                 "system_prompt": "You are a factual assistant that provides accurate, consistent, and well-researched information. Focus on objectivity and precision in your responses.",
                 "enable_tools": False,
-                "tags": ["factual", "deterministic", "analytical"]
+                "tags": ["factual", "deterministic", "analytical"],
             },
             {
                 "name": "Balanced/Default Mode",
@@ -376,7 +414,7 @@ Please create an improved prompt that addresses these meta-considerations.""",
                 "top_p": 1.0,
                 "system_prompt": "You are a helpful, informative, and balanced assistant. Provide thoughtful responses that are both accurate and engaging.",
                 "enable_tools": True,
-                "tags": ["balanced", "default", "conversational"]
+                "tags": ["balanced", "default", "conversational"],
             },
             {
                 "name": "Creative/Brainstorming Mode",
@@ -389,7 +427,7 @@ Please create an improved prompt that addresses these meta-considerations.""",
                 "top_p": 1.0,
                 "system_prompt": "You are a creative assistant focused on generating innovative ideas, exploring possibilities, and thinking outside the box. Embrace creativity and diverse perspectives.",
                 "enable_tools": True,
-                "tags": ["creative", "brainstorming", "innovative"]
+                "tags": ["creative", "brainstorming", "innovative"],
             },
             {
                 "name": "Concise/Short-Form Mode",
@@ -402,7 +440,7 @@ Please create an improved prompt that addresses these meta-considerations.""",
                 "top_p": 0.95,
                 "system_prompt": "You are a concise assistant that provides direct, brief, and to-the-point responses. Avoid unnecessary elaboration while maintaining accuracy and helpfulness.",
                 "enable_tools": False,
-                "tags": ["concise", "brief", "direct"]
+                "tags": ["concise", "brief", "direct"],
             },
             {
                 "name": "Exploration/Diverse Mode",
@@ -416,7 +454,7 @@ Please create an improved prompt that addresses these meta-considerations.""",
                 "top_k": 50,
                 "system_prompt": "You are an exploratory assistant that considers multiple perspectives, examines different angles, and encourages deep thinking about complex topics.",
                 "enable_tools": True,
-                "tags": ["exploration", "diverse", "multi-perspective"]
+                "tags": ["exploration", "diverse", "multi-perspective"],
             },
             {
                 "name": "Step-by-Step Reasoning Mode",
@@ -429,8 +467,8 @@ Please create an improved prompt that addresses these meta-considerations.""",
                 "top_p": 0.9,
                 "system_prompt": "You are a methodical assistant that breaks down complex problems into clear steps, shows your reasoning process, and provides structured solutions.",
                 "enable_tools": True,
-                "tags": ["reasoning", "methodical", "step-by-step"]
-            }
+                "tags": ["reasoning", "methodical", "step-by-step"],
+            },
         ]
 
         for profile_data in default_profiles:
@@ -448,7 +486,7 @@ Please create an improved prompt that addresses these meta-considerations.""",
                 system_prompt=profile_data.get("system_prompt"),
                 enable_tools=profile_data.get("enable_tools", False),
                 is_public=True,
-                tags=profile_data.get("tags", [])
+                tags=profile_data.get("tags", []),
             )
             session.add(profile)
 

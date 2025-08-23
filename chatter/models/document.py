@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 try:
     from pgvector.sqlalchemy import Vector
+
     PGVECTOR_AVAILABLE = True
 except ImportError:
     # Fallback for non-PostgreSQL environments
@@ -21,6 +22,7 @@ from chatter.models.base import Base, Keys
 
 class DocumentStatus(str, Enum):
     """Enumeration for document processing status."""
+
     PENDING = "pending"
     PROCESSING = "processing"
     PROCESSED = "processed"
@@ -30,6 +32,7 @@ class DocumentStatus(str, Enum):
 
 class DocumentType(str, Enum):
     """Enumeration for document types."""
+
     PDF = "pdf"
     TEXT = "text"
     MARKDOWN = "markdown"
@@ -48,12 +51,7 @@ class Document(Base):
     """Document model for knowledge base files."""
 
     # Foreign keys
-    owner_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=False,
-        index=True
-    )
+    owner_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=False, index=True)
 
     # File information
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
@@ -62,11 +60,7 @@ class Document(Base):
     file_size: Mapped[int] = mapped_column(Integer, nullable=False)
     file_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)  # SHA-256
     mime_type: Mapped[str] = mapped_column(String(100), nullable=False)
-    document_type: Mapped[DocumentType] = mapped_column(
-        SQLEnum(DocumentType),
-        nullable=False,
-        index=True
-    )
+    document_type: Mapped[DocumentType] = mapped_column(SQLEnum(DocumentType), nullable=False, index=True)
 
     # Content
     title: Mapped[str | None] = mapped_column(String(500), nullable=True)
@@ -76,19 +70,10 @@ class Document(Base):
 
     # Processing status
     status: Mapped[DocumentStatus] = mapped_column(
-        SQLEnum(DocumentStatus),
-        default=DocumentStatus.PENDING,
-        nullable=False,
-        index=True
+        SQLEnum(DocumentStatus), default=DocumentStatus.PENDING, nullable=False, index=True
     )
-    processing_started_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
-    processing_completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
+    processing_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    processing_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     processing_error: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Chunking configuration
@@ -103,10 +88,7 @@ class Document(Base):
     # Version control
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     parent_document_id: Mapped[str | None] = mapped_column(
-        String(12),
-        ForeignKey(Keys.DOCUMENTS),
-        nullable=True,
-        index=True
+        String(12), ForeignKey(Keys.DOCUMENTS), nullable=True, index=True
     )
 
     # Access control
@@ -115,27 +97,17 @@ class Document(Base):
     # Usage statistics
     view_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     search_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    last_accessed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
+    last_accessed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     owner: Mapped["User"] = relationship("User", back_populates="documents")
     chunks: Mapped[list["DocumentChunk"]] = relationship(
-        "DocumentChunk",
-        back_populates="document",
-        cascade="all, delete-orphan"
+        "DocumentChunk", back_populates="document", cascade="all, delete-orphan"
     )
     parent_document: Mapped[Optional["Document"]] = relationship(
-        "Document",
-        remote_side="Document.id",
-        back_populates="child_documents"
+        "Document", remote_side="Document.id", back_populates="child_documents"
     )
-    child_documents: Mapped[list["Document"]] = relationship(
-        "Document",
-        back_populates="parent_document"
-    )
+    child_documents: Mapped[list["Document"]] = relationship("Document", back_populates="parent_document")
 
     def __repr__(self) -> str:
         """String representation of document."""
@@ -154,7 +126,7 @@ class Document(Base):
             return delta.total_seconds()
         return None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert document to dictionary."""
         return {
             "id": self.id,
@@ -169,7 +141,9 @@ class Document(Base):
             "description": self.description,
             "status": self.status.value,
             "processing_started_at": self.processing_started_at.isoformat() if self.processing_started_at else None,
-            "processing_completed_at": self.processing_completed_at.isoformat() if self.processing_completed_at else None,
+            "processing_completed_at": (
+                self.processing_completed_at.isoformat() if self.processing_completed_at else None
+            ),
             "processing_error": self.processing_error,
             "chunk_size": self.chunk_size,
             "chunk_overlap": self.chunk_overlap,
@@ -191,12 +165,7 @@ class DocumentChunk(Base):
     """Document chunk model for vector storage."""
 
     # Foreign keys
-    document_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.DOCUMENTS),
-        nullable=False,
-        index=True
-    )
+    document_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.DOCUMENTS), nullable=False, index=True)
 
     # Chunk content
     content: Mapped[str] = mapped_column(Text, nullable=False)
@@ -205,10 +174,8 @@ class DocumentChunk(Base):
     end_char: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     # Vector embedding (conditional on pgvector availability)
-    if PGVECTOR_AVAILABLE:
-        embedding: Mapped[Any | None] = mapped_column(Vector(1536), nullable=True)
-    else:
-        embedding: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Use Any type to handle both Vector and Text types
+    embedding: Mapped[Any | None] = mapped_column(Vector(1536) if PGVECTOR_AVAILABLE else Text, nullable=True)
 
     # Metadata
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
@@ -220,10 +187,7 @@ class DocumentChunk(Base):
     # Embedding metadata
     embedding_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
     embedding_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    embedding_created_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
+    embedding_created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Search optimization
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
@@ -241,7 +205,7 @@ class DocumentChunk(Base):
         """Check if chunk has an embedding."""
         return self.embedding is not None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert document chunk to dictionary."""
         return {
             "id": self.id,

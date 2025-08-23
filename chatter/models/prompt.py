@@ -14,6 +14,7 @@ from chatter.models.base import Base, Keys
 
 class PromptType(str, Enum):
     """Enumeration for prompt types."""
+
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
@@ -23,6 +24,7 @@ class PromptType(str, Enum):
 
 class PromptCategory(str, Enum):
     """Enumeration for prompt categories."""
+
     GENERAL = "general"
     CREATIVE = "creative"
     ANALYTICAL = "analytical"
@@ -37,27 +39,16 @@ class Prompt(Base):
     """Prompt model for template management."""
 
     # Foreign keys
-    owner_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=False,
-        index=True
-    )
+    owner_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=False, index=True)
 
     # Prompt metadata
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     prompt_type: Mapped[PromptType] = mapped_column(
-        SQLEnum(PromptType),
-        default=PromptType.TEMPLATE,
-        nullable=False,
-        index=True
+        SQLEnum(PromptType), default=PromptType.TEMPLATE, nullable=False, index=True
     )
     category: Mapped[PromptCategory] = mapped_column(
-        SQLEnum(PromptCategory),
-        default=PromptCategory.GENERAL,
-        nullable=False,
-        index=True
+        SQLEnum(PromptCategory), default=PromptCategory.GENERAL, nullable=False, index=True
     )
 
     # Prompt content
@@ -89,10 +80,7 @@ class Prompt(Base):
     is_chain: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     chain_steps: Mapped[list[dict[str, Any]] | None] = mapped_column(JSON, nullable=True)
     parent_prompt_id: Mapped[str | None] = mapped_column(
-        String(12),
-        ForeignKey(Keys.PROMPTS),
-        nullable=True,
-        index=True
+        String(12), ForeignKey(Keys.PROMPTS), nullable=True, index=True
     )
 
     # Version control
@@ -111,10 +99,7 @@ class Prompt(Base):
     usage_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     success_rate: Mapped[float | None] = mapped_column(Float, nullable=True)
     avg_response_time_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    last_used_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Performance metrics
     total_tokens_used: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
@@ -133,17 +118,12 @@ class Prompt(Base):
     # Relationships
     owner: Mapped["User"] = relationship("User", back_populates="prompts")
     parent_prompt: Mapped[Optional["Prompt"]] = relationship(
-        "Prompt",
-        remote_side="Prompt.id",
-        back_populates="child_prompts"
+        "Prompt", remote_side="Prompt.id", back_populates="child_prompts"
     )
-    child_prompts: Mapped[list["Prompt"]] = relationship(
-        "Prompt",
-        back_populates="parent_prompt"
-    )
+    child_prompts: Mapped[list["Prompt"]] = relationship("Prompt", back_populates="parent_prompt")
 
     @validates("content")
-    def _set_content_and_hash(self, key, value):
+    def _set_content_and_hash(self, key: str, value: str) -> str:
         self.content_hash = hashlib.sha256(value.encode("utf-8")).hexdigest()
         return value
 
@@ -168,6 +148,7 @@ class Prompt(Base):
         elif self.template_format == "jinja2":
             try:
                 from jinja2 import Template
+
                 template = Template(self.content)
                 return template.render(**kwargs)
             except ImportError as e:
@@ -175,6 +156,7 @@ class Prompt(Base):
         elif self.template_format == "mustache":
             try:
                 import pystache
+
                 return pystache.render(self.content, kwargs)
             except ImportError as e:
                 raise ValueError("Pystache not installed for mustache template rendering") from e
@@ -194,13 +176,7 @@ class Prompt(Base):
         Returns:
             Validation result with errors and warnings
         """
-        result = {
-            "valid": True,
-            "errors": [],
-            "warnings": [],
-            "missing_required": [],
-            "unexpected": []
-        }
+        result = {"valid": True, "errors": [], "warnings": [], "missing_required": [], "unexpected": []}
 
         # Check required variables
         if self.required_variables:
@@ -239,7 +215,7 @@ class Prompt(Base):
                 return example["output"]
         return None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert prompt to dictionary."""
         return {
             "id": self.id,

@@ -26,6 +26,7 @@ class LangChainOrchestrator:
         """Setup LangSmith tracing if enabled."""
         if settings.langchain_tracing_v2:
             import os
+
             os.environ["LANGCHAIN_TRACING_V2"] = "true"
             if settings.langchain_api_key:
                 os.environ["LANGCHAIN_API_KEY"] = settings.langchain_api_key
@@ -36,10 +37,7 @@ class LangChainOrchestrator:
             logger.info("LangSmith tracing enabled", project=settings.langchain_project)
 
     def create_chat_chain(
-        self,
-        llm: BaseChatModel,
-        system_message: str | None = None,
-        include_history: bool = True
+        self, llm: BaseChatModel, system_message: str | None = None, include_history: bool = True
     ) -> Runnable:
         """Create a basic chat chain with optional system message and history."""
         messages = []
@@ -57,12 +55,7 @@ class LangChainOrchestrator:
 
         return chain
 
-    def create_rag_chain(
-        self,
-        llm: BaseChatModel,
-        retriever: Any,
-        system_message: str | None = None
-    ) -> Runnable:
+    def create_rag_chain(self, llm: BaseChatModel, retriever: Any, system_message: str | None = None) -> Runnable:
         """Create a RAG (Retrieval-Augmented Generation) chain."""
         if not system_message:
             system_message = (
@@ -73,29 +66,25 @@ class LangChainOrchestrator:
                 "answer concise.\n\n{context}"
             )
 
-        prompt = ChatPromptTemplate.from_messages([
-            ("system", system_message),
-            ("human", "{input}"),
-        ])
+        prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_message),
+                ("human", "{input}"),
+            ]
+        )
 
         def format_docs(docs):
             """Format retrieved documents for RAG context."""
             return "\n\n".join(doc.page_content for doc in docs)
 
         rag_chain = (
-            {"context": retriever | format_docs, "input": RunnablePassthrough()}
-            | prompt
-            | llm
-            | StrOutputParser()
+            {"context": retriever | format_docs, "input": RunnablePassthrough()} | prompt | llm | StrOutputParser()
         )
 
         return rag_chain
 
     def create_conversational_rag_chain(
-        self,
-        llm: BaseChatModel,
-        retriever: Any,
-        system_message: str | None = None
+        self, llm: BaseChatModel, retriever: Any, system_message: str | None = None
     ) -> Runnable:
         """Create a conversational RAG chain with chat history."""
         if not system_message:
@@ -107,11 +96,13 @@ class LangChainOrchestrator:
                 "just reformulate it if needed and otherwise return it as is."
             )
 
-        contextualize_q_prompt = ChatPromptTemplate.from_messages([
-            ("system", system_message),
-            ("placeholder", "{chat_history}"),
-            ("human", "{input}"),
-        ])
+        contextualize_q_prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", system_message),
+                ("placeholder", "{chat_history}"),
+                ("human", "{input}"),
+            ]
+        )
 
         contextualize_q_chain = contextualize_q_prompt | llm | StrOutputParser()
 
@@ -123,11 +114,13 @@ class LangChainOrchestrator:
             "answer concise.\n\n{context}"
         )
 
-        qa_prompt = ChatPromptTemplate.from_messages([
-            ("system", qa_system_prompt),
-            ("placeholder", "{chat_history}"),
-            ("human", "{input}"),
-        ])
+        qa_prompt = ChatPromptTemplate.from_messages(
+            [
+                ("system", qa_system_prompt),
+                ("placeholder", "{chat_history}"),
+                ("human", "{input}"),
+            ]
+        )
 
         def format_docs(docs):
             """Format retrieved documents for context."""
@@ -141,9 +134,7 @@ class LangChainOrchestrator:
                 return input["input"]
 
         rag_chain = (
-            RunnablePassthrough.assign(
-                context=contextualized_question | retriever | format_docs
-            )
+            RunnablePassthrough.assign(context=contextualized_question | retriever | format_docs)
             | qa_prompt
             | llm
             | StrOutputParser()
@@ -152,10 +143,7 @@ class LangChainOrchestrator:
         return rag_chain
 
     async def run_chain_with_callback(
-        self,
-        chain: Runnable,
-        inputs: dict[str, Any],
-        provider_name: str = "unknown"
+        self, chain: Runnable, inputs: dict[str, Any], provider_name: str = "unknown"
     ) -> dict[str, Any]:
         """Run a chain with callback tracking for token usage."""
         result = {"response": "", "usage": {}}
@@ -182,10 +170,7 @@ class LangChainOrchestrator:
 
         return result
 
-    def convert_messages_to_langchain(
-        self,
-        messages: list[dict[str, Any]]
-    ) -> list[BaseMessage]:
+    def convert_messages_to_langchain(self, messages: list[dict[str, Any]]) -> list[BaseMessage]:
         """Convert API messages to LangChain message format."""
         langchain_messages = []
 
@@ -202,10 +187,7 @@ class LangChainOrchestrator:
 
         return langchain_messages
 
-    def format_chat_history(
-        self,
-        messages: list[BaseMessage]
-    ) -> list[BaseMessage]:
+    def format_chat_history(self, messages: list[BaseMessage]) -> list[BaseMessage]:
         """Format chat history for use in prompts."""
         # Filter out system messages from history
         return [msg for msg in messages if not isinstance(msg, SystemMessage)]

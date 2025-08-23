@@ -55,6 +55,7 @@ class PromptBase(BaseModel):
 
 class PromptCreate(PromptBase):
     """Schema for creating a prompt."""
+
     pass
 
 
@@ -104,6 +105,7 @@ class PromptUpdate(BaseModel):
 
 class PromptResponse(BaseModel):
     """Schema for prompt response."""
+
     model_config = ConfigDict(from_attributes=True)
 
     id: str = Field(..., description="Prompt ID")
@@ -190,16 +192,19 @@ class PromptListRequest(ListRequestBase):
 
 class PromptGetRequest(GetRequestBase):
     """Schema for prompt get request."""
+
     pass
 
 
 class PromptDeleteRequest(DeleteRequestBase):
     """Schema for prompt delete request."""
+
     pass
 
 
 class PromptStatsRequest(GetRequestBase):
     """Schema for prompt stats request."""
+
     pass
 
 

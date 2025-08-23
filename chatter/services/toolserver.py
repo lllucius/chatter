@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 
 class ToolServerServiceError(Exception):
     """Tool server service error."""
+
     pass
 
 
@@ -44,11 +45,7 @@ class ToolServerService:
 
     # CRUD Operations for Tool Servers
 
-    async def create_server(
-        self,
-        server_data: ToolServerCreate,
-        user_id: str | None = None
-    ) -> ToolServerResponse:
+    async def create_server(self, server_data: ToolServerCreate, user_id: str | None = None) -> ToolServerResponse:
         """Create a new tool server.
 
         Args:
@@ -60,9 +57,7 @@ class ToolServerService:
         """
         try:
             # Check if server name already exists
-            existing = await self.session.execute(
-                select(ToolServer).where(ToolServer.name == server_data.name)
-            )
+            existing = await self.session.execute(select(ToolServer).where(ToolServer.name == server_data.name))
             if existing.scalar_one_or_none():
                 raise ToolServerServiceError(f"Server with name '{server_data.name}' already exists") from None
 
@@ -78,7 +73,7 @@ class ToolServerService:
                 auto_update=server_data.auto_update,
                 max_failures=server_data.max_failures,
                 created_by=user_id,
-                status=ServerStatus.DISABLED
+                status=ServerStatus.DISABLED,
             )
 
             self.session.add(server)
@@ -111,9 +106,7 @@ class ToolServerService:
             Server response or None if not found
         """
         result = await self.session.execute(
-            select(ToolServer)
-            .options(selectinload(ToolServer.tools))
-            .where(ToolServer.id == server_id)
+            select(ToolServer).options(selectinload(ToolServer.tools)).where(ToolServer.id == server_id)
         )
         server = result.scalar_one_or_none()
 
@@ -131,9 +124,7 @@ class ToolServerService:
             Server response or None if not found
         """
         result = await self.session.execute(
-            select(ToolServer)
-            .options(selectinload(ToolServer.tools))
-            .where(ToolServer.name == name)
+            select(ToolServer).options(selectinload(ToolServer.tools)).where(ToolServer.name == name)
         )
         server = result.scalar_one_or_none()
 
@@ -142,10 +133,7 @@ class ToolServerService:
         return None
 
     async def list_servers(
-        self,
-        status: ServerStatus | None = None,
-        user_id: str | None = None,
-        include_builtin: bool = True
+        self, status: ServerStatus | None = None, user_id: str | None = None, include_builtin: bool = True
     ) -> list[ToolServerResponse]:
         """List tool servers with optional filtering.
 
@@ -175,11 +163,7 @@ class ToolServerService:
 
         return [ToolServerResponse.model_validate(server) for server in servers]
 
-    async def update_server(
-        self,
-        server_id: str,
-        update_data: ToolServerUpdate
-    ) -> ToolServerResponse | None:
+    async def update_server(self, server_id: str, update_data: ToolServerUpdate) -> ToolServerResponse | None:
         """Update a tool server.
 
         Args:
@@ -190,9 +174,7 @@ class ToolServerService:
             Updated server response or None if not found
         """
         try:
-            result = await self.session.execute(
-                select(ToolServer).where(ToolServer.id == server_id)
-            )
+            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
             server = result.scalar_one_or_none()
 
             if not server:
@@ -228,9 +210,7 @@ class ToolServerService:
             True if deleted, False if not found
         """
         try:
-            result = await self.session.execute(
-                select(ToolServer).where(ToolServer.id == server_id)
-            )
+            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
             server = result.scalar_one_or_none()
 
             if not server:
@@ -264,9 +244,7 @@ class ToolServerService:
             True if started successfully
         """
         try:
-            result = await self.session.execute(
-                select(ToolServer).where(ToolServer.id == server_id)
-            )
+            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
             server = result.scalar_one_or_none()
 
             if not server:
@@ -292,9 +270,7 @@ class ToolServerService:
             True if stopped successfully
         """
         try:
-            result = await self.session.execute(
-                select(ToolServer).where(ToolServer.id == server_id)
-            )
+            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
             server = result.scalar_one_or_none()
 
             if not server:
@@ -340,9 +316,7 @@ class ToolServerService:
             True if enabled successfully
         """
         try:
-            result = await self.session.execute(
-                select(ToolServer).where(ToolServer.id == server_id)
-            )
+            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
             server = result.scalar_one_or_none()
 
             if not server:
@@ -373,9 +347,7 @@ class ToolServerService:
             True if disabled successfully
         """
         try:
-            result = await self.session.execute(
-                select(ToolServer).where(ToolServer.id == server_id)
-            )
+            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
             server = result.scalar_one_or_none()
 
             if not server:
@@ -407,9 +379,7 @@ class ToolServerService:
         Returns:
             List of server tools
         """
-        result = await self.session.execute(
-            select(ServerTool).where(ServerTool.server_id == server_id)
-        )
+        result = await self.session.execute(select(ServerTool).where(ServerTool.server_id == server_id))
         tools = result.scalars().all()
 
         return [ServerToolResponse.model_validate(tool) for tool in tools]
@@ -424,9 +394,7 @@ class ToolServerService:
             True if enabled successfully
         """
         try:
-            result = await self.session.execute(
-                select(ServerTool).where(ServerTool.id == tool_id)
-            )
+            result = await self.session.execute(select(ServerTool).where(ServerTool.id == tool_id))
             tool = result.scalar_one_or_none()
 
             if not tool:
@@ -453,9 +421,7 @@ class ToolServerService:
             True if disabled successfully
         """
         try:
-            result = await self.session.execute(
-                select(ServerTool).where(ServerTool.id == tool_id)
-            )
+            result = await self.session.execute(select(ServerTool).where(ServerTool.id == tool_id))
             tool = result.scalar_one_or_none()
 
             if not tool:
@@ -474,12 +440,7 @@ class ToolServerService:
 
     # Usage Tracking
 
-    async def record_tool_usage(
-        self,
-        server_id: str,
-        tool_name: str,
-        usage_data: ToolUsageCreate
-    ) -> bool:
+    async def record_tool_usage(self, server_id: str, tool_name: str, usage_data: ToolUsageCreate) -> bool:
         """Record tool usage for analytics.
 
         Args:
@@ -493,18 +454,12 @@ class ToolServerService:
         try:
             # Get tool ID
             result = await self.session.execute(
-                select(ServerTool).where(
-                    and_(
-                        ServerTool.server_id == server_id,
-                        ServerTool.name == tool_name
-                    )
-                )
+                select(ServerTool).where(and_(ServerTool.server_id == server_id, ServerTool.name == tool_name))
             )
             tool = result.scalar_one_or_none()
 
             if not tool:
-                logger.warning("Tool not found for usage tracking",
-                             server_id=server_id, tool_name=tool_name)
+                logger.warning("Tool not found for usage tracking", server_id=server_id, tool_name=tool_name)
                 return False
 
             # Create usage record
@@ -518,7 +473,7 @@ class ToolServerService:
                 result=usage_data.result,
                 response_time_ms=usage_data.response_time_ms,
                 success=usage_data.success,
-                error_message=usage_data.error_message
+                error_message=usage_data.error_message,
             )
 
             self.session.add(usage)
@@ -540,8 +495,7 @@ class ToolServerService:
                     # Exponential moving average
                     alpha = 0.1
                     tool.avg_response_time_ms = (
-                        alpha * usage_data.response_time_ms +
-                        (1 - alpha) * tool.avg_response_time_ms
+                        alpha * usage_data.response_time_ms + (1 - alpha) * tool.avg_response_time_ms
                     )
 
             tool.updated_at = datetime.now(UTC)
@@ -566,9 +520,7 @@ class ToolServerService:
             Server metrics or None if not found
         """
         result = await self.session.execute(
-            select(ToolServer)
-            .options(selectinload(ToolServer.tools))
-            .where(ToolServer.id == server_id)
+            select(ToolServer).options(selectinload(ToolServer.tools)).where(ToolServer.id == server_id)
         )
         server = result.scalar_one_or_none()
 
@@ -601,7 +553,7 @@ class ToolServerService:
             success_rate=success_rate,
             avg_response_time_ms=avg_response_time,
             last_activity=last_activity,
-            uptime_percentage=None  # TODO: Implement uptime tracking
+            uptime_percentage=None,  # TODO: Implement uptime tracking
         )
 
     async def health_check_server(self, server_id: str) -> ToolServerHealthCheck:
@@ -613,9 +565,7 @@ class ToolServerService:
         Returns:
             Health check result
         """
-        result = await self.session.execute(
-            select(ToolServer).where(ToolServer.id == server_id)
-        )
+        result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
         server = result.scalar_one_or_none()
 
         if not server:
@@ -625,8 +575,7 @@ class ToolServerService:
         now = datetime.now(UTC)
         last_check = self._last_health_check.get(server_id)
 
-        if (last_check is None or
-            (now - last_check).total_seconds() > self._health_check_interval):
+        if last_check is None or (now - last_check).total_seconds() > self._health_check_interval:
 
             # Perform actual health check
             is_running = server.name in self.mcp_service.tools_cache
@@ -642,8 +591,7 @@ class ToolServerService:
                     is_responsive = True
                 except Exception as e:
                     error_message = str(e)
-                    logger.warning("Server health check failed",
-                                 server_id=server_id, error=error_message)
+                    logger.warning("Server health check failed", server_id=server_id, error=error_message)
 
             # Update last health check
             server.last_health_check = now
@@ -665,7 +613,7 @@ class ToolServerService:
             is_responsive=is_responsive,
             tools_count=tools_count,
             last_check=server.last_health_check or now,
-            error_message=error_message
+            error_message=error_message,
         )
 
     async def _start_server_internal(self, server: ToolServer) -> bool:
@@ -684,12 +632,8 @@ class ToolServerService:
             # Add server to MCP service if not already there
             if server.name not in self.mcp_service.servers:
                 from chatter.services.mcp import MCPServer
-                mcp_server = MCPServer(
-                    name=server.name,
-                    command=server.command,
-                    args=server.args,
-                    env=server.env
-                )
+
+                mcp_server = MCPServer(name=server.name, command=server.command, args=server.args, env=server.env)
                 self.mcp_service.servers[server.name] = mcp_server
 
             # Start the server
@@ -766,9 +710,7 @@ class ToolServerService:
             mcp_tools = self.mcp_service.tools_cache.get(server.name, [])
 
             # Get existing tools from database
-            result = await self.session.execute(
-                select(ServerTool).where(ServerTool.server_id == server.id)
-            )
+            result = await self.session.execute(select(ServerTool).where(ServerTool.server_id == server.id))
             existing_tools = {tool.name: tool for tool in result.scalars().all()}
 
             # Update or create tools
@@ -791,7 +733,7 @@ class ToolServerService:
                         description=mcp_tool.description,
                         args_schema=getattr(mcp_tool, 'args_schema', None),
                         status=ToolStatus.ENABLED,
-                        is_available=True
+                        is_available=True,
                     )
                     self.session.add(tool)
 
@@ -803,8 +745,7 @@ class ToolServerService:
                     tool.updated_at = datetime.now(UTC)
 
         except Exception as e:
-            logger.error("Failed to discover server tools",
-                        server_id=server.id, error=str(e))
+            logger.error("Failed to discover server tools", server_id=server.id, error=str(e))
 
     async def initialize_builtin_servers(self) -> None:
         """Initialize built-in servers from configuration."""
@@ -817,7 +758,7 @@ class ToolServerService:
                     "description": "Access to file system operations",
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
-                    "env": None
+                    "env": None,
                 },
                 {
                     "name": "browser",
@@ -825,7 +766,7 @@ class ToolServerService:
                     "description": "Web browsing and search capabilities",
                     "command": "npx",
                     "args": ["-y", "@modelcontextprotocol/server-brave-search"],
-                    "env": {"BRAVE_API_KEY": "your_brave_api_key"}
+                    "env": {"BRAVE_API_KEY": "your_brave_api_key"},
                 },
                 {
                     "name": "calculator",
@@ -833,15 +774,13 @@ class ToolServerService:
                     "description": "Mathematical calculations",
                     "command": "python",
                     "args": ["-m", "mcp_math_server"],
-                    "env": None
-                }
+                    "env": None,
+                },
             ]
 
             for server_data in builtin_servers:
                 # Check if server already exists
-                existing = await self.session.execute(
-                    select(ToolServer).where(ToolServer.name == server_data["name"])
-                )
+                existing = await self.session.execute(select(ToolServer).where(ToolServer.name == server_data["name"]))
 
                 if not existing.scalar_one_or_none():
                     # Create built-in server
@@ -854,7 +793,7 @@ class ToolServerService:
                         env=server_data["env"],
                         is_builtin=True,
                         auto_start=True,
-                        status=ServerStatus.DISABLED
+                        status=ServerStatus.DISABLED,
                     )
 
                     self.session.add(server)

@@ -18,12 +18,14 @@ try:
     from unstructured.partition.html import partition_html
     from unstructured.partition.pdf import partition_pdf
     from unstructured.partition.text import partition_text  # noqa: F401
+
     UNSTRUCTURED_AVAILABLE = True
 except ImportError:
     UNSTRUCTURED_AVAILABLE = False
 
 try:
     from pypdf import PdfReader
+
     PYPDF_AVAILABLE = True
 except ImportError:
     PYPDF_AVAILABLE = False
@@ -53,12 +55,7 @@ class DocumentProcessingService:
         self.storage_path = Path(settings.document_storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
-    async def process_document(
-        self,
-        document_id: str,
-        file_content: bytes,
-        force_reprocess: bool = False
-    ) -> bool:
+    async def process_document(self, document_id: str, file_content: bytes, force_reprocess: bool = False) -> bool:
         """Process a document: extract text, create chunks, and generate embeddings.
 
         Args:
@@ -71,9 +68,7 @@ class DocumentProcessingService:
         """
         try:
             # Get document
-            result = await self.session.execute(
-                select(Document).where(Document.id == document_id)
-            )
+            result = await self.session.execute(select(Document).where(Document.id == document_id))
             document = result.scalar_one_or_none()
 
             if not document:
@@ -130,7 +125,7 @@ class DocumentProcessingService:
                 "Document processing completed",
                 document_id=document_id,
                 chunks_created=len(chunk_objects),
-                text_length=len(extracted_text)
+                text_length=len(extracted_text),
             )
 
             return True
@@ -264,6 +259,7 @@ class DocumentProcessingService:
         """Extract text from JSON file."""
         try:
             import json
+
             data = json.loads(file_content.decode('utf-8'))
 
             # Extract text from JSON structure
@@ -311,20 +307,20 @@ class DocumentProcessingService:
                 splitter = RecursiveCharacterTextSplitter(
                     chunk_size=document.chunk_size,
                     chunk_overlap=document.chunk_overlap,
-                    separators=["\n# ", "\n## ", "\n### ", "\n\n", "\n", ".", "!", "?", ";", " "]
+                    separators=["\n# ", "\n## ", "\n### ", "\n\n", "\n", ".", "!", "?", ";", " "],
                 )
             elif document.document_type in [DocumentType.HTML, DocumentType.XML]:
                 splitter = RecursiveCharacterTextSplitter(
                     chunk_size=document.chunk_size,
                     chunk_overlap=document.chunk_overlap,
-                    separators=["\n\n", "\n", "<p>", "<div>", "<br>", ".", "!", "?", ";", " "]
+                    separators=["\n\n", "\n", "<p>", "<div>", "<br>", ".", "!", "?", ";", " "],
                 )
             else:
                 # Default recursive character splitter
                 splitter = RecursiveCharacterTextSplitter(
                     chunk_size=document.chunk_size,
                     chunk_overlap=document.chunk_overlap,
-                    separators=["\n\n", "\n", ".", "!", "?", ";", " "]
+                    separators=["\n\n", "\n", ".", "!", "?", ";", " "],
                 )
 
             chunks = splitter.split_text(text)
@@ -338,7 +334,7 @@ class DocumentProcessingService:
                 document_id=document.id,
                 total_chunks=len(chunks),
                 chunk_size=document.chunk_size,
-                chunk_overlap=document.chunk_overlap
+                chunk_overlap=document.chunk_overlap,
             )
 
             return chunks
@@ -410,7 +406,7 @@ class DocumentProcessingService:
             success_count = 0
 
             for i in range(0, len(chunks), batch_size):
-                batch = chunks[i:i + batch_size]
+                batch = chunks[i : i + batch_size]
                 batch_texts = [chunk.content for chunk in batch]
 
                 try:
@@ -451,7 +447,7 @@ class DocumentProcessingService:
                 "Embedding generation completed",
                 total_chunks=len(chunks),
                 successful_embeddings=success_count,
-                success_rate=success_rate
+                success_rate=success_rate,
             )
 
             return success_rate > 0.5  # Consider successful if >50% of embeddings generated
@@ -543,19 +539,13 @@ class DocumentProcessingService:
             # Count documents by status
             status_counts = {}
             for status in DocumentStatus:
-                result = await self.session.execute(
-                    select(func.count(Document.id)).where(Document.status == status)
-                )
+                result = await self.session.execute(select(func.count(Document.id)).where(Document.status == status))
                 status_counts[status.value] = result.scalar()
 
             # Get processing times
             processing_times_result = await self.session.execute(
-                select(Document.processing_started_at, Document.processing_completed_at)
-                .where(
-                    and_(
-                        Document.processing_started_at.is_not(None),
-                        Document.processing_completed_at.is_not(None)
-                    )
+                select(Document.processing_started_at, Document.processing_completed_at).where(
+                    and_(Document.processing_started_at.is_not(None), Document.processing_completed_at.is_not(None))
                 )
             )
 
@@ -571,8 +561,9 @@ class DocumentProcessingService:
                 "status_counts": status_counts,
                 "total_documents": sum(status_counts.values()),
                 "processing_success_rate": (
-                    status_counts.get("processed", 0) /
-                    sum(status_counts.values()) if sum(status_counts.values()) > 0 else 0
+                    status_counts.get("processed", 0) / sum(status_counts.values())
+                    if sum(status_counts.values()) > 0
+                    else 0
                 ),
                 "average_processing_time_seconds": avg_processing_time,
                 "unstructured_available": UNSTRUCTURED_AVAILABLE,
@@ -593,4 +584,5 @@ class DocumentProcessingService:
 
 class DocumentProcessingError(Exception):
     """Document processing error."""
+
     pass

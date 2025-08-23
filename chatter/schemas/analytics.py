@@ -219,6 +219,7 @@ class DocumentAnalyticsRequest(GetRequestBase):
 
 class SystemAnalyticsRequest(GetRequestBase):
     """Schema for system analytics request."""
+
     pass
 
 

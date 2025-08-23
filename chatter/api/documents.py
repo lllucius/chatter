@@ -1,6 +1,5 @@
 """Document management endpoints."""
 
-
 from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -54,7 +53,7 @@ async def upload_document(
     chunk_overlap: int = Form(200),
     is_public: bool = Form(False),
     current_user: User = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentResponse:
     """Upload a document.
 
@@ -77,6 +76,7 @@ async def upload_document(
         parsed_tags = None
         if tags:
             import json
+
             try:
                 parsed_tags = json.loads(tags)
             except json.JSONDecodeError:
@@ -94,21 +94,15 @@ async def upload_document(
         )
 
         # Create document
-        document = await document_service.create_document(
-            current_user.id, file, document_data
-        )
+        document = await document_service.create_document(current_user.id, file, document_data)
 
         return DocumentResponse.model_validate(document)
 
     except DocumentError as e:
-        raise BadRequestProblem(
-            detail=str(e)
-        ) from None
+        raise BadRequestProblem(detail=str(e)) from None
     except Exception as e:
         logger.error("Document upload failed", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to upload document"
-        ) from None
+        raise InternalServerProblem(detail="Failed to upload document") from None
 
 
 @router.get("/", response_model=DocumentListResponse)
@@ -117,7 +111,7 @@ async def list_documents(
     pagination: PaginationRequest = Depends(),
     sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentListResponse:
     """List user's documents.
 
@@ -133,9 +127,7 @@ async def list_documents(
     """
     try:
         # Get documents
-        documents, total_count = await document_service.list_documents(
-            current_user.id, request, pagination, sorting
-        )
+        documents, total_count = await document_service.list_documents(current_user.id, request, pagination, sorting)
 
         return DocumentListResponse(
             documents=[DocumentResponse.model_validate(doc) for doc in documents],
@@ -146,9 +138,7 @@ async def list_documents(
 
     except Exception as e:
         logger.error("Failed to list documents", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to list documents"
-        ) from None
+        raise InternalServerProblem(detail="Failed to list documents") from None
 
 
 @router.get("/{document_id}", response_model=DocumentResponse)
@@ -156,7 +146,7 @@ async def get_document(
     document_id: str,
     request: DocumentGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentResponse:
     """Get document details.
 
@@ -174,9 +164,7 @@ async def get_document(
 
         if not document:
             raise NotFoundProblem(
-                detail="Document not found",
-                resource_type="document",
-                resource_id=document_id
+                detail="Document not found", resource_type="document", resource_id=document_id
             ) from None
 
         return DocumentResponse.model_validate(document)
@@ -185,10 +173,7 @@ async def get_document(
         raise
     except Exception as e:
         logger.error("Failed to get document", document_id=document_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get document",
-            error_id=document_id
-        ) from None
+        raise InternalServerProblem(detail="Failed to get document", error_id=document_id) from None
 
 
 @router.put("/{document_id}", response_model=DocumentResponse)
@@ -196,7 +181,7 @@ async def update_document(
     document_id: str,
     update_data: DocumentUpdate,
     current_user: User = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentResponse:
     """Update document metadata.
 
@@ -210,15 +195,11 @@ async def update_document(
         Updated document information
     """
     try:
-        document = await document_service.update_document(
-            document_id, current_user.id, update_data
-        )
+        document = await document_service.update_document(document_id, current_user.id, update_data)
 
         if not document:
             raise NotFoundProblem(
-                detail="Document not found",
-                resource_type="document",
-                resource_id=document_id
+                detail="Document not found", resource_type="document", resource_id=document_id
             ) from None
 
         return DocumentResponse.model_validate(document)
@@ -227,9 +208,7 @@ async def update_document(
         raise
     except Exception as e:
         logger.error("Failed to update document", document_id=document_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to update document"
-        ) from None
+        raise InternalServerProblem(detail="Failed to update document") from None
 
 
 @router.delete("/{document_id}")
@@ -237,7 +216,7 @@ async def delete_document(
     document_id: str,
     request: DocumentDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    document_service: DocumentService = Depends(get_document_service),
 ) -> dict:
     """Delete document.
 
@@ -255,9 +234,7 @@ async def delete_document(
 
         if not success:
             raise NotFoundProblem(
-                detail="Document not found",
-                resource_type="document",
-                resource_id=document_id
+                detail="Document not found", resource_type="document", resource_id=document_id
             ) from None
 
         return {"message": "Document deleted successfully"}
@@ -266,16 +243,14 @@ async def delete_document(
         raise
     except Exception as e:
         logger.error("Failed to delete document", document_id=document_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to delete document"
-        ) from None
+        raise InternalServerProblem(detail="Failed to delete document") from None
 
 
 @router.post("/search", response_model=DocumentSearchResponse)
 async def search_documents(
     search_request: DocumentSearchRequest,
     current_user: User = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentSearchResponse:
     """Search documents using vector similarity.
 
@@ -289,9 +264,7 @@ async def search_documents(
     """
     try:
         # Perform search
-        search_results = await document_service.search_documents(
-            current_user.id, search_request
-        )
+        search_results = await document_service.search_documents(current_user.id, search_request)
 
         # Format results
         results = []
@@ -302,7 +275,7 @@ async def search_documents(
                 score=score,
                 content=chunk.content,
                 metadata=chunk.extra_metadata,
-                document=DocumentResponse.model_validate(document)
+                document=DocumentResponse.model_validate(document),
             )
             results.append(result)
 
@@ -315,9 +288,7 @@ async def search_documents(
 
     except Exception as e:
         logger.error("Document search failed", error=str(e))
-        raise InternalServerProblem(
-            detail="Document search failed"
-        ) from None
+        raise InternalServerProblem(detail="Document search failed") from None
 
 
 @router.get("/{document_id}/chunks", response_model=list[DocumentChunkResponse])
@@ -325,7 +296,7 @@ async def get_document_chunks(
     document_id: str,
     request: DocumentGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    document_service: DocumentService = Depends(get_document_service),
 ) -> list[DocumentChunkResponse]:
     """Get document chunks.
 
@@ -345,9 +316,7 @@ async def get_document_chunks(
 
     except Exception as e:
         logger.error("Failed to get document chunks", document_id=document_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get document chunks"
-        ) from None
+        raise InternalServerProblem(detail="Failed to get document chunks") from None
 
 
 @router.post("/{document_id}/process", response_model=DocumentProcessingResponse)
@@ -355,7 +324,7 @@ async def process_document(
     document_id: str,
     processing_request: DocumentProcessingRequest,
     current_user: User = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentProcessingResponse:
     """Trigger document processing.
 
@@ -369,15 +338,11 @@ async def process_document(
         Processing status
     """
     try:
-        success = await document_service.process_document(
-            document_id, current_user.id, processing_request
-        )
+        success = await document_service.process_document(document_id, current_user.id, processing_request)
 
         if not success:
             raise NotFoundProblem(
-                detail="Document not found or processing failed",
-                resource_type="document",
-                resource_id=document_id
+                detail="Document not found or processing failed", resource_type="document", resource_id=document_id
             ) from None
 
         return DocumentProcessingResponse(
@@ -391,16 +356,14 @@ async def process_document(
         raise
     except Exception as e:
         logger.error("Failed to process document", document_id=document_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to process document"
-        ) from None
+        raise InternalServerProblem(detail="Failed to process document") from None
 
 
 @router.get("/stats/overview", response_model=DocumentStatsResponse)
 async def get_document_stats(
     request: DocumentStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    document_service: DocumentService = Depends(get_document_service)
+    document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentStatsResponse:
     """Get document statistics.
 
@@ -426,6 +389,4 @@ async def get_document_stats(
 
     except Exception as e:
         logger.error("Failed to get document stats", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get document stats"
-        ) from None
+        raise InternalServerProblem(detail="Failed to get document stats") from None

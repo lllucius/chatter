@@ -30,11 +30,7 @@ class PromptService:
         """
         self.session = session
 
-    async def create_prompt(
-        self,
-        user_id: str,
-        prompt_data: PromptCreate
-    ) -> Prompt:
+    async def create_prompt(self, user_id: str, prompt_data: PromptCreate) -> Prompt:
         """Create a new prompt.
 
         Args:
@@ -50,12 +46,7 @@ class PromptService:
         try:
             # Check for duplicate prompt names for this user
             existing_result = await self.session.execute(
-                select(Prompt).where(
-                    and_(
-                        Prompt.owner_id == user_id,
-                        Prompt.name == prompt_data.name
-                    )
-                )
+                select(Prompt).where(and_(Prompt.owner_id == user_id, Prompt.name == prompt_data.name))
             )
             existing_prompt = existing_result.scalar_one_or_none()
 
@@ -67,11 +58,7 @@ class PromptService:
 
             # Create prompt
             prompt_dict = prompt_data.model_dump()
-            prompt = Prompt(
-                owner_id=user_id,
-                content_hash=content_hash,
-                **prompt_dict
-            )
+            prompt = Prompt(owner_id=user_id, content_hash=content_hash, **prompt_dict)
 
             self.session.add(prompt)
             await self.session.commit()
@@ -83,7 +70,7 @@ class PromptService:
                 name=prompt.name,
                 user_id=user_id,
                 prompt_type=prompt.prompt_type.value,
-                category=prompt.category.value
+                category=prompt.category.value,
             )
 
             return prompt
@@ -94,11 +81,7 @@ class PromptService:
             logger.error("Prompt creation failed", error=str(e))
             raise PromptError(f"Failed to create prompt: {str(e)}") from e
 
-    async def get_prompt(
-        self,
-        prompt_id: str,
-        user_id: str
-    ) -> Prompt | None:
+    async def get_prompt(self, prompt_id: str, user_id: str) -> Prompt | None:
         """Get prompt by ID with access control.
 
         Args:
@@ -116,7 +99,7 @@ class PromptService:
                         or_(
                             Prompt.owner_id == user_id,
                             Prompt.is_public is True,
-                        )
+                        ),
                     )
                 )
             )
@@ -126,11 +109,7 @@ class PromptService:
             logger.error("Failed to get prompt", prompt_id=prompt_id, error=str(e))
             return None
 
-    async def list_prompts(
-        self,
-        user_id: str,
-        list_request: PromptListRequest
-    ) -> tuple[list[Prompt], int]:
+    async def list_prompts(self, user_id: str, list_request: PromptListRequest) -> tuple[list[Prompt], int]:
         """List prompts with filtering and pagination.
 
         Args:
@@ -191,12 +170,7 @@ class PromptService:
             logger.error("Failed to list prompts", error=str(e))
             return [], 0
 
-    async def update_prompt(
-        self,
-        prompt_id: str,
-        user_id: str,
-        update_data: PromptUpdate
-    ) -> Prompt | None:
+    async def update_prompt(self, prompt_id: str, user_id: str, update_data: PromptUpdate) -> Prompt | None:
         """Update prompt.
 
         Args:
@@ -210,12 +184,7 @@ class PromptService:
         try:
             # Get prompt with ownership check
             result = await self.session.execute(
-                select(Prompt).where(
-                    and_(
-                        Prompt.id == prompt_id,
-                        Prompt.owner_id == user_id
-                    )
-                )
+                select(Prompt).where(and_(Prompt.id == prompt_id, Prompt.owner_id == user_id))
             )
             prompt = result.scalar_one_or_none()
 
@@ -226,11 +195,7 @@ class PromptService:
             if update_data.name and update_data.name != prompt.name:
                 existing_result = await self.session.execute(
                     select(Prompt).where(
-                        and_(
-                            Prompt.owner_id == user_id,
-                            Prompt.name == update_data.name,
-                            Prompt.id != prompt_id
-                        )
+                        and_(Prompt.owner_id == user_id, Prompt.name == update_data.name, Prompt.id != prompt_id)
                     )
                 )
                 existing_prompt = existing_result.scalar_one_or_none()
@@ -259,11 +224,7 @@ class PromptService:
             logger.error("Failed to update prompt", prompt_id=prompt_id, error=str(e))
             raise PromptError(f"Failed to update prompt: {str(e)}") from e
 
-    async def delete_prompt(
-        self,
-        prompt_id: str,
-        user_id: str
-    ) -> bool:
+    async def delete_prompt(self, prompt_id: str, user_id: str) -> bool:
         """Delete prompt.
 
         Args:
@@ -276,12 +237,7 @@ class PromptService:
         try:
             # Get prompt with ownership check
             result = await self.session.execute(
-                select(Prompt).where(
-                    and_(
-                        Prompt.id == prompt_id,
-                        Prompt.owner_id == user_id
-                    )
-                )
+                select(Prompt).where(and_(Prompt.id == prompt_id, Prompt.owner_id == user_id))
             )
             prompt = result.scalar_one_or_none()
 
@@ -298,12 +254,7 @@ class PromptService:
             logger.error("Failed to delete prompt", prompt_id=prompt_id, error=str(e))
             return False
 
-    async def test_prompt(
-        self,
-        prompt_id: str,
-        user_id: str,
-        test_request: PromptTestRequest
-    ) -> dict[str, Any]:
+    async def test_prompt(self, prompt_id: str, user_id: str, test_request: PromptTestRequest) -> dict[str, Any]:
         """Test prompt with given variables.
 
         Args:
@@ -358,7 +309,7 @@ class PromptService:
                 "Prompt test completed",
                 prompt_id=prompt_id,
                 test_duration_ms=test_duration_ms,
-                validation_valid=validation_result["valid"]
+                validation_valid=validation_result["valid"],
             )
 
             return result
@@ -375,7 +326,7 @@ class PromptService:
         user_id: str,
         new_name: str,
         description: str | None = None,
-        modifications: dict[str, Any] | None = None
+        modifications: dict[str, Any] | None = None,
     ) -> Prompt:
         """Clone an existing prompt.
 
@@ -400,12 +351,7 @@ class PromptService:
 
             # Check for name conflicts
             existing_result = await self.session.execute(
-                select(Prompt).where(
-                    and_(
-                        Prompt.owner_id == user_id,
-                        Prompt.name == new_name
-                    )
-                )
+                select(Prompt).where(and_(Prompt.owner_id == user_id, Prompt.name == new_name))
             )
             existing_prompt = existing_result.scalar_one_or_none()
 
@@ -417,9 +363,19 @@ class PromptService:
 
             # Remove fields that should not be copied
             fields_to_remove = [
-                'id', 'owner_id', 'created_at', 'updated_at', 'content_hash',
-                'usage_count', 'last_used_at', 'total_tokens_used', 'total_cost',
-                'rating', 'rating_count', 'success_rate', 'avg_response_time_ms'
+                'id',
+                'owner_id',
+                'created_at',
+                'updated_at',
+                'content_hash',
+                'usage_count',
+                'last_used_at',
+                'total_tokens_used',
+                'total_cost',
+                'rating',
+                'rating_count',
+                'success_rate',
+                'avg_response_time_ms',
             ]
             for field in fields_to_remove:
                 prompt_dict.pop(field, None)
@@ -436,22 +392,13 @@ class PromptService:
             content_hash = hashlib.sha256(prompt_dict['content'].encode()).hexdigest()
 
             # Create cloned prompt
-            cloned_prompt = Prompt(
-                owner_id=user_id,
-                content_hash=content_hash,
-                **prompt_dict
-            )
+            cloned_prompt = Prompt(owner_id=user_id, content_hash=content_hash, **prompt_dict)
 
             self.session.add(cloned_prompt)
             await self.session.commit()
             await self.session.refresh(cloned_prompt)
 
-            logger.info(
-                "Prompt cloned",
-                source_prompt_id=prompt_id,
-                cloned_prompt_id=cloned_prompt.id,
-                user_id=user_id
-            )
+            logger.info("Prompt cloned", source_prompt_id=prompt_id, cloned_prompt_id=cloned_prompt.id, user_id=user_id)
 
             return cloned_prompt
 
@@ -461,10 +408,7 @@ class PromptService:
             logger.error("Failed to clone prompt", prompt_id=prompt_id, error=str(e))
             raise PromptError(f"Failed to clone prompt: {str(e)}") from e
 
-    async def get_prompt_stats(
-        self,
-        user_id: str
-    ) -> dict[str, Any]:
+    async def get_prompt_stats(self, user_id: str) -> dict[str, Any]:
         """Get prompt statistics for a user.
 
         Args:
@@ -479,10 +423,7 @@ class PromptService:
             for prompt_type in PromptType:
                 result = await self.session.execute(
                     select(func.count(Prompt.id)).where(
-                        and_(
-                            Prompt.owner_id == user_id,
-                            Prompt.prompt_type == prompt_type
-                        )
+                        and_(Prompt.owner_id == user_id, Prompt.prompt_type == prompt_type)
                     )
                 )
                 type_counts[prompt_type.value] = result.scalar()
@@ -491,37 +432,26 @@ class PromptService:
             category_counts = {}
             for category in PromptCategory:
                 result = await self.session.execute(
-                    select(func.count(Prompt.id)).where(
-                        and_(
-                            Prompt.owner_id == user_id,
-                            Prompt.category == category
-                        )
-                    )
+                    select(func.count(Prompt.id)).where(and_(Prompt.owner_id == user_id, Prompt.category == category))
                 )
                 category_counts[category.value] = result.scalar()
 
             # Get most used prompts
             most_used_result = await self.session.execute(
-                select(Prompt).where(
-                    Prompt.owner_id == user_id
-                ).order_by(desc(Prompt.usage_count)).limit(5)
+                select(Prompt).where(Prompt.owner_id == user_id).order_by(desc(Prompt.usage_count)).limit(5)
             )
             most_used_prompts = most_used_result.scalars().all()
 
             # Get recent prompts
             recent_result = await self.session.execute(
-                select(Prompt).where(
-                    Prompt.owner_id == user_id
-                ).order_by(desc(Prompt.created_at)).limit(5)
+                select(Prompt).where(Prompt.owner_id == user_id).order_by(desc(Prompt.created_at)).limit(5)
             )
             recent_prompts = recent_result.scalars().all()
 
             # Get usage totals
             usage_result = await self.session.execute(
                 select(
-                    func.sum(Prompt.usage_count),
-                    func.sum(Prompt.total_tokens_used),
-                    func.sum(Prompt.total_cost)
+                    func.sum(Prompt.usage_count), func.sum(Prompt.total_tokens_used), func.sum(Prompt.total_cost)
                 ).where(Prompt.owner_id == user_id)
             )
             total_usage, total_tokens, total_cost = usage_result.first()
@@ -546,4 +476,5 @@ class PromptService:
 
 class PromptError(Exception):
     """Prompt operation error."""
+
     pass

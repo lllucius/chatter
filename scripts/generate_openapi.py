@@ -90,7 +90,7 @@ A Python SDK is available for easy integration. See the SDK documentation for de
 - Documentation: https://github.com/lllucius/chatter#readme
 - Issues: https://github.com/lllucius/chatter/issues
         """.strip(),
-        routes=app.routes
+        routes=app.routes,
     )
 
     # Add additional metadata manually
@@ -102,54 +102,28 @@ A Python SDK is available for easy integration. See the SDK documentation for de
     openapi_spec["info"]["contact"] = {
         "name": "Chatter API Support",
         "url": "https://github.com/lllucius/chatter",
-        "email": "support@chatter.ai"
+        "email": "support@chatter.ai",
     }
 
-    openapi_spec["info"]["license"] = {
-        "name": "MIT",
-        "url": "https://github.com/lllucius/chatter/blob/main/LICENSE"
-    }
+    openapi_spec["info"]["license"] = {"name": "MIT", "url": "https://github.com/lllucius/chatter/blob/main/LICENSE"}
 
     openapi_spec["externalDocs"] = {
         "description": "Chatter Documentation",
-        "url": "https://github.com/lllucius/chatter#readme"
+        "url": "https://github.com/lllucius/chatter#readme",
     }
 
     # Add custom extensions
-    openapi_spec["x-logo"] = {
-        "url": "https://github.com/lllucius/chatter/raw/main/docs/logo.png"
-    }
+    openapi_spec["x-logo"] = {"url": "https://github.com/lllucius/chatter/raw/main/docs/logo.png"}
 
     # Add API categories/tags descriptions
     openapi_spec["tags"] = [
-        {
-            "name": "Health",
-            "description": "Health check and system status endpoints"
-        },
-        {
-            "name": "Authentication",
-            "description": "User authentication and authorization endpoints"
-        },
-        {
-            "name": "Chat",
-            "description": "Core chat and conversation endpoints with LLM integration"
-        },
-        {
-            "name": "Documents",
-            "description": "Document management and knowledge base endpoints"
-        },
-        {
-            "name": "Profiles",
-            "description": "LLM profile and prompt management endpoints"
-        },
-        {
-            "name": "Analytics",
-            "description": "Usage analytics and reporting endpoints"
-        },
-        {
-            "name": "Tool Servers",
-            "description": "MCP tool server management endpoints"
-        }
+        {"name": "Health", "description": "Health check and system status endpoints"},
+        {"name": "Authentication", "description": "User authentication and authorization endpoints"},
+        {"name": "Chat", "description": "Core chat and conversation endpoints with LLM integration"},
+        {"name": "Documents", "description": "Document management and knowledge base endpoints"},
+        {"name": "Profiles", "description": "LLM profile and prompt management endpoints"},
+        {"name": "Analytics", "description": "Usage analytics and reporting endpoints"},
+        {"name": "Tool Servers", "description": "MCP tool server management endpoints"},
     ]
 
     return openapi_spec

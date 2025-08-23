@@ -116,3 +116,30 @@ class APIKeyResponse(BaseModel):
         """Pydantic configuration."""
 
         from_attributes = True
+
+
+class TokenRefreshResponse(BaseModel):
+    """Schema for token refresh response."""
+
+    access_token: str = Field(..., description="New access token")
+    refresh_token: str = Field(..., description="New refresh token")
+    token_type: str = Field(default="bearer", description="Token type")
+    expires_in: int = Field(..., description="Token expiration time in seconds")
+
+
+class PasswordChangeResponse(BaseModel):
+    """Schema for password change response."""
+
+    message: str = Field(..., description="Success message")
+
+
+class APIKeyRevokeResponse(BaseModel):
+    """Schema for API key revoke response."""
+
+    message: str = Field(..., description="Success message")
+
+
+class AccountDeactivateResponse(BaseModel):
+    """Schema for account deactivation response."""
+
+    message: str = Field(..., description="Success message")

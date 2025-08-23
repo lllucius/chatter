@@ -233,3 +233,46 @@ class BulkOperationResult(BaseModel):
     failed: int = Field(..., description="Failed to process")
     results: list[dict[str, Any]] = Field(..., description="Detailed results")
     errors: list[str] = Field(default_factory=list, description="Error messages")
+
+
+class ToolServerListRequest(BaseModel):
+    """Schema for tool server list request with parameters."""
+
+    status: ServerStatus | None = Field(None, description="Filter by server status")
+    include_builtin: bool = Field(True, description="Include built-in servers")
+
+
+class ToolServerDeleteResponse(BaseModel):
+    """Schema for tool server delete response."""
+
+    message: str = Field(..., description="Success message")
+
+
+class ToolServerOperationResponse(BaseModel):
+    """Schema for tool server operation response."""
+
+    success: bool = Field(..., description="Operation success status")
+    message: str = Field(..., description="Operation result message")
+
+
+class ServerToolsRequest(BaseModel):
+    """Schema for server tools request with pagination."""
+
+    limit: int = Field(50, ge=1, le=100, description="Maximum number of results")
+    offset: int = Field(0, ge=0, description="Number of results to skip")
+
+
+class ServerToolsResponse(BaseModel):
+    """Schema for server tools response with pagination."""
+
+    tools: list[ServerToolResponse] = Field(..., description="List of server tools")
+    total_count: int = Field(..., description="Total number of tools")
+    limit: int = Field(..., description="Applied limit")
+    offset: int = Field(..., description="Applied offset")
+
+
+class ToolOperationResponse(BaseModel):
+    """Schema for tool operation response."""
+
+    success: bool = Field(..., description="Operation success status")
+    message: str = Field(..., description="Operation result message")

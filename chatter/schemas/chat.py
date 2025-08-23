@@ -173,3 +173,33 @@ class ConversationSearchResponse(BaseModel):
     total: int = Field(..., description="Total number of conversations")
     limit: int = Field(..., description="Request limit")
     offset: int = Field(..., description="Request offset")
+
+
+class ConversationDeleteResponse(BaseModel):
+    """Schema for conversation delete response."""
+
+    message: str = Field(..., description="Success message")
+
+
+class AvailableToolResponse(BaseModel):
+    """Schema for individual available tool."""
+
+    name: str = Field(..., description="Tool name")
+    description: str = Field(..., description="Tool description")
+    type: str = Field(..., description="Tool type (mcp, builtin)")
+    args_schema: dict[str, Any] = Field(..., description="Tool arguments schema")
+
+
+class AvailableToolsResponse(BaseModel):
+    """Schema for available tools response."""
+
+    tools: list[AvailableToolResponse] = Field(..., description="Available tools")
+
+
+class McpStatusResponse(BaseModel):
+    """Schema for MCP status response."""
+
+    status: str = Field(..., description="MCP service status")
+    servers: list[dict[str, Any]] = Field(..., description="Connected servers")
+    last_check: datetime | None = Field(None, description="Last health check time")
+    errors: list[str] = Field(default_factory=list, description="Any error messages")

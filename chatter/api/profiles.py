@@ -8,9 +8,11 @@ from chatter.core.profiles import ProfileError, ProfileService
 from chatter.models.user import User
 from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.profile import (
+    AvailableProvidersResponse,
     ProfileCloneRequest,
     ProfileCreate,
     ProfileDeleteRequest,
+    ProfileDeleteResponse,
     ProfileGetRequest,
     ProfileListRequest,
     ProfileListResponse,
@@ -166,13 +168,13 @@ async def update_profile(
         raise InternalServerProblem(detail="Failed to update profile") from None
 
 
-@router.delete("/{profile_id}")
+@router.delete("/{profile_id}", response_model=ProfileDeleteResponse)
 async def delete_profile(
     profile_id: str,
     request: ProfileDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service),
-) -> dict:
+) -> ProfileDeleteResponse:
     """Delete profile.
 
     Args:
@@ -190,7 +192,7 @@ async def delete_profile(
         if not success:
             raise NotFoundProblem(detail="Profile not found", resource_type="profile", resource_id=profile_id) from None
 
-        return {"message": "Profile deleted successfully"}
+        return ProfileDeleteResponse(message="Profile deleted successfully")
 
     except ProblemException:
         raise
@@ -296,12 +298,12 @@ async def get_profile_stats(
         raise InternalServerProblem(detail="Failed to get profile stats") from None
 
 
-@router.get("/providers/available")
+@router.get("/providers/available", response_model=AvailableProvidersResponse)
 async def get_available_providers(
     request: ProfileProvidersRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service),
-) -> dict:
+) -> AvailableProvidersResponse:
     """Get available LLM providers.
 
     Args:
@@ -314,7 +316,11 @@ async def get_available_providers(
     """
     try:
         providers_info = await profile_service.get_available_providers()
-        return providers_info
+        return AvailableProvidersResponse(
+            providers=providers_info,
+            total_providers=len(providers_info),
+            supported_features=providers_info.get("supported_features", {}),
+        )
 
     except Exception as e:
         logger.error("Failed to get available providers", error=str(e))

@@ -245,3 +245,17 @@ class ProfileExportResponse(BaseModel):
     export_format: str = Field("json", description="Export format")
     exported_at: datetime = Field(..., description="Export timestamp")
     version: str = Field("1.0", description="Export format version")
+
+
+class ProfileDeleteResponse(BaseModel):
+    """Schema for profile delete response."""
+
+    message: str = Field(..., description="Success message")
+
+
+class AvailableProvidersResponse(BaseModel):
+    """Schema for available providers response."""
+
+    providers: dict[str, Any] = Field(..., description="Available LLM providers with their configurations")
+    total_providers: int = Field(..., description="Total number of available providers")
+    supported_features: dict[str, list[str]] = Field(..., description="Features supported by each provider")

@@ -7,7 +7,7 @@ import traceback
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, status, HTTPException
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -18,7 +18,7 @@ from starlette.responses import Response
 from chatter.config import settings
 from chatter.utils.database import close_database, init_database
 from chatter.utils.logging import get_logger, setup_logging
-from chatter.utils.problem import ProblemException, convert_http_exception, InternalServerProblem
+from chatter.utils.problem import ProblemException, InternalServerProblem
 
 # Set up uvloop for better async performance
 try:
@@ -223,7 +223,6 @@ def create_app() -> FastAPI:
     
     # Add exception handlers
     from fastapi.exceptions import RequestValidationError
-    from starlette.exceptions import HTTPException as StarletteHTTPException
     
     @app.exception_handler(ProblemException)
     async def problem_exception_handler(request: Request, exc: ProblemException) -> JSONResponse:
@@ -237,32 +236,6 @@ def create_app() -> FastAPI:
             detail=exc.detail
         )
         return exc.to_response(request)
-    
-    @app.exception_handler(StarletteHTTPException)
-    async def starlette_http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
-        """Handle Starlette HTTPException instances (including 404s)."""
-        logger.error(
-            "Starlette HTTP exception",
-            url=str(request.url),
-            method=request.method,
-            status_code=exc.status_code,
-            detail=str(exc.detail)
-        )
-        # Convert Starlette HTTPException to FastAPI HTTPException for conversion
-        fastapi_exc = HTTPException(status_code=exc.status_code, detail=exc.detail)
-        return convert_http_exception(fastapi_exc, request)
-    
-    @app.exception_handler(HTTPException)
-    async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
-        """Handle HTTPException instances by converting to RFC 9457 format."""
-        logger.error(
-            "HTTP exception",
-            url=str(request.url),
-            method=request.method,
-            status_code=exc.status_code,
-            detail=str(exc.detail)
-        )
-        return convert_http_exception(exc, request)
     
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:

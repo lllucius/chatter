@@ -1,6 +1,6 @@
 """Prompt management endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -19,6 +19,7 @@ from chatter.schemas.prompt import (
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
+from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -50,14 +51,12 @@ async def create_prompt(
         return PromptResponse.model_validate(prompt)
 
     except PromptError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
     except Exception as e:
         logger.error("Prompt creation failed", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to create prompt"
         )
 
@@ -127,8 +126,7 @@ async def list_prompts(
 
     except Exception as e:
         logger.error("Failed to list prompts", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to list prompts"
         )
 
@@ -153,19 +151,19 @@ async def get_prompt(
         prompt = await prompt_service.get_prompt(prompt_id, current_user.id)
 
         if not prompt:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Prompt not found"
-            )
+            raise NotFoundProblem(
+            detail="Prompt not found",
+            resource_type="prompt",
+            resource_id=prompt_id
+        )
 
         return PromptResponse.model_validate(prompt)
 
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to get prompt", prompt_id=prompt_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get prompt"
         )
 
@@ -194,24 +192,23 @@ async def update_prompt(
         )
 
         if not prompt:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Prompt not found"
-            )
+            raise NotFoundProblem(
+            detail="Prompt not found",
+            resource_type="prompt",
+            resource_id=prompt_id
+        )
 
         return PromptResponse.model_validate(prompt)
 
     except PromptError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to update prompt", prompt_id=prompt_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to update prompt"
         )
 
@@ -236,19 +233,19 @@ async def delete_prompt(
         success = await prompt_service.delete_prompt(prompt_id, current_user.id)
 
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Prompt not found"
-            )
+            raise NotFoundProblem(
+            detail="Prompt not found",
+            resource_type="prompt",
+            resource_id=prompt_id
+        )
 
         return {"message": "Prompt deleted successfully"}
 
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to delete prompt", prompt_id=prompt_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to delete prompt"
         )
 
@@ -279,14 +276,12 @@ async def test_prompt(
         return PromptTestResponse(**result)
 
     except PromptError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
     except Exception as e:
         logger.error("Prompt test failed", prompt_id=prompt_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Prompt test failed"
         )
 
@@ -321,14 +316,12 @@ async def clone_prompt(
         return PromptResponse.model_validate(cloned_prompt)
 
     except PromptError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
     except Exception as e:
         logger.error("Prompt cloning failed", prompt_id=prompt_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Prompt cloning failed"
         )
 
@@ -367,7 +360,6 @@ async def get_prompt_stats(
 
     except Exception as e:
         logger.error("Failed to get prompt stats", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get prompt stats"
         )

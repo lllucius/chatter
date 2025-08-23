@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,6 +20,7 @@ from chatter.schemas.auth import (
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
+from chatter.utils.problem import AuthenticationProblem
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -93,10 +94,8 @@ async def login(
     """
     user = await auth_service.authenticate_user(user_data.email, user_data.password)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid email or password",
-            headers={"WWW-Authenticate": "Bearer"},
+        raise AuthenticationProblem(
+            detail="Invalid email or password"
         )
 
     tokens = auth_service.create_tokens(user)

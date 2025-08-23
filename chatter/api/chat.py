@@ -3,7 +3,7 @@
 import json
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,6 +24,7 @@ from chatter.schemas.chat import (
 from chatter.services.llm import LLMService
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
+from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -65,7 +66,7 @@ async def create_conversation(
         )
         return ConversationResponse.model_validate(conversation)
     except ChatError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise BadRequestProblem(detail=str(e))
 
 
 @router.get("/conversations", response_model=ConversationSearchResponse)
@@ -121,9 +122,9 @@ async def get_conversation(
     )
 
     if not conversation:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Conversation not found"
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation"
         )
 
     # Convert to response format
@@ -162,9 +163,9 @@ async def update_conversation(
         )
         return ConversationResponse.model_validate(conversation)
     except ConversationNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Conversation not found"
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation"
         )
 
 
@@ -188,9 +189,9 @@ async def delete_conversation(
         await chat_service.delete_conversation(conversation_id, current_user.id)
         return {"message": "Conversation deleted successfully"}
     except ConversationNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Conversation not found"
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation"
         )
 
 
@@ -217,9 +218,9 @@ async def get_conversation_messages(
         )
         return [MessageResponse.model_validate(m) for m in messages]
     except ConversationNotFoundError:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Conversation not found"
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation"
         )
 
 
@@ -240,8 +241,7 @@ async def chat(
         Chat response with assistant message
     """
     if chat_request.stream:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail="Use /chat/stream for streaming responses"
         )
 
@@ -257,8 +257,7 @@ async def chat(
             conversation=ConversationResponse.model_validate(conversation)
         )
     except (ConversationNotFoundError, ChatError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
 
@@ -335,8 +334,7 @@ async def create_basic_workflow(
             conversation=ConversationResponse.model_validate(conversation)
         )
     except (ConversationNotFoundError, ChatError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
 
@@ -370,8 +368,7 @@ async def create_rag_workflow(
             conversation=ConversationResponse.model_validate(conversation)
         )
     except (ConversationNotFoundError, ChatError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
 
@@ -405,8 +402,7 @@ async def create_tools_workflow(
             conversation=ConversationResponse.model_validate(conversation)
         )
     except (ConversationNotFoundError, ChatError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
 
@@ -454,8 +450,7 @@ async def get_available_tools(
 
         return all_tools
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail=f"Failed to get available tools: {str(e)}"
         )
 
@@ -477,7 +472,6 @@ async def get_mcp_status(
     try:
         return await mcp_service.health_check()
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail=f"Failed to get MCP status: {str(e)}"
         )

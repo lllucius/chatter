@@ -128,6 +128,7 @@ class AuthService:
         # Update last login
         user.last_login_at = datetime.now(UTC)
         await self.session.commit()
+        await self.session.refresh(user)
 
         logger.info("User authenticated", user_id=user.id, email=user.email)
         return user

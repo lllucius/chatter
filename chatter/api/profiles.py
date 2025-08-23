@@ -1,7 +1,7 @@
 """Profile management endpoints."""
 
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -20,6 +20,7 @@ from chatter.schemas.profile import (
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
+from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -51,14 +52,12 @@ async def create_profile(
         return ProfileResponse.model_validate(profile)
 
     except ProfileError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
     except Exception as e:
         logger.error("Profile creation failed", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to create profile"
         )
 
@@ -125,8 +124,7 @@ async def list_profiles(
 
     except Exception as e:
         logger.error("Failed to list profiles", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to list profiles"
         )
 
@@ -151,19 +149,19 @@ async def get_profile(
         profile = await profile_service.get_profile(profile_id, current_user.id)
 
         if not profile:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Profile not found"
+            raise NotFoundProblem(
+                detail="Profile not found",
+                resource_type="profile",
+                resource_id=profile_id
             )
 
         return ProfileResponse.model_validate(profile)
 
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to get profile", profile_id=profile_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get profile"
         )
 
@@ -192,24 +190,23 @@ async def update_profile(
         )
 
         if not profile:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Profile not found"
+            raise NotFoundProblem(
+                detail="Profile not found",
+                resource_type="profile",
+                resource_id=profile_id
             )
 
         return ProfileResponse.model_validate(profile)
 
     except ProfileError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to update profile", profile_id=profile_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to update profile"
         )
 
@@ -234,19 +231,19 @@ async def delete_profile(
         success = await profile_service.delete_profile(profile_id, current_user.id)
 
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Profile not found"
+            raise NotFoundProblem(
+                detail="Profile not found",
+                resource_type="profile",
+                resource_id=profile_id
             )
 
         return {"message": "Profile deleted successfully"}
 
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to delete profile", profile_id=profile_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to delete profile"
         )
 
@@ -277,14 +274,12 @@ async def test_profile(
         return ProfileTestResponse(**result)
 
     except ProfileError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
     except Exception as e:
         logger.error("Profile test failed", profile_id=profile_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Profile test failed"
         )
 
@@ -319,14 +314,12 @@ async def clone_profile(
         return ProfileResponse.model_validate(cloned_profile)
 
     except ProfileError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+        raise BadRequestProblem(
             detail=str(e)
         )
     except Exception as e:
         logger.error("Profile cloning failed", profile_id=profile_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Profile cloning failed"
         )
 
@@ -365,8 +358,7 @@ async def get_profile_stats(
 
     except Exception as e:
         logger.error("Failed to get profile stats", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get profile stats"
         )
 
@@ -391,7 +383,6 @@ async def get_available_providers(
 
     except Exception as e:
         logger.error("Failed to get available providers", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get available providers"
         )

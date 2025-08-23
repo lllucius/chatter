@@ -277,7 +277,8 @@ class LangGraphWorkflowManager:
                 and last_message.tool_calls
             ):
                 return "execute_tools"
-            return END
+            end_result: str = str(END)
+            return end_result
 
         # Build workflow
         workflow = StateGraph(ConversationState)
@@ -314,7 +315,8 @@ class LangGraphWorkflowManager:
             result = await workflow.ainvoke(
                 initial_state, config=config
             )
-            return result
+            typed_result: ConversationState = result
+            return typed_result
         except Exception as e:
             logger.error(
                 "Workflow execution failed",

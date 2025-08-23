@@ -38,7 +38,7 @@ def setup_logging() -> None:
     )
 
     # Configure standard library logging
-    handlers = [logging.StreamHandler(sys.stdout)]
+    handlers: list[logging.Handler] = [logging.StreamHandler(sys.stdout)]
     if settings.log_file:
         handlers.append(logging.FileHandler(settings.log_file))
 

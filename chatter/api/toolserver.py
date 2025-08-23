@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -21,6 +21,7 @@ from chatter.schemas.toolserver import (
 from chatter.services.toolserver import ToolServerService, ToolServerServiceError
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
+from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -61,14 +62,10 @@ async def create_tool_server(
     try:
         return await service.create_server(server_data, current_user.id)
     except ToolServerServiceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e))
     except Exception as e:
         logger.error("Failed to create tool server", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to create tool server"
         )
 
@@ -98,8 +95,7 @@ async def list_tool_servers(
         )
     except Exception as e:
         logger.error("Failed to list tool servers", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to list tool servers"
         )
 
@@ -122,9 +118,9 @@ async def get_tool_server(
     """
     server = await service.get_server(server_id)
     if not server:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Tool server not found"
+        raise NotFoundProblem(
+            detail="Tool server not found",
+            resource_type="tool_server"
         )
     return server
 
@@ -150,20 +146,16 @@ async def update_tool_server(
     try:
         server = await service.update_server(server_id, update_data)
         if not server:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Tool server not found"
-            )
+            raise NotFoundProblem(
+            detail="Tool server not found",
+            resource_type="tool_server"
+        )
         return server
     except ToolServerServiceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e))
     except Exception as e:
         logger.error("Failed to update tool server", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to update tool server"
         )
 
@@ -184,19 +176,15 @@ async def delete_tool_server(
     try:
         success = await service.delete_server(server_id)
         if not success:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Tool server not found"
-            )
-    except ToolServerServiceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
+            raise NotFoundProblem(
+            detail="Tool server not found",
+            resource_type="tool_server"
         )
+    except ToolServerServiceError as e:
+        raise BadRequestProblem(detail=str(e))
     except Exception as e:
         logger.error("Failed to delete tool server", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to delete tool server"
         )
 
@@ -226,14 +214,10 @@ async def start_tool_server(
             "message": "Server started successfully" if success else "Failed to start server"
         }
     except ToolServerServiceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e))
     except Exception as e:
         logger.error("Failed to start tool server", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to start tool server"
         )
 
@@ -261,14 +245,10 @@ async def stop_tool_server(
             "message": "Server stopped successfully" if success else "Failed to stop server"
         }
     except ToolServerServiceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e))
     except Exception as e:
         logger.error("Failed to stop tool server", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to stop tool server"
         )
 
@@ -296,14 +276,10 @@ async def restart_tool_server(
             "message": "Server restarted successfully" if success else "Failed to restart server"
         }
     except ToolServerServiceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e))
     except Exception as e:
         logger.error("Failed to restart tool server", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to restart tool server"
         )
 
@@ -331,14 +307,10 @@ async def enable_tool_server(
             "message": "Server enabled successfully" if success else "Failed to enable server"
         }
     except ToolServerServiceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e))
     except Exception as e:
         logger.error("Failed to enable tool server", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to enable tool server"
         )
 
@@ -366,14 +338,10 @@ async def disable_tool_server(
             "message": "Server disabled successfully" if success else "Failed to disable server"
         }
     except ToolServerServiceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e))
     except Exception as e:
         logger.error("Failed to disable tool server", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to disable tool server"
         )
 
@@ -400,8 +368,7 @@ async def get_server_tools(
         return await service.get_server_tools(server_id)
     except Exception as e:
         logger.error("Failed to get server tools", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get server tools"
         )
 
@@ -430,8 +397,7 @@ async def enable_tool(
         }
     except Exception as e:
         logger.error("Failed to enable tool", tool_id=tool_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to enable tool"
         )
 
@@ -460,8 +426,7 @@ async def disable_tool(
         }
     except Exception as e:
         logger.error("Failed to disable tool", tool_id=tool_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to disable tool"
         )
 
@@ -487,17 +452,16 @@ async def get_server_metrics(
     try:
         metrics = await service.get_server_analytics(server_id)
         if not metrics:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Server not found"
-            )
+            raise NotFoundProblem(
+            detail="Server not found",
+            resource_type="tool_server"
+        )
         return metrics
-    except HTTPException:
+    except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to get server metrics", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to get server metrics"
         )
 
@@ -521,14 +485,13 @@ async def check_server_health(
     try:
         return await service.health_check_server(server_id)
     except ToolServerServiceError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e)
+        raise NotFoundProblem(
+            detail=str(e),
+            resource_type="tool_server"
         )
     except Exception as e:
         logger.error("Failed to check server health", server_id=server_id, error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to check server health"
         )
 
@@ -608,7 +571,6 @@ async def bulk_server_operation(
 
     except Exception as e:
         logger.error("Failed to perform bulk server operation", error=str(e))
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        raise InternalServerProblem(
             detail="Failed to perform bulk server operation"
         )

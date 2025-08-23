@@ -1,12 +1,18 @@
 """User model for authentication and user management."""
 
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
+
+if TYPE_CHECKING:
+    from chatter.models.conversation import Conversation
+    from chatter.models.document import Document
+    from chatter.models.profile import Profile
+    from chatter.models.prompt import Prompt
 
 
 class User(Base):
@@ -34,10 +40,7 @@ class User(Base):
     # Preferences
     default_llm_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
     default_profile_id: Mapped[str | None] = mapped_column(
-        String(12),
-        ForeignKey(Keys.PROFILES),
-        nullable=True,
-        index=True
+        String(12), ForeignKey(Keys.PROFILES), nullable=True, index=True
     )
 
     # Usage limits
@@ -46,41 +49,23 @@ class User(Base):
     max_file_size_mb: Mapped[int | None] = mapped_column(nullable=True)
 
     # Timestamps
-    last_login_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True
-    )
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     # Relationships
     conversations: Mapped[list["Conversation"]] = relationship(
-        "Conversation",
-        back_populates="user",
-        cascade="all, delete-orphan"
+        "Conversation", back_populates="user", cascade="all, delete-orphan"
     )
 
-    documents: Mapped[list["Document"]] = relationship(
-        "Document",
-        back_populates="owner",
-        cascade="all, delete-orphan"
-    )
+    documents: Mapped[list["Document"]] = relationship("Document", back_populates="owner", cascade="all, delete-orphan")
 
     profiles: Mapped[list["Profile"]] = relationship(
-        "Profile",
-        back_populates="owner",
-        foreign_keys="Profile.owner_id",
-        cascade="all, delete-orphan"
+        "Profile", back_populates="owner", foreign_keys="Profile.owner_id", cascade="all, delete-orphan"
     )
 
-    prompts: Mapped[list["Prompt"]] = relationship(
-        "Prompt",
-        back_populates="owner",
-        cascade="all, delete-orphan"
-    )
+    prompts: Mapped[list["Prompt"]] = relationship("Prompt", back_populates="owner", cascade="all, delete-orphan")
 
     default_profile: Mapped[Optional["Profile"]] = relationship(
-        "Profile",
-        foreign_keys=[default_profile_id],
-        post_update=True
+        "Profile", foreign_keys=[default_profile_id], post_update=True
     )
 
     def __repr__(self) -> str:
@@ -92,7 +77,7 @@ class User(Base):
         """Get display name for the user."""
         return self.full_name or self.username
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert user to dictionary (excluding sensitive data)."""
         return {
             "id": self.id,

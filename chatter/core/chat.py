@@ -19,11 +19,13 @@ logger = get_logger(__name__)
 
 class ChatError(Exception):
     """Chat service error."""
+
     pass
 
 
 class ConversationNotFoundError(ChatError):
     """Conversation not found error."""
+
     pass
 
 
@@ -40,11 +42,7 @@ class ChatService:
         self.session = session
         self.llm_service = llm_service
 
-    async def create_conversation(
-        self,
-        user_id: str,
-        conversation_data: ConversationCreate
-    ) -> Conversation:
+    async def create_conversation(self, user_id: str, conversation_data: ConversationCreate) -> Conversation:
         """Create a new conversation.
 
         Args:
@@ -58,14 +56,11 @@ class ChatService:
         profile = None
         if conversation_data.profile_id:
             result = await self.session.execute(
-                select(Profile).where(
-                    Profile.id == conversation_data.profile_id,
-                    Profile.owner_id == user_id
-                )
+                select(Profile).where(Profile.id == conversation_data.profile_id, Profile.owner_id == user_id)
             )
             profile = result.scalar_one_or_none()
             if not profile:
-                raise ChatError("Profile not found or not accessible")
+                raise ChatError("Profile not found or not accessible") from None
 
         # Create conversation
         conversation = Conversation(
@@ -98,10 +93,7 @@ class ChatService:
         return conversation
 
     async def get_conversation(
-        self,
-        conversation_id: str,
-        user_id: str,
-        include_messages: bool = False
+        self, conversation_id: str, user_id: str, include_messages: bool = False
     ) -> Conversation | None:
         """Get conversation by ID.
 
@@ -113,10 +105,7 @@ class ChatService:
         Returns:
             Conversation if found, None otherwise
         """
-        query = select(Conversation).where(
-            Conversation.id == conversation_id,
-            Conversation.user_id == user_id
-        )
+        query = select(Conversation).where(Conversation.id == conversation_id, Conversation.user_id == user_id)
 
         if include_messages:
             query = query.options(selectinload(Conversation.messages))
@@ -125,10 +114,7 @@ class ChatService:
         return result.scalar_one_or_none()
 
     async def list_conversations(
-        self,
-        user_id: str,
-        limit: int = 20,
-        offset: int = 0
+        self, user_id: str, limit: int = 20, offset: int = 0
     ) -> tuple[list[Conversation], int]:
         """List user's conversations.
 
@@ -151,19 +137,13 @@ class ChatService:
         conversations = result.scalars().all()
 
         # Get total count
-        count_result = await self.session.execute(
-            select(Conversation)
-            .where(Conversation.user_id == user_id)
-        )
+        count_result = await self.session.execute(select(Conversation).where(Conversation.user_id == user_id))
         total_count = len(count_result.scalars().all())
 
         return list(conversations), total_count
 
     async def update_conversation(
-        self,
-        conversation_id: str,
-        user_id: str,
-        update_data: ConversationUpdate
+        self, conversation_id: str, user_id: str, update_data: ConversationUpdate
     ) -> Conversation:
         """Update conversation.
 
@@ -180,7 +160,7 @@ class ChatService:
         """
         conversation = await self.get_conversation(conversation_id, user_id)
         if not conversation:
-            raise ConversationNotFoundError("Conversation not found")
+            raise ConversationNotFoundError("Conversation not found") from None
 
         # Update fields
         update_dict = update_data.model_dump(exclude_unset=True)
@@ -208,7 +188,7 @@ class ChatService:
         """
         conversation = await self.get_conversation(conversation_id, user_id)
         if not conversation:
-            raise ConversationNotFoundError("Conversation not found")
+            raise ConversationNotFoundError("Conversation not found") from None
 
         await self.session.delete(conversation)
         await self.session.commit()
@@ -217,12 +197,7 @@ class ChatService:
         return True
 
     async def add_message(
-        self,
-        conversation_id: str,
-        user_id: str,
-        role: MessageRole,
-        content: str,
-        **metadata
+        self, conversation_id: str, user_id: str, role: MessageRole, content: str, **metadata
     ) -> Message:
         """Add message to conversation.
 
@@ -241,7 +216,7 @@ class ChatService:
         """
         conversation = await self.get_conversation(conversation_id, user_id)
         if not conversation:
-            raise ConversationNotFoundError("Conversation not found")
+            raise ConversationNotFoundError("Conversation not found") from None
 
         # Get next sequence number
         last_message_result = await self.session.execute(
@@ -255,11 +230,7 @@ class ChatService:
 
         # Create message
         message = Message(
-            conversation_id=conversation_id,
-            role=role,
-            content=content,
-            sequence_number=sequence_number,
-            **metadata
+            conversation_id=conversation_id, role=role, content=content, sequence_number=sequence_number, **metadata
         )
 
         self.session.add(message)
@@ -274,10 +245,7 @@ class ChatService:
         return message
 
     async def get_conversation_messages(
-        self,
-        conversation_id: str,
-        user_id: str,
-        limit: int | None = None
+        self, conversation_id: str, user_id: str, limit: int | None = None
     ) -> list[Message]:
         """Get conversation messages.
 
@@ -294,13 +262,9 @@ class ChatService:
         """
         conversation = await self.get_conversation(conversation_id, user_id)
         if not conversation:
-            raise ConversationNotFoundError("Conversation not found")
+            raise ConversationNotFoundError("Conversation not found") from None
 
-        query = (
-            select(Message)
-            .where(Message.conversation_id == conversation_id)
-            .order_by(Message.sequence_number)
-        )
+        query = select(Message).where(Message.conversation_id == conversation_id).order_by(Message.sequence_number)
 
         if limit:
             query = query.limit(limit)
@@ -308,11 +272,7 @@ class ChatService:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
-    async def chat(
-        self,
-        user_id: str,
-        chat_request: ChatRequest
-    ) -> tuple[Conversation, Message]:
+    async def chat(self, user_id: str, chat_request: ChatRequest) -> tuple[Conversation, Message]:
         """Process chat request and generate response.
 
         Args:
@@ -326,23 +286,18 @@ class ChatService:
         if chat_request.conversation_id:
             conversation = await self.get_conversation(chat_request.conversation_id, user_id)
             if not conversation:
-                raise ConversationNotFoundError("Conversation not found")
+                raise ConversationNotFoundError("Conversation not found") from None
         else:
             # Create new conversation
             conversation_data = ConversationCreate(
                 title=f"Chat {datetime.now().strftime('%Y-%m-%d %H:%M')}",
                 profile_id=chat_request.profile_id,
-                enable_retrieval=chat_request.enable_retrieval or False
+                enable_retrieval=chat_request.enable_retrieval or False,
             )
             conversation = await self.create_conversation(user_id, conversation_data)
 
         # Add user message
-        await self.add_message(
-            conversation.id,
-            user_id,
-            MessageRole.USER,
-            chat_request.message
-        )
+        await self.add_message(conversation.id, user_id, MessageRole.USER, chat_request.message)
 
         # Get conversation history
         messages = await self.get_conversation_messages(conversation.id, user_id)
@@ -350,9 +305,7 @@ class ChatService:
         # Get LLM provider
         provider = None
         if conversation.profile_id:
-            profile_result = await self.session.execute(
-                select(Profile).where(Profile.id == conversation.profile_id)
-            )
+            profile_result = await self.session.execute(select(Profile).where(Profile.id == conversation.profile_id))
             profile = profile_result.scalar_one_or_none()
             if profile:
                 provider = self.llm_service.create_provider_from_profile(profile)
@@ -361,9 +314,7 @@ class ChatService:
             provider = self.llm_service.get_default_provider()
 
         # Convert to LangChain format
-        langchain_messages = self.llm_service.convert_conversation_to_messages(
-            conversation, messages
-        )
+        langchain_messages = self.llm_service.convert_conversation_to_messages(conversation, messages)
 
         # Generate response
         try:
@@ -374,9 +325,7 @@ class ChatService:
                 generation_kwargs["max_tokens"] = chat_request.max_tokens
 
             response_content, usage_info = await self.llm_service.generate_response(
-                langchain_messages,
-                provider,
-                **generation_kwargs
+                langchain_messages, provider, **generation_kwargs
             )
 
             # Add assistant message
@@ -404,13 +353,9 @@ class ChatService:
 
         except LLMProviderError as e:
             logger.error("LLM generation failed", error=str(e), conversation_id=conversation.id)
-            raise ChatError(f"Failed to generate response: {str(e)}")
+            raise ChatError(f"Failed to generate response: {str(e)}") from e
 
-    async def chat_streaming(
-        self,
-        user_id: str,
-        chat_request: ChatRequest
-    ) -> AsyncGenerator[dict, None]:
+    async def chat_streaming(self, user_id: str, chat_request: ChatRequest) -> AsyncGenerator[dict, None]:
         """Process chat request with streaming response.
 
         Args:
@@ -424,23 +369,18 @@ class ChatService:
         if chat_request.conversation_id:
             conversation = await self.get_conversation(chat_request.conversation_id, user_id)
             if not conversation:
-                raise ConversationNotFoundError("Conversation not found")
+                raise ConversationNotFoundError("Conversation not found") from None
         else:
             # Create new conversation
             conversation_data = ConversationCreate(
                 title=f"Chat {datetime.now().strftime('%Y-%m-%d %H:%M')}",
                 profile_id=chat_request.profile_id,
-                enable_retrieval=chat_request.enable_retrieval or False
+                enable_retrieval=chat_request.enable_retrieval or False,
             )
             conversation = await self.create_conversation(user_id, conversation_data)
 
         # Add user message
-        await self.add_message(
-            conversation.id,
-            user_id,
-            MessageRole.USER,
-            chat_request.message
-        )
+        await self.add_message(conversation.id, user_id, MessageRole.USER, chat_request.message)
 
         # Get conversation history
         messages = await self.get_conversation_messages(conversation.id, user_id)
@@ -448,9 +388,7 @@ class ChatService:
         # Get LLM provider
         provider = None
         if conversation.profile_id:
-            profile_result = await self.session.execute(
-                select(Profile).where(Profile.id == conversation.profile_id)
-            )
+            profile_result = await self.session.execute(select(Profile).where(Profile.id == conversation.profile_id))
             profile = profile_result.scalar_one_or_none()
             if profile:
                 provider = self.llm_service.create_provider_from_profile(profile)
@@ -459,9 +397,7 @@ class ChatService:
             provider = self.llm_service.get_default_provider()
 
         # Convert to LangChain format
-        langchain_messages = self.llm_service.convert_conversation_to_messages(
-            conversation, messages
-        )
+        langchain_messages = self.llm_service.convert_conversation_to_messages(conversation, messages)
 
         # Generate streaming response
         try:
@@ -475,9 +411,7 @@ class ChatService:
             message_id = str(uuid.uuid4())
 
             async for chunk in self.llm_service.generate_streaming_response(
-                langchain_messages,
-                provider,
-                **generation_kwargs
+                langchain_messages, provider, **generation_kwargs
             ):
                 if chunk["type"] == "token":
                     full_content += chunk["content"]
@@ -532,10 +466,7 @@ class ChatService:
             }
 
     async def chat_with_workflow(
-        self,
-        user_id: str,
-        chat_request: ChatRequest,
-        workflow_type: str = "basic"
+        self, user_id: str, chat_request: ChatRequest, workflow_type: str = "basic"
     ) -> tuple[Conversation, Message]:
         """Send a chat message using LangGraph workflows.
 
@@ -559,7 +490,7 @@ class ChatService:
             conversation_id=conversation.id,
             role=MessageRole.USER,
             content=chat_request.message,
-            metadata={"workflow_type": workflow_type}
+            metadata={"workflow_type": workflow_type},
         )
         self.session.add(user_message)
         await self.session.flush()
@@ -569,9 +500,7 @@ class ChatService:
             provider_name = conversation.llm_provider or "openai"
 
             # Build conversation history
-            conversation_messages = await self._build_conversation_messages(
-                conversation, chat_request.message
-            )
+            conversation_messages = await self._build_conversation_messages(conversation, chat_request.message)
 
             # Create workflow based on type
             if workflow_type == "rag":
@@ -585,13 +514,11 @@ class ChatService:
                     provider_name=provider_name,
                     workflow_type="rag",
                     system_message=conversation.system_prompt,
-                    retriever=retriever
+                    retriever=retriever,
                 )
             else:
                 workflow = await self.llm_service.create_langgraph_workflow(
-                    provider_name=provider_name,
-                    workflow_type=workflow_type,
-                    system_message=conversation.system_prompt
+                    provider_name=provider_name, workflow_type=workflow_type, system_message=conversation.system_prompt
                 )
 
             # Prepare initial state
@@ -601,17 +528,12 @@ class ChatService:
                 "conversation_id": str(conversation.id),
                 "retrieval_context": None,
                 "tool_calls": [],
-                "metadata": {
-                    "workflow_type": workflow_type,
-                    "provider": provider_name
-                }
+                "metadata": {"workflow_type": workflow_type, "provider": provider_name},
             }
 
             # Run workflow
             result_state = await workflow_manager.run_workflow(
-                workflow=workflow,
-                initial_state=initial_state,
-                thread_id=f"{conversation.id}_{workflow_type}"
+                workflow=workflow, initial_state=initial_state, thread_id=f"{conversation.id}_{workflow_type}"
             )
 
             # Extract assistant response
@@ -625,7 +547,7 @@ class ChatService:
                 metadata={
                     "workflow_type": workflow_type,
                     "tool_calls": result_state.get("tool_calls", []),
-                    "retrieval_context": result_state.get("retrieval_context")
+                    "retrieval_context": result_state.get("retrieval_context"),
                 },
                 provider_used=provider_name,
             )
@@ -638,10 +560,7 @@ class ChatService:
             await self.session.commit()
 
             logger.info(
-                "Workflow chat completed",
-                conversation_id=conversation.id,
-                workflow_type=workflow_type,
-                user_id=user_id
+                "Workflow chat completed", conversation_id=conversation.id, workflow_type=workflow_type, user_id=user_id
             )
 
             return conversation, assistant_message
@@ -649,12 +568,9 @@ class ChatService:
         except Exception as e:
             await self.session.rollback()
             logger.error(
-                "Workflow chat failed",
-                error=str(e),
-                conversation_id=conversation.id,
-                workflow_type=workflow_type
+                "Workflow chat failed", error=str(e), conversation_id=conversation.id, workflow_type=workflow_type
             )
-            raise ChatError(f"Workflow chat failed: {str(e)}")
+            raise ChatError(f"Workflow chat failed: {str(e)}") from e
 
         finally:
             # Clean up any resources if needed

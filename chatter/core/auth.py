@@ -2,7 +2,6 @@
 
 from datetime import UTC, datetime, timedelta
 
-from fastapi import status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,7 +14,7 @@ from chatter.utils.problem import (
     AuthorizationProblem,
     BadRequestProblem,
     ConflictProblem,
-    NotFoundProblem
+    NotFoundProblem,
 )
 from chatter.utils.security import (
     create_access_token,
@@ -33,15 +32,15 @@ logger = get_logger(__name__)
 
 # Use RFC 9457 compliant problem classes instead of HTTPException subclasses
 AuthenticationError = AuthenticationProblem
-AuthorizationError = AuthorizationProblem  
-UserAlreadyExistsError = lambda detail="User already exists": ConflictProblem(
-    detail=detail, 
-    conflicting_resource="user"
-)
-UserNotFoundError = lambda detail="User not found": NotFoundProblem(
-    detail=detail,
-    resource_type="user"
-)
+AuthorizationError = AuthorizationProblem
+
+
+def UserAlreadyExistsError(detail="User already exists"):
+    return ConflictProblem(detail=detail, conflicting_resource="user")
+
+
+def UserNotFoundError(detail="User not found"):
+    return NotFoundProblem(detail=detail, resource_type="user")
 
 
 class AuthService:
@@ -70,26 +69,23 @@ class AuthService:
         """
         # Validate email format
         if not validate_email(user_data.email):
-            raise BadRequestProblem(
-                detail="Invalid email format"
-            )
+            raise BadRequestProblem(detail="Invalid email format") from None
 
         # Validate password strength
         password_validation = validate_password_strength(user_data.password)
         if not password_validation["valid"]:
             raise BadRequestProblem(
-                detail="Password does not meet requirements",
-                errors=password_validation["errors"]
-            )
+                detail="Password does not meet requirements", errors=password_validation["errors"]
+            ) from None
 
         # Check if user already exists
         existing_user = await self.get_user_by_email(user_data.email)
         if existing_user:
-            raise UserAlreadyExistsError("User with this email already exists")
+            raise UserAlreadyExistsError("User with this email already exists") from None
 
         existing_user = await self.get_user_by_username(user_data.username)
         if existing_user:
-            raise UserAlreadyExistsError("User with this username already exists")
+            raise UserAlreadyExistsError("User with this username already exists") from None
 
         # Create user
         hashed_password = hash_password(user_data.password)
@@ -145,9 +141,7 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.id == user_id)
-        )
+        result = await self.session.execute(select(User).where(User.id == user_id))
         return result.scalar_one_or_none()
 
     async def get_user_by_email(self, email: str) -> User | None:
@@ -159,9 +153,7 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.email == email)
-        )
+        result = await self.session.execute(select(User).where(User.email == email))
         return result.scalar_one_or_none()
 
     async def get_user_by_username(self, username: str) -> User | None:
@@ -173,9 +165,7 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.username == username)
-        )
+        result = await self.session.execute(select(User).where(User.username == username))
         return result.scalar_one_or_none()
 
     async def get_user_by_api_key(self, api_key: str) -> User | None:
@@ -187,9 +177,7 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(
-            select(User).where(User.api_key == api_key)
-        )
+        result = await self.session.execute(select(User).where(User.api_key == api_key))
         return result.scalar_one_or_none()
 
     async def update_user(self, user_id: str, user_data: UserUpdate) -> User:
@@ -207,7 +195,7 @@ class AuthService:
         """
         user = await self.get_user_by_id(user_id)
         if not user:
-            raise UserNotFoundError()
+            raise UserNotFoundError() from None
 
         # Update fields
         update_data = user_data.model_dump(exclude_unset=True)
@@ -238,19 +226,18 @@ class AuthService:
         """
         user = await self.get_user_by_id(user_id)
         if not user:
-            raise UserNotFoundError()
+            raise UserNotFoundError() from None
 
         # Verify current password
         if not verify_password(current_password, user.hashed_password):
-            raise AuthenticationError("Current password is incorrect")
+            raise AuthenticationError("Current password is incorrect") from None
 
         # Validate new password
         password_validation = validate_password_strength(new_password)
         if not password_validation["valid"]:
             raise BadRequestProblem(
-                detail="New password does not meet requirements",
-                errors=password_validation["errors"]
-            )
+                detail="New password does not meet requirements", errors=password_validation["errors"]
+            ) from None
 
         # Update password
         user.hashed_password = hash_password(new_password)
@@ -274,7 +261,7 @@ class AuthService:
         """
         user = await self.get_user_by_id(user_id)
         if not user:
-            raise UserNotFoundError()
+            raise UserNotFoundError() from None
 
         # Generate API key
         api_key = generate_api_key()
@@ -300,7 +287,7 @@ class AuthService:
         """
         user = await self.get_user_by_id(user_id)
         if not user:
-            raise UserNotFoundError()
+            raise UserNotFoundError() from None
 
         user.api_key = None
         user.api_key_name = None
@@ -323,7 +310,7 @@ class AuthService:
         """
         user = await self.get_user_by_id(user_id)
         if not user:
-            raise UserNotFoundError()
+            raise UserNotFoundError() from None
 
         user.is_active = False
         await self.session.commit()
@@ -344,13 +331,11 @@ class AuthService:
         refresh_token_expires = timedelta(days=settings.refresh_token_expire_days)
 
         access_token = create_access_token(
-            data={"sub": user.id, "email": user.email},
-            expires_delta=access_token_expires
+            data={"sub": user.id, "email": user.email}, expires_delta=access_token_expires
         )
 
         refresh_token = create_refresh_token(
-            data={"sub": user.id, "email": user.email},
-            expires_delta=refresh_token_expires
+            data={"sub": user.id, "email": user.email}, expires_delta=refresh_token_expires
         )
 
         return {
@@ -375,18 +360,18 @@ class AuthService:
         print("TOKEN", token)
         payload = verify_token(token)
         if not payload:
-            raise AuthenticationError("Invalid token")
+            raise AuthenticationError("Invalid token") from None
 
         user_id = payload.get("sub")
         if not user_id:
-            raise AuthenticationError("Invalid token")
+            raise AuthenticationError("Invalid token") from None
 
         user = await self.get_user_by_id(user_id)
         if not user:
-            raise AuthenticationError("User not found")
+            raise AuthenticationError("User not found") from None
 
         if not user.is_active:
-            raise AuthenticationError("User account is deactivated")
+            raise AuthenticationError("User account is deactivated") from None
 
         return user
 
@@ -404,14 +389,14 @@ class AuthService:
         """
         payload = verify_token(refresh_token)
         if not payload or payload.get("type") != "refresh":
-            raise AuthenticationError("Invalid refresh token")
+            raise AuthenticationError("Invalid refresh token") from None
 
         user_id = payload.get("sub")
         if not user_id:
-            raise AuthenticationError("Invalid refresh token")
+            raise AuthenticationError("Invalid refresh token") from None
 
         user = await self.get_user_by_id(user_id)
         if not user or not user.is_active:
-            raise AuthenticationError("User not found or inactive")
+            raise AuthenticationError("User not found or inactive") from None
 
         return self.create_tokens(user)

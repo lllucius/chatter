@@ -6,7 +6,7 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from chatter.models.document import DocumentStatus, DocumentType
-from chatter.schemas.common import ListRequestBase, GetRequestBase, DeleteRequestBase
+from chatter.schemas.common import DeleteRequestBase, GetRequestBase, ListRequestBase
 
 
 class DocumentBase(BaseModel):
@@ -107,16 +107,19 @@ class DocumentListRequest(ListRequestBase):
 
 class DocumentGetRequest(GetRequestBase):
     """Schema for document get request."""
+
     pass
 
 
 class DocumentDeleteRequest(DeleteRequestBase):
     """Schema for document delete request."""
+
     pass
 
 
 class DocumentStatsRequest(GetRequestBase):
     """Schema for document stats request."""
+
     pass
 
 

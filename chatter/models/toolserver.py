@@ -1,6 +1,6 @@
 """Tool server models for MCP server management and analytics."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
@@ -13,6 +13,7 @@ from chatter.models.base import Base, Keys
 
 class ServerStatus(str, Enum):
     """Enumeration for server status."""
+
     ENABLED = "enabled"
     DISABLED = "disabled"
     ERROR = "error"
@@ -22,6 +23,7 @@ class ServerStatus(str, Enum):
 
 class ToolStatus(str, Enum):
     """Enumeration for tool status."""
+
     ENABLED = "enabled"
     DISABLED = "disabled"
     UNAVAILABLE = "unavailable"
@@ -43,10 +45,7 @@ class ToolServer(Base):
 
     # Management fields
     status: Mapped[ServerStatus] = mapped_column(
-        SQLEnum(ServerStatus),
-        default=ServerStatus.DISABLED,
-        nullable=False,
-        index=True
+        SQLEnum(ServerStatus), default=ServerStatus.DISABLED, nullable=False, index=True
     )
     is_builtin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     auto_start: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
@@ -60,23 +59,14 @@ class ToolServer(Base):
     max_failures: Mapped[int] = mapped_column(Integer, default=3, nullable=False)
 
     # Metadata
-    created_by: Mapped[str | None] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=True,
-        index=True
-    )
+    created_by: Mapped[str | None] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=True, index=True)
 
     # Relationships
     tools: Mapped[list["ServerTool"]] = relationship(
-        "ServerTool",
-        back_populates="server",
-        cascade="all, delete-orphan"
+        "ServerTool", back_populates="server", cascade="all, delete-orphan"
     )
     usage_records: Mapped[list["ToolUsage"]] = relationship(
-        "ToolUsage",
-        back_populates="server",
-        cascade="all, delete-orphan"
+        "ToolUsage", back_populates="server", cascade="all, delete-orphan"
     )
 
 
@@ -84,12 +74,7 @@ class ServerTool(Base):
     """Individual tool model for tools provided by servers."""
 
     # Foreign keys
-    server_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey("tool_servers.id"),
-        nullable=False,
-        index=True
-    )
+    server_id: Mapped[str] = mapped_column(String(12), ForeignKey("tool_servers.id"), nullable=False, index=True)
 
     # Tool identification
     name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
@@ -101,10 +86,7 @@ class ServerTool(Base):
 
     # Management fields
     status: Mapped[ToolStatus] = mapped_column(
-        SQLEnum(ToolStatus),
-        default=ToolStatus.ENABLED,
-        nullable=False,
-        index=True
+        SQLEnum(ToolStatus), default=ToolStatus.ENABLED, nullable=False, index=True
     )
     is_available: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     bypass_when_unavailable: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
@@ -119,44 +101,22 @@ class ServerTool(Base):
     # Relationships
     server: Mapped["ToolServer"] = relationship("ToolServer", back_populates="tools")
     usage_records: Mapped[list["ToolUsage"]] = relationship(
-        "ToolUsage",
-        back_populates="tool",
-        cascade="all, delete-orphan"
+        "ToolUsage", back_populates="tool", cascade="all, delete-orphan"
     )
 
     # Constraints
-    __table_args__ = (
-        UniqueConstraint('server_id', 'name', name='uix_server_tool_name'),
-    )
+    __table_args__ = (UniqueConstraint('server_id', 'name', name='uix_server_tool_name'),)
 
 
 class ToolUsage(Base):
     """Tool usage tracking model for analytics."""
 
     # Foreign keys
-    server_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.TOOL_SERVERS),
-        nullable=False,
-        index=True
-    )
-    tool_id: Mapped[str] = mapped_column(
-        String(12),
-        ForeignKey(Keys.SERVER_TOOLS),
-        nullable=False,
-        index=True
-    )
-    user_id: Mapped[str | None] = mapped_column(
-        String(12),
-        ForeignKey(Keys.USERS),
-        nullable=True,
-        index=True
-    )
+    server_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.TOOL_SERVERS), nullable=False, index=True)
+    tool_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.SERVER_TOOLS), nullable=False, index=True)
+    user_id: Mapped[str | None] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=True, index=True)
     conversation_id: Mapped[str | None] = mapped_column(
-        String(12),
-        ForeignKey(Keys.CONVERSATIONS),
-        nullable=True,
-        index=True
+        String(12), ForeignKey(Keys.CONVERSATIONS), nullable=True, index=True
     )
 
     # Usage details
@@ -171,10 +131,7 @@ class ToolUsage(Base):
 
     # Timing
     called_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(datetime.UTC),
-        nullable=False,
-        index=True
+        DateTime(timezone=True), default=lambda: datetime.now(UTC), nullable=False, index=True
     )
 
     # Relationships

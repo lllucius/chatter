@@ -7,7 +7,7 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 import yaml
 from fastapi.openapi.utils import get_openapi
@@ -21,13 +21,13 @@ os.environ.setdefault('DATABASE_URL', 'sqlite+aiosqlite:///test.db')
 os.environ.setdefault('ENVIRONMENT', 'development')
 os.environ.setdefault('OPENAI_API_KEY', 'fake-key-for-testing')
 
-from chatter.main import app
-from chatter.config import settings
+from chatter.config import settings  # noqa: E402
+from chatter.main import app  # noqa: E402
 
 
-def generate_openapi_spec() -> Dict[str, Any]:
+def generate_openapi_spec() -> dict[str, Any]:
     """Generate OpenAPI specification from FastAPI app."""
-    
+
     # Generate the OpenAPI spec with enhanced metadata
     openapi_spec = get_openapi(
         title=settings.api_title,
@@ -35,7 +35,7 @@ def generate_openapi_spec() -> Dict[str, Any]:
         description=f"""
 # {settings.api_description}
 
-A comprehensive Python-based backend API platform for building advanced AI chatbots, 
+A comprehensive Python-based backend API platform for building advanced AI chatbots,
 implemented with FastAPI, LangChain, LangGraph, Postgres, PGVector, and SQLAlchemy.
 
 ## Features
@@ -90,72 +90,46 @@ A Python SDK is available for easy integration. See the SDK documentation for de
 - Documentation: https://github.com/lllucius/chatter#readme
 - Issues: https://github.com/lllucius/chatter/issues
         """.strip(),
-        routes=app.routes
+        routes=app.routes,
     )
-    
+
     # Add additional metadata manually
     openapi_spec["servers"] = [
         {"url": "http://localhost:8000", "description": "Development server"},
         {"url": "https://api.chatter.ai", "description": "Production server"},
     ]
-    
+
     openapi_spec["info"]["contact"] = {
         "name": "Chatter API Support",
         "url": "https://github.com/lllucius/chatter",
-        "email": "support@chatter.ai"
+        "email": "support@chatter.ai",
     }
-    
-    openapi_spec["info"]["license"] = {
-        "name": "MIT",
-        "url": "https://github.com/lllucius/chatter/blob/main/LICENSE"
-    }
-    
+
+    openapi_spec["info"]["license"] = {"name": "MIT", "url": "https://github.com/lllucius/chatter/blob/main/LICENSE"}
+
     openapi_spec["externalDocs"] = {
         "description": "Chatter Documentation",
-        "url": "https://github.com/lllucius/chatter#readme"
+        "url": "https://github.com/lllucius/chatter#readme",
     }
-    
+
     # Add custom extensions
-    openapi_spec["x-logo"] = {
-        "url": "https://github.com/lllucius/chatter/raw/main/docs/logo.png"
-    }
-    
+    openapi_spec["x-logo"] = {"url": "https://github.com/lllucius/chatter/raw/main/docs/logo.png"}
+
     # Add API categories/tags descriptions
     openapi_spec["tags"] = [
-        {
-            "name": "Health",
-            "description": "Health check and system status endpoints"
-        },
-        {
-            "name": "Authentication", 
-            "description": "User authentication and authorization endpoints"
-        },
-        {
-            "name": "Chat",
-            "description": "Core chat and conversation endpoints with LLM integration"
-        },
-        {
-            "name": "Documents",
-            "description": "Document management and knowledge base endpoints"
-        },
-        {
-            "name": "Profiles",
-            "description": "LLM profile and prompt management endpoints"
-        },
-        {
-            "name": "Analytics",
-            "description": "Usage analytics and reporting endpoints"
-        },
-        {
-            "name": "Tool Servers",
-            "description": "MCP tool server management endpoints"
-        }
+        {"name": "Health", "description": "Health check and system status endpoints"},
+        {"name": "Authentication", "description": "User authentication and authorization endpoints"},
+        {"name": "Chat", "description": "Core chat and conversation endpoints with LLM integration"},
+        {"name": "Documents", "description": "Document management and knowledge base endpoints"},
+        {"name": "Profiles", "description": "LLM profile and prompt management endpoints"},
+        {"name": "Analytics", "description": "Usage analytics and reporting endpoints"},
+        {"name": "Tool Servers", "description": "MCP tool server management endpoints"},
     ]
-    
+
     return openapi_spec
 
 
-def export_openapi_json(spec: Dict[str, Any], output_path: Path) -> None:
+def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
     """Export OpenAPI spec to JSON format."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w', encoding='utf-8') as f:
@@ -163,7 +137,7 @@ def export_openapi_json(spec: Dict[str, Any], output_path: Path) -> None:
     print(f"✅ Exported OpenAPI JSON to: {output_path}")
 
 
-def export_openapi_yaml(spec: Dict[str, Any], output_path: Path) -> None:
+def export_openapi_yaml(spec: dict[str, Any], output_path: Path) -> None:
     """Export OpenAPI spec to YAML format."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, 'w', encoding='utf-8') as f:
@@ -174,27 +148,27 @@ def export_openapi_yaml(spec: Dict[str, Any], output_path: Path) -> None:
 def main():
     """Main function to generate OpenAPI documentation."""
     print("🚀 Generating OpenAPI documentation...")
-    
+
     # Create output directory
     output_dir = project_root / "docs" / "api"
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Generate OpenAPI spec
     spec = generate_openapi_spec()
-    
+
     # Export in different formats
     export_openapi_json(spec, output_dir / "openapi.json")
     export_openapi_yaml(spec, output_dir / "openapi.yaml")
-    
+
     # Also create a versioned copy
     version = spec.get("info", {}).get("version", "unknown")
     export_openapi_json(spec, output_dir / f"openapi-v{version}.json")
     export_openapi_yaml(spec, output_dir / f"openapi-v{version}.yaml")
-    
-    print(f"📚 OpenAPI documentation generated successfully!")
+
+    print("📚 OpenAPI documentation generated successfully!")
     print(f"📁 Output directory: {output_dir}")
-    print(f"🔗 Formats available: JSON, YAML")
-    print(f"📊 Total endpoints: {len([path for path in spec.get('paths', {}).keys()])}")
+    print("🔗 Formats available: JSON, YAML")
+    print(f"📊 Total endpoints: {len(list(spec.get('paths', {}).keys()))}")
     print(f"🏷️  Total schemas: {len(spec.get('components', {}).get('schemas', {}))}")
 
 

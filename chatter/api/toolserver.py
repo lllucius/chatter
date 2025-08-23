@@ -21,15 +21,13 @@ from chatter.schemas.toolserver import (
 from chatter.services.toolserver import ToolServerService, ToolServerServiceError
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
+from chatter.utils.problem import BadRequestProblem, InternalServerProblem, NotFoundProblem, ProblemException
 
 logger = get_logger(__name__)
 router = APIRouter()
 
 
-async def get_tool_server_service(
-    session: AsyncSession = Depends(get_session)
-) -> ToolServerService:
+async def get_tool_server_service(session: AsyncSession = Depends(get_session)) -> ToolServerService:
     """Get tool server service instance.
 
     Args:
@@ -43,11 +41,12 @@ async def get_tool_server_service(
 
 # Server CRUD Operations
 
+
 @router.post("/servers", response_model=ToolServerResponse, status_code=status.HTTP_201_CREATED)
 async def create_tool_server(
     server_data: ToolServerCreate,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> ToolServerResponse:
     """Create a new tool server.
 
@@ -62,12 +61,10 @@ async def create_tool_server(
     try:
         return await service.create_server(server_data, current_user.id)
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to create tool server", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to create tool server"
-        )
+        raise InternalServerProblem(detail="Failed to create tool server") from None
 
 
 @router.get("/servers", response_model=list[ToolServerResponse])
@@ -75,7 +72,7 @@ async def list_tool_servers(
     status_filter: ServerStatus | None = Query(None, alias="status"),
     include_builtin: bool = Query(True, description="Include built-in servers"),
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> list[ToolServerResponse]:
     """List tool servers with optional filtering.
 
@@ -89,22 +86,17 @@ async def list_tool_servers(
         List of server responses
     """
     try:
-        return await service.list_servers(
-            status=status_filter,
-            include_builtin=include_builtin
-        )
+        return await service.list_servers(status=status_filter, include_builtin=include_builtin)
     except Exception as e:
         logger.error("Failed to list tool servers", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to list tool servers"
-        )
+        raise InternalServerProblem(detail="Failed to list tool servers") from None
 
 
 @router.get("/servers/{server_id}", response_model=ToolServerResponse)
 async def get_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> ToolServerResponse:
     """Get a tool server by ID.
 
@@ -118,10 +110,7 @@ async def get_tool_server(
     """
     server = await service.get_server(server_id)
     if not server:
-        raise NotFoundProblem(
-            detail="Tool server not found",
-            resource_type="tool_server"
-        )
+        raise NotFoundProblem(detail="Tool server not found", resource_type="tool_server") from None
     return server
 
 
@@ -130,7 +119,7 @@ async def update_tool_server(
     server_id: str,
     update_data: ToolServerUpdate,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> ToolServerResponse:
     """Update a tool server.
 
@@ -146,25 +135,20 @@ async def update_tool_server(
     try:
         server = await service.update_server(server_id, update_data)
         if not server:
-            raise NotFoundProblem(
-            detail="Tool server not found",
-            resource_type="tool_server"
-        )
+            raise NotFoundProblem(detail="Tool server not found", resource_type="tool_server") from None
         return server
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to update tool server", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to update tool server"
-        )
+        raise InternalServerProblem(detail="Failed to update tool server") from None
 
 
 @router.delete("/servers/{server_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> None:
     """Delete a tool server.
 
@@ -176,26 +160,22 @@ async def delete_tool_server(
     try:
         success = await service.delete_server(server_id)
         if not success:
-            raise NotFoundProblem(
-            detail="Tool server not found",
-            resource_type="tool_server"
-        )
+            raise NotFoundProblem(detail="Tool server not found", resource_type="tool_server") from None
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to delete tool server", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to delete tool server"
-        )
+        raise InternalServerProblem(detail="Failed to delete tool server") from None
 
 
 # Server Control Operations
+
 
 @router.post("/servers/{server_id}/start")
 async def start_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> dict[str, Any]:
     """Start a tool server.
 
@@ -209,24 +189,19 @@ async def start_tool_server(
     """
     try:
         success = await service.start_server(server_id)
-        return {
-            "success": success,
-            "message": "Server started successfully" if success else "Failed to start server"
-        }
+        return {"success": success, "message": "Server started successfully" if success else "Failed to start server"}
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to start tool server", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to start tool server"
-        )
+        raise InternalServerProblem(detail="Failed to start tool server") from None
 
 
 @router.post("/servers/{server_id}/stop")
 async def stop_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> dict[str, Any]:
     """Stop a tool server.
 
@@ -240,24 +215,19 @@ async def stop_tool_server(
     """
     try:
         success = await service.stop_server(server_id)
-        return {
-            "success": success,
-            "message": "Server stopped successfully" if success else "Failed to stop server"
-        }
+        return {"success": success, "message": "Server stopped successfully" if success else "Failed to stop server"}
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to stop tool server", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to stop tool server"
-        )
+        raise InternalServerProblem(detail="Failed to stop tool server") from None
 
 
 @router.post("/servers/{server_id}/restart")
 async def restart_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> dict[str, Any]:
     """Restart a tool server.
 
@@ -273,22 +243,20 @@ async def restart_tool_server(
         success = await service.restart_server(server_id)
         return {
             "success": success,
-            "message": "Server restarted successfully" if success else "Failed to restart server"
+            "message": "Server restarted successfully" if success else "Failed to restart server",
         }
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to restart tool server", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to restart tool server"
-        )
+        raise InternalServerProblem(detail="Failed to restart tool server") from None
 
 
 @router.post("/servers/{server_id}/enable")
 async def enable_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> dict[str, Any]:
     """Enable a tool server.
 
@@ -302,24 +270,19 @@ async def enable_tool_server(
     """
     try:
         success = await service.enable_server(server_id)
-        return {
-            "success": success,
-            "message": "Server enabled successfully" if success else "Failed to enable server"
-        }
+        return {"success": success, "message": "Server enabled successfully" if success else "Failed to enable server"}
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to enable tool server", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to enable tool server"
-        )
+        raise InternalServerProblem(detail="Failed to enable tool server") from None
 
 
 @router.post("/servers/{server_id}/disable")
 async def disable_tool_server(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> dict[str, Any]:
     """Disable a tool server.
 
@@ -335,24 +298,23 @@ async def disable_tool_server(
         success = await service.disable_server(server_id)
         return {
             "success": success,
-            "message": "Server disabled successfully" if success else "Failed to disable server"
+            "message": "Server disabled successfully" if success else "Failed to disable server",
         }
     except ToolServerServiceError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to disable tool server", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to disable tool server"
-        )
+        raise InternalServerProblem(detail="Failed to disable tool server") from None
 
 
 # Tool Management
+
 
 @router.get("/servers/{server_id}/tools", response_model=list[ServerToolResponse])
 async def get_server_tools(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> list[ServerToolResponse]:
     """Get tools for a specific server.
 
@@ -368,16 +330,14 @@ async def get_server_tools(
         return await service.get_server_tools(server_id)
     except Exception as e:
         logger.error("Failed to get server tools", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get server tools"
-        )
+        raise InternalServerProblem(detail="Failed to get server tools") from None
 
 
 @router.post("/tools/{tool_id}/enable")
 async def enable_tool(
     tool_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> dict[str, Any]:
     """Enable a specific tool.
 
@@ -391,22 +351,17 @@ async def enable_tool(
     """
     try:
         success = await service.enable_tool(tool_id)
-        return {
-            "success": success,
-            "message": "Tool enabled successfully" if success else "Tool not found"
-        }
+        return {"success": success, "message": "Tool enabled successfully" if success else "Tool not found"}
     except Exception as e:
         logger.error("Failed to enable tool", tool_id=tool_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to enable tool"
-        )
+        raise InternalServerProblem(detail="Failed to enable tool") from None
 
 
 @router.post("/tools/{tool_id}/disable")
 async def disable_tool(
     tool_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> dict[str, Any]:
     """Disable a specific tool.
 
@@ -420,24 +375,20 @@ async def disable_tool(
     """
     try:
         success = await service.disable_tool(tool_id)
-        return {
-            "success": success,
-            "message": "Tool disabled successfully" if success else "Tool not found"
-        }
+        return {"success": success, "message": "Tool disabled successfully" if success else "Tool not found"}
     except Exception as e:
         logger.error("Failed to disable tool", tool_id=tool_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to disable tool"
-        )
+        raise InternalServerProblem(detail="Failed to disable tool") from None
 
 
 # Analytics and Health
+
 
 @router.get("/servers/{server_id}/metrics", response_model=ToolServerMetrics)
 async def get_server_metrics(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> ToolServerMetrics:
     """Get analytics for a specific server.
 
@@ -452,25 +403,20 @@ async def get_server_metrics(
     try:
         metrics = await service.get_server_analytics(server_id)
         if not metrics:
-            raise NotFoundProblem(
-            detail="Server not found",
-            resource_type="tool_server"
-        )
+            raise NotFoundProblem(detail="Server not found", resource_type="tool_server") from None
         return metrics
     except ProblemException:
         raise
     except Exception as e:
         logger.error("Failed to get server metrics", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get server metrics"
-        )
+        raise InternalServerProblem(detail="Failed to get server metrics") from None
 
 
 @router.get("/servers/{server_id}/health", response_model=ToolServerHealthCheck)
 async def check_server_health(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> ToolServerHealthCheck:
     """Perform health check on a server.
 
@@ -485,24 +431,20 @@ async def check_server_health(
     try:
         return await service.health_check_server(server_id)
     except ToolServerServiceError as e:
-        raise NotFoundProblem(
-            detail=str(e),
-            resource_type="tool_server"
-        )
+        raise NotFoundProblem(detail=str(e), resource_type="tool_server") from None
     except Exception as e:
         logger.error("Failed to check server health", server_id=server_id, error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to check server health"
-        )
+        raise InternalServerProblem(detail="Failed to check server health") from None
 
 
 # Bulk Operations
+
 
 @router.post("/servers/bulk", response_model=BulkOperationResult)
 async def bulk_server_operation(
     operation_data: BulkToolServerOperation,
     current_user: User = Depends(get_current_user),
-    service: ToolServerService = Depends(get_tool_server_service)
+    service: ToolServerService = Depends(get_tool_server_service),
 ) -> BulkOperationResult:
     """Perform bulk operations on multiple servers.
 
@@ -534,43 +476,37 @@ async def bulk_server_operation(
                 elif operation_data.operation == "disable":
                     success = await service.disable_server(server_id)
                 else:
-                    raise ValueError(f"Unknown operation: {operation_data.operation}")
+                    raise ValueError(f"Unknown operation: {operation_data.operation}") from None
 
                 if success:
                     successful += 1
-                    results.append({
-                        "server_id": server_id,
-                        "success": True,
-                        "message": f"{operation_data.operation.title()} successful"
-                    })
+                    results.append(
+                        {
+                            "server_id": server_id,
+                            "success": True,
+                            "message": f"{operation_data.operation.title()} successful",
+                        }
+                    )
                 else:
                     failed += 1
-                    results.append({
-                        "server_id": server_id,
-                        "success": False,
-                        "message": f"{operation_data.operation.title()} failed"
-                    })
+                    results.append(
+                        {
+                            "server_id": server_id,
+                            "success": False,
+                            "message": f"{operation_data.operation.title()} failed",
+                        }
+                    )
 
             except Exception as e:
                 failed += 1
                 error_msg = f"Server {server_id}: {str(e)}"
                 errors.append(error_msg)
-                results.append({
-                    "server_id": server_id,
-                    "success": False,
-                    "message": str(e)
-                })
+                results.append({"server_id": server_id, "success": False, "message": str(e)})
 
         return BulkOperationResult(
-            total_requested=total_requested,
-            successful=successful,
-            failed=failed,
-            results=results,
-            errors=errors
+            total_requested=total_requested, successful=successful, failed=failed, results=results, errors=errors
         )
 
     except Exception as e:
         logger.error("Failed to perform bulk server operation", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to perform bulk server operation"
-        )
+        raise InternalServerProblem(detail="Failed to perform bulk server operation") from None

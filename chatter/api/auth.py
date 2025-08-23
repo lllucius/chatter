@@ -40,8 +40,7 @@ async def get_auth_service(session: AsyncSession = Depends(get_session)) -> Auth
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    auth_service: AuthService = Depends(get_auth_service)
+    credentials: HTTPAuthorizationCredentials = Depends(security), auth_service: AuthService = Depends(get_auth_service)
 ):
     """Get current authenticated user.
 
@@ -56,10 +55,7 @@ async def get_current_user(
 
 
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-async def register(
-    user_data: UserCreate,
-    auth_service: AuthService = Depends(get_auth_service)
-) -> TokenResponse:
+async def register(user_data: UserCreate, auth_service: AuthService = Depends(get_auth_service)) -> TokenResponse:
     """Register a new user.
 
     Args:
@@ -72,17 +68,11 @@ async def register(
     user = await auth_service.create_user(user_data)
     tokens = auth_service.create_tokens(user)
 
-    return TokenResponse(
-        **tokens,
-        user=UserResponse.model_validate(user)
-    )
+    return TokenResponse(**tokens, user=UserResponse.model_validate(user))
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(
-    user_data: UserLogin,
-    auth_service: AuthService = Depends(get_auth_service)
-) -> TokenResponse:
+async def login(user_data: UserLogin, auth_service: AuthService = Depends(get_auth_service)) -> TokenResponse:
     """Authenticate user and return tokens.
 
     Args:
@@ -94,22 +84,16 @@ async def login(
     """
     user = await auth_service.authenticate_user(user_data.email, user_data.password)
     if not user:
-        raise AuthenticationProblem(
-            detail="Invalid email or password"
-        )
+        raise AuthenticationProblem(detail="Invalid email or password") from None
 
     tokens = auth_service.create_tokens(user)
 
-    return TokenResponse(
-        **tokens,
-        user=UserResponse.model_validate(user)
-    )
+    return TokenResponse(**tokens, user=UserResponse.model_validate(user))
 
 
 @router.post("/refresh", response_model=dict[str, Any])
 async def refresh_token(
-    token_data: TokenRefresh,
-    auth_service: AuthService = Depends(get_auth_service)
+    token_data: TokenRefresh, auth_service: AuthService = Depends(get_auth_service)
 ) -> dict[str, Any]:
     """Refresh access token.
 
@@ -124,7 +108,7 @@ async def refresh_token(
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user = Depends(get_current_user)) -> UserResponse:
+async def get_current_user_info(current_user=Depends(get_current_user)) -> UserResponse:
     """Get current user information.
 
     Args:
@@ -138,9 +122,7 @@ async def get_current_user_info(current_user = Depends(get_current_user)) -> Use
 
 @router.put("/me", response_model=UserResponse)
 async def update_profile(
-    user_data: UserUpdate,
-    current_user = Depends(get_current_user),
-    auth_service: AuthService = Depends(get_auth_service)
+    user_data: UserUpdate, current_user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
 ) -> UserResponse:
     """Update current user profile.
 
@@ -159,8 +141,8 @@ async def update_profile(
 @router.post("/change-password")
 async def change_password(
     password_data: PasswordChange,
-    current_user = Depends(get_current_user),
-    auth_service: AuthService = Depends(get_auth_service)
+    current_user=Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> dict[str, str]:
     """Change user password.
 
@@ -172,11 +154,7 @@ async def change_password(
     Returns:
         Success message
     """
-    await auth_service.change_password(
-        current_user.id,
-        password_data.current_password,
-        password_data.new_password
-    )
+    await auth_service.change_password(current_user.id, password_data.current_password, password_data.new_password)
 
     return {"message": "Password changed successfully"}
 
@@ -184,8 +162,8 @@ async def change_password(
 @router.post("/api-key", response_model=APIKeyResponse)
 async def create_api_key(
     key_data: APIKeyCreate,
-    current_user = Depends(get_current_user),
-    auth_service: AuthService = Depends(get_auth_service)
+    current_user=Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> APIKeyResponse:
     """Create API key for current user.
 
@@ -200,17 +178,13 @@ async def create_api_key(
     api_key = await auth_service.create_api_key(current_user.id, key_data.name)
 
     return APIKeyResponse(
-        id=current_user.id,
-        api_key=api_key,
-        api_key_name=key_data.name,
-        created_at=current_user.updated_at
+        id=current_user.id, api_key=api_key, api_key_name=key_data.name, created_at=current_user.updated_at
     )
 
 
 @router.delete("/api-key")
 async def revoke_api_key(
-    current_user = Depends(get_current_user),
-    auth_service: AuthService = Depends(get_auth_service)
+    current_user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
 ) -> dict[str, str]:
     """Revoke current user's API key.
 
@@ -227,8 +201,7 @@ async def revoke_api_key(
 
 @router.delete("/account")
 async def deactivate_account(
-    current_user = Depends(get_current_user),
-    auth_service: AuthService = Depends(get_auth_service)
+    current_user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
 ) -> dict[str, str]:
     """Deactivate current user account.
 

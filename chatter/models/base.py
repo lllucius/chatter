@@ -47,9 +47,7 @@ class Base(DeclarativeBase):
     _lock: threading.Lock = threading.Lock()
     _last_timestamp: int = 0
     _counter: int = 0
-    _server_hash: int = int(
-        hashlib.sha1(socket.gethostname().encode()).hexdigest(), 16
-    ) % (62**2)
+    _server_hash: int = int(hashlib.sha1(socket.gethostname().encode()).hexdigest(), 16) % (62**2)
 
     @classmethod
     def _encode_base62(cls, num: int, length: int = 12) -> str:
@@ -122,4 +120,3 @@ class Keys(str, Enum):
     DOCUMENT_STATS = "document_stats.id"
     PROMPT_STATS = "prompt_stats.id"
     PROFILE_STATS = "profile_stats.id"
-

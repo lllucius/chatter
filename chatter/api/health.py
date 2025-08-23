@@ -27,9 +27,7 @@ async def health_check_endpoint() -> dict[str, Any]:
 
 
 @router.get("/readyz")
-async def readiness_check(
-    session: AsyncSession = Depends(get_session)
-) -> dict[str, Any]:
+async def readiness_check(session: AsyncSession = Depends(get_session)) -> dict[str, Any]:
     """Readiness check endpoint with database connectivity.
 
     Args:
@@ -46,10 +44,7 @@ async def readiness_check(
     }
 
     # Determine overall status
-    all_healthy = all(
-        check.get("status") == "healthy"
-        for check in checks.values()
-    )
+    all_healthy = all(check.get("status") == "healthy" for check in checks.values())
 
     return {
         "status": "ready" if all_healthy else "not_ready",

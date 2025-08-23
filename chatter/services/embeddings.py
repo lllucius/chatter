@@ -9,6 +9,7 @@ from langchain_openai import OpenAIEmbeddings
 
 try:
     from langchain_anthropic import AnthropicEmbeddings
+
     ANTHROPIC_EMBEDDINGS_AVAILABLE = True
 except ImportError:
     AnthropicEmbeddings = None
@@ -16,6 +17,7 @@ except ImportError:
 
 try:
     from langchain_google_genai import GoogleGenerativeAIEmbeddings
+
     GOOGLE_AVAILABLE = True
 except ImportError:
     GoogleGenerativeAIEmbeddings = None
@@ -23,6 +25,7 @@ except ImportError:
 
 try:
     from langchain_cohere import CohereEmbeddings
+
     COHERE_AVAILABLE = True
 except ImportError:
     CohereEmbeddings = None
@@ -74,8 +77,7 @@ class EmbeddingService:
                     google_api_key=settings.google_api_key,
                 )
                 logger.info(
-                    "Google Generative AI embedding provider initialized",
-                    model=settings.google_embedding_model
+                    "Google Generative AI embedding provider initialized", model=settings.google_embedding_model
                 )
             except Exception as e:
                 logger.warning("Failed to initialize Google Generative AI embedding provider", error=str(e))
@@ -151,28 +153,32 @@ class EmbeddingService:
 
         # Add provider-specific information
         if provider_name == "openai":
-            info.update({
-                "model": settings.openai_embedding_model,
-                "dimensions": settings.openai_embedding_dimensions,
-                "chunk_size": settings.openai_embedding_chunk_size,
-            })
+            info.update(
+                {
+                    "model": settings.openai_embedding_model,
+                    "dimensions": settings.openai_embedding_dimensions,
+                    "chunk_size": settings.openai_embedding_chunk_size,
+                }
+            )
         elif provider_name == "google":
-            info.update({
-                "model": settings.google_embedding_model,
-                "dimensions": settings.google_embedding_dimensions,
-            })
+            info.update(
+                {
+                    "model": settings.google_embedding_model,
+                    "dimensions": settings.google_embedding_dimensions,
+                }
+            )
         elif provider_name == "cohere":
-            info.update({
-                "model": settings.cohere_embedding_model,
-                "dimensions": settings.cohere_embedding_dimensions,
-            })
+            info.update(
+                {
+                    "model": settings.cohere_embedding_model,
+                    "dimensions": settings.cohere_embedding_dimensions,
+                }
+            )
 
         return info
 
     async def generate_embedding(
-        self,
-        text: str,
-        provider_name: str | None = None
+        self, text: str, provider_name: str | None = None
     ) -> tuple[list[float], dict[str, Any]]:
         """Generate embedding for text.
 
@@ -192,11 +198,11 @@ class EmbeddingService:
         if provider_name:
             provider = self.get_provider(provider_name)
             if not provider:
-                raise EmbeddingError(f"Provider '{provider_name}' not available")
+                raise EmbeddingError(f"Provider '{provider_name}' not available") from None
         else:
             provider = self.get_default_provider()
             if not provider:
-                raise EmbeddingError("No embedding providers available")
+                raise EmbeddingError("No embedding providers available") from None
             provider_name = self._get_provider_name(provider)
 
         try:
@@ -218,25 +224,17 @@ class EmbeddingService:
                 provider=provider_name,
                 text_length=len(text),
                 dimensions=len(embedding),
-                response_time_ms=usage_info["response_time_ms"]
+                response_time_ms=usage_info["response_time_ms"],
             )
 
             return embedding, usage_info
 
         except Exception as e:
-            logger.error(
-                "Failed to generate embedding",
-                provider=provider_name,
-                text_length=len(text),
-                error=str(e)
-            )
-            raise EmbeddingError(f"Failed to generate embedding: {str(e)}")
+            logger.error("Failed to generate embedding", provider=provider_name, text_length=len(text), error=str(e))
+            raise EmbeddingError(f"Failed to generate embedding: {str(e)}") from e
 
     async def generate_embeddings(
-        self,
-        texts: list[str],
-        provider_name: str | None = None,
-        batch_size: int = 100
+        self, texts: list[str], provider_name: str | None = None, batch_size: int = 100
     ) -> tuple[list[list[float]], dict[str, Any]]:
         """Generate embeddings for multiple texts.
 
@@ -257,11 +255,11 @@ class EmbeddingService:
         if provider_name:
             provider = self.get_provider(provider_name)
             if not provider:
-                raise EmbeddingError(f"Provider '{provider_name}' not available")
+                raise EmbeddingError(f"Provider '{provider_name}' not available") from None
         else:
             provider = self.get_default_provider()
             if not provider:
-                raise EmbeddingError("No embedding providers available")
+                raise EmbeddingError("No embedding providers available") from None
             provider_name = self._get_provider_name(provider)
 
         try:
@@ -270,7 +268,7 @@ class EmbeddingService:
             total_chars = 0
 
             for i in range(0, len(texts), batch_size):
-                batch = texts[i:i + batch_size]
+                batch = texts[i : i + batch_size]
                 batch_embeddings = await provider.aembed_documents(batch)
                 all_embeddings.extend(batch_embeddings)
                 total_chars += sum(len(text) for text in batch)
@@ -292,19 +290,14 @@ class EmbeddingService:
                 text_count=len(texts),
                 total_characters=total_chars,
                 dimensions=usage_info["embedding_dimensions"],
-                response_time_ms=usage_info["response_time_ms"]
+                response_time_ms=usage_info["response_time_ms"],
             )
 
             return all_embeddings, usage_info
 
         except Exception as e:
-            logger.error(
-                "Failed to generate embeddings",
-                provider=provider_name,
-                text_count=len(texts),
-                error=str(e)
-            )
-            raise EmbeddingError(f"Failed to generate embeddings: {str(e)}")
+            logger.error("Failed to generate embeddings", provider=provider_name, text_count=len(texts), error=str(e))
+            raise EmbeddingError(f"Failed to generate embeddings: {str(e)}") from e
 
     def _get_provider_name(self, provider: Embeddings) -> str:
         """Get provider name from provider instance."""
@@ -331,4 +324,5 @@ class EmbeddingService:
 
 class EmbeddingError(Exception):
     """Embedding generation error."""
+
     pass

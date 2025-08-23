@@ -7,8 +7,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
-    from pgvector.sqlalchemy import Vector
-    from sqlalchemy import text
+    from pgvector.sqlalchemy import Vector  # noqa: F401
+    from sqlalchemy import text  # noqa: F401
+
     PGVECTOR_AVAILABLE = True
 except ImportError:
     PGVECTOR_AVAILABLE = False
@@ -36,10 +37,7 @@ class VectorStoreService:
         self.embedding_dimension = settings.pgvector_embedding_dimension
 
     async def store_embedding(
-        self,
-        chunk_id: str,
-        embedding: list[float],
-        metadata: dict[str, Any] | None = None
+        self, chunk_id: str, embedding: list[float], metadata: dict[str, Any] | None = None
     ) -> bool:
         """Store embedding for a document chunk.
 
@@ -53,9 +51,7 @@ class VectorStoreService:
         """
         try:
             # Get the chunk
-            result = await self.session.execute(
-                select(DocumentChunk).where(DocumentChunk.id == chunk_id)
-            )
+            result = await self.session.execute(select(DocumentChunk).where(DocumentChunk.id == chunk_id))
             chunk = result.scalar_one_or_none()
 
             if not chunk:
@@ -74,10 +70,7 @@ class VectorStoreService:
             return False
 
     async def _store_pgvector_embedding(
-        self,
-        chunk: DocumentChunk,
-        embedding: list[float],
-        metadata: dict[str, Any] | None = None
+        self, chunk: DocumentChunk, embedding: list[float], metadata: dict[str, Any] | None = None
     ) -> bool:
         """Store embedding using PGVector.
 
@@ -92,11 +85,7 @@ class VectorStoreService:
         try:
             # Validate embedding dimension
             if len(embedding) != self.embedding_dimension:
-                logger.warning(
-                    "Embedding dimension mismatch",
-                    expected=self.embedding_dimension,
-                    actual=len(embedding)
-                )
+                logger.warning("Embedding dimension mismatch", expected=self.embedding_dimension, actual=len(embedding))
 
             # Update chunk with embedding
             chunk.embedding = embedding
@@ -114,10 +103,7 @@ class VectorStoreService:
             return False
 
     async def _store_json_embedding(
-        self,
-        chunk: DocumentChunk,
-        embedding: list[float],
-        metadata: dict[str, Any] | None = None
+        self, chunk: DocumentChunk, embedding: list[float], metadata: dict[str, Any] | None = None
     ) -> bool:
         """Store embedding as JSON string (fallback).
 
@@ -151,7 +137,7 @@ class VectorStoreService:
         limit: int = 10,
         score_threshold: float = 0.5,
         document_ids: list[str] | None = None,
-        metadata_filter: dict[str, Any] | None = None
+        metadata_filter: dict[str, Any] | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
         """Perform similarity search.
 
@@ -185,7 +171,7 @@ class VectorStoreService:
         limit: int,
         score_threshold: float,
         document_ids: list[str] | None = None,
-        metadata_filter: dict[str, Any] | None = None
+        metadata_filter: dict[str, Any] | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
         """Perform similarity search using PGVector.
 
@@ -202,11 +188,8 @@ class VectorStoreService:
         try:
             # Build query with similarity calculation
             query = select(
-                DocumentChunk,
-                (1 - DocumentChunk.embedding.cosine_distance(query_embedding)).label("similarity")
-            ).where(
-                DocumentChunk.embedding.is_not(None)
-            )
+                DocumentChunk, (1 - DocumentChunk.embedding.cosine_distance(query_embedding)).label("similarity")
+            ).where(DocumentChunk.embedding.is_not(None))
 
             # Add filters
             if document_ids:
@@ -215,16 +198,14 @@ class VectorStoreService:
             if metadata_filter:
                 # Add metadata filters (this is a simplified version)
                 for key, value in metadata_filter.items():
-                    query = query.where(
-                        DocumentChunk.extra_metadata[key].astext == str(value)
-                    )
+                    query = query.where(DocumentChunk.extra_metadata[key].astext == str(value))
 
             # Add similarity threshold and ordering
-            query = query.where(
-                (1 - DocumentChunk.embedding.cosine_distance(query_embedding)) >= score_threshold
-            ).order_by(
-                (1 - DocumentChunk.embedding.cosine_distance(query_embedding)).desc()
-            ).limit(limit)
+            query = (
+                query.where((1 - DocumentChunk.embedding.cosine_distance(query_embedding)) >= score_threshold)
+                .order_by((1 - DocumentChunk.embedding.cosine_distance(query_embedding)).desc())
+                .limit(limit)
+            )
 
             # Execute query
             result = await self.session.execute(query)
@@ -234,7 +215,7 @@ class VectorStoreService:
                 "PGVector similarity search completed",
                 results_count=len(results),
                 limit=limit,
-                threshold=score_threshold
+                threshold=score_threshold,
             )
 
             return [(chunk, float(similarity)) for chunk, similarity in results]
@@ -249,7 +230,7 @@ class VectorStoreService:
         limit: int,
         score_threshold: float,
         document_ids: list[str] | None = None,
-        metadata_filter: dict[str, Any] | None = None
+        metadata_filter: dict[str, Any] | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
         """Perform similarity search using JSON embeddings (fallback).
 
@@ -265,9 +246,7 @@ class VectorStoreService:
         """
         try:
             # Get chunks with embeddings
-            query = select(DocumentChunk).where(
-                DocumentChunk.embedding.is_not(None)
-            )
+            query = select(DocumentChunk).where(DocumentChunk.embedding.is_not(None))
 
             # Add filters
             if document_ids:
@@ -275,9 +254,7 @@ class VectorStoreService:
 
             if metadata_filter:
                 for key, value in metadata_filter.items():
-                    query = query.where(
-                        DocumentChunk.extra_metadata[key].astext == str(value)
-                    )
+                    query = query.where(DocumentChunk.extra_metadata[key].astext == str(value))
 
             result = await self.session.execute(query)
             chunks = result.scalars().all()
@@ -304,10 +281,7 @@ class VectorStoreService:
             results = results[:limit]
 
             logger.debug(
-                "JSON similarity search completed",
-                results_count=len(results),
-                limit=limit,
-                threshold=score_threshold
+                "JSON similarity search completed", results_count=len(results), limit=limit, threshold=score_threshold
             )
 
             return results
@@ -333,7 +307,7 @@ class VectorStoreService:
                 return 0.0
 
             # Calculate dot product
-            dot_product = sum(a * b for a, b in zip(vec1, vec2))
+            dot_product = sum(a * b for a, b in zip(vec1, vec2, strict=False))
 
             # Calculate magnitudes
             magnitude1 = math.sqrt(sum(a * a for a in vec1))
@@ -355,7 +329,7 @@ class VectorStoreService:
         score_threshold: float = 0.5,
         document_ids: list[str] | None = None,
         semantic_weight: float = 0.7,
-        text_weight: float = 0.3
+        text_weight: float = 0.3,
     ) -> list[tuple[DocumentChunk, float]]:
         """Perform hybrid search combining semantic and text search.
 
@@ -386,9 +360,7 @@ class VectorStoreService:
 
             # Simple text matching (can be enhanced with full-text search)
             for word in text_query_words:
-                text_query_obj = text_query_obj.where(
-                    func.lower(DocumentChunk.content).contains(word)
-                )
+                text_query_obj = text_query_obj.where(func.lower(DocumentChunk.content).contains(word))
 
             text_result = await self.session.execute(text_query_obj.limit(limit * 2))
             text_chunks = text_result.scalars().all()
@@ -398,11 +370,7 @@ class VectorStoreService:
 
             # Add semantic scores
             for chunk, score in semantic_results:
-                combined_scores[chunk.id] = {
-                    'chunk': chunk,
-                    'semantic_score': score,
-                    'text_score': 0.0
-                }
+                combined_scores[chunk.id] = {'chunk': chunk, 'semantic_score': score, 'text_score': 0.0}
 
             # Add text scores
             for chunk in text_chunks:
@@ -411,19 +379,12 @@ class VectorStoreService:
                 if chunk.id in combined_scores:
                     combined_scores[chunk.id]['text_score'] = text_score
                 else:
-                    combined_scores[chunk.id] = {
-                        'chunk': chunk,
-                        'semantic_score': 0.0,
-                        'text_score': text_score
-                    }
+                    combined_scores[chunk.id] = {'chunk': chunk, 'semantic_score': 0.0, 'text_score': text_score}
 
             # Calculate combined scores
             results = []
             for chunk_data in combined_scores.values():
-                combined_score = (
-                    semantic_weight * chunk_data['semantic_score'] +
-                    text_weight * chunk_data['text_score']
-                )
+                combined_score = semantic_weight * chunk_data['semantic_score'] + text_weight * chunk_data['text_score']
 
                 if combined_score >= score_threshold:
                     results.append((chunk_data['chunk'], combined_score))
@@ -437,7 +398,7 @@ class VectorStoreService:
                 results_count=len(results),
                 semantic_results=len(semantic_results),
                 text_results=len(text_chunks),
-                limit=limit
+                limit=limit,
             )
 
             return results
@@ -483,27 +444,20 @@ class VectorStoreService:
         """
         try:
             # Count total chunks
-            total_result = await self.session.execute(
-                select(func.count(DocumentChunk.id))
-            )
+            total_result = await self.session.execute(select(func.count(DocumentChunk.id)))
             total_chunks = total_result.scalar()
 
             # Count chunks with embeddings
             embedded_result = await self.session.execute(
-                select(func.count(DocumentChunk.id)).where(
-                    DocumentChunk.embedding.is_not(None)
-                )
+                select(func.count(DocumentChunk.id)).where(DocumentChunk.embedding.is_not(None))
             )
             embedded_chunks = embedded_result.scalar()
 
             # Get embedding models used
             models_result = await self.session.execute(
-                select(
-                    DocumentChunk.embedding_model,
-                    func.count(DocumentChunk.id)
-                ).where(
-                    DocumentChunk.embedding_model.is_not(None)
-                ).group_by(DocumentChunk.embedding_model)
+                select(DocumentChunk.embedding_model, func.count(DocumentChunk.id))
+                .where(DocumentChunk.embedding_model.is_not(None))
+                .group_by(DocumentChunk.embedding_model)
             )
             models_stats = dict(models_result.all())
 
@@ -530,4 +484,5 @@ class VectorStoreService:
 
 class VectorStoreError(Exception):
     """Vector store operation error."""
+
     pass

@@ -1,23 +1,23 @@
 """Pydantic schemas for API request/response models."""
 
-from chatter.schemas.analytics import *
-from chatter.schemas.auth import *
-from chatter.schemas.chat import *
-from chatter.schemas.common import *
-from chatter.schemas.document import *
-from chatter.schemas.profile import *
-from chatter.schemas.prompt import *
-from chatter.schemas.toolserver import *
+# Star imports are intentional for convenience re-export of all schemas
+from chatter.schemas.analytics import *  # noqa: F403
+from chatter.schemas.auth import *  # noqa: F403
+from chatter.schemas.chat import *  # noqa: F403
+from chatter.schemas.common import *  # noqa: F403
+from chatter.schemas.document import *  # noqa: F403
+from chatter.schemas.profile import *  # noqa: F403
+from chatter.schemas.prompt import *  # noqa: F403
+from chatter.schemas.toolserver import *  # noqa: F403
 
 __all__ = [
     # Common schemas
     "PaginationRequest",
-    "SortingRequest", 
+    "SortingRequest",
     "PaginatedRequest",
     "ListRequestBase",
     "GetRequestBase",
     "DeleteRequestBase",
-
     # Auth schemas
     "UserBase",
     "UserCreate",
@@ -32,7 +32,6 @@ __all__ = [
     "EmailVerification",
     "APIKeyCreate",
     "APIKeyResponse",
-
     # Chat schemas
     "MessageBase",
     "MessageCreate",
@@ -48,11 +47,10 @@ __all__ = [
     "ConversationSearchRequest",
     "ConversationSearchResponse",
     "ConversationGetRequest",
-    "ConversationDeleteRequest", 
+    "ConversationDeleteRequest",
     "ConversationMessagesRequest",
     "AvailableToolsRequest",
     "McpStatusRequest",
-
     # Document schemas
     "DocumentBase",
     "DocumentCreate",
@@ -70,7 +68,6 @@ __all__ = [
     "DocumentGetRequest",
     "DocumentDeleteRequest",
     "DocumentStatsRequest",
-
     # Profile schemas
     "ProfileBase",
     "ProfileCreate",
@@ -88,7 +85,6 @@ __all__ = [
     "ProfileDeleteRequest",
     "ProfileStatsRequest",
     "ProfileProvidersRequest",
-
     # Prompt schemas
     "PromptBase",
     "PromptCreate",
@@ -103,7 +99,6 @@ __all__ = [
     "PromptGetRequest",
     "PromptDeleteRequest",
     "PromptStatsRequest",
-
     # Analytics schemas
     "ConversationStatsResponse",
     "UsageMetricsResponse",
@@ -123,7 +118,6 @@ __all__ = [
     "SystemAnalyticsRequest",
     "DashboardRequest",
     "ToolServerAnalyticsRequest",
-
     # Tool server schemas
     "ToolServerBase",
     "ToolServerCreate",

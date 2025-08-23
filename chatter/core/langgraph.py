@@ -18,6 +18,7 @@ logger = get_logger(__name__)
 
 class ConversationState(TypedDict):
     """State for conversation workflows."""
+
     messages: Annotated[Sequence[BaseMessage], add_messages]
     user_id: str
     conversation_id: str
@@ -45,11 +46,7 @@ class LangGraphWorkflowManager:
             logger.warning("Failed to initialize checkpointer", error=str(e))
             self.checkpointer = None
 
-    def create_basic_conversation_workflow(
-        self,
-        llm: BaseChatModel,
-        system_message: str | None = None
-    ) -> Pregel:
+    def create_basic_conversation_workflow(self, llm: BaseChatModel, system_message: str | None = None) -> Pregel:
         """Create a basic conversation workflow."""
 
         async def call_model(state: ConversationState) -> dict[str, Any]:
@@ -75,19 +72,12 @@ class LangGraphWorkflowManager:
         workflow.add_edge("call_model", END)
 
         # Compile with checkpointer
-        app = workflow.compile(
-            checkpointer=self.checkpointer,
-            interrupt_before=[],
-            interrupt_after=[]
-        )
+        app = workflow.compile(checkpointer=self.checkpointer, interrupt_before=[], interrupt_after=[])
 
         return app
 
     def create_rag_conversation_workflow(
-        self,
-        llm: BaseChatModel,
-        retriever: Any,
-        system_message: str | None = None
+        self, llm: BaseChatModel, retriever: Any, system_message: str | None = None
     ) -> Pregel:
         """Create a RAG-enabled conversation workflow."""
 
@@ -152,19 +142,12 @@ class LangGraphWorkflowManager:
         workflow.add_edge("call_model", END)
 
         # Compile with checkpointer
-        app = workflow.compile(
-            checkpointer=self.checkpointer,
-            interrupt_before=[],
-            interrupt_after=[]
-        )
+        app = workflow.compile(checkpointer=self.checkpointer, interrupt_before=[], interrupt_after=[])
 
         return app
 
     def create_tool_calling_workflow(
-        self,
-        llm: BaseChatModel,
-        tools: list[Any],
-        system_message: str | None = None
+        self, llm: BaseChatModel, tools: list[Any], system_message: str | None = None
     ) -> Pregel:
         """Create a workflow with tool calling capabilities."""
 
@@ -205,16 +188,10 @@ class LangGraphWorkflowManager:
                     # Execute tool (this is a simplified version)
                     # In a real implementation, you'd have a tool registry
                     result = f"Tool {tool_name} executed with args {tool_args}"
-                    tool_results.append({
-                        "tool_call_id": tool_call["id"],
-                        "result": result
-                    })
+                    tool_results.append({"tool_call_id": tool_call["id"], "result": result})
                 except Exception as e:
                     logger.error("Tool execution failed", tool=tool_call.get("name"), error=str(e))
-                    tool_results.append({
-                        "tool_call_id": tool_call.get("id"),
-                        "result": f"Error: {str(e)}"
-                    })
+                    tool_results.append({"tool_call_id": tool_call.get("id"), "result": f"Error: {str(e)}"})
 
             return {"tool_calls": tool_results}
 
@@ -237,19 +214,12 @@ class LangGraphWorkflowManager:
         workflow.add_edge("execute_tools", "call_model")
 
         # Compile with checkpointer
-        app = workflow.compile(
-            checkpointer=self.checkpointer,
-            interrupt_before=[],
-            interrupt_after=[]
-        )
+        app = workflow.compile(checkpointer=self.checkpointer, interrupt_before=[], interrupt_after=[])
 
         return app
 
     async def run_workflow(
-        self,
-        workflow: Pregel,
-        initial_state: ConversationState,
-        thread_id: str | None = None
+        self, workflow: Pregel, initial_state: ConversationState, thread_id: str | None = None
     ) -> ConversationState:
         """Run a workflow with state management."""
         if not thread_id:
@@ -265,12 +235,7 @@ class LangGraphWorkflowManager:
             logger.error("Workflow execution failed", error=str(e), thread_id=thread_id)
             raise
 
-    async def stream_workflow(
-        self,
-        workflow: Pregel,
-        initial_state: ConversationState,
-        thread_id: str | None = None
-    ):
+    async def stream_workflow(self, workflow: Pregel, initial_state: ConversationState, thread_id: str | None = None):
         """Stream workflow execution for real-time updates."""
         if not thread_id:
             thread_id = str(uuid4())
@@ -284,11 +249,7 @@ class LangGraphWorkflowManager:
             logger.error("Workflow streaming failed", error=str(e), thread_id=thread_id)
             raise
 
-    async def get_conversation_history(
-        self,
-        workflow: Pregel,
-        thread_id: str
-    ) -> ConversationState | None:
+    async def get_conversation_history(self, workflow: Pregel, thread_id: str) -> ConversationState | None:
         """Get conversation history for a thread."""
         if not self.checkpointer:
             return None

@@ -11,26 +11,26 @@ from chatter.api.auth import get_current_user
 from chatter.core.chat import ChatError, ChatService, ConversationNotFoundError
 from chatter.models.user import User
 from chatter.schemas.chat import (
+    AvailableToolsRequest,
     ChatRequest,
     ChatResponse,
     ConversationCreate,
+    ConversationDeleteRequest,
+    ConversationGetRequest,
+    ConversationMessagesRequest,
     ConversationResponse,
     ConversationSearchRequest,
     ConversationSearchResponse,
     ConversationUpdate,
     ConversationWithMessages,
-    MessageResponse,
-    ConversationGetRequest,
-    ConversationDeleteRequest,
-    ConversationMessagesRequest,
-    AvailableToolsRequest,
     McpStatusRequest,
+    MessageResponse,
 )
 from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.services.llm import LLMService
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import BadRequestProblem, NotFoundProblem, InternalServerProblem, ProblemException
+from chatter.utils.problem import BadRequestProblem, InternalServerProblem, NotFoundProblem
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -53,7 +53,7 @@ async def get_chat_service(session: AsyncSession = Depends(get_session)) -> Chat
 async def create_conversation(
     conversation_data: ConversationCreate,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationResponse:
     """Create a new conversation.
 
@@ -66,13 +66,10 @@ async def create_conversation(
         Created conversation
     """
     try:
-        conversation = await chat_service.create_conversation(
-            current_user.id,
-            conversation_data
-        )
+        conversation = await chat_service.create_conversation(current_user.id, conversation_data)
         return ConversationResponse.model_validate(conversation)
     except ChatError as e:
-        raise BadRequestProblem(detail=str(e))
+        raise BadRequestProblem(detail=str(e)) from e
 
 
 @router.get("/conversations", response_model=ConversationSearchResponse)
@@ -81,7 +78,7 @@ async def list_conversations(
     pagination: PaginationRequest = Depends(),
     sorting: SortingRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationSearchResponse:
     """List user's conversations.
 
@@ -95,18 +92,13 @@ async def list_conversations(
     Returns:
         List of conversations with pagination
     """
-    conversations, total = await chat_service.list_conversations(
-        current_user.id,
-        request,
-        pagination,
-        sorting
-    )
+    conversations, total = await chat_service.list_conversations(current_user.id, request, pagination, sorting)
 
     return ConversationSearchResponse(
         conversations=[ConversationResponse.model_validate(c) for c in conversations],
         total=total,
         limit=pagination.limit,
-        offset=pagination.offset
+        offset=pagination.offset,
     )
 
 
@@ -115,7 +107,7 @@ async def get_conversation(
     conversation_id: str,
     request: ConversationGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationWithMessages:
     """Get conversation details with messages.
 
@@ -128,26 +120,16 @@ async def get_conversation(
     Returns:
         Conversation with messages
     """
-    conversation = await chat_service.get_conversation(
-        conversation_id,
-        current_user.id,
-        include_messages=True
-    )
+    conversation = await chat_service.get_conversation(conversation_id, current_user.id, include_messages=True)
 
     if not conversation:
-        raise NotFoundProblem(
-            detail="Conversation not found",
-            resource_type="conversation"
-        )
+        raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
 
     # Convert to response format
     conversation_response = ConversationResponse.model_validate(conversation)
     messages = [MessageResponse.model_validate(m) for m in conversation.messages]
 
-    return ConversationWithMessages(
-        **conversation_response.model_dump(),
-        messages=messages
-    )
+    return ConversationWithMessages(**conversation_response.model_dump(), messages=messages)
 
 
 @router.put("/conversations/{conversation_id}", response_model=ConversationResponse)
@@ -155,7 +137,7 @@ async def update_conversation(
     conversation_id: str,
     update_data: ConversationUpdate,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationResponse:
     """Update conversation.
 
@@ -169,17 +151,10 @@ async def update_conversation(
         Updated conversation
     """
     try:
-        conversation = await chat_service.update_conversation(
-            conversation_id,
-            current_user.id,
-            update_data
-        )
+        conversation = await chat_service.update_conversation(conversation_id, current_user.id, update_data)
         return ConversationResponse.model_validate(conversation)
     except ConversationNotFoundError:
-        raise NotFoundProblem(
-            detail="Conversation not found",
-            resource_type="conversation"
-        )
+        raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
 
 
 @router.delete("/conversations/{conversation_id}")
@@ -187,7 +162,7 @@ async def delete_conversation(
     conversation_id: str,
     request: ConversationDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> dict:
     """Delete conversation.
 
@@ -204,10 +179,7 @@ async def delete_conversation(
         await chat_service.delete_conversation(conversation_id, current_user.id)
         return {"message": "Conversation deleted successfully"}
     except ConversationNotFoundError:
-        raise NotFoundProblem(
-            detail="Conversation not found",
-            resource_type="conversation"
-        )
+        raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
 
 
 @router.get("/conversations/{conversation_id}/messages", response_model=list[MessageResponse])
@@ -215,7 +187,7 @@ async def get_conversation_messages(
     conversation_id: str,
     request: ConversationMessagesRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
     """Get conversation messages.
 
@@ -229,23 +201,17 @@ async def get_conversation_messages(
         List of messages
     """
     try:
-        messages = await chat_service.get_conversation_messages(
-            conversation_id,
-            current_user.id
-        )
+        messages = await chat_service.get_conversation_messages(conversation_id, current_user.id)
         return [MessageResponse.model_validate(m) for m in messages]
     except ConversationNotFoundError:
-        raise NotFoundProblem(
-            detail="Conversation not found",
-            resource_type="conversation"
-        )
+        raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
 
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> ChatResponse:
     """Send a chat message and get response.
 
@@ -258,32 +224,25 @@ async def chat(
         Chat response with assistant message
     """
     if chat_request.stream:
-        raise BadRequestProblem(
-            detail="Use /chat/stream for streaming responses"
-        )
+        raise BadRequestProblem(detail="Use /chat/stream for streaming responses") from None
 
     try:
-        conversation, assistant_message = await chat_service.chat(
-            current_user.id,
-            chat_request
-        )
+        conversation, assistant_message = await chat_service.chat(current_user.id, chat_request)
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation)
+            conversation=ConversationResponse.model_validate(conversation),
         )
     except (ConversationNotFoundError, ChatError) as e:
-        raise BadRequestProblem(
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e)) from None
 
 
 @router.post("/chat/stream")
 async def chat_stream(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> StreamingResponse:
     """Send a chat message and get streaming response.
 
@@ -295,16 +254,14 @@ async def chat_stream(
     Returns:
         Streaming response with chat chunks
     """
+
     async def generate_stream():
         """Generate streaming chat response chunks."""
         try:
             async for chunk in chat_service.chat_streaming(current_user.id, chat_request):
                 yield f"data: {json.dumps(chunk)}\n\n"
         except (ConversationNotFoundError, ChatError) as e:
-            error_chunk = {
-                "type": "error",
-                "error": str(e)
-            }
+            error_chunk = {"type": "error", "error": str(e)}
             yield f"data: {json.dumps(error_chunk)}\n\n"
         finally:
             # Send end-of-stream marker
@@ -316,17 +273,18 @@ async def chat_stream(
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-        }
+        },
     )
 
 
 # New LangGraph workflow endpoints
 
+
 @router.post("/workflows/basic")
 async def create_basic_workflow(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> ChatResponse:
     """Create and run a basic conversation workflow with LangGraph.
 
@@ -340,27 +298,23 @@ async def create_basic_workflow(
     """
     try:
         conversation, assistant_message = await chat_service.chat_with_workflow(
-            current_user.id,
-            chat_request,
-            workflow_type="basic"
+            current_user.id, chat_request, workflow_type="basic"
         )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation)
+            conversation=ConversationResponse.model_validate(conversation),
         )
     except (ConversationNotFoundError, ChatError) as e:
-        raise BadRequestProblem(
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e)) from None
 
 
 @router.post("/workflows/rag")
 async def create_rag_workflow(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> ChatResponse:
     """Create and run a RAG workflow with document retrieval.
 
@@ -374,27 +328,23 @@ async def create_rag_workflow(
     """
     try:
         conversation, assistant_message = await chat_service.chat_with_workflow(
-            current_user.id,
-            chat_request,
-            workflow_type="rag"
+            current_user.id, chat_request, workflow_type="rag"
         )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation)
+            conversation=ConversationResponse.model_validate(conversation),
         )
     except (ConversationNotFoundError, ChatError) as e:
-        raise BadRequestProblem(
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e)) from None
 
 
 @router.post("/workflows/tools")
 async def create_tools_workflow(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service)
+    chat_service: ChatService = Depends(get_chat_service),
 ) -> ChatResponse:
     """Create and run a workflow with tool calling capabilities.
 
@@ -408,26 +358,21 @@ async def create_tools_workflow(
     """
     try:
         conversation, assistant_message = await chat_service.chat_with_workflow(
-            current_user.id,
-            chat_request,
-            workflow_type="tools"
+            current_user.id, chat_request, workflow_type="tools"
         )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation)
+            conversation=ConversationResponse.model_validate(conversation),
         )
     except (ConversationNotFoundError, ChatError) as e:
-        raise BadRequestProblem(
-            detail=str(e)
-        )
+        raise BadRequestProblem(detail=str(e)) from None
 
 
 @router.get("/tools/available")
 async def get_available_tools(
-    request: AvailableToolsRequest = Depends(),
-    current_user: User = Depends(get_current_user)
+    request: AvailableToolsRequest = Depends(), current_user: User = Depends(get_current_user)
 ) -> list[dict[str, Any]]:
     """Get list of available MCP tools.
 
@@ -451,33 +396,34 @@ async def get_available_tools(
 
         # Add MCP tools
         for tool in mcp_tools:
-            all_tools.append({
-                "name": tool.name,
-                "description": tool.description,
-                "type": "mcp",
-                "args_schema": getattr(tool, "args_schema", {})
-            })
+            all_tools.append(
+                {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "type": "mcp",
+                    "args_schema": getattr(tool, "args_schema", {}),
+                }
+            )
 
         # Add built-in tools
         for tool in builtin_tools:
-            all_tools.append({
-                "name": tool.name,
-                "description": tool.description,
-                "type": "builtin",
-                "args_schema": getattr(tool, "args_schema", {})
-            })
+            all_tools.append(
+                {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "type": "builtin",
+                    "args_schema": getattr(tool, "args_schema", {}),
+                }
+            )
 
         return all_tools
     except Exception as e:
-        raise InternalServerProblem(
-            detail=f"Failed to get available tools: {str(e)}"
-        )
+        raise InternalServerProblem(detail=f"Failed to get available tools: {str(e)}") from None
 
 
 @router.get("/mcp/status")
 async def get_mcp_status(
-    request: McpStatusRequest = Depends(),
-    current_user: User = Depends(get_current_user)
+    request: McpStatusRequest = Depends(), current_user: User = Depends(get_current_user)
 ) -> dict[str, Any]:
     """Get MCP service status.
 
@@ -493,6 +439,4 @@ async def get_mcp_status(
     try:
         return await mcp_service.health_check()
     except Exception as e:
-        raise InternalServerProblem(
-            detail=f"Failed to get MCP status: {str(e)}"
-        )
+        raise InternalServerProblem(detail=f"Failed to get MCP status: {str(e)}") from None

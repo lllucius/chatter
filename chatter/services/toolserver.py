@@ -7,7 +7,13 @@ from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from chatter.models.toolserver import ServerStatus, ServerTool, ToolServer, ToolStatus, ToolUsage
+from chatter.models.toolserver import (
+    ServerStatus,
+    ServerTool,
+    ToolServer,
+    ToolStatus,
+    ToolUsage,
+)
 from chatter.schemas.toolserver import (
     ServerToolResponse,
     ToolServerCreate,
@@ -45,7 +51,9 @@ class ToolServerService:
 
     # CRUD Operations for Tool Servers
 
-    async def create_server(self, server_data: ToolServerCreate, user_id: str | None = None) -> ToolServerResponse:
+    async def create_server(
+        self, server_data: ToolServerCreate, user_id: str | None = None
+    ) -> ToolServerResponse:
         """Create a new tool server.
 
         Args:
@@ -57,9 +65,15 @@ class ToolServerService:
         """
         try:
             # Check if server name already exists
-            existing = await self.session.execute(select(ToolServer).where(ToolServer.name == server_data.name))
+            existing = await self.session.execute(
+                select(ToolServer).where(
+                    ToolServer.name == server_data.name
+                )
+            )
             if existing.scalar_one_or_none():
-                raise ToolServerServiceError(f"Server with name '{server_data.name}' already exists") from None
+                raise ToolServerServiceError(
+                    f"Server with name '{server_data.name}' already exists"
+                ) from None
 
             # Create server model
             server = ToolServer(
@@ -86,9 +100,13 @@ class ToolServerService:
             await self.session.commit()
 
             # Load with tools for response
-            await self.session.refresh(server, ['tools'])
+            await self.session.refresh(server, ["tools"])
 
-            logger.info("Tool server created", server_id=server.id, name=server.name)
+            logger.info(
+                "Tool server created",
+                server_id=server.id,
+                name=server.name,
+            )
             return ToolServerResponse.model_validate(server)
 
         except Exception as e:
@@ -96,7 +114,9 @@ class ToolServerService:
             logger.error("Failed to create tool server", error=str(e))
             raise
 
-    async def get_server(self, server_id: str) -> ToolServerResponse | None:
+    async def get_server(
+        self, server_id: str
+    ) -> ToolServerResponse | None:
         """Get a tool server by ID.
 
         Args:
@@ -106,7 +126,9 @@ class ToolServerService:
             Server response or None if not found
         """
         result = await self.session.execute(
-            select(ToolServer).options(selectinload(ToolServer.tools)).where(ToolServer.id == server_id)
+            select(ToolServer)
+            .options(selectinload(ToolServer.tools))
+            .where(ToolServer.id == server_id)
         )
         server = result.scalar_one_or_none()
 
@@ -114,7 +136,9 @@ class ToolServerService:
             return ToolServerResponse.model_validate(server)
         return None
 
-    async def get_server_by_name(self, name: str) -> ToolServerResponse | None:
+    async def get_server_by_name(
+        self, name: str
+    ) -> ToolServerResponse | None:
         """Get a tool server by name.
 
         Args:
@@ -124,7 +148,9 @@ class ToolServerService:
             Server response or None if not found
         """
         result = await self.session.execute(
-            select(ToolServer).options(selectinload(ToolServer.tools)).where(ToolServer.name == name)
+            select(ToolServer)
+            .options(selectinload(ToolServer.tools))
+            .where(ToolServer.name == name)
         )
         server = result.scalar_one_or_none()
 
@@ -133,7 +159,10 @@ class ToolServerService:
         return None
 
     async def list_servers(
-        self, status: ServerStatus | None = None, user_id: str | None = None, include_builtin: bool = True
+        self,
+        status: ServerStatus | None = None,
+        user_id: str | None = None,
+        include_builtin: bool = True,
     ) -> list[ToolServerResponse]:
         """List tool servers with optional filtering.
 
@@ -145,7 +174,9 @@ class ToolServerService:
         Returns:
             List of server responses
         """
-        query = select(ToolServer).options(selectinload(ToolServer.tools))
+        query = select(ToolServer).options(
+            selectinload(ToolServer.tools)
+        )
 
         filters = []
         if status:
@@ -158,12 +189,19 @@ class ToolServerService:
         if filters:
             query = query.where(and_(*filters))
 
-        result = await self.session.execute(query.order_by(ToolServer.created_at))
+        result = await self.session.execute(
+            query.order_by(ToolServer.created_at)
+        )
         servers = result.scalars().all()
 
-        return [ToolServerResponse.model_validate(server) for server in servers]
+        return [
+            ToolServerResponse.model_validate(server)
+            for server in servers
+        ]
 
-    async def update_server(self, server_id: str, update_data: ToolServerUpdate) -> ToolServerResponse | None:
+    async def update_server(
+        self, server_id: str, update_data: ToolServerUpdate
+    ) -> ToolServerResponse | None:
         """Update a tool server.
 
         Args:
@@ -174,7 +212,9 @@ class ToolServerService:
             Updated server response or None if not found
         """
         try:
-            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
+            result = await self.session.execute(
+                select(ToolServer).where(ToolServer.id == server_id)
+            )
             server = result.scalar_one_or_none()
 
             if not server:
@@ -190,14 +230,22 @@ class ToolServerService:
             await self.session.commit()
 
             # Reload with tools
-            await self.session.refresh(server, ['tools'])
+            await self.session.refresh(server, ["tools"])
 
-            logger.info("Tool server updated", server_id=server.id, name=server.name)
+            logger.info(
+                "Tool server updated",
+                server_id=server.id,
+                name=server.name,
+            )
             return ToolServerResponse.model_validate(server)
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to update tool server", server_id=server_id, error=str(e))
+            logger.error(
+                "Failed to update tool server",
+                server_id=server_id,
+                error=str(e),
+            )
             raise
 
     async def delete_server(self, server_id: str) -> bool:
@@ -210,26 +258,39 @@ class ToolServerService:
             True if deleted, False if not found
         """
         try:
-            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
+            result = await self.session.execute(
+                select(ToolServer).where(ToolServer.id == server_id)
+            )
             server = result.scalar_one_or_none()
 
             if not server:
                 return False
 
             # Stop server if running
-            if server.status in [ServerStatus.ENABLED, ServerStatus.STARTING]:
+            if server.status in [
+                ServerStatus.ENABLED,
+                ServerStatus.STARTING,
+            ]:
                 await self._stop_server_internal(server)
 
             # Delete from database (cascade will handle related records)
             await self.session.delete(server)
             await self.session.commit()
 
-            logger.info("Tool server deleted", server_id=server.id, name=server.name)
+            logger.info(
+                "Tool server deleted",
+                server_id=server.id,
+                name=server.name,
+            )
             return True
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to delete tool server", server_id=server_id, error=str(e))
+            logger.error(
+                "Failed to delete tool server",
+                server_id=server_id,
+                error=str(e),
+            )
             raise
 
     # Server Control Operations
@@ -244,11 +305,15 @@ class ToolServerService:
             True if started successfully
         """
         try:
-            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
+            result = await self.session.execute(
+                select(ToolServer).where(ToolServer.id == server_id)
+            )
             server = result.scalar_one_or_none()
 
             if not server:
-                raise ToolServerServiceError(f"Server not found: {server_id}") from None
+                raise ToolServerServiceError(
+                    f"Server not found: {server_id}"
+                ) from None
 
             success = await self._start_server_internal(server)
             await self.session.commit()
@@ -257,7 +322,11 @@ class ToolServerService:
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to start server", server_id=server_id, error=str(e))
+            logger.error(
+                "Failed to start server",
+                server_id=server_id,
+                error=str(e),
+            )
             raise
 
     async def stop_server(self, server_id: str) -> bool:
@@ -270,11 +339,15 @@ class ToolServerService:
             True if stopped successfully
         """
         try:
-            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
+            result = await self.session.execute(
+                select(ToolServer).where(ToolServer.id == server_id)
+            )
             server = result.scalar_one_or_none()
 
             if not server:
-                raise ToolServerServiceError(f"Server not found: {server_id}") from None
+                raise ToolServerServiceError(
+                    f"Server not found: {server_id}"
+                ) from None
 
             success = await self._stop_server_internal(server)
             await self.session.commit()
@@ -283,7 +356,11 @@ class ToolServerService:
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to stop server", server_id=server_id, error=str(e))
+            logger.error(
+                "Failed to stop server",
+                server_id=server_id,
+                error=str(e),
+            )
             raise
 
     async def restart_server(self, server_id: str) -> bool:
@@ -303,7 +380,11 @@ class ToolServerService:
                 return await self.start_server(server_id)
             return False
         except Exception as e:
-            logger.error("Failed to restart server", server_id=server_id, error=str(e))
+            logger.error(
+                "Failed to restart server",
+                server_id=server_id,
+                error=str(e),
+            )
             raise
 
     async def enable_server(self, server_id: str) -> bool:
@@ -316,7 +397,9 @@ class ToolServerService:
             True if enabled successfully
         """
         try:
-            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
+            result = await self.session.execute(
+                select(ToolServer).where(ToolServer.id == server_id)
+            )
             server = result.scalar_one_or_none()
 
             if not server:
@@ -334,7 +417,11 @@ class ToolServerService:
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to enable server", server_id=server_id, error=str(e))
+            logger.error(
+                "Failed to enable server",
+                server_id=server_id,
+                error=str(e),
+            )
             raise
 
     async def disable_server(self, server_id: str) -> bool:
@@ -347,14 +434,19 @@ class ToolServerService:
             True if disabled successfully
         """
         try:
-            result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
+            result = await self.session.execute(
+                select(ToolServer).where(ToolServer.id == server_id)
+            )
             server = result.scalar_one_or_none()
 
             if not server:
                 return False
 
             # Stop if running
-            if server.status in [ServerStatus.ENABLED, ServerStatus.STARTING]:
+            if server.status in [
+                ServerStatus.ENABLED,
+                ServerStatus.STARTING,
+            ]:
                 await self._stop_server_internal(server)
 
             server.status = ServerStatus.DISABLED
@@ -365,12 +457,18 @@ class ToolServerService:
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to disable server", server_id=server_id, error=str(e))
+            logger.error(
+                "Failed to disable server",
+                server_id=server_id,
+                error=str(e),
+            )
             raise
 
     # Tool Management
 
-    async def get_server_tools(self, server_id: str) -> list[ServerToolResponse]:
+    async def get_server_tools(
+        self, server_id: str
+    ) -> list[ServerToolResponse]:
         """Get tools for a specific server.
 
         Args:
@@ -379,10 +477,14 @@ class ToolServerService:
         Returns:
             List of server tools
         """
-        result = await self.session.execute(select(ServerTool).where(ServerTool.server_id == server_id))
+        result = await self.session.execute(
+            select(ServerTool).where(ServerTool.server_id == server_id)
+        )
         tools = result.scalars().all()
 
-        return [ServerToolResponse.model_validate(tool) for tool in tools]
+        return [
+            ServerToolResponse.model_validate(tool) for tool in tools
+        ]
 
     async def enable_tool(self, tool_id: str) -> bool:
         """Enable a specific tool.
@@ -394,7 +496,9 @@ class ToolServerService:
             True if enabled successfully
         """
         try:
-            result = await self.session.execute(select(ServerTool).where(ServerTool.id == tool_id))
+            result = await self.session.execute(
+                select(ServerTool).where(ServerTool.id == tool_id)
+            )
             tool = result.scalar_one_or_none()
 
             if not tool:
@@ -408,7 +512,9 @@ class ToolServerService:
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to enable tool", tool_id=tool_id, error=str(e))
+            logger.error(
+                "Failed to enable tool", tool_id=tool_id, error=str(e)
+            )
             raise
 
     async def disable_tool(self, tool_id: str) -> bool:
@@ -421,7 +527,9 @@ class ToolServerService:
             True if disabled successfully
         """
         try:
-            result = await self.session.execute(select(ServerTool).where(ServerTool.id == tool_id))
+            result = await self.session.execute(
+                select(ServerTool).where(ServerTool.id == tool_id)
+            )
             tool = result.scalar_one_or_none()
 
             if not tool:
@@ -435,12 +543,19 @@ class ToolServerService:
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to disable tool", tool_id=tool_id, error=str(e))
+            logger.error(
+                "Failed to disable tool", tool_id=tool_id, error=str(e)
+            )
             raise
 
     # Usage Tracking
 
-    async def record_tool_usage(self, server_id: str, tool_name: str, usage_data: ToolUsageCreate) -> bool:
+    async def record_tool_usage(
+        self,
+        server_id: str,
+        tool_name: str,
+        usage_data: ToolUsageCreate,
+    ) -> bool:
         """Record tool usage for analytics.
 
         Args:
@@ -454,12 +569,21 @@ class ToolServerService:
         try:
             # Get tool ID
             result = await self.session.execute(
-                select(ServerTool).where(and_(ServerTool.server_id == server_id, ServerTool.name == tool_name))
+                select(ServerTool).where(
+                    and_(
+                        ServerTool.server_id == server_id,
+                        ServerTool.name == tool_name,
+                    )
+                )
             )
             tool = result.scalar_one_or_none()
 
             if not tool:
-                logger.warning("Tool not found for usage tracking", server_id=server_id, tool_name=tool_name)
+                logger.warning(
+                    "Tool not found for usage tracking",
+                    server_id=server_id,
+                    tool_name=tool_name,
+                )
                 return False
 
             # Create usage record
@@ -490,12 +614,15 @@ class ToolServerService:
             # Update average response time
             if usage_data.response_time_ms is not None:
                 if tool.avg_response_time_ms is None:
-                    tool.avg_response_time_ms = usage_data.response_time_ms
+                    tool.avg_response_time_ms = (
+                        usage_data.response_time_ms
+                    )
                 else:
                     # Exponential moving average
                     alpha = 0.1
                     tool.avg_response_time_ms = (
-                        alpha * usage_data.response_time_ms + (1 - alpha) * tool.avg_response_time_ms
+                        alpha * usage_data.response_time_ms
+                        + (1 - alpha) * tool.avg_response_time_ms
                     )
 
             tool.updated_at = datetime.now(UTC)
@@ -510,7 +637,9 @@ class ToolServerService:
 
     # Analytics and Health
 
-    async def get_server_analytics(self, server_id: str) -> ToolServerMetrics | None:
+    async def get_server_analytics(
+        self, server_id: str
+    ) -> ToolServerMetrics | None:
         """Get analytics for a specific server.
 
         Args:
@@ -520,7 +649,9 @@ class ToolServerService:
             Server metrics or None if not found
         """
         result = await self.session.execute(
-            select(ToolServer).options(selectinload(ToolServer.tools)).where(ToolServer.id == server_id)
+            select(ToolServer)
+            .options(selectinload(ToolServer.tools))
+            .where(ToolServer.id == server_id)
         )
         server = result.scalar_one_or_none()
 
@@ -529,17 +660,35 @@ class ToolServerService:
 
         # Calculate metrics from tools
         total_tools = len(server.tools)
-        enabled_tools = sum(1 for tool in server.tools if tool.status == ToolStatus.ENABLED)
+        enabled_tools = sum(
+            1
+            for tool in server.tools
+            if tool.status == ToolStatus.ENABLED
+        )
         total_calls = sum(tool.total_calls for tool in server.tools)
         total_errors = sum(tool.total_errors for tool in server.tools)
-        success_rate = (total_calls - total_errors) / total_calls if total_calls > 0 else 1.0
+        success_rate = (
+            (total_calls - total_errors) / total_calls
+            if total_calls > 0
+            else 1.0
+        )
 
         # Calculate average response time
-        response_times = [t.avg_response_time_ms for t in server.tools if t.avg_response_time_ms]
-        avg_response_time = sum(response_times) / len(response_times) if response_times else None
+        response_times = [
+            t.avg_response_time_ms
+            for t in server.tools
+            if t.avg_response_time_ms
+        ]
+        avg_response_time = (
+            sum(response_times) / len(response_times)
+            if response_times
+            else None
+        )
 
         # Get last activity
-        last_calls = [t.last_called for t in server.tools if t.last_called]
+        last_calls = [
+            t.last_called for t in server.tools if t.last_called
+        ]
         last_activity = max(last_calls) if last_calls else None
 
         return ToolServerMetrics(
@@ -556,7 +705,9 @@ class ToolServerService:
             uptime_percentage=None,  # TODO: Implement uptime tracking
         )
 
-    async def health_check_server(self, server_id: str) -> ToolServerHealthCheck:
+    async def health_check_server(
+        self, server_id: str
+    ) -> ToolServerHealthCheck:
         """Perform health check on a server.
 
         Args:
@@ -565,18 +716,25 @@ class ToolServerService:
         Returns:
             Health check result
         """
-        result = await self.session.execute(select(ToolServer).where(ToolServer.id == server_id))
+        result = await self.session.execute(
+            select(ToolServer).where(ToolServer.id == server_id)
+        )
         server = result.scalar_one_or_none()
 
         if not server:
-            raise ToolServerServiceError(f"Server not found: {server_id}") from None
+            raise ToolServerServiceError(
+                f"Server not found: {server_id}"
+            ) from None
 
         # Check if we need to perform health check
         now = datetime.now(UTC)
         last_check = self._last_health_check.get(server_id)
 
-        if last_check is None or (now - last_check).total_seconds() > self._health_check_interval:
-
+        if (
+            last_check is None
+            or (now - last_check).total_seconds()
+            > self._health_check_interval
+        ):
             # Perform actual health check
             is_running = server.name in self.mcp_service.tools_cache
             is_responsive = False
@@ -586,12 +744,18 @@ class ToolServerService:
             if is_running:
                 try:
                     # Try to get tools to check responsiveness
-                    tools = await self.mcp_service.get_tools([server.name])
+                    tools = await self.mcp_service.get_tools(
+                        [server.name]
+                    )
                     tools_count = len(tools)
                     is_responsive = True
                 except Exception as e:
                     error_message = str(e)
-                    logger.warning("Server health check failed", server_id=server_id, error=error_message)
+                    logger.warning(
+                        "Server health check failed",
+                        server_id=server_id,
+                        error=error_message,
+                    )
 
             # Update last health check
             server.last_health_check = now
@@ -601,7 +765,9 @@ class ToolServerService:
         else:
             # Use cached data
             is_running = server.name in self.mcp_service.tools_cache
-            tools_count = len(self.mcp_service.tools_cache.get(server.name, []))
+            tools_count = len(
+                self.mcp_service.tools_cache.get(server.name, [])
+            )
             is_responsive = is_running
             error_message = server.last_startup_error
 
@@ -633,7 +799,12 @@ class ToolServerService:
             if server.name not in self.mcp_service.servers:
                 from chatter.services.mcp import MCPServer
 
-                mcp_server = MCPServer(name=server.name, command=server.command, args=server.args, env=server.env)
+                mcp_server = MCPServer(
+                    name=server.name,
+                    command=server.command,
+                    args=server.args,
+                    env=server.env,
+                )
                 self.mcp_service.servers[server.name] = mcp_server
 
             # Start the server
@@ -668,7 +839,11 @@ class ToolServerService:
             if server.consecutive_failures >= server.max_failures:
                 server.status = ServerStatus.DISABLED
 
-            logger.error("Failed to start server", server_id=server.id, error=str(e))
+            logger.error(
+                "Failed to start server",
+                server_id=server.id,
+                error=str(e),
+            )
             return False
 
     async def _stop_server_internal(self, server: ToolServer) -> bool:
@@ -696,7 +871,11 @@ class ToolServerService:
             server.status = ServerStatus.ERROR
             server.last_startup_error = str(e)
             server.updated_at = datetime.now(UTC)
-            logger.error("Failed to stop server", server_id=server.id, error=str(e))
+            logger.error(
+                "Failed to stop server",
+                server_id=server.id,
+                error=str(e),
+            )
             return False
 
     async def _discover_server_tools(self, server: ToolServer) -> None:
@@ -707,11 +886,19 @@ class ToolServerService:
         """
         try:
             # Get tools from MCP service
-            mcp_tools = self.mcp_service.tools_cache.get(server.name, [])
+            mcp_tools = self.mcp_service.tools_cache.get(
+                server.name, []
+            )
 
             # Get existing tools from database
-            result = await self.session.execute(select(ServerTool).where(ServerTool.server_id == server.id))
-            existing_tools = {tool.name: tool for tool in result.scalars().all()}
+            result = await self.session.execute(
+                select(ServerTool).where(
+                    ServerTool.server_id == server.id
+                )
+            )
+            existing_tools = {
+                tool.name: tool for tool in result.scalars().all()
+            }
 
             # Update or create tools
             for mcp_tool in mcp_tools:
@@ -721,7 +908,9 @@ class ToolServerService:
                     # Update existing tool
                     tool = existing_tools[tool_name]
                     tool.description = mcp_tool.description
-                    tool.args_schema = getattr(mcp_tool, 'args_schema', None)
+                    tool.args_schema = getattr(
+                        mcp_tool, "args_schema", None
+                    )
                     tool.is_available = True
                     tool.updated_at = datetime.now(UTC)
                 else:
@@ -729,9 +918,13 @@ class ToolServerService:
                     tool = ServerTool(
                         server_id=server.id,
                         name=tool_name,
-                        display_name=tool_name.replace('_', ' ').title(),
+                        display_name=tool_name.replace(
+                            "_", " "
+                        ).title(),
                         description=mcp_tool.description,
-                        args_schema=getattr(mcp_tool, 'args_schema', None),
+                        args_schema=getattr(
+                            mcp_tool, "args_schema", None
+                        ),
                         status=ToolStatus.ENABLED,
                         is_available=True,
                     )
@@ -745,7 +938,11 @@ class ToolServerService:
                     tool.updated_at = datetime.now(UTC)
 
         except Exception as e:
-            logger.error("Failed to discover server tools", server_id=server.id, error=str(e))
+            logger.error(
+                "Failed to discover server tools",
+                server_id=server.id,
+                error=str(e),
+            )
 
     async def initialize_builtin_servers(self) -> None:
         """Initialize built-in servers from configuration."""
@@ -757,7 +954,11 @@ class ToolServerService:
                     "display_name": "File System",
                     "description": "Access to file system operations",
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+                    "args": [
+                        "-y",
+                        "@modelcontextprotocol/server-filesystem",
+                        "/tmp",
+                    ],
                     "env": None,
                 },
                 {
@@ -765,7 +966,10 @@ class ToolServerService:
                     "display_name": "Web Browser",
                     "description": "Web browsing and search capabilities",
                     "command": "npx",
-                    "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+                    "args": [
+                        "-y",
+                        "@modelcontextprotocol/server-brave-search",
+                    ],
                     "env": {"BRAVE_API_KEY": "your_brave_api_key"},
                 },
                 {
@@ -780,7 +984,11 @@ class ToolServerService:
 
             for server_data in builtin_servers:
                 # Check if server already exists
-                existing = await self.session.execute(select(ToolServer).where(ToolServer.name == server_data["name"]))
+                existing = await self.session.execute(
+                    select(ToolServer).where(
+                        ToolServer.name == server_data["name"]
+                    )
+                )
 
                 if not existing.scalar_one_or_none():
                     # Create built-in server
@@ -803,5 +1011,7 @@ class ToolServerService:
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to initialize built-in servers", error=str(e))
+            logger.error(
+                "Failed to initialize built-in servers", error=str(e)
+            )
             raise

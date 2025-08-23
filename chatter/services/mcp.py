@@ -7,8 +7,14 @@ from dataclasses import dataclass
 from typing import Any
 
 from langchain_core.tools import BaseTool, StructuredTool
-from langchain_mcp_adapters.client import MultiServerMCPClient, create_session
-from langchain_mcp_adapters.tools import convert_mcp_tool_to_langchain_tool, load_mcp_tools
+from langchain_mcp_adapters.client import (
+    MultiServerMCPClient,
+    create_session,
+)
+from langchain_mcp_adapters.tools import (
+    convert_mcp_tool_to_langchain_tool,
+    load_mcp_tools,
+)
 from pydantic import BaseModel
 
 from chatter.config import settings
@@ -53,16 +59,28 @@ class MCPToolService:
             "filesystem": MCPServer(
                 name="filesystem",
                 command="npx",
-                args=["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+                args=[
+                    "-y",
+                    "@modelcontextprotocol/server-filesystem",
+                    "/tmp",
+                ],
                 env=None,
             ),
             "browser": MCPServer(
                 name="browser",
                 command="npx",
-                args=["-y", "@modelcontextprotocol/server-brave-search"],
+                args=[
+                    "-y",
+                    "@modelcontextprotocol/server-brave-search",
+                ],
                 env={"BRAVE_API_KEY": "your_brave_api_key"},
             ),
-            "calculator": MCPServer(name="calculator", command="python", args=["-m", "mcp_math_server"], env=None),
+            "calculator": MCPServer(
+                name="calculator",
+                command="python",
+                args=["-m", "mcp_math_server"],
+                env=None,
+            ),
         }
 
         # Initialize configured servers
@@ -81,7 +99,9 @@ class MCPToolService:
         try:
             # Create session for the server
             session = await create_session(
-                command=server_config.command, args=server_config.args, env=server_config.env
+                command=server_config.command,
+                args=server_config.args,
+                env=server_config.env,
             )
 
             # Load tools from the session
@@ -95,11 +115,19 @@ class MCPToolService:
 
             self.tools_cache[server_name] = langchain_tools
 
-            logger.info("MCP server started", server=server_name, tools_count=len(langchain_tools))
+            logger.info(
+                "MCP server started",
+                server=server_name,
+                tools_count=len(langchain_tools),
+            )
             return True
 
         except Exception as e:
-            logger.error("Failed to start MCP server", server=server_name, error=str(e))
+            logger.error(
+                "Failed to start MCP server",
+                server=server_name,
+                error=str(e),
+            )
             return False
 
     async def stop_server(self, server_name: str) -> bool:
@@ -118,10 +146,16 @@ class MCPToolService:
             return True
 
         except Exception as e:
-            logger.error("Failed to stop MCP server", server=server_name, error=str(e))
+            logger.error(
+                "Failed to stop MCP server",
+                server=server_name,
+                error=str(e),
+            )
             return False
 
-    async def get_tools(self, server_names: list[str] | None = None) -> list[BaseTool]:
+    async def get_tools(
+        self, server_names: list[str] | None = None
+    ) -> list[BaseTool]:
         """Get tools from specified MCP servers."""
         if not self.enabled:
             return []
@@ -139,7 +173,11 @@ class MCPToolService:
             if server_name in self.tools_cache:
                 tools = self.tools_cache[server_name]
                 all_tools.extend(tools)
-                logger.debug("Retrieved tools from server", server=server_name, count=len(tools))
+                logger.debug(
+                    "Retrieved tools from server",
+                    server=server_name,
+                    count=len(tools),
+                )
 
         return all_tools
 
@@ -177,7 +215,9 @@ class MCPToolService:
         tool = await self.get_tool_by_name(tool_name)
 
         if not tool:
-            raise MCPServiceError(f"Tool not found: {tool_name}") from None
+            raise MCPServiceError(
+                f"Tool not found: {tool_name}"
+            ) from None
 
         # Find which server provides this tool
         found_server = None
@@ -187,7 +227,9 @@ class MCPToolService:
                 break
 
         if not found_server:
-            raise MCPServiceError(f"Server not found for tool: {tool_name}") from None
+            raise MCPServiceError(
+                f"Server not found for tool: {tool_name}"
+            ) from None
 
         try:
             result = await tool.arun(arguments)
@@ -196,7 +238,15 @@ class MCPToolService:
             # Track usage (async, don't block)
             asyncio.create_task(
                 self._track_tool_usage(
-                    found_server, tool_name, arguments, result, response_time_ms, True, None, user_id, conversation_id
+                    found_server,
+                    tool_name,
+                    arguments,
+                    result,
+                    response_time_ms,
+                    True,
+                    None,
+                    user_id,
+                    conversation_id,
                 )
             )
 
@@ -211,7 +261,12 @@ class MCPToolService:
             response_time_ms = (time.time() - start_time) * 1000
             error_msg = str(e)
 
-            logger.error("Tool call failed", tool=tool_name, server=found_server, error=error_msg)
+            logger.error(
+                "Tool call failed",
+                tool=tool_name,
+                server=found_server,
+                error=error_msg,
+            )
 
             # Track usage error (async, don't block)
             asyncio.create_task(
@@ -272,16 +327,23 @@ class MCPToolService:
                 tool_server_service = ToolServerService(session)
 
                 # Find server by name
-                server = await tool_server_service.get_server_by_name(server_name)
+                server = await tool_server_service.get_server_by_name(
+                    server_name
+                )
                 if not server:
-                    logger.warning("Server not found for usage tracking", server_name=server_name)
+                    logger.warning(
+                        "Server not found for usage tracking",
+                        server_name=server_name,
+                    )
                     return
 
                 # Create usage record
                 usage_data = ToolUsageCreate(
                     tool_name=tool_name,
                     arguments=arguments,
-                    result={"data": result} if result is not None else None,
+                    result={"data": result}
+                    if result is not None
+                    else None,
                     response_time_ms=response_time_ms,
                     success=success,
                     error_message=error_message,
@@ -289,17 +351,28 @@ class MCPToolService:
                     conversation_id=conversation_id,
                 )
 
-                await tool_server_service.record_tool_usage(server.id, tool_name, usage_data)
+                await tool_server_service.record_tool_usage(
+                    server.id, tool_name, usage_data
+                )
 
         except Exception as e:
             logger.error("Failed to track tool usage", error=str(e))
             # Don't raise - usage tracking shouldn't break tool calls
 
     def create_custom_tool(
-        self, name: str, description: str, func: Callable, args_schema: BaseModel | None = None
+        self,
+        name: str,
+        description: str,
+        func: Callable,
+        args_schema: BaseModel | None = None,
     ) -> BaseTool:
         """Create a custom tool for integration."""
-        return StructuredTool.from_function(func=func, name=name, description=description, args_schema=args_schema)
+        return StructuredTool.from_function(
+            func=func,
+            name=name,
+            description=description,
+            args_schema=args_schema,
+        )
 
     async def get_available_servers(self) -> list[dict[str, Any]]:
         """Get list of available MCP servers."""
@@ -333,7 +406,10 @@ class MCPToolService:
             is_running = server_name in self.tools_cache
             tools_count = len(self.tools_cache.get(server_name, []))
 
-            server_status[server_name] = {"running": is_running, "tools_count": tools_count}
+            server_status[server_name] = {
+                "running": is_running,
+                "tools_count": tools_count,
+            }
             total_tools += tools_count
 
         return {
@@ -393,13 +469,15 @@ class BuiltInTools:
                 if isinstance(node, ast.Num):
                     return node.n
                 elif isinstance(node, ast.BinOp):
-                    return ops[type(node.op)](eval_expr(node.left), eval_expr(node.right))
+                    return ops[type(node.op)](
+                        eval_expr(node.left), eval_expr(node.right)
+                    )
                 elif isinstance(node, ast.UnaryOp):
                     return ops[type(node.op)](eval_expr(node.operand))
                 else:
                     raise TypeError(node) from None
 
-            return eval_expr(ast.parse(expression, mode='eval').body)
+            return eval_expr(ast.parse(expression, mode="eval").body)
         except Exception as e:
             return f"Error: {str(e)}"
 

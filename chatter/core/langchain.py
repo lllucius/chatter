@@ -4,7 +4,12 @@ from typing import Any
 
 from langchain_community.callbacks import get_openai_callback
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+    SystemMessage,
+)
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import Runnable, RunnablePassthrough
@@ -29,15 +34,27 @@ class LangChainOrchestrator:
 
             os.environ["LANGCHAIN_TRACING_V2"] = "true"
             if settings.langchain_api_key:
-                os.environ["LANGCHAIN_API_KEY"] = settings.langchain_api_key
+                os.environ[
+                    "LANGCHAIN_API_KEY"
+                ] = settings.langchain_api_key
             if settings.langchain_project:
-                os.environ["LANGCHAIN_PROJECT"] = settings.langchain_project
+                os.environ[
+                    "LANGCHAIN_PROJECT"
+                ] = settings.langchain_project
             if settings.langchain_endpoint:
-                os.environ["LANGCHAIN_ENDPOINT"] = settings.langchain_endpoint
-            logger.info("LangSmith tracing enabled", project=settings.langchain_project)
+                os.environ[
+                    "LANGCHAIN_ENDPOINT"
+                ] = settings.langchain_endpoint
+            logger.info(
+                "LangSmith tracing enabled",
+                project=settings.langchain_project,
+            )
 
     def create_chat_chain(
-        self, llm: BaseChatModel, system_message: str | None = None, include_history: bool = True
+        self,
+        llm: BaseChatModel,
+        system_message: str | None = None,
+        include_history: bool = True,
     ) -> Runnable:
         """Create a basic chat chain with optional system message and history."""
         messages = []
@@ -55,7 +72,12 @@ class LangChainOrchestrator:
 
         return chain
 
-    def create_rag_chain(self, llm: BaseChatModel, retriever: Any, system_message: str | None = None) -> Runnable:
+    def create_rag_chain(
+        self,
+        llm: BaseChatModel,
+        retriever: Any,
+        system_message: str | None = None,
+    ) -> Runnable:
         """Create a RAG (Retrieval-Augmented Generation) chain."""
         if not system_message:
             system_message = (
@@ -78,13 +100,22 @@ class LangChainOrchestrator:
             return "\n\n".join(doc.page_content for doc in docs)
 
         rag_chain = (
-            {"context": retriever | format_docs, "input": RunnablePassthrough()} | prompt | llm | StrOutputParser()
+            {
+                "context": retriever | format_docs,
+                "input": RunnablePassthrough(),
+            }
+            | prompt
+            | llm
+            | StrOutputParser()
         )
 
         return rag_chain
 
     def create_conversational_rag_chain(
-        self, llm: BaseChatModel, retriever: Any, system_message: str | None = None
+        self,
+        llm: BaseChatModel,
+        retriever: Any,
+        system_message: str | None = None,
     ) -> Runnable:
         """Create a conversational RAG chain with chat history."""
         if not system_message:
@@ -104,7 +135,9 @@ class LangChainOrchestrator:
             ]
         )
 
-        contextualize_q_chain = contextualize_q_prompt | llm | StrOutputParser()
+        contextualize_q_chain = (
+            contextualize_q_prompt | llm | StrOutputParser()
+        )
 
         qa_system_prompt = (
             "You are an assistant for question-answering tasks. "
@@ -134,7 +167,11 @@ class LangChainOrchestrator:
                 return input["input"]
 
         rag_chain = (
-            RunnablePassthrough.assign(context=contextualized_question | retriever | format_docs)
+            RunnablePassthrough.assign(
+                context=contextualized_question
+                | retriever
+                | format_docs
+            )
             | qa_prompt
             | llm
             | StrOutputParser()
@@ -143,7 +180,10 @@ class LangChainOrchestrator:
         return rag_chain
 
     async def run_chain_with_callback(
-        self, chain: Runnable, inputs: dict[str, Any], provider_name: str = "unknown"
+        self,
+        chain: Runnable,
+        inputs: dict[str, Any],
+        provider_name: str = "unknown",
     ) -> dict[str, Any]:
         """Run a chain with callback tracking for token usage."""
         result = {"response": "", "usage": {}}
@@ -165,12 +205,18 @@ class LangChainOrchestrator:
                 result["usage"] = {"provider": provider_name}
 
         except Exception as e:
-            logger.error("Chain execution failed", error=str(e), provider=provider_name)
+            logger.error(
+                "Chain execution failed",
+                error=str(e),
+                provider=provider_name,
+            )
             raise
 
         return result
 
-    def convert_messages_to_langchain(self, messages: list[dict[str, Any]]) -> list[BaseMessage]:
+    def convert_messages_to_langchain(
+        self, messages: list[dict[str, Any]]
+    ) -> list[BaseMessage]:
         """Convert API messages to LangChain message format."""
         langchain_messages = []
 
@@ -179,7 +225,9 @@ class LangChainOrchestrator:
             content = msg.get("content", "")
 
             if role == "system":
-                langchain_messages.append(SystemMessage(content=content))
+                langchain_messages.append(
+                    SystemMessage(content=content)
+                )
             elif role == "assistant":
                 langchain_messages.append(AIMessage(content=content))
             else:  # user or any other role
@@ -187,10 +235,16 @@ class LangChainOrchestrator:
 
         return langchain_messages
 
-    def format_chat_history(self, messages: list[BaseMessage]) -> list[BaseMessage]:
+    def format_chat_history(
+        self, messages: list[BaseMessage]
+    ) -> list[BaseMessage]:
         """Format chat history for use in prompts."""
         # Filter out system messages from history
-        return [msg for msg in messages if not isinstance(msg, SystemMessage)]
+        return [
+            msg
+            for msg in messages
+            if not isinstance(msg, SystemMessage)
+        ]
 
 
 # Global orchestrator instance

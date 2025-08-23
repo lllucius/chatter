@@ -17,9 +17,9 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Set required environment variables
-os.environ.setdefault('DATABASE_URL', 'sqlite+aiosqlite:///test.db')
-os.environ.setdefault('ENVIRONMENT', 'development')
-os.environ.setdefault('OPENAI_API_KEY', 'fake-key-for-testing')
+os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///test.db")
+os.environ.setdefault("ENVIRONMENT", "development")
+os.environ.setdefault("OPENAI_API_KEY", "fake-key-for-testing")
 
 from chatter.config import settings  # noqa: E402
 from chatter.main import app  # noqa: E402
@@ -95,8 +95,14 @@ A Python SDK is available for easy integration. See the SDK documentation for de
 
     # Add additional metadata manually
     openapi_spec["servers"] = [
-        {"url": "http://localhost:8000", "description": "Development server"},
-        {"url": "https://api.chatter.ai", "description": "Production server"},
+        {
+            "url": "http://localhost:8000",
+            "description": "Development server",
+        },
+        {
+            "url": "https://api.chatter.ai",
+            "description": "Production server",
+        },
     ]
 
     openapi_spec["info"]["contact"] = {
@@ -105,7 +111,10 @@ A Python SDK is available for easy integration. See the SDK documentation for de
         "email": "support@chatter.ai",
     }
 
-    openapi_spec["info"]["license"] = {"name": "MIT", "url": "https://github.com/lllucius/chatter/blob/main/LICENSE"}
+    openapi_spec["info"]["license"] = {
+        "name": "MIT",
+        "url": "https://github.com/lllucius/chatter/blob/main/LICENSE",
+    }
 
     openapi_spec["externalDocs"] = {
         "description": "Chatter Documentation",
@@ -113,35 +122,68 @@ A Python SDK is available for easy integration. See the SDK documentation for de
     }
 
     # Add custom extensions
-    openapi_spec["x-logo"] = {"url": "https://github.com/lllucius/chatter/raw/main/docs/logo.png"}
+    openapi_spec["x-logo"] = {
+        "url": "https://github.com/lllucius/chatter/raw/main/docs/logo.png"
+    }
 
     # Add API categories/tags descriptions
     openapi_spec["tags"] = [
-        {"name": "Health", "description": "Health check and system status endpoints"},
-        {"name": "Authentication", "description": "User authentication and authorization endpoints"},
-        {"name": "Chat", "description": "Core chat and conversation endpoints with LLM integration"},
-        {"name": "Documents", "description": "Document management and knowledge base endpoints"},
-        {"name": "Profiles", "description": "LLM profile and prompt management endpoints"},
-        {"name": "Analytics", "description": "Usage analytics and reporting endpoints"},
-        {"name": "Tool Servers", "description": "MCP tool server management endpoints"},
+        {
+            "name": "Health",
+            "description": "Health check and system status endpoints",
+        },
+        {
+            "name": "Authentication",
+            "description": "User authentication and authorization endpoints",
+        },
+        {
+            "name": "Chat",
+            "description": "Core chat and conversation endpoints with LLM integration",
+        },
+        {
+            "name": "Documents",
+            "description": "Document management and knowledge base endpoints",
+        },
+        {
+            "name": "Profiles",
+            "description": "LLM profile and prompt management endpoints",
+        },
+        {
+            "name": "Analytics",
+            "description": "Usage analytics and reporting endpoints",
+        },
+        {
+            "name": "Tool Servers",
+            "description": "MCP tool server management endpoints",
+        },
     ]
 
     return openapi_spec
 
 
-def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
+def export_openapi_json(
+    spec: dict[str, Any], output_path: Path
+) -> None:
     """Export OpenAPI spec to JSON format."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(spec, f, indent=2, ensure_ascii=False)
     print(f"✅ Exported OpenAPI JSON to: {output_path}")
 
 
-def export_openapi_yaml(spec: dict[str, Any], output_path: Path) -> None:
+def export_openapi_yaml(
+    spec: dict[str, Any], output_path: Path
+) -> None:
     """Export OpenAPI spec to YAML format."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, 'w', encoding='utf-8') as f:
-        yaml.dump(spec, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+    with open(output_path, "w", encoding="utf-8") as f:
+        yaml.dump(
+            spec,
+            f,
+            default_flow_style=False,
+            allow_unicode=True,
+            sort_keys=False,
+        )
     print(f"✅ Exported OpenAPI YAML to: {output_path}")
 
 
@@ -168,8 +210,12 @@ def main():
     print("📚 OpenAPI documentation generated successfully!")
     print(f"📁 Output directory: {output_dir}")
     print("🔗 Formats available: JSON, YAML")
-    print(f"📊 Total endpoints: {len(list(spec.get('paths', {}).keys()))}")
-    print(f"🏷️  Total schemas: {len(spec.get('components', {}).get('schemas', {}))}")
+    print(
+        f"📊 Total endpoints: {len(list(spec.get('paths', {}).keys()))}"
+    )
+    print(
+        f"🏷️  Total schemas: {len(spec.get('components', {}).get('schemas', {}))}"
+    )
 
 
 if __name__ == "__main__":

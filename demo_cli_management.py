@@ -9,6 +9,7 @@ in practice for managing all aspects of the Chatter platform.
 import os
 from pathlib import Path
 
+
 def demo_cli_commands():
     """Demonstrate the new CLI management commands."""
     

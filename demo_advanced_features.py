@@ -20,7 +20,11 @@ sys.path.insert(0, str(project_root))
 # For demo purposes
 
 from chatter.config import settings
-from chatter.core import orchestrator, vector_store_manager, workflow_manager
+from chatter.core import (
+    orchestrator,
+    vector_store_manager,
+    workflow_manager,
+)
 from chatter.services import mcp_service
 from chatter.services.embeddings import EmbeddingService
 from chatter.services.llm import LLMService

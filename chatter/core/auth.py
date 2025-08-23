@@ -69,23 +69,34 @@ class AuthService:
         """
         # Validate email format
         if not validate_email(user_data.email):
-            raise BadRequestProblem(detail="Invalid email format") from None
+            raise BadRequestProblem(
+                detail="Invalid email format"
+            ) from None
 
         # Validate password strength
-        password_validation = validate_password_strength(user_data.password)
+        password_validation = validate_password_strength(
+            user_data.password
+        )
         if not password_validation["valid"]:
             raise BadRequestProblem(
-                detail="Password does not meet requirements", errors=password_validation["errors"]
+                detail="Password does not meet requirements",
+                errors=password_validation["errors"],
             ) from None
 
         # Check if user already exists
         existing_user = await self.get_user_by_email(user_data.email)
         if existing_user:
-            raise UserAlreadyExistsError("User with this email already exists") from None
+            raise UserAlreadyExistsError(
+                "User with this email already exists"
+            ) from None
 
-        existing_user = await self.get_user_by_username(user_data.username)
+        existing_user = await self.get_user_by_username(
+            user_data.username
+        )
         if existing_user:
-            raise UserAlreadyExistsError("User with this username already exists") from None
+            raise UserAlreadyExistsError(
+                "User with this username already exists"
+            ) from None
 
         # Create user
         hashed_password = hash_password(user_data.password)
@@ -105,7 +116,9 @@ class AuthService:
         logger.info("User created", user_id=user.id, email=user.email)
         return user
 
-    async def authenticate_user(self, email: str, password: str) -> User | None:
+    async def authenticate_user(
+        self, email: str, password: str
+    ) -> User | None:
         """Authenticate user with email and password.
 
         Args:
@@ -130,7 +143,9 @@ class AuthService:
         await self.session.commit()
         await self.session.refresh(user)
 
-        logger.info("User authenticated", user_id=user.id, email=user.email)
+        logger.info(
+            "User authenticated", user_id=user.id, email=user.email
+        )
         return user
 
     async def get_user_by_id(self, user_id: str) -> User | None:
@@ -142,7 +157,9 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(select(User).where(User.id == user_id))
+        result = await self.session.execute(
+            select(User).where(User.id == user_id)
+        )
         return result.scalar_one_or_none()
 
     async def get_user_by_email(self, email: str) -> User | None:
@@ -154,7 +171,9 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(select(User).where(User.email == email))
+        result = await self.session.execute(
+            select(User).where(User.email == email)
+        )
         return result.scalar_one_or_none()
 
     async def get_user_by_username(self, username: str) -> User | None:
@@ -166,7 +185,9 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(select(User).where(User.username == username))
+        result = await self.session.execute(
+            select(User).where(User.username == username)
+        )
         return result.scalar_one_or_none()
 
     async def get_user_by_api_key(self, api_key: str) -> User | None:
@@ -178,10 +199,14 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
-        result = await self.session.execute(select(User).where(User.api_key == api_key))
+        result = await self.session.execute(
+            select(User).where(User.api_key == api_key)
+        )
         return result.scalar_one_or_none()
 
-    async def update_user(self, user_id: str, user_data: UserUpdate) -> User:
+    async def update_user(
+        self, user_id: str, user_data: UserUpdate
+    ) -> User:
         """Update user profile.
 
         Args:
@@ -209,7 +234,9 @@ class AuthService:
         logger.info("User updated", user_id=user.id)
         return user
 
-    async def change_password(self, user_id: str, current_password: str, new_password: str) -> bool:
+    async def change_password(
+        self, user_id: str, current_password: str, new_password: str
+    ) -> bool:
         """Change user password.
 
         Args:
@@ -231,13 +258,16 @@ class AuthService:
 
         # Verify current password
         if not verify_password(current_password, user.hashed_password):
-            raise AuthenticationError("Current password is incorrect") from None
+            raise AuthenticationError(
+                "Current password is incorrect"
+            ) from None
 
         # Validate new password
         password_validation = validate_password_strength(new_password)
         if not password_validation["valid"]:
             raise BadRequestProblem(
-                detail="New password does not meet requirements", errors=password_validation["errors"]
+                detail="New password does not meet requirements",
+                errors=password_validation["errors"],
             ) from None
 
         # Update password
@@ -271,7 +301,9 @@ class AuthService:
 
         await self.session.commit()
 
-        logger.info("API key created", user_id=user.id, key_name=key_name)
+        logger.info(
+            "API key created", user_id=user.id, key_name=key_name
+        )
         return api_key
 
     async def revoke_api_key(self, user_id: str) -> bool:
@@ -328,15 +360,21 @@ class AuthService:
         Returns:
             Dictionary with tokens and expiration info
         """
-        access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
-        refresh_token_expires = timedelta(days=settings.refresh_token_expire_days)
+        access_token_expires = timedelta(
+            minutes=settings.access_token_expire_minutes
+        )
+        refresh_token_expires = timedelta(
+            days=settings.refresh_token_expire_days
+        )
 
         access_token = create_access_token(
-            data={"sub": user.id, "email": user.email}, expires_delta=access_token_expires
+            data={"sub": user.id, "email": user.email},
+            expires_delta=access_token_expires,
         )
 
         refresh_token = create_refresh_token(
-            data={"sub": user.id, "email": user.email}, expires_delta=refresh_token_expires
+            data={"sub": user.id, "email": user.email},
+            expires_delta=refresh_token_expires,
         )
 
         return {
@@ -372,7 +410,9 @@ class AuthService:
             raise AuthenticationError("User not found") from None
 
         if not user.is_active:
-            raise AuthenticationError("User account is deactivated") from None
+            raise AuthenticationError(
+                "User account is deactivated"
+            ) from None
 
         return user
 
@@ -398,6 +438,8 @@ class AuthService:
 
         user = await self.get_user_by_id(user_id)
         if not user or not user.is_active:
-            raise AuthenticationError("User not found or inactive") from None
+            raise AuthenticationError(
+                "User not found or inactive"
+            ) from None
 
         return self.create_tokens(user)

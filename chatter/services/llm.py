@@ -6,7 +6,12 @@ from typing import Any
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+    SystemMessage,
+)
 from langchain_openai import ChatOpenAI
 
 from chatter.config import settings
@@ -46,9 +51,14 @@ class LLMService:
                     temperature=settings.openai_temperature,
                     max_tokens=settings.openai_max_tokens,
                 )
-                logger.info("OpenAI provider initialized", model=settings.openai_model)
+                logger.info(
+                    "OpenAI provider initialized",
+                    model=settings.openai_model,
+                )
             except Exception as e:
-                logger.warning("Failed to initialize OpenAI provider", error=str(e))
+                logger.warning(
+                    "Failed to initialize OpenAI provider", error=str(e)
+                )
 
         # Anthropic
         if settings.anthropic_api_key:
@@ -59,9 +69,15 @@ class LLMService:
                     temperature=settings.anthropic_temperature,
                     max_tokens=settings.anthropic_max_tokens,
                 )
-                logger.info("Anthropic provider initialized", model=settings.anthropic_model)
+                logger.info(
+                    "Anthropic provider initialized",
+                    model=settings.anthropic_model,
+                )
             except Exception as e:
-                logger.warning("Failed to initialize Anthropic provider", error=str(e))
+                logger.warning(
+                    "Failed to initialize Anthropic provider",
+                    error=str(e),
+                )
 
     def get_provider(self, provider_name: str) -> BaseChatModel:
         """Get LLM provider by name.
@@ -93,7 +109,9 @@ class LLMService:
             LLMProviderError: If no providers available
         """
         if not self._providers:
-            raise LLMProviderError("No LLM providers available") from None
+            raise LLMProviderError(
+                "No LLM providers available"
+            ) from None
 
         # Try to get the configured default provider
         default_provider = settings.default_llm_provider
@@ -103,7 +121,9 @@ class LLMService:
         # Fall back to first available provider
         return next(iter(self._providers.values()))
 
-    def create_provider_from_profile(self, profile: Profile) -> BaseChatModel:
+    def create_provider_from_profile(
+        self, profile: Profile
+    ) -> BaseChatModel:
         """Create LLM provider from profile configuration.
 
         Args:
@@ -147,7 +167,9 @@ class LLMService:
             # you'd need more sophisticated provider configuration
             return provider
 
-    def convert_conversation_to_messages(self, conversation: Conversation, messages: list[Any]) -> list[BaseMessage]:
+    def convert_conversation_to_messages(
+        self, conversation: Conversation, messages: list[Any]
+    ) -> list[BaseMessage]:
         """Convert conversation messages to LangChain format.
 
         Args:
@@ -161,21 +183,32 @@ class LLMService:
 
         # Add system message if present
         if conversation.system_prompt:
-            langchain_messages.append(SystemMessage(content=conversation.system_prompt))
+            langchain_messages.append(
+                SystemMessage(content=conversation.system_prompt)
+            )
 
         # Convert messages
         for message in messages:
             if message.role == "user":
-                langchain_messages.append(HumanMessage(content=message.content))
+                langchain_messages.append(
+                    HumanMessage(content=message.content)
+                )
             elif message.role == "assistant":
-                langchain_messages.append(AIMessage(content=message.content))
+                langchain_messages.append(
+                    AIMessage(content=message.content)
+                )
             elif message.role == "system":
-                langchain_messages.append(SystemMessage(content=message.content))
+                langchain_messages.append(
+                    SystemMessage(content=message.content)
+                )
 
         return langchain_messages
 
     async def generate_response(
-        self, messages: list[BaseMessage], provider: BaseChatModel | None = None, **kwargs
+        self,
+        messages: list[BaseMessage],
+        provider: BaseChatModel | None = None,
+        **kwargs,
     ) -> tuple[str, dict[str, Any]]:
         """Generate response using LLM.
 
@@ -203,29 +236,48 @@ class LLMService:
             usage_info = {
                 "response_time_ms": response_time_ms,
                 "model": getattr(provider, "model_name", "unknown"),
-                "provider": provider.__class__.__name__.lower().replace("chat", ""),
+                "provider": provider.__class__.__name__.lower().replace(
+                    "chat", ""
+                ),
             }
 
             # Try to extract token usage if available
             if hasattr(response, "response_metadata"):
-                token_usage = response.response_metadata.get("token_usage", {})
+                token_usage = response.response_metadata.get(
+                    "token_usage", {}
+                )
                 if token_usage:
                     usage_info.update(
                         {
-                            "prompt_tokens": token_usage.get("prompt_tokens"),
-                            "completion_tokens": token_usage.get("completion_tokens"),
-                            "total_tokens": token_usage.get("total_tokens"),
+                            "prompt_tokens": token_usage.get(
+                                "prompt_tokens"
+                            ),
+                            "completion_tokens": token_usage.get(
+                                "completion_tokens"
+                            ),
+                            "total_tokens": token_usage.get(
+                                "total_tokens"
+                            ),
                         }
                     )
 
             return response.content, usage_info
 
         except Exception as e:
-            logger.error("LLM generation failed", error=str(e), provider=provider.__class__.__name__)
-            raise LLMProviderError(f"Generation failed: {str(e)}") from e
+            logger.error(
+                "LLM generation failed",
+                error=str(e),
+                provider=provider.__class__.__name__,
+            )
+            raise LLMProviderError(
+                f"Generation failed: {str(e)}"
+            ) from e
 
     async def generate_streaming_response(
-        self, messages: list[BaseMessage], provider: BaseChatModel | None = None, **kwargs
+        self,
+        messages: list[BaseMessage],
+        provider: BaseChatModel | None = None,
+        **kwargs,
     ) -> AsyncGenerator[dict[str, Any], None]:
         """Generate streaming response using LLM.
 
@@ -261,7 +313,9 @@ class LLMService:
                 "usage": {
                     "response_time_ms": response_time_ms,
                     "model": getattr(provider, "model_name", "unknown"),
-                    "provider": provider.__class__.__name__.lower().replace("chat", ""),
+                    "provider": provider.__class__.__name__.lower().replace(
+                        "chat", ""
+                    ),
                     "full_content": full_content,
                 },
             }
@@ -270,7 +324,11 @@ class LLMService:
             yield {"type": "end"}
 
         except Exception as e:
-            logger.error("Streaming generation failed", error=str(e), provider=provider.__class__.__name__)
+            logger.error(
+                "Streaming generation failed",
+                error=str(e),
+                provider=provider.__class__.__name__,
+            )
             yield {"type": "error", "error": str(e)}
 
     def list_available_providers(self) -> list[str]:
@@ -291,7 +349,9 @@ class LLMService:
             Provider information
         """
         if provider_name not in self._providers:
-            raise LLMProviderError(f"Provider '{provider_name}' not available") from None
+            raise LLMProviderError(
+                f"Provider '{provider_name}' not available"
+            ) from None
 
         provider = self._providers[provider_name]
 
@@ -303,21 +363,39 @@ class LLMService:
         }
 
     def create_conversation_chain(
-        self, provider_name: str, system_message: str | None = None, include_history: bool = True
+        self,
+        provider_name: str,
+        system_message: str | None = None,
+        include_history: bool = True,
     ):
         """Create a conversation chain using LangChain orchestrator."""
         provider = self.get_provider(provider_name)
         return orchestrator.create_chat_chain(
-            llm=provider, system_message=system_message, include_history=include_history
+            llm=provider,
+            system_message=system_message,
+            include_history=include_history,
         )
 
-    def create_rag_chain(self, provider_name: str, retriever, system_message: str | None = None):
+    def create_rag_chain(
+        self,
+        provider_name: str,
+        retriever,
+        system_message: str | None = None,
+    ):
         """Create a RAG chain using LangChain orchestrator."""
         provider = self.get_provider(provider_name)
-        return orchestrator.create_rag_chain(llm=provider, retriever=retriever, system_message=system_message)
+        return orchestrator.create_rag_chain(
+            llm=provider,
+            retriever=retriever,
+            system_message=system_message,
+        )
 
     async def generate_with_tools(
-        self, messages: list[BaseMessage], tools: list[Any] = None, provider: BaseChatModel | None = None, **kwargs
+        self,
+        messages: list[BaseMessage],
+        tools: list[Any] = None,
+        provider: BaseChatModel | None = None,
+        **kwargs,
     ) -> tuple[str, dict[str, Any]]:
         """Generate response with tool calling capabilities."""
         if not provider:
@@ -337,32 +415,50 @@ class LLMService:
         try:
             start_time = asyncio.get_event_loop().time()
             response = await provider_with_tools.ainvoke(messages)
-            response_time_ms = int((asyncio.get_event_loop().time() - start_time) * 1000)
+            response_time_ms = int(
+                (asyncio.get_event_loop().time() - start_time) * 1000
+            )
 
             usage_info = {
                 "response_time_ms": response_time_ms,
                 "model": getattr(provider, "model_name", "unknown"),
-                "provider": provider.__class__.__name__.lower().replace("chat", ""),
+                "provider": provider.__class__.__name__.lower().replace(
+                    "chat", ""
+                ),
                 "tools_available": len(tools) if tools else 0,
             }
 
             # Try to extract token usage if available
             if hasattr(response, "response_metadata"):
-                token_usage = response.response_metadata.get("token_usage", {})
+                token_usage = response.response_metadata.get(
+                    "token_usage", {}
+                )
                 if token_usage:
                     usage_info.update(
                         {
-                            "prompt_tokens": token_usage.get("prompt_tokens"),
-                            "completion_tokens": token_usage.get("completion_tokens"),
-                            "total_tokens": token_usage.get("total_tokens"),
+                            "prompt_tokens": token_usage.get(
+                                "prompt_tokens"
+                            ),
+                            "completion_tokens": token_usage.get(
+                                "completion_tokens"
+                            ),
+                            "total_tokens": token_usage.get(
+                                "total_tokens"
+                            ),
                         }
                     )
 
             return response.content, usage_info
 
         except Exception as e:
-            logger.error("LLM generation with tools failed", error=str(e), provider=provider.__class__.__name__)
-            raise LLMProviderError(f"Generation with tools failed: {str(e)}") from e
+            logger.error(
+                "LLM generation with tools failed",
+                error=str(e),
+                provider=provider.__class__.__name__,
+            )
+            raise LLMProviderError(
+                f"Generation with tools failed: {str(e)}"
+            ) from e
 
     async def create_langgraph_workflow(
         self,
@@ -379,9 +475,13 @@ class LLMService:
 
         if workflow_type == "rag":
             if not retriever:
-                raise LLMProviderError("Retriever required for RAG workflow") from None
+                raise LLMProviderError(
+                    "Retriever required for RAG workflow"
+                ) from None
             return workflow_manager.create_rag_conversation_workflow(
-                llm=provider, retriever=retriever, system_message=system_message
+                llm=provider,
+                retriever=retriever,
+                system_message=system_message,
             )
         elif workflow_type == "tools":
             if not tools:
@@ -391,4 +491,6 @@ class LLMService:
                 llm=provider, tools=tools, system_message=system_message
             )
         else:  # basic
-            return workflow_manager.create_basic_conversation_workflow(llm=provider, system_message=system_message)
+            return workflow_manager.create_basic_conversation_workflow(
+                llm=provider, system_message=system_message
+            )

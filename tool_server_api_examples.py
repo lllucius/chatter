@@ -13,7 +13,7 @@ import requests
 API_BASE_URL = "http://localhost:8000/api/v1"
 AUTH_HEADERS = {
     "Authorization": "Bearer your_jwt_token_here",
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
 }
 
 
@@ -26,25 +26,24 @@ def create_tool_server_example():
         "description": "A specialized calculator with advanced mathematical functions",
         "command": "python",
         "args": ["-m", "advanced_calculator", "--port", "8080"],
-        "env": {
-            "CALC_MODE": "advanced",
-            "LOG_LEVEL": "info"
-        },
+        "env": {"CALC_MODE": "advanced", "LOG_LEVEL": "info"},
         "auto_start": True,
         "auto_update": True,
-        "max_failures": 3
+        "max_failures": 3,
     }
 
     response = requests.post(
         f"{API_BASE_URL}/toolservers/servers",
         headers=AUTH_HEADERS,
-        json=server_data
+        json=server_data,
     )
 
     if response.status_code == 201:
         server = response.json()
-        print(f"✅ Created server: {server['name']} (ID: {server['id']})")
-        return server['id']
+        print(
+            f"✅ Created server: {server['name']} (ID: {server['id']})"
+        )
+        return server["id"]
     else:
         print(f"❌ Failed to create server: {response.text}")
         return None
@@ -55,20 +54,21 @@ def list_tool_servers_example():
 
     # List all servers
     response = requests.get(
-        f"{API_BASE_URL}/toolservers/servers",
-        headers=AUTH_HEADERS
+        f"{API_BASE_URL}/toolservers/servers", headers=AUTH_HEADERS
     )
 
     if response.status_code == 200:
         servers = response.json()
         print(f"📋 Found {len(servers)} servers:")
         for server in servers:
-            print(f"   - {server['name']}: {server['status']} ({server['display_name']})")
+            print(
+                f"   - {server['name']}: {server['status']} ({server['display_name']})"
+            )
 
     # List only enabled servers
     response = requests.get(
         f"{API_BASE_URL}/toolservers/servers?status=enabled",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -78,7 +78,7 @@ def list_tool_servers_example():
     # List excluding built-in servers
     response = requests.get(
         f"{API_BASE_URL}/toolservers/servers?include_builtin=false",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -91,20 +91,24 @@ def get_server_details_example(server_id: str):
 
     response = requests.get(
         f"{API_BASE_URL}/toolservers/servers/{server_id}",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
         server = response.json()
         print(f"📄 Server Details for {server['name']}:")
         print(f"   - Status: {server['status']}")
-        print(f"   - Command: {server['command']} {' '.join(server['args'])}")
+        print(
+            f"   - Command: {server['command']} {' '.join(server['args'])}"
+        )
         print(f"   - Auto-start: {server['auto_start']}")
         print(f"   - Auto-update: {server['auto_update']}")
         print(f"   - Tools: {len(server.get('tools', []))}")
 
-        if server.get('last_health_check'):
-            print(f"   - Last health check: {server['last_health_check']}")
+        if server.get("last_health_check"):
+            print(
+                f"   - Last health check: {server['last_health_check']}"
+            )
     else:
         print(f"❌ Server not found: {response.text}")
 
@@ -116,13 +120,13 @@ def update_server_example(server_id: str):
         "display_name": "Updated Calculator Server",
         "description": "Updated description with new features",
         "auto_start": False,
-        "max_failures": 5
+        "max_failures": 5,
     }
 
     response = requests.put(
         f"{API_BASE_URL}/toolservers/servers/{server_id}",
         headers=AUTH_HEADERS,
-        json=update_data
+        json=update_data,
     )
 
     if response.status_code == 200:
@@ -140,7 +144,7 @@ def server_control_examples(server_id: str):
     # Start server
     response = requests.post(
         f"{API_BASE_URL}/toolservers/servers/{server_id}/start",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -150,7 +154,7 @@ def server_control_examples(server_id: str):
     # Check health
     response = requests.get(
         f"{API_BASE_URL}/toolservers/servers/{server_id}/health",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -163,7 +167,7 @@ def server_control_examples(server_id: str):
     # Stop server
     response = requests.post(
         f"{API_BASE_URL}/toolservers/servers/{server_id}/stop",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -173,7 +177,7 @@ def server_control_examples(server_id: str):
     # Restart server
     response = requests.post(
         f"{API_BASE_URL}/toolservers/servers/{server_id}/restart",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -183,7 +187,7 @@ def server_control_examples(server_id: str):
     # Enable server
     response = requests.post(
         f"{API_BASE_URL}/toolservers/servers/{server_id}/enable",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -193,7 +197,7 @@ def server_control_examples(server_id: str):
     # Disable server
     response = requests.post(
         f"{API_BASE_URL}/toolservers/servers/{server_id}/disable",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -207,7 +211,7 @@ def tool_management_examples(server_id: str):
     # Get server tools
     response = requests.get(
         f"{API_BASE_URL}/toolservers/servers/{server_id}/tools",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -217,27 +221,36 @@ def tool_management_examples(server_id: str):
         for tool in tools:
             print(f"   - {tool['name']}: {tool['status']}")
             print(f"     Description: {tool['description']}")
-            print(f"     Calls: {tool['total_calls']}, Errors: {tool['total_errors']}")
+            print(
+                f"     Calls: {tool['total_calls']}, Errors: {tool['total_errors']}"
+            )
 
-            if tool['avg_response_time_ms']:
-                print(f"     Avg response time: {tool['avg_response_time_ms']:.1f}ms")
+            if tool["avg_response_time_ms"]:
+                print(
+                    f"     Avg response time: {tool['avg_response_time_ms']:.1f}ms"
+                )
 
             # Enable/disable individual tools
-            if tool['status'] == 'disabled':
+            if tool["status"] == "disabled":
                 enable_response = requests.post(
                     f"{API_BASE_URL}/toolservers/tools/{tool['id']}/enable",
-                    headers=AUTH_HEADERS
+                    headers=AUTH_HEADERS,
                 )
                 if enable_response.status_code == 200:
                     print(f"     ✅ Enabled tool: {tool['name']}")
 
-            elif tool['status'] == 'enabled' and tool['total_errors'] > 10:
+            elif (
+                tool["status"] == "enabled"
+                and tool["total_errors"] > 10
+            ):
                 disable_response = requests.post(
                     f"{API_BASE_URL}/toolservers/tools/{tool['id']}/disable",
-                    headers=AUTH_HEADERS
+                    headers=AUTH_HEADERS,
                 )
                 if disable_response.status_code == 200:
-                    print(f"     ❌ Disabled problematic tool: {tool['name']}")
+                    print(
+                        f"     ❌ Disabled problematic tool: {tool['name']}"
+                    )
 
 
 def analytics_examples(server_id: str):
@@ -246,7 +259,7 @@ def analytics_examples(server_id: str):
     # Server-specific metrics
     response = requests.get(
         f"{API_BASE_URL}/toolservers/servers/{server_id}/metrics",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -258,16 +271,18 @@ def analytics_examples(server_id: str):
         print(f"   - Total errors: {metrics['total_errors']}")
         print(f"   - Success rate: {metrics['success_rate']:.2%}")
 
-        if metrics['avg_response_time_ms']:
-            print(f"   - Avg response time: {metrics['avg_response_time_ms']:.1f}ms")
+        if metrics["avg_response_time_ms"]:
+            print(
+                f"   - Avg response time: {metrics['avg_response_time_ms']:.1f}ms"
+            )
 
-        if metrics['last_activity']:
+        if metrics["last_activity"]:
             print(f"   - Last activity: {metrics['last_activity']}")
 
     # System-wide analytics
     response = requests.get(
         f"{API_BASE_URL}/analytics/toolservers?period=7d",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 200:
@@ -278,20 +293,28 @@ def analytics_examples(server_id: str):
         print(f"   - Total tools: {analytics['total_tools']}")
         print(f"   - Enabled tools: {analytics['enabled_tools']}")
         print(f"   - Calls this week: {analytics['total_calls_week']}")
-        print(f"   - Overall success rate: {analytics['overall_success_rate']:.2%}")
-        print(f"   - Avg response time: {analytics['avg_response_time_ms']:.1f}ms")
+        print(
+            f"   - Overall success rate: {analytics['overall_success_rate']:.2%}"
+        )
+        print(
+            f"   - Avg response time: {analytics['avg_response_time_ms']:.1f}ms"
+        )
 
         # Top tools
-        if analytics['top_tools']:
+        if analytics["top_tools"]:
             print("\n🔝 Top Tools:")
-            for tool in analytics['top_tools'][:5]:
-                print(f"   - {tool['tool_name']} ({tool['server_name']}): {tool['total_calls']} calls")
+            for tool in analytics["top_tools"][:5]:
+                print(
+                    f"   - {tool['tool_name']} ({tool['server_name']}): {tool['total_calls']} calls"
+                )
 
         # Failing tools
-        if analytics['failing_tools']:
+        if analytics["failing_tools"]:
             print("\n⚠️  Failing Tools:")
-            for tool in analytics['failing_tools']:
-                print(f"   - {tool['tool_name']}: {tool['success_rate']:.2%} success rate")
+            for tool in analytics["failing_tools"]:
+                print(
+                    f"   - {tool['tool_name']}: {tool['success_rate']:.2%} success rate"
+                )
 
 
 def bulk_operations_example():
@@ -299,13 +322,14 @@ def bulk_operations_example():
 
     # First, get list of servers to work with
     response = requests.get(
-        f"{API_BASE_URL}/toolservers/servers",
-        headers=AUTH_HEADERS
+        f"{API_BASE_URL}/toolservers/servers", headers=AUTH_HEADERS
     )
 
     if response.status_code == 200:
         servers = response.json()
-        server_ids = [s['id'] for s in servers if not s['is_builtin']][:3]  # Max 3 custom servers
+        server_ids = [s["id"] for s in servers if not s["is_builtin"]][
+            :3
+        ]  # Max 3 custom servers
 
         if not server_ids:
             print("ℹ️  No custom servers available for bulk operations")
@@ -315,13 +339,13 @@ def bulk_operations_example():
         bulk_operation = {
             "server_ids": server_ids,
             "operation": "restart",
-            "parameters": {}
+            "parameters": {},
         }
 
         response = requests.post(
             f"{API_BASE_URL}/toolservers/servers/bulk",
             headers=AUTH_HEADERS,
-            json=bulk_operation
+            json=bulk_operation,
         )
 
         if response.status_code == 200:
@@ -331,22 +355,24 @@ def bulk_operations_example():
             print(f"   - Successful: {result['successful']}")
             print(f"   - Failed: {result['failed']}")
 
-            if result['errors']:
+            if result["errors"]:
                 print(f"   - Errors: {result['errors']}")
 
         # Bulk enable operation
-        bulk_operation['operation'] = 'enable'
+        bulk_operation["operation"] = "enable"
 
         response = requests.post(
             f"{API_BASE_URL}/toolservers/servers/bulk",
             headers=AUTH_HEADERS,
-            json=bulk_operation
+            json=bulk_operation,
         )
 
         if response.status_code == 200:
             result = response.json()
             print("✅ Bulk Enable Results:")
-            print(f"   - Successful: {result['successful']}/{result['total_requested']}")
+            print(
+                f"   - Successful: {result['successful']}/{result['total_requested']}"
+            )
 
 
 def time_based_analytics_example():
@@ -357,7 +383,7 @@ def time_based_analytics_example():
     for period in time_periods:
         response = requests.get(
             f"{API_BASE_URL}/analytics/toolservers?period={period}",
-            headers=AUTH_HEADERS
+            headers=AUTH_HEADERS,
         )
 
         if response.status_code == 200:
@@ -373,7 +399,9 @@ def time_based_analytics_example():
                 calls_key = "total_calls_month"
 
             total_calls = analytics.get(calls_key, 0)
-            print(f"📅 {period.upper()} Analytics: {total_calls} total calls")
+            print(
+                f"📅 {period.upper()} Analytics: {total_calls} total calls"
+            )
 
 
 def delete_server_example(server_id: str):
@@ -381,7 +409,7 @@ def delete_server_example(server_id: str):
 
     response = requests.delete(
         f"{API_BASE_URL}/toolservers/servers/{server_id}",
-        headers=AUTH_HEADERS
+        headers=AUTH_HEADERS,
     )
 
     if response.status_code == 204:

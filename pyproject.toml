@@ -140,8 +140,8 @@ path = "chatter/__init__.py"
 packages = ["chatter"]
 
 [tool.ruff]
-target-version = "py311"
-line-length = 120
+target-version = "py312"
+line-length = 72
 
 [tool.ruff.lint]
 select = [
@@ -167,18 +167,18 @@ keep-runtime-typing = true
 "chatter/models/*.py" = ["F821"]  # Allow forward references in SQLAlchemy models
 
 [tool.black]
-target-version = ["py311"]
-line-length = 120
+target-version = ["py312"]
+line-length = 72
 skip-string-normalization = true
 
 [tool.isort]
 profile = "black"
 multi_line_output = 3
-line_length = 120
+line_length = 72
 known_first_party = ["chatter"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.12"
 check_untyped_defs = true
 disallow_any_generics = true
 disallow_incomplete_defs = true

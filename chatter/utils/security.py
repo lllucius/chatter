@@ -34,10 +34,14 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     Returns:
         True if password matches, False otherwise
     """
-    return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
+    return bcrypt.checkpw(
+        plain_password.encode(), hashed_password.encode()
+    )
 
 
-def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
+def create_access_token(
+    data: dict[str, Any], expires_delta: timedelta | None = None
+) -> str:
     """Create a JWT access token.
 
     Args:
@@ -52,16 +56,22 @@ def create_access_token(data: dict[str, Any], expires_delta: timedelta | None = 
     if expires_delta:
         expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(UTC) + timedelta(minutes=settings.access_token_expire_minutes)
+        expire = datetime.now(UTC) + timedelta(
+            minutes=settings.access_token_expire_minutes
+        )
 
     to_encode.update({"exp": expire})
 
-    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.secret_key, algorithm=settings.algorithm
+    )
 
     return encoded_jwt
 
 
-def create_refresh_token(data: dict[str, Any], expires_delta: timedelta | None = None) -> str:
+def create_refresh_token(
+    data: dict[str, Any], expires_delta: timedelta | None = None
+) -> str:
     """Create a JWT refresh token.
 
     Args:
@@ -76,11 +86,15 @@ def create_refresh_token(data: dict[str, Any], expires_delta: timedelta | None =
     if expires_delta:
         expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.now(UTC) + timedelta(days=settings.refresh_token_expire_days)
+        expire = datetime.now(UTC) + timedelta(
+            days=settings.refresh_token_expire_days
+        )
 
     to_encode.update({"exp": expire, "type": "refresh"})
 
-    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.secret_key, algorithm=settings.algorithm
+    )
 
     return encoded_jwt
 
@@ -95,7 +109,9 @@ def verify_token(token: str) -> dict[str, Any] | None:
         Decoded token payload if valid, None otherwise
     """
     try:
-        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+        payload = jwt.decode(
+            token, settings.secret_key, algorithms=[settings.algorithm]
+        )
         return payload
     except JWTError as e:
         logger.debug("Token verification failed", error=str(e))
@@ -164,7 +180,11 @@ class TokenValidator:
         # Check token type for refresh tokens
         if self.token_type == "refresh":
             if payload.get("type") != "refresh":
-                logger.debug("Invalid token type", expected="refresh", actual=payload.get("type"))
+                logger.debug(
+                    "Invalid token type",
+                    expected="refresh",
+                    actual=payload.get("type"),
+                )
                 return None
 
         return payload
@@ -183,7 +203,7 @@ def generate_api_key(length: int = 32) -> str:
     import string
 
     alphabet = string.ascii_letters + string.digits
-    return ''.join(secrets.choice(alphabet) for _ in range(length))
+    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 def sanitize_input(input_string: str, max_length: int = 1000) -> str:
@@ -203,7 +223,11 @@ def sanitize_input(input_string: str, max_length: int = 1000) -> str:
     sanitized = input_string[:max_length]
 
     # Remove null bytes and other control characters
-    sanitized = ''.join(char for char in sanitized if ord(char) >= 32 or char in '\t\n\r')
+    sanitized = "".join(
+        char
+        for char in sanitized
+        if ord(char) >= 32 or char in "\t\n\r"
+    )
 
     # Strip whitespace
     sanitized = sanitized.strip()
@@ -222,7 +246,7 @@ def validate_email(email: str) -> bool:
     """
     import re
 
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     return bool(re.match(pattern, email))
 
 
@@ -243,32 +267,42 @@ def validate_password_strength(password: str) -> dict[str, Any]:
 
     if len(password) < 8:
         result["valid"] = False
-        result["errors"].append("Password must be at least 8 characters long")
+        result["errors"].append(
+            "Password must be at least 8 characters long"
+        )
     else:
         result["score"] += 1
 
     if not any(c.isupper() for c in password):
         result["valid"] = False
-        result["errors"].append("Password must contain at least one uppercase letter")
+        result["errors"].append(
+            "Password must contain at least one uppercase letter"
+        )
     else:
         result["score"] += 1
 
     if not any(c.islower() for c in password):
         result["valid"] = False
-        result["errors"].append("Password must contain at least one lowercase letter")
+        result["errors"].append(
+            "Password must contain at least one lowercase letter"
+        )
     else:
         result["score"] += 1
 
     if not any(c.isdigit() for c in password):
         result["valid"] = False
-        result["errors"].append("Password must contain at least one digit")
+        result["errors"].append(
+            "Password must contain at least one digit"
+        )
     else:
         result["score"] += 1
 
     special_chars = "!@#$%^&*()_+-=[]{}|;:,.<>?"
     if not any(c in special_chars for c in password):
         result["valid"] = False
-        result["errors"].append("Password must contain at least one special character")
+        result["errors"].append(
+            "Password must contain at least one special character"
+        )
     else:
         result["score"] += 1
 

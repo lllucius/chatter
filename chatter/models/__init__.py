@@ -1,6 +1,11 @@
 """Database models for Chatter application."""
 
-from chatter.models.analytics import ConversationStats, DocumentStats, ProfileStats, PromptStats
+from chatter.models.analytics import (
+    ConversationStats,
+    DocumentStats,
+    ProfileStats,
+    PromptStats,
+)
 from chatter.models.conversation import Conversation, Message
 from chatter.models.document import Document, DocumentChunk
 from chatter.models.profile import Profile

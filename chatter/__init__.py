@@ -11,7 +11,7 @@ __email__ = "team@chatter.ai"
 __description__ = "Advanced AI Chatbot Backend API Platform"
 
 # Version info tuple for programmatic access
-VERSION_INFO = tuple(int(part) for part in __version__.split('.'))
+VERSION_INFO = tuple(int(part) for part in __version__.split("."))
 
 # Public API
 __all__ = [

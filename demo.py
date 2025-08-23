@@ -32,7 +32,9 @@ class ChatterAPIDemo:
         """Async context manager exit."""
         await self.client.aclose()
 
-    async def register_user(self, email: str, username: str, password: str, full_name: str) -> dict[str, Any]:
+    async def register_user(
+        self, email: str, username: str, password: str, full_name: str
+    ) -> dict[str, Any]:
         """Register a new user.
 
         Args:
@@ -51,7 +53,7 @@ class ChatterAPIDemo:
                 "username": username,
                 "password": password,
                 "full_name": full_name,
-            }
+            },
         )
         response.raise_for_status()
         data = response.json()
@@ -77,7 +79,7 @@ class ChatterAPIDemo:
             json={
                 "email": email,
                 "password": password,
-            }
+            },
         )
         response.raise_for_status()
         data = response.json()
@@ -95,7 +97,9 @@ class ChatterAPIDemo:
             Headers with authorization
         """
         if not self.token:
-            raise ValueError("Not authenticated. Please login first.") from None
+            raise ValueError(
+                "Not authenticated. Please login first."
+            ) from None
 
         return {"Authorization": f"Bearer {self.token}"}
 
@@ -107,12 +111,14 @@ class ChatterAPIDemo:
         """
         response = await self.client.get(
             f"{self.base_url}/api/v1/auth/me",
-            headers=self._get_headers()
+            headers=self._get_headers(),
         )
         response.raise_for_status()
         return response.json()
 
-    async def create_conversation(self, title: str, description: str = None) -> dict[str, Any]:
+    async def create_conversation(
+        self, title: str, description: str = None
+    ) -> dict[str, Any]:
         """Create a new conversation.
 
         Args:
@@ -128,7 +134,7 @@ class ChatterAPIDemo:
             json={
                 "title": title,
                 "description": description,
-            }
+            },
         )
         response.raise_for_status()
         return response.json()
@@ -141,12 +147,14 @@ class ChatterAPIDemo:
         """
         response = await self.client.get(
             f"{self.base_url}/api/v1/chat/conversations",
-            headers=self._get_headers()
+            headers=self._get_headers(),
         )
         response.raise_for_status()
         return response.json()
 
-    async def get_conversation(self, conversation_id: str) -> dict[str, Any]:
+    async def get_conversation(
+        self, conversation_id: str
+    ) -> dict[str, Any]:
         """Get conversation details.
 
         Args:
@@ -157,7 +165,7 @@ class ChatterAPIDemo:
         """
         response = await self.client.get(
             f"{self.base_url}/api/v1/chat/conversations/{conversation_id}",
-            headers=self._get_headers()
+            headers=self._get_headers(),
         )
         response.raise_for_status()
         return response.json()
@@ -193,11 +201,13 @@ async def run_demo():
                 email="demo@chatter.ai",
                 username="demo_user",
                 password="DemoPassword123!",
-                full_name="Demo User"
+                full_name="Demo User",
             )
             print(f"   User created: {user_data['user']['username']}")
             print(f"   User ID: {user_data['user']['id']}")
-            print(f"   Token received: {user_data['access_token'][:20]}...")
+            print(
+                f"   Token received: {user_data['access_token'][:20]}..."
+            )
 
             # Get user profile
             print("\n3. Getting user profile...")
@@ -210,14 +220,14 @@ async def run_demo():
             print("\n4. Creating conversations...")
             conv1 = await demo.create_conversation(
                 title="General Chat",
-                description="A general conversation"
+                description="A general conversation",
             )
             print(f"   Created conversation: {conv1['title']}")
             print(f"   Conversation ID: {conv1['id']}")
 
             conv2 = await demo.create_conversation(
                 title="Technical Discussion",
-                description="Discussion about technical topics"
+                description="Discussion about technical topics",
             )
             print(f"   Created conversation: {conv2['title']}")
             print(f"   Conversation ID: {conv2['id']}")
@@ -226,25 +236,29 @@ async def run_demo():
             print("\n5. Listing conversations...")
             conversations = await demo.list_conversations()
             print(f"   Total conversations: {conversations['total']}")
-            for conv in conversations['conversations']:
+            for conv in conversations["conversations"]:
                 print(f"   - {conv['title']} (ID: {conv['id'][:8]}...)")
 
             # Get conversation details
             print("\n6. Getting conversation details...")
-            details = await demo.get_conversation(conv1['id'])
+            details = await demo.get_conversation(conv1["id"])
             print(f"   Conversation: {details['title']}")
             print(f"   Messages: {len(details['messages'])}")
             print(f"   Status: {details['status']}")
 
             print("\n✅ Demo completed successfully!")
-            print("\nThe Chatter API platform is working correctly with:")
+            print(
+                "\nThe Chatter API platform is working correctly with:"
+            )
             print("   - User authentication and registration")
             print("   - Conversation management")
             print("   - Health checks and monitoring")
             print("   - Database persistence")
             print("   - RESTful API endpoints")
 
-            print("\nTo test chat functionality, configure LLM providers in .env:")
+            print(
+                "\nTo test chat functionality, configure LLM providers in .env:"
+            )
             print("   OPENAI_API_KEY=your_openai_key")
             print("   ANTHROPIC_API_KEY=your_anthropic_key")
 

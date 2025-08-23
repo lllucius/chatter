@@ -79,7 +79,9 @@ class ToolServerScheduler:
                 break
             except Exception as e:
                 logger.error("Auto-update loop error", error=str(e))
-                await asyncio.sleep(300)  # Wait 5 minutes before retrying
+                await asyncio.sleep(
+                    300
+                )  # Wait 5 minutes before retrying
 
     async def _cleanup_loop(self):
         """Periodic cleanup of old usage data."""
@@ -101,33 +103,51 @@ class ToolServerScheduler:
                 service = ToolServerService(session)
 
                 # Get all enabled servers
-                servers = await service.list_servers(status=ServerStatus.ENABLED)
+                servers = await service.list_servers(
+                    status=ServerStatus.ENABLED
+                )
 
                 for server in servers:
                     try:
-                        health = await service.health_check_server(server.id)
+                        health = await service.health_check_server(
+                            server.id
+                        )
 
                         # Handle server issues
                         if not health.is_running and server.auto_start:
                             logger.info(
-                                "Auto-restarting unresponsive server", server_id=server.id, server_name=server.name
+                                "Auto-restarting unresponsive server",
+                                server_id=server.id,
+                                server_name=server.name,
                             )
                             await service.start_server(server.id)
 
                         elif not health.is_responsive:
-                            logger.warning("Server not responsive", server_id=server.id, server_name=server.name)
+                            logger.warning(
+                                "Server not responsive",
+                                server_id=server.id,
+                                server_name=server.name,
+                            )
 
                             # Try to restart if auto-start is enabled
                             if server.auto_start:
                                 await service.restart_server(server.id)
 
                     except Exception as e:
-                        logger.error("Health check failed for server", server_id=server.id, error=str(e))
+                        logger.error(
+                            "Health check failed for server",
+                            server_id=server.id,
+                            error=str(e),
+                        )
 
-                logger.debug("Health checks completed", server_count=len(servers))
+                logger.debug(
+                    "Health checks completed", server_count=len(servers)
+                )
 
         except Exception as e:
-            logger.error("Failed to perform health checks", error=str(e))
+            logger.error(
+                "Failed to perform health checks", error=str(e)
+            )
 
     async def _perform_auto_updates(self):
         """Perform auto-updates for servers with auto_update enabled."""
@@ -138,22 +158,33 @@ class ToolServerScheduler:
 
                 # Get all servers with auto_update enabled
                 servers = await service.list_servers()
-                auto_update_servers = [s for s in servers if s.auto_update]
+                auto_update_servers = [
+                    s for s in servers if s.auto_update
+                ]
 
                 for server in auto_update_servers:
                     try:
                         if server.status == ServerStatus.ENABLED:
                             logger.info(
-                                "Auto-updating server capabilities", server_id=server.id, server_name=server.name
+                                "Auto-updating server capabilities",
+                                server_id=server.id,
+                                server_name=server.name,
                             )
 
                             # Restart server to discover new tools
                             await service.restart_server(server.id)
 
                     except Exception as e:
-                        logger.error("Auto-update failed for server", server_id=server.id, error=str(e))
+                        logger.error(
+                            "Auto-update failed for server",
+                            server_id=server.id,
+                            error=str(e),
+                        )
 
-                logger.debug("Auto-updates completed", server_count=len(auto_update_servers))
+                logger.debug(
+                    "Auto-updates completed",
+                    server_count=len(auto_update_servers),
+                )
 
         except Exception as e:
             logger.error("Failed to perform auto-updates", error=str(e))
@@ -170,13 +201,20 @@ class ToolServerScheduler:
                 # Delete usage records older than 90 days
                 cutoff_date = datetime.now(UTC) - timedelta(days=90)
 
-                result = await session.execute(delete(ToolUsage).where(ToolUsage.called_at < cutoff_date))
+                result = await session.execute(
+                    delete(ToolUsage).where(
+                        ToolUsage.called_at < cutoff_date
+                    )
+                )
 
                 deleted_count = result.rowcount
                 await session.commit()
 
                 if deleted_count > 0:
-                    logger.info("Cleaned up old usage records", deleted_count=deleted_count)
+                    logger.info(
+                        "Cleaned up old usage records",
+                        deleted_count=deleted_count,
+                    )
 
         except Exception as e:
             logger.error("Failed to perform cleanup", error=str(e))

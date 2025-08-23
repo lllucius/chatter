@@ -5,7 +5,12 @@ from typing import Annotated, Any, TypedDict
 from uuid import uuid4
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import (
+    AIMessage,
+    BaseMessage,
+    HumanMessage,
+    SystemMessage,
+)
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
@@ -43,26 +48,38 @@ class LangGraphWorkflowManager:
             self.checkpointer = MemorySaver()
             logger.info("LangGraph Memory checkpointer initialized")
         except Exception as e:
-            logger.warning("Failed to initialize checkpointer", error=str(e))
+            logger.warning(
+                "Failed to initialize checkpointer", error=str(e)
+            )
             self.checkpointer = None
 
-    def create_basic_conversation_workflow(self, llm: BaseChatModel, system_message: str | None = None) -> Pregel:
+    def create_basic_conversation_workflow(
+        self, llm: BaseChatModel, system_message: str | None = None
+    ) -> Pregel:
         """Create a basic conversation workflow."""
 
-        async def call_model(state: ConversationState) -> dict[str, Any]:
+        async def call_model(
+            state: ConversationState
+        ) -> dict[str, Any]:
             """Call the language model."""
             messages = state["messages"]
 
             # Add system message if provided and not already present
-            if system_message and not any(isinstance(msg, SystemMessage) for msg in messages):
-                messages = [SystemMessage(content=system_message)] + list(messages)
+            if system_message and not any(
+                isinstance(msg, SystemMessage) for msg in messages
+            ):
+                messages = [
+                    SystemMessage(content=system_message)
+                ] + list(messages)
 
             try:
                 response = await llm.ainvoke(messages)
                 return {"messages": [response]}
             except Exception as e:
                 logger.error("Model call failed", error=str(e))
-                error_response = AIMessage(content=f"I'm sorry, I encountered an error: {str(e)}")
+                error_response = AIMessage(
+                    content=f"I'm sorry, I encountered an error: {str(e)}"
+                )
                 return {"messages": [error_response]}
 
         # Build workflow
@@ -72,16 +89,25 @@ class LangGraphWorkflowManager:
         workflow.add_edge("call_model", END)
 
         # Compile with checkpointer
-        app = workflow.compile(checkpointer=self.checkpointer, interrupt_before=[], interrupt_after=[])
+        app = workflow.compile(
+            checkpointer=self.checkpointer,
+            interrupt_before=[],
+            interrupt_after=[],
+        )
 
         return app
 
     def create_rag_conversation_workflow(
-        self, llm: BaseChatModel, retriever: Any, system_message: str | None = None
+        self,
+        llm: BaseChatModel,
+        retriever: Any,
+        system_message: str | None = None,
     ) -> Pregel:
         """Create a RAG-enabled conversation workflow."""
 
-        async def retrieve_context(state: ConversationState) -> dict[str, Any]:
+        async def retrieve_context(
+            state: ConversationState
+        ) -> dict[str, Any]:
             """Retrieve relevant context for the current query."""
             messages = state["messages"]
 
@@ -97,14 +123,18 @@ class LangGraphWorkflowManager:
 
             try:
                 # Retrieve relevant documents
-                docs = await retriever.ainvoke(last_human_message.content)
+                docs = await retriever.ainvoke(
+                    last_human_message.content
+                )
                 context = "\n\n".join(doc.page_content for doc in docs)
                 return {"retrieval_context": context}
             except Exception as e:
                 logger.error("Retrieval failed", error=str(e))
                 return {"retrieval_context": ""}
 
-        async def call_model_with_context(state: ConversationState) -> dict[str, Any]:
+        async def call_model_with_context(
+            state: ConversationState
+        ) -> dict[str, Any]:
             """Call the language model with retrieved context."""
             messages = list(state["messages"])
             context = state.get("retrieval_context", "")
@@ -122,14 +152,20 @@ class LangGraphWorkflowManager:
             if messages and isinstance(messages[0], SystemMessage):
                 messages[0] = SystemMessage(content=rag_system_message)
             else:
-                messages.insert(0, SystemMessage(content=rag_system_message))
+                messages.insert(
+                    0, SystemMessage(content=rag_system_message)
+                )
 
             try:
                 response = await llm.ainvoke(messages)
                 return {"messages": [response]}
             except Exception as e:
-                logger.error("Model call with context failed", error=str(e))
-                error_response = AIMessage(content=f"I'm sorry, I encountered an error: {str(e)}")
+                logger.error(
+                    "Model call with context failed", error=str(e)
+                )
+                error_response = AIMessage(
+                    content=f"I'm sorry, I encountered an error: {str(e)}"
+                )
                 return {"messages": [error_response]}
 
         # Build workflow
@@ -142,40 +178,61 @@ class LangGraphWorkflowManager:
         workflow.add_edge("call_model", END)
 
         # Compile with checkpointer
-        app = workflow.compile(checkpointer=self.checkpointer, interrupt_before=[], interrupt_after=[])
+        app = workflow.compile(
+            checkpointer=self.checkpointer,
+            interrupt_before=[],
+            interrupt_after=[],
+        )
 
         return app
 
     def create_tool_calling_workflow(
-        self, llm: BaseChatModel, tools: list[Any], system_message: str | None = None
+        self,
+        llm: BaseChatModel,
+        tools: list[Any],
+        system_message: str | None = None,
     ) -> Pregel:
         """Create a workflow with tool calling capabilities."""
 
         # Bind tools to the model
         llm_with_tools = llm.bind_tools(tools)
 
-        async def call_model(state: ConversationState) -> dict[str, Any]:
+        async def call_model(
+            state: ConversationState
+        ) -> dict[str, Any]:
             """Call the language model with tools."""
             messages = state["messages"]
 
             # Add system message if provided
-            if system_message and not any(isinstance(msg, SystemMessage) for msg in messages):
-                messages = [SystemMessage(content=system_message)] + list(messages)
+            if system_message and not any(
+                isinstance(msg, SystemMessage) for msg in messages
+            ):
+                messages = [
+                    SystemMessage(content=system_message)
+                ] + list(messages)
 
             try:
                 response = await llm_with_tools.ainvoke(messages)
                 return {"messages": [response]}
             except Exception as e:
-                logger.error("Model call with tools failed", error=str(e))
-                error_response = AIMessage(content=f"I'm sorry, I encountered an error: {str(e)}")
+                logger.error(
+                    "Model call with tools failed", error=str(e)
+                )
+                error_response = AIMessage(
+                    content=f"I'm sorry, I encountered an error: {str(e)}"
+                )
                 return {"messages": [error_response]}
 
-        async def execute_tools(state: ConversationState) -> dict[str, Any]:
+        async def execute_tools(
+            state: ConversationState
+        ) -> dict[str, Any]:
             """Execute any tool calls from the model."""
             messages = state["messages"]
             last_message = messages[-1] if messages else None
 
-            if not last_message or not hasattr(last_message, 'tool_calls'):
+            if not last_message or not hasattr(
+                last_message, "tool_calls"
+            ):
                 return {}
 
             tool_results = []
@@ -188,10 +245,24 @@ class LangGraphWorkflowManager:
                     # Execute tool (this is a simplified version)
                     # In a real implementation, you'd have a tool registry
                     result = f"Tool {tool_name} executed with args {tool_args}"
-                    tool_results.append({"tool_call_id": tool_call["id"], "result": result})
+                    tool_results.append(
+                        {
+                            "tool_call_id": tool_call["id"],
+                            "result": result,
+                        }
+                    )
                 except Exception as e:
-                    logger.error("Tool execution failed", tool=tool_call.get("name"), error=str(e))
-                    tool_results.append({"tool_call_id": tool_call.get("id"), "result": f"Error: {str(e)}"})
+                    logger.error(
+                        "Tool execution failed",
+                        tool=tool_call.get("name"),
+                        error=str(e),
+                    )
+                    tool_results.append(
+                        {
+                            "tool_call_id": tool_call.get("id"),
+                            "result": f"Error: {str(e)}",
+                        }
+                    )
 
             return {"tool_calls": tool_results}
 
@@ -200,7 +271,11 @@ class LangGraphWorkflowManager:
             messages = state["messages"]
             last_message = messages[-1] if messages else None
 
-            if last_message and hasattr(last_message, 'tool_calls') and last_message.tool_calls:
+            if (
+                last_message
+                and hasattr(last_message, "tool_calls")
+                and last_message.tool_calls
+            ):
                 return "execute_tools"
             return END
 
@@ -214,12 +289,19 @@ class LangGraphWorkflowManager:
         workflow.add_edge("execute_tools", "call_model")
 
         # Compile with checkpointer
-        app = workflow.compile(checkpointer=self.checkpointer, interrupt_before=[], interrupt_after=[])
+        app = workflow.compile(
+            checkpointer=self.checkpointer,
+            interrupt_before=[],
+            interrupt_after=[],
+        )
 
         return app
 
     async def run_workflow(
-        self, workflow: Pregel, initial_state: ConversationState, thread_id: str | None = None
+        self,
+        workflow: Pregel,
+        initial_state: ConversationState,
+        thread_id: str | None = None,
     ) -> ConversationState:
         """Run a workflow with state management."""
         if not thread_id:
@@ -229,13 +311,24 @@ class LangGraphWorkflowManager:
 
         try:
             # Run the workflow
-            result = await workflow.ainvoke(initial_state, config=config)
+            result = await workflow.ainvoke(
+                initial_state, config=config
+            )
             return result
         except Exception as e:
-            logger.error("Workflow execution failed", error=str(e), thread_id=thread_id)
+            logger.error(
+                "Workflow execution failed",
+                error=str(e),
+                thread_id=thread_id,
+            )
             raise
 
-    async def stream_workflow(self, workflow: Pregel, initial_state: ConversationState, thread_id: str | None = None):
+    async def stream_workflow(
+        self,
+        workflow: Pregel,
+        initial_state: ConversationState,
+        thread_id: str | None = None,
+    ):
         """Stream workflow execution for real-time updates."""
         if not thread_id:
             thread_id = str(uuid4())
@@ -243,13 +336,21 @@ class LangGraphWorkflowManager:
         config = {"configurable": {"thread_id": thread_id}}
 
         try:
-            async for event in workflow.astream(initial_state, config=config):
+            async for event in workflow.astream(
+                initial_state, config=config
+            ):
                 yield event
         except Exception as e:
-            logger.error("Workflow streaming failed", error=str(e), thread_id=thread_id)
+            logger.error(
+                "Workflow streaming failed",
+                error=str(e),
+                thread_id=thread_id,
+            )
             raise
 
-    async def get_conversation_history(self, workflow: Pregel, thread_id: str) -> ConversationState | None:
+    async def get_conversation_history(
+        self, workflow: Pregel, thread_id: str
+    ) -> ConversationState | None:
         """Get conversation history for a thread."""
         if not self.checkpointer:
             return None
@@ -260,7 +361,11 @@ class LangGraphWorkflowManager:
             state = await workflow.aget_state(config)
             return state.values if state else None
         except Exception as e:
-            logger.error("Failed to get conversation history", error=str(e), thread_id=thread_id)
+            logger.error(
+                "Failed to get conversation history",
+                error=str(e),
+                thread_id=thread_id,
+            )
             return None
 
 

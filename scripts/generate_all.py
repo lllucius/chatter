@@ -29,14 +29,35 @@ def run_command(cmd: list, description: str) -> bool:
 
 def main():
     """Main workflow function."""
-    parser = argparse.ArgumentParser(description="Automated OpenAPI docs and SDK generation workflow")
-    parser.add_argument("--docs-only", action="store_true", help="Generate only documentation, skip SDK")
-    parser.add_argument("--sdk-only", action="store_true", help="Generate only SDK, skip documentation")
-    parser.add_argument("--output-dir", default="./", help="Base output directory (default: current directory)")
-    parser.add_argument(
-        "--docs-format", choices=["json", "yaml", "all"], default="all", help="Documentation format to generate"
+    parser = argparse.ArgumentParser(
+        description="Automated OpenAPI docs and SDK generation workflow"
     )
-    parser.add_argument("--clean", action="store_true", help="Clean output directories before generating")
+    parser.add_argument(
+        "--docs-only",
+        action="store_true",
+        help="Generate only documentation, skip SDK",
+    )
+    parser.add_argument(
+        "--sdk-only",
+        action="store_true",
+        help="Generate only SDK, skip documentation",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default="./",
+        help="Base output directory (default: current directory)",
+    )
+    parser.add_argument(
+        "--docs-format",
+        choices=["json", "yaml", "all"],
+        default="all",
+        help="Documentation format to generate",
+    )
+    parser.add_argument(
+        "--clean",
+        action="store_true",
+        help="Clean output directories before generating",
+    )
 
     args = parser.parse_args()
 
@@ -44,7 +65,9 @@ def main():
     project_root = Path(__file__).parent.parent
     os.chdir(project_root)
 
-    print("🚀 Starting Chatter Documentation and SDK Generation Workflow")
+    print(
+        "🚀 Starting Chatter Documentation and SDK Generation Workflow"
+    )
     print(f"📁 Project root: {project_root}")
     print(f"📂 Output directory: {args.output_dir}")
 
@@ -91,9 +114,13 @@ def main():
         # Verify documentation files were created
         expected_files = []
         if args.docs_format in ["json", "all"]:
-            expected_files.extend(["openapi.json", "openapi-v0.1.0.json"])
+            expected_files.extend(
+                ["openapi.json", "openapi-v0.1.0.json"]
+            )
         if args.docs_format in ["yaml", "all"]:
-            expected_files.extend(["openapi.yaml", "openapi-v0.1.0.yaml"])
+            expected_files.extend(
+                ["openapi.yaml", "openapi-v0.1.0.yaml"]
+            )
 
         for file in expected_files:
             file_path = docs_output / file
@@ -124,7 +151,9 @@ def main():
             success = False
 
         # Verify SDK files were created
-        sdk_dir = project_root / "sdk" / "python"  # The CLI uses project_root internally
+        sdk_dir = (
+            project_root / "sdk" / "python"
+        )  # The CLI uses project_root internally
         expected_sdk_files = [
             "setup.py",
             "README.md",
@@ -154,7 +183,9 @@ def main():
 
         if not args.sdk_only:
             print("\n📚 Documentation generated:")
-            print(f"   📁 Location: {Path(args.output_dir) / 'docs' / 'api'}")
+            print(
+                f"   📁 Location: {Path(args.output_dir) / 'docs' / 'api'}"
+            )
             print(f"   🔗 Formats: {args.docs_format}")
 
         if not args.docs_only:
@@ -164,7 +195,9 @@ def main():
 
         print("\n📋 Next steps:")
         if not args.docs_only:
-            print(f"   • Test the SDK: cd {project_root / 'sdk' / 'python'} && pip install -e .")
+            print(
+                f"   • Test the SDK: cd {project_root / 'sdk' / 'python'} && pip install -e ."
+            )
             print("   • Run examples: python examples/basic_usage.py")
         if not args.sdk_only:
             print("   • View docs: python -m chatter docs serve")
@@ -173,7 +206,9 @@ def main():
         return 0
     else:
         print("❌ Workflow completed with errors!")
-        print("   Please check the error messages above and fix any issues.")
+        print(
+            "   Please check the error messages above and fix any issues."
+        )
         return 1
 
 

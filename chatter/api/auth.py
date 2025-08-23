@@ -6,10 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.auth import AuthService
 from chatter.schemas.auth import (
+    AccountDeactivateResponse,
     APIKeyCreate,
     APIKeyResponse,
     APIKeyRevokeResponse,
-    AccountDeactivateResponse,
     PasswordChange,
     PasswordChangeResponse,
     TokenRefresh,
@@ -29,7 +29,9 @@ router = APIRouter()
 security = HTTPBearer()
 
 
-async def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthService:
+async def get_auth_service(
+    session: AsyncSession = Depends(get_session)
+) -> AuthService:
     """Get authentication service instance.
 
     Args:
@@ -42,7 +44,8 @@ async def get_auth_service(session: AsyncSession = Depends(get_session)) -> Auth
 
 
 async def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security), auth_service: AuthService = Depends(get_auth_service)
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    auth_service: AuthService = Depends(get_auth_service),
 ):
     """Get current authenticated user.
 
@@ -56,8 +59,15 @@ async def get_current_user(
     return await auth_service.get_current_user(credentials.credentials)
 
 
-@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
-async def register(user_data: UserCreate, auth_service: AuthService = Depends(get_auth_service)) -> TokenResponse:
+@router.post(
+    "/register",
+    response_model=TokenResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def register(
+    user_data: UserCreate,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> TokenResponse:
     """Register a new user.
 
     Args:
@@ -70,11 +80,16 @@ async def register(user_data: UserCreate, auth_service: AuthService = Depends(ge
     user = await auth_service.create_user(user_data)
     tokens = auth_service.create_tokens(user)
 
-    return TokenResponse(**tokens, user=UserResponse.model_validate(user))
+    return TokenResponse(
+        **tokens, user=UserResponse.model_validate(user)
+    )
 
 
 @router.post("/login", response_model=TokenResponse)
-async def login(user_data: UserLogin, auth_service: AuthService = Depends(get_auth_service)) -> TokenResponse:
+async def login(
+    user_data: UserLogin,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> TokenResponse:
     """Authenticate user and return tokens.
 
     Args:
@@ -84,18 +99,25 @@ async def login(user_data: UserLogin, auth_service: AuthService = Depends(get_au
     Returns:
         User data and authentication tokens
     """
-    user = await auth_service.authenticate_user(user_data.email, user_data.password)
+    user = await auth_service.authenticate_user(
+        user_data.email, user_data.password
+    )
     if not user:
-        raise AuthenticationProblem(detail="Invalid email or password") from None
+        raise AuthenticationProblem(
+            detail="Invalid email or password"
+        ) from None
 
     tokens = auth_service.create_tokens(user)
 
-    return TokenResponse(**tokens, user=UserResponse.model_validate(user))
+    return TokenResponse(
+        **tokens, user=UserResponse.model_validate(user)
+    )
 
 
 @router.post("/refresh", response_model=TokenRefreshResponse)
 async def refresh_token(
-    token_data: TokenRefresh, auth_service: AuthService = Depends(get_auth_service)
+    token_data: TokenRefresh,
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenRefreshResponse:
     """Refresh access token.
 
@@ -106,12 +128,16 @@ async def refresh_token(
     Returns:
         New access and refresh tokens
     """
-    result = await auth_service.refresh_access_token(token_data.refresh_token)
+    result = await auth_service.refresh_access_token(
+        token_data.refresh_token
+    )
     return TokenRefreshResponse(**result)
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user=Depends(get_current_user)) -> UserResponse:
+async def get_current_user_info(
+    current_user=Depends(get_current_user)
+) -> UserResponse:
     """Get current user information.
 
     Args:
@@ -125,7 +151,9 @@ async def get_current_user_info(current_user=Depends(get_current_user)) -> UserR
 
 @router.put("/me", response_model=UserResponse)
 async def update_profile(
-    user_data: UserUpdate, current_user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
+    user_data: UserUpdate,
+    current_user=Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> UserResponse:
     """Update current user profile.
 
@@ -137,7 +165,9 @@ async def update_profile(
     Returns:
         Updated user data
     """
-    updated_user = await auth_service.update_user(current_user.id, user_data)
+    updated_user = await auth_service.update_user(
+        current_user.id, user_data
+    )
     return UserResponse.model_validate(updated_user)
 
 
@@ -157,9 +187,15 @@ async def change_password(
     Returns:
         Success message
     """
-    await auth_service.change_password(current_user.id, password_data.current_password, password_data.new_password)
+    await auth_service.change_password(
+        current_user.id,
+        password_data.current_password,
+        password_data.new_password,
+    )
 
-    return PasswordChangeResponse(message="Password changed successfully")
+    return PasswordChangeResponse(
+        message="Password changed successfully"
+    )
 
 
 @router.post("/api-key", response_model=APIKeyResponse)
@@ -178,16 +214,22 @@ async def create_api_key(
     Returns:
         Created API key
     """
-    api_key = await auth_service.create_api_key(current_user.id, key_data.name)
+    api_key = await auth_service.create_api_key(
+        current_user.id, key_data.name
+    )
 
     return APIKeyResponse(
-        id=current_user.id, api_key=api_key, api_key_name=key_data.name, created_at=current_user.updated_at
+        id=current_user.id,
+        api_key=api_key,
+        api_key_name=key_data.name,
+        created_at=current_user.updated_at,
     )
 
 
 @router.delete("/api-key", response_model=APIKeyRevokeResponse)
 async def revoke_api_key(
-    current_user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
+    current_user=Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> APIKeyRevokeResponse:
     """Revoke current user's API key.
 
@@ -204,7 +246,8 @@ async def revoke_api_key(
 
 @router.delete("/account", response_model=AccountDeactivateResponse)
 async def deactivate_account(
-    current_user=Depends(get_current_user), auth_service: AuthService = Depends(get_auth_service)
+    current_user=Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
 ) -> AccountDeactivateResponse:
     """Deactivate current user account.
 
@@ -216,4 +259,6 @@ async def deactivate_account(
         Success message
     """
     await auth_service.deactivate_user(current_user.id)
-    return AccountDeactivateResponse(message="Account deactivated successfully")
+    return AccountDeactivateResponse(
+        message="Account deactivated successfully"
+    )

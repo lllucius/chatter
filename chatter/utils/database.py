@@ -4,7 +4,12 @@ import asyncio
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import event, text
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from chatter.config import settings
 from chatter.models.base import Base
@@ -45,10 +50,23 @@ def get_engine() -> AsyncEngine:
         # Add query logging event listener
         if settings.debug_database_queries:
 
-            @event.listens_for(_engine.sync_engine, "before_cursor_execute")
-            def receive_before_cursor_execute(conn, cursor, statement, parameters, context, executemany):
+            @event.listens_for(
+                _engine.sync_engine, "before_cursor_execute"
+            )
+            def receive_before_cursor_execute(
+                conn,
+                cursor,
+                statement,
+                parameters,
+                context,
+                executemany,
+            ):
                 """Log SQL queries when debug mode is enabled."""
-                logger.debug("SQL Query", statement=statement, parameters=parameters)
+                logger.debug(
+                    "SQL Query",
+                    statement=statement,
+                    parameters=parameters,
+                )
 
     return _engine
 
@@ -106,10 +124,14 @@ async def initialize_default_data() -> None:
         existing_user = result.scalar_one_or_none()
 
         if existing_user is not None:
-            logger.info("Database already has users, skipping default data initialization")
+            logger.info(
+                "Database already has users, skipping default data initialization"
+            )
             return
 
-        logger.info("Virgin database detected, initializing default data")
+        logger.info(
+            "Virgin database detected, initializing default data"
+        )
 
         # Create admin user
         admin_user = User(
@@ -213,7 +235,14 @@ Step 4: Let me verify my reasoning.
 {verification}
 
 Final Answer: {conclusion}""",
-                "variables": ["problem", "understanding", "key_info", "reasoning_steps", "verification", "conclusion"],
+                "variables": [
+                    "problem",
+                    "understanding",
+                    "key_info",
+                    "reasoning_steps",
+                    "verification",
+                    "conclusion",
+                ],
                 "suggested_temperature": 0.4,
                 "suggested_max_tokens": 1500,
             },
@@ -271,7 +300,14 @@ Current Situation:
 Question: {question}
 
 Please provide a comprehensive answer that takes into account all the context provided above.""",
-                "variables": ["context_background", "detail1", "detail2", "detail3", "current_situation", "question"],
+                "variables": [
+                    "context_background",
+                    "detail1",
+                    "detail2",
+                    "detail3",
+                    "current_situation",
+                    "question",
+                ],
                 "suggested_temperature": 0.5,
                 "suggested_max_tokens": 1000,
             },
@@ -327,7 +363,12 @@ Please ensure your response strictly follows the specified format.""",
 ===== END OF INPUT =====
 
 Based on the delimited sections above, please provide your analysis.""",
-                "variables": ["main_content", "additional_context", "requirements", "constraints"],
+                "variables": [
+                    "main_content",
+                    "additional_context",
+                    "requirements",
+                    "constraints",
+                ],
                 "suggested_temperature": 0.3,
                 "suggested_max_tokens": 1200,
             },
@@ -382,8 +423,12 @@ Please create an improved prompt that addresses these meta-considerations.""",
                 content=prompt_data["content"],
                 variables=prompt_data["variables"],
                 examples=prompt_data.get("examples"),
-                suggested_temperature=prompt_data.get("suggested_temperature"),
-                suggested_max_tokens=prompt_data.get("suggested_max_tokens"),
+                suggested_temperature=prompt_data.get(
+                    "suggested_temperature"
+                ),
+                suggested_max_tokens=prompt_data.get(
+                    "suggested_max_tokens"
+                ),
                 is_public=True,
             )
             session.add(prompt)
@@ -491,7 +536,9 @@ Please create an improved prompt that addresses these meta-considerations.""",
             session.add(profile)
 
         await session.commit()
-        logger.info("Default data initialization completed successfully")
+        logger.info(
+            "Default data initialization completed successfully"
+        )
 
 
 async def init_database() -> None:
@@ -505,10 +552,14 @@ async def init_database() -> None:
     # For PostgreSQL, ensure pgvector extension is installed
     async with engine.begin() as conn:
         try:
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            await conn.execute(
+                text("CREATE EXTENSION IF NOT EXISTS vector;")
+            )
             logger.info("Ensured pgvector extension is installed")
         except Exception as e:
-            logger.warning("Could not install pgvector extension", error=str(e))
+            logger.warning(
+                "Could not install pgvector extension", error=str(e)
+            )
 
     # Create all tables
     async with engine.begin() as conn:
@@ -615,7 +666,9 @@ async def health_check() -> dict:
             "status": "healthy" if is_connected else "unhealthy",
             "connected": is_connected,
             "response_time_ms": response_time,
-            "database_url": settings.database_url_for_env.split("@")[-1],  # Hide credentials
+            "database_url": settings.database_url_for_env.split("@")[
+                -1
+            ],  # Hide credentials
         }
     except Exception as e:
         return {

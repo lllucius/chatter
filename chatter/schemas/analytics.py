@@ -11,151 +11,283 @@ from chatter.schemas.common import GetRequestBase
 class ConversationStatsResponse(BaseModel):
     """Schema for conversation statistics response."""
 
-    total_conversations: int = Field(..., description="Total number of conversations")
-    conversations_by_status: dict[str, int] = Field(..., description="Conversations grouped by status")
-    total_messages: int = Field(..., description="Total number of messages")
-    messages_by_role: dict[str, int] = Field(..., description="Messages grouped by role")
-    avg_messages_per_conversation: float = Field(..., description="Average messages per conversation")
+    total_conversations: int = Field(
+        ..., description="Total number of conversations"
+    )
+    conversations_by_status: dict[str, int] = Field(
+        ..., description="Conversations grouped by status"
+    )
+    total_messages: int = Field(
+        ..., description="Total number of messages"
+    )
+    messages_by_role: dict[str, int] = Field(
+        ..., description="Messages grouped by role"
+    )
+    avg_messages_per_conversation: float = Field(
+        ..., description="Average messages per conversation"
+    )
     total_tokens_used: int = Field(..., description="Total tokens used")
     total_cost: float = Field(..., description="Total cost incurred")
-    avg_response_time_ms: float = Field(..., description="Average response time in milliseconds")
-    conversations_by_date: dict[str, int] = Field(..., description="Conversations by date")
-    most_active_hours: dict[str, int] = Field(..., description="Most active hours")
-    popular_models: dict[str, int] = Field(..., description="Popular LLM models")
-    popular_providers: dict[str, int] = Field(..., description="Popular LLM providers")
+    avg_response_time_ms: float = Field(
+        ..., description="Average response time in milliseconds"
+    )
+    conversations_by_date: dict[str, int] = Field(
+        ..., description="Conversations by date"
+    )
+    most_active_hours: dict[str, int] = Field(
+        ..., description="Most active hours"
+    )
+    popular_models: dict[str, int] = Field(
+        ..., description="Popular LLM models"
+    )
+    popular_providers: dict[str, int] = Field(
+        ..., description="Popular LLM providers"
+    )
 
 
 class UsageMetricsResponse(BaseModel):
     """Schema for usage metrics response."""
 
     # Token usage
-    total_prompt_tokens: int = Field(..., description="Total prompt tokens")
-    total_completion_tokens: int = Field(..., description="Total completion tokens")
+    total_prompt_tokens: int = Field(
+        ..., description="Total prompt tokens"
+    )
+    total_completion_tokens: int = Field(
+        ..., description="Total completion tokens"
+    )
     total_tokens: int = Field(..., description="Total tokens used")
-    tokens_by_model: dict[str, int] = Field(..., description="Token usage by model")
-    tokens_by_provider: dict[str, int] = Field(..., description="Token usage by provider")
+    tokens_by_model: dict[str, int] = Field(
+        ..., description="Token usage by model"
+    )
+    tokens_by_provider: dict[str, int] = Field(
+        ..., description="Token usage by provider"
+    )
 
     # Cost metrics
     total_cost: float = Field(..., description="Total cost")
-    cost_by_model: dict[str, float] = Field(..., description="Cost by model")
-    cost_by_provider: dict[str, float] = Field(..., description="Cost by provider")
+    cost_by_model: dict[str, float] = Field(
+        ..., description="Cost by model"
+    )
+    cost_by_provider: dict[str, float] = Field(
+        ..., description="Cost by provider"
+    )
 
     # Usage over time
-    daily_usage: dict[str, int] = Field(..., description="Daily token usage")
+    daily_usage: dict[str, int] = Field(
+        ..., description="Daily token usage"
+    )
     daily_cost: dict[str, float] = Field(..., description="Daily cost")
 
     # Performance metrics
-    avg_response_time: float = Field(..., description="Average response time")
-    response_times_by_model: dict[str, float] = Field(..., description="Response times by model")
+    avg_response_time: float = Field(
+        ..., description="Average response time"
+    )
+    response_times_by_model: dict[str, float] = Field(
+        ..., description="Response times by model"
+    )
 
     # Activity metrics
     active_days: int = Field(..., description="Number of active days")
     peak_usage_hour: int = Field(..., description="Peak usage hour")
-    conversations_per_day: float = Field(..., description="Average conversations per day")
+    conversations_per_day: float = Field(
+        ..., description="Average conversations per day"
+    )
 
 
 class PerformanceMetricsResponse(BaseModel):
     """Schema for performance metrics response."""
 
     # Response time metrics
-    avg_response_time_ms: float = Field(..., description="Average response time")
-    median_response_time_ms: float = Field(..., description="Median response time")
-    p95_response_time_ms: float = Field(..., description="95th percentile response time")
-    p99_response_time_ms: float = Field(..., description="99th percentile response time")
+    avg_response_time_ms: float = Field(
+        ..., description="Average response time"
+    )
+    median_response_time_ms: float = Field(
+        ..., description="Median response time"
+    )
+    p95_response_time_ms: float = Field(
+        ..., description="95th percentile response time"
+    )
+    p99_response_time_ms: float = Field(
+        ..., description="99th percentile response time"
+    )
 
     # Throughput metrics
-    requests_per_minute: float = Field(..., description="Average requests per minute")
-    tokens_per_minute: float = Field(..., description="Average tokens per minute")
+    requests_per_minute: float = Field(
+        ..., description="Average requests per minute"
+    )
+    tokens_per_minute: float = Field(
+        ..., description="Average tokens per minute"
+    )
 
     # Error metrics
     total_errors: int = Field(..., description="Total number of errors")
     error_rate: float = Field(..., description="Error rate percentage")
-    errors_by_type: dict[str, int] = Field(..., description="Errors grouped by type")
+    errors_by_type: dict[str, int] = Field(
+        ..., description="Errors grouped by type"
+    )
 
     # Model performance
-    performance_by_model: dict[str, dict[str, float]] = Field(..., description="Performance metrics by model")
-    performance_by_provider: dict[str, dict[str, float]] = Field(..., description="Performance metrics by provider")
+    performance_by_model: dict[str, dict[str, float]] = Field(
+        ..., description="Performance metrics by model"
+    )
+    performance_by_provider: dict[str, dict[str, float]] = Field(
+        ..., description="Performance metrics by provider"
+    )
 
     # System metrics
-    database_response_time_ms: float = Field(..., description="Average database response time")
-    vector_search_time_ms: float = Field(..., description="Average vector search time")
-    embedding_generation_time_ms: float = Field(..., description="Average embedding generation time")
+    database_response_time_ms: float = Field(
+        ..., description="Average database response time"
+    )
+    vector_search_time_ms: float = Field(
+        ..., description="Average vector search time"
+    )
+    embedding_generation_time_ms: float = Field(
+        ..., description="Average embedding generation time"
+    )
 
 
 class DocumentAnalyticsResponse(BaseModel):
     """Schema for document analytics response."""
 
     # Document counts
-    total_documents: int = Field(..., description="Total number of documents")
-    documents_by_status: dict[str, int] = Field(..., description="Documents by processing status")
-    documents_by_type: dict[str, int] = Field(..., description="Documents by file type")
+    total_documents: int = Field(
+        ..., description="Total number of documents"
+    )
+    documents_by_status: dict[str, int] = Field(
+        ..., description="Documents by processing status"
+    )
+    documents_by_type: dict[str, int] = Field(
+        ..., description="Documents by file type"
+    )
 
     # Processing metrics
-    avg_processing_time_seconds: float = Field(..., description="Average processing time")
-    processing_success_rate: float = Field(..., description="Processing success rate")
+    avg_processing_time_seconds: float = Field(
+        ..., description="Average processing time"
+    )
+    processing_success_rate: float = Field(
+        ..., description="Processing success rate"
+    )
     total_chunks: int = Field(..., description="Total number of chunks")
-    avg_chunks_per_document: float = Field(..., description="Average chunks per document")
+    avg_chunks_per_document: float = Field(
+        ..., description="Average chunks per document"
+    )
 
     # Storage metrics
-    total_storage_bytes: int = Field(..., description="Total storage used")
-    avg_document_size_bytes: float = Field(..., description="Average document size")
-    storage_by_type: dict[str, int] = Field(..., description="Storage usage by document type")
+    total_storage_bytes: int = Field(
+        ..., description="Total storage used"
+    )
+    avg_document_size_bytes: float = Field(
+        ..., description="Average document size"
+    )
+    storage_by_type: dict[str, int] = Field(
+        ..., description="Storage usage by document type"
+    )
 
     # Search metrics
-    total_searches: int = Field(..., description="Total number of searches")
-    avg_search_results: float = Field(..., description="Average search results returned")
-    popular_search_terms: dict[str, int] = Field(..., description="Popular search terms")
+    total_searches: int = Field(
+        ..., description="Total number of searches"
+    )
+    avg_search_results: float = Field(
+        ..., description="Average search results returned"
+    )
+    popular_search_terms: dict[str, int] = Field(
+        ..., description="Popular search terms"
+    )
 
     # Access metrics
     total_views: int = Field(..., description="Total document views")
-    most_viewed_documents: list[dict[str, Any]] = Field(..., description="Most viewed documents")
-    documents_by_access_level: dict[str, int] = Field(..., description="Documents by access level")
+    most_viewed_documents: list[dict[str, Any]] = Field(
+        ..., description="Most viewed documents"
+    )
+    documents_by_access_level: dict[str, int] = Field(
+        ..., description="Documents by access level"
+    )
 
 
 class PromptAnalyticsResponse(BaseModel):
     """Schema for prompt analytics response."""
 
     # Prompt counts
-    total_prompts: int = Field(..., description="Total number of prompts")
-    prompts_by_category: dict[str, int] = Field(..., description="Prompts by category")
-    prompts_by_version: dict[str, int] = Field(..., description="Prompts by version")
+    total_prompts: int = Field(
+        ..., description="Total number of prompts"
+    )
+    prompts_by_category: dict[str, int] = Field(
+        ..., description="Prompts by category"
+    )
+    prompts_by_version: dict[str, int] = Field(
+        ..., description="Prompts by version"
+    )
 
     # Usage metrics
-    total_prompt_usage: int = Field(..., description="Total prompt usage count")
-    most_used_prompts: list[dict[str, Any]] = Field(..., description="Most used prompts")
-    avg_usage_per_prompt: float = Field(..., description="Average usage per prompt")
+    total_prompt_usage: int = Field(
+        ..., description="Total prompt usage count"
+    )
+    most_used_prompts: list[dict[str, Any]] = Field(
+        ..., description="Most used prompts"
+    )
+    avg_usage_per_prompt: float = Field(
+        ..., description="Average usage per prompt"
+    )
 
     # Performance metrics
-    avg_prompt_length: float = Field(..., description="Average prompt length")
-    prompts_by_length_range: dict[str, int] = Field(..., description="Prompts by length range")
+    avg_prompt_length: float = Field(
+        ..., description="Average prompt length"
+    )
+    prompts_by_length_range: dict[str, int] = Field(
+        ..., description="Prompts by length range"
+    )
 
     # Testing metrics
     total_tests: int = Field(..., description="Total prompt tests")
     avg_test_score: float = Field(..., description="Average test score")
-    prompts_with_tests: int = Field(..., description="Number of prompts with tests")
+    prompts_with_tests: int = Field(
+        ..., description="Number of prompts with tests"
+    )
 
 
 class ProfileAnalyticsResponse(BaseModel):
     """Schema for profile analytics response."""
 
     # Profile counts
-    total_profiles: int = Field(..., description="Total number of profiles")
-    profiles_by_type: dict[str, int] = Field(..., description="Profiles by type")
-    profiles_by_provider: dict[str, int] = Field(..., description="Profiles by LLM provider")
+    total_profiles: int = Field(
+        ..., description="Total number of profiles"
+    )
+    profiles_by_type: dict[str, int] = Field(
+        ..., description="Profiles by type"
+    )
+    profiles_by_provider: dict[str, int] = Field(
+        ..., description="Profiles by LLM provider"
+    )
 
     # Usage metrics
-    total_profile_usage: int = Field(..., description="Total profile usage count")
-    most_used_profiles: list[dict[str, Any]] = Field(..., description="Most used profiles")
-    avg_usage_per_profile: float = Field(..., description="Average usage per profile")
+    total_profile_usage: int = Field(
+        ..., description="Total profile usage count"
+    )
+    most_used_profiles: list[dict[str, Any]] = Field(
+        ..., description="Most used profiles"
+    )
+    avg_usage_per_profile: float = Field(
+        ..., description="Average usage per profile"
+    )
 
     # Configuration metrics
-    avg_temperature: float = Field(..., description="Average temperature setting")
-    avg_max_tokens: float = Field(..., description="Average max tokens setting")
-    popular_settings: dict[str, Any] = Field(..., description="Popular configuration settings")
+    avg_temperature: float = Field(
+        ..., description="Average temperature setting"
+    )
+    avg_max_tokens: float = Field(
+        ..., description="Average max tokens setting"
+    )
+    popular_settings: dict[str, Any] = Field(
+        ..., description="Popular configuration settings"
+    )
 
     # Performance metrics
-    performance_by_profile: dict[str, dict[str, float]] = Field(..., description="Performance by profile")
-    cost_by_profile: dict[str, float] = Field(..., description="Cost by profile")
+    performance_by_profile: dict[str, dict[str, float]] = Field(
+        ..., description="Performance by profile"
+    )
+    cost_by_profile: dict[str, float] = Field(
+        ..., description="Cost by profile"
+    )
 
 
 class SystemAnalyticsResponse(BaseModel):
@@ -163,58 +295,100 @@ class SystemAnalyticsResponse(BaseModel):
 
     # User activity
     total_users: int = Field(..., description="Total number of users")
-    active_users_today: int = Field(..., description="Active users today")
-    active_users_week: int = Field(..., description="Active users this week")
-    active_users_month: int = Field(..., description="Active users this month")
+    active_users_today: int = Field(
+        ..., description="Active users today"
+    )
+    active_users_week: int = Field(
+        ..., description="Active users this week"
+    )
+    active_users_month: int = Field(
+        ..., description="Active users this month"
+    )
 
     # System health
-    system_uptime_seconds: float = Field(..., description="System uptime in seconds")
-    avg_cpu_usage: float = Field(..., description="Average CPU usage percentage")
-    avg_memory_usage: float = Field(..., description="Average memory usage percentage")
-    database_connections: int = Field(..., description="Current database connections")
+    system_uptime_seconds: float = Field(
+        ..., description="System uptime in seconds"
+    )
+    avg_cpu_usage: float = Field(
+        ..., description="Average CPU usage percentage"
+    )
+    avg_memory_usage: float = Field(
+        ..., description="Average memory usage percentage"
+    )
+    database_connections: int = Field(
+        ..., description="Current database connections"
+    )
 
     # API metrics
-    total_api_requests: int = Field(..., description="Total API requests")
-    requests_per_endpoint: dict[str, int] = Field(..., description="Requests by endpoint")
-    avg_api_response_time: float = Field(..., description="Average API response time")
+    total_api_requests: int = Field(
+        ..., description="Total API requests"
+    )
+    requests_per_endpoint: dict[str, int] = Field(
+        ..., description="Requests by endpoint"
+    )
+    avg_api_response_time: float = Field(
+        ..., description="Average API response time"
+    )
     api_error_rate: float = Field(..., description="API error rate")
 
     # Resource usage
-    storage_usage_bytes: int = Field(..., description="Total storage usage")
-    vector_database_size_bytes: int = Field(..., description="Vector database size")
+    storage_usage_bytes: int = Field(
+        ..., description="Total storage usage"
+    )
+    vector_database_size_bytes: int = Field(
+        ..., description="Vector database size"
+    )
     cache_hit_rate: float = Field(..., description="Cache hit rate")
 
 
 class AnalyticsTimeRange(BaseModel):
     """Schema for analytics time range filter."""
 
-    start_date: datetime | None = Field(None, description="Start date for analytics")
-    end_date: datetime | None = Field(None, description="End date for analytics")
-    period: str = Field("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)")
+    start_date: datetime | None = Field(
+        None, description="Start date for analytics"
+    )
+    end_date: datetime | None = Field(
+        None, description="End date for analytics"
+    )
+    period: str = Field(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    )
 
 
 class ConversationStatsRequest(GetRequestBase):
     """Schema for conversation stats request."""
 
-    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+    time_range: AnalyticsTimeRange = Field(
+        default_factory=AnalyticsTimeRange,
+        description="Time range filter",
+    )
 
 
 class UsageMetricsRequest(GetRequestBase):
     """Schema for usage metrics request."""
 
-    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+    time_range: AnalyticsTimeRange = Field(
+        default_factory=AnalyticsTimeRange,
+        description="Time range filter",
+    )
 
 
 class PerformanceMetricsRequest(GetRequestBase):
     """Schema for performance metrics request."""
 
-    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+    time_range: AnalyticsTimeRange = Field(
+        default_factory=AnalyticsTimeRange,
+        description="Time range filter",
+    )
 
 
 class DocumentAnalyticsRequest(GetRequestBase):
     """Schema for document analytics request."""
 
-    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+    time_range: AnalyticsTimeRange = Field(
+        default_factory=AnalyticsTimeRange,
+        description="Time range filter",
+    )
 
 
 class SystemAnalyticsRequest(GetRequestBase):
@@ -226,22 +400,36 @@ class SystemAnalyticsRequest(GetRequestBase):
 class DashboardRequest(GetRequestBase):
     """Schema for dashboard request."""
 
-    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+    time_range: AnalyticsTimeRange = Field(
+        default_factory=AnalyticsTimeRange,
+        description="Time range filter",
+    )
 
 
 class ToolServerAnalyticsRequest(GetRequestBase):
     """Schema for tool server analytics request."""
 
-    time_range: AnalyticsTimeRange = Field(default_factory=AnalyticsTimeRange, description="Time range filter")
+    time_range: AnalyticsTimeRange = Field(
+        default_factory=AnalyticsTimeRange,
+        description="Time range filter",
+    )
 
 
 class AnalyticsExportRequest(BaseModel):
     """Schema for analytics export request."""
 
-    metrics: list[str] = Field(..., description="List of metrics to export")
-    time_range: AnalyticsTimeRange = Field(..., description="Time range for export")
-    format: str = Field("json", description="Export format (json, csv, xlsx)")
-    include_raw_data: bool = Field(False, description="Include raw data points")
+    metrics: list[str] = Field(
+        ..., description="List of metrics to export"
+    )
+    time_range: AnalyticsTimeRange = Field(
+        ..., description="Time range for export"
+    )
+    format: str = Field(
+        "json", description="Export format (json, csv, xlsx)"
+    )
+    include_raw_data: bool = Field(
+        False, description="Include raw data points"
+    )
 
 
 class AnalyticsExportResponse(BaseModel):
@@ -249,19 +437,33 @@ class AnalyticsExportResponse(BaseModel):
 
     export_id: str = Field(..., description="Export job ID")
     status: str = Field(..., description="Export status")
-    download_url: str | None = Field(None, description="Download URL when ready")
-    created_at: datetime = Field(..., description="Export creation time")
-    expires_at: datetime | None = Field(None, description="Download expiration time")
+    download_url: str | None = Field(
+        None, description="Download URL when ready"
+    )
+    created_at: datetime = Field(
+        ..., description="Export creation time"
+    )
+    expires_at: datetime | None = Field(
+        None, description="Download expiration time"
+    )
 
 
 class CustomMetricRequest(BaseModel):
     """Schema for custom metric creation request."""
 
-    name: str = Field(..., min_length=1, max_length=100, description="Metric name")
-    description: str | None = Field(None, description="Metric description")
+    name: str = Field(
+        ..., min_length=1, max_length=100, description="Metric name"
+    )
+    description: str | None = Field(
+        None, description="Metric description"
+    )
     query: str = Field(..., description="SQL query for the metric")
-    refresh_interval_minutes: int = Field(60, ge=1, le=1440, description="Refresh interval in minutes")
-    is_public: bool = Field(False, description="Whether metric is public")
+    refresh_interval_minutes: int = Field(
+        60, ge=1, le=1440, description="Refresh interval in minutes"
+    )
+    is_public: bool = Field(
+        False, description="Whether metric is public"
+    )
 
 
 class CustomMetricResponse(BaseModel):
@@ -271,11 +473,17 @@ class CustomMetricResponse(BaseModel):
 
     id: str = Field(..., description="Metric ID")
     name: str = Field(..., description="Metric name")
-    description: str | None = Field(None, description="Metric description")
+    description: str | None = Field(
+        None, description="Metric description"
+    )
     query: str = Field(..., description="SQL query")
-    refresh_interval_minutes: int = Field(..., description="Refresh interval")
+    refresh_interval_minutes: int = Field(
+        ..., description="Refresh interval"
+    )
     is_public: bool = Field(..., description="Public status")
-    last_updated: datetime | None = Field(None, description="Last update time")
+    last_updated: datetime | None = Field(
+        None, description="Last update time"
+    )
     owner_id: str = Field(..., description="Owner user ID")
     created_at: datetime = Field(..., description="Creation time")
 
@@ -283,10 +491,24 @@ class CustomMetricResponse(BaseModel):
 class DashboardResponse(BaseModel):
     """Schema for analytics dashboard response."""
 
-    conversation_stats: ConversationStatsResponse = Field(..., description="Conversation statistics")
-    usage_metrics: UsageMetricsResponse = Field(..., description="Usage metrics")
-    performance_metrics: PerformanceMetricsResponse = Field(..., description="Performance metrics")
-    document_analytics: DocumentAnalyticsResponse = Field(..., description="Document analytics")
-    system_health: SystemAnalyticsResponse = Field(..., description="System health metrics")
-    custom_metrics: list[dict[str, Any]] = Field(..., description="Custom metrics")
-    generated_at: datetime = Field(..., description="Dashboard generation time")
+    conversation_stats: ConversationStatsResponse = Field(
+        ..., description="Conversation statistics"
+    )
+    usage_metrics: UsageMetricsResponse = Field(
+        ..., description="Usage metrics"
+    )
+    performance_metrics: PerformanceMetricsResponse = Field(
+        ..., description="Performance metrics"
+    )
+    document_analytics: DocumentAnalyticsResponse = Field(
+        ..., description="Document analytics"
+    )
+    system_health: SystemAnalyticsResponse = Field(
+        ..., description="System health metrics"
+    )
+    custom_metrics: list[dict[str, Any]] = Field(
+        ..., description="Custom metrics"
+    )
+    generated_at: datetime = Field(
+        ..., description="Dashboard generation time"
+    )

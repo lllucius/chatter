@@ -1,12 +1,15 @@
 """Health check and monitoring endpoints."""
 
-from typing import Any
 
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
-from chatter.schemas.health import HealthCheckResponse, LivenessCheckResponse, ReadinessCheckResponse
+from chatter.schemas.health import (
+    HealthCheckResponse,
+    LivenessCheckResponse,
+    ReadinessCheckResponse,
+)
 from chatter.utils.database import get_session, health_check
 
 router = APIRouter()
@@ -28,7 +31,9 @@ async def health_check_endpoint() -> HealthCheckResponse:
 
 
 @router.get("/readyz", response_model=ReadinessCheckResponse)
-async def readiness_check(session: AsyncSession = Depends(get_session)) -> ReadinessCheckResponse:
+async def readiness_check(
+    session: AsyncSession = Depends(get_session)
+) -> ReadinessCheckResponse:
     """Readiness check endpoint with database connectivity.
 
     Args:
@@ -45,7 +50,9 @@ async def readiness_check(session: AsyncSession = Depends(get_session)) -> Readi
     }
 
     # Determine overall status
-    all_healthy = all(check.get("status") == "healthy" for check in checks.values())
+    all_healthy = all(
+        check.get("status") == "healthy" for check in checks.values()
+    )
 
     return ReadinessCheckResponse(
         status="ready" if all_healthy else "not_ready",

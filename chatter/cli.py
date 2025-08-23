@@ -17,7 +17,10 @@ from rich.prompt import Confirm, Prompt
 from rich.table import Table
 
 from chatter.config import settings
-from chatter.utils.database import check_database_connection, init_database
+from chatter.utils.database import (
+    check_database_connection,
+    init_database,
+)
 from chatter.utils.logging import get_logger
 
 app = typer.Typer(
@@ -33,9 +36,15 @@ class APIClient:
     """HTTP client for interacting with Chatter API."""
 
     def __init__(self, base_url: str = None, access_token: str = None):
-        self.base_url = base_url or f"http://{settings.host}:{settings.port}"
-        self.access_token = access_token or settings.chatter_access_token
-        self.client = httpx.AsyncClient(timeout=30.0, follow_redirects=True)
+        self.base_url = (
+            base_url or f"http://{settings.host}:{settings.port}"
+        )
+        self.access_token = (
+            access_token or settings.chatter_access_token
+        )
+        self.client = httpx.AsyncClient(
+            timeout=30.0, follow_redirects=True
+        )
 
     async def close(self):
         """Close the HTTP client."""
@@ -54,22 +63,32 @@ class APIClient:
         headers = self._get_headers()
 
         try:
-            response = await self.client.request(method, url, headers=headers, **kwargs)
+            response = await self.client.request(
+                method, url, headers=headers, **kwargs
+            )
             response.raise_for_status()
             return response.json() if response.content else None
         except httpx.HTTPStatusError as e:
             if e.response.status_code == 401:
-                console.print("❌ Authentication required. Please login first.")
+                console.print(
+                    "❌ Authentication required. Please login first."
+                )
                 raise typer.Exit(1) from None
             elif e.response.status_code == 403:
-                console.print("❌ Access denied. Insufficient permissions.")
+                console.print(
+                    "❌ Access denied. Insufficient permissions."
+                )
                 raise typer.Exit(1) from None
             else:
                 try:
-                    error_detail = e.response.json().get("detail", str(e))
+                    error_detail = e.response.json().get(
+                        "detail", str(e)
+                    )
                 except Exception:
                     error_detail = str(e)
-                console.print(f"❌ API Error ({e.response.status_code}): {error_detail}")
+                console.print(
+                    f"❌ API Error ({e.response.status_code}): {error_detail}"
+                )
                 raise typer.Exit(1) from None
         except httpx.RequestError as e:
             console.print(f"❌ Connection error: {e}")
@@ -81,7 +100,9 @@ def get_api_client() -> APIClient:
     """Get API client with configuration."""
     # Try to get access token from environment or config file
     token = os.getenv("CHATTER_ACCESS_TOKEN")
-    base_url = os.getenv("CHATTER_BASE_URL", f"http://{settings.host}:{settings.port}")
+    base_url = os.getenv(
+        "CHATTER_BASE_URL", f"http://{settings.host}:{settings.port}"
+    )
 
     return APIClient(base_url=base_url, access_token=token)
 
@@ -93,13 +114,27 @@ app.add_typer(prompts_app, name="prompts")
 
 @prompts_app.command("list")
 def list_prompts(
-    prompt_type: str = typer.Option(None, "--type", "-t", help="Filter by prompt type"),
-    category: str = typer.Option(None, "--category", "-c", help="Filter by category"),
-    tags: str = typer.Option(None, "--tags", help="Filter by tags (comma-separated)"),
-    public: bool = typer.Option(None, "--public", help="Filter by public status"),
-    chain: bool = typer.Option(None, "--chain", help="Filter by chain status"),
-    limit: int = typer.Option(20, "--limit", "-l", help="Maximum number of results"),
-    offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
+    prompt_type: str = typer.Option(
+        None, "--type", "-t", help="Filter by prompt type"
+    ),
+    category: str = typer.Option(
+        None, "--category", "-c", help="Filter by category"
+    ),
+    tags: str = typer.Option(
+        None, "--tags", help="Filter by tags (comma-separated)"
+    ),
+    public: bool = typer.Option(
+        None, "--public", help="Filter by public status"
+    ),
+    chain: bool = typer.Option(
+        None, "--chain", help="Filter by chain status"
+    ),
+    limit: int = typer.Option(
+        20, "--limit", "-l", help="Maximum number of results"
+    ),
+    offset: int = typer.Option(
+        0, "--offset", help="Number of results to skip"
+    ),
 ) -> None:
     """List available prompts."""
 
@@ -121,14 +156,18 @@ def list_prompts(
             if chain is not None:
                 params["is_chain"] = chain
 
-            response = await api_client.request("GET", "/prompts", params=params)
+            response = await api_client.request(
+                "GET", "/prompts", params=params
+            )
 
             if not response or not response.get("prompts"):
                 console.print("📝 No prompts found.")
                 return
 
             # Create table
-            table = Table(title=f"Prompts ({response['total_count']} total)")
+            table = Table(
+                title=f"Prompts ({response['total_count']} total)"
+            )
             table.add_column("ID", style="dim", no_wrap=True)
             table.add_column("Name", style="bold")
             table.add_column("Type", style="cyan")
@@ -145,7 +184,9 @@ def list_prompts(
                     prompt["category"],
                     str(prompt.get("usage_count", 0)),
                     "Yes" if prompt.get("is_public") else "No",
-                    prompt.get("created_at", "")[:10] if prompt.get("created_at") else "N/A",
+                    prompt.get("created_at", "")[:10]
+                    if prompt.get("created_at")
+                    else "N/A",
                 )
 
             console.print(table)
@@ -154,7 +195,9 @@ def list_prompts(
             total = response["total_count"]
             showing_from = offset + 1
             showing_to = min(offset + limit, total)
-            console.print(f"\n📄 Showing {showing_from}-{showing_to} of {total} prompts")
+            console.print(
+                f"\n📄 Showing {showing_from}-{showing_to} of {total} prompts"
+            )
 
         finally:
             await api_client.close()
@@ -165,14 +208,30 @@ def list_prompts(
 @prompts_app.command("create")
 def create_prompt(
     name: str = typer.Option(..., "--name", "-n", help="Prompt name"),
-    content: str = typer.Option(..., "--content", "-c", help="Prompt content"),
-    category: str = typer.Option("general", "--category", help="Prompt category"),
-    description: str = typer.Option(None, "--description", "-d", help="Prompt description"),
-    prompt_type: str = typer.Option("template", "--type", "-t", help="Prompt type"),
-    template_format: str = typer.Option("f-string", "--format", "-f", help="Template format"),
-    tags: str = typer.Option(None, "--tags", help="Tags (comma-separated)"),
-    public: bool = typer.Option(False, "--public", help="Make prompt public"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Interactive mode"),
+    content: str = typer.Option(
+        ..., "--content", "-c", help="Prompt content"
+    ),
+    category: str = typer.Option(
+        "general", "--category", help="Prompt category"
+    ),
+    description: str = typer.Option(
+        None, "--description", "-d", help="Prompt description"
+    ),
+    prompt_type: str = typer.Option(
+        "template", "--type", "-t", help="Prompt type"
+    ),
+    template_format: str = typer.Option(
+        "f-string", "--format", "-f", help="Template format"
+    ),
+    tags: str = typer.Option(
+        None, "--tags", help="Tags (comma-separated)"
+    ),
+    public: bool = typer.Option(
+        False, "--public", help="Make prompt public"
+    ),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Interactive mode"
+    ),
 ) -> None:
     """Create a new prompt."""
 
@@ -187,12 +246,32 @@ def create_prompt(
                 description = Prompt.ask("Description", default="")
                 category = Prompt.ask("Category", default="general")
                 prompt_type = Prompt.ask("Type", default="template")
-                template_format = Prompt.ask("Template format", default="f-string")
-                tags_input = Prompt.ask("Tags (comma-separated)", default="")
+                template_format = Prompt.ask(
+                    "Template format", default="f-string"
+                )
+                tags_input = Prompt.ask(
+                    "Tags (comma-separated)", default=""
+                )
                 public = Confirm.ask("Make public?", default=False)
-                tags = [tag.strip() for tag in tags_input.split(",") if tag.strip()] if tags_input else None
+                tags = (
+                    [
+                        tag.strip()
+                        for tag in tags_input.split(",")
+                        if tag.strip()
+                    ]
+                    if tags_input
+                    else None
+                )
             else:
-                tags = [tag.strip() for tag in tags.split(",") if tag.strip()] if tags else None
+                tags = (
+                    [
+                        tag.strip()
+                        for tag in tags.split(",")
+                        if tag.strip()
+                    ]
+                    if tags
+                    else None
+                )
 
             # Prepare data
             prompt_data = {
@@ -209,7 +288,9 @@ def create_prompt(
             if tags:
                 prompt_data["tags"] = tags
 
-            response = await api_client.request("POST", "/prompts", json=prompt_data)
+            response = await api_client.request(
+                "POST", "/prompts", json=prompt_data
+            )
 
             console.print("✅ Prompt created successfully!")
             console.print(f"📝 Prompt ID: {response['id']}")
@@ -232,53 +313,85 @@ def show_prompt(
     async def _show():
         api_client = get_api_client()
         try:
-            response = await api_client.request("GET", f"/prompts/{prompt_id}")
+            response = await api_client.request(
+                "GET", f"/prompts/{prompt_id}"
+            )
 
             if not response:
                 console.print(f"❌ Prompt {prompt_id} not found.")
                 return
 
             # Create detailed view
-            console.print(Panel.fit(f"[bold]Prompt: {response['name']}[/bold]"))
+            console.print(
+                Panel.fit(f"[bold]Prompt: {response['name']}[/bold]")
+            )
 
             # Basic info table
-            basic_table = Table(title="Basic Information", show_header=False)
+            basic_table = Table(
+                title="Basic Information", show_header=False
+            )
             basic_table.add_column("Field", style="cyan")
             basic_table.add_column("Value", style="white")
 
             basic_table.add_row("ID", response["id"])
             basic_table.add_row("Name", response["name"])
-            basic_table.add_row("Description", response.get("description", "N/A"))
+            basic_table.add_row(
+                "Description", response.get("description", "N/A")
+            )
             basic_table.add_row("Type", response["prompt_type"])
             basic_table.add_row("Category", response["category"])
             basic_table.add_row("Format", response["template_format"])
-            basic_table.add_row("Public", "Yes" if response.get("is_public") else "No")
-            basic_table.add_row("Chain", "Yes" if response.get("is_chain") else "No")
-            basic_table.add_row("Created", response.get("created_at", "N/A"))
+            basic_table.add_row(
+                "Public", "Yes" if response.get("is_public") else "No"
+            )
+            basic_table.add_row(
+                "Chain", "Yes" if response.get("is_chain") else "No"
+            )
+            basic_table.add_row(
+                "Created", response.get("created_at", "N/A")
+            )
 
             console.print(basic_table)
 
             # Content
-            content_panel = Panel(response["content"], title="Content", border_style="blue")
+            content_panel = Panel(
+                response["content"],
+                title="Content",
+                border_style="blue",
+            )
             console.print(content_panel)
 
             # Usage stats table
-            stats_table = Table(title="Usage Statistics", show_header=False)
+            stats_table = Table(
+                title="Usage Statistics", show_header=False
+            )
             stats_table.add_column("Metric", style="cyan")
             stats_table.add_column("Value", style="green")
 
-            stats_table.add_row("Usage Count", str(response.get("usage_count", 0)))
-            stats_table.add_row("Total Tokens", str(response.get("total_tokens_used", 0)))
-            stats_table.add_row("Total Cost", f"${response.get('total_cost', 0):.4f}")
             stats_table.add_row(
-                "Last Used", response.get("last_used_at", "Never")[:19] if response.get("last_used_at") else "Never"
+                "Usage Count", str(response.get("usage_count", 0))
+            )
+            stats_table.add_row(
+                "Total Tokens",
+                str(response.get("total_tokens_used", 0)),
+            )
+            stats_table.add_row(
+                "Total Cost", f"${response.get('total_cost', 0):.4f}"
+            )
+            stats_table.add_row(
+                "Last Used",
+                response.get("last_used_at", "Never")[:19]
+                if response.get("last_used_at")
+                else "Never",
             )
 
             console.print(stats_table)
 
             # Variables and metadata
             if response.get("variables"):
-                console.print(f"\\n🔧 Variables: {', '.join(response['variables'])}")
+                console.print(
+                    f"\\n🔧 Variables: {', '.join(response['variables'])}"
+                )
             if response.get("tags"):
                 console.print(f"🏷️  Tags: {', '.join(response['tags'])}")
 
@@ -291,7 +404,9 @@ def show_prompt(
 @prompts_app.command("delete")
 def delete_prompt(
     prompt_id: str = typer.Argument(..., help="Prompt ID to delete"),
-    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+    force: bool = typer.Option(
+        False, "--force", "-f", help="Skip confirmation"
+    ),
 ) -> None:
     """Delete a prompt."""
 
@@ -299,13 +414,17 @@ def delete_prompt(
         api_client = get_api_client()
         try:
             # Get prompt details first
-            prompt = await api_client.request("GET", f"/prompts/{prompt_id}")
+            prompt = await api_client.request(
+                "GET", f"/prompts/{prompt_id}"
+            )
 
             if not force:
                 console.print(f"Prompt: {prompt['name']}")
                 console.print(f"Type: {prompt['prompt_type']}")
                 console.print(f"Category: {prompt['category']}")
-                if not Confirm.ask("Are you sure you want to delete this prompt?"):
+                if not Confirm.ask(
+                    "Are you sure you want to delete this prompt?"
+                ):
                     console.print("❌ Deletion cancelled.")
                     return
 
@@ -321,8 +440,12 @@ def delete_prompt(
 @prompts_app.command("test")
 def test_prompt(
     prompt_id: str = typer.Argument(..., help="Prompt ID to test"),
-    variables: str = typer.Option(None, "--variables", "-v", help="Variables as JSON string"),
-    validate_only: bool = typer.Option(False, "--validate-only", help="Only validate, don't render"),
+    variables: str = typer.Option(
+        None, "--variables", "-v", help="Variables as JSON string"
+    ),
+    validate_only: bool = typer.Option(
+        False, "--validate-only", help="Only validate, don't render"
+    ),
 ) -> None:
     """Test a prompt with variables."""
 
@@ -337,12 +460,19 @@ def test_prompt(
 
                     test_variables = json.loads(variables)
                 except json.JSONDecodeError:
-                    console.print("❌ Invalid JSON format for variables.")
+                    console.print(
+                        "❌ Invalid JSON format for variables."
+                    )
                     return
 
-            test_data = {"variables": test_variables, "validate_only": validate_only}
+            test_data = {
+                "variables": test_variables,
+                "validate_only": validate_only,
+            }
 
-            response = await api_client.request("POST", f"/prompts/{prompt_id}/test", json=test_data)
+            response = await api_client.request(
+                "POST", f"/prompts/{prompt_id}/test", json=test_data
+            )
 
             # Show validation results
             validation = response["validation_result"]
@@ -359,13 +489,21 @@ def test_prompt(
 
             # Show rendered content
             if response.get("rendered_content"):
-                content_panel = Panel(response["rendered_content"], title="Rendered Content", border_style="green")
+                content_panel = Panel(
+                    response["rendered_content"],
+                    title="Rendered Content",
+                    border_style="green",
+                )
                 console.print(content_panel)
 
             # Show stats
-            console.print(f"\\n⏱️  Test duration: {response['test_duration_ms']}ms")
+            console.print(
+                f"\\n⏱️  Test duration: {response['test_duration_ms']}ms"
+            )
             if response.get("estimated_tokens"):
-                console.print(f"🔢 Estimated tokens: {response['estimated_tokens']}")
+                console.print(
+                    f"🔢 Estimated tokens: {response['estimated_tokens']}"
+                )
 
         finally:
             await api_client.close()
@@ -376,8 +514,15 @@ def test_prompt(
 @prompts_app.command("clone")
 def clone_prompt(
     prompt_id: str = typer.Argument(..., help="Prompt ID to clone"),
-    name: str = typer.Option(..., "--name", "-n", help="Name for cloned prompt"),
-    description: str = typer.Option(None, "--description", "-d", help="Description for cloned prompt"),
+    name: str = typer.Option(
+        ..., "--name", "-n", help="Name for cloned prompt"
+    ),
+    description: str = typer.Option(
+        None,
+        "--description",
+        "-d",
+        help="Description for cloned prompt",
+    ),
 ) -> None:
     """Clone an existing prompt."""
 
@@ -386,7 +531,9 @@ def clone_prompt(
         try:
             clone_data = {"name": name, "description": description}
 
-            response = await api_client.request("POST", f"/prompts/{prompt_id}/clone", json=clone_data)
+            response = await api_client.request(
+                "POST", f"/prompts/{prompt_id}/clone", json=clone_data
+            )
 
             console.print("✅ Prompt cloned successfully!")
             console.print(f"📝 New Prompt ID: {response['id']}")
@@ -401,11 +548,21 @@ def clone_prompt(
 
 @app.command()
 def serve(
-    host: str = typer.Option(None, "--host", "-h", help="Host to bind to"),
-    port: int = typer.Option(None, "--port", "-p", help="Port to bind to"),
-    workers: int = typer.Option(None, "--workers", "-w", help="Number of workers"),
-    reload: bool = typer.Option(None, "--reload", "-r", help="Enable auto-reload"),
-    debug: bool = typer.Option(None, "--debug", "-d", help="Enable debug mode"),
+    host: str = typer.Option(
+        None, "--host", "-h", help="Host to bind to"
+    ),
+    port: int = typer.Option(
+        None, "--port", "-p", help="Port to bind to"
+    ),
+    workers: int = typer.Option(
+        None, "--workers", "-w", help="Number of workers"
+    ),
+    reload: bool = typer.Option(
+        None, "--reload", "-r", help="Enable auto-reload"
+    ),
+    debug: bool = typer.Option(
+        None, "--debug", "-d", help="Enable debug mode"
+    ),
 ) -> None:
     """Start the Chatter API server."""
 
@@ -421,8 +578,12 @@ def serve(
     if debug is not None:
         settings.debug = debug
 
-    console.print(f"🚀 Starting Chatter API server on {settings.host}:{settings.port}")
-    console.print(f"📚 API documentation: http://{settings.host}:{settings.port}/docs")
+    console.print(
+        f"🚀 Starting Chatter API server on {settings.host}:{settings.port}"
+    )
+    console.print(
+        f"📚 API documentation: http://{settings.host}:{settings.port}/docs"
+    )
     console.print(f"🔍 Environment: {settings.environment}")
 
     uvicorn.run(
@@ -479,10 +640,17 @@ def db_check() -> None:
 def db_migrate() -> None:
     """Run database migrations."""
     try:
-        result = subprocess.run(["alembic", "upgrade", "head"], cwd=os.getcwd(), capture_output=True, text=True)
+        result = subprocess.run(
+            ["alembic", "upgrade", "head"],
+            cwd=os.getcwd(),
+            capture_output=True,
+            text=True,
+        )
 
         if result.returncode == 0:
-            console.print("✅ Database migrations completed successfully")
+            console.print(
+                "✅ Database migrations completed successfully"
+            )
             if result.stdout:
                 console.print(result.stdout)
         else:
@@ -491,7 +659,9 @@ def db_migrate() -> None:
                 console.print(result.stderr)
             sys.exit(1)
     except FileNotFoundError:
-        console.print("❌ Alembic not found. Please install with: pip install alembic")
+        console.print(
+            "❌ Alembic not found. Please install with: pip install alembic"
+        )
         sys.exit(1)
     except Exception as e:
         console.print(f"❌ Migration error: {e}")
@@ -500,8 +670,12 @@ def db_migrate() -> None:
 
 @db_app.command("revision")
 def db_revision(
-    message: str = typer.Option(..., "--message", "-m", help="Migration message"),
-    autogenerate: bool = typer.Option(True, "--autogenerate", help="Auto-generate migration"),
+    message: str = typer.Option(
+        ..., "--message", "-m", help="Migration message"
+    ),
+    autogenerate: bool = typer.Option(
+        True, "--autogenerate", help="Auto-generate migration"
+    ),
 ) -> None:
     """Create a new database migration."""
     try:
@@ -512,7 +686,9 @@ def db_revision(
 
         cmd.extend(["-m", message])
 
-        result = subprocess.run(cmd, cwd=os.getcwd(), capture_output=True, text=True)
+        result = subprocess.run(
+            cmd, cwd=os.getcwd(), capture_output=True, text=True
+        )
 
         if result.returncode == 0:
             console.print(f"✅ Created migration: {message}")
@@ -524,7 +700,9 @@ def db_revision(
                 console.print(result.stderr)
             sys.exit(1)
     except FileNotFoundError:
-        console.print("❌ Alembic not found. Please install with: pip install alembic")
+        console.print(
+            "❌ Alembic not found. Please install with: pip install alembic"
+        )
         sys.exit(1)
     except Exception as e:
         console.print(f"❌ Migration creation error: {e}")
@@ -537,20 +715,33 @@ app.add_typer(config_app, name="config")
 
 
 @config_app.command("show")
-def config_show(section: str | None = typer.Argument(None, help="Configuration section to show")) -> None:
+def config_show(
+    section: str | None = typer.Argument(
+        None, help="Configuration section to show"
+    ),
+) -> None:
     """Show current configuration."""
 
     def format_value(value):
         """Format configuration value for display."""
-        if isinstance(value, str) and any(key in value.lower() for key in ['key', 'secret', 'password', 'token']):
+        if isinstance(value, str) and any(
+            key in value.lower()
+            for key in ["key", "secret", "password", "token"]
+        ):
             return "***HIDDEN***" if value else "Not Set"
         return str(value)
 
     if section:
         # Show specific section
-        section_attrs = [attr for attr in dir(settings) if attr.startswith(section.lower())]
+        section_attrs = [
+            attr
+            for attr in dir(settings)
+            if attr.startswith(section.lower())
+        ]
         if not section_attrs:
-            console.print(f"❌ Configuration section '{section}' not found")
+            console.print(
+                f"❌ Configuration section '{section}' not found"
+            )
             sys.exit(1)
 
         table = Table(title=f"Configuration - {section.title()}")
@@ -569,7 +760,9 @@ def config_show(section: str | None = typer.Argument(None, help="Configuration s
         table.add_column("Value", style="magenta")
 
         for attr in sorted(dir(settings)):
-            if not attr.startswith('_') and not callable(getattr(settings, attr)):
+            if not attr.startswith("_") and not callable(
+                getattr(settings, attr)
+            ):
                 value = getattr(settings, attr)
                 table.add_row(attr, format_value(value))
 
@@ -585,12 +778,22 @@ def config_test() -> None:
 
     # Test database URL
     default_db_url = "postgresql+asyncpg://chatter:chatter_password@localhost:5432/chatter"
-    if not settings.database_url or settings.database_url == default_db_url:
-        issues.append("⚠️  Using default database URL - update for production")
+    if (
+        not settings.database_url
+        or settings.database_url == default_db_url
+    ):
+        issues.append(
+            "⚠️  Using default database URL - update for production"
+        )
 
     # Test secret key
-    if settings.secret_key == "your_super_secret_key_here_change_this_in_production":
-        issues.append("🔒 Using default secret key - CHANGE THIS for production")
+    if (
+        settings.secret_key
+        == "your_super_secret_key_here_change_this_in_production"
+    ):
+        issues.append(
+            "🔒 Using default secret key - CHANGE THIS for production"
+        )
 
     # Test LLM providers
     if not settings.openai_api_key and not settings.anthropic_api_key:
@@ -604,7 +807,9 @@ def config_test() -> None:
         console.print("\n❌ Configuration Issues Found:")
         for issue in issues:
             console.print(f"  {issue}")
-        console.print("\n📝 Please update your .env file to resolve these issues.")
+        console.print(
+            "\n📝 Please update your .env file to resolve these issues."
+        )
     else:
         console.print("✅ Configuration looks good!")
 
@@ -647,8 +852,12 @@ app.add_typer(docs_app, name="docs")
 
 @docs_app.command("generate")
 def generate_docs(
-    output_dir: str = typer.Option("docs/api", "--output", "-o", help="Output directory"),
-    format: str = typer.Option("all", "--format", "-f", help="Format: json, yaml, or all"),
+    output_dir: str = typer.Option(
+        "docs/api", "--output", "-o", help="Output directory"
+    ),
+    format: str = typer.Option(
+        "all", "--format", "-f", help="Format: json, yaml, or all"
+    ),
 ) -> None:
     """Generate OpenAPI documentation."""
     import sys
@@ -659,7 +868,11 @@ def generate_docs(
     sys.path.insert(0, str(project_root))
 
     try:
-        from scripts.generate_openapi import export_openapi_json, export_openapi_yaml, generate_openapi_spec
+        from scripts.generate_openapi import (
+            export_openapi_json,
+            export_openapi_yaml,
+            generate_openapi_spec,
+        )
 
         console.print("🚀 Generating OpenAPI documentation...")
 
@@ -674,16 +887,24 @@ def generate_docs(
         if format in ["json", "all"]:
             export_openapi_json(spec, output_path / "openapi.json")
             version = spec.get("info", {}).get("version", "unknown")
-            export_openapi_json(spec, output_path / f"openapi-v{version}.json")
+            export_openapi_json(
+                spec, output_path / f"openapi-v{version}.json"
+            )
 
         if format in ["yaml", "all"]:
             export_openapi_yaml(spec, output_path / "openapi.yaml")
             version = spec.get("info", {}).get("version", "unknown")
-            export_openapi_yaml(spec, output_path / f"openapi-v{version}.yaml")
+            export_openapi_yaml(
+                spec, output_path / f"openapi-v{version}.yaml"
+            )
 
         console.print(f"✅ Documentation generated in: {output_path}")
-        console.print(f"📊 Total endpoints: {len(list(spec.get('paths', {}).keys()))}")
-        console.print(f"🏷️  Total schemas: {len(spec.get('components', {}).get('schemas', {}))}")
+        console.print(
+            f"📊 Total endpoints: {len(list(spec.get('paths', {}).keys()))}"
+        )
+        console.print(
+            f"🏷️  Total schemas: {len(spec.get('components', {}).get('schemas', {}))}"
+        )
 
     except Exception as e:
         console.print(f"❌ Failed to generate documentation: {e}")
@@ -692,12 +913,21 @@ def generate_docs(
 
 @docs_app.command("sdk")
 def generate_sdk(
-    language: str = typer.Option("python", "--language", "-l", help="SDK language (currently supports: python)"),
-    output_dir: str = typer.Option("sdk", "--output", "-o", help="Output directory"),
+    language: str = typer.Option(
+        "python",
+        "--language",
+        "-l",
+        help="SDK language (currently supports: python)",
+    ),
+    output_dir: str = typer.Option(
+        "sdk", "--output", "-o", help="Output directory"
+    ),
 ) -> None:
     """Generate SDK from OpenAPI specification."""
     if language != "python":
-        console.print(f"❌ Unsupported language: {language}. Currently only 'python' is supported.")
+        console.print(
+            f"❌ Unsupported language: {language}. Currently only 'python' is supported."
+        )
         raise typer.Exit(1) from None
 
     import sys
@@ -728,13 +958,21 @@ def generate_sdk(
         sdk_module.project_root = original_project_root
 
         if success:
-            console.print(f"✅ {language.title()} SDK generated successfully!")
-            console.print(f"📁 SDK location: {project_root / 'sdk' / language}")
+            console.print(
+                f"✅ {language.title()} SDK generated successfully!"
+            )
+            console.print(
+                f"📁 SDK location: {project_root / 'sdk' / language}"
+            )
             console.print("\n📋 Next steps:")
             console.print("1. Review the generated SDK code")
             console.print("2. Test the examples")
-            console.print(f"3. Install the SDK: pip install -e ./{project_root / 'sdk' / language}")
-            console.print("4. Package for distribution: python -m build")
+            console.print(
+                f"3. Install the SDK: pip install -e ./{project_root / 'sdk' / language}"
+            )
+            console.print(
+                "4. Package for distribution: python -m build"
+            )
         else:
             raise typer.Exit(1) from None
 
@@ -745,8 +983,12 @@ def generate_sdk(
 
 @docs_app.command("serve")
 def serve_docs(
-    port: int = typer.Option(8080, "--port", "-p", help="Port to serve documentation"),
-    docs_dir: str = typer.Option("docs/api", "--dir", "-d", help="Documentation directory"),
+    port: int = typer.Option(
+        8080, "--port", "-p", help="Port to serve documentation"
+    ),
+    docs_dir: str = typer.Option(
+        "docs/api", "--dir", "-d", help="Documentation directory"
+    ),
 ) -> None:
     """Serve generated documentation locally."""
     import http.server
@@ -755,8 +997,12 @@ def serve_docs(
 
     docs_path = Path(docs_dir)
     if not docs_path.exists():
-        console.print(f"❌ Documentation directory not found: {docs_path}")
-        console.print("💡 Run 'chatter docs generate' first to create documentation.")
+        console.print(
+            f"❌ Documentation directory not found: {docs_path}"
+        )
+        console.print(
+            "💡 Run 'chatter docs generate' first to create documentation."
+        )
         raise typer.Exit(1) from None
 
     # Change to the docs directory
@@ -767,11 +1013,15 @@ def serve_docs(
 
     try:
         with socketserver.TCPServer(("", port), handler) as httpd:
-            console.print(f"📚 Serving documentation at http://localhost:{port}")
+            console.print(
+                f"📚 Serving documentation at http://localhost:{port}"
+            )
             console.print("📄 Available files:")
             for file in docs_path.glob("*"):
                 if file.is_file():
-                    console.print(f"  - http://localhost:{port}/{file.name}")
+                    console.print(
+                        f"  - http://localhost:{port}/{file.name}"
+                    )
             console.print("\n🛑 Press Ctrl+C to stop the server")
             httpd.serve_forever()
     except KeyboardInterrupt:
@@ -789,7 +1039,10 @@ def version() -> None:
 
     table.add_row("Chatter", __version__)
     table.add_row("Environment", settings.environment)
-    table.add_row("Python", f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+    table.add_row(
+        "Python",
+        f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
+    )
 
     console.print(table)
     console.print(f"\n{__description__}")
@@ -802,12 +1055,24 @@ app.add_typer(profiles_app, name="profiles")
 
 @profiles_app.command("list")
 def list_profiles(
-    profile_type: str = typer.Option(None, "--type", "-t", help="Filter by profile type"),
-    llm_provider: str = typer.Option(None, "--provider", "-p", help="Filter by LLM provider"),
-    tags: str = typer.Option(None, "--tags", help="Filter by tags (comma-separated)"),
-    public: bool = typer.Option(None, "--public", help="Filter by public status"),
-    limit: int = typer.Option(20, "--limit", "-l", help="Maximum number of results"),
-    offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
+    profile_type: str = typer.Option(
+        None, "--type", "-t", help="Filter by profile type"
+    ),
+    llm_provider: str = typer.Option(
+        None, "--provider", "-p", help="Filter by LLM provider"
+    ),
+    tags: str = typer.Option(
+        None, "--tags", help="Filter by tags (comma-separated)"
+    ),
+    public: bool = typer.Option(
+        None, "--public", help="Filter by public status"
+    ),
+    limit: int = typer.Option(
+        20, "--limit", "-l", help="Maximum number of results"
+    ),
+    offset: int = typer.Option(
+        0, "--offset", help="Number of results to skip"
+    ),
 ) -> None:
     """List LLM profiles."""
 
@@ -827,7 +1092,9 @@ def list_profiles(
             if public is not None:
                 params["is_public"] = public
 
-            response = await api_client.request("GET", "/profiles", params=params)
+            response = await api_client.request(
+                "GET", "/profiles", params=params
+            )
 
             if not response or not response.get("profiles"):
                 console.print("📝 No profiles found.")
@@ -836,7 +1103,9 @@ def list_profiles(
             profiles = response["profiles"]
             total = response.get("total_count", len(profiles))
 
-            table = Table(title=f"LLM Profiles ({len(profiles)} of {total})")
+            table = Table(
+                title=f"LLM Profiles ({len(profiles)} of {total})"
+            )
             table.add_column("ID", style="cyan", no_wrap=True)
             table.add_column("Name", style="bright_white")
             table.add_column("Provider", style="green")
@@ -853,14 +1122,20 @@ def list_profiles(
                     profile["llm_model"],
                     profile["profile_type"],
                     "✓" if profile.get("is_public") else "✗",
-                    profile["created_at"][:10] if profile.get("created_at") else "N/A",
+                    profile["created_at"][:10]
+                    if profile.get("created_at")
+                    else "N/A",
                 )
 
             console.print(table)
 
             if total > len(profiles):
-                console.print(f"\n💡 Showing {offset + 1}-{offset + len(profiles)} of {total} profiles")
-                console.print(f"Use --offset {offset + limit} to see more")
+                console.print(
+                    f"\n💡 Showing {offset + 1}-{offset + len(profiles)} of {total} profiles"
+                )
+                console.print(
+                    f"Use --offset {offset + limit} to see more"
+                )
 
         finally:
             await api_client.close()
@@ -877,38 +1152,60 @@ def show_profile(
     async def _show():
         api_client = get_api_client()
         try:
-            response = await api_client.request("GET", f"/profiles/{profile_id}")
+            response = await api_client.request(
+                "GET", f"/profiles/{profile_id}"
+            )
 
             if not response:
                 console.print(f"❌ Profile {profile_id} not found.")
                 return
 
             # Create detailed view
-            console.print(Panel.fit(f"[bold]Profile: {response['name']}[/bold]"))
+            console.print(
+                Panel.fit(f"[bold]Profile: {response['name']}[/bold]")
+            )
 
             # Basic info table
-            basic_table = Table(title="Basic Information", show_header=False)
+            basic_table = Table(
+                title="Basic Information", show_header=False
+            )
             basic_table.add_column("Field", style="cyan")
             basic_table.add_column("Value", style="white")
 
             basic_table.add_row("ID", response["id"])
             basic_table.add_row("Name", response["name"])
-            basic_table.add_row("Description", response.get("description", "N/A"))
+            basic_table.add_row(
+                "Description", response.get("description", "N/A")
+            )
             basic_table.add_row("Type", response["profile_type"])
-            basic_table.add_row("Public", "Yes" if response.get("is_public") else "No")
-            basic_table.add_row("Created", response.get("created_at", "N/A"))
+            basic_table.add_row(
+                "Public", "Yes" if response.get("is_public") else "No"
+            )
+            basic_table.add_row(
+                "Created", response.get("created_at", "N/A")
+            )
 
             # LLM config table
-            llm_table = Table(title="LLM Configuration", show_header=False)
+            llm_table = Table(
+                title="LLM Configuration", show_header=False
+            )
             llm_table.add_column("Parameter", style="cyan")
             llm_table.add_column("Value", style="white")
 
             llm_table.add_row("Provider", response["llm_provider"])
             llm_table.add_row("Model", response["llm_model"])
-            llm_table.add_row("Temperature", str(response.get("temperature", "N/A")))
-            llm_table.add_row("Max Tokens", str(response.get("max_tokens", "N/A")))
-            llm_table.add_row("Top P", str(response.get("top_p", "N/A")))
-            llm_table.add_row("Top K", str(response.get("top_k", "N/A")))
+            llm_table.add_row(
+                "Temperature", str(response.get("temperature", "N/A"))
+            )
+            llm_table.add_row(
+                "Max Tokens", str(response.get("max_tokens", "N/A"))
+            )
+            llm_table.add_row(
+                "Top P", str(response.get("top_p", "N/A"))
+            )
+            llm_table.add_row(
+                "Top K", str(response.get("top_k", "N/A"))
+            )
 
             console.print(basic_table)
             console.print()
@@ -917,7 +1214,9 @@ def show_profile(
             # System prompt
             if response.get("system_prompt"):
                 console.print("\n[bold]System Prompt:[/bold]")
-                console.print(Panel(response["system_prompt"], expand=False))
+                console.print(
+                    Panel(response["system_prompt"], expand=False)
+                )
 
         finally:
             await api_client.close()
@@ -928,14 +1227,30 @@ def show_profile(
 @profiles_app.command("create")
 def create_profile(
     name: str = typer.Option(..., "--name", "-n", help="Profile name"),
-    description: str = typer.Option(None, "--description", "-d", help="Profile description"),
-    provider: str = typer.Option("openai", "--provider", "-p", help="LLM provider"),
-    model: str = typer.Option("gpt-4", "--model", "-m", help="LLM model"),
-    temperature: float = typer.Option(0.7, "--temperature", "-t", help="Temperature (0.0-2.0)"),
-    max_tokens: int = typer.Option(4096, "--max-tokens", help="Maximum tokens"),
-    system_prompt: str = typer.Option(None, "--system-prompt", help="System prompt"),
-    public: bool = typer.Option(False, "--public", help="Make profile public"),
-    interactive: bool = typer.Option(False, "--interactive", "-i", help="Interactive mode"),
+    description: str = typer.Option(
+        None, "--description", "-d", help="Profile description"
+    ),
+    provider: str = typer.Option(
+        "openai", "--provider", "-p", help="LLM provider"
+    ),
+    model: str = typer.Option(
+        "gpt-4", "--model", "-m", help="LLM model"
+    ),
+    temperature: float = typer.Option(
+        0.7, "--temperature", "-t", help="Temperature (0.0-2.0)"
+    ),
+    max_tokens: int = typer.Option(
+        4096, "--max-tokens", help="Maximum tokens"
+    ),
+    system_prompt: str = typer.Option(
+        None, "--system-prompt", help="System prompt"
+    ),
+    public: bool = typer.Option(
+        False, "--public", help="Make profile public"
+    ),
+    interactive: bool = typer.Option(
+        False, "--interactive", "-i", help="Interactive mode"
+    ),
 ) -> None:
     """Create a new LLM profile."""
 
@@ -949,9 +1264,15 @@ def create_profile(
                 description = Prompt.ask("Description", default="")
                 provider = Prompt.ask("LLM provider", default="openai")
                 model = Prompt.ask("LLM model", default="gpt-4")
-                temperature = float(Prompt.ask("Temperature", default="0.7"))
-                max_tokens = int(Prompt.ask("Max tokens", default="4096"))
-                system_prompt = Prompt.ask("System prompt (optional)", default="")
+                temperature = float(
+                    Prompt.ask("Temperature", default="0.7")
+                )
+                max_tokens = int(
+                    Prompt.ask("Max tokens", default="4096")
+                )
+                system_prompt = Prompt.ask(
+                    "System prompt (optional)", default=""
+                )
                 public = Confirm.ask("Make public?", default=False)
 
             # Prepare data
@@ -969,7 +1290,9 @@ def create_profile(
             if system_prompt:
                 profile_data["system_prompt"] = system_prompt
 
-            response = await api_client.request("POST", "/profiles", json=profile_data)
+            response = await api_client.request(
+                "POST", "/profiles", json=profile_data
+            )
 
             console.print("✅ Profile created successfully!")
             console.print(f"📝 Profile ID: {response['id']}")
@@ -986,7 +1309,9 @@ def create_profile(
 @profiles_app.command("delete")
 def delete_profile(
     profile_id: str = typer.Argument(..., help="Profile ID to delete"),
-    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+    force: bool = typer.Option(
+        False, "--force", "-f", help="Skip confirmation"
+    ),
 ) -> None:
     """Delete a profile."""
 
@@ -994,15 +1319,21 @@ def delete_profile(
         api_client = get_api_client()
         try:
             # Get profile details first
-            profile = await api_client.request("GET", f"/profiles/{profile_id}")
+            profile = await api_client.request(
+                "GET", f"/profiles/{profile_id}"
+            )
 
             if not force:
                 console.print(f"Profile: {profile['name']}")
-                if not Confirm.ask("Are you sure you want to delete this profile?"):
+                if not Confirm.ask(
+                    "Are you sure you want to delete this profile?"
+                ):
                     console.print("❌ Deletion cancelled.")
                     return
 
-            await api_client.request("DELETE", f"/profiles/{profile_id}")
+            await api_client.request(
+                "DELETE", f"/profiles/{profile_id}"
+            )
             console.print("✅ Profile deleted successfully!")
 
         finally:
@@ -1018,8 +1349,12 @@ app.add_typer(conversations_app, name="conversations")
 
 @conversations_app.command("list")
 def list_conversations(
-    limit: int = typer.Option(20, "--limit", "-l", help="Maximum number of results"),
-    offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
+    limit: int = typer.Option(
+        20, "--limit", "-l", help="Maximum number of results"
+    ),
+    offset: int = typer.Option(
+        0, "--offset", help="Number of results to skip"
+    ),
 ) -> None:
     """List conversations."""
 
@@ -1027,7 +1362,9 @@ def list_conversations(
         api_client = get_api_client()
         try:
             params = {"limit": limit, "offset": offset}
-            response = await api_client.request("GET", "/chat/conversations", params=params)
+            response = await api_client.request(
+                "GET", "/chat/conversations", params=params
+            )
 
             if not response or not response.get("conversations"):
                 console.print("💬 No conversations found.")
@@ -1036,7 +1373,9 @@ def list_conversations(
             conversations = response["conversations"]
             total = response.get("total_count", len(conversations))
 
-            table = Table(title=f"Conversations ({len(conversations)} of {total})")
+            table = Table(
+                title=f"Conversations ({len(conversations)} of {total})"
+            )
             table.add_column("ID", style="cyan", no_wrap=True)
             table.add_column("Title", style="bright_white")
             table.add_column("Messages", style="green")
@@ -1048,15 +1387,23 @@ def list_conversations(
                     conv["id"][:8] + "...",
                     conv.get("title", "Untitled")[:50],
                     str(conv.get("message_count", 0)),
-                    conv["created_at"][:10] if conv.get("created_at") else "N/A",
-                    conv["updated_at"][:10] if conv.get("updated_at") else "N/A",
+                    conv["created_at"][:10]
+                    if conv.get("created_at")
+                    else "N/A",
+                    conv["updated_at"][:10]
+                    if conv.get("updated_at")
+                    else "N/A",
                 )
 
             console.print(table)
 
             if total > len(conversations):
-                console.print(f"\n💡 Showing {offset + 1}-{offset + len(conversations)} of {total} conversations")
-                console.print(f"Use --offset {offset + limit} to see more")
+                console.print(
+                    f"\n💡 Showing {offset + 1}-{offset + len(conversations)} of {total} conversations"
+                )
+                console.print(
+                    f"Use --offset {offset + limit} to see more"
+                )
 
         finally:
             await api_client.close()
@@ -1066,9 +1413,15 @@ def list_conversations(
 
 @conversations_app.command("show")
 def show_conversation(
-    conversation_id: str = typer.Argument(..., help="Conversation ID to show"),
-    messages: bool = typer.Option(True, "--messages/--no-messages", help="Show messages"),
-    limit: int = typer.Option(10, "--limit", "-l", help="Number of messages to show"),
+    conversation_id: str = typer.Argument(
+        ..., help="Conversation ID to show"
+    ),
+    messages: bool = typer.Option(
+        True, "--messages/--no-messages", help="Show messages"
+    ),
+    limit: int = typer.Option(
+        10, "--limit", "-l", help="Number of messages to show"
+    ),
 ) -> None:
     """Show conversation details."""
 
@@ -1076,9 +1429,15 @@ def show_conversation(
         api_client = get_api_client()
         try:
             # Get conversation details
-            conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
+            conv = await api_client.request(
+                "GET", f"/chat/conversations/{conversation_id}"
+            )
 
-            console.print(Panel.fit(f"[bold]Conversation: {conv.get('title', 'Untitled')}[/bold]"))
+            console.print(
+                Panel.fit(
+                    f"[bold]Conversation: {conv.get('title', 'Untitled')}[/bold]"
+                )
+            )
 
             # Basic info
             info_table = Table(title="Information", show_header=False)
@@ -1087,7 +1446,9 @@ def show_conversation(
 
             info_table.add_row("ID", conv["id"])
             info_table.add_row("Title", conv.get("title", "Untitled"))
-            info_table.add_row("Messages", str(conv.get("message_count", 0)))
+            info_table.add_row(
+                "Messages", str(conv.get("message_count", 0))
+            )
             info_table.add_row("Created", conv.get("created_at", "N/A"))
             info_table.add_row("Updated", conv.get("updated_at", "N/A"))
 
@@ -1096,21 +1457,43 @@ def show_conversation(
             if messages:
                 # Get messages
                 msg_response = await api_client.request(
-                    "GET", f"/chat/conversations/{conversation_id}/messages", params={"limit": limit}
+                    "GET",
+                    f"/chat/conversations/{conversation_id}/messages",
+                    params={"limit": limit},
                 )
 
                 if msg_response and msg_response.get("messages"):
-                    console.print(f"\n[bold]Recent Messages (last {limit}):[/bold]")
+                    console.print(
+                        f"\n[bold]Recent Messages (last {limit}):[/bold]"
+                    )
 
                     for msg in msg_response["messages"][-limit:]:
                         role = msg.get("role", "unknown")
                         content = msg.get("content", "")
-                        timestamp = msg.get("created_at", "")[:19] if msg.get("created_at") else ""
+                        timestamp = (
+                            msg.get("created_at", "")[:19]
+                            if msg.get("created_at")
+                            else ""
+                        )
 
-                        role_color = "blue" if role == "user" else "green" if role == "assistant" else "yellow"
+                        role_color = (
+                            "blue"
+                            if role == "user"
+                            else "green"
+                            if role == "assistant"
+                            else "yellow"
+                        )
 
-                        console.print(f"\n[{role_color}]●[/{role_color}] [bold]{role.title()}[/bold] {timestamp}")
-                        console.print(Panel(content, expand=False, border_style=role_color))
+                        console.print(
+                            f"\n[{role_color}]●[/{role_color}] [bold]{role.title()}[/bold] {timestamp}"
+                        )
+                        console.print(
+                            Panel(
+                                content,
+                                expand=False,
+                                border_style=role_color,
+                            )
+                        )
 
         finally:
             await api_client.close()
@@ -1120,8 +1503,12 @@ def show_conversation(
 
 @conversations_app.command("delete")
 def delete_conversation(
-    conversation_id: str = typer.Argument(..., help="Conversation ID to delete"),
-    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+    conversation_id: str = typer.Argument(
+        ..., help="Conversation ID to delete"
+    ),
+    force: bool = typer.Option(
+        False, "--force", "-f", help="Skip confirmation"
+    ),
 ) -> None:
     """Delete a conversation."""
 
@@ -1129,16 +1516,26 @@ def delete_conversation(
         api_client = get_api_client()
         try:
             # Get conversation details first
-            conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
+            conv = await api_client.request(
+                "GET", f"/chat/conversations/{conversation_id}"
+            )
 
             if not force:
-                console.print(f"Conversation: {conv.get('title', 'Untitled')}")
-                console.print(f"Messages: {conv.get('message_count', 0)}")
-                if not Confirm.ask("Are you sure you want to delete this conversation?"):
+                console.print(
+                    f"Conversation: {conv.get('title', 'Untitled')}"
+                )
+                console.print(
+                    f"Messages: {conv.get('message_count', 0)}"
+                )
+                if not Confirm.ask(
+                    "Are you sure you want to delete this conversation?"
+                ):
                     console.print("❌ Deletion cancelled.")
                     return
 
-            await api_client.request("DELETE", f"/chat/conversations/{conversation_id}")
+            await api_client.request(
+                "DELETE", f"/chat/conversations/{conversation_id}"
+            )
             console.print("✅ Conversation deleted successfully!")
 
         finally:
@@ -1149,9 +1546,15 @@ def delete_conversation(
 
 @conversations_app.command("export")
 def export_conversation(
-    conversation_id: str = typer.Argument(..., help="Conversation ID to export"),
-    output_file: str = typer.Option(None, "--output", "-o", help="Output file path"),
-    format: str = typer.Option("json", "--format", "-f", help="Export format (json, txt, md)"),
+    conversation_id: str = typer.Argument(
+        ..., help="Conversation ID to export"
+    ),
+    output_file: str = typer.Option(
+        None, "--output", "-o", help="Output file path"
+    ),
+    format: str = typer.Option(
+        "json", "--format", "-f", help="Export format (json, txt, md)"
+    ),
 ) -> None:
     """Export a conversation."""
 
@@ -1160,34 +1563,51 @@ def export_conversation(
         api_client = get_api_client()
         try:
             # Get conversation and messages
-            conv = await api_client.request("GET", f"/chat/conversations/{conversation_id}")
-            messages = await api_client.request("GET", f"/chat/conversations/{conversation_id}/messages")
+            conv = await api_client.request(
+                "GET", f"/chat/conversations/{conversation_id}"
+            )
+            messages = await api_client.request(
+                "GET", f"/chat/conversations/{conversation_id}/messages"
+            )
 
             # Generate filename if not provided
             if not output_file:
                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                title = conv.get("title", "conversation").replace(" ", "_")
+                title = conv.get("title", "conversation").replace(
+                    " ", "_"
+                )
                 output_file = f"{title}_{timestamp}.{format}"
 
             # Export based on format
             if format == "json":
-                export_data = {"conversation": conv, "messages": messages.get("messages", [])}
+                export_data = {
+                    "conversation": conv,
+                    "messages": messages.get("messages", []),
+                }
                 with open(output_file, "w") as f:
                     json.dump(export_data, f, indent=2, default=str)
 
             elif format == "txt":
                 with open(output_file, "w") as f:
-                    f.write(f"Conversation: {conv.get('title', 'Untitled')}\n")
-                    f.write(f"Created: {conv.get('created_at', 'N/A')}\n")
+                    f.write(
+                        f"Conversation: {conv.get('title', 'Untitled')}\n"
+                    )
+                    f.write(
+                        f"Created: {conv.get('created_at', 'N/A')}\n"
+                    )
                     f.write("=" * 50 + "\n\n")
 
                     for msg in messages.get("messages", []):
-                        f.write(f"{msg.get('role', 'unknown').upper()}: {msg.get('content', '')}\n\n")
+                        f.write(
+                            f"{msg.get('role', 'unknown').upper()}: {msg.get('content', '')}\n\n"
+                        )
 
             elif format == "md":
                 with open(output_file, "w") as f:
                     f.write(f"# {conv.get('title', 'Untitled')}\n\n")
-                    f.write(f"**Created:** {conv.get('created_at', 'N/A')}\n\n")
+                    f.write(
+                        f"**Created:** {conv.get('created_at', 'N/A')}\n\n"
+                    )
                     f.write("---\n\n")
 
                     for msg in messages.get("messages", []):
@@ -1199,7 +1619,9 @@ def export_conversation(
                         elif role == "assistant":
                             f.write(f"**🤖 Assistant:** {content}\n\n")
                         else:
-                            f.write(f"**{role.title()}:** {content}\n\n")
+                            f.write(
+                                f"**{role.title()}:** {content}\n\n"
+                            )
 
             console.print(f"✅ Conversation exported to: {output_file}")
 
@@ -1216,9 +1638,15 @@ app.add_typer(documents_app, name="documents")
 
 @documents_app.command("list")
 def list_documents(
-    limit: int = typer.Option(20, "--limit", "-l", help="Maximum number of results"),
-    offset: int = typer.Option(0, "--offset", help="Number of results to skip"),
-    file_type: str = typer.Option(None, "--type", "-t", help="Filter by file type"),
+    limit: int = typer.Option(
+        20, "--limit", "-l", help="Maximum number of results"
+    ),
+    offset: int = typer.Option(
+        0, "--offset", help="Number of results to skip"
+    ),
+    file_type: str = typer.Option(
+        None, "--type", "-t", help="Filter by file type"
+    ),
 ) -> None:
     """List uploaded documents."""
 
@@ -1229,7 +1657,9 @@ def list_documents(
             if file_type:
                 params["file_type"] = file_type
 
-            response = await api_client.request("GET", "/documents", params=params)
+            response = await api_client.request(
+                "GET", "/documents", params=params
+            )
 
             if not response or not response.get("documents"):
                 console.print("📄 No documents found.")
@@ -1238,7 +1668,9 @@ def list_documents(
             documents = response["documents"]
             total = response.get("total_count", len(documents))
 
-            table = Table(title=f"Documents ({len(documents)} of {total})")
+            table = Table(
+                title=f"Documents ({len(documents)} of {total})"
+            )
             table.add_column("ID", style="cyan", no_wrap=True)
             table.add_column("Title", style="bright_white")
             table.add_column("Type", style="green")
@@ -1247,21 +1679,31 @@ def list_documents(
             table.add_column("Uploaded", style="dim")
 
             for doc in documents:
-                size_mb = doc.get("file_size", 0) / (1024 * 1024) if doc.get("file_size") else 0
+                size_mb = (
+                    doc.get("file_size", 0) / (1024 * 1024)
+                    if doc.get("file_size")
+                    else 0
+                )
                 table.add_row(
                     doc["id"][:8] + "...",
                     doc.get("title", "Untitled")[:40],
                     doc.get("file_type", "unknown"),
                     f"{size_mb:.1f}MB" if size_mb > 0 else "N/A",
                     doc.get("status", "unknown"),
-                    doc["created_at"][:10] if doc.get("created_at") else "N/A",
+                    doc["created_at"][:10]
+                    if doc.get("created_at")
+                    else "N/A",
                 )
 
             console.print(table)
 
             if total > len(documents):
-                console.print(f"\n💡 Showing {offset + 1}-{offset + len(documents)} of {total} documents")
-                console.print(f"Use --offset {offset + limit} to see more")
+                console.print(
+                    f"\n💡 Showing {offset + 1}-{offset + len(documents)} of {total} documents"
+                )
+                console.print(
+                    f"Use --offset {offset + limit} to see more"
+                )
 
         finally:
             await api_client.close()
@@ -1272,9 +1714,15 @@ def list_documents(
 @documents_app.command("upload")
 def upload_document(
     file_path: str = typer.Argument(..., help="Path to document file"),
-    title: str = typer.Option(None, "--title", "-t", help="Document title"),
-    description: str = typer.Option(None, "--description", "-d", help="Document description"),
-    tags: str = typer.Option(None, "--tags", help="Tags (comma-separated)"),
+    title: str = typer.Option(
+        None, "--title", "-t", help="Document title"
+    ),
+    description: str = typer.Option(
+        None, "--description", "-d", help="Document description"
+    ),
+    tags: str = typer.Option(
+        None, "--tags", help="Tags (comma-separated)"
+    ),
 ) -> None:
     """Upload a document."""
 
@@ -1294,7 +1742,9 @@ def upload_document(
             console.print(f"📤 Uploading: {file_path_obj.name}")
 
             # Prepare multipart form data
-            files = {"file": (file_path_obj.name, open(file_path_obj, "rb"))}
+            files = {
+                "file": (file_path_obj.name, open(file_path_obj, "rb"))
+            }
 
             data = {"title": title}
             if description:
@@ -1305,10 +1755,14 @@ def upload_document(
             # Remove Content-Type header to let httpx set it for multipart
             headers = {}
             if api_client.access_token:
-                headers["Authorization"] = f"Bearer {api_client.access_token}"
+                headers[
+                    "Authorization"
+                ] = f"Bearer {api_client.access_token}"
 
             url = f"{api_client.base_url}{settings.api_prefix}/documents/upload"
-            response = await api_client.client.post(url, headers=headers, files=files, data=data)
+            response = await api_client.client.post(
+                url, headers=headers, files=files, data=data
+            )
             response.raise_for_status()
 
             result = response.json()
@@ -1316,12 +1770,14 @@ def upload_document(
             console.print("✅ Document uploaded successfully!")
             console.print(f"📝 Document ID: {result['id']}")
             console.print(f"🏷️  Title: {result['title']}")
-            console.print(f"📊 Status: {result.get('status', 'processing')}")
+            console.print(
+                f"📊 Status: {result.get('status', 'processing')}"
+            )
 
         except Exception as e:
             console.print(f"❌ Upload failed: {e}")
         finally:
-            if 'files' in locals():
+            if "files" in locals():
                 files["file"][1].close()
             await api_client.close()
 
@@ -1337,19 +1793,32 @@ def show_document(
     async def _show():
         api_client = get_api_client()
         try:
-            response = await api_client.request("GET", f"/documents/{document_id}")
+            response = await api_client.request(
+                "GET", f"/documents/{document_id}"
+            )
 
-            console.print(Panel.fit(f"[bold]Document: {response.get('title', 'Untitled')}[/bold]"))
+            console.print(
+                Panel.fit(
+                    f"[bold]Document: {response.get('title', 'Untitled')}[/bold]"
+                )
+            )
 
-            table = Table(title="Document Information", show_header=False)
+            table = Table(
+                title="Document Information", show_header=False
+            )
             table.add_column("Field", style="cyan")
             table.add_column("Value", style="white")
 
             table.add_row("ID", response["id"])
             table.add_row("Title", response.get("title", "Untitled"))
-            table.add_row("Description", response.get("description", "N/A"))
+            table.add_row(
+                "Description", response.get("description", "N/A")
+            )
             table.add_row("File Type", response.get("file_type", "N/A"))
-            table.add_row("File Size", f"{response.get('file_size', 0) / (1024*1024):.1f}MB")
+            table.add_row(
+                "File Size",
+                f"{response.get('file_size', 0) / (1024*1024):.1f}MB",
+            )
             table.add_row("Status", response.get("status", "N/A"))
             table.add_row("Chunks", str(response.get("chunk_count", 0)))
             table.add_row("Uploaded", response.get("created_at", "N/A"))
@@ -1368,25 +1837,39 @@ def show_document(
 @documents_app.command("search")
 def search_documents(
     query: str = typer.Argument(..., help="Search query"),
-    limit: int = typer.Option(10, "--limit", "-l", help="Number of results"),
-    threshold: float = typer.Option(0.7, "--threshold", "-t", help="Similarity threshold"),
+    limit: int = typer.Option(
+        10, "--limit", "-l", help="Number of results"
+    ),
+    threshold: float = typer.Option(
+        0.7, "--threshold", "-t", help="Similarity threshold"
+    ),
 ) -> None:
     """Search documents using vector similarity."""
 
     async def _search():
         api_client = get_api_client()
         try:
-            search_data = {"query": query, "limit": limit, "score_threshold": threshold}
+            search_data = {
+                "query": query,
+                "limit": limit,
+                "score_threshold": threshold,
+            }
 
-            response = await api_client.request("POST", "/documents/search", json=search_data)
+            response = await api_client.request(
+                "POST", "/documents/search", json=search_data
+            )
 
             if not response or not response.get("results"):
-                console.print("🔍 No documents found matching your query.")
+                console.print(
+                    "🔍 No documents found matching your query."
+                )
                 return
 
             results = response["results"]
 
-            console.print(f"[bold]Search Results for: '{query}'[/bold]\n")
+            console.print(
+                f"[bold]Search Results for: '{query}'[/bold]\n"
+            )
 
             for i, result in enumerate(results, 1):
                 score = result.get("score", 0)
@@ -1397,8 +1880,12 @@ def search_documents(
                 )
                 doc_title = result.get("document_title", "Unknown")
 
-                console.print(f"[bold]{i}. {doc_title}[/bold] (Score: {score:.3f})")
-                console.print(Panel(content, expand=False, border_style="dim"))
+                console.print(
+                    f"[bold]{i}. {doc_title}[/bold] (Score: {score:.3f})"
+                )
+                console.print(
+                    Panel(content, expand=False, border_style="dim")
+                )
                 console.print()
 
         finally:
@@ -1409,8 +1896,12 @@ def search_documents(
 
 @documents_app.command("delete")
 def delete_document(
-    document_id: str = typer.Argument(..., help="Document ID to delete"),
-    force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation"),
+    document_id: str = typer.Argument(
+        ..., help="Document ID to delete"
+    ),
+    force: bool = typer.Option(
+        False, "--force", "-f", help="Skip confirmation"
+    ),
 ) -> None:
     """Delete a document."""
 
@@ -1418,16 +1909,26 @@ def delete_document(
         api_client = get_api_client()
         try:
             # Get document details first
-            doc = await api_client.request("GET", f"/documents/{document_id}")
+            doc = await api_client.request(
+                "GET", f"/documents/{document_id}"
+            )
 
             if not force:
-                console.print(f"Document: {doc.get('title', 'Untitled')}")
-                console.print(f"Type: {doc.get('file_type', 'unknown')}")
-                if not Confirm.ask("Are you sure you want to delete this document?"):
+                console.print(
+                    f"Document: {doc.get('title', 'Untitled')}"
+                )
+                console.print(
+                    f"Type: {doc.get('file_type', 'unknown')}"
+                )
+                if not Confirm.ask(
+                    "Are you sure you want to delete this document?"
+                ):
                     console.print("❌ Deletion cancelled.")
                     return
 
-            await api_client.request("DELETE", f"/documents/{document_id}")
+            await api_client.request(
+                "DELETE", f"/documents/{document_id}"
+            )
             console.print("✅ Document deleted successfully!")
 
         finally:
@@ -1443,9 +1944,18 @@ app.add_typer(auth_app, name="auth")
 
 @auth_app.command("login")
 def login(
-    email: str = typer.Option(..., "--email", "-e", help="Email address"),
-    password: str = typer.Option(None, "--password", "-p", help="Password (will prompt if not provided)"),
-    save_token: bool = typer.Option(True, "--save/--no-save", help="Save access token"),
+    email: str = typer.Option(
+        ..., "--email", "-e", help="Email address"
+    ),
+    password: str = typer.Option(
+        None,
+        "--password",
+        "-p",
+        help="Password (will prompt if not provided)",
+    ),
+    save_token: bool = typer.Option(
+        True, "--save/--no-save", help="Save access token"
+    ),
 ) -> None:
     """Login to get access token."""
 
@@ -1457,11 +1967,15 @@ def login(
         api_client = APIClient()
         try:
             login_data = {"email": email, "password": password}
-            response = await api_client.request("POST", "/auth/login", json=login_data)
+            response = await api_client.request(
+                "POST", "/auth/login", json=login_data
+            )
 
             access_token = response.get("access_token")
             if not access_token:
-                console.print("❌ Login failed: No access token received")
+                console.print(
+                    "❌ Login failed: No access token received"
+                )
                 return
 
             console.print("✅ Login successful!")
@@ -1477,7 +1991,7 @@ def login(
                     env_content = env_file.read_text()
 
                 # Update or add token
-                lines = env_content.split('\n')
+                lines = env_content.split("\n")
                 token_line = f"CHATTER_ACCESS_TOKEN={access_token}"
 
                 # Check if token line exists
@@ -1491,9 +2005,11 @@ def login(
                 if not token_updated:
                     lines.append(token_line)
 
-                env_file.write_text('\n'.join(lines))
+                env_file.write_text("\n".join(lines))
                 console.print("💾 Access token saved to .env file")
-                console.print("💡 You can now use other CLI commands without authentication")
+                console.print(
+                    "💡 You can now use other CLI commands without authentication"
+                )
 
         finally:
             await api_client.close()
@@ -1519,8 +2035,13 @@ def whoami() -> None:
             table.add_row("ID", response["id"])
             table.add_row("Email", response["email"])
             table.add_row("Name", response.get("full_name", "N/A"))
-            table.add_row("Active", "Yes" if response.get("is_active") else "No")
-            table.add_row("Superuser", "Yes" if response.get("is_superuser") else "No")
+            table.add_row(
+                "Active", "Yes" if response.get("is_active") else "No"
+            )
+            table.add_row(
+                "Superuser",
+                "Yes" if response.get("is_superuser") else "No",
+            )
             table.add_row("Created", response.get("created_at", "N/A"))
 
             console.print(table)
@@ -1538,8 +2059,12 @@ def logout() -> None:
 
     if env_file.exists():
         content = env_file.read_text()
-        lines = [line for line in content.split('\n') if not line.startswith("CHATTER_ACCESS_TOKEN=")]
-        env_file.write_text('\n'.join(lines))
+        lines = [
+            line
+            for line in content.split("\n")
+            if not line.startswith("CHATTER_ACCESS_TOKEN=")
+        ]
+        env_file.write_text("\n".join(lines))
         console.print("✅ Logged out successfully!")
         console.print("🗑️  Access token removed from .env file")
     else:
@@ -1558,7 +2083,9 @@ def show_dashboard() -> None:
     async def _dashboard():
         api_client = get_api_client()
         try:
-            response = await api_client.request("GET", "/analytics/dashboard")
+            response = await api_client.request(
+                "GET", "/analytics/dashboard"
+            )
 
             console.print(Panel.fit("[bold]Analytics Dashboard[/bold]"))
 
@@ -1568,10 +2095,22 @@ def show_dashboard() -> None:
             conv_table.add_column("Value", style="white")
 
             conv_stats = response.get("conversations", {})
-            conv_table.add_row("Total Conversations", str(conv_stats.get("total_conversations", 0)))
-            conv_table.add_row("Active Today", str(conv_stats.get("active_conversations_today", 0)))
-            conv_table.add_row("Messages Today", str(conv_stats.get("total_messages_today", 0)))
-            conv_table.add_row("Avg Messages/Conv", f"{conv_stats.get('avg_messages_per_conversation', 0):.1f}")
+            conv_table.add_row(
+                "Total Conversations",
+                str(conv_stats.get("total_conversations", 0)),
+            )
+            conv_table.add_row(
+                "Active Today",
+                str(conv_stats.get("active_conversations_today", 0)),
+            )
+            conv_table.add_row(
+                "Messages Today",
+                str(conv_stats.get("total_messages_today", 0)),
+            )
+            conv_table.add_row(
+                "Avg Messages/Conv",
+                f"{conv_stats.get('avg_messages_per_conversation', 0):.1f}",
+            )
 
             # Usage stats
             usage_table = Table(title="Usage")
@@ -1579,10 +2118,22 @@ def show_dashboard() -> None:
             usage_table.add_column("Value", style="white")
 
             usage_stats = response.get("usage", {})
-            usage_table.add_row("Total Tokens", str(usage_stats.get("total_tokens_used", 0)))
-            usage_table.add_row("Prompt Tokens", str(usage_stats.get("total_prompt_tokens", 0)))
-            usage_table.add_row("Completion Tokens", str(usage_stats.get("total_completion_tokens", 0)))
-            usage_table.add_row("API Requests", str(usage_stats.get("total_api_requests", 0)))
+            usage_table.add_row(
+                "Total Tokens",
+                str(usage_stats.get("total_tokens_used", 0)),
+            )
+            usage_table.add_row(
+                "Prompt Tokens",
+                str(usage_stats.get("total_prompt_tokens", 0)),
+            )
+            usage_table.add_row(
+                "Completion Tokens",
+                str(usage_stats.get("total_completion_tokens", 0)),
+            )
+            usage_table.add_row(
+                "API Requests",
+                str(usage_stats.get("total_api_requests", 0)),
+            )
 
             console.print(conv_table)
             console.print()
@@ -1596,7 +2147,9 @@ def show_dashboard() -> None:
 
 @analytics_app.command("usage")
 def show_usage(
-    days: int = typer.Option(7, "--days", "-d", help="Number of days to analyze"),
+    days: int = typer.Option(
+        7, "--days", "-d", help="Number of days to analyze"
+    ),
 ) -> None:
     """Show usage metrics."""
 
@@ -1604,9 +2157,15 @@ def show_usage(
         api_client = get_api_client()
         try:
             params = {"days": days}
-            response = await api_client.request("GET", "/analytics/usage", params=params)
+            response = await api_client.request(
+                "GET", "/analytics/usage", params=params
+            )
 
-            console.print(Panel.fit(f"[bold]Usage Metrics (Last {days} days)[/bold]"))
+            console.print(
+                Panel.fit(
+                    f"[bold]Usage Metrics (Last {days} days)[/bold]"
+                )
+            )
 
             table = Table(title="Usage Statistics")
             table.add_column("Metric", style="cyan")
@@ -1624,7 +2183,9 @@ def show_usage(
             for metric_name, metric_key in metrics:
                 total = response.get(metric_key, 0)
                 daily_avg = total / days if days > 0 else 0
-                table.add_row(metric_name, str(total), f"{daily_avg:.1f}")
+                table.add_row(
+                    metric_name, str(total), f"{daily_avg:.1f}"
+                )
 
             console.print(table)
 
@@ -1641,7 +2202,9 @@ def show_performance() -> None:
     async def _performance():
         api_client = get_api_client()
         try:
-            response = await api_client.request("GET", "/analytics/performance")
+            response = await api_client.request(
+                "GET", "/analytics/performance"
+            )
 
             console.print(Panel.fit("[bold]Performance Metrics[/bold]"))
 
@@ -1649,12 +2212,28 @@ def show_performance() -> None:
             table.add_column("Metric", style="cyan")
             table.add_column("Value", style="white")
 
-            table.add_row("Avg API Response Time", f"{response.get('avg_api_response_time', 0):.3f}s")
-            table.add_row("Avg LLM Response Time", f"{response.get('avg_llm_response_time', 0):.3f}s")
-            table.add_row("P95 Response Time", f"{response.get('p95_response_time', 0):.3f}s")
-            table.add_row("Error Rate", f"{response.get('error_rate', 0):.2%}")
-            table.add_row("Success Rate", f"{response.get('success_rate', 0):.2%}")
-            table.add_row("Cache Hit Rate", f"{response.get('cache_hit_rate', 0):.2%}")
+            table.add_row(
+                "Avg API Response Time",
+                f"{response.get('avg_api_response_time', 0):.3f}s",
+            )
+            table.add_row(
+                "Avg LLM Response Time",
+                f"{response.get('avg_llm_response_time', 0):.3f}s",
+            )
+            table.add_row(
+                "P95 Response Time",
+                f"{response.get('p95_response_time', 0):.3f}s",
+            )
+            table.add_row(
+                "Error Rate", f"{response.get('error_rate', 0):.2%}"
+            )
+            table.add_row(
+                "Success Rate", f"{response.get('success_rate', 0):.2%}"
+            )
+            table.add_row(
+                "Cache Hit Rate",
+                f"{response.get('cache_hit_rate', 0):.2%}",
+            )
 
             console.print(table)
 

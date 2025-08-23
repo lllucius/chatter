@@ -29,7 +29,7 @@ def generate_python_sdk():
 
     # Save the spec to a temporary file
     temp_spec_path = sdk_output_dir / "temp_openapi.json"
-    with open(temp_spec_path, 'w', encoding='utf-8') as f:
+    with open(temp_spec_path, "w", encoding="utf-8") as f:
         json.dump(spec, f, indent=2, ensure_ascii=False)
 
     # Configuration for the SDK generation
@@ -52,7 +52,7 @@ def generate_python_sdk():
 
     # Save config to a file
     config_path = sdk_output_dir / "generator_config.json"
-    with open(config_path, 'w', encoding='utf-8') as f:
+    with open(config_path, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=2)
 
     try:
@@ -74,7 +74,9 @@ def generate_python_sdk():
         ]
 
         print(f"🔧 Running command: {' '.join(cmd)}")
-        result = subprocess.run(cmd, capture_output=True, text=True, cwd=str(project_root))
+        result = subprocess.run(
+            cmd, capture_output=True, text=True, cwd=str(project_root)
+        )
 
         if result.returncode != 0:
             print("❌ SDK generation failed:")
@@ -167,7 +169,7 @@ setup(
 '''
 
     setup_py_path = sdk_dir / "setup.py"
-    with open(setup_py_path, 'w', encoding='utf-8') as f:
+    with open(setup_py_path, "w", encoding="utf-8") as f:
         f.write(setup_py_content)
 
     print(f"✅ Enhanced setup.py created at: {setup_py_path}")
@@ -239,7 +241,9 @@ if __name__ == "__main__":
     asyncio.run(main())
 '''
 
-    with open(examples_dir / "basic_usage.py", 'w', encoding='utf-8') as f:
+    with open(
+        examples_dir / "basic_usage.py", "w", encoding="utf-8"
+    ) as f:
         f.write(basic_example)
 
     # Advanced example with documents and profiles
@@ -319,7 +323,9 @@ if __name__ == "__main__":
     asyncio.run(main())
 '''
 
-    with open(examples_dir / "advanced_usage.py", 'w', encoding='utf-8') as f:
+    with open(
+        examples_dir / "advanced_usage.py", "w", encoding="utf-8"
+    ) as f:
         f.write(advanced_example)
 
     print(f"✅ SDK examples created in: {examples_dir}")
@@ -327,7 +333,7 @@ if __name__ == "__main__":
 
 def create_sdk_readme(sdk_dir: Path, config: dict[str, Any]):
     """Create a comprehensive README for the SDK."""
-    readme_content = f'''# Chatter Python SDK
+    readme_content = f"""# Chatter Python SDK
 
 {config['packageDescription']}
 
@@ -582,10 +588,10 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - GitHub Issues: {config['packageUrl']}/issues
 - Documentation: {config['packageUrl']}#readme
 - Email: {config['infoEmail']}
-'''
+"""
 
     readme_path = sdk_dir / "README.md"
-    with open(readme_path, 'w', encoding='utf-8') as f:
+    with open(readme_path, "w", encoding="utf-8") as f:
         f.write(readme_content)
 
     print(f"✅ SDK README created at: {readme_path}")

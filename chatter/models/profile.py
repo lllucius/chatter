@@ -4,8 +4,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime
 from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -25,76 +26,143 @@ class Profile(Base):
     """Profile model for LLM parameter management."""
 
     # Foreign keys
-    owner_id: Mapped[str] = mapped_column(String(12), ForeignKey(Keys.USERS), nullable=False, index=True)
+    owner_id: Mapped[str] = mapped_column(
+        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
+    )
 
     # Profile metadata
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
     profile_type: Mapped[ProfileType] = mapped_column(
-        SQLEnum(ProfileType), default=ProfileType.CUSTOM, nullable=False, index=True
+        SQLEnum(ProfileType),
+        default=ProfileType.CUSTOM,
+        nullable=False,
+        index=True,
     )
 
     # LLM Configuration
-    llm_provider: Mapped[str] = mapped_column(String(50), nullable=False)
+    llm_provider: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )
     llm_model: Mapped[str] = mapped_column(String(100), nullable=False)
 
     # Generation parameters
-    temperature: Mapped[float] = mapped_column(Float, default=0.7, nullable=False)
+    temperature: Mapped[float] = mapped_column(
+        Float, default=0.7, nullable=False
+    )
     top_p: Mapped[float | None] = mapped_column(Float, nullable=True)
     top_k: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    max_tokens: Mapped[int] = mapped_column(Integer, default=4096, nullable=False)
-    presence_penalty: Mapped[float | None] = mapped_column(Float, nullable=True)
-    frequency_penalty: Mapped[float | None] = mapped_column(Float, nullable=True)
+    max_tokens: Mapped[int] = mapped_column(
+        Integer, default=4096, nullable=False
+    )
+    presence_penalty: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
+    frequency_penalty: Mapped[float | None] = mapped_column(
+        Float, nullable=True
+    )
 
     # Context configuration
-    context_window: Mapped[int] = mapped_column(Integer, default=4096, nullable=False)
-    system_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
+    context_window: Mapped[int] = mapped_column(
+        Integer, default=4096, nullable=False
+    )
+    system_prompt: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
 
     # Memory and retrieval settings
-    memory_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    memory_strategy: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    enable_retrieval: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    retrieval_limit: Mapped[int] = mapped_column(Integer, default=5, nullable=False)
-    retrieval_score_threshold: Mapped[float] = mapped_column(Float, default=0.7, nullable=False)
+    memory_enabled: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False
+    )
+    memory_strategy: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )
+    enable_retrieval: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    retrieval_limit: Mapped[int] = mapped_column(
+        Integer, default=5, nullable=False
+    )
+    retrieval_score_threshold: Mapped[float] = mapped_column(
+        Float, default=0.7, nullable=False
+    )
 
     # Tool calling
-    enable_tools: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    available_tools: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    tool_choice: Mapped[str | None] = mapped_column(String(50), nullable=True)  # auto, none, specific tool
+    enable_tools: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    available_tools: Mapped[list[str] | None] = mapped_column(
+        JSON, nullable=True
+    )
+    tool_choice: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )  # auto, none, specific tool
 
     # Safety and filtering
-    content_filter_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    safety_level: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    content_filter_enabled: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False
+    )
+    safety_level: Mapped[str | None] = mapped_column(
+        String(20), nullable=True
+    )
 
     # Response formatting
-    response_format: Mapped[str | None] = mapped_column(String(20), nullable=True)  # json, text, markdown
-    stream_response: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    response_format: Mapped[str | None] = mapped_column(
+        String(20), nullable=True
+    )  # json, text, markdown
+    stream_response: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False
+    )
 
     # Advanced settings
     seed: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    stop_sequences: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    logit_bias: Mapped[dict[str, float] | None] = mapped_column(JSON, nullable=True)
+    stop_sequences: Mapped[list[str] | None] = mapped_column(
+        JSON, nullable=True
+    )
+    logit_bias: Mapped[dict[str, float] | None] = mapped_column(
+        JSON, nullable=True
+    )
 
     # Embedding configuration (for retrieval)
-    embedding_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
-    embedding_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    embedding_provider: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )
+    embedding_model: Mapped[str | None] = mapped_column(
+        String(100), nullable=True
+    )
 
     # Access control
-    is_public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_public: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
 
     # Usage statistics
-    usage_count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    total_tokens_used: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
-    total_cost: Mapped[float] = mapped_column(Float, default=0.0, nullable=False)
-    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    usage_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
+    total_tokens_used: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
+    total_cost: Mapped[float] = mapped_column(
+        Float, default=0.0, nullable=False
+    )
+    last_used_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Metadata and tags
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    extra_metadata: Mapped[dict[str, Any] | None] = mapped_column("extra_metadata", JSON, nullable=True)
+    extra_metadata: Mapped[dict[str, Any] | None] = mapped_column(
+        "extra_metadata", JSON, nullable=True
+    )
 
     # Relationships
-    owner: Mapped["User"] = relationship("User", back_populates="profiles", foreign_keys=[owner_id])
-    conversations: Mapped[list["Conversation"]] = relationship("Conversation", back_populates="profile")
+    owner: Mapped["User"] = relationship(
+        "User", back_populates="profiles", foreign_keys=[owner_id]
+    )
+    conversations: Mapped[list["Conversation"]] = relationship(
+        "Conversation", back_populates="profile"
+    )
 
     def __repr__(self) -> str:
         """String representation of profile."""
@@ -169,9 +237,15 @@ class Profile(Base):
             "usage_count": self.usage_count,
             "total_tokens_used": self.total_tokens_used,
             "total_cost": self.total_cost,
-            "last_used_at": self.last_used_at.isoformat() if self.last_used_at else None,
+            "last_used_at": self.last_used_at.isoformat()
+            if self.last_used_at
+            else None,
             "tags": self.tags,
             "metadata": self.extra_metadata,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": self.created_at.isoformat()
+            if self.created_at
+            else None,
+            "updated_at": self.updated_at.isoformat()
+            if self.updated_at
+            else None,
         }

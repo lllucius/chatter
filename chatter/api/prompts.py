@@ -24,18 +24,29 @@ from chatter.schemas.prompt import (
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import BadRequestProblem, InternalServerProblem, NotFoundProblem, ProblemException
+from chatter.utils.problem import (
+    BadRequestProblem,
+    InternalServerProblem,
+    NotFoundProblem,
+    ProblemException,
+)
 
 logger = get_logger(__name__)
 router = APIRouter()
 
 
-async def get_prompt_service(session: AsyncSession = Depends(get_session)) -> PromptService:
+async def get_prompt_service(
+    session: AsyncSession = Depends(get_session)
+) -> PromptService:
     """Get prompt service instance."""
     return PromptService(session)
 
 
-@router.post("/", response_model=PromptResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=PromptResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_prompt(
     prompt_data: PromptCreate,
     current_user: User = Depends(get_current_user),
@@ -52,14 +63,18 @@ async def create_prompt(
         Created prompt information
     """
     try:
-        prompt = await prompt_service.create_prompt(current_user.id, prompt_data)
+        prompt = await prompt_service.create_prompt(
+            current_user.id, prompt_data
+        )
         return PromptResponse.model_validate(prompt)
 
     except PromptError as e:
         raise BadRequestProblem(detail=str(e)) from None
     except Exception as e:
         logger.error("Prompt creation failed", error=str(e))
-        raise InternalServerProblem(detail="Failed to create prompt") from None
+        raise InternalServerProblem(
+            detail="Failed to create prompt"
+        ) from None
 
 
 @router.get("/", response_model=PromptListResponse)
@@ -84,10 +99,15 @@ async def list_prompts(
     """
     try:
         # Get prompts
-        prompts, total_count = await prompt_service.list_prompts(current_user.id, request, pagination, sorting)
+        prompts, total_count = await prompt_service.list_prompts(
+            current_user.id, request, pagination, sorting
+        )
 
         return PromptListResponse(
-            prompts=[PromptResponse.model_validate(prompt) for prompt in prompts],
+            prompts=[
+                PromptResponse.model_validate(prompt)
+                for prompt in prompts
+            ],
             total_count=total_count,
             limit=pagination.limit,
             offset=pagination.offset,
@@ -95,7 +115,9 @@ async def list_prompts(
 
     except Exception as e:
         logger.error("Failed to list prompts", error=str(e))
-        raise InternalServerProblem(detail="Failed to list prompts") from None
+        raise InternalServerProblem(
+            detail="Failed to list prompts"
+        ) from None
 
 
 @router.get("/{prompt_id}", response_model=PromptResponse)
@@ -117,18 +139,28 @@ async def get_prompt(
         Prompt information
     """
     try:
-        prompt = await prompt_service.get_prompt(prompt_id, current_user.id)
+        prompt = await prompt_service.get_prompt(
+            prompt_id, current_user.id
+        )
 
         if not prompt:
-            raise NotFoundProblem(detail="Prompt not found", resource_type="prompt", resource_id=prompt_id) from None
+            raise NotFoundProblem(
+                detail="Prompt not found",
+                resource_type="prompt",
+                resource_id=prompt_id,
+            ) from None
 
         return PromptResponse.model_validate(prompt)
 
     except ProblemException:
         raise
     except Exception as e:
-        logger.error("Failed to get prompt", prompt_id=prompt_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to get prompt") from None
+        logger.error(
+            "Failed to get prompt", prompt_id=prompt_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to get prompt"
+        ) from None
 
 
 @router.put("/{prompt_id}", response_model=PromptResponse)
@@ -150,10 +182,16 @@ async def update_prompt(
         Updated prompt information
     """
     try:
-        prompt = await prompt_service.update_prompt(prompt_id, current_user.id, update_data)
+        prompt = await prompt_service.update_prompt(
+            prompt_id, current_user.id, update_data
+        )
 
         if not prompt:
-            raise NotFoundProblem(detail="Prompt not found", resource_type="prompt", resource_id=prompt_id) from None
+            raise NotFoundProblem(
+                detail="Prompt not found",
+                resource_type="prompt",
+                resource_id=prompt_id,
+            ) from None
 
         return PromptResponse.model_validate(prompt)
 
@@ -162,8 +200,12 @@ async def update_prompt(
     except ProblemException:
         raise
     except Exception as e:
-        logger.error("Failed to update prompt", prompt_id=prompt_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to update prompt") from None
+        logger.error(
+            "Failed to update prompt", prompt_id=prompt_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to update prompt"
+        ) from None
 
 
 @router.delete("/{prompt_id}", response_model=PromptDeleteResponse)
@@ -185,18 +227,30 @@ async def delete_prompt(
         Success message
     """
     try:
-        success = await prompt_service.delete_prompt(prompt_id, current_user.id)
+        success = await prompt_service.delete_prompt(
+            prompt_id, current_user.id
+        )
 
         if not success:
-            raise NotFoundProblem(detail="Prompt not found", resource_type="prompt", resource_id=prompt_id) from None
+            raise NotFoundProblem(
+                detail="Prompt not found",
+                resource_type="prompt",
+                resource_id=prompt_id,
+            ) from None
 
-        return PromptDeleteResponse(message="Prompt deleted successfully")
+        return PromptDeleteResponse(
+            message="Prompt deleted successfully"
+        )
 
     except ProblemException:
         raise
     except Exception as e:
-        logger.error("Failed to delete prompt", prompt_id=prompt_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to delete prompt") from None
+        logger.error(
+            "Failed to delete prompt", prompt_id=prompt_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to delete prompt"
+        ) from None
 
 
 @router.post("/{prompt_id}/test", response_model=PromptTestResponse)
@@ -218,15 +272,21 @@ async def test_prompt(
         Test results
     """
     try:
-        result = await prompt_service.test_prompt(prompt_id, current_user.id, test_request)
+        result = await prompt_service.test_prompt(
+            prompt_id, current_user.id, test_request
+        )
 
         return PromptTestResponse(**result)
 
     except PromptError as e:
         raise BadRequestProblem(detail=str(e)) from None
     except Exception as e:
-        logger.error("Prompt test failed", prompt_id=prompt_id, error=str(e))
-        raise InternalServerProblem(detail="Prompt test failed") from None
+        logger.error(
+            "Prompt test failed", prompt_id=prompt_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Prompt test failed"
+        ) from None
 
 
 @router.post("/{prompt_id}/clone", response_model=PromptResponse)
@@ -249,7 +309,11 @@ async def clone_prompt(
     """
     try:
         cloned_prompt = await prompt_service.clone_prompt(
-            prompt_id, current_user.id, clone_request.name, clone_request.description, clone_request.modifications
+            prompt_id,
+            current_user.id,
+            clone_request.name,
+            clone_request.description,
+            clone_request.modifications,
         )
 
         return PromptResponse.model_validate(cloned_prompt)
@@ -257,8 +321,12 @@ async def clone_prompt(
     except PromptError as e:
         raise BadRequestProblem(detail=str(e)) from None
     except Exception as e:
-        logger.error("Prompt cloning failed", prompt_id=prompt_id, error=str(e))
-        raise InternalServerProblem(detail="Prompt cloning failed") from None
+        logger.error(
+            "Prompt cloning failed", prompt_id=prompt_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Prompt cloning failed"
+        ) from None
 
 
 @router.get("/stats/overview", response_model=PromptStatsResponse)
@@ -284,11 +352,19 @@ async def get_prompt_stats(
             total_prompts=stats.get("total_prompts", 0),
             prompts_by_type=stats.get("prompts_by_type", {}),
             prompts_by_category=stats.get("prompts_by_category", {}),
-            most_used_prompts=[PromptResponse.model_validate(prompt) for prompt in stats.get("most_used_prompts", [])],
-            recent_prompts=[PromptResponse.model_validate(prompt) for prompt in stats.get("recent_prompts", [])],
+            most_used_prompts=[
+                PromptResponse.model_validate(prompt)
+                for prompt in stats.get("most_used_prompts", [])
+            ],
+            recent_prompts=[
+                PromptResponse.model_validate(prompt)
+                for prompt in stats.get("recent_prompts", [])
+            ],
             usage_stats=stats.get("usage_stats", {}),
         )
 
     except Exception as e:
         logger.error("Failed to get prompt stats", error=str(e))
-        raise InternalServerProblem(detail="Failed to get prompt stats") from None
+        raise InternalServerProblem(
+            detail="Failed to get prompt stats"
+        ) from None

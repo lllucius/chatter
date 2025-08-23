@@ -11,8 +11,11 @@ Usage:
 """
 
 import json
+
 from fastapi.testclient import TestClient
+
 from chatter.main import create_app
+
 
 def demo_rfc9457():
     """Demonstrate RFC 9457 error responses."""

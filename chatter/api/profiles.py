@@ -26,18 +26,29 @@ from chatter.schemas.profile import (
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import BadRequestProblem, InternalServerProblem, NotFoundProblem, ProblemException
+from chatter.utils.problem import (
+    BadRequestProblem,
+    InternalServerProblem,
+    NotFoundProblem,
+    ProblemException,
+)
 
 logger = get_logger(__name__)
 router = APIRouter()
 
 
-async def get_profile_service(session: AsyncSession = Depends(get_session)) -> ProfileService:
+async def get_profile_service(
+    session: AsyncSession = Depends(get_session)
+) -> ProfileService:
     """Get profile service instance."""
     return ProfileService(session)
 
 
-@router.post("/", response_model=ProfileResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=ProfileResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_profile(
     profile_data: ProfileCreate,
     current_user: User = Depends(get_current_user),
@@ -54,14 +65,18 @@ async def create_profile(
         Created profile information
     """
     try:
-        profile = await profile_service.create_profile(current_user.id, profile_data)
+        profile = await profile_service.create_profile(
+            current_user.id, profile_data
+        )
         return ProfileResponse.model_validate(profile)
 
     except ProfileError as e:
         raise BadRequestProblem(detail=str(e)) from None
     except Exception as e:
         logger.error("Profile creation failed", error=str(e))
-        raise InternalServerProblem(detail="Failed to create profile") from None
+        raise InternalServerProblem(
+            detail="Failed to create profile"
+        ) from None
 
 
 @router.get("/", response_model=ProfileListResponse)
@@ -86,10 +101,15 @@ async def list_profiles(
     """
     try:
         # Get profiles
-        profiles, total_count = await profile_service.list_profiles(current_user.id, request, pagination, sorting)
+        profiles, total_count = await profile_service.list_profiles(
+            current_user.id, request, pagination, sorting
+        )
 
         return ProfileListResponse(
-            profiles=[ProfileResponse.model_validate(profile) for profile in profiles],
+            profiles=[
+                ProfileResponse.model_validate(profile)
+                for profile in profiles
+            ],
             total_count=total_count,
             limit=pagination.limit,
             offset=pagination.offset,
@@ -97,7 +117,9 @@ async def list_profiles(
 
     except Exception as e:
         logger.error("Failed to list profiles", error=str(e))
-        raise InternalServerProblem(detail="Failed to list profiles") from None
+        raise InternalServerProblem(
+            detail="Failed to list profiles"
+        ) from None
 
 
 @router.get("/{profile_id}", response_model=ProfileResponse)
@@ -119,18 +141,28 @@ async def get_profile(
         Profile information
     """
     try:
-        profile = await profile_service.get_profile(profile_id, current_user.id)
+        profile = await profile_service.get_profile(
+            profile_id, current_user.id
+        )
 
         if not profile:
-            raise NotFoundProblem(detail="Profile not found", resource_type="profile", resource_id=profile_id) from None
+            raise NotFoundProblem(
+                detail="Profile not found",
+                resource_type="profile",
+                resource_id=profile_id,
+            ) from None
 
         return ProfileResponse.model_validate(profile)
 
     except ProblemException:
         raise
     except Exception as e:
-        logger.error("Failed to get profile", profile_id=profile_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to get profile") from None
+        logger.error(
+            "Failed to get profile", profile_id=profile_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to get profile"
+        ) from None
 
 
 @router.put("/{profile_id}", response_model=ProfileResponse)
@@ -152,10 +184,16 @@ async def update_profile(
         Updated profile information
     """
     try:
-        profile = await profile_service.update_profile(profile_id, current_user.id, update_data)
+        profile = await profile_service.update_profile(
+            profile_id, current_user.id, update_data
+        )
 
         if not profile:
-            raise NotFoundProblem(detail="Profile not found", resource_type="profile", resource_id=profile_id) from None
+            raise NotFoundProblem(
+                detail="Profile not found",
+                resource_type="profile",
+                resource_id=profile_id,
+            ) from None
 
         return ProfileResponse.model_validate(profile)
 
@@ -164,8 +202,14 @@ async def update_profile(
     except ProblemException:
         raise
     except Exception as e:
-        logger.error("Failed to update profile", profile_id=profile_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to update profile") from None
+        logger.error(
+            "Failed to update profile",
+            profile_id=profile_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to update profile"
+        ) from None
 
 
 @router.delete("/{profile_id}", response_model=ProfileDeleteResponse)
@@ -187,18 +231,32 @@ async def delete_profile(
         Success message
     """
     try:
-        success = await profile_service.delete_profile(profile_id, current_user.id)
+        success = await profile_service.delete_profile(
+            profile_id, current_user.id
+        )
 
         if not success:
-            raise NotFoundProblem(detail="Profile not found", resource_type="profile", resource_id=profile_id) from None
+            raise NotFoundProblem(
+                detail="Profile not found",
+                resource_type="profile",
+                resource_id=profile_id,
+            ) from None
 
-        return ProfileDeleteResponse(message="Profile deleted successfully")
+        return ProfileDeleteResponse(
+            message="Profile deleted successfully"
+        )
 
     except ProblemException:
         raise
     except Exception as e:
-        logger.error("Failed to delete profile", profile_id=profile_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to delete profile") from None
+        logger.error(
+            "Failed to delete profile",
+            profile_id=profile_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to delete profile"
+        ) from None
 
 
 @router.post("/{profile_id}/test", response_model=ProfileTestResponse)
@@ -220,15 +278,21 @@ async def test_profile(
         Test results
     """
     try:
-        result = await profile_service.test_profile(profile_id, current_user.id, test_request)
+        result = await profile_service.test_profile(
+            profile_id, current_user.id, test_request
+        )
 
         return ProfileTestResponse(**result)
 
     except ProfileError as e:
         raise BadRequestProblem(detail=str(e)) from None
     except Exception as e:
-        logger.error("Profile test failed", profile_id=profile_id, error=str(e))
-        raise InternalServerProblem(detail="Profile test failed") from None
+        logger.error(
+            "Profile test failed", profile_id=profile_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Profile test failed"
+        ) from None
 
 
 @router.post("/{profile_id}/clone", response_model=ProfileResponse)
@@ -251,7 +315,11 @@ async def clone_profile(
     """
     try:
         cloned_profile = await profile_service.clone_profile(
-            profile_id, current_user.id, clone_request.name, clone_request.description, clone_request.modifications
+            profile_id,
+            current_user.id,
+            clone_request.name,
+            clone_request.description,
+            clone_request.modifications,
         )
 
         return ProfileResponse.model_validate(cloned_profile)
@@ -259,8 +327,14 @@ async def clone_profile(
     except ProfileError as e:
         raise BadRequestProblem(detail=str(e)) from None
     except Exception as e:
-        logger.error("Profile cloning failed", profile_id=profile_id, error=str(e))
-        raise InternalServerProblem(detail="Profile cloning failed") from None
+        logger.error(
+            "Profile cloning failed",
+            profile_id=profile_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Profile cloning failed"
+        ) from None
 
 
 @router.get("/stats/overview", response_model=ProfileStatsResponse)
@@ -287,18 +361,26 @@ async def get_profile_stats(
             profiles_by_type=stats.get("profiles_by_type", {}),
             profiles_by_provider=stats.get("profiles_by_provider", {}),
             most_used_profiles=[
-                ProfileResponse.model_validate(profile) for profile in stats.get("most_used_profiles", [])
+                ProfileResponse.model_validate(profile)
+                for profile in stats.get("most_used_profiles", [])
             ],
-            recent_profiles=[ProfileResponse.model_validate(profile) for profile in stats.get("recent_profiles", [])],
+            recent_profiles=[
+                ProfileResponse.model_validate(profile)
+                for profile in stats.get("recent_profiles", [])
+            ],
             usage_stats=stats.get("usage_stats", {}),
         )
 
     except Exception as e:
         logger.error("Failed to get profile stats", error=str(e))
-        raise InternalServerProblem(detail="Failed to get profile stats") from None
+        raise InternalServerProblem(
+            detail="Failed to get profile stats"
+        ) from None
 
 
-@router.get("/providers/available", response_model=AvailableProvidersResponse)
+@router.get(
+    "/providers/available", response_model=AvailableProvidersResponse
+)
 async def get_available_providers(
     request: ProfileProvidersRequest = Depends(),
     current_user: User = Depends(get_current_user),
@@ -319,9 +401,13 @@ async def get_available_providers(
         return AvailableProvidersResponse(
             providers=providers_info,
             total_providers=len(providers_info),
-            supported_features=providers_info.get("supported_features", {}),
+            supported_features=providers_info.get(
+                "supported_features", {}
+            ),
         )
 
     except Exception as e:
         logger.error("Failed to get available providers", error=str(e))
-        raise InternalServerProblem(detail="Failed to get available providers") from None
+        raise InternalServerProblem(
+            detail="Failed to get available providers"
+        ) from None

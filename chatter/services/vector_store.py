@@ -37,7 +37,10 @@ class VectorStoreService:
         self.embedding_dimension = settings.pgvector_embedding_dimension
 
     async def store_embedding(
-        self, chunk_id: str, embedding: list[float], metadata: dict[str, Any] | None = None
+        self,
+        chunk_id: str,
+        embedding: list[float],
+        metadata: dict[str, Any] | None = None,
     ) -> bool:
         """Store embedding for a document chunk.
 
@@ -51,7 +54,11 @@ class VectorStoreService:
         """
         try:
             # Get the chunk
-            result = await self.session.execute(select(DocumentChunk).where(DocumentChunk.id == chunk_id))
+            result = await self.session.execute(
+                select(DocumentChunk).where(
+                    DocumentChunk.id == chunk_id
+                )
+            )
             chunk = result.scalar_one_or_none()
 
             if not chunk:
@@ -60,17 +67,28 @@ class VectorStoreService:
 
             # Store embedding based on vector store type
             if self.store_type == "pgvector" and PGVECTOR_AVAILABLE:
-                return await self._store_pgvector_embedding(chunk, embedding, metadata)
+                return await self._store_pgvector_embedding(
+                    chunk, embedding, metadata
+                )
             else:
                 # Fallback: store as JSON string
-                return await self._store_json_embedding(chunk, embedding, metadata)
+                return await self._store_json_embedding(
+                    chunk, embedding, metadata
+                )
 
         except Exception as e:
-            logger.error("Failed to store embedding", chunk_id=chunk_id, error=str(e))
+            logger.error(
+                "Failed to store embedding",
+                chunk_id=chunk_id,
+                error=str(e),
+            )
             return False
 
     async def _store_pgvector_embedding(
-        self, chunk: DocumentChunk, embedding: list[float], metadata: dict[str, Any] | None = None
+        self,
+        chunk: DocumentChunk,
+        embedding: list[float],
+        metadata: dict[str, Any] | None = None,
     ) -> bool:
         """Store embedding using PGVector.
 
@@ -85,12 +103,19 @@ class VectorStoreService:
         try:
             # Validate embedding dimension
             if len(embedding) != self.embedding_dimension:
-                logger.warning("Embedding dimension mismatch", expected=self.embedding_dimension, actual=len(embedding))
+                logger.warning(
+                    "Embedding dimension mismatch",
+                    expected=self.embedding_dimension,
+                    actual=len(embedding),
+                )
 
             # Update chunk with embedding
             chunk.embedding = embedding
             if metadata:
-                chunk.extra_metadata = {**(chunk.extra_metadata or {}), **metadata}
+                chunk.extra_metadata = {
+                    **(chunk.extra_metadata or {}),
+                    **metadata,
+                }
 
             await self.session.commit()
 
@@ -99,11 +124,18 @@ class VectorStoreService:
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to store PGVector embedding", chunk_id=chunk.id, error=str(e))
+            logger.error(
+                "Failed to store PGVector embedding",
+                chunk_id=chunk.id,
+                error=str(e),
+            )
             return False
 
     async def _store_json_embedding(
-        self, chunk: DocumentChunk, embedding: list[float], metadata: dict[str, Any] | None = None
+        self,
+        chunk: DocumentChunk,
+        embedding: list[float],
+        metadata: dict[str, Any] | None = None,
     ) -> bool:
         """Store embedding as JSON string (fallback).
 
@@ -119,7 +151,10 @@ class VectorStoreService:
             # Store embedding as JSON string
             chunk.embedding = json.dumps(embedding)
             if metadata:
-                chunk.extra_metadata = {**(chunk.extra_metadata or {}), **metadata}
+                chunk.extra_metadata = {
+                    **(chunk.extra_metadata or {}),
+                    **metadata,
+                }
 
             await self.session.commit()
 
@@ -128,7 +163,11 @@ class VectorStoreService:
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to store JSON embedding", chunk_id=chunk.id, error=str(e))
+            logger.error(
+                "Failed to store JSON embedding",
+                chunk_id=chunk.id,
+                error=str(e),
+            )
             return False
 
     async def similarity_search(
@@ -154,11 +193,19 @@ class VectorStoreService:
         try:
             if self.store_type == "pgvector" and PGVECTOR_AVAILABLE:
                 return await self._pgvector_similarity_search(
-                    query_embedding, limit, score_threshold, document_ids, metadata_filter
+                    query_embedding,
+                    limit,
+                    score_threshold,
+                    document_ids,
+                    metadata_filter,
                 )
             else:
                 return await self._json_similarity_search(
-                    query_embedding, limit, score_threshold, document_ids, metadata_filter
+                    query_embedding,
+                    limit,
+                    score_threshold,
+                    document_ids,
+                    metadata_filter,
                 )
 
         except Exception as e:
@@ -188,22 +235,48 @@ class VectorStoreService:
         try:
             # Build query with similarity calculation
             query = select(
-                DocumentChunk, (1 - DocumentChunk.embedding.cosine_distance(query_embedding)).label("similarity")
+                DocumentChunk,
+                (
+                    1
+                    - DocumentChunk.embedding.cosine_distance(
+                        query_embedding
+                    )
+                ).label("similarity"),
             ).where(DocumentChunk.embedding.is_not(None))
 
             # Add filters
             if document_ids:
-                query = query.where(DocumentChunk.document_id.in_(document_ids))
+                query = query.where(
+                    DocumentChunk.document_id.in_(document_ids)
+                )
 
             if metadata_filter:
                 # Add metadata filters (this is a simplified version)
                 for key, value in metadata_filter.items():
-                    query = query.where(DocumentChunk.extra_metadata[key].astext == str(value))
+                    query = query.where(
+                        DocumentChunk.extra_metadata[key].astext
+                        == str(value)
+                    )
 
             # Add similarity threshold and ordering
             query = (
-                query.where((1 - DocumentChunk.embedding.cosine_distance(query_embedding)) >= score_threshold)
-                .order_by((1 - DocumentChunk.embedding.cosine_distance(query_embedding)).desc())
+                query.where(
+                    (
+                        1
+                        - DocumentChunk.embedding.cosine_distance(
+                            query_embedding
+                        )
+                    )
+                    >= score_threshold
+                )
+                .order_by(
+                    (
+                        1
+                        - DocumentChunk.embedding.cosine_distance(
+                            query_embedding
+                        )
+                    ).desc()
+                )
                 .limit(limit)
             )
 
@@ -218,10 +291,15 @@ class VectorStoreService:
                 threshold=score_threshold,
             )
 
-            return [(chunk, float(similarity)) for chunk, similarity in results]
+            return [
+                (chunk, float(similarity))
+                for chunk, similarity in results
+            ]
 
         except Exception as e:
-            logger.error("PGVector similarity search failed", error=str(e))
+            logger.error(
+                "PGVector similarity search failed", error=str(e)
+            )
             return []
 
     async def _json_similarity_search(
@@ -246,15 +324,22 @@ class VectorStoreService:
         """
         try:
             # Get chunks with embeddings
-            query = select(DocumentChunk).where(DocumentChunk.embedding.is_not(None))
+            query = select(DocumentChunk).where(
+                DocumentChunk.embedding.is_not(None)
+            )
 
             # Add filters
             if document_ids:
-                query = query.where(DocumentChunk.document_id.in_(document_ids))
+                query = query.where(
+                    DocumentChunk.document_id.in_(document_ids)
+                )
 
             if metadata_filter:
                 for key, value in metadata_filter.items():
-                    query = query.where(DocumentChunk.extra_metadata[key].astext == str(value))
+                    query = query.where(
+                        DocumentChunk.extra_metadata[key].astext
+                        == str(value)
+                    )
 
             result = await self.session.execute(query)
             chunks = result.scalars().all()
@@ -267,13 +352,17 @@ class VectorStoreService:
                     chunk_embedding = json.loads(chunk.embedding)
 
                     # Calculate cosine similarity
-                    similarity = self._cosine_similarity(query_embedding, chunk_embedding)
+                    similarity = self._cosine_similarity(
+                        query_embedding, chunk_embedding
+                    )
 
                     if similarity >= score_threshold:
                         results.append((chunk, similarity))
 
                 except (json.JSONDecodeError, TypeError):
-                    logger.warning("Invalid embedding format", chunk_id=chunk.id)
+                    logger.warning(
+                        "Invalid embedding format", chunk_id=chunk.id
+                    )
                     continue
 
             # Sort by similarity and limit
@@ -281,7 +370,10 @@ class VectorStoreService:
             results = results[:limit]
 
             logger.debug(
-                "JSON similarity search completed", results_count=len(results), limit=limit, threshold=score_threshold
+                "JSON similarity search completed",
+                results_count=len(results),
+                limit=limit,
+                threshold=score_threshold,
             )
 
             return results
@@ -290,7 +382,9 @@ class VectorStoreService:
             logger.error("JSON similarity search failed", error=str(e))
             return []
 
-    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
+    def _cosine_similarity(
+        self, vec1: list[float], vec2: list[float]
+    ) -> float:
         """Calculate cosine similarity between two vectors.
 
         Args:
@@ -307,7 +401,9 @@ class VectorStoreService:
                 return 0.0
 
             # Calculate dot product
-            dot_product = sum(a * b for a, b in zip(vec1, vec2, strict=False))
+            dot_product = sum(
+                a * b for a, b in zip(vec1, vec2, strict=False)
+            )
 
             # Calculate magnitudes
             magnitude1 = math.sqrt(sum(a * a for a in vec1))
@@ -348,7 +444,10 @@ class VectorStoreService:
         try:
             # Perform semantic search
             semantic_results = await self.similarity_search(
-                query_embedding, limit * 2, score_threshold * 0.5, document_ids
+                query_embedding,
+                limit * 2,
+                score_threshold * 0.5,
+                document_ids,
             )
 
             # Perform text search (using LIKE for simplicity)
@@ -356,13 +455,19 @@ class VectorStoreService:
             text_query_obj = select(DocumentChunk)
 
             if document_ids:
-                text_query_obj = text_query_obj.where(DocumentChunk.document_id.in_(document_ids))
+                text_query_obj = text_query_obj.where(
+                    DocumentChunk.document_id.in_(document_ids)
+                )
 
             # Simple text matching (can be enhanced with full-text search)
             for word in text_query_words:
-                text_query_obj = text_query_obj.where(func.lower(DocumentChunk.content).contains(word))
+                text_query_obj = text_query_obj.where(
+                    func.lower(DocumentChunk.content).contains(word)
+                )
 
-            text_result = await self.session.execute(text_query_obj.limit(limit * 2))
+            text_result = await self.session.execute(
+                text_query_obj.limit(limit * 2)
+            )
             text_chunks = text_result.scalars().all()
 
             # Combine results
@@ -370,24 +475,39 @@ class VectorStoreService:
 
             # Add semantic scores
             for chunk, score in semantic_results:
-                combined_scores[chunk.id] = {'chunk': chunk, 'semantic_score': score, 'text_score': 0.0}
+                combined_scores[chunk.id] = {
+                    "chunk": chunk,
+                    "semantic_score": score,
+                    "text_score": 0.0,
+                }
 
             # Add text scores
             for chunk in text_chunks:
-                text_score = self._calculate_text_score(chunk.content, text_query)
+                text_score = self._calculate_text_score(
+                    chunk.content, text_query
+                )
 
                 if chunk.id in combined_scores:
-                    combined_scores[chunk.id]['text_score'] = text_score
+                    combined_scores[chunk.id]["text_score"] = text_score
                 else:
-                    combined_scores[chunk.id] = {'chunk': chunk, 'semantic_score': 0.0, 'text_score': text_score}
+                    combined_scores[chunk.id] = {
+                        "chunk": chunk,
+                        "semantic_score": 0.0,
+                        "text_score": text_score,
+                    }
 
             # Calculate combined scores
             results = []
             for chunk_data in combined_scores.values():
-                combined_score = semantic_weight * chunk_data['semantic_score'] + text_weight * chunk_data['text_score']
+                combined_score = (
+                    semantic_weight * chunk_data["semantic_score"]
+                    + text_weight * chunk_data["text_score"]
+                )
 
                 if combined_score >= score_threshold:
-                    results.append((chunk_data['chunk'], combined_score))
+                    results.append(
+                        (chunk_data["chunk"], combined_score)
+                    )
 
             # Sort by combined score and limit
             results.sort(key=lambda x: x[1], reverse=True)
@@ -444,18 +564,25 @@ class VectorStoreService:
         """
         try:
             # Count total chunks
-            total_result = await self.session.execute(select(func.count(DocumentChunk.id)))
+            total_result = await self.session.execute(
+                select(func.count(DocumentChunk.id))
+            )
             total_chunks = total_result.scalar()
 
             # Count chunks with embeddings
             embedded_result = await self.session.execute(
-                select(func.count(DocumentChunk.id)).where(DocumentChunk.embedding.is_not(None))
+                select(func.count(DocumentChunk.id)).where(
+                    DocumentChunk.embedding.is_not(None)
+                )
             )
             embedded_chunks = embedded_result.scalar()
 
             # Get embedding models used
             models_result = await self.session.execute(
-                select(DocumentChunk.embedding_model, func.count(DocumentChunk.id))
+                select(
+                    DocumentChunk.embedding_model,
+                    func.count(DocumentChunk.id),
+                )
                 .where(DocumentChunk.embedding_model.is_not(None))
                 .group_by(DocumentChunk.embedding_model)
             )
@@ -464,7 +591,9 @@ class VectorStoreService:
             return {
                 "total_chunks": total_chunks,
                 "embedded_chunks": embedded_chunks,
-                "embedding_coverage": embedded_chunks / total_chunks if total_chunks > 0 else 0.0,
+                "embedding_coverage": embedded_chunks / total_chunks
+                if total_chunks > 0
+                else 0.0,
                 "models_used": models_stats,
                 "vector_store_type": self.store_type,
                 "pgvector_available": PGVECTOR_AVAILABLE,

@@ -16,11 +16,22 @@ from chatter.config import settings
 class ProblemDetail(BaseModel):
     """RFC 9457 Problem Detail model."""
 
-    type: str = Field(default="about:blank", description="A URI reference that identifies the problem type")
-    title: str = Field(description="A short, human-readable summary of the problem type")
+    type: str = Field(
+        default="about:blank",
+        description="A URI reference that identifies the problem type",
+    )
+    title: str = Field(
+        description="A short, human-readable summary of the problem type"
+    )
     status: int = Field(description="The HTTP status code")
-    detail: str | None = Field(default=None, description="A human-readable explanation specific to this occurrence")
-    instance: str | None = Field(default=None, description="A URI reference that identifies the specific occurrence")
+    detail: str | None = Field(
+        default=None,
+        description="A human-readable explanation specific to this occurrence",
+    )
+    instance: str | None = Field(
+        default=None,
+        description="A URI reference that identifies the specific occurrence",
+    )
 
     # Additional fields can be included for context
     class Config:
@@ -60,13 +71,19 @@ class ProblemException(HTTPException):
 
         # Generate problem type URI
         if type_suffix:
-            self.type_uri = f"{settings.api_base_url}/problems/{type_suffix}"
+            self.type_uri = (
+                f"{settings.api_base_url}/problems/{type_suffix}"
+            )
         else:
             self.type_uri = "about:blank"
 
-        super().__init__(status_code=status_code, detail=detail, headers=headers)
+        super().__init__(
+            status_code=status_code, detail=detail, headers=headers
+        )
 
-    def to_problem_detail(self, request: Request | None = None) -> ProblemDetail:
+    def to_problem_detail(
+        self, request: Request | None = None
+    ) -> ProblemDetail:
         """Convert to ProblemDetail model."""
         instance = self.instance
         if not instance and request:
@@ -82,17 +99,24 @@ class ProblemException(HTTPException):
         }
 
         # Remove None values
-        problem_data = {k: v for k, v in problem_data.items() if v is not None}
+        problem_data = {
+            k: v for k, v in problem_data.items() if v is not None
+        }
 
         return ProblemDetail(**problem_data)
 
-    def to_response(self, request: Request | None = None) -> JSONResponse:
+    def to_response(
+        self, request: Request | None = None
+    ) -> JSONResponse:
         """Convert to JSONResponse with RFC 9457 format."""
         problem = self.to_problem_detail(request)
         return JSONResponse(
             status_code=self.status_code,
             content=problem.model_dump(exclude_none=True),
-            headers={"Content-Type": "application/problem+json", **dict(self.headers or {})},
+            headers={
+                "Content-Type": "application/problem+json",
+                **dict(self.headers or {}),
+            },
         )
 
 
@@ -100,7 +124,11 @@ class ProblemException(HTTPException):
 class BadRequestProblem(ProblemException):
     """Bad request problem."""
 
-    def __init__(self, detail: str = "The request contains invalid data or parameters", **kwargs) -> None:
+    def __init__(
+        self,
+        detail: str = "The request contains invalid data or parameters",
+        **kwargs,
+    ) -> None:
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
             title="Bad Request",
@@ -114,7 +142,10 @@ class ValidationProblem(ProblemException):
     """Validation error problem."""
 
     def __init__(
-        self, detail: str = "The request contains invalid data", validation_errors: list[Any] | None = None, **kwargs
+        self,
+        detail: str = "The request contains invalid data",
+        validation_errors: list[Any] | None = None,
+        **kwargs,
     ) -> None:
         super().__init__(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
@@ -129,7 +160,9 @@ class ValidationProblem(ProblemException):
 class AuthenticationProblem(ProblemException):
     """Authentication error problem."""
 
-    def __init__(self, detail: str = "Authentication failed", **kwargs) -> None:
+    def __init__(
+        self, detail: str = "Authentication failed", **kwargs
+    ) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
             title="Authentication Required",
@@ -143,7 +176,12 @@ class AuthenticationProblem(ProblemException):
 class AuthorizationProblem(ProblemException):
     """Authorization error problem."""
 
-    def __init__(self, detail: str = "Access denied", required_permissions: list[str] | None = None, **kwargs) -> None:
+    def __init__(
+        self,
+        detail: str = "Access denied",
+        required_permissions: list[str] | None = None,
+        **kwargs,
+    ) -> None:
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
             title="Access Forbidden",
@@ -206,7 +244,12 @@ class ConflictProblem(ProblemException):
 class RateLimitProblem(ProblemException):
     """Rate limit exceeded problem."""
 
-    def __init__(self, detail: str = "Rate limit exceeded", retry_after: int | None = None, **kwargs) -> None:
+    def __init__(
+        self,
+        detail: str = "Rate limit exceeded",
+        retry_after: int | None = None,
+        **kwargs,
+    ) -> None:
         headers = {}
         if retry_after:
             headers["Retry-After"] = str(retry_after)
@@ -226,7 +269,10 @@ class InternalServerProblem(ProblemException):
     """Internal server error problem."""
 
     def __init__(
-        self, detail: str = "An internal server error occurred", error_id: str | None = None, **kwargs
+        self,
+        detail: str = "An internal server error occurred",
+        error_id: str | None = None,
+        **kwargs,
     ) -> None:
         extra_fields = {}
         if error_id:
@@ -264,6 +310,10 @@ def create_problem_response(
         JSONResponse with RFC 9457 format
     """
     problem = ProblemException(
-        status_code=status_code, title=title, detail=detail, type_suffix=type_suffix, **extra_fields
+        status_code=status_code,
+        title=title,
+        detail=detail,
+        type_suffix=type_suffix,
+        **extra_fields,
     )
     return problem.to_response(request)

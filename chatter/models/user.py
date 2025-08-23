@@ -19,50 +19,87 @@ class User(Base):
     """User model for authentication and profile management."""
 
     # Authentication fields
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
-    username: Mapped[str] = mapped_column(String(50), unique=True, index=True, nullable=False)
-    hashed_password: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str] = mapped_column(
+        String(255), unique=True, index=True, nullable=False
+    )
+    username: Mapped[str] = mapped_column(
+        String(50), unique=True, index=True, nullable=False
+    )
+    hashed_password: Mapped[str] = mapped_column(
+        String(255), nullable=False
+    )
 
     # Profile fields
-    full_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    full_name: Mapped[str | None] = mapped_column(
+        String(255), nullable=True
+    )
     bio: Mapped[str | None] = mapped_column(Text, nullable=True)
-    avatar_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    avatar_url: Mapped[str | None] = mapped_column(
+        String(500), nullable=True
+    )
 
     # Status fields
-    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    is_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
-    is_superuser: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, default=True, nullable=False
+    )
+    is_verified: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
+    is_superuser: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False
+    )
 
     # API access
-    api_key: Mapped[str | None] = mapped_column(String(255), unique=True, nullable=True, index=True)
-    api_key_name: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    api_key: Mapped[str | None] = mapped_column(
+        String(255), unique=True, nullable=True, index=True
+    )
+    api_key_name: Mapped[str | None] = mapped_column(
+        String(100), nullable=True
+    )
 
     # Preferences
-    default_llm_provider: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    default_llm_provider: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )
     default_profile_id: Mapped[str | None] = mapped_column(
         String(12), ForeignKey(Keys.PROFILES), nullable=True, index=True
     )
 
     # Usage limits
-    daily_message_limit: Mapped[int | None] = mapped_column(nullable=True)
-    monthly_message_limit: Mapped[int | None] = mapped_column(nullable=True)
+    daily_message_limit: Mapped[int | None] = mapped_column(
+        nullable=True
+    )
+    monthly_message_limit: Mapped[int | None] = mapped_column(
+        nullable=True
+    )
     max_file_size_mb: Mapped[int | None] = mapped_column(nullable=True)
 
     # Timestamps
-    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    last_login_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Relationships
     conversations: Mapped[list["Conversation"]] = relationship(
-        "Conversation", back_populates="user", cascade="all, delete-orphan"
+        "Conversation",
+        back_populates="user",
+        cascade="all, delete-orphan",
     )
 
-    documents: Mapped[list["Document"]] = relationship("Document", back_populates="owner", cascade="all, delete-orphan")
+    documents: Mapped[list["Document"]] = relationship(
+        "Document", back_populates="owner", cascade="all, delete-orphan"
+    )
 
     profiles: Mapped[list["Profile"]] = relationship(
-        "Profile", back_populates="owner", foreign_keys="Profile.owner_id", cascade="all, delete-orphan"
+        "Profile",
+        back_populates="owner",
+        foreign_keys="Profile.owner_id",
+        cascade="all, delete-orphan",
     )
 
-    prompts: Mapped[list["Prompt"]] = relationship("Prompt", back_populates="owner", cascade="all, delete-orphan")
+    prompts: Mapped[list["Prompt"]] = relationship(
+        "Prompt", back_populates="owner", cascade="all, delete-orphan"
+    )
 
     default_profile: Mapped[Optional["Profile"]] = relationship(
         "Profile", foreign_keys=[default_profile_id], post_update=True
@@ -90,7 +127,13 @@ class User(Base):
             "is_verified": self.is_verified,
             "default_llm_provider": self.default_llm_provider,
             "default_profile_id": self.default_profile_id,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-            "last_login_at": self.last_login_at.isoformat() if self.last_login_at else None,
+            "created_at": self.created_at.isoformat()
+            if self.created_at
+            else None,
+            "updated_at": self.updated_at.isoformat()
+            if self.updated_at
+            else None,
+            "last_login_at": self.last_login_at.isoformat()
+            if self.last_login_at
+            else None,
         }

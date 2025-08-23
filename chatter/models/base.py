@@ -10,7 +10,12 @@ from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import DateTime, String, func
-from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    declared_attr,
+    mapped_column,
+)
 
 
 class Base(DeclarativeBase):
@@ -25,21 +30,21 @@ class Base(DeclarativeBase):
     def __tablename__(cls) -> str:
         """Generate table name from class name using snake_case and plural form."""
         # Convert CamelCase to snake_case
-        name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', cls.__name__)
-        name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+        name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", cls.__name__)
+        name = re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).lower()
         # Handle pluralization
-        if name.endswith('s'):
+        if name.endswith("s"):
             return name  # Already plural
-        elif name.endswith('y'):
-            return name[:-1] + 'ies'  # e.g., 'category' -> 'categories'
-        elif name.endswith(('ch', 'sh', 'x', 'z')):
-            return name + 'es'  # e.g., 'box' -> 'boxes'
-        elif name.endswith('f'):
-            return name[:-1] + 'ves'  # e.g., 'shelf' -> 'shelves'
-        elif name.endswith('fe'):
-            return name[:-2] + 'ves'  # e.g., 'life' -> 'lives'
+        elif name.endswith("y"):
+            return name[:-1] + "ies"  # e.g., 'category' -> 'categories'
+        elif name.endswith(("ch", "sh", "x", "z")):
+            return name + "es"  # e.g., 'box' -> 'boxes'
+        elif name.endswith("f"):
+            return name[:-1] + "ves"  # e.g., 'shelf' -> 'shelves'
+        elif name.endswith("fe"):
+            return name[:-2] + "ves"  # e.g., 'life' -> 'lives'
         else:
-            return name + 's'  # Default: add 's'
+            return name + "s"  # Default: add 's'
 
     # ----------------------------------------------------------------
     # Monotonic distributed ID generator
@@ -47,18 +52,24 @@ class Base(DeclarativeBase):
     _lock: threading.Lock = threading.Lock()
     _last_timestamp: int = 0
     _counter: int = 0
-    _server_hash: int = int(hashlib.sha1(socket.gethostname().encode()).hexdigest(), 16) % (62**2)
+    _server_hash: int = int(
+        hashlib.sha1(socket.gethostname().encode()).hexdigest(), 16
+    ) % (62**2)
 
     @classmethod
     def _encode_base62(cls, num: int, length: int = 12) -> str:
-        alphabet = string.digits + string.ascii_uppercase + string.ascii_lowercase
+        alphabet = (
+            string.digits
+            + string.ascii_uppercase
+            + string.ascii_lowercase
+        )
         arr: list[str] = []
         base: int = 62
         while num > 0:
             num, rem = divmod(num, base)
             arr.append(alphabet[rem])
-        s: str = ''.join(reversed(arr))
-        return s.rjust(length, '0')[:length]
+        s: str = "".join(reversed(arr))
+        return s.rjust(length, "0")[:length]
 
     @classmethod
     def _generate_id(cls) -> str:
@@ -77,7 +88,11 @@ class Base(DeclarativeBase):
                 cls._counter = 0
                 cls._last_timestamp = timestamp
 
-            combined: int = (timestamp << 16) | (cls._server_hash << 12) | cls._counter
+            combined: int = (
+                (timestamp << 16)
+                | (cls._server_hash << 12)
+                | cls._counter
+            )
             return cls._encode_base62(combined, length=12)
 
     # ----------------------------------------------------------------

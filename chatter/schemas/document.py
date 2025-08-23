@@ -6,45 +6,79 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from chatter.models.document import DocumentStatus, DocumentType
-from chatter.schemas.common import DeleteRequestBase, GetRequestBase, ListRequestBase
+from chatter.schemas.common import (
+    DeleteRequestBase,
+    GetRequestBase,
+    ListRequestBase,
+)
 
 
 class DocumentBase(BaseModel):
     """Base document schema."""
 
     title: str | None = Field(None, description="Document title")
-    description: str | None = Field(None, description="Document description")
+    description: str | None = Field(
+        None, description="Document description"
+    )
     tags: list[str] | None = Field(None, description="Document tags")
-    extra_metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
-    is_public: bool = Field(False, description="Whether document is public")
+    extra_metadata: dict[str, Any] | None = Field(
+        None, description="Additional metadata"
+    )
+    is_public: bool = Field(
+        False, description="Whether document is public"
+    )
 
 
 class DocumentCreate(DocumentBase):
     """Schema for creating a document."""
 
-    chunk_size: int = Field(1000, ge=100, le=10000, description="Chunk size for text splitting")
-    chunk_overlap: int = Field(200, ge=0, le=2000, description="Overlap between chunks")
+    chunk_size: int = Field(
+        1000,
+        ge=100,
+        le=10000,
+        description="Chunk size for text splitting",
+    )
+    chunk_overlap: int = Field(
+        200, ge=0, le=2000, description="Overlap between chunks"
+    )
 
 
 class DocumentUploadRequest(BaseModel):
     """Schema for document upload request."""
 
     title: str | None = Field(None, description="Document title")
-    description: str | None = Field(None, description="Document description")
+    description: str | None = Field(
+        None, description="Document description"
+    )
     tags: list[str] | None = Field(None, description="Document tags")
-    chunk_size: int = Field(1000, ge=100, le=10000, description="Chunk size for text splitting")
-    chunk_overlap: int = Field(200, ge=0, le=2000, description="Overlap between chunks")
-    is_public: bool = Field(False, description="Whether document is public")
+    chunk_size: int = Field(
+        1000,
+        ge=100,
+        le=10000,
+        description="Chunk size for text splitting",
+    )
+    chunk_overlap: int = Field(
+        200, ge=0, le=2000, description="Overlap between chunks"
+    )
+    is_public: bool = Field(
+        False, description="Whether document is public"
+    )
 
 
 class DocumentUpdate(BaseModel):
     """Schema for updating a document."""
 
     title: str | None = Field(None, description="Document title")
-    description: str | None = Field(None, description="Document description")
+    description: str | None = Field(
+        None, description="Document description"
+    )
     tags: list[str] | None = Field(None, description="Document tags")
-    extra_metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
-    is_public: bool | None = Field(None, description="Whether document is public")
+    extra_metadata: dict[str, Any] | None = Field(
+        None, description="Additional metadata"
+    )
+    is_public: bool | None = Field(
+        None, description="Whether document is public"
+    )
 
 
 class DocumentResponse(DocumentBase):
@@ -59,19 +93,31 @@ class DocumentResponse(DocumentBase):
     file_size: int = Field(..., description="File size in bytes")
     file_hash: str = Field(..., description="File hash (SHA-256)")
     mime_type: str = Field(..., description="MIME type")
-    document_type: DocumentType = Field(..., description="Document type")
+    document_type: DocumentType = Field(
+        ..., description="Document type"
+    )
     status: DocumentStatus = Field(..., description="Processing status")
-    processing_started_at: datetime | None = Field(None, description="Processing start time")
-    processing_completed_at: datetime | None = Field(None, description="Processing completion time")
-    processing_error: str | None = Field(None, description="Processing error message")
+    processing_started_at: datetime | None = Field(
+        None, description="Processing start time"
+    )
+    processing_completed_at: datetime | None = Field(
+        None, description="Processing completion time"
+    )
+    processing_error: str | None = Field(
+        None, description="Processing error message"
+    )
     chunk_size: int = Field(..., description="Chunk size")
     chunk_overlap: int = Field(..., description="Chunk overlap")
     chunk_count: int = Field(..., description="Number of chunks")
     version: int = Field(..., description="Document version")
-    parent_document_id: str | None = Field(None, description="Parent document ID")
+    parent_document_id: str | None = Field(
+        None, description="Parent document ID"
+    )
     view_count: int = Field(..., description="View count")
     search_count: int = Field(..., description="Search count")
-    last_accessed_at: datetime | None = Field(None, description="Last access time")
+    last_accessed_at: datetime | None = Field(
+        None, description="Last access time"
+    )
     created_at: datetime = Field(..., description="Creation time")
     updated_at: datetime = Field(..., description="Last update time")
 
@@ -79,12 +125,22 @@ class DocumentResponse(DocumentBase):
 class DocumentSearchRequest(BaseModel):
     """Schema for document search request."""
 
-    query: str = Field(..., min_length=1, max_length=1000, description="Search query")
-    limit: int = Field(10, ge=1, le=100, description="Maximum number of results")
-    score_threshold: float = Field(0.5, ge=0.0, le=1.0, description="Minimum similarity score")
-    document_types: list[DocumentType] | None = Field(None, description="Filter by document types")
+    query: str = Field(
+        ..., min_length=1, max_length=1000, description="Search query"
+    )
+    limit: int = Field(
+        10, ge=1, le=100, description="Maximum number of results"
+    )
+    score_threshold: float = Field(
+        0.5, ge=0.0, le=1.0, description="Minimum similarity score"
+    )
+    document_types: list[DocumentType] | None = Field(
+        None, description="Filter by document types"
+    )
     tags: list[str] | None = Field(None, description="Filter by tags")
-    include_content: bool = Field(False, description="Include document content in results")
+    include_content: bool = Field(
+        False, description="Include document content in results"
+    )
 
 
 class DocumentSearchResult(BaseModel):
@@ -94,26 +150,42 @@ class DocumentSearchResult(BaseModel):
     chunk_id: str = Field(..., description="Chunk ID")
     score: float = Field(..., description="Similarity score")
     content: str = Field(..., description="Matching content")
-    metadata: dict[str, Any] | None = Field(None, description="Chunk metadata")
-    document: DocumentResponse = Field(..., description="Document information")
+    metadata: dict[str, Any] | None = Field(
+        None, description="Chunk metadata"
+    )
+    document: DocumentResponse = Field(
+        ..., description="Document information"
+    )
 
 
 class DocumentSearchResponse(BaseModel):
     """Schema for document search response."""
 
-    results: list[DocumentSearchResult] = Field(..., description="Search results")
-    total_results: int = Field(..., description="Total number of matching results")
+    results: list[DocumentSearchResult] = Field(
+        ..., description="Search results"
+    )
+    total_results: int = Field(
+        ..., description="Total number of matching results"
+    )
     query: str = Field(..., description="Original search query")
-    score_threshold: float = Field(..., description="Applied score threshold")
+    score_threshold: float = Field(
+        ..., description="Applied score threshold"
+    )
 
 
 class DocumentListRequest(ListRequestBase):
     """Schema for document list request."""
 
-    status: DocumentStatus | None = Field(None, description="Filter by status")
-    document_type: DocumentType | None = Field(None, description="Filter by document type")
+    status: DocumentStatus | None = Field(
+        None, description="Filter by status"
+    )
+    document_type: DocumentType | None = Field(
+        None, description="Filter by document type"
+    )
     tags: list[str] | None = Field(None, description="Filter by tags")
-    owner_id: str | None = Field(None, description="Filter by owner (admin only)")
+    owner_id: str | None = Field(
+        None, description="Filter by owner (admin only)"
+    )
 
 
 class DocumentGetRequest(GetRequestBase):
@@ -137,8 +209,12 @@ class DocumentStatsRequest(GetRequestBase):
 class DocumentListResponse(BaseModel):
     """Schema for document list response."""
 
-    documents: list[DocumentResponse] = Field(..., description="List of documents")
-    total_count: int = Field(..., description="Total number of documents")
+    documents: list[DocumentResponse] = Field(
+        ..., description="List of documents"
+    )
+    total_count: int = Field(
+        ..., description="Total number of documents"
+    )
     limit: int = Field(..., description="Applied limit")
     offset: int = Field(..., description="Applied offset")
 
@@ -152,16 +228,30 @@ class DocumentChunkResponse(BaseModel):
     document_id: str = Field(..., description="Document ID")
     content: str = Field(..., description="Chunk content")
     chunk_index: int = Field(..., description="Chunk index")
-    start_char: int | None = Field(None, description="Start character position")
-    end_char: int | None = Field(None, description="End character position")
-    extra_metadata: dict[str, Any] | None = Field(None, description="Chunk metadata")
+    start_char: int | None = Field(
+        None, description="Start character position"
+    )
+    end_char: int | None = Field(
+        None, description="End character position"
+    )
+    extra_metadata: dict[str, Any] | None = Field(
+        None, description="Chunk metadata"
+    )
     token_count: int | None = Field(None, description="Token count")
     language: str | None = Field(None, description="Detected language")
-    embedding_model: str | None = Field(None, description="Embedding model used")
-    embedding_provider: str | None = Field(None, description="Embedding provider")
-    embedding_created_at: datetime | None = Field(None, description="Embedding creation time")
+    embedding_model: str | None = Field(
+        None, description="Embedding model used"
+    )
+    embedding_provider: str | None = Field(
+        None, description="Embedding provider"
+    )
+    embedding_created_at: datetime | None = Field(
+        None, description="Embedding creation time"
+    )
     content_hash: str = Field(..., description="Content hash")
-    has_embedding: bool = Field(..., description="Whether chunk has embedding")
+    has_embedding: bool = Field(
+        ..., description="Whether chunk has embedding"
+    )
     created_at: datetime = Field(..., description="Creation time")
     updated_at: datetime = Field(..., description="Last update time")
 
@@ -170,9 +260,15 @@ class DocumentProcessingRequest(BaseModel):
     """Schema for document processing request."""
 
     reprocess: bool = Field(False, description="Force reprocessing")
-    chunk_size: int | None = Field(None, ge=100, le=10000, description="Override chunk size")
-    chunk_overlap: int | None = Field(None, ge=0, le=2000, description="Override chunk overlap")
-    generate_embeddings: bool = Field(True, description="Generate embeddings for chunks")
+    chunk_size: int | None = Field(
+        None, ge=100, le=10000, description="Override chunk size"
+    )
+    chunk_overlap: int | None = Field(
+        None, ge=0, le=2000, description="Override chunk overlap"
+    )
+    generate_embeddings: bool = Field(
+        True, description="Generate embeddings for chunks"
+    )
 
 
 class DocumentProcessingResponse(BaseModel):
@@ -181,24 +277,38 @@ class DocumentProcessingResponse(BaseModel):
     document_id: str = Field(..., description="Document ID")
     status: DocumentStatus = Field(..., description="Processing status")
     message: str = Field(..., description="Status message")
-    processing_started_at: datetime | None = Field(None, description="Processing start time")
+    processing_started_at: datetime | None = Field(
+        None, description="Processing start time"
+    )
 
 
 class DocumentStatsResponse(BaseModel):
     """Schema for document statistics response."""
 
-    total_documents: int = Field(..., description="Total number of documents")
+    total_documents: int = Field(
+        ..., description="Total number of documents"
+    )
     total_chunks: int = Field(..., description="Total number of chunks")
-    total_size_bytes: int = Field(..., description="Total size in bytes")
-    documents_by_status: dict[str, int] = Field(..., description="Documents grouped by status")
-    documents_by_type: dict[str, int] = Field(..., description="Documents grouped by type")
-    processing_stats: dict[str, Any] = Field(..., description="Processing statistics")
+    total_size_bytes: int = Field(
+        ..., description="Total size in bytes"
+    )
+    documents_by_status: dict[str, int] = Field(
+        ..., description="Documents grouped by status"
+    )
+    documents_by_type: dict[str, int] = Field(
+        ..., description="Documents grouped by type"
+    )
+    processing_stats: dict[str, Any] = Field(
+        ..., description="Processing statistics"
+    )
 
 
 class DocumentChunksResponse(BaseModel):
     """Schema for document chunks response with pagination."""
 
-    chunks: list[DocumentChunkResponse] = Field(..., description="List of document chunks")
+    chunks: list[DocumentChunkResponse] = Field(
+        ..., description="List of document chunks"
+    )
     total_count: int = Field(..., description="Total number of chunks")
     limit: int = Field(..., description="Applied limit")
     offset: int = Field(..., description="Applied offset")

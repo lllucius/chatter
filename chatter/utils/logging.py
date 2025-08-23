@@ -27,7 +27,9 @@ def setup_logging() -> None:
             # Exception formatting
             structlog.dev.set_exc_info,
             # JSON processor if JSON logging is enabled
-            structlog.processors.JSONRenderer() if settings.log_json else structlog.dev.ConsoleRenderer(),
+            structlog.processors.JSONRenderer()
+            if settings.log_json
+            else structlog.dev.ConsoleRenderer(),
         ],
         wrapper_class=structlog.stdlib.BoundLogger,
         logger_factory=LoggerFactory(),
@@ -77,7 +79,9 @@ def get_logger(name: str) -> structlog.stdlib.BoundLogger:
 class ContextLogger:
     """Logger with persistent context."""
 
-    def __init__(self, logger: structlog.stdlib.BoundLogger, **context: Any):
+    def __init__(
+        self, logger: structlog.stdlib.BoundLogger, **context: Any
+    ):
         """Initialize with base logger and context.
 
         Args:

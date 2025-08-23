@@ -18,7 +18,10 @@ from starlette.responses import Response
 from chatter.config import settings
 from chatter.utils.database import close_database, init_database
 from chatter.utils.logging import get_logger, setup_logging
-from chatter.utils.problem import InternalServerProblem, ProblemException
+from chatter.utils.problem import (
+    InternalServerProblem,
+    ProblemException,
+)
 
 # Set up uvloop for better async performance
 try:
@@ -53,7 +56,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 method=request.method,
                 url=str(request.url),
                 headers=dict(request.headers),
-                body=request_body.decode('utf-8', errors='ignore') if request_body else None,
+                body=request_body.decode("utf-8", errors="ignore")
+                if request_body
+                else None,
             )
 
         response = await call_next(request)
@@ -72,8 +77,10 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             try:
                 # For streaming responses, we can't easily capture the body
                 # But for most error responses, we can try to read it
-                if hasattr(response, 'body') and response.body:
-                    response_body = response.body.decode('utf-8', errors='ignore')
+                if hasattr(response, "body") and response.body:
+                    response_body = response.body.decode(
+                        "utf-8", errors="ignore"
+                    )
             except Exception:
                 # If we can't capture response body, that's okay
                 pass
@@ -92,15 +99,24 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 status_code=response.status_code,
                 duration=duration,
                 request_headers=dict(request.headers),
-                request_body=request_body.decode('utf-8', errors='ignore') if request_body else None,
-                response_headers=json.dumps(dict(response.headers), indent=4),
+                request_body=request_body.decode(
+                    "utf-8", errors="ignore"
+                )
+                if request_body
+                else None,
+                response_headers=json.dumps(
+                    dict(response.headers), indent=4
+                ),
                 response_body=response_body,
                 # stack_trace=json.dumps(stack_trace)
             )
         elif settings.debug_http_requests:
             # Normal debug logging for non-error responses
             logger.debug(
-                "HTTP Response", status_code=response.status_code, headers=dict(response.headers), duration=duration
+                "HTTP Response",
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                duration=duration,
             )
         else:
             # Always log basic request info for non-errors
@@ -118,7 +134,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager."""
-    logger.info("Starting Chatter application", version=settings.app_version)
+    logger.info(
+        "Starting Chatter application", version=settings.app_version
+    )
 
     # Initialize database
     await init_database()
@@ -136,7 +154,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
         logger.info("Built-in tool servers initialized")
     except Exception as e:
-        logger.error("Failed to initialize built-in tool servers", error=str(e))
+        logger.error(
+            "Failed to initialize built-in tool servers", error=str(e)
+        )
 
     # Start background scheduler
     try:
@@ -183,7 +203,9 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
         docs_url="/docs" if settings.is_development else None,
         redoc_url="/redoc" if settings.is_development else None,
-        openapi_url="/openapi.json" if settings.is_development else None,
+        openapi_url="/openapi.json"
+        if settings.is_development
+        else None,
     )
 
     # Add security middleware
@@ -196,8 +218,12 @@ def create_app() -> FastAPI:
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["X-Frame-Options"] = "DENY"
             response.headers["X-XSS-Protection"] = "1; mode=block"
-            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-            response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+            response.headers[
+                "Strict-Transport-Security"
+            ] = "max-age=31536000; includeSubDomains"
+            response.headers[
+                "Referrer-Policy"
+            ] = "strict-origin-when-cross-origin"
             return response
 
     # Add CORS middleware
@@ -211,7 +237,9 @@ def create_app() -> FastAPI:
 
     # Add trusted host middleware
     if settings.trusted_hosts:
-        app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.trusted_hosts)
+        app.add_middleware(
+            TrustedHostMiddleware, allowed_hosts=settings.trusted_hosts
+        )
 
     # Add compression middleware
     app.add_middleware(GZipMiddleware, minimum_size=1000)
@@ -223,7 +251,9 @@ def create_app() -> FastAPI:
     from fastapi.exceptions import RequestValidationError
 
     @app.exception_handler(ProblemException)
-    async def problem_exception_handler(request: Request, exc: ProblemException) -> JSONResponse:
+    async def problem_exception_handler(
+        request: Request, exc: ProblemException
+    ) -> JSONResponse:
         """Handle ProblemException instances."""
         logger.error(
             "Problem exception",
@@ -236,7 +266,9 @@ def create_app() -> FastAPI:
         return exc.to_response(request)
 
     @app.exception_handler(RequestValidationError)
-    async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+    async def validation_exception_handler(
+        request: Request, exc: RequestValidationError
+    ) -> JSONResponse:
         """Handle validation errors with RFC 9457 format."""
         logger.error(
             "Validation exception",
@@ -247,14 +279,22 @@ def create_app() -> FastAPI:
         from chatter.utils.problem import ValidationProblem
 
         validation_problem = ValidationProblem(
-            detail="The request contains invalid data", validation_errors=exc.errors()
+            detail="The request contains invalid data",
+            validation_errors=exc.errors(),
         )
         return validation_problem.to_response(request)
 
     @app.exception_handler(Exception)
-    async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    async def global_exception_handler(
+        request: Request, exc: Exception
+    ) -> JSONResponse:
         """Global exception handler."""
-        logger.exception("Unhandled exception", url=str(request.url), method=request.method, exception=str(exc))
+        logger.exception(
+            "Unhandled exception",
+            url=str(request.url),
+            method=request.method,
+            exception=str(exc),
+        )
 
         if settings.is_development:
             problem = InternalServerProblem(
@@ -268,23 +308,58 @@ def create_app() -> FastAPI:
         return problem.to_response(request)
 
     # --- DELAYED IMPORTS: Routers registered here only ---
-    from chatter.api import analytics, auth, chat, documents, health, profiles, prompts, toolserver
+    from chatter.api import (
+        analytics,
+        auth,
+        chat,
+        documents,
+        health,
+        profiles,
+        prompts,
+        toolserver,
+    )
 
     app.include_router(health.router, tags=["Health"])
 
-    app.include_router(auth.router, prefix=f"{settings.api_prefix}/auth", tags=["Authentication"])
+    app.include_router(
+        auth.router,
+        prefix=f"{settings.api_prefix}/auth",
+        tags=["Authentication"],
+    )
 
-    app.include_router(chat.router, prefix=f"{settings.api_prefix}/chat", tags=["Chat"])
+    app.include_router(
+        chat.router, prefix=f"{settings.api_prefix}/chat", tags=["Chat"]
+    )
 
-    app.include_router(documents.router, prefix=f"{settings.api_prefix}/documents", tags=["Documents"])
+    app.include_router(
+        documents.router,
+        prefix=f"{settings.api_prefix}/documents",
+        tags=["Documents"],
+    )
 
-    app.include_router(profiles.router, prefix=f"{settings.api_prefix}/profiles", tags=["Profiles"])
+    app.include_router(
+        profiles.router,
+        prefix=f"{settings.api_prefix}/profiles",
+        tags=["Profiles"],
+    )
 
-    app.include_router(prompts.router, prefix=f"{settings.api_prefix}/prompts", tags=["Prompts"])
+    app.include_router(
+        prompts.router,
+        prefix=f"{settings.api_prefix}/prompts",
+        tags=["Prompts"],
+    )
 
-    app.include_router(analytics.router, prefix=f"{settings.api_prefix}/analytics", tags=["Analytics"])
+    app.include_router(
+        analytics.router,
+        prefix=f"{settings.api_prefix}/analytics",
+        tags=["Analytics"],
+    )
 
-    app.include_router(toolserver.router, prefix=f"{settings.api_prefix}/toolservers", tags=["Tool Servers"])
+    app.include_router(
+        toolserver.router,
+        prefix=f"{settings.api_prefix}/toolservers",
+        tags=["Tool Servers"],
+    )
 
     @app.get("/")
     async def root():

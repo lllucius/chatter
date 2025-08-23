@@ -1,14 +1,17 @@
 """Chat endpoints."""
 
 import json
-from typing import Any
 
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.core.chat import ChatError, ChatService, ConversationNotFoundError
+from chatter.core.chat import (
+    ChatError,
+    ChatService,
+    ConversationNotFoundError,
+)
 from chatter.models.user import User
 from chatter.schemas.chat import (
     AvailableToolResponse,
@@ -34,13 +37,19 @@ from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.services.llm import LLMService
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import BadRequestProblem, InternalServerProblem, NotFoundProblem
+from chatter.utils.problem import (
+    BadRequestProblem,
+    InternalServerProblem,
+    NotFoundProblem,
+)
 
 logger = get_logger(__name__)
 router = APIRouter()
 
 
-async def get_chat_service(session: AsyncSession = Depends(get_session)) -> ChatService:
+async def get_chat_service(
+    session: AsyncSession = Depends(get_session)
+) -> ChatService:
     """Get chat service instance.
 
     Args:
@@ -53,7 +62,11 @@ async def get_chat_service(session: AsyncSession = Depends(get_session)) -> Chat
     return ChatService(session, llm_service)
 
 
-@router.post("/conversations", response_model=ConversationResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/conversations",
+    response_model=ConversationResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_conversation(
     conversation_data: ConversationCreate,
     current_user: User = Depends(get_current_user),
@@ -70,7 +83,9 @@ async def create_conversation(
         Created conversation
     """
     try:
-        conversation = await chat_service.create_conversation(current_user.id, conversation_data)
+        conversation = await chat_service.create_conversation(
+            current_user.id, conversation_data
+        )
         return ConversationResponse.model_validate(conversation)
     except ChatError as e:
         raise BadRequestProblem(detail=str(e)) from e
@@ -96,17 +111,25 @@ async def list_conversations(
     Returns:
         List of conversations with pagination
     """
-    conversations, total = await chat_service.list_conversations(current_user.id, request, pagination, sorting)
+    conversations, total = await chat_service.list_conversations(
+        current_user.id, request, pagination, sorting
+    )
 
     return ConversationSearchResponse(
-        conversations=[ConversationResponse.model_validate(c) for c in conversations],
+        conversations=[
+            ConversationResponse.model_validate(c)
+            for c in conversations
+        ],
         total=total,
         limit=pagination.limit,
         offset=pagination.offset,
     )
 
 
-@router.get("/conversations/{conversation_id}", response_model=ConversationWithMessages)
+@router.get(
+    "/conversations/{conversation_id}",
+    response_model=ConversationWithMessages,
+)
 async def get_conversation(
     conversation_id: str,
     request: ConversationGetRequest = Depends(),
@@ -124,19 +147,33 @@ async def get_conversation(
     Returns:
         Conversation with messages
     """
-    conversation = await chat_service.get_conversation(conversation_id, current_user.id, include_messages=True)
+    conversation = await chat_service.get_conversation(
+        conversation_id, current_user.id, include_messages=True
+    )
 
     if not conversation:
-        raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation",
+        ) from None
 
     # Convert to response format
-    conversation_response = ConversationResponse.model_validate(conversation)
-    messages = [MessageResponse.model_validate(m) for m in conversation.messages]
+    conversation_response = ConversationResponse.model_validate(
+        conversation
+    )
+    messages = [
+        MessageResponse.model_validate(m) for m in conversation.messages
+    ]
 
-    return ConversationWithMessages(**conversation_response.model_dump(), messages=messages)
+    return ConversationWithMessages(
+        **conversation_response.model_dump(), messages=messages
+    )
 
 
-@router.put("/conversations/{conversation_id}", response_model=ConversationResponse)
+@router.put(
+    "/conversations/{conversation_id}",
+    response_model=ConversationResponse,
+)
 async def update_conversation(
     conversation_id: str,
     update_data: ConversationUpdate,
@@ -155,13 +192,21 @@ async def update_conversation(
         Updated conversation
     """
     try:
-        conversation = await chat_service.update_conversation(conversation_id, current_user.id, update_data)
+        conversation = await chat_service.update_conversation(
+            conversation_id, current_user.id, update_data
+        )
         return ConversationResponse.model_validate(conversation)
     except ConversationNotFoundError:
-        raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation",
+        ) from None
 
 
-@router.delete("/conversations/{conversation_id}", response_model=ConversationDeleteResponse)
+@router.delete(
+    "/conversations/{conversation_id}",
+    response_model=ConversationDeleteResponse,
+)
 async def delete_conversation(
     conversation_id: str,
     request: ConversationDeleteRequest = Depends(),
@@ -180,13 +225,23 @@ async def delete_conversation(
         Success message
     """
     try:
-        await chat_service.delete_conversation(conversation_id, current_user.id)
-        return ConversationDeleteResponse(message="Conversation deleted successfully")
+        await chat_service.delete_conversation(
+            conversation_id, current_user.id
+        )
+        return ConversationDeleteResponse(
+            message="Conversation deleted successfully"
+        )
     except ConversationNotFoundError:
-        raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation",
+        ) from None
 
 
-@router.get("/conversations/{conversation_id}/messages", response_model=list[MessageResponse])
+@router.get(
+    "/conversations/{conversation_id}/messages",
+    response_model=list[MessageResponse],
+)
 async def get_conversation_messages(
     conversation_id: str,
     request: ConversationMessagesRequest = Depends(),
@@ -205,10 +260,15 @@ async def get_conversation_messages(
         List of messages
     """
     try:
-        messages = await chat_service.get_conversation_messages(conversation_id, current_user.id)
+        messages = await chat_service.get_conversation_messages(
+            conversation_id, current_user.id
+        )
         return [MessageResponse.model_validate(m) for m in messages]
     except ConversationNotFoundError:
-        raise NotFoundProblem(detail="Conversation not found", resource_type="conversation") from None
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation",
+        ) from None
 
 
 @router.post("/chat", response_model=ChatResponse)
@@ -228,15 +288,21 @@ async def chat(
         Chat response with assistant message
     """
     if chat_request.stream:
-        raise BadRequestProblem(detail="Use /chat/stream for streaming responses") from None
+        raise BadRequestProblem(
+            detail="Use /chat/stream for streaming responses"
+        ) from None
 
     try:
-        conversation, assistant_message = await chat_service.chat(current_user.id, chat_request)
+        conversation, assistant_message = await chat_service.chat(
+            current_user.id, chat_request
+        )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation),
+            conversation=ConversationResponse.model_validate(
+                conversation
+            ),
         )
     except (ConversationNotFoundError, ChatError) as e:
         raise BadRequestProblem(detail=str(e)) from None
@@ -262,7 +328,9 @@ async def chat_stream(
     async def generate_stream():
         """Generate streaming chat response chunks."""
         try:
-            async for chunk in chat_service.chat_streaming(current_user.id, chat_request):
+            async for chunk in chat_service.chat_streaming(
+                current_user.id, chat_request
+            ):
                 yield f"data: {json.dumps(chunk)}\n\n"
         except (ConversationNotFoundError, ChatError) as e:
             error_chunk = {"type": "error", "error": str(e)}
@@ -301,14 +369,19 @@ async def create_basic_workflow(
         Chat response from workflow
     """
     try:
-        conversation, assistant_message = await chat_service.chat_with_workflow(
+        (
+            conversation,
+            assistant_message,
+        ) = await chat_service.chat_with_workflow(
             current_user.id, chat_request, workflow_type="basic"
         )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation),
+            conversation=ConversationResponse.model_validate(
+                conversation
+            ),
         )
     except (ConversationNotFoundError, ChatError) as e:
         raise BadRequestProblem(detail=str(e)) from None
@@ -331,14 +404,19 @@ async def create_rag_workflow(
         Chat response from RAG workflow
     """
     try:
-        conversation, assistant_message = await chat_service.chat_with_workflow(
+        (
+            conversation,
+            assistant_message,
+        ) = await chat_service.chat_with_workflow(
             current_user.id, chat_request, workflow_type="rag"
         )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation),
+            conversation=ConversationResponse.model_validate(
+                conversation
+            ),
         )
     except (ConversationNotFoundError, ChatError) as e:
         raise BadRequestProblem(detail=str(e)) from None
@@ -361,14 +439,19 @@ async def create_tools_workflow(
         Chat response from tools workflow
     """
     try:
-        conversation, assistant_message = await chat_service.chat_with_workflow(
+        (
+            conversation,
+            assistant_message,
+        ) = await chat_service.chat_with_workflow(
             current_user.id, chat_request, workflow_type="tools"
         )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation),
+            conversation=ConversationResponse.model_validate(
+                conversation
+            ),
         )
     except (ConversationNotFoundError, ChatError) as e:
         raise BadRequestProblem(detail=str(e)) from None
@@ -376,7 +459,8 @@ async def create_tools_workflow(
 
 @router.get("/tools/available", response_model=AvailableToolsResponse)
 async def get_available_tools(
-    request: AvailableToolsRequest = Depends(), current_user: User = Depends(get_current_user)
+    request: AvailableToolsRequest = Depends(),
+    current_user: User = Depends(get_current_user),
 ) -> AvailableToolsResponse:
     """Get list of available MCP tools.
 
@@ -422,12 +506,15 @@ async def get_available_tools(
 
         return AvailableToolsResponse(tools=all_tools)
     except Exception as e:
-        raise InternalServerProblem(detail=f"Failed to get available tools: {str(e)}") from None
+        raise InternalServerProblem(
+            detail=f"Failed to get available tools: {str(e)}"
+        ) from None
 
 
 @router.get("/mcp/status", response_model=McpStatusResponse)
 async def get_mcp_status(
-    request: McpStatusRequest = Depends(), current_user: User = Depends(get_current_user)
+    request: McpStatusRequest = Depends(),
+    current_user: User = Depends(get_current_user),
 ) -> McpStatusResponse:
     """Get MCP service status.
 
@@ -444,4 +531,6 @@ async def get_mcp_status(
         result = await mcp_service.health_check()
         return McpStatusResponse(**result)
     except Exception as e:
-        raise InternalServerProblem(detail=f"Failed to get MCP status: {str(e)}") from None
+        raise InternalServerProblem(
+            detail=f"Failed to get MCP status: {str(e)}"
+        ) from None

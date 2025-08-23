@@ -26,7 +26,10 @@ async def test_tool_server_functionality():
     print("=" * 60)
 
     try:
-        from chatter.schemas.toolserver import ToolServerCreate, ToolUsageCreate
+        from chatter.schemas.toolserver import (
+            ToolServerCreate,
+            ToolUsageCreate,
+        )
         from chatter.services.toolserver import ToolServerService
         from chatter.utils.database import get_session_factory
 

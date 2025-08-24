@@ -122,7 +122,11 @@ async def upload_document(
         ) from None
 
 
-@router.get("", response_model=DocumentListResponse)
+@router.get("", response_model=DocumentListResponse, responses={
+    401: {"description": "Unauthorized - Invalid or missing authentication token"},
+    403: {"description": "Forbidden - User lacks permission to access documents"},
+    422: {"description": "Validation Error"},
+})
 async def list_documents(
     status: DocumentStatus | None = Query(None, description="Filter by status"),
     document_type: DocumentType | None = Query(None, description="Filter by document type"),
@@ -188,7 +192,12 @@ async def list_documents(
         ) from None
 
 
-@router.get("/{document_id}", response_model=DocumentResponse)
+@router.get("/{document_id}", response_model=DocumentResponse, responses={
+    401: {"description": "Unauthorized - Invalid or missing authentication token"},
+    403: {"description": "Forbidden - User lacks permission to access this document"},
+    404: {"description": "Not Found - Document does not exist"},
+    422: {"description": "Validation Error"},
+})
 async def get_document(
     document_id: str,
     current_user: User = Depends(get_current_user),

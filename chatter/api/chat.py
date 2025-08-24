@@ -92,7 +92,11 @@ async def create_conversation(
         raise BadRequestProblem(detail=str(e)) from e
 
 
-@router.get("/conversations", response_model=ConversationSearchResponse)
+@router.get("/conversations", response_model=ConversationSearchResponse, responses={
+    401: {"description": "Unauthorized - Invalid or missing authentication token"},
+    403: {"description": "Forbidden - User lacks permission to access conversations"},
+    422: {"description": "Validation Error"},
+})
 async def list_conversations(
     query: str | None = Query(None, description="Search query"),
     status: ConversationStatus | None = Query(None, description="Filter by status"),
@@ -248,6 +252,12 @@ async def delete_conversation(
 @router.get(
     "/conversations/{conversation_id}/messages",
     response_model=list[MessageResponse],
+    responses={
+        401: {"description": "Unauthorized - Invalid or missing authentication token"},
+        403: {"description": "Forbidden - User lacks permission to access this conversation"},
+        404: {"description": "Not Found - Conversation does not exist"},
+        422: {"description": "Validation Error"},
+    }
 )
 async def get_conversation_messages(
     conversation_id: str,

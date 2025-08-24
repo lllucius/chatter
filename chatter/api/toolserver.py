@@ -705,3 +705,67 @@ async def bulk_server_operation(
         raise InternalServerProblem(
             detail="Failed to perform bulk server operation"
         ) from None
+
+
+@router.get("/tools/all", response_model=list[dict])
+async def list_all_tools(
+    current_user: User = Depends(get_current_user),
+    tool_server_service: ToolServerService = Depends(get_tool_server_service),
+) -> list[dict]:
+    """List all tools across all servers.
+
+    Args:
+        current_user: Current authenticated user
+        tool_server_service: Tool server service
+
+    Returns:
+        List of all available tools across all servers
+    """
+    try:
+        all_tools = await tool_server_service.list_all_tools()
+        return all_tools
+
+    except Exception as e:
+        logger.error("Failed to list all tools", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to list all tools"
+        ) from None
+
+
+@router.post("/servers/{server_id}/test-connectivity", response_model=dict)
+async def test_server_connectivity(
+    server_id: str,
+    current_user: User = Depends(get_current_user),
+    tool_server_service: ToolServerService = Depends(get_tool_server_service),
+) -> dict:
+    """Test connectivity to an external MCP server.
+
+    Args:
+        server_id: Tool server ID
+        current_user: Current authenticated user
+        tool_server_service: Tool server service
+
+    Returns:
+        Connectivity test results
+    """
+    try:
+        result = await tool_server_service.test_connectivity(server_id)
+        
+        if not result:
+            raise NotFoundProblem(
+                detail="Tool server not found",
+                resource_type="tool_server",
+                resource_id=server_id,
+            ) from None
+
+        return result
+
+    except Exception as e:
+        logger.error(
+            "Failed to test server connectivity", 
+            server_id=server_id, 
+            error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to test server connectivity"
+        ) from None

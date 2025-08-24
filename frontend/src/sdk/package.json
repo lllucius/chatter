@@ -1,0 +1,28 @@
+{
+  "name": "chatter-sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for Chatter AI Chatbot API",
+  "main": "index.ts",
+  "types": "index.ts",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lllucius/chatter"
+  },
+  "keywords": [
+    "api",
+    "sdk",
+    "chatbot",
+    "ai",
+    "typescript",
+    "axios"
+  ],
+  "author": "Chatter Team",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "@types/node": "^16.18.126"
+  }
+}

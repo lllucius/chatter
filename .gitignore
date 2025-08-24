@@ -27,8 +27,8 @@ share/python-wheels/
 MANIFEST
 
 # Generated documentation and SDK files 
-docs/api/
-sdk/
+#docs/api/
+#sdk/
 temp_openapi.json
 generator_config.json
 

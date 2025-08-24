@@ -273,6 +273,7 @@ class AuthService:
         # Update password
         user.hashed_password = hash_password(new_password)
         await self.session.commit()
+        await self.session.refresh(user)
 
         logger.info("Password changed", user_id=user.id)
         return True
@@ -300,6 +301,7 @@ class AuthService:
         user.api_key_name = key_name
 
         await self.session.commit()
+        await self.session.refresh(user)
 
         logger.info(
             "API key created", user_id=user.id, key_name=key_name
@@ -325,6 +327,7 @@ class AuthService:
         user.api_key = None
         user.api_key_name = None
         await self.session.commit()
+        await self.session.refresh(user)
 
         logger.info("API key revoked", user_id=user.id)
         return True
@@ -347,6 +350,7 @@ class AuthService:
 
         user.is_active = False
         await self.session.commit()
+        await self.session.refresh(user)
 
         logger.info("User deactivated", user_id=user.id)
         return True

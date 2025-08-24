@@ -388,6 +388,7 @@ class PromptService:
                 prompt.usage_count += 1
                 prompt.last_used_at = datetime.now(UTC)
                 await self.session.commit()
+                await self.session.refresh(prompt)
 
             result = {
                 "rendered_content": rendered_content,

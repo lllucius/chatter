@@ -317,6 +317,7 @@ class ToolServerService:
 
             success = await self._start_server_internal(server)
             await self.session.commit()
+            await self.session.refresh(server)
 
             return success
 
@@ -351,6 +352,7 @@ class ToolServerService:
 
             success = await self._stop_server_internal(server)
             await self.session.commit()
+            await self.session.refresh(server)
 
             return success
 
@@ -413,6 +415,7 @@ class ToolServerService:
                 await self._start_server_internal(server)
 
             await self.session.commit()
+            await self.session.refresh(server)
             return True
 
         except Exception as e:
@@ -453,6 +456,7 @@ class ToolServerService:
             server.updated_at = datetime.now(UTC)
 
             await self.session.commit()
+            await self.session.refresh(server)
             return True
 
         except Exception as e:
@@ -508,6 +512,7 @@ class ToolServerService:
             tool.updated_at = datetime.now(UTC)
 
             await self.session.commit()
+            await self.session.refresh(tool)
             return True
 
         except Exception as e:
@@ -539,6 +544,7 @@ class ToolServerService:
             tool.updated_at = datetime.now(UTC)
 
             await self.session.commit()
+            await self.session.refresh(tool)
             return True
 
         except Exception as e:
@@ -628,6 +634,7 @@ class ToolServerService:
             tool.updated_at = datetime.now(UTC)
 
             await self.session.commit()
+            await self.session.refresh(tool)
             return True
 
         except Exception as e:
@@ -760,6 +767,7 @@ class ToolServerService:
             # Update last health check
             server.last_health_check = now
             await self.session.commit()
+            await self.session.refresh(server)
 
             self._last_health_check[server_id] = now
         else:

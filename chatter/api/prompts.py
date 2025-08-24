@@ -105,7 +105,7 @@ async def list_prompts(
             'sort_by': sorting.sort_by,
             'sort_order': sorting.sort_order,
         })
-        
+
         # Get prompts
         prompts, total_count = await prompt_service.list_prompts(
             current_user.id, merged_request

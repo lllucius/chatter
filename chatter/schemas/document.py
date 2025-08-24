@@ -186,7 +186,7 @@ class DocumentListRequest(ListRequestBase):
     owner_id: str | None = Field(
         None, description="Filter by owner (admin only)"
     )
-    
+
     # Pagination and sorting fields
     limit: int = Field(
         50, ge=1, le=100, description="Maximum number of results"

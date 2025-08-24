@@ -179,7 +179,7 @@ def list_prompts(
 
             for prompt in response["prompts"]:
                 table.add_row(
-                    prompt["id"][:8] + "...",
+                    prompt["id"],
                     prompt["name"],
                     prompt["prompt_type"],
                     prompt["category"],
@@ -239,9 +239,9 @@ def create_prompt(
     async def _create():
         api_client = get_api_client()
         try:
-            # Initialize all variables to avoid unbound variable errors  
+            # Initialize all variables to avoid unbound variable errors
             parsed_tags = None
-            
+
             # Interactive mode
             if interactive:
                 console.print("[bold]Creating new prompt[/bold]\\n")
@@ -266,7 +266,7 @@ def create_prompt(
                     if tags_input
                     else None
                 )
-            
+
             # For non-interactive mode, use function parameters
             # (In interactive mode, they're overridden above)
             if not interactive:
@@ -277,7 +277,7 @@ def create_prompt(
                 if not content:
                     console.print("[red]Error: Content is required[/red]")
                     raise typer.Exit(1)
-                    
+
                 parsed_tags = (
                     [
                         tag.strip()
@@ -1134,7 +1134,7 @@ def list_profiles(
 
             for profile in profiles:
                 table.add_row(
-                    profile["id"][:8] + "...",
+                    profile["id"],
                     profile["name"],
                     profile["llm_provider"],
                     profile["llm_model"],
@@ -1402,7 +1402,7 @@ def list_conversations(
 
             for conv in conversations:
                 table.add_row(
-                    conv["id"][:8] + "...",
+                    conv["id"],
                     conv.get("title", "Untitled")[:50],
                     str(conv.get("message_count", 0)),
                     conv["created_at"][:10]
@@ -1703,7 +1703,7 @@ def list_documents(
                     else 0
                 )
                 table.add_row(
-                    doc["id"][:8] + "...",
+                    doc["id"],
                     doc.get("title", "Untitled")[:40],
                     doc.get("file_type", "unknown"),
                     f"{size_mb:.1f}MB" if size_mb > 0 else "N/A",

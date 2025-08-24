@@ -105,6 +105,7 @@ class DocumentProcessingService:
             document.processing_started_at = datetime.now(UTC)
             document.processing_error = None
             await self.session.commit()
+            await self.session.refresh(document)
 
             logger.info(
                 "Starting document processing",
@@ -125,6 +126,7 @@ class DocumentProcessingService:
             # Update document with extracted text
             document.extracted_text = extracted_text
             await self.session.commit()
+            await self.session.refresh(document)
 
             # Create chunks
             chunks = await self._create_chunks(document, extracted_text)
@@ -144,6 +146,7 @@ class DocumentProcessingService:
 
             # Generate embeddings for chunks
             embedding_success = await self._generate_embeddings(
+                document,
                 chunk_objects
             )
             if not embedding_success:
@@ -157,6 +160,7 @@ class DocumentProcessingService:
             document.processing_completed_at = datetime.now(UTC)
             document.chunk_count = len(chunk_objects)
             await self.session.commit()
+            await self.session.refresh(document)
 
             logger.info(
                 "Document processing completed",
@@ -536,6 +540,7 @@ class DocumentProcessingService:
                 self.session.add(chunk)
 
             await self.session.commit()
+            await self.session.refresh(document)
 
             # Refresh objects to get IDs
             for chunk in chunk_objects:
@@ -558,7 +563,7 @@ class DocumentProcessingService:
             return []
 
     async def _generate_embeddings(
-        self, chunks: list[DocumentChunk]
+        self, document: Document, chunks: list[DocumentChunk]
     ) -> bool:
         """Generate embeddings for document chunks.
 
@@ -577,11 +582,7 @@ class DocumentProcessingService:
                 return False
 
             # Process chunks in batches
-            batch_size = (
-                settings.embedding_batch_size
-                if hasattr(settings, "embedding_batch_size")
-                else 10
-            )
+            batch_size = settings.embedding_batch_size
             success_count = 0
 
             for i in range(0, len(chunks), batch_size):
@@ -619,14 +620,14 @@ class DocumentProcessingService:
                             chunk.id, embedding, embedding_metadata
                         )
 
-                        if success:
-                            success_count += 1
-                        else:
+                        if not success:
                             logger.warning(
                                 "Failed to store embedding",
                                 chunk_id=chunk.id,
                             )
+                            raise EmbeddingError
 
+                    success_count += len(batch)
                     await self.session.commit()
 
                 except EmbeddingError as e:
@@ -634,6 +635,8 @@ class DocumentProcessingService:
                         "Embedding generation failed for batch",
                         error=str(e),
                     )
+                    await self.session.rollback()
+                    await self.session.refresh(document, ["chunks"])
                     continue
 
             success_rate = success_count / len(chunks) if chunks else 0
@@ -666,6 +669,7 @@ class DocumentProcessingService:
             document.processing_completed_at = datetime.now(UTC)
             document.processing_error = error_message
             await self.session.commit()
+            await self.session.refresh(document)
 
             logger.error(
                 "Document processing marked as failed",

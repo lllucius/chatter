@@ -403,6 +403,7 @@ class ProfileService:
             profile.last_used_at = datetime.now(UTC)
 
             await self.session.commit()
+            await self.session.refresh(profile)
 
             result = {
                 "profile_id": profile_id,

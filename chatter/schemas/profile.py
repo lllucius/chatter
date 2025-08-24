@@ -281,7 +281,7 @@ class ProfileListRequest(ListRequestBase):
     is_public: bool | None = Field(
         None, description="Filter by public status"
     )
-    
+
     # Pagination and sorting fields
     limit: int = Field(
         50, ge=1, le=100, description="Maximum number of results"

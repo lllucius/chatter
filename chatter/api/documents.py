@@ -150,7 +150,7 @@ async def list_documents(
             'sort_by': sorting.sort_by,
             'sort_order': sorting.sort_order,
         })
-        
+
         # Get documents
         documents, total_count = await document_service.list_documents(
             current_user.id, merged_request
@@ -203,9 +203,13 @@ async def get_document(
                 resource_id=document_id,
             ) from None
 
-        return DocumentResponse.model_validate(document)
+        response = DocumentResponse.model_validate(document)
+
+        return response
 
     except (NotFoundProblem, ValidationProblem):
+        import traceback
+        print(traceback.format_stack())
         raise
     except Exception as e:
         logger.error(

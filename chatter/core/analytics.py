@@ -65,7 +65,7 @@ class AnalyticsService:
                 )
                 .group_by(Conversation.status)
             )
-            conversations_by_status = {status: count for status, count in status_result.all()}
+            conversations_by_status = dict(status_result.all())
 
             # Total messages
             total_messages_result = await self.session.execute(
@@ -114,13 +114,13 @@ class AnalyticsService:
 
             token_stats = token_stats_result.first()
             if token_stats:
-                prompt_tokens = token_stats[0] or 0
-                completion_tokens = token_stats[1] or 0
+                token_stats[0] or 0
+                token_stats[1] or 0
                 total_tokens = token_stats[2] or 0
                 total_cost = float(token_stats[3] or 0)
                 avg_response_time = float(token_stats[4] or 0)
             else:
-                prompt_tokens = completion_tokens = total_tokens = 0
+                total_tokens = 0
                 total_cost = avg_response_time = 0.0
 
             # Conversations by date

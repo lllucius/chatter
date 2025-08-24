@@ -118,6 +118,7 @@ class VectorStoreService:
                 }
 
             await self.session.commit()
+            await self.session.refresh(chunk)
 
             logger.debug("PGVector embedding stored", chunk_id=chunk.id)
             return True
@@ -157,6 +158,7 @@ class VectorStoreService:
                 }
 
             await self.session.commit()
+            await self.session.refresh(chunk)
 
             logger.debug("JSON embedding stored", chunk_id=chunk.id)
             return True
@@ -502,12 +504,12 @@ class VectorStoreService:
                 semantic_score = chunk_data["semantic_score"]
                 text_score = chunk_data["text_score"]
                 chunk_obj = chunk_data["chunk"]
-                
+
                 # Type assertions to help mypy
                 assert isinstance(semantic_score, float)
                 assert isinstance(text_score, float)
                 assert isinstance(chunk_obj, DocumentChunk)
-                
+
                 combined_score = (
                     semantic_weight * semantic_score
                     + text_weight * text_score

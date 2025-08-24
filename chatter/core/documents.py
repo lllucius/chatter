@@ -208,6 +208,7 @@ class DocumentService:
                 document.view_count += 1
                 document.last_accessed_at = datetime.now(UTC)
                 await self.session.commit()
+                await self.session.refresh(document)
 
             return document
 
@@ -494,6 +495,8 @@ class DocumentService:
                 results.append((chunk, score, chunk.document))
 
             await self.session.commit()
+            for _, _, document in results:
+                await self.session.refresh(document)
 
             logger.info(
                 "Document search completed",
@@ -548,6 +551,7 @@ class DocumentService:
                 )
 
             await self.session.commit()
+            await self.session.refresh(document)
 
             # Load file content
             if (

@@ -738,6 +738,7 @@ class ChatService:
             conversation.updated_at = datetime.now(UTC)
 
             await self.session.commit()
+            await self.session.refresh(conversation)
 
             logger.info(
                 "Workflow chat completed",

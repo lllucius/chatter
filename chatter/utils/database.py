@@ -536,6 +536,7 @@ Please create an improved prompt that addresses these meta-considerations.""",
             session.add(profile)
 
         await session.commit()
+
         logger.info(
             "Default data initialization completed successfully"
         )

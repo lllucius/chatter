@@ -333,7 +333,7 @@ class PromptListRequest(ListRequestBase):
     is_chain: bool | None = Field(
         None, description="Filter by chain status"
     )
-    
+
     # Pagination and sorting fields
     limit: int = Field(
         50, ge=1, le=100, description="Maximum number of results"

@@ -107,7 +107,7 @@ async def list_profiles(
             'sort_by': sorting.sort_by,
             'sort_order': sorting.sort_order,
         })
-        
+
         # Get profiles
         profiles, total_count = await profile_service.list_profiles(
             current_user.id, merged_request

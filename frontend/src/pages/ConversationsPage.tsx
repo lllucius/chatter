@@ -60,8 +60,9 @@ const ConversationsPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const response = await chatterSDK.conversations.apiV1ChatConversationsGet(); const data = response.data;
-      setConversations(data);
+      const response = await chatterSDK.conversations.listConversationsApiV1ChatConversationsGet({}); 
+      const data = response.data;
+      setConversations(data.conversations);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load conversations');
     } finally {
@@ -75,7 +76,8 @@ const ConversationsPage: React.FC = () => {
     setLoadingMessages(true);
     
     try {
-      const response = await chatterSDK.conversations.apiV1ChatConversationsIdMessagesGet(conversation.id); const messages = response.data;
+      const response = await chatterSDK.conversations.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet({ conversationId: conversation.id }); 
+      const messages = response.data;
       setConversationMessages(messages);
     } catch (err: any) {
       console.error('Failed to load messages:', err);
@@ -322,9 +324,9 @@ const ConversationsPage: React.FC = () => {
                           <Typography variant="caption" color="text.secondary">
                             {format(new Date(message.created_at), 'MMM dd, yyyy HH:mm:ss')}
                           </Typography>
-                          {message.tokens && (
+                          {message.total_tokens && (
                             <Chip
-                              label={`${message.tokens} tokens`}
+                              label={`${message.total_tokens} tokens`}
                               size="small"
                               variant="outlined"
                               sx={{ ml: 1 }}

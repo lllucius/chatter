@@ -76,8 +76,8 @@ const ProfilesPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const response = await chatterSDK.profiles.apiV1ProfilesGet();
-      setProfiles(response.data);
+      const response = await chatterSDK.profiles.listProfilesApiV1ProfilesGet({});
+      setProfiles(response.data.profiles);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load profiles');
     } finally {
@@ -91,8 +91,8 @@ const ProfilesPage: React.FC = () => {
       setFormData({
         name: profile.name,
         description: profile.description || '',
-        model_name: profile.model_name,
-        provider: profile.provider,
+        model_name: profile.llm_model,
+        provider: profile.llm_provider,
         temperature: profile.temperature,
         max_tokens: profile.max_tokens || 1000,
         top_p: profile.top_p || 1.0,
@@ -123,29 +123,29 @@ const ProfilesPage: React.FC = () => {
         const updateRequest: ApiV1ProfilesIdPutRequest = {
           name: formData.name,
           description: formData.description,
-          model_name: formData.model_name,
-          provider: formData.provider,
+          model_name: formData.llm_model,
+          provider: formData.llm_provider,
           temperature: formData.temperature,
           max_tokens: formData.max_tokens,
           top_p: formData.top_p,
           frequency_penalty: formData.frequency_penalty,
           presence_penalty: formData.presence_penalty,
         };
-        const response = await chatterSDK.profiles.apiV1ProfilesIdPut(editingProfile.id, updateRequest);
+        const response = await chatterSDK.profiles.updateProfileApiV1ProfilesProfileIdPut({ profileId: editingProfile.id, profileUpdate: updateRequest });
         setProfiles(prev => prev.map(p => p.id === editingProfile.id ? response.data : p));
       } else {
         const createRequest: ApiV1ProfilesPostRequest = {
           name: formData.name,
           description: formData.description,
-          model_name: formData.model_name,
-          provider: formData.provider,
+          model_name: formData.llm_model,
+          provider: formData.llm_provider,
           temperature: formData.temperature,
           max_tokens: formData.max_tokens,
           top_p: formData.top_p,
           frequency_penalty: formData.frequency_penalty,
           presence_penalty: formData.presence_penalty,
         };
-        const response = await chatterSDK.profiles.apiV1ProfilesPost(createRequest);
+        const response = await chatterSDK.profiles.createProfileApiV1ProfilesPost({ profileCreate: createRequest });
         setProfiles(prev => [response.data, ...prev]);
       }
       setDialogOpen(false);
@@ -162,7 +162,7 @@ const ProfilesPage: React.FC = () => {
     }
 
     try {
-      await chatterSDK.profiles.apiV1ProfilesIdDelete(profileId);
+      await chatterSDK.profiles.deleteProfileApiV1ProfilesProfileIdDelete({ profileId: profileId });
       setProfiles(prev => prev.filter(p => p.id !== profileId));
     } catch (err: any) {
       setError('Failed to delete profile');
@@ -253,7 +253,7 @@ const ProfilesPage: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={profile.provider}
+                      label={profile.llm_provider}
                       color="primary"
                       variant="outlined"
                       size="small"
@@ -261,7 +261,7 @@ const ProfilesPage: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                      {profile.model_name}
+                      {profile.llm_model}
                     </Typography>
                   </TableCell>
                   <TableCell>
@@ -347,7 +347,7 @@ const ProfilesPage: React.FC = () => {
               <FormControl fullWidth required>
                 <InputLabel>Provider</InputLabel>
                 <Select
-                  value={formData.provider}
+                  value={formData.llm_provider}
                   label="Provider"
                   onChange={(e) => setFormData({ 
                     ...formData, 
@@ -377,12 +377,12 @@ const ProfilesPage: React.FC = () => {
               <FormControl fullWidth required>
                 <InputLabel>Model</InputLabel>
                 <Select
-                  value={formData.model_name}
+                  value={formData.llm_model}
                   label="Model"
                   onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
-                  disabled={!formData.provider}
+                  disabled={!formData.llm_provider}
                 >
-                  {formData.provider && models[formData.provider as keyof typeof models]?.map((model) => (
+                  {formData.llm_provider && models[formData.llm_provider as keyof typeof models]?.map((model) => (
                     <MenuItem key={model} value={model}>
                       {model}
                     </MenuItem>
@@ -469,7 +469,7 @@ const ProfilesPage: React.FC = () => {
           <Button
             onClick={handleSave}
             variant="contained"
-            disabled={!formData.name || !formData.provider || !formData.model_name || saving}
+            disabled={!formData.name || !formData.llm_provider || !formData.llm_model || saving}
           >
             {saving ? 'Saving...' : 'Save'}
           </Button>

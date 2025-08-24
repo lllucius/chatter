@@ -51,8 +51,8 @@ const HealthPage: React.FC = () => {
       setLoading(true);
       setError('');
       const [healthResponse, toolServerResponse] = await Promise.all([
-        chatterSDK.health.healthGet(),
-        chatterSDK.toolServers.apiV1ToolserversGet(),
+        chatterSDK.health.healthCheckEndpointHealthzGet(),
+        chatterSDK.toolServers.listToolServersApiV1ToolserversServersGet({}),
       ]);
       setHealth(healthResponse.data);
       setToolServers(toolServerResponse.data);

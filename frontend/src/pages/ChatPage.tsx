@@ -66,17 +66,17 @@ const ChatPage: React.FC = () => {
   const loadData = async () => {
     try {
       const [profilesResponse, promptsResponse, documentsResponse] = await Promise.all([
-        chatterSDK.profiles.apiV1ProfilesGet(),
-        chatterSDK.prompts.apiV1PromptsGet(),
-        chatterSDK.documents.apiV1DocumentsGet(),
+        chatterSDK.profiles.listProfilesApiV1ProfilesGet({}),
+        chatterSDK.prompts.listPromptsApiV1PromptsGet({}),
+        chatterSDK.documents.listDocumentsApiV1DocumentsGet({}),
       ]);
-      setProfiles(profilesResponse.data);
-      setPrompts(promptsResponse.data);
-      setDocuments(documentsResponse.data);
+      setProfiles(profilesResponse.data.profiles);
+      setPrompts(promptsResponse.data.prompts);
+      setDocuments(documentsResponse.data.documents);
       
       // Set default selections
-      if (profilesResponse.data.length > 0) {
-        setSelectedProfile(profilesResponse.data[0].id);
+      if (profilesResponse.data.profiles.length > 0) {
+        setSelectedProfile(profilesResponse.data.profiles[0].id);
       }
     } catch (err: any) {
       setError('Failed to load chat data');
@@ -90,9 +90,8 @@ const ChatPage: React.FC = () => {
       const createRequest: CreateConversationRequest = {
         title: `Chat ${new Date().toLocaleString()}`,
         profile_id: selectedProfile || undefined,
-        prompt_id: selectedPrompt || undefined,
       };
-      const response = await chatterSDK.conversations.apiV1ChatConversationsPost(createRequest);
+      const response = await chatterSDK.conversations.createConversationApiV1ChatConversationsPost({ conversationCreate: createRequest });
       setCurrentConversation(response.data);
       setMessages([]);
       
@@ -138,13 +137,13 @@ const ChatPage: React.FC = () => {
       const sendRequest: SendMessageRequest = {
         message: userMessage.content,
       };
-      const response = await chatterSDK.conversations.apiV1ChatConversationIdPost(currentConversation.id, sendRequest);
+      const response = await chatterSDK.conversations.chatApiV1ChatChatPost({ chatRequest: sendRequest });
       
       const assistantMessage: ChatMessage = {
-        id: response.data.id,
+        id: response.data.message.id,
         role: 'assistant',
-        content: response.data.content,
-        timestamp: new Date(response.data.created_at),
+        content: response.data.message.content,
+        timestamp: new Date(response.data.message.created_at),
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -224,7 +223,7 @@ const ChatPage: React.FC = () => {
                 >
                   {profiles.map((profile) => (
                     <MenuItem key={profile.id} value={profile.id}>
-                      {profile.name} ({profile.model_name})
+                      {profile.name} ({profile.llm_model})
                     </MenuItem>
                   ))}
                 </Select>

@@ -12,15 +12,15 @@ import {
   Configuration,
   AuthenticationApi,
   AnalyticsApi,
-  ConversationsApi,
+  ChatApi,
   DocumentsApi,
   ProfilesApi,
   PromptsApi,
   AgentsApi,
   ToolServersApi,
   HealthApi,
-  LoginRequest,
-  RegisterRequest,
+  UserLogin,
+  UserCreate,
 } from '../sdk';
 
 export class ChatterSDK {
@@ -30,7 +30,7 @@ export class ChatterSDK {
   // API instances
   public auth: AuthenticationApi;
   public analytics: AnalyticsApi;
-  public conversations: ConversationsApi;
+  public conversations: ChatApi;
   public documents: DocumentsApi;
   public profiles: ProfilesApi;
   public prompts: PromptsApi;
@@ -54,7 +54,7 @@ export class ChatterSDK {
     // Initialize API instances
     this.auth = new AuthenticationApi(this.configuration);
     this.analytics = new AnalyticsApi(this.configuration);
-    this.conversations = new ConversationsApi(this.configuration);
+    this.conversations = new ChatApi(this.configuration);
     this.documents = new DocumentsApi(this.configuration);
     this.profiles = new ProfilesApi(this.configuration);
     this.prompts = new PromptsApi(this.configuration);
@@ -110,7 +110,7 @@ export class ChatterSDK {
   private updateApiInstances() {
     this.auth = new AuthenticationApi(this.configuration);
     this.analytics = new AnalyticsApi(this.configuration);
-    this.conversations = new ConversationsApi(this.configuration);
+    this.conversations = new ChatApi(this.configuration);
     this.documents = new DocumentsApi(this.configuration);
     this.profiles = new ProfilesApi(this.configuration);
     this.prompts = new PromptsApi(this.configuration);
@@ -124,12 +124,12 @@ export class ChatterSDK {
    */
   async login(username: string, password: string) {
     try {
-      const loginRequest: LoginRequest = {
+      const loginRequest: UserLogin = {
         username,
         password,
       };
       
-      const response = await this.auth.apiV1AuthLoginPost(loginRequest);
+      const response = await this.auth.loginApiV1AuthLoginPost({ userLogin: loginRequest });
       
       const { access_token, user } = response.data;
       this.setToken(access_token);
@@ -153,14 +153,14 @@ export class ChatterSDK {
     full_name?: string;
   }) {
     try {
-      const registerRequest: RegisterRequest = {
+      const registerRequest: UserCreate = {
         username: userData.username,
         email: userData.email,
         password: userData.password,
         full_name: userData.full_name,
       };
       
-      const response = await this.auth.apiV1AuthRegisterPost(registerRequest);
+      const response = await this.auth.registerApiV1AuthRegisterPost({ userCreate: registerRequest });
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 400) {
@@ -175,7 +175,7 @@ export class ChatterSDK {
    */
   async getCurrentUser() {
     try {
-      const response = await this.auth.apiV1AuthMeGet();
+      const response = await this.auth.getCurrentUserInfoApiV1AuthMeGet();
       return response.data;
     } catch (error: any) {
       if (error.response?.status === 401) {

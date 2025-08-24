@@ -128,9 +128,9 @@ const DocumentsPage: React.FC = () => {
   };
 
   const filteredDocuments = documents.filter(document =>
-    document.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (document.title?.toLowerCase() ?? '').includes(searchTerm.toLowerCase()) ||
     document.filename.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    document.content_type.toLowerCase().includes(searchTerm.toLowerCase())
+    document.mime_type.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const paginatedDocuments = filteredDocuments.slice(
@@ -316,7 +316,7 @@ const DocumentsPage: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={document.content_type}
+                      label={document.mime_type}
                       variant="outlined"
                       size="small"
                     />

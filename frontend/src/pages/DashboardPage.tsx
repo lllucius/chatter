@@ -173,10 +173,10 @@ const DashboardPage: React.FC = () => {
   ];
 
   const tokenUsageData = [
-    { name: 'Week 1', tokens: (usageMetrics.tokens_week ?? 0) * 0.6 },
-    { name: 'Week 2', tokens: (usageMetrics.tokens_week ?? 0) * 0.8 },
-    { name: 'Week 3', tokens: (usageMetrics.tokens_week ?? 0) * 1.1 },
-    { name: 'Week 4', tokens: usageMetrics.tokens_week ?? 0 },
+    { name: 'Week 1', tokens: (usageMetrics.total_tokens ?? 0) * 0.6 },
+    { name: 'Week 2', tokens: (usageMetrics.total_tokens ?? 0) * 0.8 },
+    { name: 'Week 3', tokens: (usageMetrics.total_tokens ?? 0) * 1.1 },
+    { name: 'Week 4', tokens: usageMetrics.total_tokens ?? 0 },
   ];
 
   const systemHealthData = [
@@ -227,7 +227,7 @@ const DashboardPage: React.FC = () => {
           <MetricCard
             title="Token Usage"
             value={safeLocaleString(usageMetrics.total_tokens)}
-            change={`${safeLocaleString(usageMetrics.tokens_today)} today`}
+            change={`${safeLocaleString(usageMetrics.total_prompt_tokens)} prompts`}
             changeType="positive"
             icon={<Assessment />}
             color="info"
@@ -346,22 +346,22 @@ const DashboardPage: React.FC = () => {
                 <Grid item xs={12}>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" gutterBottom>
-                      Response Time: {safeToFixed(performanceMetrics.avg_response_time, 2)}ms
+                      Response Time: {safeToFixed(performanceMetrics.avg_response_time_ms, 2)}ms
                     </Typography>
                     <LinearProgress
                       variant="determinate"
-                      value={Math.min((performanceMetrics.avg_response_time ?? 0) / 10, 100)}
+                      value={Math.min((performanceMetrics.avg_response_time_ms ?? 0) / 10, 100)}
                       sx={{ mb: 1 }}
                     />
                   </Box>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" gutterBottom>
-                      Success Rate: {safeToFixed((performanceMetrics.success_rate ?? 0) * 100, 1)}%
+                      P95 Response Time: {safeToFixed(performanceMetrics.p95_response_time_ms ?? 0, 1)}ms
                     </Typography>
                     <LinearProgress
                       variant="determinate"
-                      value={(performanceMetrics.success_rate ?? 0) * 100}
-                      color="success"
+                      value={Math.min((performanceMetrics.p95_response_time_ms ?? 0) / 20, 100)}
+                      color="warning"
                     />
                   </Box>
                 </Grid>
@@ -397,8 +397,8 @@ const DashboardPage: React.FC = () => {
               icon={<SmartToy />}
             />
             <Chip
-              label={`Performance: ${safeToFixed((performanceMetrics.success_rate ?? 0) * 100, 0)}%`}
-              color={(performanceMetrics.success_rate ?? 0) > 0.9 ? "success" : "warning"}
+              label={`Avg Response: ${safeToFixed(performanceMetrics.avg_response_time_ms ?? 0, 0)}ms`}
+              color={(performanceMetrics.avg_response_time_ms ?? 0) < 1000 ? "success" : "warning"}
               variant="outlined"
               icon={<Speed />}
             />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { api } from '../services/api';
+import { api } from '../services/api-sdk';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

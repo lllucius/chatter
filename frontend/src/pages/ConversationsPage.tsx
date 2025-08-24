@@ -37,7 +37,7 @@ import {
   SmartToy as BotIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Conversation, ConversationMessage } from '../services/api';
+import { api, Conversation, ConversationMessage } from '../services/api-sdk';
 
 const ConversationsPage: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);

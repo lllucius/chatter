@@ -35,7 +35,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Profile } from '../services/api';
+import { api, Profile } from '../services/api-sdk';
 
 const ProfilesPage: React.FC = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);

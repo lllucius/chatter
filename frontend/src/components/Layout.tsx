@@ -32,7 +32,7 @@ import {
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
 } from '@mui/icons-material';
-import { api } from '../services/api';
+import { api } from '../services/api-sdk';
 
 const drawerWidth = 240;
 

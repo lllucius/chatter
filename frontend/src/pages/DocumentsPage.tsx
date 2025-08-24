@@ -40,7 +40,7 @@ import {
   Add as AddIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Document } from '../services/api';
+import { api, Document } from '../services/api-sdk';
 
 const DocumentsPage: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);

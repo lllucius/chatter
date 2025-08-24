@@ -32,7 +32,7 @@ import {
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
 } from '@mui/icons-material';
-import { api } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
 
 const drawerWidth = 240;
 
@@ -72,7 +72,7 @@ const Layout: React.FC = () => {
   };
 
   const handleLogout = () => {
-    api.logout();
+    chatterSDK.logout();
     navigate('/login');
     handleProfileMenuClose();
   };

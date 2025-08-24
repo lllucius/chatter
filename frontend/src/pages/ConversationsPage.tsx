@@ -37,7 +37,8 @@ import {
   SmartToy as BotIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Conversation, ConversationMessage } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
+import { Conversation, ConversationMessage } from '../sdk';
 
 const ConversationsPage: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -59,7 +60,7 @@ const ConversationsPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const data = await api.getConversations();
+      const response = await chatterSDK.conversations.apiV1ChatConversationsGet(); const data = response.data;
       setConversations(data);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load conversations');
@@ -74,7 +75,7 @@ const ConversationsPage: React.FC = () => {
     setLoadingMessages(true);
     
     try {
-      const messages = await api.getConversationMessages(conversation.id);
+      const response = await chatterSDK.conversations.apiV1ChatConversationsIdMessagesGet(conversation.id); const messages = response.data;
       setConversationMessages(messages);
     } catch (err: any) {
       console.error('Failed to load messages:', err);

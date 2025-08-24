@@ -11,8 +11,6 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import {
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -36,7 +34,8 @@ import {
   Assessment,
   CloudQueue,
 } from '@mui/icons-material';
-import { api, DashboardData } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
+import { DashboardData } from '../sdk';
 
 interface MetricCardProps {
   title: string;
@@ -123,8 +122,8 @@ const DashboardPage: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const dashboardData = await api.getDashboardData();
-        setData(dashboardData);
+        const response = await chatterSDK.analytics.apiV1AnalyticsDashboardGet();
+        setData(response.data);
       } catch (err: any) {
         setError(err?.response?.data?.detail || 'Failed to load dashboard data');
       } finally {

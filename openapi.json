@@ -1,0 +1,1001 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Chatter API",
+    "description": "Advanced AI Chatbot Backend API Platform",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8000",
+      "description": "Development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "username": {"type": "string"},
+          "email": {"type": "string"},
+          "full_name": {"type": "string"},
+          "is_active": {"type": "boolean"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["id", "username", "email", "is_active", "created_at"]
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "model_name": {"type": "string"},
+          "provider": {"type": "string"},
+          "temperature": {"type": "number"},
+          "max_tokens": {"type": "integer"},
+          "top_p": {"type": "number"},
+          "frequency_penalty": {"type": "number"},
+          "presence_penalty": {"type": "number"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["id", "name", "model_name", "provider", "temperature", "created_at"]
+      },
+      "Prompt": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "content": {"type": "string"},
+          "variables": {"type": "array", "items": {"type": "string"}},
+          "category": {"type": "string"},
+          "prompt_type": {"type": "string"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["id", "name", "content", "category", "prompt_type", "created_at"]
+      },
+      "Document": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "filename": {"type": "string"},
+          "content_type": {"type": "string"},
+          "file_size": {"type": "integer"},
+          "status": {"type": "string"},
+          "chunk_count": {"type": "integer"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["id", "title", "filename", "content_type", "file_size", "status", "created_at"]
+      },
+      "Conversation": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "title": {"type": "string"},
+          "profile_id": {"type": "string"},
+          "prompt_id": {"type": "string"},
+          "message_count": {"type": "integer"},
+          "total_tokens": {"type": "integer"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["id", "message_count", "created_at"]
+      },
+      "ConversationMessage": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "conversation_id": {"type": "string"},
+          "role": {"type": "string", "enum": ["user", "assistant", "system"]},
+          "content": {"type": "string"},
+          "tokens": {"type": "integer"},
+          "created_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["id", "conversation_id", "role", "content", "created_at"]
+      },
+      "Agent": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "description": {"type": "string"},
+          "system_prompt": {"type": "string"},
+          "agent_type": {"type": "string"},
+          "config": {"type": "object"},
+          "is_active": {"type": "boolean"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["id", "name", "agent_type", "config", "is_active", "created_at"]
+      },
+      "ToolServer": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "name": {"type": "string"},
+          "url": {"type": "string"},
+          "status": {"type": "string"},
+          "description": {"type": "string"},
+          "health_status": {"type": "object"},
+          "last_health_check": {"type": "string", "format": "date-time"},
+          "created_at": {"type": "string", "format": "date-time"},
+          "updated_at": {"type": "string", "format": "date-time"}
+        },
+        "required": ["id", "name", "url", "status", "health_status", "created_at"]
+      },
+      "DashboardData": {
+        "type": "object",
+        "properties": {
+          "conversation_stats": {
+            "type": "object",
+            "properties": {
+              "total_conversations": {"type": "integer"},
+              "total_messages": {"type": "integer"},
+              "avg_messages_per_conversation": {"type": "number"},
+              "conversations_today": {"type": "integer"},
+              "conversations_week": {"type": "integer"}
+            }
+          },
+          "usage_metrics": {
+            "type": "object",
+            "properties": {
+              "total_tokens": {"type": "integer"},
+              "tokens_today": {"type": "integer"},
+              "tokens_week": {"type": "integer"},
+              "avg_tokens_per_message": {"type": "number"}
+            }
+          },
+          "performance_metrics": {
+            "type": "object",
+            "properties": {
+              "avg_response_time": {"type": "number"},
+              "success_rate": {"type": "number"},
+              "error_rate": {"type": "number"}
+            }
+          },
+          "document_analytics": {
+            "type": "object",
+            "properties": {
+              "total_documents": {"type": "integer"},
+              "total_chunks": {"type": "integer"},
+              "documents_processed_today": {"type": "integer"},
+              "avg_chunk_size": {"type": "number"}
+            }
+          },
+          "system_health": {
+            "type": "object",
+            "properties": {
+              "total_users": {"type": "integer"},
+              "active_users_today": {"type": "integer"},
+              "active_users_week": {"type": "integer"},
+              "storage_usage_bytes": {"type": "integer"}
+            }
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "username": {"type": "string"},
+          "password": {"type": "string"}
+        },
+        "required": ["username", "password"]
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": {"type": "string"},
+          "user": {"$ref": "#/components/schemas/User"}
+        },
+        "required": ["access_token", "user"]
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "username": {"type": "string"},
+          "email": {"type": "string"},
+          "password": {"type": "string"},
+          "full_name": {"type": "string"}
+        },
+        "required": ["username", "email", "password"]
+      },
+      "CreateConversationRequest": {
+        "type": "object",
+        "properties": {
+          "title": {"type": "string"},
+          "profile_id": {"type": "string"},
+          "prompt_id": {"type": "string"}
+        }
+      },
+      "SendMessageRequest": {
+        "type": "object",
+        "properties": {
+          "message": {"type": "string"}
+        },
+        "required": ["message"]
+      },
+      "DocumentSearchRequest": {
+        "type": "object",
+        "properties": {
+          "query": {"type": "string"},
+          "limit": {"type": "integer"}
+        },
+        "required": ["query"]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {"type": "string"},
+          "version": {"type": "string"}
+        },
+        "required": ["status", "version"]
+      }
+    }
+  },
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User login",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/LoginRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/LoginResponse"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/register": {
+      "post": {
+        "tags": ["Authentication"],
+        "summary": "User registration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/RegisterRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registration successful",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/User"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": ["Authentication"],
+        "summary": "Get current user",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Current user information",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/User"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/dashboard": {
+      "get": {
+        "tags": ["Analytics"],
+        "summary": "Get dashboard data",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Dashboard data",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/DashboardData"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/conversations": {
+      "get": {
+        "tags": ["Conversations"],
+        "summary": "Get conversations",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of conversations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/Conversation"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Conversations"],
+        "summary": "Create conversation",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/CreateConversationRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created conversation",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Conversation"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/conversations/{id}": {
+      "get": {
+        "tags": ["Conversations"],
+        "summary": "Get conversation",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversation details",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Conversation"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/conversations/{id}/messages": {
+      "get": {
+        "tags": ["Conversations"],
+        "summary": "Get conversation messages",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Conversation messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/ConversationMessage"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/{conversationId}": {
+      "post": {
+        "tags": ["Conversations"],
+        "summary": "Send message",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "conversationId",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/SendMessageRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message sent",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ConversationMessage"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents": {
+      "get": {
+        "tags": ["Documents"],
+        "summary": "Get documents",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of documents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/Document"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/upload": {
+      "post": {
+        "tags": ["Documents"],
+        "summary": "Upload document",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {"type": "string", "format": "binary"},
+                  "title": {"type": "string"}
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Document uploaded",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Document"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/{id}": {
+      "delete": {
+        "tags": ["Documents"],
+        "summary": "Delete document",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Document deleted"
+          }
+        }
+      }
+    },
+    "/api/v1/documents/search": {
+      "post": {
+        "tags": ["Documents"],
+        "summary": "Search documents",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/DocumentSearchRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"type": "object"}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profiles": {
+      "get": {
+        "tags": ["Profiles"],
+        "summary": "Get profiles",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of profiles",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/Profile"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Profiles"],
+        "summary": "Create profile",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "description": {"type": "string"},
+                  "model_name": {"type": "string"},
+                  "provider": {"type": "string"},
+                  "temperature": {"type": "number"},
+                  "max_tokens": {"type": "integer"},
+                  "top_p": {"type": "number"},
+                  "frequency_penalty": {"type": "number"},
+                  "presence_penalty": {"type": "number"}
+                },
+                "required": ["name", "model_name", "provider", "temperature"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile created",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Profile"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/profiles/{id}": {
+      "put": {
+        "tags": ["Profiles"],
+        "summary": "Update profile",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "description": {"type": "string"},
+                  "model_name": {"type": "string"},
+                  "provider": {"type": "string"},
+                  "temperature": {"type": "number"},
+                  "max_tokens": {"type": "integer"},
+                  "top_p": {"type": "number"},
+                  "frequency_penalty": {"type": "number"},
+                  "presence_penalty": {"type": "number"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Profile updated",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Profile"}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Profiles"],
+        "summary": "Delete profile",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Profile deleted"
+          }
+        }
+      }
+    },
+    "/api/v1/prompts": {
+      "get": {
+        "tags": ["Prompts"],
+        "summary": "Get prompts",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of prompts",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/Prompt"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Prompts"],
+        "summary": "Create prompt",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "description": {"type": "string"},
+                  "content": {"type": "string"},
+                  "variables": {"type": "array", "items": {"type": "string"}},
+                  "category": {"type": "string"},
+                  "prompt_type": {"type": "string"}
+                },
+                "required": ["name", "content", "category", "prompt_type"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prompt created",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Prompt"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/prompts/{id}": {
+      "put": {
+        "tags": ["Prompts"],
+        "summary": "Update prompt",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "description": {"type": "string"},
+                  "content": {"type": "string"},
+                  "variables": {"type": "array", "items": {"type": "string"}},
+                  "category": {"type": "string"},
+                  "prompt_type": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Prompt updated",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Prompt"}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Prompts"],
+        "summary": "Delete prompt",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Prompt deleted"
+          }
+        }
+      }
+    },
+    "/api/v1/agents": {
+      "get": {
+        "tags": ["Agents"],
+        "summary": "Get agents",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of agents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/Agent"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Agents"],
+        "summary": "Create agent",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "description": {"type": "string"},
+                  "system_prompt": {"type": "string"},
+                  "agent_type": {"type": "string"},
+                  "config": {"type": "object"},
+                  "is_active": {"type": "boolean"}
+                },
+                "required": ["name", "agent_type", "config", "is_active"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent created",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Agent"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/agents/{id}": {
+      "put": {
+        "tags": ["Agents"],
+        "summary": "Update agent",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "description": {"type": "string"},
+                  "system_prompt": {"type": "string"},
+                  "agent_type": {"type": "string"},
+                  "config": {"type": "object"},
+                  "is_active": {"type": "boolean"}
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent updated",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Agent"}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Agents"],
+        "summary": "Delete agent",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Agent deleted"
+          }
+        }
+      }
+    },
+    "/api/v1/toolservers": {
+      "get": {
+        "tags": ["Tool Servers"],
+        "summary": "Get tool servers",
+        "security": [{"bearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "List of tool servers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {"$ref": "#/components/schemas/ToolServer"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Tool Servers"],
+        "summary": "Create tool server",
+        "security": [{"bearerAuth": []}],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {"type": "string"},
+                  "url": {"type": "string"},
+                  "status": {"type": "string"},
+                  "description": {"type": "string"}
+                },
+                "required": ["name", "url", "status"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tool server created",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ToolServer"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/toolservers/{id}": {
+      "delete": {
+        "tags": ["Tool Servers"],
+        "summary": "Delete tool server",
+        "security": [{"bearerAuth": []}],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Tool server deleted"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Health status",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/HealthResponse"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

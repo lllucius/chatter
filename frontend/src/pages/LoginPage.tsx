@@ -10,7 +10,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { api } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -25,18 +25,17 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await api.login(username, password);
-      api.setToken(response.access_token);
+      await chatterSDK.login(username, password);
       navigate('/dashboard');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Login failed');
+      setError(err.message || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
 
   // Redirect if already authenticated
-  if (api.isAuthenticated()) {
+  if (chatterSDK.isAuthenticated()) {
     navigate('/dashboard');
     return null;
   }

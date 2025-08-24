@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
@@ -404,14 +405,42 @@ def create_app() -> FastAPI:
         tags=["Data Management"],
     )
 
+    # Mount static files for the web interface
+    import os
+    static_dir = os.path.join(os.path.dirname(__file__), "../frontend/build")
+    if os.path.exists(static_dir):
+        app.mount("/static", StaticFiles(directory=os.path.join(static_dir, "static")), name="static")
+        
+        # Serve React app for all non-API routes
+        @app.get("/{full_path:path}")
+        async def serve_react_app(full_path: str):
+            # Don't intercept API routes, docs, or health checks
+            if (full_path.startswith("api/") or 
+                full_path.startswith("health") or 
+                full_path.startswith("docs") or 
+                full_path.startswith("redoc") or 
+                full_path.startswith("openapi.json")):
+                return {"error": "Not found"}
+            
+            from fastapi.responses import FileResponse
+            index_file = os.path.join(static_dir, "index.html")
+            return FileResponse(index_file)
+
     @app.get("/")
     async def root():
         """Root endpoint."""
-        return {
-            "message": "Welcome to Chatter API",
-            "version": settings.app_version,
-            "docs": "/docs" if settings.is_development else None,
-        }
+        # If frontend is available, serve it; otherwise return API info
+        static_dir = os.path.join(os.path.dirname(__file__), "../frontend/build")
+        if os.path.exists(static_dir):
+            from fastapi.responses import FileResponse
+            index_file = os.path.join(static_dir, "index.html")
+            return FileResponse(index_file)
+        else:
+            return {
+                "message": "Welcome to Chatter API",
+                "version": settings.app_version,
+                "docs": "/docs" if settings.is_development else None,
+            }
 
     return app
 

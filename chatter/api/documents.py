@@ -1,6 +1,6 @@
 """Document management endpoints."""
 
-from fastapi import APIRouter, Depends, File, Form, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -122,20 +122,30 @@ async def upload_document(
         ) from None
 
 
-@router.get("/", response_model=DocumentListResponse)
+@router.get("", response_model=DocumentListResponse)
 async def list_documents(
-    request: DocumentListRequest = Depends(),
-    pagination: PaginationRequest = Depends(),
-    sorting: SortingRequest = Depends(),
+    status: DocumentStatus | None = Query(None, description="Filter by status"),
+    document_type: DocumentType | None = Query(None, description="Filter by document type"),
+    tags: list[str] | None = Query(None, description="Filter by tags"),
+    owner_id: str | None = Query(None, description="Filter by owner (admin only)"),
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    sort_by: str = Query("created_at", description="Sort field"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentListResponse:
     """List user's documents.
 
     Args:
-        request: List request parameters
-        pagination: Pagination parameters
-        sorting: Sorting parameters
+        status: Filter by document status
+        document_type: Filter by document type
+        tags: Filter by tags
+        owner_id: Filter by owner (admin only)
+        limit: Maximum number of results
+        offset: Number of results to skip
+        sort_by: Sort field
+        sort_order: Sort order (asc/desc)
         current_user: Current authenticated user
         document_service: Document service
 
@@ -143,13 +153,18 @@ async def list_documents(
         List of documents with pagination info
     """
     try:
-        # Merge pagination and sorting into request
-        merged_request = request.model_copy(update={
-            'limit': pagination.limit,
-            'offset': pagination.offset,
-            'sort_by': sorting.sort_by,
-            'sort_order': sorting.sort_order,
-        })
+        # Create request object from query parameters
+        from chatter.schemas.document import DocumentListRequest
+        merged_request = DocumentListRequest(
+            status=status,
+            document_type=document_type,
+            tags=tags,
+            owner_id=owner_id,
+            limit=limit,
+            offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
+        )
 
         # Get documents
         documents, total_count = await document_service.list_documents(
@@ -162,8 +177,8 @@ async def list_documents(
                 for doc in documents
             ],
             total_count=total_count,
-            limit=pagination.limit,
-            offset=pagination.offset,
+            limit=limit,
+            offset=offset,
         )
 
     except Exception as e:
@@ -176,7 +191,6 @@ async def list_documents(
 @router.get("/{document_id}", response_model=DocumentResponse)
 async def get_document(
     document_id: str,
-    request: DocumentGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentResponse:
@@ -184,7 +198,6 @@ async def get_document(
 
     Args:
         document_id: Document ID
-        request: Get request parameters
         current_user: Current authenticated user
         document_service: Document service
 
@@ -366,8 +379,8 @@ async def search_documents(
 )
 async def get_document_chunks(
     document_id: str,
-    request: DocumentGetRequest = Depends(),
-    pagination: PaginationRequest = Depends(),
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentChunksResponse:
@@ -375,8 +388,8 @@ async def get_document_chunks(
 
     Args:
         document_id: Document ID
-        request: Get request parameters
-        pagination: Pagination parameters
+        limit: Maximum number of results
+        offset: Number of results to skip
         current_user: Current authenticated user
         document_service: Document service
 
@@ -390,8 +403,8 @@ async def get_document_chunks(
 
         # Apply pagination manually for now
         total_count = len(chunks)
-        start_index = pagination.offset
-        end_index = start_index + pagination.limit
+        start_index = offset
+        end_index = start_index + limit
         paginated_chunks = chunks[start_index:end_index]
 
         return DocumentChunksResponse(
@@ -400,8 +413,8 @@ async def get_document_chunks(
                 for chunk in paginated_chunks
             ],
             total_count=total_count,
-            limit=pagination.limit,
-            offset=pagination.offset,
+            limit=limit,
+            offset=offset,
         )
 
     except Exception as e:
@@ -469,14 +482,12 @@ async def process_document(
 
 @router.get("/stats/overview", response_model=DocumentStatsResponse)
 async def get_document_stats(
-    request: DocumentStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentStatsResponse:
     """Get document statistics.
 
     Args:
-        request: Stats request parameters
         current_user: Current authenticated user
         document_service: Document service
 

@@ -1,10 +1,11 @@
 """Profile management endpoints."""
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.core.profiles import ProfileError, ProfileService
+from chatter.models.profile import ProfileType
 from chatter.models.user import User
 from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.profile import (
@@ -79,20 +80,30 @@ async def create_profile(
         ) from None
 
 
-@router.get("/", response_model=ProfileListResponse)
+@router.get("", response_model=ProfileListResponse)
 async def list_profiles(
-    request: ProfileListRequest = Depends(),
-    pagination: PaginationRequest = Depends(),
-    sorting: SortingRequest = Depends(),
+    profile_type: ProfileType | None = Query(None, description="Filter by profile type"),
+    llm_provider: str | None = Query(None, description="Filter by LLM provider"),
+    tags: list[str] | None = Query(None, description="Filter by tags"),
+    is_public: bool | None = Query(None, description="Filter by public status"),
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    sort_by: str = Query("created_at", description="Sort field"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> ProfileListResponse:
     """List user's profiles.
 
     Args:
-        request: List request parameters
-        pagination: Pagination parameters
-        sorting: Sorting parameters
+        profile_type: Filter by profile type
+        llm_provider: Filter by LLM provider
+        tags: Filter by tags
+        is_public: Filter by public status
+        limit: Maximum number of results
+        offset: Number of results to skip
+        sort_by: Sort field
+        sort_order: Sort order (asc/desc)
         current_user: Current authenticated user
         profile_service: Profile service
 
@@ -100,13 +111,18 @@ async def list_profiles(
         List of profiles with pagination info
     """
     try:
-        # Merge pagination and sorting into request
-        merged_request = request.model_copy(update={
-            'limit': pagination.limit,
-            'offset': pagination.offset,
-            'sort_by': sorting.sort_by,
-            'sort_order': sorting.sort_order,
-        })
+        # Create request object from query parameters
+        from chatter.schemas.profile import ProfileListRequest
+        merged_request = ProfileListRequest(
+            profile_type=profile_type,
+            llm_provider=llm_provider,
+            tags=tags,
+            is_public=is_public,
+            limit=limit,
+            offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
+        )
 
         # Get profiles
         profiles, total_count = await profile_service.list_profiles(
@@ -119,8 +135,8 @@ async def list_profiles(
                 for profile in profiles
             ],
             total_count=total_count,
-            limit=pagination.limit,
-            offset=pagination.offset,
+            limit=limit,
+            offset=offset,
         )
 
     except Exception as e:
@@ -133,7 +149,6 @@ async def list_profiles(
 @router.get("/{profile_id}", response_model=ProfileResponse)
 async def get_profile(
     profile_id: str,
-    request: ProfileGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> ProfileResponse:
@@ -141,7 +156,6 @@ async def get_profile(
 
     Args:
         profile_id: Profile ID
-        request: Get request parameters
         current_user: Current authenticated user
         profile_service: Profile service
 
@@ -347,14 +361,12 @@ async def clone_profile(
 
 @router.get("/stats/overview", response_model=ProfileStatsResponse)
 async def get_profile_stats(
-    request: ProfileStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> ProfileStatsResponse:
     """Get profile statistics.
 
     Args:
-        request: Stats request parameters
         current_user: Current authenticated user
         profile_service: Profile service
 
@@ -390,7 +402,6 @@ async def get_profile_stats(
     "/providers/available", response_model=AvailableProvidersResponse
 )
 async def get_available_providers(
-    request: ProfileProvidersRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> AvailableProvidersResponse:

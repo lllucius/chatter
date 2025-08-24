@@ -27,7 +27,7 @@ import {
   Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Profile, Prompt, Document, Conversation, ConversationMessage } from '../services/api-sdk';
+import { api, Profile, Prompt, Document, Conversation, ConversationMessage } from '../services/api';
 
 interface ChatMessage {
   id: string;
@@ -138,7 +138,7 @@ const ChatPage: React.FC = () => {
       
       const assistantMessage: ChatMessage = {
         id: response.id,
-        role: response.role,
+        role: 'assistant',
         content: response.content,
         timestamp: new Date(response.created_at),
       };

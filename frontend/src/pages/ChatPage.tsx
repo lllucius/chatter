@@ -228,7 +228,7 @@ const ChatPage: React.FC = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', height: 'calc(100vh - 120px)' }}>
+    <Box sx={{ display: 'flex', height: 'calc(100vh - 80px)' }}>
       {/* Main Chat Area */}
       <Box sx={{ 
         flexGrow: 1, 
@@ -239,62 +239,58 @@ const ChatPage: React.FC = () => {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.leavingScreen,
         }),
+        overflow: 'hidden',
       }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h4" component="h1" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
-            Chat Interface
-          </Typography>
-          <Tooltip title={sidebarOpen ? 'Hide Settings' : 'Show Settings'}>
-            <IconButton onClick={() => setSidebarOpen(!sidebarOpen)}>
-              <TuneIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-
         {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
+          <Alert severity="error" sx={{ mb: 1 }}>
             {error}
           </Alert>
         )}
 
         {/* Quick Actions Bar */}
-        <Card sx={{ mb: 2 }}>
-          <CardContent sx={{ py: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <FormControlLabel
-                control={
-                  <Switch 
-                    checked={streamingEnabled} 
-                    onChange={(e) => setStreamingEnabled(e.target.checked)}
-                    icon={<SpeedIcon />}
-                    checkedIcon={<StreamIcon />}
-                  />
-                }
-                label={streamingEnabled ? 'Streaming' : 'Standard'}
-              />
-              <Divider orientation="vertical" flexItem />
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={startNewConversation}
-                startIcon={<RefreshIcon />}
-              >
-                New Chat
-              </Button>
-              {currentConversation && (
-                <Chip 
-                  label={`${currentConversation.title} (${messages.length} messages)`}
-                  size="small"
-                  variant="outlined"
+        <Card sx={{ mb: 1 }}>
+          <CardContent sx={{ py: 1, px: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <FormControlLabel
+                  control={
+                    <Switch 
+                      checked={streamingEnabled} 
+                      onChange={(e) => setStreamingEnabled(e.target.checked)}
+                      icon={<SpeedIcon />}
+                      checkedIcon={<StreamIcon />}
+                    />
+                  }
+                  label={streamingEnabled ? 'Streaming' : 'Standard'}
                 />
-              )}
+                <Divider orientation="vertical" flexItem />
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={startNewConversation}
+                  startIcon={<RefreshIcon />}
+                >
+                  New Chat
+                </Button>
+                {currentConversation && (
+                  <Chip 
+                    label={`${currentConversation.title} (${messages.length} messages)`}
+                    size="small"
+                    variant="outlined"
+                  />
+                )}
+              </Box>
+              <Tooltip title={sidebarOpen ? 'Hide Settings' : 'Show Settings'}>
+                <IconButton onClick={() => setSidebarOpen(!sidebarOpen)} size="small">
+                  <TuneIcon />
+                </IconButton>
+              </Tooltip>
             </Box>
           </CardContent>
         </Card>
 
         {/* Messages Area */}
-        <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', mb: 2 }}>
+        <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', mb: 1 }}>
           <CardContent sx={{ flexGrow: 1, overflow: 'hidden', p: 0 }}>
             <Box
               sx={{
@@ -350,8 +346,12 @@ const ChatPage: React.FC = () => {
                       sx={{
                         p: 2,
                         maxWidth: '70%',
-                        bgcolor: msg.role === 'user' ? 'primary.light' : 'grey.100',
-                        color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
+                        bgcolor: msg.role === 'user' 
+                          ? 'primary.light' 
+                          : (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
+                        color: msg.role === 'user' 
+                          ? 'primary.contrastText' 
+                          : 'text.primary',
                       }}
                     >
                       <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
@@ -390,7 +390,7 @@ const ChatPage: React.FC = () => {
         </Card>
 
         {/* Message Input */}
-        <Paper sx={{ p: 2 }}>
+        <Paper sx={{ p: 1.5 }}>
           <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
             <TextField
               fullWidth

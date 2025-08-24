@@ -67,8 +67,8 @@ const DocumentsPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const response = await chatterSDK.documents.apiV1DocumentsGet();
-      setDocuments(response.data);
+      const response = await chatterSDK.documents.listDocumentsApiV1DocumentsGet({});
+      setDocuments(response.data.documents);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load documents');
     } finally {
@@ -81,7 +81,10 @@ const DocumentsPage: React.FC = () => {
 
     try {
       setUploading(true);
-      const response = await chatterSDK.documents.apiV1DocumentsUploadPost(uploadFile, uploadTitle || undefined);
+      const response = await chatterSDK.documents.uploadDocumentApiV1DocumentsUploadPost({
+        file: uploadFile,
+        title: uploadTitle || undefined
+      });
       setDocuments(prev => [response.data, ...prev]);
       setUploadDialogOpen(false);
       setUploadFile(null);
@@ -99,7 +102,7 @@ const DocumentsPage: React.FC = () => {
     }
 
     try {
-      await chatterSDK.documents.apiV1DocumentsIdDelete(documentId);
+      await chatterSDK.documents.deleteDocumentApiV1DocumentsDocumentIdDelete({ documentId: documentId });
       setDocuments(prev => prev.filter(d => d.id !== documentId));
     } catch (err: any) {
       setError('Failed to delete document');
@@ -115,8 +118,8 @@ const DocumentsPage: React.FC = () => {
         query: searchQuery,
         limit: 10,
       };
-      const response = await chatterSDK.documents.apiV1DocumentsSearchPost(searchRequest);
-      setSearchResults(response.data);
+      const response = await chatterSDK.documents.searchDocumentsApiV1DocumentsSearchPost({ documentSearchRequest: searchRequest });
+      setSearchResults(response.data.results);
     } catch (err: any) {
       setError('Failed to search documents');
     } finally {

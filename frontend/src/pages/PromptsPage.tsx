@@ -67,8 +67,9 @@ const PromptsPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const response = await chatterSDK.prompts.apiV1PromptsGet(); const data = response.data;
-      setPrompts(data);
+      const response = await chatterSDK.prompts.listPromptsApiV1PromptsGet({}); 
+      const data = response.data;
+      setPrompts(data.prompts);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load prompts');
     } finally {
@@ -105,10 +106,10 @@ const PromptsPage: React.FC = () => {
     try {
       setSaving(true);
       if (editingPrompt) {
-        const response = await chatterSDK.prompts.apiV1PromptsIdPut(editingPrompt.id, formData as ApiV1PromptsIdPutRequest);
+        const response = await chatterSDK.prompts.updatePromptApiV1PromptsPromptIdPut({ promptId: editingPrompt.id, promptUpdate: formData as ApiV1PromptsIdPutRequest });
         setPrompts(prev => prev.map(p => p.id === editingPrompt.id ? response.data : p));
       } else {
-        const response = await chatterSDK.prompts.apiV1PromptsPost(formData as ApiV1PromptsPostRequest);
+        const response = await chatterSDK.prompts.createPromptApiV1PromptsPost({ promptCreate: formData as ApiV1PromptsPostRequest });
         setPrompts(prev => [response.data, ...prev]);
       }
       setDialogOpen(false);
@@ -125,7 +126,7 @@ const PromptsPage: React.FC = () => {
     }
 
     try {
-      await chatterSDK.prompts.apiV1PromptsIdDelete(promptId);
+      await chatterSDK.prompts.deletePromptApiV1PromptsPromptIdDelete({ promptId: promptId });
       setPrompts(prev => prev.filter(p => p.id !== promptId));
     } catch (err: any) {
       setError('Failed to delete prompt');
@@ -222,7 +223,7 @@ const PromptsPage: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-                      {prompt.variables?.map((variable, index) => (
+                      {prompt.variables?.map((variable: string, index: number) => (
                         <Chip
                           key={index}
                           label={variable}

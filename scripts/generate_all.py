@@ -43,6 +43,11 @@ def main():
         help="Generate only SDK, skip documentation",
     )
     parser.add_argument(
+        "--ts-only",
+        action="store_true",
+        help="Generate only TypeScript SDK, skip Python SDK and documentation",
+    )
+    parser.add_argument(
         "--output-dir",
         default="./",
         help="Base output directory (default: current directory)",
@@ -92,7 +97,7 @@ def main():
             print(f"   Cleaned: {sdk_dir}")
 
     # Generate documentation
-    if not args.sdk_only:
+    if not args.sdk_only and not args.ts_only:
         print("\n📚 Generating OpenAPI Documentation...")
 
         docs_output = Path(args.output_dir) / "docs" / "api"
@@ -133,44 +138,94 @@ def main():
 
     # Generate SDK
     if not args.docs_only:
-        print("\n🐍 Generating Python SDK...")
+        # Generate Python SDK
+        if not args.ts_only:
+            print("\n🐍 Generating Python SDK...")
+
+            cmd = [
+                sys.executable,
+                "-m",
+                "chatter",
+                "docs",
+                "sdk",
+                "--language",
+                "python",
+                "--output",
+                str(Path(args.output_dir) / "sdk"),
+            ]
+
+            if not run_command(cmd, "Python SDK generation"):
+                success = False
+
+            # Verify SDK files were created
+            sdk_dir = (
+                project_root / "sdk" / "python"
+            )  # The CLI uses project_root internally
+            expected_sdk_files = [
+                "setup.py",
+                "README.md",
+                "requirements.txt",
+                "chatter_sdk/__init__.py",
+                "examples/basic_usage.py",
+            ]
+
+            for file in expected_sdk_files:
+                file_path = sdk_dir / file
+                if file_path.exists():
+                    if file.endswith(".py"):
+                        with open(file_path) as f:
+                            lines = len(f.readlines())
+                        print(f"   ✅ {file} ({lines} lines)")
+                    else:
+                        size = file_path.stat().st_size
+                        print(f"   ✅ {file} ({size:,} bytes)")
+                else:
+                    print(f"   ❌ Missing: {file}")
+                    success = False
+
+        # Generate TypeScript SDK
+        print("\n📦 Generating TypeScript SDK...")
 
         cmd = [
             sys.executable,
-            "-m",
-            "chatter",
-            "docs",
-            "sdk",
-            "--language",
-            "python",
-            "--output",
-            str(Path(args.output_dir) / "sdk"),
+            "scripts/generate_ts.py",
         ]
 
-        if not run_command(cmd, "Python SDK generation"):
+        if not run_command(cmd, "TypeScript SDK generation"):
             success = False
 
-        # Verify SDK files were created
-        sdk_dir = (
-            project_root / "sdk" / "python"
-        )  # The CLI uses project_root internally
-        expected_sdk_files = [
-            "setup.py",
+        # Verify TypeScript SDK files were created
+        ts_sdk_dir = project_root / "frontend" / "src" / "sdk"
+        expected_ts_files = [
+            "index.ts",
             "README.md",
-            "requirements.txt",
-            "chatter_sdk/__init__.py",
-            "examples/basic_usage.py",
+            "package.json",
         ]
 
-        for file in expected_sdk_files:
-            file_path = sdk_dir / file
+        # Check for either api.ts or api/ directory
+        if (ts_sdk_dir / "api.ts").exists():
+            expected_ts_files.append("api.ts")
+        elif (ts_sdk_dir / "api").exists():
+            expected_ts_files.append("api/")
+
+        # Check for either models.ts or models/ directory  
+        if (ts_sdk_dir / "models.ts").exists():
+            expected_ts_files.append("models.ts")
+        elif (ts_sdk_dir / "models").exists():
+            expected_ts_files.append("models/")
+
+        for file in expected_ts_files:
+            file_path = ts_sdk_dir / file
             if file_path.exists():
-                if file.endswith(".py"):
+                if file_path.is_file() and file.endswith(".ts"):
                     with open(file_path) as f:
                         lines = len(f.readlines())
                     print(f"   ✅ {file} ({lines} lines)")
+                elif file_path.is_dir():
+                    file_count = len(list(file_path.glob("*.ts")))
+                    print(f"   ✅ {file} ({file_count} files)")
                 else:
-                    size = file_path.stat().st_size
+                    size = file_path.stat().st_size if file_path.is_file() else 0
                     print(f"   ✅ {file} ({size:,} bytes)")
             else:
                 print(f"   ❌ Missing: {file}")
@@ -181,7 +236,7 @@ def main():
     if success:
         print("🎉 Workflow completed successfully!")
 
-        if not args.sdk_only:
+        if not args.sdk_only and not args.ts_only:
             print("\n📚 Documentation generated:")
             print(
                 f"   📁 Location: {Path(args.output_dir) / 'docs' / 'api'}"
@@ -189,17 +244,24 @@ def main():
             print(f"   🔗 Formats: {args.docs_format}")
 
         if not args.docs_only:
-            print("\n🐍 Python SDK generated:")
-            print(f"   📁 Location: {project_root / 'sdk' / 'python'}")
-            print("   📦 Package: chatter-sdk")
+            if not args.ts_only:
+                print("\n🐍 Python SDK generated:")
+                print(f"   📁 Location: {project_root / 'sdk' / 'python'}")
+                print("   📦 Package: chatter-sdk")
+
+            print("\n📦 TypeScript SDK generated:")
+            print(f"   📁 Location: {project_root / 'frontend' / 'src' / 'sdk'}")
+            print("   📦 Package: chatter-sdk (TypeScript)")
 
         print("\n📋 Next steps:")
         if not args.docs_only:
-            print(
-                f"   • Test the SDK: cd {project_root / 'sdk' / 'python'} && pip install -e ."
-            )
-            print("   • Run examples: python examples/basic_usage.py")
-        if not args.sdk_only:
+            if not args.ts_only:
+                print(
+                    f"   • Test the Python SDK: cd {project_root / 'sdk' / 'python'} && pip install -e ."
+                )
+                print("   • Run Python examples: python examples/basic_usage.py")
+            print("   • Test the TypeScript SDK: cd frontend && npm start")
+        if not args.sdk_only and not args.ts_only:
             print("   • View docs: python -m chatter docs serve")
         print("   • Package for release: python -m build")
 

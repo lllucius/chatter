@@ -122,7 +122,7 @@ const DashboardPage: React.FC = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const response = await chatterSDK.analytics.apiV1AnalyticsDashboardGet();
+        const response = await chatterSDK.analytics.getDashboardApiV1AnalyticsDashboardGet();
         setData(response.data);
       } catch (err: any) {
         setError(err?.response?.data?.detail || 'Failed to load dashboard data');
@@ -163,13 +163,13 @@ const DashboardPage: React.FC = () => {
 
   // Sample chart data (in a real app, this would come from the API)
   const conversationChartData = [
-    { name: 'Mon', conversations: (conversationStats.conversations_today ?? 0) * 0.8 },
-    { name: 'Tue', conversations: (conversationStats.conversations_today ?? 0) * 1.2 },
-    { name: 'Wed', conversations: (conversationStats.conversations_today ?? 0) * 0.9 },
-    { name: 'Thu', conversations: (conversationStats.conversations_today ?? 0) * 1.1 },
-    { name: 'Fri', conversations: (conversationStats.conversations_today ?? 0) * 1.3 },
-    { name: 'Sat', conversations: (conversationStats.conversations_today ?? 0) * 0.7 },
-    { name: 'Sun', conversations: (conversationStats.conversations_today ?? 0) },
+    { name: 'Mon', conversations: (conversationStats.total_conversations ?? 0) * 0.8 },
+    { name: 'Tue', conversations: (conversationStats.total_conversations ?? 0) * 1.2 },
+    { name: 'Wed', conversations: (conversationStats.total_conversations ?? 0) * 0.9 },
+    { name: 'Thu', conversations: (conversationStats.total_conversations ?? 0) * 1.1 },
+    { name: 'Fri', conversations: (conversationStats.total_conversations ?? 0) * 1.3 },
+    { name: 'Sat', conversations: (conversationStats.total_conversations ?? 0) * 0.7 },
+    { name: 'Sun', conversations: (conversationStats.total_conversations ?? 0) },
   ];
 
   const tokenUsageData = [
@@ -207,7 +207,7 @@ const DashboardPage: React.FC = () => {
           <MetricCard
             title="Total Conversations"
             value={safeLocaleString(conversationStats.total_conversations)}
-            change={`+${safeLocaleString(conversationStats.conversations_today)} today`}
+            change={`+${safeLocaleString(conversationStats.total_conversations)} today`}
             changeType="positive"
             icon={<Message />}
             color="primary"

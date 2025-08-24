@@ -52,8 +52,7 @@ const AgentsPage: React.FC = () => {
     description: '',
     system_prompt: '',
     agent_type: 'conversational',
-    config: {},
-    is_active: true,
+    status: 'active',
   });
 
   const agentTypes = [
@@ -73,8 +72,8 @@ const AgentsPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const response = await chatterSDK.agents.apiV1AgentsGet();
-      setAgents(response.data);
+      const response = await chatterSDK.agents.listAgentsApiV1AgentsGet();
+      setAgents(response.data.agents);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load agents');
     } finally {
@@ -90,8 +89,7 @@ const AgentsPage: React.FC = () => {
         description: agent.description || '',
         system_prompt: agent.system_prompt || '',
         agent_type: agent.agent_type,
-        config: agent.config,
-        is_active: agent.is_active,
+        status: agent.status,
       });
     } else {
       setEditingAgent(null);
@@ -100,8 +98,7 @@ const AgentsPage: React.FC = () => {
         description: '',
         system_prompt: '',
         agent_type: 'conversational',
-        config: {},
-        is_active: true,
+        status: 'active',
       });
     }
     setDialogOpen(true);
@@ -111,10 +108,15 @@ const AgentsPage: React.FC = () => {
     try {
       setSaving(true);
       if (editingAgent) {
-        const response = await chatterSDK.agents.apiV1AgentsIdPut(editingAgent.id, formData as ApiV1AgentsIdPutRequest);
+        const response = await chatterSDK.agents.updateAgentApiV1AgentsAgentIdPut({
+          agentId: editingAgent.id,
+          agentUpdateRequest: formData as ApiV1AgentsIdPutRequest
+        });
         setAgents(prev => prev.map(a => a.id === editingAgent.id ? response.data : a));
       } else {
-        const response = await chatterSDK.agents.apiV1AgentsPost(formData as ApiV1AgentsPostRequest);
+        const response = await chatterSDK.agents.createAgentApiV1AgentsPost({
+          agentCreateRequest: formData as ApiV1AgentsPostRequest
+        });
         setAgents(prev => [response.data, ...prev]);
       }
       setDialogOpen(false);
@@ -131,7 +133,7 @@ const AgentsPage: React.FC = () => {
     }
 
     try {
-      await chatterSDK.agents.apiV1AgentsIdDelete(agentId);
+      await chatterSDK.agents.deleteAgentApiV1AgentsAgentIdDelete({ agentId });
       setAgents(prev => prev.filter(a => a.id !== agentId));
     } catch (err: any) {
       setError('Failed to delete agent');
@@ -195,7 +197,7 @@ const AgentsPage: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" color="success.main">
-                {agents.filter(agent => agent.is_active).length}
+                {agents.filter(agent => agent.status === 'active').length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Active Agents
@@ -219,7 +221,7 @@ const AgentsPage: React.FC = () => {
           <Card>
             <CardContent>
               <Typography variant="h6" color="secondary.main">
-                {agents.filter(agent => !agent.is_active).length}
+                {agents.filter(agent => agent.status !== 'active').length}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Inactive Agents
@@ -248,7 +250,7 @@ const AgentsPage: React.FC = () => {
                 <TableRow key={agent.id} hover>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <BotIcon sx={{ mr: 1, color: agent.is_active ? 'primary.main' : 'grey.400' }} />
+                      <BotIcon sx={{ mr: 1, color: agent.status === 'active' ? 'primary.main' : 'grey.400' }} />
                       <Box>
                         <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
                           {agent.name}
@@ -271,8 +273,8 @@ const AgentsPage: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <Chip
-                      label={agent.is_active ? 'Active' : 'Inactive'}
-                      color={agent.is_active ? 'success' : 'default'}
+                      label={agent.status === 'active' ? 'Active' : 'Inactive'}
+                      color={agent.status === 'active' ? 'success' : 'default'}
                       size="small"
                     />
                   </TableCell>
@@ -379,8 +381,8 @@ const AgentsPage: React.FC = () => {
               <FormControlLabel
                 control={
                   <Switch
-                    checked={formData.is_active}
-                    onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    checked={formData.status === 'active'}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.checked ? 'active' : 'inactive' })}
                   />
                 }
                 label="Agent is active"

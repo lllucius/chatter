@@ -51,8 +51,8 @@ const ProfilesPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    model_name: '',
-    provider: '',
+    llm_model: '',
+    llm_provider: '',
     temperature: 0.7,
     max_tokens: 1000,
     top_p: 1.0,
@@ -91,9 +91,9 @@ const ProfilesPage: React.FC = () => {
       setFormData({
         name: profile.name,
         description: profile.description || '',
-        model_name: profile.llm_model,
-        provider: profile.llm_provider,
-        temperature: profile.temperature,
+        llm_model: profile.llm_model,
+        llm_provider: profile.llm_provider,
+        temperature: profile.temperature ?? 0.7,
         max_tokens: profile.max_tokens || 1000,
         top_p: profile.top_p || 1.0,
         frequency_penalty: profile.frequency_penalty || 0.0,
@@ -104,8 +104,8 @@ const ProfilesPage: React.FC = () => {
       setFormData({
         name: '',
         description: '',
-        model_name: '',
-        provider: '',
+        llm_model: '',
+        llm_provider: '',
         temperature: 0.7,
         max_tokens: 1000,
         top_p: 1.0,
@@ -123,8 +123,8 @@ const ProfilesPage: React.FC = () => {
         const updateRequest: ApiV1ProfilesIdPutRequest = {
           name: formData.name,
           description: formData.description,
-          model_name: formData.llm_model,
-          provider: formData.llm_provider,
+          llm_model: formData.llm_model,
+          llm_provider: formData.llm_provider,
           temperature: formData.temperature,
           max_tokens: formData.max_tokens,
           top_p: formData.top_p,
@@ -137,8 +137,8 @@ const ProfilesPage: React.FC = () => {
         const createRequest: ApiV1ProfilesPostRequest = {
           name: formData.name,
           description: formData.description,
-          model_name: formData.llm_model,
-          provider: formData.llm_provider,
+          llm_model: formData.llm_model,
+          llm_provider: formData.llm_provider,
           temperature: formData.temperature,
           max_tokens: formData.max_tokens,
           top_p: formData.top_p,
@@ -351,8 +351,8 @@ const ProfilesPage: React.FC = () => {
                   label="Provider"
                   onChange={(e) => setFormData({ 
                     ...formData, 
-                    provider: e.target.value,
-                    model_name: '' // Reset model when provider changes
+                    llm_provider: e.target.value,
+                    llm_model: '' // Reset model when provider changes
                   })}
                 >
                   {providers.map((provider) => (
@@ -379,7 +379,7 @@ const ProfilesPage: React.FC = () => {
                 <Select
                   value={formData.llm_model}
                   label="Model"
-                  onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, llm_model: e.target.value })}
                   disabled={!formData.llm_provider}
                 >
                   {formData.llm_provider && models[formData.llm_provider as keyof typeof models]?.map((model) => (

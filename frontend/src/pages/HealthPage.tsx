@@ -363,7 +363,7 @@ const HealthPage: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                        {server.url}
+                        {server.command || 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell>
@@ -383,9 +383,9 @@ const HealthPage: React.FC = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      {server.health_status && typeof server.health_status === 'object' ? (
+                      {server.last_health_check ? (
                         <Typography variant="body2">
-                          {Object.keys(server.health_status).length} metrics
+                          {format(new Date(server.last_health_check), 'MMM dd, HH:mm')}
                         </Typography>
                       ) : (
                         '-'

@@ -38,7 +38,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { Conversation, ConversationMessage } from '../sdk';
+import { Conversation, MessageResponse } from '../sdk';
 
 const ConversationsPage: React.FC = () => {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -48,7 +48,7 @@ const ConversationsPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
-  const [conversationMessages, setConversationMessages] = useState<ConversationMessage[]>([]);
+  const [conversationMessages, setConversationMessages] = useState<MessageResponse[]>([]);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
 

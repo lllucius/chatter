@@ -309,14 +309,20 @@ def create_app() -> FastAPI:
 
     # --- DELAYED IMPORTS: Routers registered here only ---
     from chatter.api import (
+        ab_testing,
+        agents,
         analytics,
         auth,
         chat,
+        data_management,
         documents,
         health,
+        jobs,
+        plugins,
         profiles,
         prompts,
         toolserver,
+        webhooks,
     )
 
     app.include_router(health.router, tags=["Health"])
@@ -359,6 +365,43 @@ def create_app() -> FastAPI:
         toolserver.router,
         prefix=f"{settings.api_prefix}/toolservers",
         tags=["Tool Servers"],
+    )
+
+    # New API endpoints from PR #23
+    app.include_router(
+        agents.router,
+        prefix=f"{settings.api_prefix}/agents",
+        tags=["Agents"],
+    )
+
+    app.include_router(
+        ab_testing.router,
+        prefix=f"{settings.api_prefix}/ab-tests",
+        tags=["A/B Testing"],
+    )
+
+    app.include_router(
+        webhooks.router,
+        prefix=f"{settings.api_prefix}/webhooks",
+        tags=["Webhooks"],
+    )
+
+    app.include_router(
+        plugins.router,
+        prefix=f"{settings.api_prefix}/plugins",
+        tags=["Plugins"],
+    )
+
+    app.include_router(
+        jobs.router,
+        prefix=f"{settings.api_prefix}/jobs",
+        tags=["Jobs"],
+    )
+
+    app.include_router(
+        data_management.router,
+        prefix=f"{settings.api_prefix}/data",
+        tags=["Data Management"],
     )
 
     @app.get("/")

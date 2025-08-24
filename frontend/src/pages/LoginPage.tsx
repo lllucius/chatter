@@ -10,7 +10,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { api } from '../services/api-sdk';
+import { api } from '../services/api';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');

@@ -19,7 +19,7 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Services
-import { api } from './services/api-sdk';
+import { api } from './services/api';
 
 const theme = createTheme({
   palette: {

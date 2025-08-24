@@ -36,7 +36,7 @@ import {
   Assessment,
   CloudQueue,
 } from '@mui/icons-material';
-import { api, DashboardData } from '../services/api-sdk';
+import { api, DashboardData } from '../services/api';
 
 interface MetricCardProps {
   title: string;

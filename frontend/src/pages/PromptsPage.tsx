@@ -35,7 +35,7 @@ import {
   Code as CodeIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Prompt } from '../services/api-sdk';
+import { api, Prompt } from '../services/api';
 
 const PromptsPage: React.FC = () => {
   const [prompts, setPrompts] = useState<Prompt[]>([]);

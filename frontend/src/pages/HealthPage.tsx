@@ -34,7 +34,7 @@ import {
   NetworkCheck as NetworkIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, ToolServer } from '../services/api-sdk';
+import { api, ToolServer } from '../services/api';
 
 const HealthPage: React.FC = () => {
   const [health, setHealth] = useState<any>(null);

@@ -1,0 +1,20 @@
+# New API Endpoints Added
+
+## Agents API (/api/v1/agents)
+- 7 endpoints
+
+## Ab Testing API (/api/v1/ab-testing)
+- 10 endpoints
+
+## Webhooks API (/api/v1/webhooks)
+- 8 endpoints
+
+## Plugins API (/api/v1/plugins)
+- 7 endpoints
+
+## Jobs API (/api/v1/jobs)
+- 5 endpoints
+
+## Data Management API (/api/v1/data-management)
+- 5 endpoints
+

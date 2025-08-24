@@ -276,6 +276,66 @@ async def get_conversation_messages(
         ) from None
 
 
+@router.post("/conversations/{conversation_id}/messages", response_model=MessageResponse)
+async def add_message_to_conversation(
+    conversation_id: str,
+    message: str,
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service),
+) -> MessageResponse:
+    """Add a new message to existing conversation.
+
+    Args:
+        conversation_id: Conversation ID
+        message: Message content
+        current_user: Current authenticated user
+        chat_service: Chat service
+
+    Returns:
+        Created message
+    """
+    try:
+        created_message = await chat_service.add_message_to_conversation(
+            conversation_id, current_user.id, message
+        )
+        return MessageResponse.model_validate(created_message)
+    except ConversationNotFoundError:
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation",
+        ) from None
+
+
+@router.delete("/conversations/{conversation_id}/messages/{message_id}")
+async def delete_message(
+    conversation_id: str,
+    message_id: str,
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service),
+) -> dict:
+    """Delete a message from conversation.
+
+    Args:
+        conversation_id: Conversation ID
+        message_id: Message ID
+        current_user: Current authenticated user
+        chat_service: Chat service
+
+    Returns:
+        Success message
+    """
+    try:
+        await chat_service.delete_message(
+            conversation_id, message_id, current_user.id
+        )
+        return {"message": "Message deleted successfully"}
+    except ConversationNotFoundError:
+        raise NotFoundProblem(
+            detail="Conversation not found",
+            resource_type="conversation",
+        ) from None
+
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat(
     chat_request: ChatRequest,

@@ -513,3 +513,99 @@ async def get_document_stats(
         raise InternalServerProblem(
             detail="Failed to get document stats"
         ) from None
+
+
+@router.get("/{document_id}/download")
+async def download_document(
+    document_id: str,
+    current_user: User = Depends(get_current_user),
+    document_service: DocumentService = Depends(get_document_service),
+):
+    """Download original document file.
+
+    Args:
+        document_id: Document ID
+        current_user: Current authenticated user
+        document_service: Document service
+
+    Returns:
+        File download response
+    """
+    try:
+        from fastapi.responses import FileResponse
+        file_path = await document_service.get_document_file_path(
+            document_id, current_user.id
+        )
+        
+        if not file_path:
+            raise NotFoundProblem(
+                detail="Document file not found",
+                resource_type="document",
+                resource_id=document_id,
+            ) from None
+            
+        return FileResponse(
+            path=file_path,
+            filename=f"document_{document_id}",
+            media_type='application/octet-stream'
+        )
+        
+    except ProblemException:
+        raise
+    except Exception as e:
+        logger.error(
+            "Failed to download document",
+            document_id=document_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to download document"
+        ) from None
+
+
+@router.post("/{document_id}/reprocess", response_model=DocumentProcessingResponse)
+async def reprocess_document(
+    document_id: str,
+    current_user: User = Depends(get_current_user),
+    document_service: DocumentService = Depends(get_document_service),
+) -> DocumentProcessingResponse:
+    """Reprocess an existing document.
+
+    Args:
+        document_id: Document ID
+        current_user: Current authenticated user
+        document_service: Document service
+
+    Returns:
+        Processing status
+    """
+    try:
+        success = await document_service.reprocess_document(
+            document_id, current_user.id
+        )
+
+        if not success:
+            raise NotFoundProblem(
+                detail="Document not found or reprocessing failed",
+                resource_type="document",
+                resource_id=document_id,
+            ) from None
+
+        return DocumentProcessingResponse(
+            document_id=document_id,
+            status=DocumentStatus.PROCESSING,
+            message="Document reprocessing started successfully",
+            processing_started_at=None,  # Would be filled by service
+        )
+
+    except ProblemException:
+        raise
+    except Exception as e:
+        logger.error(
+            "Failed to reprocess document",
+            document_id=document_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to reprocess document"
+        ) from None

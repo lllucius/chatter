@@ -63,11 +63,16 @@ async def readiness_check(
     )
 
 
-@router.get("/live", response_model=LivenessCheckResponse)
-async def liveness_check() -> LivenessCheckResponse:
-    """Liveness check endpoint for Kubernetes.
+@router.get("/live", response_model=HealthCheckResponse)
+async def liveness_check() -> HealthCheckResponse:
+    """Liveness check endpoint for Kubernetes (alias for /healthz).
 
     Returns:
-        Simple liveness status
+        Health status (same as /healthz)
     """
-    return LivenessCheckResponse(status="alive")
+    return HealthCheckResponse(
+        status="healthy",
+        service="chatter",
+        version=settings.app_version,
+        environment=settings.environment,
+    )

@@ -245,6 +245,80 @@ async def revoke_api_key(
     return APIKeyRevokeResponse(message="API key revoked successfully")
 
 
+@router.get("/api-keys", response_model=list[APIKeyResponse])
+async def list_api_keys(
+    current_user=Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> list[APIKeyResponse]:
+    """List user's API keys.
+
+    Args:
+        current_user: Current authenticated user
+        auth_service: Authentication service
+
+    Returns:
+        List of API keys
+    """
+    api_keys = await auth_service.list_api_keys(current_user.id)
+    return [APIKeyResponse.model_validate(key) for key in api_keys]
+
+
+@router.post("/logout", response_model=dict)
+async def logout(
+    current_user=Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> dict:
+    """Logout and revoke current token.
+
+    Args:
+        current_user: Current authenticated user
+        auth_service: Authentication service
+
+    Returns:
+        Success message
+    """
+    await auth_service.revoke_token(current_user.id)
+    return {"message": "Logged out successfully"}
+
+
+@router.post("/password-reset/request")
+async def request_password_reset(
+    email: str,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> dict:
+    """Request password reset.
+
+    Args:
+        email: User email
+        auth_service: Authentication service
+
+    Returns:
+        Success message
+    """
+    await auth_service.request_password_reset(email)
+    return {"message": "Password reset email sent if account exists"}
+
+
+@router.post("/password-reset/confirm")
+async def confirm_password_reset(
+    token: str,
+    new_password: str,
+    auth_service: AuthService = Depends(get_auth_service),
+) -> dict:
+    """Confirm password reset.
+
+    Args:
+        token: Reset token
+        new_password: New password
+        auth_service: Authentication service
+
+    Returns:
+        Success message
+    """
+    await auth_service.confirm_password_reset(token, new_password)
+    return {"message": "Password reset successfully"}
+
+
 @router.delete("/account", response_model=AccountDeactivateResponse)
 async def deactivate_account(
     current_user=Depends(get_current_user),

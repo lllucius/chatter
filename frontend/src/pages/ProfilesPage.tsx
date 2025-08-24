@@ -35,7 +35,8 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Profile } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
+import { Profile, ApiV1ProfilesPostRequest, ApiV1ProfilesIdPutRequest } from '../sdk';
 
 const ProfilesPage: React.FC = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
@@ -76,8 +77,8 @@ const ProfilesPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const data = await api.getProfiles();
-      setProfiles(data);
+      const response = await chatterSDK.profiles.apiV1ProfilesGet();
+      setProfiles(response.data);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load profiles');
     } finally {
@@ -120,11 +121,33 @@ const ProfilesPage: React.FC = () => {
     try {
       setSaving(true);
       if (editingProfile) {
-        const updatedProfile = await api.updateProfile(editingProfile.id, formData);
-        setProfiles(prev => prev.map(p => p.id === editingProfile.id ? updatedProfile : p));
+        const updateRequest: ApiV1ProfilesIdPutRequest = {
+          name: formData.name,
+          description: formData.description,
+          model_name: formData.model_name,
+          provider: formData.provider,
+          temperature: formData.temperature,
+          max_tokens: formData.max_tokens,
+          top_p: formData.top_p,
+          frequency_penalty: formData.frequency_penalty,
+          presence_penalty: formData.presence_penalty,
+        };
+        const response = await chatterSDK.profiles.apiV1ProfilesIdPut(editingProfile.id, updateRequest);
+        setProfiles(prev => prev.map(p => p.id === editingProfile.id ? response.data : p));
       } else {
-        const newProfile = await api.createProfile(formData);
-        setProfiles(prev => [newProfile, ...prev]);
+        const createRequest: ApiV1ProfilesPostRequest = {
+          name: formData.name,
+          description: formData.description,
+          model_name: formData.model_name,
+          provider: formData.provider,
+          temperature: formData.temperature,
+          max_tokens: formData.max_tokens,
+          top_p: formData.top_p,
+          frequency_penalty: formData.frequency_penalty,
+          presence_penalty: formData.presence_penalty,
+        };
+        const response = await chatterSDK.profiles.apiV1ProfilesPost(createRequest);
+        setProfiles(prev => [response.data, ...prev]);
       }
       setDialogOpen(false);
     } catch (err: any) {
@@ -140,7 +163,7 @@ const ProfilesPage: React.FC = () => {
     }
 
     try {
-      await api.deleteProfile(profileId);
+      await chatterSDK.profiles.apiV1ProfilesIdDelete(profileId);
       setProfiles(prev => prev.filter(p => p.id !== profileId));
     } catch (err: any) {
       setError('Failed to delete profile');

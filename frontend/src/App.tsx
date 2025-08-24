@@ -18,9 +18,6 @@ import AgentsPage from './pages/AgentsPage';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Services
-import { api } from './services/api';
-
 const theme = createTheme({
   palette: {
     mode: 'light',

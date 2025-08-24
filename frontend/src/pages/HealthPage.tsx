@@ -29,12 +29,12 @@ import {
   Info as InfoIcon,
   Refresh as RefreshIcon,
   Storage as StorageIcon,
-  Memory as MemoryIcon,
   Speed as SpeedIcon,
   NetworkCheck as NetworkIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, ToolServer } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
+import { ToolServer } from '../sdk';
 
 const HealthPage: React.FC = () => {
   const [health, setHealth] = useState<any>(null);
@@ -50,12 +50,12 @@ const HealthPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const [healthData, toolServerData] = await Promise.all([
-        api.getHealth(),
-        api.getToolServers(),
+      const [healthResponse, toolServerResponse] = await Promise.all([
+        chatterSDK.health.healthGet(),
+        chatterSDK.toolServers.apiV1ToolserversGet(),
       ]);
-      setHealth(healthData);
-      setToolServers(toolServerData);
+      setHealth(healthResponse.data);
+      setToolServers(toolServerResponse.data);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load health data');
     } finally {

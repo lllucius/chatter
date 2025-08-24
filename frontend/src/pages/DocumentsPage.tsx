@@ -40,7 +40,8 @@ import {
   Add as AddIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Document } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
+import { Document, DocumentSearchRequest } from '../sdk';
 
 const DocumentsPage: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -66,8 +67,8 @@ const DocumentsPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const data = await api.getDocuments();
-      setDocuments(data);
+      const response = await chatterSDK.documents.apiV1DocumentsGet();
+      setDocuments(response.data);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load documents');
     } finally {
@@ -80,8 +81,8 @@ const DocumentsPage: React.FC = () => {
 
     try {
       setUploading(true);
-      const document = await api.uploadDocument(uploadFile, uploadTitle || undefined);
-      setDocuments(prev => [document, ...prev]);
+      const response = await chatterSDK.documents.apiV1DocumentsUploadPost(uploadFile, uploadTitle || undefined);
+      setDocuments(prev => [response.data, ...prev]);
       setUploadDialogOpen(false);
       setUploadFile(null);
       setUploadTitle('');
@@ -98,7 +99,7 @@ const DocumentsPage: React.FC = () => {
     }
 
     try {
-      await api.deleteDocument(documentId);
+      await chatterSDK.documents.apiV1DocumentsIdDelete(documentId);
       setDocuments(prev => prev.filter(d => d.id !== documentId));
     } catch (err: any) {
       setError('Failed to delete document');
@@ -110,8 +111,12 @@ const DocumentsPage: React.FC = () => {
 
     try {
       setSearching(true);
-      const results = await api.searchDocuments(searchQuery);
-      setSearchResults(results);
+      const searchRequest: DocumentSearchRequest = {
+        query: searchQuery,
+        limit: 10,
+      };
+      const response = await chatterSDK.documents.apiV1DocumentsSearchPost(searchRequest);
+      setSearchResults(response.data);
     } catch (err: any) {
       setError('Failed to search documents');
     } finally {

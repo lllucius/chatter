@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
-  CardContent,
   Typography,
   Button,
   Table,
@@ -35,7 +34,8 @@ import {
   Code as CodeIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Prompt } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
+import { Prompt, ApiV1PromptsPostRequest, ApiV1PromptsIdPutRequest } from '../sdk';
 
 const PromptsPage: React.FC = () => {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
@@ -67,7 +67,7 @@ const PromptsPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const data = await api.getPrompts();
+      const response = await chatterSDK.prompts.apiV1PromptsGet(); const data = response.data;
       setPrompts(data);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load prompts');
@@ -105,11 +105,11 @@ const PromptsPage: React.FC = () => {
     try {
       setSaving(true);
       if (editingPrompt) {
-        const updatedPrompt = await api.updatePrompt(editingPrompt.id, formData);
-        setPrompts(prev => prev.map(p => p.id === editingPrompt.id ? updatedPrompt : p));
+        const response = await chatterSDK.prompts.apiV1PromptsIdPut(editingPrompt.id, formData as ApiV1PromptsIdPutRequest);
+        setPrompts(prev => prev.map(p => p.id === editingPrompt.id ? response.data : p));
       } else {
-        const newPrompt = await api.createPrompt(formData);
-        setPrompts(prev => [newPrompt, ...prev]);
+        const response = await chatterSDK.prompts.apiV1PromptsPost(formData as ApiV1PromptsPostRequest);
+        setPrompts(prev => [response.data, ...prev]);
       }
       setDialogOpen(false);
     } catch (err: any) {
@@ -125,7 +125,7 @@ const PromptsPage: React.FC = () => {
     }
 
     try {
-      await api.deletePrompt(promptId);
+      await chatterSDK.prompts.apiV1PromptsIdDelete(promptId);
       setPrompts(prev => prev.filter(p => p.id !== promptId));
     } catch (err: any) {
       setError('Failed to delete prompt');

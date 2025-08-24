@@ -36,7 +36,8 @@ import {
   SmartToy as BotIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Agent } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
+import { Agent, ApiV1AgentsPostRequest, ApiV1AgentsIdPutRequest } from '../sdk';
 
 const AgentsPage: React.FC = () => {
   const [agents, setAgents] = useState<Agent[]>([]);
@@ -72,8 +73,8 @@ const AgentsPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const data = await api.getAgents();
-      setAgents(data);
+      const response = await chatterSDK.agents.apiV1AgentsGet();
+      setAgents(response.data);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load agents');
     } finally {
@@ -110,11 +111,11 @@ const AgentsPage: React.FC = () => {
     try {
       setSaving(true);
       if (editingAgent) {
-        const updatedAgent = await api.updateAgent(editingAgent.id, formData);
-        setAgents(prev => prev.map(a => a.id === editingAgent.id ? updatedAgent : a));
+        const response = await chatterSDK.agents.apiV1AgentsIdPut(editingAgent.id, formData as ApiV1AgentsIdPutRequest);
+        setAgents(prev => prev.map(a => a.id === editingAgent.id ? response.data : a));
       } else {
-        const newAgent = await api.createAgent(formData);
-        setAgents(prev => [newAgent, ...prev]);
+        const response = await chatterSDK.agents.apiV1AgentsPost(formData as ApiV1AgentsPostRequest);
+        setAgents(prev => [response.data, ...prev]);
       }
       setDialogOpen(false);
     } catch (err: any) {
@@ -130,7 +131,7 @@ const AgentsPage: React.FC = () => {
     }
 
     try {
-      await api.deleteAgent(agentId);
+      await chatterSDK.agents.apiV1AgentsIdDelete(agentId);
       setAgents(prev => prev.filter(a => a.id !== agentId));
     } catch (err: any) {
       setError('Failed to delete agent');

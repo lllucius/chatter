@@ -27,7 +27,8 @@ import {
   Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Profile, Prompt, Document, Conversation, ConversationMessage } from '../services/api';
+import { chatterSDK } from '../services/chatter-sdk';
+import { Profile, Prompt, Document, Conversation, CreateConversationRequest, SendMessageRequest } from '../sdk';
 
 interface ChatMessage {
   id: string;
@@ -64,18 +65,18 @@ const ChatPage: React.FC = () => {
 
   const loadData = async () => {
     try {
-      const [profilesData, promptsData, documentsData] = await Promise.all([
-        api.getProfiles(),
-        api.getPrompts(),
-        api.getDocuments(),
+      const [profilesResponse, promptsResponse, documentsResponse] = await Promise.all([
+        chatterSDK.profiles.apiV1ProfilesGet(),
+        chatterSDK.prompts.apiV1PromptsGet(),
+        chatterSDK.documents.apiV1DocumentsGet(),
       ]);
-      setProfiles(profilesData);
-      setPrompts(promptsData);
-      setDocuments(documentsData);
+      setProfiles(profilesResponse.data);
+      setPrompts(promptsResponse.data);
+      setDocuments(documentsResponse.data);
       
       // Set default selections
-      if (profilesData.length > 0) {
-        setSelectedProfile(profilesData[0].id);
+      if (profilesResponse.data.length > 0) {
+        setSelectedProfile(profilesResponse.data[0].id);
       }
     } catch (err: any) {
       setError('Failed to load chat data');
@@ -86,12 +87,13 @@ const ChatPage: React.FC = () => {
   const startNewConversation = async () => {
     try {
       setError('');
-      const conversation = await api.createConversation({
+      const createRequest: CreateConversationRequest = {
         title: `Chat ${new Date().toLocaleString()}`,
         profile_id: selectedProfile || undefined,
         prompt_id: selectedPrompt || undefined,
-      });
-      setCurrentConversation(conversation);
+      };
+      const response = await chatterSDK.conversations.apiV1ChatConversationsPost(createRequest);
+      setCurrentConversation(response.data);
       setMessages([]);
       
       // Add system message if prompt is selected
@@ -132,15 +134,17 @@ const ChatPage: React.FC = () => {
     setLoading(true);
 
     try {
-      // In a real implementation, this would send to the API and get a streaming response
-      // For now, we'll simulate an assistant response
-      const response = await api.sendMessage(currentConversation.id, userMessage.content);
+      // Send message to the API
+      const sendRequest: SendMessageRequest = {
+        message: userMessage.content,
+      };
+      const response = await chatterSDK.conversations.apiV1ChatConversationIdPost(currentConversation.id, sendRequest);
       
       const assistantMessage: ChatMessage = {
-        id: response.id,
+        id: response.data.id,
         role: 'assistant',
-        content: response.content,
-        timestamp: new Date(response.created_at),
+        content: response.data.content,
+        timestamp: new Date(response.data.created_at),
       };
 
       setMessages(prev => [...prev, assistantMessage]);

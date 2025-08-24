@@ -25,7 +25,7 @@ const LoginPage: React.FC = () => {
     setError('');
 
     try {
-      const response = await chatterSDK.login(username, password);
+      await chatterSDK.login(username, password);
       navigate('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Login failed');

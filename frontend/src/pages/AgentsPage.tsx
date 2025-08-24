@@ -36,7 +36,7 @@ import {
   SmartToy as BotIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Agent } from '../services/api';
+import { api, Agent } from '../services/api-sdk';
 
 const AgentsPage: React.FC = () => {
   const [agents, setAgents] = useState<Agent[]>([]);

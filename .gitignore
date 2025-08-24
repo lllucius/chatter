@@ -28,7 +28,7 @@ MANIFEST
 
 # Generated documentation and SDK files 
 docs/api/
-sdk/
+sdk/python/
 temp_openapi.json
 generator_config.json
 

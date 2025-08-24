@@ -169,7 +169,9 @@ async def get_usage_metrics(
 
 @router.get("/performance", response_model=PerformanceMetricsResponse)
 async def get_performance_metrics(
-    request: PerformanceMetricsRequest = Depends(),
+    start_date: datetime | None = Query(None, description="Start date for analytics"),
+    end_date: datetime | None = Query(None, description="End date for analytics"),
+    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -186,8 +188,16 @@ async def get_performance_metrics(
         Performance metrics
     """
     try:
+        # Create time range object
+        from chatter.schemas.analytics import AnalyticsTimeRange
+        time_range = AnalyticsTimeRange(
+            start_date=start_date,
+            end_date=end_date,
+            period=period,
+        )
+        
         metrics = await analytics_service.get_performance_metrics(
-            current_user.id, request.time_range
+            current_user.id, time_range
         )
 
         return PerformanceMetricsResponse(
@@ -234,7 +244,9 @@ async def get_performance_metrics(
 
 @router.get("/documents", response_model=DocumentAnalyticsResponse)
 async def get_document_analytics(
-    request: DocumentAnalyticsRequest = Depends(),
+    start_date: datetime | None = Query(None, description="Start date for analytics"),
+    end_date: datetime | None = Query(None, description="End date for analytics"),
+    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -251,8 +263,16 @@ async def get_document_analytics(
         Document analytics
     """
     try:
+        # Create time range object
+        from chatter.schemas.analytics import AnalyticsTimeRange
+        time_range = AnalyticsTimeRange(
+            start_date=start_date,
+            end_date=end_date,
+            period=period,
+        )
+        
         analytics = await analytics_service.get_document_analytics(
-            current_user.id, request.time_range
+            current_user.id, time_range
         )
 
         return DocumentAnalyticsResponse(
@@ -299,7 +319,6 @@ async def get_document_analytics(
 
 @router.get("/system", response_model=SystemAnalyticsResponse)
 async def get_system_analytics(
-    request: SystemAnalyticsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -355,7 +374,9 @@ async def get_system_analytics(
 
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
-    request: DashboardRequest = Depends(),
+    start_date: datetime | None = Query(None, description="Start date for analytics"),
+    end_date: datetime | None = Query(None, description="End date for analytics"),
+    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -372,8 +393,16 @@ async def get_dashboard(
         Complete dashboard data
     """
     try:
+        # Create time range object
+        from chatter.schemas.analytics import AnalyticsTimeRange
+        time_range = AnalyticsTimeRange(
+            start_date=start_date,
+            end_date=end_date,
+            period=period,
+        )
+        
         dashboard_data = await analytics_service.get_dashboard_data(
-            current_user.id, request.time_range
+            current_user.id, time_range
         )
 
         return DashboardResponse(
@@ -407,7 +436,9 @@ async def get_dashboard(
 
 @router.get("/toolservers")
 async def get_tool_server_analytics(
-    request: ToolServerAnalyticsRequest = Depends(),
+    start_date: datetime | None = Query(None, description="Start date for analytics"),
+    end_date: datetime | None = Query(None, description="End date for analytics"),
+    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -424,8 +455,16 @@ async def get_tool_server_analytics(
         Tool server analytics data
     """
     try:
+        # Create time range object
+        from chatter.schemas.analytics import AnalyticsTimeRange
+        time_range = AnalyticsTimeRange(
+            start_date=start_date,
+            end_date=end_date,
+            period=period,
+        )
+        
         return await analytics_service.get_tool_server_analytics(
-            current_user.id, request.time_range
+            current_user.id, time_range
         )
 
     except Exception as e:

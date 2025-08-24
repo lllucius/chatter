@@ -2,7 +2,7 @@
 
 import json
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +12,7 @@ from chatter.core.chat import (
     ChatService,
     ConversationNotFoundError,
 )
+from chatter.models.conversation import ConversationStatus
 from chatter.models.user import User
 from chatter.schemas.chat import (
     AvailableToolResponse,
@@ -93,18 +94,24 @@ async def create_conversation(
 
 @router.get("/conversations", response_model=ConversationSearchResponse)
 async def list_conversations(
-    request: ConversationSearchRequest = Depends(),
-    pagination: PaginationRequest = Depends(),
-    sorting: SortingRequest = Depends(),
+    query: str | None = Query(None, description="Search query"),
+    status: ConversationStatus | None = Query(None, description="Filter by status"),
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    sort_by: str = Query("created_at", description="Sort field"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationSearchResponse:
     """List user's conversations.
 
     Args:
-        request: Search request parameters
-        pagination: Pagination parameters
-        sorting: Sorting parameters
+        query: Search query
+        status: Filter by status
+        limit: Maximum number of results
+        offset: Number of results to skip
+        sort_by: Sort field
+        sort_order: Sort order (asc/desc)
         current_user: Current authenticated user
         chat_service: Chat service
 
@@ -112,7 +119,7 @@ async def list_conversations(
         List of conversations with pagination
     """
     conversations, total = await chat_service.list_conversations(
-        current_user.id, pagination.limit, pagination.offset
+        current_user.id, limit, offset
     )
 
     return ConversationSearchResponse(
@@ -121,8 +128,8 @@ async def list_conversations(
             for c in conversations
         ],
         total=total,
-        limit=pagination.limit,
-        offset=pagination.offset,
+        limit=limit,
+        offset=offset,
     )
 
 
@@ -244,7 +251,6 @@ async def delete_conversation(
 )
 async def get_conversation_messages(
     conversation_id: str,
-    request: ConversationMessagesRequest = Depends(),
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
@@ -252,7 +258,6 @@ async def get_conversation_messages(
 
     Args:
         conversation_id: Conversation ID
-        request: Messages request parameters
         current_user: Current authenticated user
         chat_service: Chat service
 
@@ -308,7 +313,12 @@ async def chat(
         raise BadRequestProblem(detail=str(e)) from None
 
 
-@router.post("/chat/stream")
+@router.post("/chat/stream", responses={
+    200: {
+        "content": {"text/event-stream": {"schema": {"type": "string"}}},
+        "description": "Streaming chat response in Server-Sent Events format"
+    }
+})
 async def chat_stream(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
@@ -459,13 +469,11 @@ async def create_tools_workflow(
 
 @router.get("/tools/available", response_model=AvailableToolsResponse)
 async def get_available_tools(
-    request: AvailableToolsRequest = Depends(),
     current_user: User = Depends(get_current_user),
 ) -> AvailableToolsResponse:
     """Get list of available MCP tools.
 
     Args:
-        request: Available tools request parameters
         current_user: Current authenticated user
 
     Returns:
@@ -513,13 +521,11 @@ async def get_available_tools(
 
 @router.get("/mcp/status", response_model=McpStatusResponse)
 async def get_mcp_status(
-    request: McpStatusRequest = Depends(),
     current_user: User = Depends(get_current_user),
 ) -> McpStatusResponse:
     """Get MCP service status.
 
     Args:
-        request: MCP status request parameters
         current_user: Current authenticated user
 
     Returns:

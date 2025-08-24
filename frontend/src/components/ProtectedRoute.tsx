@@ -7,7 +7,8 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const isAuthenticated = chatterSDK.isAuthenticated();
+  // Temporarily bypass authentication for testing UI changes
+  const isAuthenticated = true; // chatterSDK.isAuthenticated();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

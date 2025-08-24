@@ -633,3 +633,76 @@ async def get_ab_test_metrics(
     except Exception as e:
         logger.error("Failed to get A/B test metrics", test_id=test_id, error=str(e))
         raise InternalServerProblem(detail="Failed to get A/B test metrics") from e
+
+
+@router.post("/{test_id}/end", response_model=ABTestActionResponse)
+async def end_ab_test(
+    test_id: str,
+    winner_variant: str,
+    current_user: User = Depends(get_current_user),
+    ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
+) -> ABTestActionResponse:
+    """End A/B test and declare winner.
+
+    Args:
+        test_id: A/B test ID
+        winner_variant: Winning variant identifier
+        current_user: Current authenticated user
+        ab_test_manager: A/B test manager instance
+
+    Returns:
+        Action response
+    """
+    try:
+        success = await ab_test_manager.end_test(test_id, winner_variant)
+        
+        if not success:
+            raise NotFoundProblem(
+                detail="A/B test not found or could not be ended",
+                resource_type="ab_test",
+                resource_id=test_id,
+            ) from None
+            
+        return ABTestActionResponse(
+            test_id=test_id,
+            action="ended",
+            message=f"A/B test ended with winner: {winner_variant}",
+            timestamp=datetime.now(UTC),
+        )
+        
+    except Exception as e:
+        logger.error("Failed to end A/B test", test_id=test_id, error=str(e))
+        raise InternalServerProblem(detail="Failed to end A/B test") from e
+
+
+@router.get("/{test_id}/performance", response_model=dict)
+async def get_ab_test_performance(
+    test_id: str,
+    current_user: User = Depends(get_current_user),
+    ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
+) -> dict:
+    """Get A/B test performance results by variant.
+
+    Args:
+        test_id: A/B test ID
+        current_user: Current authenticated user
+        ab_test_manager: A/B test manager instance
+
+    Returns:
+        Performance results per variant
+    """
+    try:
+        performance = await ab_test_manager.get_test_performance(test_id)
+        
+        if not performance:
+            raise NotFoundProblem(
+                detail="A/B test not found or no performance data available",
+                resource_type="ab_test",
+                resource_id=test_id,
+            ) from None
+            
+        return performance
+        
+    except Exception as e:
+        logger.error("Failed to get A/B test performance", test_id=test_id, error=str(e))
+        raise InternalServerProblem(detail="Failed to get A/B test performance") from e

@@ -270,3 +270,108 @@ async def get_storage_stats(
     except Exception as e:
         logger.error("Failed to get storage stats", error=str(e))
         raise InternalServerProblem(detail="Failed to get storage stats") from e
+
+
+@router.post("/bulk/delete-documents", response_model=dict)
+async def bulk_delete_documents(
+    document_ids: list[str],
+    current_user: User = Depends(get_current_user),
+    data_manager: DataManager = Depends(get_data_manager),
+) -> dict:
+    """Bulk delete documents.
+
+    Args:
+        document_ids: List of document IDs to delete
+        current_user: Current authenticated user
+        data_manager: Data manager instance
+
+    Returns:
+        Bulk operation results
+    """
+    try:
+        results = await data_manager.bulk_delete_documents(
+            document_ids, current_user.id
+        )
+        
+        return {
+            "total_requested": len(document_ids),
+            "successful_deletions": results.get("success_count", 0),
+            "failed_deletions": results.get("error_count", 0),
+            "errors": results.get("errors", []),
+        }
+
+    except Exception as e:
+        logger.error("Failed to bulk delete documents", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to bulk delete documents"
+        ) from e
+
+
+@router.post("/bulk/delete-conversations", response_model=dict)
+async def bulk_delete_conversations(
+    conversation_ids: list[str],
+    current_user: User = Depends(get_current_user),
+    data_manager: DataManager = Depends(get_data_manager),
+) -> dict:
+    """Bulk delete conversations.
+
+    Args:
+        conversation_ids: List of conversation IDs to delete
+        current_user: Current authenticated user
+        data_manager: Data manager instance
+
+    Returns:
+        Bulk operation results
+    """
+    try:
+        results = await data_manager.bulk_delete_conversations(
+            conversation_ids, current_user.id
+        )
+        
+        return {
+            "total_requested": len(conversation_ids),
+            "successful_deletions": results.get("success_count", 0),
+            "failed_deletions": results.get("error_count", 0),
+            "errors": results.get("errors", []),
+        }
+
+    except Exception as e:
+        logger.error("Failed to bulk delete conversations", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to bulk delete conversations"
+        ) from e
+
+
+@router.post("/bulk/delete-prompts", response_model=dict)
+async def bulk_delete_prompts(
+    prompt_ids: list[str],
+    current_user: User = Depends(get_current_user),
+    data_manager: DataManager = Depends(get_data_manager),
+) -> dict:
+    """Bulk delete prompts.
+
+    Args:
+        prompt_ids: List of prompt IDs to delete
+        current_user: Current authenticated user
+        data_manager: Data manager instance
+
+    Returns:
+        Bulk operation results
+    """
+    try:
+        results = await data_manager.bulk_delete_prompts(
+            prompt_ids, current_user.id
+        )
+        
+        return {
+            "total_requested": len(prompt_ids),
+            "successful_deletions": results.get("success_count", 0),
+            "failed_deletions": results.get("error_count", 0),
+            "errors": results.get("errors", []),
+        }
+
+    except Exception as e:
+        logger.error("Failed to bulk delete prompts", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to bulk delete prompts"
+        ) from e

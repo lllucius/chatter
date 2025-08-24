@@ -1,11 +1,11 @@
 """Advanced job queue system for background processing."""
 
 import asyncio
-import json
 import uuid
-from datetime import UTC, datetime, timedelta
+from collections.abc import Callable
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -38,20 +38,20 @@ class Job(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     function_name: str
-    args: List[Any] = Field(default_factory=list)
-    kwargs: Dict[str, Any] = Field(default_factory=dict)
+    args: list[Any] = Field(default_factory=list)
+    kwargs: dict[str, Any] = Field(default_factory=dict)
     priority: JobPriority = JobPriority.NORMAL
     status: JobStatus = JobStatus.PENDING
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    error_message: Optional[str] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error_message: str | None = None
     retry_count: int = 0
     max_retries: int = 3
     retry_delay: int = 60  # seconds
     timeout: int = 3600  # seconds
-    tags: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class JobResult(BaseModel):
@@ -59,7 +59,7 @@ class JobResult(BaseModel):
     job_id: str
     status: JobStatus
     result: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     execution_time: float = 0.0
     completed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -69,23 +69,23 @@ class AdvancedJobQueue:
 
     def __init__(self, max_workers: int = 4):
         """Initialize the job queue.
-        
+
         Args:
             max_workers: Maximum number of concurrent workers
         """
         self.max_workers = max_workers
-        self.workers: List[asyncio.Task] = []
+        self.workers: list[asyncio.Task] = []
         self.job_queue: asyncio.Queue = asyncio.Queue()
         self.priority_queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
-        self.jobs: Dict[str, Job] = {}
-        self.results: Dict[str, JobResult] = {}
-        self.job_handlers: Dict[str, Callable] = {}
+        self.jobs: dict[str, Job] = {}
+        self.results: dict[str, JobResult] = {}
+        self.job_handlers: dict[str, Callable] = {}
         self.running = False
         self._job_counter = 0
 
     def register_handler(self, name: str, handler: Callable) -> None:
         """Register a job handler function.
-        
+
         Args:
             name: Name of the job handler
             handler: Async function to handle the job
@@ -97,16 +97,16 @@ class AdvancedJobQueue:
         self,
         name: str,
         function_name: str,
-        args: Optional[List[Any]] = None,
-        kwargs: Optional[Dict[str, Any]] = None,
+        args: list[Any] | None = None,
+        kwargs: dict[str, Any] | None = None,
         priority: JobPriority = JobPriority.NORMAL,
         max_retries: int = 3,
         timeout: int = 3600,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Add a job to the queue.
-        
+
         Args:
             name: Human-readable job name
             function_name: Name of the registered handler function
@@ -117,7 +117,7 @@ class AdvancedJobQueue:
             timeout: Job timeout in seconds
             tags: Job tags for filtering
             metadata: Additional job metadata
-            
+
         Returns:
             Job ID
         """
@@ -142,12 +142,12 @@ class AdvancedJobQueue:
             JobPriority.NORMAL: 2,
             JobPriority.LOW: 3,
         }
-        
+
         await self.priority_queue.put((priority_order[priority], self._job_counter, job))
         self._job_counter += 1
 
         logger.info(
-            f"Added job to queue",
+            "Added job to queue",
             job_id=job.id,
             name=job.name,
             priority=job.priority,
@@ -156,24 +156,24 @@ class AdvancedJobQueue:
 
         return job.id
 
-    async def get_job_status(self, job_id: str) -> Optional[JobStatus]:
+    async def get_job_status(self, job_id: str) -> JobStatus | None:
         """Get the status of a job.
-        
+
         Args:
             job_id: Job ID
-            
+
         Returns:
             Job status or None if not found
         """
         job = self.jobs.get(job_id)
         return job.status if job else None
 
-    async def get_job_result(self, job_id: str) -> Optional[JobResult]:
+    async def get_job_result(self, job_id: str) -> JobResult | None:
         """Get the result of a completed job.
-        
+
         Args:
             job_id: Job ID
-            
+
         Returns:
             Job result or None if not found
         """
@@ -181,10 +181,10 @@ class AdvancedJobQueue:
 
     async def cancel_job(self, job_id: str) -> bool:
         """Cancel a pending or running job.
-        
+
         Args:
             job_id: Job ID
-            
+
         Returns:
             True if cancelled, False if not found or already completed
         """
@@ -206,17 +206,17 @@ class AdvancedJobQueue:
 
     async def list_jobs(
         self,
-        status: Optional[JobStatus] = None,
-        tags: Optional[List[str]] = None,
+        status: JobStatus | None = None,
+        tags: list[str] | None = None,
         limit: int = 100,
-    ) -> List[Job]:
+    ) -> list[Job]:
         """List jobs with optional filtering.
-        
+
         Args:
             status: Filter by job status
             tags: Filter by job tags
             limit: Maximum number of jobs to return
-            
+
         Returns:
             List of jobs
         """
@@ -236,15 +236,15 @@ class AdvancedJobQueue:
 
         return jobs[:limit]
 
-    async def get_queue_stats(self) -> Dict[str, Any]:
+    async def get_queue_stats(self) -> dict[str, Any]:
         """Get queue statistics.
-        
+
         Returns:
             Dictionary with queue statistics
         """
         total_jobs = len(self.jobs)
         status_counts = {}
-        
+
         for status in JobStatus:
             status_counts[status.value] = sum(
                 1 for job in self.jobs.values() if job.status == status
@@ -294,7 +294,7 @@ class AdvancedJobQueue:
 
     async def _worker(self, worker_id: str) -> None:
         """Worker coroutine that processes jobs from the queue.
-        
+
         Args:
             worker_id: Unique worker identifier
         """
@@ -326,7 +326,7 @@ class AdvancedJobQueue:
 
     async def _execute_job(self, worker_id: str, job: Job) -> None:
         """Execute a single job.
-        
+
         Args:
             worker_id: Worker identifier
             job: Job to execute
@@ -372,7 +372,7 @@ class AdvancedJobQueue:
             self.results[job.id] = job_result
 
             logger.info(
-                f"Job completed successfully",
+                "Job completed successfully",
                 job_id=job.id,
                 execution_time=execution_time,
                 worker_id=worker_id,
@@ -388,7 +388,7 @@ class AdvancedJobQueue:
 
     async def _handle_job_error(self, job: Job, error_message: str, worker_id: str) -> None:
         """Handle job execution errors and retries.
-        
+
         Args:
             job: Failed job
             error_message: Error message
@@ -400,9 +400,9 @@ class AdvancedJobQueue:
         if job.retry_count <= job.max_retries:
             # Schedule retry
             job.status = JobStatus.RETRYING
-            
+
             logger.warning(
-                f"Job failed, scheduling retry",
+                "Job failed, scheduling retry",
                 job_id=job.id,
                 retry_count=job.retry_count,
                 max_retries=job.max_retries,
@@ -431,7 +431,7 @@ class AdvancedJobQueue:
             self.results[job.id] = job_result
 
             logger.error(
-                f"Job failed permanently",
+                "Job failed permanently",
                 job_id=job.id,
                 retry_count=job.retry_count,
                 error=error_message,
@@ -440,12 +440,12 @@ class AdvancedJobQueue:
 
     async def _schedule_retry(self, job: Job) -> None:
         """Schedule a job retry after delay.
-        
+
         Args:
             job: Job to retry
         """
         await asyncio.sleep(job.retry_delay)
-        
+
         if job.status == JobStatus.RETRYING and self.running:
             # Add back to queue with same priority
             priority_order = {
@@ -454,7 +454,7 @@ class AdvancedJobQueue:
                 JobPriority.NORMAL: 2,
                 JobPriority.LOW: 3,
             }
-            
+
             await self.priority_queue.put((priority_order[job.priority], self._job_counter, job))
             self._job_counter += 1
 
@@ -464,7 +464,7 @@ job_queue = AdvancedJobQueue(max_workers=settings.background_worker_concurrency)
 
 
 # Register some default job handlers
-async def document_processing_job(document_id: str, processing_type: str) -> Dict[str, Any]:
+async def document_processing_job(document_id: str, processing_type: str) -> dict[str, Any]:
     """Default document processing job handler."""
     logger.info(f"Processing document {document_id} with type {processing_type}")
     # Simulate processing time
@@ -477,7 +477,7 @@ async def document_processing_job(document_id: str, processing_type: str) -> Dic
     }
 
 
-async def conversation_summarization_job(conversation_id: str) -> Dict[str, Any]:
+async def conversation_summarization_job(conversation_id: str) -> dict[str, Any]:
     """Default conversation summarization job handler."""
     logger.info(f"Summarizing conversation {conversation_id}")
     # Simulate processing time
@@ -489,7 +489,7 @@ async def conversation_summarization_job(conversation_id: str) -> Dict[str, Any]
     }
 
 
-async def vector_store_maintenance_job() -> Dict[str, Any]:
+async def vector_store_maintenance_job() -> dict[str, Any]:
     """Default vector store maintenance job handler."""
     logger.info("Performing vector store maintenance")
     # Simulate maintenance work
@@ -501,7 +501,7 @@ async def vector_store_maintenance_job() -> Dict[str, Any]:
     }
 
 
-async def data_export_job(user_id: str, export_type: str) -> Dict[str, Any]:
+async def data_export_job(user_id: str, export_type: str) -> dict[str, Any]:
     """Default data export job handler."""
     logger.info(f"Exporting data for user {user_id}, type: {export_type}")
     # Simulate export work

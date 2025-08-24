@@ -80,7 +80,9 @@ class UserResponse(UserBase):
 class UserLogin(BaseModel):
     """Schema for user login."""
 
-    email: EmailStr = Field(..., description="User email address")
+    username: str = Field(
+        ..., min_length=3, max_length=50, description="Username"
+    )
     password: str = Field(..., description="Password")
 
 

@@ -1,22 +1,17 @@
 """AI Agent framework for creating and managing specialized AI agents."""
 
-import asyncio
-import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.tools import BaseTool
 from pydantic import BaseModel, Field
 
-from chatter.config import settings
-from chatter.core.langgraph import workflow_manager, ConversationState
-from chatter.core.vector_store import vector_store_manager
-from chatter.services.job_queue import job_queue
+from chatter.core.langgraph import ConversationState, workflow_manager
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -46,8 +41,8 @@ class AgentCapability(BaseModel):
     """Agent capability definition."""
     name: str
     description: str
-    required_tools: List[str] = Field(default_factory=list)
-    required_models: List[str] = Field(default_factory=list)
+    required_tools: list[str] = Field(default_factory=list)
+    required_models: list[str] = Field(default_factory=list)
     confidence_threshold: float = 0.7
     enabled: bool = True
 
@@ -59,39 +54,39 @@ class AgentProfile(BaseModel):
     description: str
     agent_type: AgentType
     status: AgentStatus = AgentStatus.INACTIVE
-    
+
     # Behavior configuration
     system_prompt: str
-    personality_traits: List[str] = Field(default_factory=list)
-    knowledge_domains: List[str] = Field(default_factory=list)
+    personality_traits: list[str] = Field(default_factory=list)
+    knowledge_domains: list[str] = Field(default_factory=list)
     response_style: str = "professional"
-    
+
     # Capabilities
-    capabilities: List[AgentCapability] = Field(default_factory=list)
-    available_tools: List[str] = Field(default_factory=list)
-    
+    capabilities: list[AgentCapability] = Field(default_factory=list)
+    available_tools: list[str] = Field(default_factory=list)
+
     # Model configuration
     primary_llm: str = "openai"
     fallback_llm: str = "anthropic"
     temperature: float = 0.7
     max_tokens: int = 4096
-    
+
     # Performance settings
     max_conversation_length: int = 50
     context_window_size: int = 4000
     response_timeout: int = 30
-    
+
     # Learning and adaptation
     learning_enabled: bool = True
     feedback_weight: float = 0.1
     adaptation_threshold: float = 0.8
-    
+
     # Metadata
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     created_by: str = "system"
-    tags: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class AgentInteraction(BaseModel):
@@ -101,12 +96,12 @@ class AgentInteraction(BaseModel):
     conversation_id: str
     user_message: str
     agent_response: str
-    tools_used: List[str] = Field(default_factory=list)
+    tools_used: list[str] = Field(default_factory=list)
     confidence_score: float
     response_time: float
-    feedback_score: Optional[float] = None
+    feedback_score: float | None = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class BaseAgent(ABC):
@@ -114,16 +109,16 @@ class BaseAgent(ABC):
 
     def __init__(self, profile: AgentProfile, llm: BaseChatModel):
         """Initialize the agent.
-        
+
         Args:
             profile: Agent profile and configuration
             llm: Language model instance
         """
         self.profile = profile
         self.llm = llm
-        self.tools: Dict[str, BaseTool] = {}
-        self.conversation_history: Dict[str, List[AgentInteraction]] = {}
-        self.performance_metrics: Dict[str, Any] = {
+        self.tools: dict[str, BaseTool] = {}
+        self.conversation_history: dict[str, list[AgentInteraction]] = {}
+        self.performance_metrics: dict[str, Any] = {
             "total_interactions": 0,
             "average_confidence": 0.0,
             "average_response_time": 0.0,
@@ -136,24 +131,24 @@ class BaseAgent(ABC):
         self,
         message: str,
         conversation_id: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> str:
         """Process a user message and generate a response.
-        
+
         Args:
             message: User message
             conversation_id: Conversation identifier
             context: Additional context for processing
-            
+
         Returns:
             Agent response
         """
         pass
 
     @abstractmethod
-    async def get_capabilities(self) -> List[AgentCapability]:
+    async def get_capabilities(self) -> list[AgentCapability]:
         """Get the agent's current capabilities.
-        
+
         Returns:
             List of agent capabilities
         """
@@ -161,7 +156,7 @@ class BaseAgent(ABC):
 
     async def add_tool(self, tool: BaseTool) -> None:
         """Add a tool to the agent's toolkit.
-        
+
         Args:
             tool: Tool to add
         """
@@ -172,10 +167,10 @@ class BaseAgent(ABC):
 
     async def remove_tool(self, tool_name: str) -> bool:
         """Remove a tool from the agent's toolkit.
-        
+
         Args:
             tool_name: Name of tool to remove
-            
+
         Returns:
             True if removed, False if not found
         """
@@ -187,16 +182,16 @@ class BaseAgent(ABC):
             return True
         return False
 
-    async def update_profile(self, updates: Dict[str, Any]) -> None:
+    async def update_profile(self, updates: dict[str, Any]) -> None:
         """Update the agent's profile.
-        
+
         Args:
             updates: Profile updates to apply
         """
         for key, value in updates.items():
             if hasattr(self.profile, key):
                 setattr(self.profile, key, value)
-        
+
         self.profile.updated_at = datetime.now(UTC)
         logger.info(f"Updated profile for agent {self.profile.name}")
 
@@ -205,12 +200,12 @@ class BaseAgent(ABC):
         conversation_id: str,
         user_message: str,
         agent_response: str,
-        tools_used: List[str],
+        tools_used: list[str],
         confidence_score: float,
         response_time: float,
     ) -> AgentInteraction:
         """Record an interaction for learning and metrics.
-        
+
         Args:
             conversation_id: Conversation identifier
             user_message: User's message
@@ -218,7 +213,7 @@ class BaseAgent(ABC):
             tools_used: List of tools used
             confidence_score: Confidence in the response
             response_time: Response generation time
-            
+
         Returns:
             Recorded interaction
         """
@@ -244,13 +239,13 @@ class BaseAgent(ABC):
 
     async def get_conversation_context(
         self, conversation_id: str, max_interactions: int = 10
-    ) -> List[AgentInteraction]:
+    ) -> list[AgentInteraction]:
         """Get recent conversation context.
-        
+
         Args:
             conversation_id: Conversation identifier
             max_interactions: Maximum number of interactions to return
-            
+
         Returns:
             List of recent interactions
         """
@@ -259,22 +254,22 @@ class BaseAgent(ABC):
 
     async def _update_metrics(self, interaction: AgentInteraction) -> None:
         """Update performance metrics based on interaction.
-        
+
         Args:
             interaction: Interaction to process
         """
         metrics = self.performance_metrics
-        
+
         # Update total interactions
         metrics["total_interactions"] += 1
-        
+
         # Update average confidence
         total_confidence = (
             metrics["average_confidence"] * (metrics["total_interactions"] - 1) +
             interaction.confidence_score
         )
         metrics["average_confidence"] = total_confidence / metrics["total_interactions"]
-        
+
         # Update average response time
         total_response_time = (
             metrics["average_response_time"] * (metrics["total_interactions"] - 1) +
@@ -286,7 +281,7 @@ class BaseAgent(ABC):
         self, interaction_id: str, feedback_score: float
     ) -> None:
         """Learn from user feedback.
-        
+
         Args:
             interaction_id: Interaction identifier
             feedback_score: Feedback score (0.0 to 1.0)
@@ -320,7 +315,7 @@ class BaseAgent(ABC):
             1 for conv_history in self.conversation_history.values()
             for inter in conv_history if inter.feedback_score is not None
         )
-        
+
         if feedback_count > 0:
             self.performance_metrics["feedback_score"] = total_feedback / feedback_count
 
@@ -338,7 +333,7 @@ class BaseAgent(ABC):
         self, interaction: AgentInteraction, feedback_score: float
     ) -> None:
         """Adapt agent behavior based on poor feedback.
-        
+
         Args:
             interaction: Interaction that received poor feedback
             feedback_score: The feedback score received
@@ -365,7 +360,7 @@ class ConversationalAgent(BaseAgent):
         self,
         message: str,
         conversation_id: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> str:
         """Process a conversational message."""
         start_time = datetime.now(UTC)
@@ -373,15 +368,15 @@ class ConversationalAgent(BaseAgent):
         try:
             # Get conversation context
             recent_interactions = await self.get_conversation_context(conversation_id)
-            
+
             # Build message history
             messages = [SystemMessage(content=self.profile.system_prompt)]
-            
+
             # Add recent conversation history
             for interaction in recent_interactions:
                 messages.append(HumanMessage(content=interaction.user_message))
                 messages.append(SystemMessage(content=interaction.agent_response))
-            
+
             # Add current message
             messages.append(HumanMessage(content=message))
 
@@ -409,7 +404,7 @@ class ConversationalAgent(BaseAgent):
             logger.error(f"Error processing message: {str(e)}")
             return "I apologize, but I encountered an error processing your request."
 
-    async def get_capabilities(self) -> List[AgentCapability]:
+    async def get_capabilities(self) -> list[AgentCapability]:
         """Get conversational agent capabilities."""
         return [
             AgentCapability(
@@ -432,7 +427,7 @@ class TaskOrientedAgent(BaseAgent):
         self,
         message: str,
         conversation_id: str,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> str:
         """Process a task-oriented message with potential tool usage."""
         start_time = datetime.now(UTC)
@@ -474,7 +469,7 @@ class TaskOrientedAgent(BaseAgent):
             if result and "messages" in result:
                 last_message = result["messages"][-1]
                 response_text = last_message.content if hasattr(last_message, 'content') else str(last_message)
-            
+
             if result and "tool_calls" in result:
                 tools_used = [call.get("name", "unknown") for call in result["tool_calls"]]
 
@@ -498,7 +493,7 @@ class TaskOrientedAgent(BaseAgent):
             logger.error(f"Error processing task: {str(e)}")
             return "I apologize, but I encountered an error while processing your task."
 
-    async def get_capabilities(self) -> List[AgentCapability]:
+    async def get_capabilities(self) -> list[AgentCapability]:
         """Get task-oriented agent capabilities."""
         capabilities = [
             AgentCapability(
@@ -513,7 +508,7 @@ class TaskOrientedAgent(BaseAgent):
                 confidence_threshold=0.7,
             ),
         ]
-        
+
         # Add tool-specific capabilities
         for tool_name in self.tools:
             capabilities.append(
@@ -524,7 +519,7 @@ class TaskOrientedAgent(BaseAgent):
                     confidence_threshold=0.9,
                 )
             )
-        
+
         return capabilities
 
 
@@ -533,8 +528,8 @@ class AgentManager:
 
     def __init__(self):
         """Initialize the agent manager."""
-        self.agents: Dict[str, BaseAgent] = {}
-        self.agent_classes: Dict[AgentType, Type[BaseAgent]] = {
+        self.agents: dict[str, BaseAgent] = {}
+        self.agent_classes: dict[AgentType, type[BaseAgent]] = {
             AgentType.CONVERSATIONAL: ConversationalAgent,
             AgentType.TASK_ORIENTED: TaskOrientedAgent,
             # Add more agent types as needed
@@ -550,7 +545,7 @@ class AgentManager:
         **kwargs,
     ) -> str:
         """Create a new AI agent.
-        
+
         Args:
             name: Agent name
             agent_type: Type of agent to create
@@ -558,7 +553,7 @@ class AgentManager:
             system_prompt: System prompt for the agent
             llm: Language model instance
             **kwargs: Additional profile configuration
-            
+
         Returns:
             Agent ID
         """
@@ -582,7 +577,7 @@ class AgentManager:
         self.agents[profile.id] = agent
 
         logger.info(
-            f"Created agent",
+            "Created agent",
             agent_id=profile.id,
             name=name,
             agent_type=agent_type,
@@ -590,12 +585,12 @@ class AgentManager:
 
         return profile.id
 
-    async def get_agent(self, agent_id: str) -> Optional[BaseAgent]:
+    async def get_agent(self, agent_id: str) -> BaseAgent | None:
         """Get an agent by ID.
-        
+
         Args:
             agent_id: Agent identifier
-            
+
         Returns:
             Agent instance or None if not found
         """
@@ -603,15 +598,15 @@ class AgentManager:
 
     async def list_agents(
         self,
-        agent_type: Optional[AgentType] = None,
-        status: Optional[AgentStatus] = None,
-    ) -> List[AgentProfile]:
+        agent_type: AgentType | None = None,
+        status: AgentStatus | None = None,
+    ) -> list[AgentProfile]:
         """List agents with optional filtering.
-        
+
         Args:
             agent_type: Filter by agent type
             status: Filter by agent status
-            
+
         Returns:
             List of agent profiles
         """
@@ -627,10 +622,10 @@ class AgentManager:
 
     async def delete_agent(self, agent_id: str) -> bool:
         """Delete an agent.
-        
+
         Args:
             agent_id: Agent identifier
-            
+
         Returns:
             True if deleted, False if not found
         """
@@ -647,16 +642,16 @@ class AgentManager:
         agent_id: str,
         message: str,
         conversation_id: str,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> Optional[str]:
+        context: dict[str, Any] | None = None,
+    ) -> str | None:
         """Send a message to a specific agent.
-        
+
         Args:
             agent_id: Agent identifier
             message: Message to send
             conversation_id: Conversation identifier
             context: Additional context
-            
+
         Returns:
             Agent response or None if agent not found
         """
@@ -673,17 +668,17 @@ class AgentManager:
         self,
         message: str,
         conversation_id: str,
-        context: Optional[Dict[str, Any]] = None,
-        preferred_agent_type: Optional[AgentType] = None,
+        context: dict[str, Any] | None = None,
+        preferred_agent_type: AgentType | None = None,
     ) -> str:
         """Route a message to the most appropriate agent.
-        
+
         Args:
             message: Message to route
             conversation_id: Conversation identifier
             context: Additional context
             preferred_agent_type: Preferred agent type
-            
+
         Returns:
             Agent response
         """
@@ -708,9 +703,9 @@ class AgentManager:
 
         return await agent.process_message(message, conversation_id, context)
 
-    async def get_agent_stats(self) -> Dict[str, Any]:
+    async def get_agent_stats(self) -> dict[str, Any]:
         """Get statistics about all agents.
-        
+
         Returns:
             Agent statistics
         """

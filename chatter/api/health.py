@@ -7,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from chatter.config import settings
 from chatter.schemas.health import (
     HealthCheckResponse,
-    LivenessCheckResponse,
     ReadinessCheckResponse,
 )
 from chatter.utils.database import get_session, health_check

@@ -117,18 +117,18 @@ class AuthService:
         return user
 
     async def authenticate_user(
-        self, email: str, password: str
+        self, username: str, password: str
     ) -> User | None:
-        """Authenticate user with email and password.
+        """Authenticate user with userid and password.
 
         Args:
-            email: User email
+            username: User username
             password: User password
 
         Returns:
             User if authentication successful, None otherwise
         """
-        user = await self.get_user_by_email(email)
+        user = await self.get_user_by_username(username)
         if not user:
             return None
 
@@ -144,7 +144,7 @@ class AuthService:
         await self.session.refresh(user)
 
         logger.info(
-            "User authenticated", user_id=user.id, email=user.email
+            "User authenticated", user_id=user.id, username=user.username
         )
         return user
 

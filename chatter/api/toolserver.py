@@ -750,7 +750,7 @@ async def test_server_connectivity(
     """
     try:
         result = await tool_server_service.test_connectivity(server_id)
-        
+
         if not result:
             raise NotFoundProblem(
                 detail="Tool server not found",
@@ -762,8 +762,8 @@ async def test_server_connectivity(
 
     except Exception as e:
         logger.error(
-            "Failed to test server connectivity", 
-            server_id=server_id, 
+            "Failed to test server connectivity",
+            server_id=server_id,
             error=str(e)
         )
         raise InternalServerProblem(

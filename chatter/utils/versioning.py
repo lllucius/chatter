@@ -2,7 +2,6 @@
 
 import re
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.routing import APIRoute
@@ -41,12 +40,12 @@ class VersionInfo(BaseModel):
     version: APIVersion
     status: VersionStatus
     release_date: str
-    sunset_date: Optional[str] = None
-    changelog_url: Optional[str] = None
-    documentation_url: Optional[str] = None
-    breaking_changes: List[str] = []
-    new_features: List[str] = []
-    deprecated_features: List[str] = []
+    sunset_date: str | None = None
+    changelog_url: str | None = None
+    documentation_url: str | None = None
+    breaking_changes: list[str] = []
+    new_features: list[str] = []
+    deprecated_features: list[str] = []
 
 
 class EndpointVersioning(BaseModel):
@@ -54,9 +53,9 @@ class EndpointVersioning(BaseModel):
     path: str
     method: str
     introduced_in: APIVersion
-    deprecated_in: Optional[APIVersion] = None
-    removed_in: Optional[APIVersion] = None
-    changes: Dict[APIVersion, List[str]] = {}
+    deprecated_in: APIVersion | None = None
+    removed_in: APIVersion | None = None
+    changes: dict[APIVersion, list[str]] = {}
 
 
 class APIVersionManager:
@@ -64,8 +63,8 @@ class APIVersionManager:
 
     def __init__(self):
         """Initialize the API version manager."""
-        self.versions: Dict[APIVersion, VersionInfo] = {}
-        self.endpoints: Dict[str, EndpointVersioning] = {}
+        self.versions: dict[APIVersion, VersionInfo] = {}
+        self.endpoints: dict[str, EndpointVersioning] = {}
         self.default_version = APIVersion.V1
         self._setup_versions()
 
@@ -112,35 +111,35 @@ class APIVersionManager:
 
     def add_version(self, version_info: VersionInfo) -> None:
         """Add a new API version.
-        
+
         Args:
             version_info: Version information
         """
         self.versions[version_info.version] = version_info
         logger.info(f"Added API version {version_info.version}")
 
-    def get_version_info(self, version: APIVersion) -> Optional[VersionInfo]:
+    def get_version_info(self, version: APIVersion) -> VersionInfo | None:
         """Get information about a specific version.
-        
+
         Args:
             version: API version
-            
+
         Returns:
             Version information or None if not found
         """
         return self.versions.get(version)
 
-    def get_all_versions(self) -> List[VersionInfo]:
+    def get_all_versions(self) -> list[VersionInfo]:
         """Get information about all versions.
-        
+
         Returns:
             List of version information
         """
         return list(self.versions.values())
 
-    def get_active_versions(self) -> List[VersionInfo]:
+    def get_active_versions(self) -> list[VersionInfo]:
         """Get all active API versions.
-        
+
         Returns:
             List of active versions
         """
@@ -151,10 +150,10 @@ class APIVersionManager:
 
     def is_version_supported(self, version: APIVersion) -> bool:
         """Check if a version is supported.
-        
+
         Args:
             version: API version to check
-            
+
         Returns:
             True if supported, False otherwise
         """
@@ -166,11 +165,11 @@ class APIVersionManager:
         path: str,
         method: str,
         introduced_in: APIVersion,
-        deprecated_in: Optional[APIVersion] = None,
-        removed_in: Optional[APIVersion] = None,
+        deprecated_in: APIVersion | None = None,
+        removed_in: APIVersion | None = None,
     ) -> None:
         """Register an endpoint with versioning information.
-        
+
         Args:
             path: Endpoint path
             method: HTTP method
@@ -191,18 +190,18 @@ class APIVersionManager:
         self, path: str, method: str, version: APIVersion
     ) -> bool:
         """Check if an endpoint is available in a specific version.
-        
+
         Args:
             path: Endpoint path
             method: HTTP method
             version: API version
-            
+
         Returns:
             True if available, False otherwise
         """
         endpoint_key = f"{method.upper()}:{path}"
         endpoint = self.endpoints.get(endpoint_key)
-        
+
         if not endpoint:
             return False
 
@@ -218,20 +217,20 @@ class APIVersionManager:
 
     def get_endpoint_status(
         self, path: str, method: str, version: APIVersion
-    ) -> Optional[str]:
+    ) -> str | None:
         """Get the status of an endpoint in a specific version.
-        
+
         Args:
             path: Endpoint path
             method: HTTP method
             version: API version
-            
+
         Returns:
             Endpoint status or None if not found
         """
         endpoint_key = f"{method.upper()}:{path}"
         endpoint = self.endpoints.get(endpoint_key)
-        
+
         if not endpoint:
             return None
 
@@ -246,10 +245,10 @@ class APIVersionManager:
 
 def extract_version_from_request(request: Request) -> APIVersion:
     """Extract API version from request.
-    
+
     Args:
         request: FastAPI request object
-        
+
     Returns:
         Extracted API version
     """
@@ -286,17 +285,17 @@ def extract_version_from_request(request: Request) -> APIVersion:
 
 async def version_middleware(request: Request, call_next):
     """Middleware to handle API versioning.
-    
+
     Args:
         request: FastAPI request object
         call_next: Next middleware in chain
-        
+
     Returns:
         Response with version headers
     """
     # Extract version from request
     version = extract_version_from_request(request)
-    
+
     # Check if version is supported
     if not version_manager.is_version_supported(version):
         raise HTTPException(
@@ -310,10 +309,10 @@ async def version_middleware(request: Request, call_next):
     # Check endpoint availability
     path = request.url.path
     method = request.method
-    
+
     # Remove version prefix from path for endpoint checking
     clean_path = re.sub(r"/api/v\d+", "", path)
-    
+
     if not version_manager.is_endpoint_available(clean_path, method, version):
         raise HTTPException(
             status_code=404,
@@ -322,14 +321,14 @@ async def version_middleware(request: Request, call_next):
 
     # Check if endpoint is deprecated
     endpoint_status = version_manager.get_endpoint_status(clean_path, method, version)
-    
+
     # Process request
     response = await call_next(request)
-    
+
     # Add version headers to response
     response.headers["API-Version"] = version.value
     response.headers["API-Supported-Versions"] = ",".join([v.value for v in APIVersion])
-    
+
     # Add deprecation warning if needed
     if endpoint_status == "deprecated":
         response.headers["Deprecation"] = "true"
@@ -341,7 +340,7 @@ async def version_middleware(request: Request, call_next):
 
 def create_versioned_app() -> FastAPI:
     """Create FastAPI app with versioning support.
-    
+
     Returns:
         Configured FastAPI app
     """
@@ -358,15 +357,15 @@ def create_versioned_app() -> FastAPI:
 
 
 def version_route(
-    versions: List[APIVersion],
-    deprecated_in: Optional[APIVersion] = None,
+    versions: list[APIVersion],
+    deprecated_in: APIVersion | None = None,
 ):
     """Decorator to mark routes with version information.
-    
+
     Args:
         versions: List of supported versions
         deprecated_in: Version where route was deprecated
-        
+
     Returns:
         Route decorator
     """
@@ -374,13 +373,13 @@ def version_route(
         # Add version metadata to function
         func._api_versions = versions
         func._deprecated_in = deprecated_in
-        
+
         # Register endpoint with version manager
         # This would be called during route registration
         # For now, just mark the function
-        
+
         return func
-    
+
     return decorator
 
 
@@ -389,23 +388,23 @@ class VersionedRouter:
 
     def __init__(self, prefix: str = ""):
         """Initialize versioned router.
-        
+
         Args:
             prefix: Route prefix
         """
         self.prefix = prefix
-        self.routes: Dict[APIVersion, List[APIRoute]] = {}
+        self.routes: dict[APIVersion, list[APIRoute]] = {}
 
     def add_route(
         self,
         path: str,
         endpoint,
-        methods: List[str],
-        versions: List[APIVersion],
+        methods: list[str],
+        versions: list[APIVersion],
         **kwargs
     ) -> None:
         """Add a versioned route.
-        
+
         Args:
             path: Route path
             endpoint: Route endpoint function
@@ -416,7 +415,7 @@ class VersionedRouter:
         for version in versions:
             if version not in self.routes:
                 self.routes[version] = []
-            
+
             versioned_path = f"/api/{version.value}{self.prefix}{path}"
             route = APIRoute(
                 path=versioned_path,
@@ -426,12 +425,12 @@ class VersionedRouter:
             )
             self.routes[version].append(route)
 
-    def get_routes_for_version(self, version: APIVersion) -> List[APIRoute]:
+    def get_routes_for_version(self, version: APIVersion) -> list[APIRoute]:
         """Get routes for a specific version.
-        
+
         Args:
             version: API version
-            
+
         Returns:
             List of routes for the version
         """

@@ -1,22 +1,17 @@
 """Data management system for backup, recovery, and export operations."""
 
-import asyncio
 import json
-import os
-import shutil
 import tarfile
-import tempfile
-import zipfile
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import aiofiles
 from pydantic import BaseModel, Field
 
 from chatter.config import settings
-from chatter.services.job_queue import job_queue, JobPriority
+from chatter.services.job_queue import JobPriority, job_queue
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -72,12 +67,12 @@ class DataExportRequest(BaseModel):
     user_id: str
     scope: ExportScope
     format: DataFormat = DataFormat.JSON
-    filters: Dict[str, Any] = Field(default_factory=dict)
+    filters: dict[str, Any] = Field(default_factory=dict)
     include_metadata: bool = True
     compress: bool = True
-    encryption_key: Optional[str] = None
+    encryption_key: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
 
 
 class BackupRequest(BaseModel):
@@ -88,7 +83,7 @@ class BackupRequest(BaseModel):
     include_vectors: bool = True
     include_analytics: bool = True
     compress: bool = True
-    encryption_key: Optional[str] = None
+    encryption_key: str | None = None
     retention_days: int = 30
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -99,11 +94,11 @@ class DataOperationModel(BaseModel):
     operation_type: str  # Changed from DataOperation to str to avoid circular reference
     status: OperationStatus = OperationStatus.PENDING
     progress: float = 0.0
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    error_message: Optional[str] = None
-    result_path: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error_message: str | None = None
+    result_path: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
     created_by: str = "system"
 
 
@@ -115,7 +110,7 @@ class RetentionPolicy(BaseModel):
     scope: ExportScope
     retention_days: int
     auto_purge: bool = False
-    filters: Dict[str, Any] = Field(default_factory=dict)
+    filters: dict[str, Any] = Field(default_factory=dict)
     active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -125,8 +120,8 @@ class DataManager:
 
     def __init__(self):
         """Initialize the data manager."""
-        self.operations: Dict[str, DataOperationModel] = {}
-        self.retention_policies: Dict[str, RetentionPolicy] = {}
+        self.operations: dict[str, DataOperationModel] = {}
+        self.retention_policies: dict[str, RetentionPolicy] = {}
         self.backup_directory = Path(settings.document_storage_path) / "backups"
         self.export_directory = Path(settings.document_storage_path) / "exports"
         self._ensure_directories()
@@ -141,13 +136,13 @@ class DataManager:
         user_id: str,
         scope: ExportScope,
         format: DataFormat = DataFormat.JSON,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: dict[str, Any] | None = None,
         include_metadata: bool = True,
         compress: bool = True,
-        encryption_key: Optional[str] = None,
+        encryption_key: str | None = None,
     ) -> str:
         """Create a data export request.
-        
+
         Args:
             user_id: User requesting the export
             scope: Scope of data to export
@@ -156,7 +151,7 @@ class DataManager:
             include_metadata: Include metadata in export
             compress: Compress the export
             encryption_key: Optional encryption key
-            
+
         Returns:
             Export operation ID
         """
@@ -194,7 +189,7 @@ class DataManager:
         )
 
         logger.info(
-            f"Created data export request",
+            "Created data export request",
             operation_id=operation.id,
             user_id=user_id,
             scope=scope.value,
@@ -210,11 +205,11 @@ class DataManager:
         include_vectors: bool = True,
         include_analytics: bool = True,
         compress: bool = True,
-        encryption_key: Optional[str] = None,
+        encryption_key: str | None = None,
         retention_days: int = 30,
     ) -> str:
         """Create a backup request.
-        
+
         Args:
             backup_type: Type of backup
             include_documents: Include document data
@@ -223,7 +218,7 @@ class DataManager:
             compress: Compress the backup
             encryption_key: Optional encryption key
             retention_days: Backup retention period
-            
+
         Returns:
             Backup operation ID
         """
@@ -259,7 +254,7 @@ class DataManager:
         )
 
         logger.info(
-            f"Created backup request",
+            "Created backup request",
             operation_id=operation.id,
             backup_type=backup_type.value,
             retention_days=retention_days,
@@ -270,16 +265,16 @@ class DataManager:
     async def restore_backup(
         self,
         backup_path: str,
-        target_scope: Optional[ExportScope] = None,
+        target_scope: ExportScope | None = None,
         overwrite_existing: bool = False,
     ) -> str:
         """Restore from a backup.
-        
+
         Args:
             backup_path: Path to backup file
             target_scope: Scope to restore (None for full restore)
             overwrite_existing: Whether to overwrite existing data
-            
+
         Returns:
             Restore operation ID
         """
@@ -306,7 +301,7 @@ class DataManager:
         )
 
         logger.info(
-            f"Created restore request",
+            "Created restore request",
             operation_id=operation.id,
             backup_path=backup_path,
         )
@@ -320,10 +315,10 @@ class DataManager:
         scope: ExportScope,
         retention_days: int,
         auto_purge: bool = False,
-        filters: Optional[Dict[str, Any]] = None,
+        filters: dict[str, Any] | None = None,
     ) -> str:
         """Create a data retention policy.
-        
+
         Args:
             name: Policy name
             description: Policy description
@@ -331,7 +326,7 @@ class DataManager:
             retention_days: Retention period in days
             auto_purge: Whether to automatically purge expired data
             filters: Optional filters for the policy
-            
+
         Returns:
             Policy ID
         """
@@ -347,7 +342,7 @@ class DataManager:
         self.retention_policies[policy.id] = policy
 
         logger.info(
-            f"Created retention policy",
+            "Created retention policy",
             policy_id=policy.id,
             name=name,
             scope=scope.value,
@@ -356,9 +351,9 @@ class DataManager:
 
         return policy.id
 
-    async def apply_retention_policies(self) -> Dict[str, Any]:
+    async def apply_retention_policies(self) -> dict[str, Any]:
         """Apply all active retention policies.
-        
+
         Returns:
             Summary of applied policies
         """
@@ -391,13 +386,13 @@ class DataManager:
                     "error": str(e),
                 })
                 logger.error(
-                    f"Failed to apply retention policy",
+                    "Failed to apply retention policy",
                     policy_id=policy.id,
                     error=str(e),
                 )
 
         logger.info(
-            f"Applied retention policies",
+            "Applied retention policies",
             policies_applied=results["policies_applied"],
             records_purged=results["records_purged"],
             policies_failed=results["policies_failed"],
@@ -405,21 +400,21 @@ class DataManager:
 
         return results
 
-    async def _apply_retention_policy(self, policy: RetentionPolicy) -> Dict[str, Any]:
+    async def _apply_retention_policy(self, policy: RetentionPolicy) -> dict[str, Any]:
         """Apply a single retention policy.
-        
+
         Args:
             policy: Retention policy to apply
-            
+
         Returns:
             Policy application result
         """
         cutoff_date = datetime.now(UTC) - timedelta(days=policy.retention_days)
-        
+
         # This is a simplified implementation
         # In a real system, you would query the actual database tables
         # based on the scope and filters
-        
+
         result = {
             "records_identified": 0,
             "records_purged": 0,
@@ -436,16 +431,16 @@ class DataManager:
     async def bulk_delete(
         self,
         scope: ExportScope,
-        filters: Dict[str, Any],
+        filters: dict[str, Any],
         dry_run: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Perform bulk delete operation.
-        
+
         Args:
             scope: Scope of data to delete
             filters: Filters to apply
             dry_run: Whether to perform a dry run
-            
+
         Returns:
             Delete operation result
         """
@@ -472,7 +467,7 @@ class DataManager:
         )
 
         logger.info(
-            f"Created bulk delete operation",
+            "Created bulk delete operation",
             operation_id=operation.id,
             scope=scope.value,
             dry_run=dry_run,
@@ -480,12 +475,12 @@ class DataManager:
 
         return {"operation_id": operation.id}
 
-    async def get_operation_status(self, operation_id: str) -> Optional[DataOperationModel]:
+    async def get_operation_status(self, operation_id: str) -> DataOperationModel | None:
         """Get the status of a data operation.
-        
+
         Args:
             operation_id: Operation ID
-            
+
         Returns:
             Operation status or None if not found
         """
@@ -493,19 +488,19 @@ class DataManager:
 
     async def list_operations(
         self,
-        operation_type: Optional[str] = None,
-        status: Optional[OperationStatus] = None,
-        user_id: Optional[str] = None,
+        operation_type: str | None = None,
+        status: OperationStatus | None = None,
+        user_id: str | None = None,
         limit: int = 100,
-    ) -> List[DataOperationModel]:
+    ) -> list[DataOperationModel]:
         """List data operations with optional filtering.
-        
+
         Args:
             operation_type: Filter by operation type
             status: Filter by status
             user_id: Filter by user
             limit: Maximum number of operations to return
-            
+
         Returns:
             List of operations
         """
@@ -525,9 +520,9 @@ class DataManager:
 
         return operations[:limit]
 
-    async def get_storage_stats(self) -> Dict[str, Any]:
+    async def get_storage_stats(self) -> dict[str, Any]:
         """Get storage statistics.
-        
+
         Returns:
             Storage statistics
         """
@@ -572,12 +567,12 @@ data_manager = DataManager()
 
 
 # Job handlers for data operations
-async def data_export_job(operation_id: str) -> Dict[str, Any]:
+async def data_export_job(operation_id: str) -> dict[str, Any]:
     """Job handler for data export.
-    
+
     Args:
         operation_id: Operation ID
-        
+
     Returns:
         Export result
     """
@@ -590,7 +585,7 @@ async def data_export_job(operation_id: str) -> Dict[str, Any]:
 
     try:
         export_request = DataExportRequest(**operation.metadata["export_request"])
-        
+
         # Simulate export process
         # In a real implementation, you would query the database and export data
         export_data = {
@@ -622,7 +617,7 @@ async def data_export_job(operation_id: str) -> Dict[str, Any]:
         operation.result_path = str(export_path)
         operation.progress = 100.0
 
-        logger.info(f"Data export completed", operation_id=operation_id)
+        logger.info("Data export completed", operation_id=operation_id)
 
         return {
             "operation_id": operation_id,
@@ -633,16 +628,16 @@ async def data_export_job(operation_id: str) -> Dict[str, Any]:
     except Exception as e:
         operation.status = OperationStatus.FAILED
         operation.error_message = str(e)
-        logger.error(f"Data export failed", operation_id=operation_id, error=str(e))
+        logger.error("Data export failed", operation_id=operation_id, error=str(e))
         raise
 
 
-async def data_backup_job(operation_id: str) -> Dict[str, Any]:
+async def data_backup_job(operation_id: str) -> dict[str, Any]:
     """Job handler for data backup.
-    
+
     Args:
         operation_id: Operation ID
-        
+
     Returns:
         Backup result
     """
@@ -655,7 +650,7 @@ async def data_backup_job(operation_id: str) -> Dict[str, Any]:
 
     try:
         backup_request = BackupRequest(**operation.metadata["backup_request"])
-        
+
         # Create backup
         backup_filename = f"{backup_request.id}.tar"
         if backup_request.compress:
@@ -664,7 +659,7 @@ async def data_backup_job(operation_id: str) -> Dict[str, Any]:
         backup_path = data_manager.backup_directory / backup_filename
 
         # Simulate backup creation
-        with tarfile.open(backup_path, 'w:gz' if backup_request.compress else 'w') as tar:
+        with tarfile.open(backup_path, 'w:gz' if backup_request.compress else 'w'):
             # In a real implementation, you would backup actual data files
             pass
 
@@ -674,7 +669,7 @@ async def data_backup_job(operation_id: str) -> Dict[str, Any]:
         operation.result_path = str(backup_path)
         operation.progress = 100.0
 
-        logger.info(f"Data backup completed", operation_id=operation_id)
+        logger.info("Data backup completed", operation_id=operation_id)
 
         return {
             "operation_id": operation_id,
@@ -685,16 +680,16 @@ async def data_backup_job(operation_id: str) -> Dict[str, Any]:
     except Exception as e:
         operation.status = OperationStatus.FAILED
         operation.error_message = str(e)
-        logger.error(f"Data backup failed", operation_id=operation_id, error=str(e))
+        logger.error("Data backup failed", operation_id=operation_id, error=str(e))
         raise
 
 
-async def data_restore_job(operation_id: str) -> Dict[str, Any]:
+async def data_restore_job(operation_id: str) -> dict[str, Any]:
     """Job handler for data restore.
-    
+
     Args:
         operation_id: Operation ID
-        
+
     Returns:
         Restore result
     """
@@ -708,12 +703,12 @@ async def data_restore_job(operation_id: str) -> Dict[str, Any]:
     try:
         # Simulate restore process
         # In a real implementation, you would extract and restore data from backup
-        
+
         operation.status = OperationStatus.COMPLETED
         operation.completed_at = datetime.now(UTC)
         operation.progress = 100.0
 
-        logger.info(f"Data restore completed", operation_id=operation_id)
+        logger.info("Data restore completed", operation_id=operation_id)
 
         return {
             "operation_id": operation_id,
@@ -723,16 +718,16 @@ async def data_restore_job(operation_id: str) -> Dict[str, Any]:
     except Exception as e:
         operation.status = OperationStatus.FAILED
         operation.error_message = str(e)
-        logger.error(f"Data restore failed", operation_id=operation_id, error=str(e))
+        logger.error("Data restore failed", operation_id=operation_id, error=str(e))
         raise
 
 
-async def bulk_delete_job(operation_id: str) -> Dict[str, Any]:
+async def bulk_delete_job(operation_id: str) -> dict[str, Any]:
     """Job handler for bulk delete.
-    
+
     Args:
         operation_id: Operation ID
-        
+
     Returns:
         Delete result
     """
@@ -746,12 +741,12 @@ async def bulk_delete_job(operation_id: str) -> Dict[str, Any]:
     try:
         # Simulate bulk delete
         # In a real implementation, you would execute DELETE queries
-        
+
         operation.status = OperationStatus.COMPLETED
         operation.completed_at = datetime.now(UTC)
         operation.progress = 100.0
 
-        logger.info(f"Bulk delete completed", operation_id=operation_id)
+        logger.info("Bulk delete completed", operation_id=operation_id)
 
         return {
             "operation_id": operation_id,
@@ -762,7 +757,7 @@ async def bulk_delete_job(operation_id: str) -> Dict[str, Any]:
     except Exception as e:
         operation.status = OperationStatus.FAILED
         operation.error_message = str(e)
-        logger.error(f"Bulk delete failed", operation_id=operation_id, error=str(e))
+        logger.error("Bulk delete failed", operation_id=operation_id, error=str(e))
         raise
 
 

@@ -5,14 +5,13 @@ import hashlib
 import hmac
 import json
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import httpx
 from pydantic import BaseModel, Field
 
-from chatter.config import settings
 from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger
 
@@ -50,27 +49,27 @@ class WebhookEndpoint(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     url: str
-    secret: Optional[str] = None
+    secret: str | None = None
     active: bool = True
-    events: List[WebhookEventType] = Field(default_factory=list)
-    headers: Dict[str, str] = Field(default_factory=dict)
+    events: list[WebhookEventType] = Field(default_factory=list)
+    headers: dict[str, str] = Field(default_factory=dict)
     timeout: int = 30
     max_retries: int = 3
     retry_delay: int = 60
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class WebhookEvent(BaseModel):
     """Webhook event data."""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     event_type: WebhookEventType
-    data: Dict[str, Any]
+    data: dict[str, Any]
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     source: str = "chatter"
     version: str = "1.0"
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class WebhookDelivery(BaseModel):
@@ -80,11 +79,11 @@ class WebhookDelivery(BaseModel):
     event_id: str
     status: WebhookStatus = WebhookStatus.PENDING
     attempts: int = 0
-    last_attempt_at: Optional[datetime] = None
-    delivered_at: Optional[datetime] = None
-    response_status: Optional[int] = None
-    response_body: Optional[str] = None
-    error_message: Optional[str] = None
+    last_attempt_at: datetime | None = None
+    delivered_at: datetime | None = None
+    response_status: int | None = None
+    response_body: str | None = None
+    error_message: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -93,24 +92,24 @@ class WebhookManager:
 
     def __init__(self):
         """Initialize the webhook manager."""
-        self.endpoints: Dict[str, WebhookEndpoint] = {}
-        self.deliveries: Dict[str, WebhookDelivery] = {}
-        self.event_history: List[WebhookEvent] = []
+        self.endpoints: dict[str, WebhookEndpoint] = {}
+        self.deliveries: dict[str, WebhookDelivery] = {}
+        self.event_history: list[WebhookEvent] = []
         self.max_history_size = 10000
 
     async def register_endpoint(
         self,
         name: str,
         url: str,
-        events: List[WebhookEventType],
-        secret: Optional[str] = None,
-        headers: Optional[Dict[str, str]] = None,
+        events: list[WebhookEventType],
+        secret: str | None = None,
+        headers: dict[str, str] | None = None,
         timeout: int = 30,
         max_retries: int = 3,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Register a new webhook endpoint.
-        
+
         Args:
             name: Endpoint name
             url: Webhook URL
@@ -120,7 +119,7 @@ class WebhookManager:
             timeout: Request timeout in seconds
             max_retries: Maximum retry attempts
             metadata: Additional metadata
-            
+
         Returns:
             Endpoint ID
         """
@@ -138,7 +137,7 @@ class WebhookManager:
         self.endpoints[endpoint.id] = endpoint
 
         logger.info(
-            f"Registered webhook endpoint",
+            "Registered webhook endpoint",
             endpoint_id=endpoint.id,
             name=name,
             url=url,
@@ -148,14 +147,14 @@ class WebhookManager:
         return endpoint.id
 
     async def update_endpoint(
-        self, endpoint_id: str, updates: Dict[str, Any]
+        self, endpoint_id: str, updates: dict[str, Any]
     ) -> bool:
         """Update a webhook endpoint.
-        
+
         Args:
             endpoint_id: Endpoint ID
             updates: Updates to apply
-            
+
         Returns:
             True if updated, False if not found
         """
@@ -174,10 +173,10 @@ class WebhookManager:
 
     async def delete_endpoint(self, endpoint_id: str) -> bool:
         """Delete a webhook endpoint.
-        
+
         Args:
             endpoint_id: Endpoint ID
-            
+
         Returns:
             True if deleted, False if not found
         """
@@ -189,12 +188,12 @@ class WebhookManager:
 
     async def list_endpoints(
         self, active_only: bool = True
-    ) -> List[WebhookEndpoint]:
+    ) -> list[WebhookEndpoint]:
         """List webhook endpoints.
-        
+
         Args:
             active_only: Only return active endpoints
-            
+
         Returns:
             List of webhook endpoints
         """
@@ -206,16 +205,16 @@ class WebhookManager:
     async def trigger_event(
         self,
         event_type: WebhookEventType,
-        data: Dict[str, Any],
-        metadata: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any],
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Trigger a webhook event.
-        
+
         Args:
             event_type: Type of event
             data: Event data
             metadata: Additional metadata
-            
+
         Returns:
             Event ID
         """
@@ -237,7 +236,7 @@ class WebhookManager:
         ]
 
         logger.info(
-            f"Triggered webhook event",
+            "Triggered webhook event",
             event_id=event.id,
             event_type=event_type.value,
             matching_endpoints=len(matching_endpoints),
@@ -253,7 +252,7 @@ class WebhookManager:
         self, endpoint: WebhookEndpoint, event: WebhookEvent
     ) -> None:
         """Schedule webhook delivery.
-        
+
         Args:
             endpoint: Webhook endpoint
             event: Event to deliver
@@ -283,10 +282,10 @@ class WebhookManager:
 
     async def deliver_webhook(self, delivery_id: str) -> bool:
         """Deliver a webhook.
-        
+
         Args:
             delivery_id: Delivery ID
-            
+
         Returns:
             True if delivered successfully, False otherwise
         """
@@ -338,7 +337,7 @@ class WebhookManager:
             # Prepare headers
             headers = {
                 "Content-Type": "application/json",
-                "User-Agent": f"Chatter-Webhook/1.0",
+                "User-Agent": "Chatter-Webhook/1.0",
                 "X-Webhook-Event": event.event_type.value,
                 "X-Webhook-Delivery": delivery.id,
                 **endpoint.headers,
@@ -368,9 +367,9 @@ class WebhookManager:
                 if response.status_code >= 200 and response.status_code < 300:
                     delivery.status = WebhookStatus.DELIVERED
                     delivery.delivered_at = datetime.now(UTC)
-                    
+
                     logger.info(
-                        f"Webhook delivered successfully",
+                        "Webhook delivered successfully",
                         delivery_id=delivery_id,
                         endpoint_id=endpoint.id,
                         status_code=response.status_code,
@@ -389,7 +388,7 @@ class WebhookManager:
             delivery.status = WebhookStatus.FAILED
 
             logger.error(
-                f"Webhook delivery failed",
+                "Webhook delivery failed",
                 delivery_id=delivery_id,
                 endpoint_id=endpoint.id,
                 attempt=delivery.attempts,
@@ -403,12 +402,12 @@ class WebhookManager:
 
             return False
 
-    async def get_delivery_status(self, delivery_id: str) -> Optional[WebhookDelivery]:
+    async def get_delivery_status(self, delivery_id: str) -> WebhookDelivery | None:
         """Get delivery status.
-        
+
         Args:
             delivery_id: Delivery ID
-            
+
         Returns:
             Delivery record or None if not found
         """
@@ -416,19 +415,19 @@ class WebhookManager:
 
     async def get_delivery_history(
         self,
-        endpoint_id: Optional[str] = None,
-        event_type: Optional[WebhookEventType] = None,
-        status: Optional[WebhookStatus] = None,
+        endpoint_id: str | None = None,
+        event_type: WebhookEventType | None = None,
+        status: WebhookStatus | None = None,
         limit: int = 100,
-    ) -> List[WebhookDelivery]:
+    ) -> list[WebhookDelivery]:
         """Get delivery history with optional filtering.
-        
+
         Args:
             endpoint_id: Filter by endpoint ID
             event_type: Filter by event type
             status: Filter by delivery status
             limit: Maximum number of records to return
-            
+
         Returns:
             List of delivery records
         """
@@ -447,15 +446,15 @@ class WebhookManager:
 
     async def get_event_history(
         self,
-        event_type: Optional[WebhookEventType] = None,
+        event_type: WebhookEventType | None = None,
         limit: int = 100,
-    ) -> List[WebhookEvent]:
+    ) -> list[WebhookEvent]:
         """Get event history with optional filtering.
-        
+
         Args:
             event_type: Filter by event type
             limit: Maximum number of events to return
-            
+
         Returns:
             List of events
         """
@@ -469,12 +468,12 @@ class WebhookManager:
 
         return events[:limit]
 
-    async def test_endpoint(self, endpoint_id: str) -> Dict[str, Any]:
+    async def test_endpoint(self, endpoint_id: str) -> dict[str, Any]:
         """Test a webhook endpoint.
-        
+
         Args:
             endpoint_id: Endpoint ID
-            
+
         Returns:
             Test result
         """
@@ -514,18 +513,18 @@ webhook_manager = WebhookManager()
 
 
 # Register webhook delivery job handler
-async def webhook_delivery_job(delivery_id: str) -> Dict[str, Any]:
+async def webhook_delivery_job(delivery_id: str) -> dict[str, Any]:
     """Job handler for webhook delivery.
-    
+
     Args:
         delivery_id: Delivery ID
-        
+
     Returns:
         Delivery result
     """
     success = await webhook_manager.deliver_webhook(delivery_id)
     delivery = await webhook_manager.get_delivery_status(delivery_id)
-    
+
     return {
         "delivery_id": delivery_id,
         "success": success,
@@ -567,7 +566,7 @@ async def trigger_message_received(
 
 
 async def trigger_document_processed(
-    document_id: str, user_id: str, processing_result: Dict[str, Any]
+    document_id: str, user_id: str, processing_result: dict[str, Any]
 ) -> str:
     """Trigger document processed event."""
     return await webhook_manager.trigger_event(
@@ -581,7 +580,7 @@ async def trigger_document_processed(
     )
 
 
-async def trigger_job_completed(job_id: str, result: Dict[str, Any]) -> str:
+async def trigger_job_completed(job_id: str, result: dict[str, Any]) -> str:
     """Trigger job completed event."""
     return await webhook_manager.trigger_event(
         WebhookEventType.JOB_COMPLETED,

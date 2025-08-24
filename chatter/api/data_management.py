@@ -1,28 +1,24 @@
 """Data management endpoints."""
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
 from chatter.schemas.data_management import (
-    ExportDataRequest,
-    ExportDataResponse,
-    BackupRequest,
-    BackupResponse,
     BackupListRequest,
     BackupListResponse,
+    BackupRequest,
+    BackupResponse,
+    ExportDataRequest,
+    ExportDataResponse,
     RestoreRequest,
     RestoreResponse,
     StorageStatsResponse,
 )
 from chatter.services.data_management import DataManager
-from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
-    BadRequestProblem,
     InternalServerProblem,
-    NotFoundProblem,
 )
 
 logger = get_logger(__name__)
@@ -31,7 +27,7 @@ router = APIRouter()
 
 async def get_data_manager() -> DataManager:
     """Get data manager instance.
-    
+
     Returns:
         DataManager instance
     """
@@ -45,12 +41,12 @@ async def export_data(
     data_manager: DataManager = Depends(get_data_manager),
 ) -> ExportDataResponse:
     """Export data in specified format.
-    
+
     Args:
         export_request: Export request parameters
         current_user: Current authenticated user
         data_manager: Data manager instance
-        
+
     Returns:
         Export operation details
     """
@@ -67,10 +63,10 @@ async def export_data(
             encrypt=export_request.encrypt,
             custom_query=export_request.custom_query,
         )
-        
+
         # Get export status
         export_info = await data_manager.get_export_status(export_id)
-        
+
         return ExportDataResponse(
             export_id=export_id,
             status=export_info.get("status", "pending"),
@@ -81,7 +77,7 @@ async def export_data(
             completed_at=export_info.get("completed_at"),
             expires_at=export_info.get("expires_at"),
         )
-        
+
     except Exception as e:
         logger.error("Failed to start data export", error=str(e))
         raise InternalServerProblem(detail="Failed to start data export") from e
@@ -94,12 +90,12 @@ async def create_backup(
     data_manager: DataManager = Depends(get_data_manager),
 ) -> BackupResponse:
     """Create a data backup.
-    
+
     Args:
         backup_request: Backup request parameters
         current_user: Current authenticated user
         data_manager: Data manager instance
-        
+
     Returns:
         Backup operation details
     """
@@ -114,10 +110,10 @@ async def create_backup(
             encrypt=backup_request.encrypt,
             retention_days=backup_request.retention_days,
         )
-        
+
         # Get backup info
         backup_info = await data_manager.get_backup_info(backup_id)
-        
+
         return BackupResponse(
             id=backup_id,
             name=backup_info.get("name", backup_request.name or f"Backup-{backup_id[:8]}"),
@@ -134,7 +130,7 @@ async def create_backup(
             compressed=backup_request.compress,
             metadata=backup_info.get("metadata", {}),
         )
-        
+
     except Exception as e:
         logger.error("Failed to create backup", error=str(e))
         raise InternalServerProblem(detail="Failed to create backup") from e
@@ -147,12 +143,12 @@ async def list_backups(
     data_manager: DataManager = Depends(get_data_manager),
 ) -> BackupListResponse:
     """List available backups.
-    
+
     Args:
         request: List request parameters
         current_user: Current authenticated user
         data_manager: Data manager instance
-        
+
     Returns:
         List of backups
     """
@@ -161,7 +157,7 @@ async def list_backups(
             backup_type=request.backup_type,
             status=request.status,
         )
-        
+
         backup_responses = []
         for backup in backups:
             backup_responses.append(BackupResponse(
@@ -180,12 +176,12 @@ async def list_backups(
                 compressed=backup.get("compressed", False),
                 metadata=backup.get("metadata", {}),
             ))
-        
+
         return BackupListResponse(
             backups=backup_responses,
             total=len(backup_responses)
         )
-        
+
     except Exception as e:
         logger.error("Failed to list backups", error=str(e))
         raise InternalServerProblem(detail="Failed to list backups") from e
@@ -198,12 +194,12 @@ async def restore_from_backup(
     data_manager: DataManager = Depends(get_data_manager),
 ) -> RestoreResponse:
     """Restore data from a backup.
-    
+
     Args:
         restore_request: Restore request parameters
         current_user: Current authenticated user
         data_manager: Data manager instance
-        
+
     Returns:
         Restore operation details
     """
@@ -214,10 +210,10 @@ async def restore_from_backup(
             create_backup_before_restore=restore_request.create_backup_before_restore,
             verify_integrity=restore_request.verify_integrity,
         )
-        
+
         # Get restore status
         restore_info = await data_manager.get_restore_status(restore_id)
-        
+
         return RestoreResponse(
             restore_id=restore_id,
             backup_id=restore_request.backup_id,
@@ -228,7 +224,7 @@ async def restore_from_backup(
             completed_at=restore_info.get("completed_at"),
             error_message=restore_info.get("error_message"),
         )
-        
+
     except Exception as e:
         logger.error("Failed to start restore operation", error=str(e))
         raise InternalServerProblem(detail="Failed to start restore operation") from e
@@ -240,17 +236,17 @@ async def get_storage_stats(
     data_manager: DataManager = Depends(get_data_manager),
 ) -> StorageStatsResponse:
     """Get storage statistics and usage information.
-    
+
     Args:
         current_user: Current authenticated user
         data_manager: Data manager instance
-        
+
     Returns:
         Storage statistics
     """
     try:
         stats = await data_manager.get_storage_stats()
-        
+
         return StorageStatsResponse(
             total_size=stats.get("total_size", 0),
             database_size=stats.get("database_size", 0),
@@ -266,7 +262,7 @@ async def get_storage_stats(
             projected_size_30_days=stats.get("projected_size_30_days", 0),
             last_updated=stats.get("last_updated"),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get storage stats", error=str(e))
         raise InternalServerProblem(detail="Failed to get storage stats") from e
@@ -292,7 +288,7 @@ async def bulk_delete_documents(
         results = await data_manager.bulk_delete_documents(
             document_ids, current_user.id
         )
-        
+
         return {
             "total_requested": len(document_ids),
             "successful_deletions": results.get("success_count", 0),
@@ -327,7 +323,7 @@ async def bulk_delete_conversations(
         results = await data_manager.bulk_delete_conversations(
             conversation_ids, current_user.id
         )
-        
+
         return {
             "total_requested": len(conversation_ids),
             "successful_deletions": results.get("success_count", 0),
@@ -362,7 +358,7 @@ async def bulk_delete_prompts(
         results = await data_manager.bulk_delete_prompts(
             prompt_ids, current_user.id
         )
-        
+
         return {
             "total_requested": len(prompt_ids),
             "successful_deletions": results.get("success_count", 0),

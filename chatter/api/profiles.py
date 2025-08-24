@@ -7,19 +7,14 @@ from chatter.api.auth import get_current_user
 from chatter.core.profiles import ProfileError, ProfileService
 from chatter.models.profile import ProfileType
 from chatter.models.user import User
-from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.profile import (
     AvailableProvidersResponse,
     ProfileCloneRequest,
     ProfileCreate,
     ProfileDeleteRequest,
     ProfileDeleteResponse,
-    ProfileGetRequest,
-    ProfileListRequest,
     ProfileListResponse,
-    ProfileProvidersRequest,
     ProfileResponse,
-    ProfileStatsRequest,
     ProfileStatsResponse,
     ProfileTestRequest,
     ProfileTestResponse,

@@ -1,23 +1,21 @@
 """A/B testing management endpoints."""
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
 from chatter.schemas.ab_testing import (
+    ABTestActionResponse,
     ABTestCreateRequest,
     ABTestDeleteResponse,
     ABTestListRequest,
     ABTestListResponse,
+    ABTestMetricsResponse,
     ABTestResponse,
     ABTestResultsResponse,
-    ABTestMetricsResponse,
     ABTestUpdateRequest,
-    ABTestActionResponse,
 )
 from chatter.services.ab_testing import ABTestManager
-from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,
@@ -31,7 +29,7 @@ router = APIRouter()
 
 async def get_ab_test_manager() -> ABTestManager:
     """Get A/B test manager instance.
-    
+
     Returns:
         ABTestManager instance
     """
@@ -45,20 +43,23 @@ async def create_ab_test(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestResponse:
     """Create a new A/B test.
-    
+
     Args:
         test_data: A/B test creation data
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         Created test data
     """
     try:
         # Convert request data to ABTest model format
-        from chatter.services.ab_testing import ABTest, TestVariant as ServiceTestVariant, TestMetric
-        from datetime import UTC, datetime, timedelta
-        
+
+        from chatter.services.ab_testing import ABTest, TestMetric
+        from chatter.services.ab_testing import (
+            TestVariant as ServiceTestVariant,
+        )
+
         # Create variants
         variants = []
         for i, variant_data in enumerate(test_data.variants):
@@ -70,13 +71,13 @@ async def create_ab_test(
                 is_control=(i == 0),  # First variant is control
             )
             variants.append(variant)
-        
+
         # Create primary metric from first metric in list
         primary_metric = TestMetric(
             name=test_data.metrics[0].value,
             metric_type=test_data.metrics[0],
         )
-        
+
         # Create secondary metrics
         secondary_metrics = []
         for metric in test_data.metrics[1:]:
@@ -84,7 +85,7 @@ async def create_ab_test(
                 name=metric.value,
                 metric_type=metric,
             ))
-        
+
         # Create test
         ab_test = ABTest(
             name=test_data.name,
@@ -103,16 +104,18 @@ async def create_ab_test(
             tags=test_data.tags,
             metadata=test_data.metadata,
         )
-        
+
         test_id = await ab_test_manager.create_test(ab_test)
         created_test = await ab_test_manager.get_test(test_id)
-        
+
         if not created_test:
             raise InternalServerProblem(detail="Failed to retrieve created test")
-        
+
         # Convert to response format
-        from chatter.schemas.ab_testing import TestVariant as ResponseTestVariant
-        
+        from chatter.schemas.ab_testing import (
+            TestVariant as ResponseTestVariant,
+        )
+
         response_variants = []
         for variant in created_test.variants:
             response_variants.append(ResponseTestVariant(
@@ -121,7 +124,7 @@ async def create_ab_test(
                 configuration=variant.configuration,
                 weight=variant.weight,
             ))
-        
+
         return ABTestResponse(
             id=created_test.id,
             name=created_test.name,
@@ -145,7 +148,7 @@ async def create_ab_test(
             tags=created_test.tags,
             metadata=created_test.metadata,
         )
-        
+
     except Exception as e:
         logger.error("Failed to create A/B test", error=str(e))
         raise InternalServerProblem(detail="Failed to create A/B test") from e
@@ -158,12 +161,12 @@ async def list_ab_tests(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestListResponse:
     """List A/B tests with optional filtering.
-    
+
     Args:
         request: List request parameters
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         List of A/B tests
     """
@@ -172,7 +175,7 @@ async def list_ab_tests(
             status=request.status,
             test_type=request.test_type,
         )
-        
+
         # Filter by tags if specified
         if request.tags:
             filtered_tests = []
@@ -180,12 +183,14 @@ async def list_ab_tests(
                 if any(tag in test.tags for tag in request.tags):
                     filtered_tests.append(test)
             tests = filtered_tests
-        
+
         # Convert to response format
         test_responses = []
         for test in tests:
-            from chatter.schemas.ab_testing import TestVariant as ResponseTestVariant
-            
+            from chatter.schemas.ab_testing import (
+                TestVariant as ResponseTestVariant,
+            )
+
             response_variants = []
             for variant in test.variants:
                 response_variants.append(ResponseTestVariant(
@@ -194,11 +199,11 @@ async def list_ab_tests(
                     configuration=variant.configuration,
                     weight=variant.weight,
                 ))
-            
+
             # Get metrics from test configuration
             metrics = [test.primary_metric.metric_type]
             metrics.extend([m.metric_type for m in test.secondary_metrics])
-            
+
             test_responses.append(ABTestResponse(
                 id=test.id,
                 name=test.name,
@@ -222,12 +227,12 @@ async def list_ab_tests(
                 tags=test.tags,
                 metadata=test.metadata,
             ))
-        
+
         return ABTestListResponse(
             tests=test_responses,
             total=len(test_responses)
         )
-        
+
     except Exception as e:
         logger.error("Failed to list A/B tests", error=str(e))
         raise InternalServerProblem(detail="Failed to list A/B tests") from e
@@ -240,12 +245,12 @@ async def get_ab_test(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestResponse:
     """Get A/B test by ID.
-    
+
     Args:
         test_id: Test ID
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         A/B test data
     """
@@ -253,10 +258,12 @@ async def get_ab_test(
         test = await ab_test_manager.get_test(test_id)
         if not test:
             raise NotFoundProblem(detail=f"A/B test {test_id} not found")
-        
+
         # Convert to response format
-        from chatter.schemas.ab_testing import TestVariant as ResponseTestVariant
-        
+        from chatter.schemas.ab_testing import (
+            TestVariant as ResponseTestVariant,
+        )
+
         response_variants = []
         for variant in test.variants:
             response_variants.append(ResponseTestVariant(
@@ -265,11 +272,11 @@ async def get_ab_test(
                 configuration=variant.configuration,
                 weight=variant.weight,
             ))
-        
+
         # Get metrics from test configuration
         metrics = [test.primary_metric.metric_type]
         metrics.extend([m.metric_type for m in test.secondary_metrics])
-        
+
         return ABTestResponse(
             id=test.id,
             name=test.name,
@@ -293,7 +300,7 @@ async def get_ab_test(
             tags=test.tags,
             metadata=test.metadata,
         )
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -309,13 +316,13 @@ async def update_ab_test(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestResponse:
     """Update an A/B test.
-    
+
     Args:
         test_id: Test ID
         test_data: Test update data
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         Updated test data
     """
@@ -324,19 +331,21 @@ async def update_ab_test(
         test = await ab_test_manager.get_test(test_id)
         if not test:
             raise NotFoundProblem(detail=f"A/B test {test_id} not found")
-        
+
         # Update test data
         update_data = test_data.model_dump(exclude_unset=True)
-        
+
         # Convert traffic percentage back to decimal
         if "traffic_percentage" in update_data:
             update_data["traffic_percentage"] = update_data["traffic_percentage"] / 100.0
-        
+
         updated_test = await ab_test_manager.update_test(test_id, update_data)
-        
+
         # Convert to response format (reuse logic from get_ab_test)
-        from chatter.schemas.ab_testing import TestVariant as ResponseTestVariant
-        
+        from chatter.schemas.ab_testing import (
+            TestVariant as ResponseTestVariant,
+        )
+
         response_variants = []
         for variant in updated_test.variants:
             response_variants.append(ResponseTestVariant(
@@ -345,10 +354,10 @@ async def update_ab_test(
                 configuration=variant.configuration,
                 weight=variant.weight,
             ))
-        
+
         metrics = [updated_test.primary_metric.metric_type]
         metrics.extend([m.metric_type for m in updated_test.secondary_metrics])
-        
+
         return ABTestResponse(
             id=updated_test.id,
             name=updated_test.name,
@@ -372,7 +381,7 @@ async def update_ab_test(
             tags=updated_test.tags,
             metadata=updated_test.metadata,
         )
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -387,26 +396,26 @@ async def delete_ab_test(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestDeleteResponse:
     """Delete an A/B test.
-    
+
     Args:
         test_id: Test ID
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         Deletion result
     """
     try:
         success = await ab_test_manager.delete_test(test_id)
-        
+
         if not success:
             raise NotFoundProblem(detail=f"A/B test {test_id} not found")
-        
+
         return ABTestDeleteResponse(
             success=True,
             message=f"A/B test {test_id} deleted successfully"
         )
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -421,30 +430,30 @@ async def start_ab_test(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestActionResponse:
     """Start an A/B test.
-    
+
     Args:
         test_id: Test ID
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         Action result
     """
     try:
         success = await ab_test_manager.start_test(test_id)
-        
+
         if not success:
             raise BadRequestProblem(detail="Failed to start test - check test status and configuration")
-        
+
         from chatter.services.ab_testing import TestStatus
-        
+
         return ABTestActionResponse(
             success=True,
             message=f"A/B test {test_id} started successfully",
             test_id=test_id,
             new_status=TestStatus.RUNNING
         )
-        
+
     except BadRequestProblem:
         raise
     except Exception as e:
@@ -459,30 +468,30 @@ async def pause_ab_test(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestActionResponse:
     """Pause an A/B test.
-    
+
     Args:
         test_id: Test ID
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         Action result
     """
     try:
         success = await ab_test_manager.pause_test(test_id)
-        
+
         if not success:
             raise BadRequestProblem(detail="Failed to pause test - check test status")
-        
+
         from chatter.services.ab_testing import TestStatus
-        
+
         return ABTestActionResponse(
             success=True,
             message=f"A/B test {test_id} paused successfully",
             test_id=test_id,
             new_status=TestStatus.PAUSED
         )
-        
+
     except BadRequestProblem:
         raise
     except Exception as e:
@@ -497,30 +506,30 @@ async def complete_ab_test(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestActionResponse:
     """Complete an A/B test.
-    
+
     Args:
         test_id: Test ID
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         Action result
     """
     try:
         success = await ab_test_manager.complete_test(test_id)
-        
+
         if not success:
             raise BadRequestProblem(detail="Failed to complete test - check test status")
-        
+
         from chatter.services.ab_testing import TestStatus
-        
+
         return ABTestActionResponse(
             success=True,
             message=f"A/B test {test_id} completed successfully",
             test_id=test_id,
             new_status=TestStatus.COMPLETED
         )
-        
+
     except BadRequestProblem:
         raise
     except Exception as e:
@@ -535,25 +544,25 @@ async def get_ab_test_results(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestResultsResponse:
     """Get A/B test results and analysis.
-    
+
     Args:
         test_id: Test ID
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         Test results and analysis
     """
     try:
         results = await ab_test_manager.analyze_test(test_id)
-        
+
         if not results:
             raise NotFoundProblem(detail=f"Results not available for test {test_id}")
-        
+
         # Convert results to response format
+
         from chatter.schemas.ab_testing import TestMetric
-        from datetime import datetime, UTC
-        
+
         metrics = []
         for variant_name, variant_results in results.variant_results.items():
             for metric_name, metric_value in variant_results.items():
@@ -563,7 +572,7 @@ async def get_ab_test_results(
                     value=metric_value,
                     sample_size=100,  # Would need to be calculated
                 ))
-        
+
         return ABTestResultsResponse(
             test_id=test_id,
             test_name="Test Name",  # Would need to fetch from test
@@ -577,7 +586,7 @@ async def get_ab_test_results(
             sample_size=100,  # Would need to be calculated
             duration_days=7,  # Would need to be calculated
         )
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -592,21 +601,22 @@ async def get_ab_test_metrics(
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestMetricsResponse:
     """Get current A/B test metrics.
-    
+
     Args:
         test_id: Test ID
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
-        
+
     Returns:
         Current test metrics
     """
     try:
         # This would need to be implemented in the AB test manager
         # For now, return a placeholder response
+        from datetime import UTC, datetime
+
         from chatter.schemas.ab_testing import TestMetric
-        from datetime import datetime, UTC
-        
+
         # Placeholder metrics
         metrics = [
             TestMetric(
@@ -622,14 +632,14 @@ async def get_ab_test_metrics(
                 sample_size=50,
             ),
         ]
-        
+
         return ABTestMetricsResponse(
             test_id=test_id,
             metrics=metrics,
             participant_count=100,
             last_updated=datetime.now(UTC),
         )
-        
+
     except Exception as e:
         logger.error("Failed to get A/B test metrics", test_id=test_id, error=str(e))
         raise InternalServerProblem(detail="Failed to get A/B test metrics") from e
@@ -655,21 +665,21 @@ async def end_ab_test(
     """
     try:
         success = await ab_test_manager.end_test(test_id, winner_variant)
-        
+
         if not success:
             raise NotFoundProblem(
                 detail="A/B test not found or could not be ended",
                 resource_type="ab_test",
                 resource_id=test_id,
             ) from None
-            
+
         return ABTestActionResponse(
             test_id=test_id,
             action="ended",
             message=f"A/B test ended with winner: {winner_variant}",
             timestamp=datetime.now(UTC),
         )
-        
+
     except Exception as e:
         logger.error("Failed to end A/B test", test_id=test_id, error=str(e))
         raise InternalServerProblem(detail="Failed to end A/B test") from e
@@ -693,16 +703,16 @@ async def get_ab_test_performance(
     """
     try:
         performance = await ab_test_manager.get_test_performance(test_id)
-        
+
         if not performance:
             raise NotFoundProblem(
                 detail="A/B test not found or no performance data available",
                 resource_type="ab_test",
                 resource_id=test_id,
             ) from None
-            
+
         return performance
-        
+
     except Exception as e:
         logger.error("Failed to get A/B test performance", test_id=test_id, error=str(e))
         raise InternalServerProblem(detail="Failed to get A/B test performance") from e

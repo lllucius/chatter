@@ -101,11 +101,11 @@ async def login(
         User data and authentication tokens
     """
     user = await auth_service.authenticate_user(
-        user_data.email, user_data.password
+        user_data.username, user_data.password
     )
     if not user:
         raise AuthenticationProblem(
-            detail="Invalid email or password"
+            detail="Invalid username or password"
         ) from None
 
     tokens = auth_service.create_tokens(user)

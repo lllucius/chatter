@@ -1,7 +1,6 @@
 """Agent management endpoints."""
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.core.agents import AgentManager
@@ -18,10 +17,8 @@ from chatter.schemas.agents import (
     AgentStatsResponse,
     AgentUpdateRequest,
 )
-from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
-    BadRequestProblem,
     InternalServerProblem,
     NotFoundProblem,
 )
@@ -32,7 +29,7 @@ router = APIRouter()
 
 async def get_agent_manager() -> AgentManager:
     """Get agent manager instance.
-    
+
     Returns:
         AgentManager instance
     """
@@ -46,12 +43,12 @@ async def create_agent(
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentResponse:
     """Create a new agent.
-    
+
     Args:
         agent_data: Agent creation data
         current_user: Current authenticated user
         agent_manager: Agent manager instance
-        
+
     Returns:
         Created agent data
     """
@@ -82,14 +79,14 @@ async def create_agent(
             tags=agent_data.tags,
             metadata=agent_data.metadata,
         )
-        
+
         # Get the created agent
         agent = await agent_manager.get_agent(agent_id)
         if not agent:
             raise InternalServerProblem(detail="Failed to retrieve created agent")
-            
+
         return AgentResponse.model_validate(agent.profile.model_dump())
-        
+
     except Exception as e:
         logger.error("Failed to create agent", error=str(e))
         raise InternalServerProblem(detail="Failed to create agent") from e
@@ -102,12 +99,12 @@ async def list_agents(
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentListResponse:
     """List all agents with optional filtering.
-    
+
     Args:
         request: List request parameters
         current_user: Current authenticated user
         agent_manager: Agent manager instance
-        
+
     Returns:
         List of agents
     """
@@ -116,7 +113,7 @@ async def list_agents(
             agent_type=request.agent_type,
             status=request.status,
         )
-        
+
         # Filter by tags if specified
         if request.tags:
             filtered_agents = []
@@ -124,14 +121,14 @@ async def list_agents(
                 if any(tag in agent.tags for tag in request.tags):
                     filtered_agents.append(agent)
             agents = filtered_agents
-        
+
         agent_responses = [AgentResponse.model_validate(agent.model_dump()) for agent in agents]
-        
+
         return AgentListResponse(
             agents=agent_responses,
             total=len(agent_responses)
         )
-        
+
     except Exception as e:
         logger.error("Failed to list agents", error=str(e))
         raise InternalServerProblem(detail="Failed to list agents") from e
@@ -145,13 +142,13 @@ async def get_agent(
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentResponse:
     """Get agent by ID.
-    
+
     Args:
         agent_id: Agent ID
         request: Get request parameters
         current_user: Current authenticated user
         agent_manager: Agent manager instance
-        
+
     Returns:
         Agent data
     """
@@ -159,9 +156,9 @@ async def get_agent(
         agent = await agent_manager.get_agent(agent_id)
         if not agent:
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
-            
+
         return AgentResponse.model_validate(agent.profile.model_dump())
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -177,13 +174,13 @@ async def update_agent(
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentResponse:
     """Update an agent.
-    
+
     Args:
         agent_id: Agent ID
         agent_data: Agent update data
         current_user: Current authenticated user
         agent_manager: Agent manager instance
-        
+
     Returns:
         Updated agent data
     """
@@ -192,20 +189,20 @@ async def update_agent(
         agent = await agent_manager.get_agent(agent_id)
         if not agent:
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
-        
+
         # Update agent profile with provided data
         profile = agent.profile
         update_data = agent_data.model_dump(exclude_unset=True)
-        
+
         for field, value in update_data.items():
             if hasattr(profile, field):
                 setattr(profile, field, value)
-        
+
         # The agent manager would need an update method - for now we'll simulate it
         # await agent_manager.update_agent(agent_id, profile)
-        
+
         return AgentResponse.model_validate(profile.model_dump())
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -220,26 +217,26 @@ async def delete_agent(
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentDeleteResponse:
     """Delete an agent.
-    
+
     Args:
         agent_id: Agent ID
         current_user: Current authenticated user
         agent_manager: Agent manager instance
-        
+
     Returns:
         Deletion result
     """
     try:
         success = await agent_manager.delete_agent(agent_id)
-        
+
         if not success:
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
-            
+
         return AgentDeleteResponse(
             success=True,
             message=f"Agent {agent_id} deleted successfully"
         )
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -255,13 +252,13 @@ async def interact_with_agent(
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentInteractResponse:
     """Send a message to an agent and get a response.
-    
+
     Args:
         agent_id: Agent ID
         interaction_data: Interaction data
         current_user: Current authenticated user
         agent_manager: Agent manager instance
-        
+
     Returns:
         Agent response
     """
@@ -272,14 +269,14 @@ async def interact_with_agent(
             conversation_id=interaction_data.conversation_id,
             context=interaction_data.context,
         )
-        
+
         if response is None:
             raise NotFoundProblem(detail=f"Agent {agent_id} not found or unable to respond")
-        
+
         # For now, return a basic response structure
         # In a real implementation, the agent manager would return full interaction details
         from datetime import UTC, datetime
-        
+
         return AgentInteractResponse(
             agent_id=agent_id,
             response=response,
@@ -289,7 +286,7 @@ async def interact_with_agent(
             response_time=1.5,  # Would be measured
             timestamp=datetime.now(UTC),
         )
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -303,18 +300,18 @@ async def get_agent_stats(
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentStatsResponse:
     """Get agent statistics.
-    
+
     Args:
         current_user: Current authenticated user
         agent_manager: Agent manager instance
-        
+
     Returns:
         Agent statistics
     """
     try:
         stats = await agent_manager.get_agent_stats()
         return AgentStatsResponse.model_validate(stats)
-        
+
     except Exception as e:
         logger.error("Failed to get agent stats", error=str(e))
         raise InternalServerProblem(detail="Failed to get agent stats") from e

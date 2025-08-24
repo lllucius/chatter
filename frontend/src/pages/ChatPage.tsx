@@ -10,7 +10,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Grid,
   Paper,
   Avatar,
   Chip,
@@ -19,6 +18,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import {
   Send as SendIcon,
   Person as PersonIcon,

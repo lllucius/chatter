@@ -16,7 +16,6 @@ from chatter.models.conversation import ConversationStatus
 from chatter.models.user import User
 from chatter.schemas.chat import (
     AvailableToolResponse,
-    AvailableToolsRequest,
     AvailableToolsResponse,
     ChatRequest,
     ChatResponse,
@@ -24,17 +23,13 @@ from chatter.schemas.chat import (
     ConversationDeleteRequest,
     ConversationDeleteResponse,
     ConversationGetRequest,
-    ConversationMessagesRequest,
     ConversationResponse,
-    ConversationSearchRequest,
     ConversationSearchResponse,
     ConversationUpdate,
     ConversationWithMessages,
-    McpStatusRequest,
     McpStatusResponse,
     MessageResponse,
 )
-from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.services.llm import LLMService
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger

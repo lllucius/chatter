@@ -392,10 +392,13 @@ class AnalyticsService:
                         "hour", func.max(Conversation.created_at)
                     ),
                     func.count(Conversation.id)
-                    / func.count(
-                        func.distinct(
-                            func.date(Conversation.created_at)
-                        )
+                    / func.nullif(
+                        func.count(
+                            func.distinct(
+                                func.date(Conversation.created_at)
+                            )
+                        ),
+                        0
                     ),
                 ).where(
                     and_(Conversation.user_id == user_id, time_filter)

@@ -7,7 +7,7 @@ from .vector_store import vector_store_manager
 
 __all__ = [
     "agent_manager",
-    "orchestrator", 
-    "workflow_manager", 
+    "orchestrator",
+    "workflow_manager",
     "vector_store_manager"
 ]

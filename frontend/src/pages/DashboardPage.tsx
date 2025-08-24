@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Grid,
   Card,
   CardContent,
   Typography,
@@ -10,6 +9,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import {
   BarChart,
   Bar,

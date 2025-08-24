@@ -276,20 +276,20 @@ class PGVectorStore(AbstractVectorStore):
         try:
             # Build complex filter
             combined_filter = {}
-            
+
             if metadata_filter:
                 combined_filter.update(metadata_filter)
-            
+
             if date_range:
                 start_date, end_date = date_range
                 combined_filter["created_at"] = {
                     "$gte": start_date,
                     "$lte": end_date
                 }
-            
+
             if content_type:
                 combined_filter["content_type"] = content_type
-            
+
             if semantic_filter:
                 combined_filter["semantic_tags"] = {"$contains": semantic_filter}
 
@@ -323,7 +323,7 @@ class PGVectorStore(AbstractVectorStore):
                     (doc, score) for doc, score in docs_with_scores
                     if score >= similarity_threshold
                 ]
-                
+
         except Exception as e:
             logger.error("Advanced search failed", error=str(e))
             raise VectorStoreError(f"Advanced search failed: {str(e)}") from e
@@ -340,11 +340,11 @@ class PGVectorStore(AbstractVectorStore):
                 k=1,
                 filter={"id": doc_id}
             )
-            
+
             if results:
                 return results[0].metadata
             return None
-            
+
         except Exception as e:
             logger.error("Get document metadata failed", error=str(e))
             return None
@@ -362,9 +362,9 @@ class PGVectorStore(AbstractVectorStore):
                 k=limit,
                 filter=metadata_query
             )
-            
+
             return [doc.metadata for doc in results]
-            
+
         except Exception as e:
             logger.error("Query metadata failed", error=str(e))
             raise VectorStoreError(f"Query metadata failed: {str(e)}") from e
@@ -381,24 +381,24 @@ class PGVectorStore(AbstractVectorStore):
             # This is a simplified implementation - in a real system you might want
             # more sophisticated metadata similarity matching
             metadata_filter = {}
-            
+
             # Match on specific important metadata fields
             for key, value in reference_metadata.items():
                 if key in ["content_type", "source", "category", "tags"]:
                     metadata_filter[key] = value
-            
+
             if exclude_ids:
                 metadata_filter["id"] = {"$nin": exclude_ids}
-            
+
             results = await asyncio.to_thread(
                 self._store.similarity_search,
                 "",  # Empty query, rely on filter
                 k=k,
                 filter=metadata_filter
             )
-            
+
             return results
-            
+
         except Exception as e:
             logger.error("Get similar documents by metadata failed", error=str(e))
             raise VectorStoreError(f"Similar metadata search failed: {str(e)}") from e
@@ -549,24 +549,24 @@ class ChromaVectorStore(AbstractVectorStore):
         try:
             # Build complex filter for Chroma
             where_filter = {}
-            
+
             if metadata_filter:
                 where_filter.update(metadata_filter)
-            
+
             if date_range:
                 start_date, end_date = date_range
                 where_filter["created_at"] = {
                     "$gte": start_date,
                     "$lte": end_date
                 }
-            
+
             if content_type:
                 where_filter["content_type"] = content_type
 
             # If no query provided, use metadata-only search
             if not query:
                 query = "retrieving documents"  # dummy query for Chroma
-            
+
             docs_with_scores = await asyncio.to_thread(
                 self._store.similarity_search_with_score,
                 query,
@@ -574,13 +574,13 @@ class ChromaVectorStore(AbstractVectorStore):
                 filter=where_filter,
                 **kwargs,
             )
-            
+
             # Filter by similarity threshold
             return [
                 (doc, score) for doc, score in docs_with_scores
                 if score >= similarity_threshold
             ]
-                
+
         except Exception as e:
             logger.error("Advanced search failed", error=str(e))
             raise VectorStoreError(f"Advanced search failed: {str(e)}") from e
@@ -596,11 +596,11 @@ class ChromaVectorStore(AbstractVectorStore):
                 k=1,
                 filter={"id": doc_id}
             )
-            
+
             if results:
                 return results[0].metadata
             return None
-            
+
         except Exception as e:
             logger.error("Get document metadata failed", error=str(e))
             return None
@@ -618,9 +618,9 @@ class ChromaVectorStore(AbstractVectorStore):
                 k=limit,
                 filter=metadata_query
             )
-            
+
             return [doc.metadata for doc in results]
-            
+
         except Exception as e:
             logger.error("Query metadata failed", error=str(e))
             raise VectorStoreError(f"Query metadata failed: {str(e)}") from e
@@ -635,23 +635,23 @@ class ChromaVectorStore(AbstractVectorStore):
         try:
             # Build filter for similar metadata
             where_filter = {}
-            
+
             for key, value in reference_metadata.items():
                 if key in ["content_type", "source", "category", "tags"]:
                     where_filter[key] = value
-            
+
             if exclude_ids:
                 where_filter["id"] = {"$nin": exclude_ids}
-            
+
             results = await asyncio.to_thread(
                 self._store.similarity_search,
                 "",  # Empty query
                 k=k,
                 filter=where_filter
             )
-            
+
             return results
-            
+
         except Exception as e:
             logger.error("Get similar documents by metadata failed", error=str(e))
             raise VectorStoreError(f"Similar metadata search failed: {str(e)}") from e

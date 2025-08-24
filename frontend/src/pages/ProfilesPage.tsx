@@ -25,9 +25,9 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Grid,
   Slider,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,

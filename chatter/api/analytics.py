@@ -9,18 +9,11 @@ from chatter.api.auth import get_current_user
 from chatter.core.analytics import AnalyticsService
 from chatter.models.user import User
 from chatter.schemas.analytics import (
-    ConversationStatsRequest,
     ConversationStatsResponse,
-    DashboardRequest,
     DashboardResponse,
-    DocumentAnalyticsRequest,
     DocumentAnalyticsResponse,
-    PerformanceMetricsRequest,
     PerformanceMetricsResponse,
-    SystemAnalyticsRequest,
     SystemAnalyticsResponse,
-    ToolServerAnalyticsRequest,
-    UsageMetricsRequest,
     UsageMetricsResponse,
 )
 from chatter.utils.database import get_session
@@ -68,7 +61,7 @@ async def get_conversation_stats(
             end_date=end_date,
             period=period,
         )
-        
+
         stats = await analytics_service.get_conversation_stats(
             current_user.id, time_range
         )
@@ -131,7 +124,7 @@ async def get_usage_metrics(
             end_date=end_date,
             period=period,
         )
-        
+
         metrics = await analytics_service.get_usage_metrics(
             current_user.id, time_range
         )
@@ -195,7 +188,7 @@ async def get_performance_metrics(
             end_date=end_date,
             period=period,
         )
-        
+
         metrics = await analytics_service.get_performance_metrics(
             current_user.id, time_range
         )
@@ -270,7 +263,7 @@ async def get_document_analytics(
             end_date=end_date,
             period=period,
         )
-        
+
         analytics = await analytics_service.get_document_analytics(
             current_user.id, time_range
         )
@@ -400,7 +393,7 @@ async def get_dashboard(
             end_date=end_date,
             period=period,
         )
-        
+
         dashboard_data = await analytics_service.get_dashboard_data(
             current_user.id, time_range
         )
@@ -462,7 +455,7 @@ async def get_tool_server_analytics(
             end_date=end_date,
             period=period,
         )
-        
+
         return await analytics_service.get_tool_server_analytics(
             current_user.id, time_range
         )
@@ -506,7 +499,7 @@ async def get_user_analytics(
             end_date=end_date,
             period=period,
         )
-        
+
         return await analytics_service.get_user_analytics(
             user_id, time_range
         )
@@ -543,9 +536,9 @@ async def export_analytics(
         Exported analytics report
     """
     try:
+
         from fastapi.responses import StreamingResponse
-        import json
-        
+
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
         time_range = AnalyticsTimeRange(
@@ -553,11 +546,11 @@ async def export_analytics(
             end_date=end_date,
             period=period,
         )
-        
+
         export_data = await analytics_service.export_analytics(
             current_user.id, metrics, time_range, format
         )
-        
+
         if format == "json":
             return export_data
         elif format == "csv":

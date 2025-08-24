@@ -14,7 +14,6 @@ import {
   Chip,
   Alert,
   CircularProgress,
-  Grid,
   LinearProgress,
   List,
   ListItem,
@@ -22,6 +21,7 @@ import {
   ListItemIcon,
   Divider,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon,

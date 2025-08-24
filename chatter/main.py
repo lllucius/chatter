@@ -410,18 +410,18 @@ def create_app() -> FastAPI:
     static_dir = os.path.join(os.path.dirname(__file__), "../frontend/build")
     if os.path.exists(static_dir):
         app.mount("/static", StaticFiles(directory=os.path.join(static_dir, "static")), name="static")
-        
+
         # Serve React app for all non-API routes
         @app.get("/{full_path:path}")
         async def serve_react_app(full_path: str):
             # Don't intercept API routes, docs, or health checks
-            if (full_path.startswith("api/") or 
-                full_path.startswith("health") or 
-                full_path.startswith("docs") or 
-                full_path.startswith("redoc") or 
+            if (full_path.startswith("api/") or
+                full_path.startswith("health") or
+                full_path.startswith("docs") or
+                full_path.startswith("redoc") or
                 full_path.startswith("openapi.json")):
                 return {"error": "Not found"}
-            
+
             from fastapi.responses import FileResponse
             index_file = os.path.join(static_dir, "index.html")
             return FileResponse(index_file)

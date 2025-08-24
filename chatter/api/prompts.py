@@ -7,17 +7,13 @@ from chatter.api.auth import get_current_user
 from chatter.core.prompts import PromptError, PromptService
 from chatter.models.prompt import PromptCategory, PromptType
 from chatter.models.user import User
-from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.prompt import (
     PromptCloneRequest,
     PromptCreate,
     PromptDeleteRequest,
     PromptDeleteResponse,
-    PromptGetRequest,
-    PromptListRequest,
     PromptListResponse,
     PromptResponse,
-    PromptStatsRequest,
     PromptStatsResponse,
     PromptTestRequest,
     PromptTestResponse,

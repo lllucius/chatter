@@ -1,17 +1,13 @@
 """A/B testing infrastructure for prompts and models."""
 
 import hashlib
-import json
-import random
 import uuid
 from datetime import UTC, datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel, Field
 
-from chatter.config import settings
-from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -61,7 +57,7 @@ class TestVariant(BaseModel):
     name: str
     description: str
     weight: float = 1.0
-    configuration: Dict[str, Any] = Field(default_factory=dict)
+    configuration: dict[str, Any] = Field(default_factory=dict)
     is_control: bool = False
     active: bool = True
 
@@ -70,7 +66,7 @@ class TestMetric(BaseModel):
     """Metric configuration for A/B tests."""
     name: str
     metric_type: MetricType
-    target_value: Optional[float] = None
+    target_value: float | None = None
     improvement_threshold: float = 0.05  # 5% improvement threshold
     direction: str = "increase"  # "increase" or "decrease"
     weight: float = 1.0
@@ -83,36 +79,36 @@ class ABTest(BaseModel):
     description: str
     test_type: TestType
     status: TestStatus = TestStatus.DRAFT
-    
+
     # Test configuration
-    variants: List[TestVariant] = Field(default_factory=list)
+    variants: list[TestVariant] = Field(default_factory=list)
     allocation_strategy: VariantAllocation = VariantAllocation.EQUAL
     traffic_percentage: float = 1.0  # Percentage of traffic to include in test
-    
+
     # Metrics and goals
     primary_metric: TestMetric
-    secondary_metrics: List[TestMetric] = Field(default_factory=list)
-    
+    secondary_metrics: list[TestMetric] = Field(default_factory=list)
+
     # Timeline
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    duration_days: Optional[int] = None
-    
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    duration_days: int | None = None
+
     # Targeting
-    target_users: Dict[str, Any] = Field(default_factory=dict)
-    exclude_users: Dict[str, Any] = Field(default_factory=dict)
-    
+    target_users: dict[str, Any] = Field(default_factory=dict)
+    exclude_users: dict[str, Any] = Field(default_factory=dict)
+
     # Statistical settings
     confidence_level: float = 0.95
     statistical_power: float = 0.8
     minimum_sample_size: int = 100
-    
+
     # Metadata
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     created_by: str
-    tags: List[str] = Field(default_factory=list)
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class TestAssignment(BaseModel):
@@ -121,9 +117,9 @@ class TestAssignment(BaseModel):
     test_id: str
     user_id: str
     variant_id: str
-    session_id: Optional[str] = None
+    session_id: str | None = None
     assigned_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class TestEvent(BaseModel):
@@ -132,20 +128,20 @@ class TestEvent(BaseModel):
     test_id: str
     variant_id: str
     user_id: str
-    session_id: Optional[str] = None
+    session_id: str | None = None
     event_type: str
-    event_data: Dict[str, Any] = Field(default_factory=dict)
+    event_data: dict[str, Any] = Field(default_factory=dict)
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    metrics: Dict[str, float] = Field(default_factory=dict)
+    metrics: dict[str, float] = Field(default_factory=dict)
 
 
 class TestResult(BaseModel):
     """A/B test results and analysis."""
     test_id: str
-    variant_results: Dict[str, Dict[str, Any]] = Field(default_factory=dict)
-    statistical_significance: Dict[str, bool] = Field(default_factory=dict)
-    confidence_intervals: Dict[str, Dict[str, float]] = Field(default_factory=dict)
-    recommendations: List[str] = Field(default_factory=list)
+    variant_results: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    statistical_significance: dict[str, bool] = Field(default_factory=dict)
+    confidence_intervals: dict[str, dict[str, float]] = Field(default_factory=dict)
+    recommendations: list[str] = Field(default_factory=list)
     analysis_date: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
@@ -154,10 +150,10 @@ class ABTestManager:
 
     def __init__(self):
         """Initialize the A/B test manager."""
-        self.tests: Dict[str, ABTest] = {}
-        self.assignments: Dict[str, TestAssignment] = {}
-        self.events: List[TestEvent] = []
-        self.results: Dict[str, TestResult] = {}
+        self.tests: dict[str, ABTest] = {}
+        self.assignments: dict[str, TestAssignment] = {}
+        self.events: list[TestEvent] = []
+        self.results: dict[str, TestResult] = {}
         self.max_events = 100000  # Limit event storage
 
     async def create_test(
@@ -165,18 +161,18 @@ class ABTestManager:
         name: str,
         description: str,
         test_type: TestType,
-        variants: List[Dict[str, Any]],
-        primary_metric: Dict[str, Any],
+        variants: list[dict[str, Any]],
+        primary_metric: dict[str, Any],
         created_by: str,
-        secondary_metrics: Optional[List[Dict[str, Any]]] = None,
+        secondary_metrics: list[dict[str, Any]] | None = None,
         allocation_strategy: VariantAllocation = VariantAllocation.EQUAL,
         traffic_percentage: float = 1.0,
-        duration_days: Optional[int] = None,
-        target_users: Optional[Dict[str, Any]] = None,
+        duration_days: int | None = None,
+        target_users: dict[str, Any] | None = None,
         **kwargs,
     ) -> str:
         """Create a new A/B test.
-        
+
         Args:
             name: Test name
             description: Test description
@@ -190,7 +186,7 @@ class ABTestManager:
             duration_days: Test duration in days
             target_users: User targeting configuration
             **kwargs: Additional test configuration
-            
+
         Returns:
             Test ID
         """
@@ -231,7 +227,7 @@ class ABTestManager:
         self.tests[test.id] = test
 
         logger.info(
-            f"Created A/B test",
+            "Created A/B test",
             test_id=test.id,
             name=name,
             test_type=test_type.value,
@@ -242,10 +238,10 @@ class ABTestManager:
 
     async def start_test(self, test_id: str) -> bool:
         """Start an A/B test.
-        
+
         Args:
             test_id: Test ID
-            
+
         Returns:
             True if started successfully, False otherwise
         """
@@ -259,7 +255,7 @@ class ABTestManager:
 
         test.status = TestStatus.RUNNING
         test.start_date = datetime.now(UTC)
-        
+
         if test.duration_days:
             test.end_date = test.start_date + timedelta(days=test.duration_days)
 
@@ -270,10 +266,10 @@ class ABTestManager:
 
     async def pause_test(self, test_id: str) -> bool:
         """Pause an A/B test.
-        
+
         Args:
             test_id: Test ID
-            
+
         Returns:
             True if paused successfully, False otherwise
         """
@@ -292,10 +288,10 @@ class ABTestManager:
 
     async def stop_test(self, test_id: str) -> bool:
         """Stop an A/B test.
-        
+
         Args:
             test_id: Test ID
-            
+
         Returns:
             True if stopped successfully, False otherwise
         """
@@ -320,17 +316,17 @@ class ABTestManager:
         self,
         test_id: str,
         user_id: str,
-        session_id: Optional[str] = None,
-        user_attributes: Optional[Dict[str, Any]] = None,
-    ) -> Optional[str]:
+        session_id: str | None = None,
+        user_attributes: dict[str, Any] | None = None,
+    ) -> str | None:
         """Assign a user to a test variant.
-        
+
         Args:
             test_id: Test ID
             user_id: User ID
             session_id: Optional session ID
             user_attributes: User attributes for targeting
-            
+
         Returns:
             Variant ID or None if not assigned
         """
@@ -353,7 +349,7 @@ class ABTestManager:
 
         # Assign variant based on strategy
         variant_id = await self._assign_variant_by_strategy(test, user_id, user_attributes)
-        
+
         if variant_id:
             assignment = TestAssignment(
                 test_id=test_id,
@@ -364,7 +360,7 @@ class ABTestManager:
             self.assignments[assignment.id] = assignment
 
             logger.debug(
-                f"Assigned user to variant",
+                "Assigned user to variant",
                 test_id=test_id,
                 user_id=user_id,
                 variant_id=variant_id,
@@ -377,12 +373,12 @@ class ABTestManager:
         test_id: str,
         user_id: str,
         event_type: str,
-        event_data: Optional[Dict[str, Any]] = None,
-        metrics: Optional[Dict[str, float]] = None,
-        session_id: Optional[str] = None,
+        event_data: dict[str, Any] | None = None,
+        metrics: dict[str, float] | None = None,
+        session_id: str | None = None,
     ) -> str:
         """Record an event for A/B test analysis.
-        
+
         Args:
             test_id: Test ID
             user_id: User ID
@@ -390,7 +386,7 @@ class ABTestManager:
             event_data: Event data
             metrics: Metrics to record
             session_id: Optional session ID
-            
+
         Returns:
             Event ID
         """
@@ -417,7 +413,7 @@ class ABTestManager:
             self.events = self.events[-self.max_events:]
 
         logger.debug(
-            f"Recorded test event",
+            "Recorded test event",
             test_id=test_id,
             user_id=user_id,
             event_type=event_type,
@@ -426,33 +422,33 @@ class ABTestManager:
 
         return event.id
 
-    async def get_test_results(self, test_id: str) -> Optional[TestResult]:
+    async def get_test_results(self, test_id: str) -> TestResult | None:
         """Get results for an A/B test.
-        
+
         Args:
             test_id: Test ID
-            
+
         Returns:
             Test results or None if not found
         """
         if test_id not in self.results:
             await self._analyze_test_results(test_id)
-        
+
         return self.results.get(test_id)
 
     async def list_tests(
         self,
-        status: Optional[TestStatus] = None,
-        test_type: Optional[TestType] = None,
-        created_by: Optional[str] = None,
-    ) -> List[ABTest]:
+        status: TestStatus | None = None,
+        test_type: TestType | None = None,
+        created_by: str | None = None,
+    ) -> list[ABTest]:
         """List A/B tests with optional filtering.
-        
+
         Args:
             status: Filter by status
             test_type: Filter by test type
             created_by: Filter by creator
-            
+
         Returns:
             List of tests
         """
@@ -474,13 +470,13 @@ class ABTestManager:
 
     async def get_variant_configuration(
         self, test_id: str, variant_id: str
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Get configuration for a specific variant.
-        
+
         Args:
             test_id: Test ID
             variant_id: Variant ID
-            
+
         Returns:
             Variant configuration or None if not found
         """
@@ -496,11 +492,11 @@ class ABTestManager:
 
     def _should_include_user_in_test(self, test: ABTest, user_id: str) -> bool:
         """Check if user should be included in test based on traffic percentage.
-        
+
         Args:
             test: A/B test
             user_id: User ID
-            
+
         Returns:
             True if user should be included
         """
@@ -513,14 +509,14 @@ class ABTestManager:
         return (hash_value % 100) / 100.0 < test.traffic_percentage
 
     def _matches_targeting_criteria(
-        self, test: ABTest, user_attributes: Dict[str, Any]
+        self, test: ABTest, user_attributes: dict[str, Any]
     ) -> bool:
         """Check if user matches targeting criteria.
-        
+
         Args:
             test: A/B test
             user_attributes: User attributes
-            
+
         Returns:
             True if user matches criteria
         """
@@ -542,15 +538,15 @@ class ABTestManager:
         self,
         test: ABTest,
         user_id: str,
-        user_attributes: Optional[Dict[str, Any]],
-    ) -> Optional[str]:
+        user_attributes: dict[str, Any] | None,
+    ) -> str | None:
         """Assign variant based on allocation strategy.
-        
+
         Args:
             test: A/B test
             user_id: User ID
             user_attributes: User attributes
-            
+
         Returns:
             Variant ID or None
         """
@@ -586,13 +582,13 @@ class ABTestManager:
 
     async def _get_user_assignment(
         self, test_id: str, user_id: str
-    ) -> Optional[TestAssignment]:
+    ) -> TestAssignment | None:
         """Get user's assignment for a test.
-        
+
         Args:
             test_id: Test ID
             user_id: User ID
-            
+
         Returns:
             Assignment or None if not found
         """
@@ -603,7 +599,7 @@ class ABTestManager:
 
     async def _analyze_test_results(self, test_id: str) -> None:
         """Analyze test results and generate statistics.
-        
+
         Args:
             test_id: Test ID
         """
@@ -613,22 +609,22 @@ class ABTestManager:
 
         # Get test events
         test_events = [e for e in self.events if e.test_id == test_id]
-        
+
         # Group by variant
         variant_results = {}
         for variant in test.variants:
             variant_events = [e for e in test_events if e.variant_id == variant.id]
-            
+
             # Calculate basic metrics
             total_events = len(variant_events)
-            unique_users = len(set(e.user_id for e in variant_events))
-            
+            unique_users = len({e.user_id for e in variant_events})
+
             # Calculate metric aggregations
             metrics = {}
             if test.primary_metric.name in variant_events[0].metrics if variant_events else {}:
                 metric_values = [
-                    e.metrics.get(test.primary_metric.name, 0) 
-                    for e in variant_events 
+                    e.metrics.get(test.primary_metric.name, 0)
+                    for e in variant_events
                     if test.primary_metric.name in e.metrics
                 ]
                 if metric_values:
@@ -648,7 +644,7 @@ class ABTestManager:
         # Simple statistical significance check (placeholder)
         statistical_significance = {}
         confidence_intervals = {}
-        
+
         if len(variant_results) >= 2:
             # In a real implementation, you would perform proper statistical tests
             # like t-tests, chi-square tests, or bayesian analysis
@@ -686,18 +682,18 @@ ab_test_manager = ABTestManager()
 # Helper functions for common test scenarios
 async def create_prompt_test(
     name: str,
-    prompt_variants: List[Dict[str, Any]],
+    prompt_variants: list[dict[str, Any]],
     created_by: str,
     duration_days: int = 7,
 ) -> str:
     """Create an A/B test for prompt variations.
-    
+
     Args:
         name: Test name
         prompt_variants: List of prompt configurations
         created_by: User creating the test
         duration_days: Test duration
-        
+
     Returns:
         Test ID
     """
@@ -731,18 +727,18 @@ async def create_prompt_test(
 
 async def create_model_test(
     name: str,
-    model_variants: List[Dict[str, Any]],
+    model_variants: list[dict[str, Any]],
     created_by: str,
     duration_days: int = 14,
 ) -> str:
     """Create an A/B test for model variations.
-    
+
     Args:
         name: Test name
         model_variants: List of model configurations
         created_by: User creating the test
         duration_days: Test duration
-        
+
     Returns:
         Test ID
     """

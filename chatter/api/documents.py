@@ -1,20 +1,25 @@
 """Document management endpoints."""
 
-from fastapi import APIRouter, Depends, File, Form, Query, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    Query,
+    UploadFile,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.core.documents import DocumentError, DocumentService
 from chatter.models.document import DocumentStatus, DocumentType
 from chatter.models.user import User
-from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.document import (
     DocumentChunkResponse,
     DocumentChunksResponse,
     DocumentCreate,
     DocumentDeleteRequest,
-    DocumentGetRequest,
-    DocumentListRequest,
     DocumentListResponse,
     DocumentProcessingRequest,
     DocumentProcessingResponse,
@@ -22,7 +27,6 @@ from chatter.schemas.document import (
     DocumentSearchRequest,
     DocumentSearchResponse,
     DocumentSearchResult,
-    DocumentStatsRequest,
     DocumentStatsResponse,
     DocumentUpdate,
 )
@@ -545,20 +549,20 @@ async def download_document(
         file_path = await document_service.get_document_file_path(
             document_id, current_user.id
         )
-        
+
         if not file_path:
             raise NotFoundProblem(
                 detail="Document file not found",
                 resource_type="document",
                 resource_id=document_id,
             ) from None
-            
+
         return FileResponse(
             path=file_path,
             filename=f"document_{document_id}",
             media_type='application/octet-stream'
         )
-        
+
     except ProblemException:
         raise
     except Exception as e:

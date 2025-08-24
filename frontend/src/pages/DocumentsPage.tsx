@@ -22,7 +22,6 @@ import {
   DialogActions,
   TextField,
   InputAdornment,
-  Grid,
   LinearProgress,
   Paper,
   List,
@@ -30,6 +29,7 @@ import {
   ListItemText,
   Fab,
 } from '@mui/material';
+import Grid from '@mui/material/GridLegacy';
 import {
   CloudUpload as UploadIcon,
   Delete as DeleteIcon,

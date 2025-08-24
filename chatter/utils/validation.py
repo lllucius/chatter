@@ -1,10 +1,10 @@
 """Input validation middleware for API security."""
 
-import re
 import html
-from typing import Any, Dict, List, Optional
+import re
+from typing import Any
+
 from fastapi import HTTPException, Request
-from fastapi.security import HTTPBearer
 from pydantic import BaseModel, ValidationError
 
 from chatter.config import settings
@@ -16,11 +16,11 @@ logger = get_logger(__name__)
 class ValidationRule(BaseModel):
     """Input validation rule definition."""
     name: str
-    pattern: Optional[str] = None
-    max_length: Optional[int] = None
-    min_length: Optional[int] = None
-    allowed_chars: Optional[str] = None
-    forbidden_patterns: List[str] = []
+    pattern: str | None = None
+    max_length: int | None = None
+    min_length: int | None = None
+    allowed_chars: str | None = None
+    forbidden_patterns: list[str] = []
     required: bool = False
     sanitize: bool = True
 
@@ -30,7 +30,7 @@ class InputValidator:
 
     def __init__(self):
         """Initialize the input validator."""
-        self.rules: Dict[str, ValidationRule] = {}
+        self.rules: dict[str, ValidationRule] = {}
         self._setup_default_rules()
 
     def _setup_default_rules(self) -> None:
@@ -137,7 +137,7 @@ class InputValidator:
 
     def add_rule(self, rule: ValidationRule) -> None:
         """Add a custom validation rule.
-        
+
         Args:
             rule: Validation rule to add
         """
@@ -148,14 +148,14 @@ class InputValidator:
         self, value: Any, rule_name: str
     ) -> str:
         """Validate and sanitize input value.
-        
+
         Args:
             value: Value to validate
             rule_name: Name of validation rule to apply
-            
+
         Returns:
             Validated and sanitized value
-            
+
         Raises:
             ValidationError: If validation fails
         """
@@ -163,13 +163,13 @@ class InputValidator:
             raise ValidationError(f"Unknown validation rule: {rule_name}")
 
         rule = self.rules[rule_name]
-        
+
         # Convert to string
         if value is None:
             if rule.required:
                 raise ValidationError(f"{rule.name} is required")
             return ""
-        
+
         str_value = str(value)
 
         # Check required
@@ -206,51 +206,51 @@ class InputValidator:
 
     def _sanitize_value(self, value: str) -> str:
         """Sanitize input value.
-        
+
         Args:
             value: Value to sanitize
-            
+
         Returns:
             Sanitized value
         """
         # HTML escape
         value = html.escape(value)
-        
+
         # Remove null bytes
         value = value.replace('\x00', '')
-        
+
         # Remove control characters except newlines and tabs
         value = re.sub(r'[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]', '', value)
-        
+
         # Normalize whitespace
         value = re.sub(r'\s+', ' ', value).strip()
-        
+
         return value
 
     def validate_dict(
-        self, data: Dict[str, Any], field_rules: Dict[str, str]
-    ) -> Dict[str, Any]:
+        self, data: dict[str, Any], field_rules: dict[str, str]
+    ) -> dict[str, Any]:
         """Validate a dictionary of values.
-        
+
         Args:
             data: Dictionary to validate
             field_rules: Mapping of field names to rule names
-            
+
         Returns:
             Validated and sanitized dictionary
-            
+
         Raises:
             ValidationError: If validation fails
         """
         validated_data = {}
-        
+
         for field_name, rule_name in field_rules.items():
             value = data.get(field_name)
             try:
                 validated_data[field_name] = self.validate_and_sanitize(value, rule_name)
             except ValidationError as e:
                 raise ValidationError(f"Field '{field_name}': {str(e)}")
-        
+
         return validated_data
 
 
@@ -259,44 +259,44 @@ class RateLimitValidator:
 
     def __init__(self):
         """Initialize rate limit validator."""
-        self.request_counts: Dict[str, List[float]] = {}
+        self.request_counts: dict[str, list[float]] = {}
 
     def check_rate_limit(
-        self, 
-        identifier: str, 
-        max_requests: int = None, 
+        self,
+        identifier: str,
+        max_requests: int = None,
         window_seconds: int = None
     ) -> bool:
         """Check if request is within rate limits.
-        
+
         Args:
             identifier: Unique identifier (IP, user ID, etc.)
             max_requests: Maximum requests allowed
             window_seconds: Time window in seconds
-            
+
         Returns:
             True if within limits, False otherwise
         """
         max_requests = max_requests or settings.rate_limit_requests
         window_seconds = window_seconds or settings.rate_limit_window
-        
+
         import time
         current_time = time.time()
-        
+
         # Initialize if new identifier
         if identifier not in self.request_counts:
             self.request_counts[identifier] = []
-        
+
         # Clean old requests outside window
         self.request_counts[identifier] = [
             req_time for req_time in self.request_counts[identifier]
             if current_time - req_time < window_seconds
         ]
-        
+
         # Check if under limit
         if len(self.request_counts[identifier]) >= max_requests:
             return False
-        
+
         # Add current request
         self.request_counts[identifier].append(current_time)
         return True
@@ -314,7 +314,7 @@ class SecurityValidator:
             r"(\%27)|(\')\s*((\%6F)|o|(\%4F))((\%72)|r|(\%52))",
             r"(\%27)|(\')\s*((\%55)|u|(\%75))((\%6E)|n|(\%4E))((\%69)|i|(\%49))((\%6F)|o|(\%4F))((\%6E)|n|(\%4E))",
         ]
-        
+
         self.xss_patterns = [
             r"<script.*?>.*?</script>",
             r"javascript:",
@@ -325,7 +325,7 @@ class SecurityValidator:
             r"<embed.*?>",
             r"<form.*?>",
         ]
-        
+
         self.path_traversal_patterns = [
             r"\.\./",
             r"\.\.\\",
@@ -335,10 +335,10 @@ class SecurityValidator:
 
     def detect_sql_injection(self, value: str) -> bool:
         """Detect potential SQL injection attempts.
-        
+
         Args:
             value: Value to check
-            
+
         Returns:
             True if potential SQL injection detected
         """
@@ -349,10 +349,10 @@ class SecurityValidator:
 
     def detect_xss(self, value: str) -> bool:
         """Detect potential XSS attempts.
-        
+
         Args:
             value: Value to check
-            
+
         Returns:
             True if potential XSS detected
         """
@@ -363,10 +363,10 @@ class SecurityValidator:
 
     def detect_path_traversal(self, value: str) -> bool:
         """Detect potential path traversal attempts.
-        
+
         Args:
             value: Value to check
-            
+
         Returns:
             True if potential path traversal detected
         """
@@ -377,19 +377,19 @@ class SecurityValidator:
 
     def validate_security(self, value: str) -> None:
         """Validate value for security threats.
-        
+
         Args:
             value: Value to validate
-            
+
         Raises:
             ValidationError: If security threat detected
         """
         if self.detect_sql_injection(value):
             raise ValidationError("Potential SQL injection detected")
-        
+
         if self.detect_xss(value):
             raise ValidationError("Potential XSS attempt detected")
-        
+
         if self.detect_path_traversal(value):
             raise ValidationError("Potential path traversal detected")
 
@@ -402,21 +402,21 @@ security_validator = SecurityValidator()
 
 async def validate_request_middleware(request: Request, call_next):
     """Middleware to validate incoming requests.
-    
+
     Args:
         request: FastAPI request object
         call_next: Next middleware in chain
-        
+
     Returns:
         Response from next middleware
-        
+
     Raises:
         HTTPException: If validation fails
     """
     # Get client identifier for rate limiting
     client_ip = request.client.host if request.client else "unknown"
     client_id = client_ip
-    
+
     # Check rate limits
     if not rate_limit_validator.check_rate_limit(client_id):
         logger.warning(f"Rate limit exceeded for client: {client_id}")
@@ -433,22 +433,22 @@ async def validate_request_middleware(request: Request, call_next):
             body = await request.body()
             if body:
                 body_str = body.decode('utf-8')
-                
+
                 # Basic security validation
                 security_validator.validate_security(body_str)
-                
+
                 # Log the request for monitoring
                 logger.debug(
-                    f"Validated request",
+                    "Validated request",
                     method=request.method,
                     url=str(request.url),
                     client_ip=client_ip,
                     body_length=len(body_str),
                 )
-        
+
         except ValidationError as e:
             logger.warning(
-                f"Request validation failed",
+                "Request validation failed",
                 client_ip=client_ip,
                 error=str(e),
                 url=str(request.url),
@@ -459,7 +459,7 @@ async def validate_request_middleware(request: Request, call_next):
             )
         except Exception as e:
             logger.error(
-                f"Error during request validation",
+                "Error during request validation",
                 client_ip=client_ip,
                 error=str(e),
                 url=str(request.url),
@@ -469,46 +469,46 @@ async def validate_request_middleware(request: Request, call_next):
 
     # Continue to next middleware
     response = await call_next(request)
-    
+
     # Add security headers
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
-    
+
     return response
 
 
 def validate_chat_message(message: str) -> str:
     """Validate and sanitize a chat message.
-    
+
     Args:
         message: Chat message to validate
-        
+
     Returns:
         Validated and sanitized message
-        
+
     Raises:
         ValidationError: If validation fails
     """
     return input_validator.validate_and_sanitize(message, "message")
 
 
-def validate_user_input(data: Dict[str, Any]) -> Dict[str, Any]:
+def validate_user_input(data: dict[str, Any]) -> dict[str, Any]:
     """Validate user input data.
-    
+
     Args:
         data: User input data
-        
+
     Returns:
         Validated data
-        
+
     Raises:
         ValidationError: If validation fails
     """
     # Define field validation rules based on common fields
     field_rules = {}
-    
+
     if "username" in data:
         field_rules["username"] = "username"
     if "email" in data:
@@ -525,5 +525,5 @@ def validate_user_input(data: Dict[str, Any]) -> Dict[str, Any]:
         field_rules["filename"] = "filename"
     if "api_key" in data:
         field_rules["api_key"] = "api_key"
-    
+
     return input_validator.validate_dict(data, field_rules)

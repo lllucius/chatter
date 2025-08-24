@@ -64,7 +64,7 @@ class LangGraphWorkflowManager:
                 logger.info("LangGraph Memory checkpointer initialized")
         except Exception as e:
             logger.warning(
-                "Failed to initialize PostgreSQL checkpointer, falling back to memory", 
+                "Failed to initialize PostgreSQL checkpointer, falling back to memory",
                 error=str(e)
             )
             # Always fallback to memory checkpointer if PostgreSQL fails
@@ -73,7 +73,7 @@ class LangGraphWorkflowManager:
                 logger.info("LangGraph Memory checkpointer initialized as fallback")
             except Exception as fallback_error:
                 logger.error(
-                    "Failed to initialize any checkpointer", 
+                    "Failed to initialize any checkpointer",
                     error=str(fallback_error)
                 )
                 self.checkpointer = None
@@ -403,13 +403,13 @@ class LangGraphWorkflowManager:
         branch_point_message_index: int = -1,
     ) -> str:
         """Create a new conversation branch from an existing conversation.
-        
+
         Args:
             workflow: The LangGraph workflow
             parent_thread_id: Thread ID of the parent conversation
             new_thread_id: Optional thread ID for the new branch
             branch_point_message_index: Message index to branch from (-1 for latest)
-            
+
         Returns:
             Thread ID of the new branch
         """
@@ -423,12 +423,12 @@ class LangGraphWorkflowManager:
 
         # Create branched state
         branch_state = dict(parent_state)
-        
+
         # Trim messages to branch point if specified
         if branch_point_message_index >= 0:
             messages = list(parent_state["messages"])
             branch_state["messages"] = messages[:branch_point_message_index + 1]
-        
+
         # Update metadata for branch
         branch_state["conversation_id"] = new_thread_id
         branch_state["parent_conversation_id"] = parent_thread_id
@@ -459,12 +459,12 @@ class LangGraphWorkflowManager:
         fork_id: str | None = None,
     ) -> str:
         """Fork a conversation to create an independent copy.
-        
+
         Args:
             workflow: The LangGraph workflow
             source_thread_id: Thread ID of the source conversation
             fork_id: Optional ID for the fork
-            
+
         Returns:
             Thread ID of the forked conversation
         """
@@ -507,13 +507,13 @@ class LangGraphWorkflowManager:
         max_messages: int = 10,
     ) -> str:
         """Summarize conversation for memory management.
-        
+
         Args:
             workflow: The LangGraph workflow
             thread_id: Thread ID of the conversation
             llm: Language model for summarization
             max_messages: Maximum number of recent messages to include
-            
+
         Returns:
             Conversation summary
         """
@@ -527,13 +527,13 @@ class LangGraphWorkflowManager:
 
         # Get recent messages for summarization
         recent_messages = messages[-max_messages:] if len(messages) > max_messages else messages
-        
+
         # Create summarization prompt
         summary_prompt = "Please provide a concise summary of this conversation:\n\n"
         for msg in recent_messages:
             role = "Human" if isinstance(msg, HumanMessage) else "Assistant"
             summary_prompt += f"{role}: {msg.content}\n"
-        
+
         summary_prompt += "\nSummary:"
 
         # Generate summary
@@ -541,17 +541,17 @@ class LangGraphWorkflowManager:
             summary_message = HumanMessage(content=summary_prompt)
             response = await llm.ainvoke([summary_message])
             summary = response.content if hasattr(response, 'content') else str(response)
-            
+
             # Update conversation state with summary
             config = {"configurable": {"thread_id": thread_id}}
             await workflow.aupdate_state(config, {"conversation_summary": summary})
-            
+
             logger.info(
                 "Generated conversation summary",
                 thread_id=thread_id,
                 summary_length=len(summary),
             )
-            
+
             return summary
         except Exception as e:
             logger.error(
@@ -568,25 +568,25 @@ class LangGraphWorkflowManager:
         memory_window: int = 20,
     ) -> Pregel:
         """Create a conversation workflow with automatic memory management.
-        
+
         Args:
             llm: Language model to use
             system_message: Optional system message
             memory_window: Number of messages to keep in active memory
-            
+
         Returns:
             Compiled LangGraph workflow
         """
         async def manage_memory(state: ConversationState) -> dict[str, Any]:
             """Manage conversation memory by summarizing old messages."""
             messages = state["messages"]
-            
+
             if len(messages) <= memory_window:
                 return {}  # No memory management needed
-            
+
             # Keep recent messages in active memory
             recent_messages = messages[-memory_window:]
-            
+
             # Summarize older messages if not already summarized
             if not state.get("conversation_summary"):
                 older_messages = messages[:-memory_window]
@@ -594,11 +594,11 @@ class LangGraphWorkflowManager:
                 for msg in older_messages:
                     role = "Human" if isinstance(msg, HumanMessage) else "Assistant"
                     summary_prompt += f"{role}: {msg.content}\n"
-                
+
                 try:
                     summary_response = await llm.ainvoke([HumanMessage(content=summary_prompt)])
                     summary = summary_response.content if hasattr(summary_response, 'content') else str(summary_response)
-                    
+
                     return {
                         "messages": recent_messages,
                         "conversation_summary": summary,
@@ -607,20 +607,20 @@ class LangGraphWorkflowManager:
                 except Exception as e:
                     logger.error("Memory management failed", error=str(e))
                     return {"messages": recent_messages}  # Fallback: just trim messages
-            
+
             return {"messages": recent_messages}
 
         async def call_model_with_memory(state: ConversationState) -> dict[str, Any]:
             """Call the language model with memory context."""
             messages = list(state["messages"])
-            
+
             # Add conversation summary as context if available
             if state.get("conversation_summary"):
                 context_msg = SystemMessage(
                     content=f"Previous conversation summary: {state['conversation_summary']}"
                 )
                 messages = [context_msg] + messages
-            
+
             # Add system message if provided
             if system_message:
                 system_msg = SystemMessage(content=system_message)

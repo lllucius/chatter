@@ -1,30 +1,24 @@
 """Webhook management endpoints."""
 
-from typing import Optional
 
 from fastapi import APIRouter, Depends, status
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
 from chatter.schemas.webhooks import (
     WebhookCreateRequest,
     WebhookDeleteResponse,
+    WebhookDeliveriesListResponse,
+    WebhookEventsListResponse,
     WebhookListRequest,
     WebhookListResponse,
     WebhookResponse,
     WebhookTestResponse,
     WebhookUpdateRequest,
-    WebhookEventResponse,
-    WebhookEventsListResponse,
-    WebhookDeliveryResponse,
-    WebhookDeliveriesListResponse,
 )
 from chatter.services.webhooks import WebhookManager
-from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
-    BadRequestProblem,
     InternalServerProblem,
     NotFoundProblem,
 )
@@ -35,7 +29,7 @@ router = APIRouter()
 
 async def get_webhook_manager() -> WebhookManager:
     """Get webhook manager instance.
-    
+
     Returns:
         WebhookManager instance
     """
@@ -49,12 +43,12 @@ async def create_webhook(
     webhook_manager: WebhookManager = Depends(get_webhook_manager),
 ) -> WebhookResponse:
     """Create a new webhook endpoint.
-    
+
     Args:
         webhook_data: Webhook creation data
         current_user: Current authenticated user
         webhook_manager: Webhook manager instance
-        
+
     Returns:
         Created webhook data
     """
@@ -69,11 +63,11 @@ async def create_webhook(
             max_retries=webhook_data.max_retries,
             metadata=webhook_data.metadata,
         )
-        
+
         endpoint = webhook_manager.endpoints.get(endpoint_id)
         if not endpoint:
             raise InternalServerProblem(detail="Failed to retrieve created webhook")
-        
+
         return WebhookResponse(
             id=endpoint.id,
             name=endpoint.name,
@@ -91,7 +85,7 @@ async def create_webhook(
             updated_at=endpoint.updated_at,
             metadata=endpoint.metadata,
         )
-        
+
     except Exception as e:
         logger.error("Failed to create webhook", error=str(e))
         raise InternalServerProblem(detail="Failed to create webhook") from e
@@ -104,25 +98,25 @@ async def list_webhooks(
     webhook_manager: WebhookManager = Depends(get_webhook_manager),
 ) -> WebhookListResponse:
     """List webhook endpoints with optional filtering.
-    
+
     Args:
         request: List request parameters
         current_user: Current authenticated user
         webhook_manager: Webhook manager instance
-        
+
     Returns:
         List of webhook endpoints
     """
     try:
         endpoints = list(webhook_manager.endpoints.values())
-        
+
         # Apply filters
         if request.active is not None:
             endpoints = [e for e in endpoints if e.active == request.active]
-        
+
         if request.event_type is not None:
             endpoints = [e for e in endpoints if request.event_type in e.events]
-        
+
         webhook_responses = []
         for endpoint in endpoints:
             webhook_responses.append(WebhookResponse(
@@ -142,12 +136,12 @@ async def list_webhooks(
                 updated_at=endpoint.updated_at,
                 metadata=endpoint.metadata,
             ))
-        
+
         return WebhookListResponse(
             webhooks=webhook_responses,
             total=len(webhook_responses)
         )
-        
+
     except Exception as e:
         logger.error("Failed to list webhooks", error=str(e))
         raise InternalServerProblem(detail="Failed to list webhooks") from e
@@ -160,12 +154,12 @@ async def get_webhook(
     webhook_manager: WebhookManager = Depends(get_webhook_manager),
 ) -> WebhookResponse:
     """Get webhook endpoint by ID.
-    
+
     Args:
         webhook_id: Webhook ID
         current_user: Current authenticated user
         webhook_manager: Webhook manager instance
-        
+
     Returns:
         Webhook endpoint data
     """
@@ -173,7 +167,7 @@ async def get_webhook(
         endpoint = webhook_manager.endpoints.get(webhook_id)
         if not endpoint:
             raise NotFoundProblem(detail=f"Webhook {webhook_id} not found")
-        
+
         return WebhookResponse(
             id=endpoint.id,
             name=endpoint.name,
@@ -191,7 +185,7 @@ async def get_webhook(
             updated_at=endpoint.updated_at,
             metadata=endpoint.metadata,
         )
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -207,13 +201,13 @@ async def update_webhook(
     webhook_manager: WebhookManager = Depends(get_webhook_manager),
 ) -> WebhookResponse:
     """Update a webhook endpoint.
-    
+
     Args:
         webhook_id: Webhook ID
         webhook_data: Webhook update data
         current_user: Current authenticated user
         webhook_manager: Webhook manager instance
-        
+
     Returns:
         Updated webhook data
     """
@@ -221,18 +215,18 @@ async def update_webhook(
         endpoint = webhook_manager.endpoints.get(webhook_id)
         if not endpoint:
             raise NotFoundProblem(detail=f"Webhook {webhook_id} not found")
-        
+
         # Update endpoint with provided data
         update_data = webhook_data.model_dump(exclude_unset=True)
-        
+
         for field, value in update_data.items():
             if hasattr(endpoint, field):
                 setattr(endpoint, field, value)
-        
+
         # Update timestamp
         from datetime import UTC, datetime
         endpoint.updated_at = datetime.now(UTC)
-        
+
         return WebhookResponse(
             id=endpoint.id,
             name=endpoint.name,
@@ -250,7 +244,7 @@ async def update_webhook(
             updated_at=endpoint.updated_at,
             metadata=endpoint.metadata,
         )
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -265,27 +259,27 @@ async def delete_webhook(
     webhook_manager: WebhookManager = Depends(get_webhook_manager),
 ) -> WebhookDeleteResponse:
     """Delete a webhook endpoint.
-    
+
     Args:
         webhook_id: Webhook ID
         current_user: Current authenticated user
         webhook_manager: Webhook manager instance
-        
+
     Returns:
         Deletion result
     """
     try:
         if webhook_id not in webhook_manager.endpoints:
             raise NotFoundProblem(detail=f"Webhook {webhook_id} not found")
-        
+
         # Remove from endpoints
         del webhook_manager.endpoints[webhook_id]
-        
+
         return WebhookDeleteResponse(
             success=True,
             message=f"Webhook {webhook_id} deleted successfully"
         )
-        
+
     except NotFoundProblem:
         raise
     except Exception as e:
@@ -300,18 +294,18 @@ async def test_webhook(
     webhook_manager: WebhookManager = Depends(get_webhook_manager),
 ) -> WebhookTestResponse:
     """Test a webhook endpoint by sending a test event.
-    
+
     Args:
         webhook_id: Webhook ID
         current_user: Current authenticated user
         webhook_manager: Webhook manager instance
-        
+
     Returns:
         Test result
     """
     try:
         result = await webhook_manager.test_endpoint(webhook_id)
-        
+
         return WebhookTestResponse(
             success=result["success"],
             status_code=result.get("status_code"),
@@ -319,7 +313,7 @@ async def test_webhook(
             response_time=result.get("response_time"),
             error=result.get("error"),
         )
-        
+
     except Exception as e:
         logger.error("Failed to test webhook", webhook_id=webhook_id, error=str(e))
         return WebhookTestResponse(
@@ -334,11 +328,11 @@ async def list_webhook_events(
     webhook_manager: WebhookManager = Depends(get_webhook_manager),
 ) -> WebhookEventsListResponse:
     """List recent webhook events.
-    
+
     Args:
         current_user: Current authenticated user
         webhook_manager: Webhook manager instance
-        
+
     Returns:
         List of recent webhook events
     """
@@ -346,12 +340,12 @@ async def list_webhook_events(
         # This would need to be implemented in the webhook manager
         # For now, return a placeholder response
         events = []
-        
+
         return WebhookEventsListResponse(
             events=events,
             total=len(events)
         )
-        
+
     except Exception as e:
         logger.error("Failed to list webhook events", error=str(e))
         raise InternalServerProblem(detail="Failed to list webhook events") from e
@@ -359,17 +353,17 @@ async def list_webhook_events(
 
 @router.get("/deliveries/list", response_model=WebhookDeliveriesListResponse)
 async def list_webhook_deliveries(
-    webhook_id: Optional[str] = None,
+    webhook_id: str | None = None,
     current_user: User = Depends(get_current_user),
     webhook_manager: WebhookManager = Depends(get_webhook_manager),
 ) -> WebhookDeliveriesListResponse:
     """List webhook delivery attempts.
-    
+
     Args:
         webhook_id: Optional webhook ID to filter by
         current_user: Current authenticated user
         webhook_manager: Webhook manager instance
-        
+
     Returns:
         List of webhook deliveries
     """
@@ -377,12 +371,12 @@ async def list_webhook_deliveries(
         # This would need to be implemented in the webhook manager
         # For now, return a placeholder response
         deliveries = []
-        
+
         return WebhookDeliveriesListResponse(
             deliveries=deliveries,
             total=len(deliveries)
         )
-        
+
     except Exception as e:
         logger.error("Failed to list webhook deliveries", error=str(e))
         raise InternalServerProblem(detail="Failed to list webhook deliveries") from e

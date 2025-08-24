@@ -17,7 +17,6 @@ import {
   Tooltip,
   Alert,
   CircularProgress,
-  Drawer,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -25,6 +24,7 @@ import {
   FormControlLabel,
   Switch,
   Divider,
+  Toolbar,
 } from '@mui/material';
 import {
   Send as SendIcon,
@@ -39,6 +39,8 @@ import {
   TextSnippet as PromptIcon,
   AccountBox as ProfileIcon,
   Stream as StreamIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
@@ -52,6 +54,7 @@ interface ChatMessage {
 }
 
 const rightSidebarWidth = 320;
+const rightSidebarCollapsedWidth = 64;
 
 const ChatPage: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -69,6 +72,7 @@ const ChatPage: React.FC = () => {
   
   // Right sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [expandedPanel, setExpandedPanel] = useState<string>('profile');
   
   // Chat configuration state
@@ -227,14 +231,16 @@ const ChatPage: React.FC = () => {
     setExpandedPanel(isExpanded ? panel : '');
   };
 
+  const currentRightSidebarWidth = sidebarOpen ? (sidebarCollapsed ? rightSidebarCollapsedWidth : rightSidebarWidth) : 0;
+
   return (
-    <Box sx={{ display: 'flex', height: 'calc(100vh - 80px)' }}>
+    <Box sx={{ display: 'flex', height: '100vh' }}>
       {/* Main Chat Area */}
       <Box sx={{ 
         flexGrow: 1, 
         display: 'flex', 
         flexDirection: 'column',
-        width: sidebarOpen ? `calc(100% - ${rightSidebarWidth}px)` : '100%',
+        width: sidebarOpen ? `calc(100% - ${currentRightSidebarWidth}px)` : '100%',
         transition: (theme) => theme.transitions.create('width', {
           easing: theme.transitions.easing.sharp,
           duration: theme.transitions.duration.leavingScreen,
@@ -417,206 +423,280 @@ const ChatPage: React.FC = () => {
       </Box>
 
       {/* Right Sidebar - Configuration Panel */}
-      <Drawer
-        variant="persistent"
-        anchor="right"
-        open={sidebarOpen}
-        sx={{
-          width: rightSidebarWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: rightSidebarWidth,
-            boxSizing: 'border-box',
-            position: 'relative',
-            border: 'none',
+      {sidebarOpen && (
+        <Box
+          sx={{
+            width: currentRightSidebarWidth,
+            flexShrink: 0,
             borderLeft: '1px solid',
             borderColor: 'divider',
-          },
-        }}
-      >
-        <Box sx={{ p: 2 }}>
-          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-            <SettingsIcon sx={{ mr: 1 }} />
-            Chat Configuration
-          </Typography>
-          
-          {/* Profile Configuration */}
-          <Accordion expanded={expandedPanel === 'profile'} onChange={handlePanelChange('profile')}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <ProfileIcon sx={{ mr: 1 }} />
-              <Typography>Profile Settings</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-                <InputLabel>AI Profile</InputLabel>
-                <Select
-                  value={selectedProfile}
-                  label="AI Profile"
-                  onChange={(e) => setSelectedProfile(e.target.value)}
-                >
-                  {profiles.map((profile) => (
-                    <MenuItem key={profile.id} value={profile.id}>
-                      {profile.name} ({profile.llm_model})
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              
-              <Typography gutterBottom>Temperature: {temperature}</Typography>
-              <Slider
-                value={temperature}
-                onChange={(_, value) => setTemperature(value as number)}
-                min={0}
-                max={2}
-                step={0.1}
-                marks={[
-                  { value: 0, label: 'Precise' },
-                  { value: 1, label: 'Balanced' },
-                  { value: 2, label: 'Creative' },
-                ]}
-                sx={{ mb: 2 }}
-              />
-              
-              <Typography gutterBottom>Max Tokens: {maxTokens}</Typography>
-              <Slider
-                value={maxTokens}
-                onChange={(_, value) => setMaxTokens(value as number)}
-                min={256}
-                max={4096}
-                step={256}
-                marks={[
-                  { value: 256, label: '256' },
-                  { value: 2048, label: '2K' },
-                  { value: 4096, label: '4K' },
-                ]}
-              />
-            </AccordionDetails>
-          </Accordion>
-
-          {/* Prompt Configuration */}
-          <Accordion expanded={expandedPanel === 'prompts'} onChange={handlePanelChange('prompts')}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <PromptIcon sx={{ mr: 1 }} />
-              <Typography>Prompt Templates</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-                <InputLabel>Prompt Template</InputLabel>
-                <Select
-                  value={selectedPrompt}
-                  label="Prompt Template"
-                  onChange={(e) => setSelectedPrompt(e.target.value)}
-                >
-                  <MenuItem value="">None</MenuItem>
-                  {prompts.map((prompt) => (
-                    <MenuItem key={prompt.id} value={prompt.id}>
-                      {prompt.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {selectedPrompt && (
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    {prompts.find(p => p.id === selectedPrompt)?.content?.substring(0, 100)}...
-                  </Typography>
-                </Box>
-              )}
-            </AccordionDetails>
-          </Accordion>
-
-          {/* Knowledge Base Configuration */}
-          <Accordion expanded={expandedPanel === 'knowledge'} onChange={handlePanelChange('knowledge')}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <DocumentIcon sx={{ mr: 1 }} />
-              <Typography>Knowledge Base</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <FormControlLabel
-                control={
-                  <Switch 
-                    checked={enableRetrieval} 
-                    onChange={(e) => setEnableRetrieval(e.target.checked)}
-                  />
-                }
-                label="Enable Document Retrieval"
-                sx={{ mb: 2 }}
-              />
-              
-              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
-                <InputLabel>Selected Documents</InputLabel>
-                <Select
-                  multiple
-                  value={selectedDocuments}
-                  label="Selected Documents"
-                  onChange={(e) => setSelectedDocuments(e.target.value as string[])}
-                  renderValue={(selected) => (
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {(selected as string[]).map((value) => {
-                        const doc = documents.find(d => d.id === value);
-                        return (
-                          <Chip
-                            key={value}
-                            label={doc?.title || value}
-                            size="small"
-                            variant="outlined"
-                          />
-                        );
-                      })}
-                    </Box>
-                  )}
-                >
-                  {documents.map((document) => (
-                    <MenuItem key={document.id} value={document.id}>
-                      {document.title}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              
-              <Typography variant="body2" color="text.secondary">
-                {selectedDocuments.length} document(s) selected for context
+            bgcolor: 'background.paper',
+            transition: (theme) => theme.transitions.create('width', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          {/* Header */}
+          <Toolbar sx={{ justifyContent: 'space-between', borderBottom: '1px solid', borderColor: 'divider' }}>
+            {!sidebarCollapsed && (
+              <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', fontWeight: 'bold' }}>
+                <SettingsIcon sx={{ mr: 1 }} />
+                Chat Configuration
               </Typography>
-            </AccordionDetails>
-          </Accordion>
+            )}
+            <IconButton onClick={() => setSidebarCollapsed(!sidebarCollapsed)} size="small">
+              {sidebarCollapsed ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+            </IconButton>
+          </Toolbar>
 
-          {/* Advanced Settings */}
-          <Accordion expanded={expandedPanel === 'advanced'} onChange={handlePanelChange('advanced')}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <SpeedIcon sx={{ mr: 1 }} />
-              <Typography>Advanced Settings</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              <FormControlLabel
-                control={
-                  <Switch 
-                    checked={streamingEnabled} 
-                    onChange={(e) => setStreamingEnabled(e.target.checked)}
-                  />
-                }
-                label="Streaming Responses"
-                sx={{ mb: 2 }}
-              />
-              
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {streamingEnabled 
-                  ? 'Responses will be streamed in real-time' 
-                  : 'Responses will be delivered all at once'
-                }
-              </Typography>
-              
-              <Button
-                variant="outlined"
-                fullWidth
-                onClick={startNewConversation}
-                startIcon={<RefreshIcon />}
-              >
-                Apply Settings & New Chat
-              </Button>
-            </AccordionDetails>
-          </Accordion>
+          {/* Configuration Content */}
+          <Box sx={{ flexGrow: 1, overflow: 'auto', p: sidebarCollapsed ? 1 : 2 }}>
+            {!sidebarCollapsed ? (
+              <>
+                {/* Profile Configuration */}
+                <Accordion expanded={expandedPanel === 'profile'} onChange={handlePanelChange('profile')}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <ProfileIcon sx={{ mr: 1 }} />
+                    <Typography>Profile Settings</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                      <InputLabel>AI Profile</InputLabel>
+                      <Select
+                        value={selectedProfile}
+                        label="AI Profile"
+                        onChange={(e) => setSelectedProfile(e.target.value)}
+                      >
+                        {profiles.map((profile) => (
+                          <MenuItem key={profile.id} value={profile.id}>
+                            {profile.name} ({profile.llm_model})
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    
+                    <Typography gutterBottom>Temperature: {temperature}</Typography>
+                    <Slider
+                      value={temperature}
+                      onChange={(_, value) => setTemperature(value as number)}
+                      min={0}
+                      max={2}
+                      step={0.1}
+                      marks={[
+                        { value: 0, label: 'Precise' },
+                        { value: 1, label: 'Balanced' },
+                        { value: 2, label: 'Creative' },
+                      ]}
+                      sx={{ mb: 2 }}
+                    />
+                    
+                    <Typography gutterBottom>Max Tokens: {maxTokens}</Typography>
+                    <Slider
+                      value={maxTokens}
+                      onChange={(_, value) => setMaxTokens(value as number)}
+                      min={256}
+                      max={4096}
+                      step={256}
+                      marks={[
+                        { value: 256, label: '256' },
+                        { value: 2048, label: '2K' },
+                        { value: 4096, label: '4K' },
+                      ]}
+                    />
+                  </AccordionDetails>
+                </Accordion>
+
+                {/* Prompt Configuration */}
+                <Accordion expanded={expandedPanel === 'prompts'} onChange={handlePanelChange('prompts')}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <PromptIcon sx={{ mr: 1 }} />
+                    <Typography>Prompt Templates</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                      <InputLabel>Prompt Template</InputLabel>
+                      <Select
+                        value={selectedPrompt}
+                        label="Prompt Template"
+                        onChange={(e) => setSelectedPrompt(e.target.value)}
+                      >
+                        <MenuItem value="">None</MenuItem>
+                        {prompts.map((prompt) => (
+                          <MenuItem key={prompt.id} value={prompt.id}>
+                            {prompt.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    {selectedPrompt && (
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {prompts.find(p => p.id === selectedPrompt)?.content?.substring(0, 100)}...
+                        </Typography>
+                      </Box>
+                    )}
+                  </AccordionDetails>
+                </Accordion>
+
+                {/* Knowledge Base Configuration */}
+                <Accordion expanded={expandedPanel === 'knowledge'} onChange={handlePanelChange('knowledge')}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <DocumentIcon sx={{ mr: 1 }} />
+                    <Typography>Knowledge Base</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <FormControlLabel
+                      control={
+                        <Switch 
+                          checked={enableRetrieval} 
+                          onChange={(e) => setEnableRetrieval(e.target.checked)}
+                        />
+                      }
+                      label="Enable Document Retrieval"
+                      sx={{ mb: 2 }}
+                    />
+                    
+                    <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                      <InputLabel>Selected Documents</InputLabel>
+                      <Select
+                        multiple
+                        value={selectedDocuments}
+                        label="Selected Documents"
+                        onChange={(e) => setSelectedDocuments(e.target.value as string[])}
+                        renderValue={(selected) => (
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                            {(selected as string[]).map((value) => {
+                              const doc = documents.find(d => d.id === value);
+                              return (
+                                <Chip
+                                  key={value}
+                                  label={doc?.title || value}
+                                  size="small"
+                                  variant="outlined"
+                                />
+                              );
+                            })}
+                          </Box>
+                        )}
+                      >
+                        {documents.map((document) => (
+                          <MenuItem key={document.id} value={document.id}>
+                            {document.title}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                    
+                    <Typography variant="body2" color="text.secondary">
+                      {selectedDocuments.length} document(s) selected for context
+                    </Typography>
+                  </AccordionDetails>
+                </Accordion>
+
+                {/* Advanced Settings */}
+                <Accordion expanded={expandedPanel === 'advanced'} onChange={handlePanelChange('advanced')}>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <SpeedIcon sx={{ mr: 1 }} />
+                    <Typography>Advanced Settings</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <FormControlLabel
+                      control={
+                        <Switch 
+                          checked={streamingEnabled} 
+                          onChange={(e) => setStreamingEnabled(e.target.checked)}
+                        />
+                      }
+                      label="Streaming Responses"
+                      sx={{ mb: 2 }}
+                    />
+                    
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {streamingEnabled 
+                        ? 'Responses will be streamed in real-time' 
+                        : 'Responses will be delivered all at once'
+                      }
+                    </Typography>
+                    
+                    <Button
+                      variant="outlined"
+                      fullWidth
+                      onClick={startNewConversation}
+                      startIcon={<RefreshIcon />}
+                    >
+                      Apply Settings & New Chat
+                    </Button>
+                  </AccordionDetails>
+                </Accordion>
+              </>
+            ) : (
+              /* Collapsed Sidebar Icons */
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+                <Tooltip title="Profile Settings" placement="left">
+                  <IconButton 
+                    onClick={() => {
+                      setSidebarCollapsed(false);
+                      setExpandedPanel('profile');
+                    }}
+                    sx={{ 
+                      borderRadius: 1,
+                      bgcolor: expandedPanel === 'profile' ? 'action.selected' : 'transparent',
+                    }}
+                  >
+                    <ProfileIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Prompt Templates" placement="left">
+                  <IconButton 
+                    onClick={() => {
+                      setSidebarCollapsed(false);
+                      setExpandedPanel('prompts');
+                    }}
+                    sx={{ 
+                      borderRadius: 1,
+                      bgcolor: expandedPanel === 'prompts' ? 'action.selected' : 'transparent',
+                    }}
+                  >
+                    <PromptIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Knowledge Base" placement="left">
+                  <IconButton 
+                    onClick={() => {
+                      setSidebarCollapsed(false);
+                      setExpandedPanel('knowledge');
+                    }}
+                    sx={{ 
+                      borderRadius: 1,
+                      bgcolor: expandedPanel === 'knowledge' ? 'action.selected' : 'transparent',
+                    }}
+                  >
+                    <DocumentIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Advanced Settings" placement="left">
+                  <IconButton 
+                    onClick={() => {
+                      setSidebarCollapsed(false);
+                      setExpandedPanel('advanced');
+                    }}
+                    sx={{ 
+                      borderRadius: 1,
+                      bgcolor: expandedPanel === 'advanced' ? 'action.selected' : 'transparent',
+                    }}
+                  >
+                    <SpeedIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            )}
+          </Box>
         </Box>
-      </Drawer>
+      )}
     </Box>
   );
 };

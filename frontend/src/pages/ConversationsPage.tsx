@@ -20,12 +20,10 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  List,
-  ListItem,
-  ListItemText,
-  Divider,
   TextField,
   InputAdornment,
+  Avatar,
+  Paper,
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
@@ -128,6 +126,19 @@ const ConversationsPage: React.FC = () => {
         return <BotIcon fontSize="small" />;
       default:
         return <MessageIcon fontSize="small" />;
+    }
+  };
+
+  const getMessageColor = (role: string) => {
+    switch (role) {
+      case 'user':
+        return 'primary.main';
+      case 'assistant':
+        return 'secondary.main';
+      case 'system':
+        return 'info.main';
+      default:
+        return 'grey.500';
     }
   };
 
@@ -299,67 +310,81 @@ const ConversationsPage: React.FC = () => {
             ID: {selectedConversation?.id}
           </Typography>
         </DialogTitle>
-        <DialogContent dividers>
+        <DialogContent sx={{ p: 0 }}>
           {loadingMessages ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
               <CircularProgress />
             </Box>
           ) : (
-            <List sx={{ maxHeight: 400, overflow: 'auto' }}>
+            <Box sx={{ 
+              maxHeight: 400, 
+              overflow: 'auto', 
+              p: 2,
+              display: 'flex',
+              flexDirection: 'column',
+            }}>
               {conversationMessages.map((message, index) => (
-                <React.Fragment key={message.id}>
-                  <ListItem alignItems="flex-start">
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', width: '100%' }}>
-                      <Box sx={{ mr: 2, mt: 0.5 }}>
-                        {getMessageIcon(message.role)}
-                      </Box>
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                          <Chip
-                            label={message.role}
-                            size="small"
-                            color={message.role === 'user' ? 'primary' : 'secondary'}
-                            sx={{ mr: 1 }}
-                          />
-                          <Typography variant="caption" color="text.secondary">
-                            {format(new Date(message.created_at), 'MMM dd, yyyy HH:mm:ss')}
-                          </Typography>
-                          {message.total_tokens && (
-                            <Chip
-                              label={`${message.total_tokens} tokens`}
-                              size="small"
-                              variant="outlined"
-                              sx={{ ml: 1 }}
-                            />
-                          )}
-                        </Box>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            whiteSpace: 'pre-wrap',
-                            bgcolor: message.role === 'user' ? 'primary.light' : 'grey.100',
-                            p: 1.5,
-                            borderRadius: 1,
-                            color: message.role === 'user' ? 'primary.contrastText' : 'text.primary',
-                          }}
-                        >
-                          {message.content}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </ListItem>
-                  {index < conversationMessages.length - 1 && <Divider />}
-                </React.Fragment>
+                <Box
+                  key={message.id}
+                  sx={{
+                    display: 'flex',
+                    mb: 2,
+                    alignItems: 'flex-start',
+                    ...(message.role === 'user' && {
+                      flexDirection: 'row-reverse',
+                    }),
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: getMessageColor(message.role),
+                      ...(message.role === 'user' ? { ml: 1 } : { mr: 1 }),
+                    }}
+                  >
+                    {getMessageIcon(message.role)}
+                  </Avatar>
+                  <Paper
+                    sx={{
+                      p: 2,
+                      maxWidth: '70%',
+                      bgcolor: message.role === 'user' 
+                        ? 'primary.light' 
+                        : (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
+                      color: message.role === 'user' 
+                        ? 'primary.contrastText' 
+                        : 'text.primary',
+                    }}
+                  >
+                    <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                      {message.content}
+                    </Typography>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        display: 'block',
+                        mt: 1,
+                        opacity: 0.7,
+                      }}
+                    >
+                      {format(new Date(message.created_at), 'HH:mm:ss')}
+                    </Typography>
+                    {message.total_tokens && (
+                      <Chip
+                        label={`${message.total_tokens} tokens`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ mt: 1 }}
+                      />
+                    )}
+                  </Paper>
+                </Box>
               ))}
               {conversationMessages.length === 0 && (
-                <ListItem>
-                  <ListItemText
-                    primary="No messages found"
-                    secondary="This conversation appears to be empty"
-                  />
-                </ListItem>
+                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+                  No messages in this conversation
+                </Typography>
               )}
-            </List>
+            </Box>
           )}
         </DialogContent>
         <DialogActions>

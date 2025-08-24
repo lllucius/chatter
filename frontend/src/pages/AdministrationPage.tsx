@@ -37,11 +37,14 @@ import {
   Upload as UploadIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material';
+import { chatterSDK } from '../services/chatter-sdk';
 
 const AdministrationPage: React.FC = () => {
   const [expanded, setExpanded] = useState<string | false>('backups');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'user' | 'tool' | 'backup' | 'plugin'>('user');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   
   // Form state
   const [formData, setFormData] = useState({
@@ -66,6 +69,7 @@ const AdministrationPage: React.FC = () => {
   const openDialog = (type: 'user' | 'tool' | 'backup' | 'plugin') => {
     setDialogType(type);
     setDialogOpen(true);
+    setError(''); // Clear any existing errors
     // Reset form data
     setFormData({
       userId: '',
@@ -89,60 +93,146 @@ const AdministrationPage: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
+      setLoading(true);
+      setError('');
+      
       switch (dialogType) {
         case 'user':
-          // TODO: Implement user creation using AuthenticationApi.registerApiV1AuthRegisterPost
-          console.log('Creating user:', { 
-            username: formData.userId, 
-            email: formData.email, 
-            password: formData.password 
+          await chatterSDK.auth.registerApiV1AuthRegisterPost({
+            userCreate: {
+              username: formData.userId,
+              email: formData.email,
+              password: formData.password,
+            }
           });
-          alert('User creation functionality will be implemented with API integration');
+          alert('User created successfully!');
           break;
+          
         case 'tool':
-          // TODO: Implement tool server creation using ToolServersApi.createToolServerApiV1ToolserversServersPost
-          console.log('Creating tool server:', { 
-            name: formData.serverName, 
-            url: formData.serverUrl, 
-            description: formData.description 
+          await chatterSDK.toolServers.createToolServerApiV1ToolserversServersPost({
+            toolServerCreate: {
+              name: formData.serverName,
+              display_name: formData.serverName,
+              command: formData.serverUrl, // Use serverUrl as command for now
+              description: formData.description,
+            }
           });
-          alert('Tool server creation functionality will be implemented with API integration');
+          alert('Tool server created successfully!');
           break;
+          
         case 'backup':
-          // TODO: Implement backup creation using DataManagementApi.createBackupApiV1DataBackupPost
-          console.log('Creating backup:', { 
-            name: formData.backupName, 
-            includeUserData: formData.includeUserData, 
-            includeDocuments: formData.includeDocuments, 
-            includeConfigurations: formData.includeConfigurations 
+          await chatterSDK.dataManagement.createBackupApiV1DataBackupPost({
+            backupRequest: {
+              name: formData.backupName,
+              description: formData.description,
+              backup_type: 'full' as any, // Use 'full' as default backup type
+              include_files: formData.includeDocuments,
+            }
           });
-          alert('Backup creation functionality will be implemented with API integration');
+          alert('Backup created successfully!');
           break;
+          
         case 'plugin':
-          // TODO: Implement plugin installation
-          console.log('Installing plugin:', { url: formData.pluginUrl });
-          alert('Plugin installation functionality will be implemented with API integration');
+          // For plugin installation, we'll simulate since there might not be a direct API
+          // This would typically involve downloading and installing from URL
+          alert('Plugin installation functionality would be implemented based on plugin architecture');
           break;
       }
+      
       setDialogOpen(false);
-    } catch (error) {
+      
+      // Reset form
+      setFormData({
+        userId: '',
+        email: '',
+        password: '',
+        role: 'user',
+        serverName: '',
+        serverUrl: '',
+        description: '',
+        backupName: '',
+        includeUserData: true,
+        includeDocuments: true,
+        includeConfigurations: true,
+        pluginUrl: '',
+      });
+      
+    } catch (error: any) {
       console.error('Error submitting form:', error);
-      alert('An error occurred. Please try again.');
+      setError(error.response?.data?.detail || error.message || 'An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteAction = (type: string, id: string) => {
+  const handleDeleteAction = async (type: string, id: string) => {
     if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
-      // TODO: Implement delete functionality based on type
-      console.log(`Deleting ${type} with id:`, id);
-      alert(`${type} deletion functionality will be implemented with API integration`);
+      try {
+        setLoading(true);
+        setError('');
+        
+        switch (type) {
+          case 'user':
+            // Note: There might not be a user deletion API in the current SDK
+            // This would typically require admin privileges
+            alert('User deletion functionality requires implementation of admin user management API');
+            break;
+            
+          case 'tool server':
+            await chatterSDK.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
+              serverId: id
+            });
+            alert('Tool server deleted successfully!');
+            break;
+            
+          case 'backup':
+            // Note: Check if backup deletion API exists
+            alert('Backup deletion functionality would be implemented with backup management API');
+            break;
+            
+          case 'plugin':
+            alert('Plugin deletion functionality would be implemented based on plugin architecture');
+            break;
+        }
+      } catch (error: any) {
+        console.error(`Error deleting ${type}:`, error);
+        setError(error.response?.data?.detail || error.message || `Failed to delete ${type}`);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
-  const handleEditAction = (type: string, id: string) => {
-    // TODO: Implement edit functionality based on type
-    console.log(`Editing ${type} with id:`, id);
-    alert(`${type} editing functionality will be implemented with API integration`);
+  const handleEditAction = async (type: string, id: string) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      switch (type) {
+        case 'user':
+          alert('User editing functionality requires implementation of admin user management API');
+          break;
+          
+        case 'tool server':
+          // For editing, we would typically fetch the current data and populate the form
+          // then call updateToolServerApiV1ToolserversServersServerIdPut
+          alert('Tool server editing functionality would open edit dialog with current data');
+          break;
+          
+        case 'backup':
+          alert('Backup editing functionality would be implemented with backup management API');
+          break;
+          
+        case 'plugin':
+          alert('Plugin editing functionality would be implemented based on plugin architecture');
+          break;
+      }
+    } catch (error: any) {
+      console.error(`Error editing ${type}:`, error);
+      setError(error.response?.data?.detail || error.message || `Failed to edit ${type}`);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -150,6 +240,12 @@ const AdministrationPage: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3, fontWeight: 'bold' }}>
         Administration Dashboard
       </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {error}
+        </Alert>
+      )}
 
       <Alert severity="info" sx={{ mb: 3 }}>
         Manage system components, users, and configurations from this central dashboard.
@@ -546,9 +642,11 @@ const AdministrationPage: React.FC = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmit}>
-            {dialogType === 'backup' ? 'Create' : 'Add'}
+          <Button onClick={() => setDialogOpen(false)} disabled={loading}>
+            Cancel
+          </Button>
+          <Button variant="contained" onClick={handleSubmit} disabled={loading}>
+            {loading ? 'Processing...' : (dialogType === 'backup' ? 'Create' : 'Add')}
           </Button>
         </DialogActions>
       </Dialog>

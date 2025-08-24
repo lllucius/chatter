@@ -41,6 +41,7 @@ const PromptsPage: React.FC = () => {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [dialogError, setDialogError] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -78,6 +79,7 @@ const PromptsPage: React.FC = () => {
   };
 
   const handleOpenDialog = (prompt?: Prompt) => {
+    setDialogError(''); // Clear any previous dialog errors
     if (prompt) {
       setEditingPrompt(prompt);
       setFormData({
@@ -105,6 +107,7 @@ const PromptsPage: React.FC = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
+      setDialogError(''); // Clear any previous dialog errors
       if (editingPrompt) {
         const response = await chatterSDK.prompts.updatePromptApiV1PromptsPromptIdPut({ promptId: editingPrompt.id, promptUpdate: formData as ApiV1PromptsIdPutRequest });
         setPrompts(prev => prev.map(p => p.id === editingPrompt.id ? response.data : p));
@@ -114,7 +117,7 @@ const PromptsPage: React.FC = () => {
       }
       setDialogOpen(false);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to save prompt');
+      setDialogError(err.response?.data?.detail || 'Failed to save prompt');
     } finally {
       setSaving(false);
     }
@@ -280,6 +283,11 @@ const PromptsPage: React.FC = () => {
           {editingPrompt ? 'Edit Prompt' : 'Create Prompt'}
         </DialogTitle>
         <DialogContent>
+          {dialogError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {dialogError}
+            </Alert>
+          )}
           <Grid container spacing={3} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
               <TextField

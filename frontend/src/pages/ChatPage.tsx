@@ -17,14 +17,28 @@ import {
   Tooltip,
   Alert,
   CircularProgress,
+  Drawer,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Slider,
+  FormControlLabel,
+  Switch,
+  Divider,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
 import {
   Send as SendIcon,
   Person as PersonIcon,
   SmartToy as BotIcon,
   Refresh as RefreshIcon,
   Settings as SettingsIcon,
+  ExpandMore as ExpandMoreIcon,
+  Tune as TuneIcon,
+  Speed as SpeedIcon,
+  Description as DocumentIcon,
+  TextSnippet as PromptIcon,
+  AccountBox as ProfileIcon,
+  Stream as StreamIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
@@ -36,6 +50,8 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
 }
+
+const rightSidebarWidth = 320;
 
 const ChatPage: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -50,6 +66,16 @@ const ChatPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Right sidebar state
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [expandedPanel, setExpandedPanel] = useState<string>('profile');
+  
+  // Chat configuration state
+  const [streamingEnabled, setStreamingEnabled] = useState(false);
+  const [temperature, setTemperature] = useState(0.7);
+  const [maxTokens, setMaxTokens] = useState(2048);
+  const [enableRetrieval, setEnableRetrieval] = useState(true);
 
   useEffect(() => {
     loadData();
@@ -197,28 +223,235 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  const handlePanelChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+    setExpandedPanel(isExpanded ? panel : '');
+  };
+
   return (
-    <Box sx={{ height: 'calc(100vh - 120px)', display: 'flex', flexDirection: 'column' }}>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3, fontWeight: 'bold' }}>
-        Chat Interface
-      </Typography>
+    <Box sx={{ display: 'flex', height: 'calc(100vh - 120px)' }}>
+      {/* Main Chat Area */}
+      <Box sx={{ 
+        flexGrow: 1, 
+        display: 'flex', 
+        flexDirection: 'column',
+        width: sidebarOpen ? `calc(100% - ${rightSidebarWidth}px)` : '100%',
+        transition: (theme) => theme.transitions.create('width', {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen,
+        }),
+      }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h4" component="h1" sx={{ flexGrow: 1, fontWeight: 'bold' }}>
+            Chat Interface
+          </Typography>
+          <Tooltip title={sidebarOpen ? 'Hide Settings' : 'Show Settings'}>
+            <IconButton onClick={() => setSidebarOpen(!sidebarOpen)}>
+              <TuneIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
 
-      {/* Configuration Panel */}
-      <Card sx={{ mb: 2 }}>
-        <CardContent sx={{ pb: 2 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Profile</InputLabel>
+        {/* Quick Actions Bar */}
+        <Card sx={{ mb: 2 }}>
+          <CardContent sx={{ py: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <FormControlLabel
+                control={
+                  <Switch 
+                    checked={streamingEnabled} 
+                    onChange={(e) => setStreamingEnabled(e.target.checked)}
+                    icon={<SpeedIcon />}
+                    checkedIcon={<StreamIcon />}
+                  />
+                }
+                label={streamingEnabled ? 'Streaming' : 'Standard'}
+              />
+              <Divider orientation="vertical" flexItem />
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={startNewConversation}
+                startIcon={<RefreshIcon />}
+              >
+                New Chat
+              </Button>
+              {currentConversation && (
+                <Chip 
+                  label={`${currentConversation.title} (${messages.length} messages)`}
+                  size="small"
+                  variant="outlined"
+                />
+              )}
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* Messages Area */}
+        <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', mb: 2 }}>
+          <CardContent sx={{ flexGrow: 1, overflow: 'hidden', p: 0 }}>
+            <Box
+              sx={{
+                height: '100%',
+                overflowY: 'auto',
+                p: 2,
+                display: 'flex',
+                flexDirection: 'column',
+              }}
+            >
+              {messages.length === 0 ? (
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    height: '100%',
+                    color: 'text.secondary',
+                  }}
+                >
+                  <BotIcon sx={{ fontSize: 64, mb: 2 }} />
+                  <Typography variant="h6" gutterBottom>
+                    Welcome to Chatter!
+                  </Typography>
+                  <Typography variant="body2" textAlign="center">
+                    Configure your settings in the right panel and start chatting.
+                    Use the streaming toggle for real-time responses.
+                  </Typography>
+                </Box>
+              ) : (
+                messages.map((msg) => (
+                  <Box
+                    key={msg.id}
+                    sx={{
+                      display: 'flex',
+                      mb: 2,
+                      alignItems: 'flex-start',
+                      ...(msg.role === 'user' && {
+                        flexDirection: 'row-reverse',
+                      }),
+                    }}
+                  >
+                    <Avatar
+                      sx={{
+                        bgcolor: getMessageColor(msg.role),
+                        ...(msg.role === 'user' ? { ml: 1 } : { mr: 1 }),
+                      }}
+                    >
+                      {getMessageAvatar(msg.role)}
+                    </Avatar>
+                    <Paper
+                      sx={{
+                        p: 2,
+                        maxWidth: '70%',
+                        bgcolor: msg.role === 'user' ? 'primary.light' : 'grey.100',
+                        color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
+                      }}
+                    >
+                      <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        {msg.content}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: 'block',
+                          mt: 1,
+                          opacity: 0.7,
+                        }}
+                      >
+                        {format(msg.timestamp, 'HH:mm:ss')}
+                      </Typography>
+                    </Paper>
+                  </Box>
+                ))
+              )}
+              {loading && (
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  <Avatar sx={{ bgcolor: 'secondary.main', mr: 1 }}>
+                    <BotIcon />
+                  </Avatar>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <CircularProgress size={20} sx={{ mr: 1 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      {streamingEnabled ? 'Streaming...' : 'Thinking...'}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+              <div ref={messagesEndRef} />
+            </Box>
+          </CardContent>
+        </Card>
+
+        {/* Message Input */}
+        <Paper sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+            <TextField
+              fullWidth
+              multiline
+              maxRows={4}
+              placeholder="Type your message here... (Shift+Enter for new line)"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
+              disabled={loading}
+              variant="outlined"
+              size="small"
+            />
+            <IconButton
+              color="primary"
+              onClick={sendMessage}
+              disabled={!message.trim() || loading}
+              sx={{ p: 1.5 }}
+            >
+              <SendIcon />
+            </IconButton>
+          </Box>
+        </Paper>
+      </Box>
+
+      {/* Right Sidebar - Configuration Panel */}
+      <Drawer
+        variant="persistent"
+        anchor="right"
+        open={sidebarOpen}
+        sx={{
+          width: rightSidebarWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: rightSidebarWidth,
+            boxSizing: 'border-box',
+            position: 'relative',
+            border: 'none',
+            borderLeft: '1px solid',
+            borderColor: 'divider',
+          },
+        }}
+      >
+        <Box sx={{ p: 2 }}>
+          <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+            <SettingsIcon sx={{ mr: 1 }} />
+            Chat Configuration
+          </Typography>
+          
+          {/* Profile Configuration */}
+          <Accordion expanded={expandedPanel === 'profile'} onChange={handlePanelChange('profile')}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <ProfileIcon sx={{ mr: 1 }} />
+              <Typography>Profile Settings</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                <InputLabel>AI Profile</InputLabel>
                 <Select
                   value={selectedProfile}
-                  label="Profile"
+                  label="AI Profile"
                   onChange={(e) => setSelectedProfile(e.target.value)}
                 >
                   {profiles.map((profile) => (
@@ -228,9 +461,46 @@ const ChatPage: React.FC = () => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6} md={3}>
-              <FormControl fullWidth size="small">
+              
+              <Typography gutterBottom>Temperature: {temperature}</Typography>
+              <Slider
+                value={temperature}
+                onChange={(_, value) => setTemperature(value as number)}
+                min={0}
+                max={2}
+                step={0.1}
+                marks={[
+                  { value: 0, label: 'Precise' },
+                  { value: 1, label: 'Balanced' },
+                  { value: 2, label: 'Creative' },
+                ]}
+                sx={{ mb: 2 }}
+              />
+              
+              <Typography gutterBottom>Max Tokens: {maxTokens}</Typography>
+              <Slider
+                value={maxTokens}
+                onChange={(_, value) => setMaxTokens(value as number)}
+                min={256}
+                max={4096}
+                step={256}
+                marks={[
+                  { value: 256, label: '256' },
+                  { value: 2048, label: '2K' },
+                  { value: 4096, label: '4K' },
+                ]}
+              />
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Prompt Configuration */}
+          <Accordion expanded={expandedPanel === 'prompts'} onChange={handlePanelChange('prompts')}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <PromptIcon sx={{ mr: 1 }} />
+              <Typography>Prompt Templates</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
                 <InputLabel>Prompt Template</InputLabel>
                 <Select
                   value={selectedPrompt}
@@ -245,14 +515,40 @@ const ChatPage: React.FC = () => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <FormControl fullWidth size="small">
-                <InputLabel>Knowledge Base</InputLabel>
+              {selectedPrompt && (
+                <Box>
+                  <Typography variant="body2" color="text.secondary">
+                    {prompts.find(p => p.id === selectedPrompt)?.content?.substring(0, 100)}...
+                  </Typography>
+                </Box>
+              )}
+            </AccordionDetails>
+          </Accordion>
+
+          {/* Knowledge Base Configuration */}
+          <Accordion expanded={expandedPanel === 'knowledge'} onChange={handlePanelChange('knowledge')}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <DocumentIcon sx={{ mr: 1 }} />
+              <Typography>Knowledge Base</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControlLabel
+                control={
+                  <Switch 
+                    checked={enableRetrieval} 
+                    onChange={(e) => setEnableRetrieval(e.target.checked)}
+                  />
+                }
+                label="Enable Document Retrieval"
+                sx={{ mb: 2 }}
+              />
+              
+              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                <InputLabel>Selected Documents</InputLabel>
                 <Select
                   multiple
                   value={selectedDocuments}
-                  label="Knowledge Base"
+                  label="Selected Documents"
                   onChange={(e) => setSelectedDocuments(e.target.value as string[])}
                   renderValue={(selected) => (
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -277,153 +573,50 @@ const ChatPage: React.FC = () => {
                   ))}
                 </Select>
               </FormControl>
-            </Grid>
-            <Grid item xs={12} sm={6} md={2}>
-              <Tooltip title="Start New Conversation">
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  onClick={startNewConversation}
-                  startIcon={<RefreshIcon />}
-                  size="small"
-                >
-                  New Chat
-                </Button>
-              </Tooltip>
-            </Grid>
-          </Grid>
-          
-          {currentConversation && (
-            <Box sx={{ mt: 2 }}>
+              
               <Typography variant="body2" color="text.secondary">
-                Current conversation: {currentConversation.title}
+                {selectedDocuments.length} document(s) selected for context
               </Typography>
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+            </AccordionDetails>
+          </Accordion>
 
-      {/* Messages Area */}
-      <Card sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', mb: 2 }}>
-        <CardContent sx={{ flexGrow: 1, overflow: 'hidden', p: 0 }}>
-          <Box
-            sx={{
-              height: '100%',
-              overflowY: 'auto',
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            {messages.length === 0 ? (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: 'text.secondary',
-                }}
+          {/* Advanced Settings */}
+          <Accordion expanded={expandedPanel === 'advanced'} onChange={handlePanelChange('advanced')}>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <SpeedIcon sx={{ mr: 1 }} />
+              <Typography>Advanced Settings</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <FormControlLabel
+                control={
+                  <Switch 
+                    checked={streamingEnabled} 
+                    onChange={(e) => setStreamingEnabled(e.target.checked)}
+                  />
+                }
+                label="Streaming Responses"
+                sx={{ mb: 2 }}
+              />
+              
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {streamingEnabled 
+                  ? 'Responses will be streamed in real-time' 
+                  : 'Responses will be delivered all at once'
+                }
+              </Typography>
+              
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={startNewConversation}
+                startIcon={<RefreshIcon />}
               >
-                <BotIcon sx={{ fontSize: 64, mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Welcome to Chatter!
-                </Typography>
-                <Typography variant="body2" textAlign="center">
-                  Configure your profile and prompt template above, then start chatting.
-                  Select documents from your knowledge base to enhance responses.
-                </Typography>
-              </Box>
-            ) : (
-              messages.map((msg) => (
-                <Box
-                  key={msg.id}
-                  sx={{
-                    display: 'flex',
-                    mb: 2,
-                    alignItems: 'flex-start',
-                    ...(msg.role === 'user' && {
-                      flexDirection: 'row-reverse',
-                    }),
-                  }}
-                >
-                  <Avatar
-                    sx={{
-                      bgcolor: getMessageColor(msg.role),
-                      ...(msg.role === 'user' ? { ml: 1 } : { mr: 1 }),
-                    }}
-                  >
-                    {getMessageAvatar(msg.role)}
-                  </Avatar>
-                  <Paper
-                    sx={{
-                      p: 2,
-                      maxWidth: '70%',
-                      bgcolor: msg.role === 'user' ? 'primary.light' : 'grey.100',
-                      color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
-                    }}
-                  >
-                    <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                      {msg.content}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{
-                        display: 'block',
-                        mt: 1,
-                        opacity: 0.7,
-                      }}
-                    >
-                      {format(msg.timestamp, 'HH:mm:ss')}
-                    </Typography>
-                  </Paper>
-                </Box>
-              ))
-            )}
-            {loading && (
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'secondary.main', mr: 1 }}>
-                  <BotIcon />
-                </Avatar>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CircularProgress size={20} sx={{ mr: 1 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Thinking...
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-            <div ref={messagesEndRef} />
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Message Input */}
-      <Paper sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-          <TextField
-            fullWidth
-            multiline
-            maxRows={4}
-            placeholder="Type your message here... (Shift+Enter for new line)"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyPress={handleKeyPress}
-            disabled={loading}
-            variant="outlined"
-            size="small"
-          />
-          <IconButton
-            color="primary"
-            onClick={sendMessage}
-            disabled={!message.trim() || loading}
-            sx={{ p: 1.5 }}
-          >
-            <SendIcon />
-          </IconButton>
+                Apply Settings & New Chat
+              </Button>
+            </AccordionDetails>
+          </Accordion>
         </Box>
-      </Paper>
+      </Drawer>
     </Box>
   );
 };

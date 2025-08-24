@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   AppBar,
@@ -17,6 +17,7 @@ import {
   MenuItem,
   Divider,
   Badge,
+  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -31,10 +32,17 @@ import {
   Logout as LogoutIcon,
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon,
+  LightMode as LightModeIcon,
+  DarkMode as DarkModeIcon,
+  AdminPanelSettings as AdminIcon,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
+import { ThemeContext } from '../App';
 
 const drawerWidth = 240;
+const collapsedDrawerWidth = 64;
 
 interface NavItem {
   label: string;
@@ -50,17 +58,26 @@ const navItems: NavItem[] = [
   { label: 'Profiles', path: '/profiles', icon: <ProfileIcon /> },
   { label: 'Prompts', path: '/prompts', icon: <PromptIcon /> },
   { label: 'Agents', path: '/agents', icon: <AgentIcon /> },
+  { label: 'Administration', path: '/administration', icon: <AdminIcon /> },
   { label: 'Health', path: '/health', icon: <HealthIcon /> },
 ];
 
 const Layout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const { darkMode, toggleDarkMode } = useContext(ThemeContext);
+
+  const currentDrawerWidth = sidebarCollapsed ? collapsedDrawerWidth : drawerWidth;
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleSidebarToggle = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
   };
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -80,9 +97,14 @@ const Layout: React.FC = () => {
   const drawer = (
     <div>
       <Toolbar>
-        <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold' }}>
-          Chatter
-        </Typography>
+        {!sidebarCollapsed && (
+          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+            Chatter
+          </Typography>
+        )}
+        <IconButton onClick={handleSidebarToggle} sx={{ display: { xs: 'none', sm: 'block' } }}>
+          {sidebarCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+        </IconButton>
       </Toolbar>
       <Divider />
       <List>
@@ -91,9 +113,24 @@ const Layout: React.FC = () => {
             <ListItemButton
               selected={location.pathname === item.path}
               onClick={() => navigate(item.path)}
+              sx={{
+                minHeight: 48,
+                justifyContent: sidebarCollapsed ? 'center' : 'initial',
+                px: 2.5,
+              }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.label} />
+              <ListItemIcon
+                sx={{
+                  minWidth: 0,
+                  mr: sidebarCollapsed ? 'auto' : 3,
+                  justifyContent: 'center',
+                }}
+              >
+                <Tooltip title={sidebarCollapsed ? item.label : ''} placement="right">
+                  {item.icon}
+                </Tooltip>
+              </ListItemIcon>
+              {!sidebarCollapsed && <ListItemText primary={item.label} />}
             </ListItemButton>
           </ListItem>
         ))}
@@ -106,8 +143,12 @@ const Layout: React.FC = () => {
       <AppBar
         position="fixed"
         sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
+          width: { sm: `calc(100% - ${currentDrawerWidth}px)` },
+          ml: { sm: `${currentDrawerWidth}px` },
+          transition: (theme) => theme.transitions.create(['width', 'margin'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
         }}
       >
         <Toolbar>
@@ -123,6 +164,12 @@ const Layout: React.FC = () => {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             {navItems.find(item => item.path === location.pathname)?.label || 'Chatter'}
           </Typography>
+          
+          <Tooltip title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}>
+            <IconButton color="inherit" onClick={toggleDarkMode} sx={{ mr: 1 }}>
+              {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+            </IconButton>
+          </Tooltip>
           
           <IconButton color="inherit" sx={{ mr: 1 }}>
             <Badge badgeContent={4} color="error">
@@ -173,7 +220,7 @@ const Layout: React.FC = () => {
       
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: { sm: currentDrawerWidth }, flexShrink: { sm: 0 } }}
       >
         <Drawer
           variant="temporary"
@@ -193,7 +240,15 @@ const Layout: React.FC = () => {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': { 
+              boxSizing: 'border-box', 
+              width: currentDrawerWidth,
+              transition: (theme) => theme.transitions.create('width', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
+              overflowX: 'hidden',
+            },
           }}
           open
         >
@@ -206,8 +261,12 @@ const Layout: React.FC = () => {
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
+          width: { sm: `calc(100% - ${currentDrawerWidth}px)` },
           mt: 8,
+          transition: (theme) => theme.transitions.create(['width'], {
+            easing: theme.transitions.easing.sharp,
+            duration: theme.transitions.duration.leavingScreen,
+          }),
         }}
       >
         <Outlet />

@@ -109,6 +109,57 @@ const DocumentsPage: React.FC = () => {
     }
   };
 
+  const handleViewDocument = async (documentId: string) => {
+    try {
+      const response = await chatterSDK.documents.getDocumentApiV1DocumentsDocumentIdGet({ documentId });
+      // Open document details in a dialog or new window
+      const document = response.data;
+      const newWindow = window.open();
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head><title>Document: ${document.title || document.filename}</title></head>
+            <body style="font-family: Arial, sans-serif; padding: 20px;">
+              <h1>${document.title || document.filename}</h1>
+              <p><strong>Type:</strong> ${document.mime_type}</p>
+              <p><strong>Size:</strong> ${formatFileSize(document.file_size)}</p>
+              <p><strong>Created:</strong> ${format(new Date(document.created_at), 'MMM dd, yyyy HH:mm')}</p>
+              <p><strong>Status:</strong> ${document.status}</p>
+              <p><strong>Chunks:</strong> ${document.chunk_count || 0}</p>
+              <hr>
+              <h2>Content Preview</h2>
+              <p>For security reasons, full content viewing requires the backend API.</p>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+      }
+    } catch (err: any) {
+      setError('Failed to view document details');
+    }
+  };
+
+  const handleDownloadDocument = async (documentId: string, filename: string) => {
+    try {
+      const response = await chatterSDK.documents.downloadDocumentApiV1DocumentsDocumentIdDownloadGet({ 
+        documentId 
+      });
+      
+      // Create a blob URL and trigger download
+      const blob = new Blob([response.data], { type: 'application/octet-stream' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err: any) {
+      setError('Failed to download document');
+    }
+  };
+
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
 
@@ -355,6 +406,7 @@ const DocumentsPage: React.FC = () => {
                       size="small"
                       color="primary"
                       title="View Details"
+                      onClick={() => handleViewDocument(document.id)}
                     >
                       <ViewIcon />
                     </IconButton>
@@ -362,6 +414,7 @@ const DocumentsPage: React.FC = () => {
                       size="small"
                       color="primary"
                       title="Download"
+                      onClick={() => handleDownloadDocument(document.id, document.filename)}
                     >
                       <DownloadIcon />
                     </IconButton>

@@ -1,10 +1,11 @@
 """Prompt management endpoints."""
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.core.prompts import PromptError, PromptService
+from chatter.models.prompt import PromptCategory, PromptType
 from chatter.models.user import User
 from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.prompt import (
@@ -77,20 +78,30 @@ async def create_prompt(
         ) from None
 
 
-@router.get("/", response_model=PromptListResponse)
+@router.get("", response_model=PromptListResponse)
 async def list_prompts(
-    request: PromptListRequest = Depends(),
-    pagination: PaginationRequest = Depends(),
-    sorting: SortingRequest = Depends(),
+    prompt_type: PromptType | None = Query(None, description="Filter by prompt type"),
+    category: PromptCategory | None = Query(None, description="Filter by category"),
+    tags: list[str] | None = Query(None, description="Filter by tags"),
+    is_public: bool | None = Query(None, description="Filter by public status"),
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    sort_by: str = Query("created_at", description="Sort field"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service),
 ) -> PromptListResponse:
     """List user's prompts.
 
     Args:
-        request: List request parameters
-        pagination: Pagination parameters
-        sorting: Sorting parameters
+        prompt_type: Filter by prompt type
+        category: Filter by category
+        tags: Filter by tags
+        is_public: Filter by public status
+        limit: Maximum number of results
+        offset: Number of results to skip
+        sort_by: Sort field
+        sort_order: Sort order (asc/desc)
         current_user: Current authenticated user
         prompt_service: Prompt service
 
@@ -98,13 +109,18 @@ async def list_prompts(
         List of prompts with pagination info
     """
     try:
-        # Merge pagination and sorting into request
-        merged_request = request.model_copy(update={
-            'limit': pagination.limit,
-            'offset': pagination.offset,
-            'sort_by': sorting.sort_by,
-            'sort_order': sorting.sort_order,
-        })
+        # Create request object from query parameters
+        from chatter.schemas.prompt import PromptListRequest
+        merged_request = PromptListRequest(
+            prompt_type=prompt_type,
+            category=category,
+            tags=tags,
+            is_public=is_public,
+            limit=limit,
+            offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
+        )
 
         # Get prompts
         prompts, total_count = await prompt_service.list_prompts(
@@ -117,8 +133,8 @@ async def list_prompts(
                 for prompt in prompts
             ],
             total_count=total_count,
-            limit=pagination.limit,
-            offset=pagination.offset,
+            limit=limit,
+            offset=offset,
         )
 
     except Exception as e:
@@ -131,7 +147,6 @@ async def list_prompts(
 @router.get("/{prompt_id}", response_model=PromptResponse)
 async def get_prompt(
     prompt_id: str,
-    request: PromptGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service),
 ) -> PromptResponse:
@@ -339,7 +354,6 @@ async def clone_prompt(
 
 @router.get("/stats/overview", response_model=PromptStatsResponse)
 async def get_prompt_stats(
-    request: PromptStatsRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service),
 ) -> PromptStatsResponse:

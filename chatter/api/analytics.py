@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -40,7 +40,9 @@ async def get_analytics_service(
 
 @router.get("/conversations", response_model=ConversationStatsResponse)
 async def get_conversation_stats(
-    request: ConversationStatsRequest = Depends(),
+    start_date: datetime | None = Query(None, description="Start date for analytics"),
+    end_date: datetime | None = Query(None, description="End date for analytics"),
+    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -49,7 +51,9 @@ async def get_conversation_stats(
     """Get conversation statistics.
 
     Args:
-        request: Conversation stats request parameters
+        start_date: Start date for analytics
+        end_date: End date for analytics
+        period: Predefined period
         current_user: Current authenticated user
         analytics_service: Analytics service
 
@@ -57,8 +61,16 @@ async def get_conversation_stats(
         Conversation statistics
     """
     try:
+        # Create time range object
+        from chatter.schemas.analytics import AnalyticsTimeRange
+        time_range = AnalyticsTimeRange(
+            start_date=start_date,
+            end_date=end_date,
+            period=period,
+        )
+        
         stats = await analytics_service.get_conversation_stats(
-            current_user.id, request.time_range
+            current_user.id, time_range
         )
 
         return ConversationStatsResponse(
@@ -91,7 +103,9 @@ async def get_conversation_stats(
 
 @router.get("/usage", response_model=UsageMetricsResponse)
 async def get_usage_metrics(
-    request: UsageMetricsRequest = Depends(),
+    start_date: datetime | None = Query(None, description="Start date for analytics"),
+    end_date: datetime | None = Query(None, description="End date for analytics"),
+    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -100,7 +114,9 @@ async def get_usage_metrics(
     """Get usage metrics.
 
     Args:
-        request: Usage metrics request parameters
+        start_date: Start date for analytics
+        end_date: End date for analytics
+        period: Predefined period
         current_user: Current authenticated user
         analytics_service: Analytics service
 
@@ -108,8 +124,16 @@ async def get_usage_metrics(
         Usage metrics
     """
     try:
+        # Create time range object
+        from chatter.schemas.analytics import AnalyticsTimeRange
+        time_range = AnalyticsTimeRange(
+            start_date=start_date,
+            end_date=end_date,
+            period=period,
+        )
+        
         metrics = await analytics_service.get_usage_metrics(
-            current_user.id, request.time_range
+            current_user.id, time_range
         )
 
         return UsageMetricsResponse(

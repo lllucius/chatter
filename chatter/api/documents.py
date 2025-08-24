@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.core.documents import DocumentError, DocumentService
-from chatter.models.document import DocumentStatus
+from chatter.models.document import DocumentStatus, DocumentType
 from chatter.models.user import User
 from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.schemas.document import (

@@ -98,6 +98,22 @@ const MetricCard: React.FC<MetricCardProps> = ({
   );
 };
 
+// Helper: safely get .toLocaleString(), fallback to "0"
+function safeLocaleString(n: number | undefined | null): string {
+  if (typeof n === 'number' && !isNaN(n)) {
+    return n.toLocaleString();
+  }
+  return '0';
+}
+
+// Helper: safely get .toFixed(), fallback to "0.0"
+function safeToFixed(n: number | undefined | null, digits: number): string {
+  if (typeof n === 'number' && !isNaN(n)) {
+    return n.toFixed(digits);
+  }
+  return (0).toFixed(digits);
+}
+
 const DashboardPage: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -110,7 +126,7 @@ const DashboardPage: React.FC = () => {
         const dashboardData = await api.getDashboardData();
         setData(dashboardData);
       } catch (err: any) {
-        setError(err.response?.data?.detail || 'Failed to load dashboard data');
+        setError(err?.response?.data?.detail || 'Failed to load dashboard data');
       } finally {
         setLoading(false);
       }
@@ -139,22 +155,29 @@ const DashboardPage: React.FC = () => {
     return null;
   }
 
+  // Defensive checks for nested data (for demo, but you may want more robust validation)
+  const conversationStats = data.conversation_stats || {};
+  const usageMetrics = data.usage_metrics || {};
+  const documentAnalytics = data.document_analytics || {};
+  const systemHealth = data.system_health || {};
+  const performanceMetrics = data.performance_metrics || {};
+
   // Sample chart data (in a real app, this would come from the API)
   const conversationChartData = [
-    { name: 'Mon', conversations: data.conversation_stats.conversations_today * 0.8 },
-    { name: 'Tue', conversations: data.conversation_stats.conversations_today * 1.2 },
-    { name: 'Wed', conversations: data.conversation_stats.conversations_today * 0.9 },
-    { name: 'Thu', conversations: data.conversation_stats.conversations_today * 1.1 },
-    { name: 'Fri', conversations: data.conversation_stats.conversations_today * 1.3 },
-    { name: 'Sat', conversations: data.conversation_stats.conversations_today * 0.7 },
-    { name: 'Sun', conversations: data.conversation_stats.conversations_today },
+    { name: 'Mon', conversations: (conversationStats.conversations_today ?? 0) * 0.8 },
+    { name: 'Tue', conversations: (conversationStats.conversations_today ?? 0) * 1.2 },
+    { name: 'Wed', conversations: (conversationStats.conversations_today ?? 0) * 0.9 },
+    { name: 'Thu', conversations: (conversationStats.conversations_today ?? 0) * 1.1 },
+    { name: 'Fri', conversations: (conversationStats.conversations_today ?? 0) * 1.3 },
+    { name: 'Sat', conversations: (conversationStats.conversations_today ?? 0) * 0.7 },
+    { name: 'Sun', conversations: (conversationStats.conversations_today ?? 0) },
   ];
 
   const tokenUsageData = [
-    { name: 'Week 1', tokens: data.usage_metrics.tokens_week * 0.6 },
-    { name: 'Week 2', tokens: data.usage_metrics.tokens_week * 0.8 },
-    { name: 'Week 3', tokens: data.usage_metrics.tokens_week * 1.1 },
-    { name: 'Week 4', tokens: data.usage_metrics.tokens_week },
+    { name: 'Week 1', tokens: (usageMetrics.tokens_week ?? 0) * 0.6 },
+    { name: 'Week 2', tokens: (usageMetrics.tokens_week ?? 0) * 0.8 },
+    { name: 'Week 3', tokens: (usageMetrics.tokens_week ?? 0) * 1.1 },
+    { name: 'Week 4', tokens: usageMetrics.tokens_week ?? 0 },
   ];
 
   const systemHealthData = [
@@ -166,9 +189,9 @@ const DashboardPage: React.FC = () => {
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-  const formatBytes = (bytes: number) => {
+  const formatBytes = (bytes: number | undefined | null) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    if (bytes === 0) return '0 Bytes';
+    if (!bytes || bytes === 0) return '0 Bytes';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
@@ -184,8 +207,8 @@ const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <MetricCard
             title="Total Conversations"
-            value={data.conversation_stats.total_conversations.toLocaleString()}
-            change={`+${data.conversation_stats.conversations_today} today`}
+            value={safeLocaleString(conversationStats.total_conversations)}
+            change={`+${safeLocaleString(conversationStats.conversations_today)} today`}
             changeType="positive"
             icon={<Message />}
             color="primary"
@@ -194,8 +217,8 @@ const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <MetricCard
             title="Total Messages"
-            value={data.conversation_stats.total_messages.toLocaleString()}
-            change={`Avg ${data.conversation_stats.avg_messages_per_conversation.toFixed(1)} per conversation`}
+            value={safeLocaleString(conversationStats.total_messages)}
+            change={`Avg ${safeToFixed(conversationStats.avg_messages_per_conversation, 1)} per conversation`}
             changeType="neutral"
             icon={<TrendingUp />}
             color="secondary"
@@ -204,8 +227,8 @@ const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <MetricCard
             title="Token Usage"
-            value={data.usage_metrics.total_tokens.toLocaleString()}
-            change={`${data.usage_metrics.tokens_today.toLocaleString()} today`}
+            value={safeLocaleString(usageMetrics.total_tokens)}
+            change={`${safeLocaleString(usageMetrics.tokens_today)} today`}
             changeType="positive"
             icon={<Assessment />}
             color="info"
@@ -214,8 +237,8 @@ const DashboardPage: React.FC = () => {
         <Grid item xs={12} sm={6} md={3}>
           <MetricCard
             title="Documents"
-            value={data.document_analytics.total_documents.toLocaleString()}
-            change={`${data.document_analytics.total_chunks.toLocaleString()} chunks`}
+            value={safeLocaleString(documentAnalytics.total_documents)}
+            change={`${safeLocaleString(documentAnalytics.total_chunks)} chunks`}
             changeType="neutral"
             icon={<Storage />}
             color="success"
@@ -305,7 +328,7 @@ const DashboardPage: React.FC = () => {
                     <Box sx={{ flexGrow: 1 }}>
                       <Typography variant="body2">Active Users</Typography>
                       <Typography variant="h6">
-                        {data.system_health.active_users_today}
+                        {safeLocaleString(systemHealth.active_users_today)}
                       </Typography>
                     </Box>
                   </Box>
@@ -316,7 +339,7 @@ const DashboardPage: React.FC = () => {
                     <Box sx={{ flexGrow: 1 }}>
                       <Typography variant="body2">Storage</Typography>
                       <Typography variant="h6">
-                        {formatBytes(data.system_health.storage_usage_bytes)}
+                        {formatBytes(systemHealth.storage_usage_bytes)}
                       </Typography>
                     </Box>
                   </Box>
@@ -324,21 +347,21 @@ const DashboardPage: React.FC = () => {
                 <Grid item xs={12}>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" gutterBottom>
-                      Response Time: {data.performance_metrics.avg_response_time.toFixed(2)}ms
+                      Response Time: {safeToFixed(performanceMetrics.avg_response_time, 2)}ms
                     </Typography>
                     <LinearProgress
                       variant="determinate"
-                      value={Math.min(data.performance_metrics.avg_response_time / 10, 100)}
+                      value={Math.min((performanceMetrics.avg_response_time ?? 0) / 10, 100)}
                       sx={{ mb: 1 }}
                     />
                   </Box>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" gutterBottom>
-                      Success Rate: {(data.performance_metrics.success_rate * 100).toFixed(1)}%
+                      Success Rate: {safeToFixed((performanceMetrics.success_rate ?? 0) * 100, 1)}%
                     </Typography>
                     <LinearProgress
                       variant="determinate"
-                      value={data.performance_metrics.success_rate * 100}
+                      value={(performanceMetrics.success_rate ?? 0) * 100}
                       color="success"
                     />
                   </Box>
@@ -375,8 +398,8 @@ const DashboardPage: React.FC = () => {
               icon={<SmartToy />}
             />
             <Chip
-              label={`Performance: ${(data.performance_metrics.success_rate * 100).toFixed(0)}%`}
-              color={data.performance_metrics.success_rate > 0.9 ? "success" : "warning"}
+              label={`Performance: ${safeToFixed((performanceMetrics.success_rate ?? 0) * 100, 0)}%`}
+              color={(performanceMetrics.success_rate ?? 0) > 0.9 ? "success" : "warning"}
               variant="outlined"
               icon={<Speed />}
             />

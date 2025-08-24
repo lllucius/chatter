@@ -41,6 +41,7 @@ const ProfilesPage: React.FC = () => {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [dialogError, setDialogError] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -86,6 +87,7 @@ const ProfilesPage: React.FC = () => {
   };
 
   const handleOpenDialog = (profile?: Profile) => {
+    setDialogError(''); // Clear any previous dialog errors
     if (profile) {
       setEditingProfile(profile);
       setFormData({
@@ -119,6 +121,7 @@ const ProfilesPage: React.FC = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
+      setDialogError(''); // Clear any previous dialog errors
       if (editingProfile) {
         const updateRequest: ApiV1ProfilesIdPutRequest = {
           name: formData.name,
@@ -150,7 +153,7 @@ const ProfilesPage: React.FC = () => {
       }
       setDialogOpen(false);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to save profile');
+      setDialogError(err.response?.data?.detail || 'Failed to save profile');
     } finally {
       setSaving(false);
     }
@@ -333,6 +336,11 @@ const ProfilesPage: React.FC = () => {
           {editingProfile ? 'Edit Profile' : 'Create Profile'}
         </DialogTitle>
         <DialogContent>
+          {dialogError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {dialogError}
+            </Alert>
+          )}
           <Grid container spacing={3} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
               <TextField

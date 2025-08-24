@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Box,
   Card,
@@ -42,6 +42,7 @@ import {
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { Document, DocumentSearchRequest } from '../sdk';
+import { ThemeContext } from '../App';
 
 const DocumentsPage: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -58,6 +59,7 @@ const DocumentsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+  const { darkMode } = useContext(ThemeContext);
 
   useEffect(() => {
     loadDocuments();
@@ -112,23 +114,105 @@ const DocumentsPage: React.FC = () => {
   const handleViewDocument = async (documentId: string) => {
     try {
       const response = await chatterSDK.documents.getDocumentApiV1DocumentsDocumentIdGet({ documentId });
-      // Open document details in a dialog or new window
       const document = response.data;
-      const newWindow = window.open();
+      
+      // Try to get document chunks for content preview
+      let contentPreview = '';
+      
+      try {
+        const chunksResponse = await chatterSDK.documents.getDocumentChunksApiV1DocumentsDocumentIdChunksGet({ 
+          documentId, 
+          limit: 3, 
+          offset: 0 
+        });
+        if (chunksResponse.data && chunksResponse.data.chunks && chunksResponse.data.chunks.length > 0) {
+          contentPreview = chunksResponse.data.chunks
+            .map(chunk => chunk.content)
+            .join('\n\n')
+            .substring(0, 1000);
+          if (contentPreview.length >= 1000) {
+            contentPreview += '...';
+          }
+        }
+      } catch (chunksError) {
+        contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
+      }
+      
+      // Create themed preview window
+      const backgroundColor = darkMode ? '#121212' : '#ffffff';
+      const textColor = darkMode ? '#ffffff' : '#000000';
+      const borderColor = darkMode ? '#333333' : '#dddddd';
+      
+      const newWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
       if (newWindow) {
         newWindow.document.write(`
           <html>
-            <head><title>Document: ${document.title || document.filename}</title></head>
-            <body style="font-family: Arial, sans-serif; padding: 20px;">
-              <h1>${document.title || document.filename}</h1>
-              <p><strong>Type:</strong> ${document.mime_type}</p>
-              <p><strong>Size:</strong> ${formatFileSize(document.file_size)}</p>
-              <p><strong>Created:</strong> ${format(new Date(document.created_at), 'MMM dd, yyyy HH:mm')}</p>
-              <p><strong>Status:</strong> ${document.status}</p>
-              <p><strong>Chunks:</strong> ${document.chunk_count || 0}</p>
-              <hr>
-              <h2>Content Preview</h2>
-              <p>For security reasons, full content viewing requires the backend API.</p>
+            <head>
+              <title>Document: ${document.title || document.filename}</title>
+              <style>
+                body { 
+                  font-family: 'Roboto', Arial, sans-serif; 
+                  padding: 20px; 
+                  background-color: ${backgroundColor};
+                  color: ${textColor};
+                  margin: 0;
+                }
+                .header {
+                  border-bottom: 2px solid ${borderColor};
+                  padding-bottom: 15px;
+                  margin-bottom: 20px;
+                }
+                .metadata {
+                  background-color: ${darkMode ? '#1e1e1e' : '#f5f5f5'};
+                  padding: 15px;
+                  border-radius: 8px;
+                  margin: 15px 0;
+                  border: 1px solid ${borderColor};
+                }
+                .content-preview {
+                  background-color: ${darkMode ? '#2d2d2d' : '#fafafa'};
+                  padding: 15px;
+                  border-radius: 8px;
+                  border: 1px solid ${borderColor};
+                  font-family: 'Monaco', 'Consolas', monospace;
+                  white-space: pre-wrap;
+                  max-height: 400px;
+                  overflow-y: auto;
+                  line-height: 1.4;
+                }
+                .tag {
+                  background-color: ${darkMode ? '#444444' : '#e0e0e0'};
+                  color: ${textColor};
+                  padding: 2px 8px;
+                  border-radius: 12px;
+                  font-size: 12px;
+                  margin-right: 5px;
+                }
+              </style>
+            </head>
+            <body>
+              <div class="header">
+                <h1>${document.title || document.filename}</h1>
+                <div>
+                  <span class="tag">${document.mime_type}</span>
+                  <span class="tag">${formatFileSize(document.file_size)}</span>
+                  <span class="tag">${document.status}</span>
+                </div>
+              </div>
+              
+              <div class="metadata">
+                <h3>Document Information</h3>
+                <p><strong>Filename:</strong> ${document.filename}</p>
+                <p><strong>Created:</strong> ${format(new Date(document.created_at), 'MMM dd, yyyy HH:mm')}</p>
+                <p><strong>Processing Status:</strong> ${document.status}</p>
+                <p><strong>Chunks:</strong> ${document.chunk_count || 0}</p>
+                ${document.extra_metadata ? `<p><strong>Metadata:</strong> ${JSON.stringify(document.extra_metadata, null, 2)}</p>` : ''}
+              </div>
+              
+              <div>
+                <h3>Content Preview</h3>
+                <div class="content-preview">${contentPreview || 'No content preview available for this document type.'}</div>
+              </div>
             </body>
           </html>
         `);

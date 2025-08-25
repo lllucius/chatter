@@ -19,6 +19,7 @@ import {
   AgentsApi,
   ToolServersApi,
   DataManagementApi,
+  PluginsApi,
   HealthApi,
   UserLogin,
   UserCreate,
@@ -38,6 +39,7 @@ export class ChatterSDK {
   public agents: AgentsApi;
   public toolServers: ToolServersApi;
   public dataManagement: DataManagementApi;
+  public plugins: PluginsApi;
   public health: HealthApi;
 
   constructor(baseURL: string = 'http://localhost:8000') {
@@ -63,6 +65,7 @@ export class ChatterSDK {
     this.agents = new AgentsApi(this.configuration);
     this.toolServers = new ToolServersApi(this.configuration);
     this.dataManagement = new DataManagementApi(this.configuration);
+    this.plugins = new PluginsApi(this.configuration);
     this.health = new HealthApi(this.configuration);
   }
 
@@ -120,6 +123,7 @@ export class ChatterSDK {
     this.agents = new AgentsApi(this.configuration);
     this.toolServers = new ToolServersApi(this.configuration);
     this.dataManagement = new DataManagementApi(this.configuration);
+    this.plugins = new PluginsApi(this.configuration);
     this.health = new HealthApi(this.configuration);
   }
 

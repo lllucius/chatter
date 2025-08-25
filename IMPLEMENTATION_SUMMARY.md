@@ -78,28 +78,38 @@ response = await agent_manager.route_message(
 )
 ```
 
-### 4. **Advanced Job Queue System** (`chatter/services/job_queue.py`)
-- ✅ **Priority Scheduling**: Critical, High, Normal, Low priority levels
+### 4. **Advanced Job Queue System** (`chatter/services/job_queue.py`) - **UPGRADED to APScheduler**
+- ✅ **Priority Scheduling**: Critical, High, Normal, Low priority levels via APScheduler
 - ✅ **Retry Logic**: Configurable retry attempts with exponential backoff
-- ✅ **Worker Pool**: Configurable concurrent worker management
+- ✅ **Worker Pool**: Managed by APScheduler's AsyncIOExecutor  
 - ✅ **Job Tracking**: Comprehensive status and result tracking
 - ✅ **Built-in Handlers**: Document processing, summarization, maintenance
+- ✅ **Scheduled Jobs**: Date/time-based job scheduling
+- ✅ **Robust Backend**: Powered by APScheduler 3.10.4 for enterprise reliability
 
 **Key Features:**
 ```python
-# Priority job scheduling
+# Priority job scheduling with APScheduler backend
 job_id = await job_queue.add_job(
     name="Document Processing",
     function_name="document_processing",
     args=["doc123", "extract_text"],
     priority=JobPriority.HIGH,
     max_retries=3,
-    timeout=3600
+    timeout=3600,
+    schedule_at=datetime.now(UTC) + timedelta(hours=1)  # Optional scheduling
 )
 
 # Real-time queue monitoring
 stats = await job_queue.get_queue_stats()
 ```
+
+**Technical Implementation:**
+- **Backend**: APScheduler AsyncIOScheduler with AsyncIOExecutor
+- **Job Store**: MemoryJobStore for consistency with original design
+- **Priority Handling**: Intelligent delay-based scheduling (CRITICAL=0s, HIGH=0.1s, NORMAL=0.5s, LOW=1.0s)
+- **Concurrency**: Controlled via APScheduler's max_instances parameter
+- **Retry Strategy**: Exponential backoff with APScheduler date triggers
 
 ### 5. **A/B Testing Infrastructure** (`chatter/services/ab_testing.py`)
 - ✅ **Test Types**: Prompts, Models, Parameters, Workflows
@@ -300,7 +310,13 @@ This implementation transforms the Chatter platform from a basic chatbot backend
 - **Data-Driven Optimization**: A/B testing and analytics infrastructure  
 - **Enterprise Security**: Multi-layer validation and threat protection
 - **Extensible Architecture**: Plugin system for unlimited customization
-- **Reliable Operations**: Background processing and health monitoring
+- **Reliable Operations**: Background processing with APScheduler and health monitoring
 - **Integration Ready**: Webhook system for external platform connectivity
+
+### 🔄 Major Infrastructure Updates
+- **Job Queue System**: Completely refactored to use **APScheduler 3.10.4** for enterprise-grade job scheduling and reliability
+- **Improved Reliability**: Replaced custom asyncio queue implementation with proven APScheduler backend
+- **Enhanced Scheduling**: Added date/time-based job scheduling capabilities  
+- **Better Error Handling**: Robust retry mechanisms with exponential backoff
 
 The platform is now ready to handle complex conversational AI use cases at scale while maintaining security, reliability, and extensibility.

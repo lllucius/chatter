@@ -25,14 +25,14 @@ import {
   Speed as SpeedIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { Profile, Prompt, Document, Conversation } from '../sdk';
+import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse } from '../sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
 interface Props {
-  profiles: Profile[];
-  prompts: Prompt[];
-  documents: Document[];
-  currentConversation: Conversation | null;
+  profiles: ProfileResponse[];
+  prompts: PromptResponse[];
+  documents: DocumentResponse[];
+  currentConversation: ConversationResponse | null;
   messagesCount: number;
 
   selectedProfile: string;

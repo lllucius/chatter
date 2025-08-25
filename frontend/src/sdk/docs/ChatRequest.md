@@ -13,6 +13,8 @@ Name | Type | Description | Notes
 **temperature** | **number** |  | [optional] [default to undefined]
 **max_tokens** | **number** |  | [optional] [default to undefined]
 **enable_retrieval** | **boolean** |  | [optional] [default to undefined]
+**document_ids** | **Array&lt;string&gt;** |  | [optional] [default to undefined]
+**system_prompt_override** | **string** |  | [optional] [default to undefined]
 
 ## Example
 
@@ -27,6 +29,8 @@ const instance: ChatRequest = {
     temperature,
     max_tokens,
     enable_retrieval,
+    document_ids,
+    system_prompt_override,
 };
 ```
 

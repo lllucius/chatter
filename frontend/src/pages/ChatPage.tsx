@@ -28,7 +28,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { Profile, Prompt, Document, Conversation, CreateConversationRequest, SendMessageRequest } from '../sdk';
+import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from '../sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import ChatConfigPanel from './ChatConfigPanel';
 
@@ -42,13 +42,13 @@ interface ChatMessage {
 const ChatPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [profiles, setProfiles] = useState<ProfileResponse[]>([]);
+  const [prompts, setPrompts] = useState<PromptResponse[]>([]);
+  const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+  const [currentConversation, setCurrentConversation] = useState<ConversationResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -88,7 +88,7 @@ const ChatPage: React.FC = () => {
   const startNewConversation = useCallback(async () => {
     try {
       setError('');
-      const createRequest: CreateConversationRequest = {
+      const createRequest: ConversationCreate = {
         title: `Chat ${new Date().toLocaleString()}`,
         profile_id: selectedProfile || undefined,
       };
@@ -204,7 +204,7 @@ const ChatPage: React.FC = () => {
       };
       setMessages((prev) => [...prev, userMessage]);
 
-      const sendRequest: SendMessageRequest = { message: text };
+      const sendRequest: ChatRequest = { message: text };
       const response = await chatterSDK.conversations.chatApiV1ChatChatPost({ chatRequest: sendRequest });
 
       const assistantMessage: ChatMessage = {

@@ -36,16 +36,16 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { Conversation, MessageResponse } from '../sdk';
+import { ConversationResponse, MessageResponse } from '../sdk';
 
 const ConversationsPage: React.FC = () => {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<ConversationResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<ConversationResponse | null>(null);
   const [conversationMessages, setConversationMessages] = useState<MessageResponse[]>([]);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
@@ -68,7 +68,7 @@ const ConversationsPage: React.FC = () => {
     }
   };
 
-  const handleViewConversation = async (conversation: Conversation) => {
+  const handleViewConversation = async (conversation: ConversationResponse) => {
     setSelectedConversation(conversation);
     setViewDialogOpen(true);
     setLoadingMessages(true);

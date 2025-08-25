@@ -37,14 +37,14 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { Agent, ApiV1AgentsPostRequest, ApiV1AgentsIdPutRequest } from '../sdk';
+import { AgentResponse, AgentsApiCreateAgentApiV1AgentsPostRequest, AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest, AgentUpdateRequest, AgentCreateRequest } from '../sdk';
 
 const AgentsPage: React.FC = () => {
-  const [agents, setAgents] = useState<Agent[]>([]);
+  const [agents, setAgents] = useState<AgentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingAgent, setEditingAgent] = useState<Agent | null>(null);
+  const [editingAgent, setEditingAgent] = useState<AgentResponse | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -81,7 +81,7 @@ const AgentsPage: React.FC = () => {
     }
   };
 
-  const handleOpenDialog = (agent?: Agent) => {
+  const handleOpenDialog = (agent?: AgentResponse) => {
     if (agent) {
       setEditingAgent(agent);
       setFormData({
@@ -110,12 +110,12 @@ const AgentsPage: React.FC = () => {
       if (editingAgent) {
         const response = await chatterSDK.agents.updateAgentApiV1AgentsAgentIdPut({
           agentId: editingAgent.id,
-          agentUpdateRequest: formData as ApiV1AgentsIdPutRequest
+          agentUpdateRequest: formData as AgentUpdateRequest
         });
         setAgents(prev => prev.map(a => a.id === editingAgent.id ? response.data : a));
       } else {
         const response = await chatterSDK.agents.createAgentApiV1AgentsPost({
-          agentCreateRequest: formData as ApiV1AgentsPostRequest
+          agentCreateRequest: formData as AgentCreateRequest
         });
         setAgents(prev => [response.data, ...prev]);
       }

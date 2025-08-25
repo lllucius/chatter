@@ -371,6 +371,7 @@ class ChatService:
                 title=f"Chat {datetime.now().strftime('%Y-%m-%d %H:%M')}",
                 profile_id=chat_request.profile_id,
                 enable_retrieval=chat_request.enable_retrieval or False,
+                system_prompt=chat_request.system_prompt_override,
             )
             conversation = await self.create_conversation(
                 user_id, conversation_data
@@ -494,6 +495,7 @@ class ChatService:
                 title=f"Chat {datetime.now().strftime('%Y-%m-%d %H:%M')}",
                 profile_id=chat_request.profile_id,
                 enable_retrieval=chat_request.enable_retrieval or False,
+                system_prompt=chat_request.system_prompt_override,
             )
             conversation = await self.create_conversation(
                 user_id, conversation_data

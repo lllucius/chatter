@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -65,6 +65,58 @@ const ChatPage: React.FC = () => {
   // Right drawer context
   const { setPanelContent, clearPanelContent, setTitle, open, setOpen } = useRightSidebar();
 
+  const loadData = async () => {
+    try {
+      const [profilesResponse, promptsResponse, documentsResponse] = await Promise.all([
+        chatterSDK.profiles.listProfilesApiV1ProfilesGet({}),
+        chatterSDK.prompts.listPromptsApiV1PromptsGet({}),
+        chatterSDK.documents.listDocumentsApiV1DocumentsGet({}),
+      ]);
+      setProfiles(profilesResponse.data.profiles);
+      setPrompts(promptsResponse.data.prompts);
+      setDocuments(documentsResponse.data.documents);
+
+      if (profilesResponse.data.profiles.length > 0) {
+        setSelectedProfile(profilesResponse.data.profiles[0].id);
+      }
+    } catch (err: any) {
+      setError('Failed to load chat data');
+      console.error(err);
+    }
+  };
+
+  const startNewConversation = useCallback(async () => {
+    try {
+      setError('');
+      const createRequest: CreateConversationRequest = {
+        title: `Chat ${new Date().toLocaleString()}`,
+        profile_id: selectedProfile || undefined,
+      };
+      const response = await chatterSDK.conversations.createConversationApiV1ChatConversationsPost({
+        conversationCreate: createRequest,
+      });
+      setCurrentConversation(response.data);
+      setMessages([]);
+
+      if (selectedPrompt) {
+        const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
+        if (selectedPromptData) {
+          setMessages([
+            {
+              id: 'system',
+              role: 'system',
+              content: `Using prompt: "${selectedPromptData.name}" - ${selectedPromptData.content}`,
+              timestamp: new Date(),
+            },
+          ]);
+        }
+      }
+    } catch (err: any) {
+      setError('Failed to start new conversation');
+      console.error(err);
+    }
+  }, [selectedProfile, selectedPrompt, prompts]);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -110,6 +162,8 @@ const ChatPage: React.FC = () => {
     return () => {
       clearPanelContent();
     };
+    // ESLint disabled: setPanelContent, clearPanelContent, setTitle, setOpen are stable setter functions
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [
     profiles,
     prompts,
@@ -123,66 +177,11 @@ const ChatPage: React.FC = () => {
     temperature,
     maxTokens,
     enableRetrieval,
-    setPanelContent,
-    clearPanelContent,
-    setTitle,
-    setOpen,
+    startNewConversation,
   ]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const loadData = async () => {
-    try {
-      const [profilesResponse, promptsResponse, documentsResponse] = await Promise.all([
-        chatterSDK.profiles.listProfilesApiV1ProfilesGet({}),
-        chatterSDK.prompts.listPromptsApiV1PromptsGet({}),
-        chatterSDK.documents.listDocumentsApiV1DocumentsGet({}),
-      ]);
-      setProfiles(profilesResponse.data.profiles);
-      setPrompts(promptsResponse.data.prompts);
-      setDocuments(documentsResponse.data.documents);
-
-      if (profilesResponse.data.profiles.length > 0) {
-        setSelectedProfile(profilesResponse.data.profiles[0].id);
-      }
-    } catch (err: any) {
-      setError('Failed to load chat data');
-      console.error(err);
-    }
-  };
-
-  const startNewConversation = async () => {
-    try {
-      setError('');
-      const createRequest: CreateConversationRequest = {
-        title: `Chat ${new Date().toLocaleString()}`,
-        profile_id: selectedProfile || undefined,
-      };
-      const response = await chatterSDK.conversations.createConversationApiV1ChatConversationsPost({
-        conversationCreate: createRequest,
-      });
-      setCurrentConversation(response.data);
-      setMessages([]);
-
-      if (selectedPrompt) {
-        const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
-        if (selectedPromptData) {
-          setMessages([
-            {
-              id: 'system',
-              role: 'system',
-              content: `Using prompt: "${selectedPromptData.name}" - ${selectedPromptData.content}`,
-              timestamp: new Date(),
-            },
-          ]);
-        }
-      }
-    } catch (err: any) {
-      setError('Failed to start new conversation');
-      console.error(err);
-    }
   };
 
   const sendMessage = async () => {

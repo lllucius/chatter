@@ -33,7 +33,7 @@ def main():
         "chatter/services/job_queue.py",
         "chatter/services/ab_testing.py",
         "chatter/services/data_management.py",
-        "chatter/services/webhooks.py",
+        "chatter/services/sse_events.py",
         "chatter/services/plugins.py",
         "chatter/utils/validation.py",
         "chatter/utils/versioning.py",

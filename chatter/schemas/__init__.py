@@ -6,6 +6,7 @@ from chatter.schemas.auth import *  # noqa: F403
 from chatter.schemas.chat import *  # noqa: F403
 from chatter.schemas.common import *  # noqa: F403
 from chatter.schemas.document import *  # noqa: F403
+from chatter.schemas.events import *  # noqa: F403
 from chatter.schemas.health import *  # noqa: F403
 from chatter.schemas.profile import *  # noqa: F403
 from chatter.schemas.prompt import *  # noqa: F403
@@ -160,4 +161,16 @@ __all__ = [
     "ServerToolsRequest",
     "ServerToolsResponse",
     "ToolOperationResponse",
+    # Events schemas
+    "EventResponse",
+    "ConnectionEstablishedEvent",
+    "TestEventRequest",
+    "TestEventResponse",
+    "SSEStatsResponse",
+    "AdminSSEStatsResponse",
+    "BackupEvent",
+    "JobEvent",
+    "ToolServerEvent",
+    "DocumentEvent",
+    "SystemEvent",
 ]

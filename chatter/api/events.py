@@ -8,6 +8,11 @@ from fastapi.responses import StreamingResponse
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
+from chatter.schemas.events import (
+    AdminSSEStatsResponse,
+    SSEStatsResponse,
+    TestEventResponse,
+)
 from chatter.services.sse_events import EventType, sse_service
 from chatter.utils.logging import get_logger
 
@@ -202,10 +207,10 @@ async def admin_events_stream(
     )
 
 
-@router.get("/stats")
+@router.get("/stats", response_model=SSEStatsResponse)
 async def get_sse_stats(
     current_user: User = Depends(get_current_user),
-) -> dict[str, Any]:
+) -> SSEStatsResponse:
     """Get SSE service statistics.
     
     Args:
@@ -218,16 +223,16 @@ async def get_sse_stats(
     stats = sse_service.get_stats()
     
     # For non-admin users, only show basic stats
-    return {
-        "total_connections": stats["total_connections"],
-        "your_connections": len(stats["connections_by_user"].get(current_user.id, [])),
-    }
+    return SSEStatsResponse(
+        total_connections=stats["total_connections"],
+        your_connections=len(stats["connections_by_user"].get(current_user.id, [])),
+    )
 
 
-@router.post("/test-event")
+@router.post("/test-event", response_model=TestEventResponse)
 async def trigger_test_event(
     current_user: User = Depends(get_current_user),
-) -> dict[str, str]:
+) -> TestEventResponse:
     """Trigger a test event for the current user.
     
     Args:
@@ -246,16 +251,16 @@ async def trigger_test_event(
         user_id=current_user.id
     )
     
-    return {
-        "message": "Test event triggered successfully",
-        "event_id": event_id
-    }
+    return TestEventResponse(
+        message="Test event triggered successfully",
+        event_id=event_id
+    )
 
 
-@router.post("/broadcast-test")
+@router.post("/broadcast-test", response_model=TestEventResponse)
 async def trigger_broadcast_test(
     current_user: User = Depends(get_current_user),
-) -> dict[str, str]:
+) -> TestEventResponse:
     """Trigger a broadcast test event for all users.
     
     Args:
@@ -276,7 +281,7 @@ async def trigger_broadcast_test(
         user_id=None  # Broadcast to all users
     )
     
-    return {
-        "message": "Broadcast test event triggered successfully",
-        "event_id": event_id
-    }
+    return TestEventResponse(
+        message="Broadcast test event triggered successfully",
+        event_id=event_id
+    )

@@ -36,3 +36,11 @@
     transform: rotate(360deg);
   }
 }
+
+/* Safety net: on desktop, ensure any MUI Backdrop can't block clicks */
+@media (min-width: 600px) {
+  .MuiBackdrop-root {
+    pointer-events: none !important;
+    background-color: transparent !important;
+  }
+}

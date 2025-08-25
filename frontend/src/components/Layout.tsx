@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
@@ -37,11 +37,17 @@ import {
   DarkMode as DarkModeIcon,
   AdminPanelSettings as AdminIcon,
 } from '@mui/icons-material';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { chatterSDK } from '../services/chatter-sdk';
 import { ThemeContext } from '../App';
+import { RightSidebarProvider, useRightSidebar } from './RightSidebarContext';
 
 const drawerWidth = 240;
 const collapsedDrawerWidth = 64;
+
+const rightDrawerWidth = 300;
+const rightCollapsedDrawerWidth = 64;
 
 interface NavItem {
   label: string;
@@ -61,7 +67,7 @@ const navItems: NavItem[] = [
   { label: 'Health', path: '/health', icon: <HealthIcon /> },
 ];
 
-const Layout: React.FC = () => {
+const LayoutFrame: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -69,7 +75,38 @@ const Layout: React.FC = () => {
   const location = useLocation();
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
 
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
+  const isMobile = !isDesktop;
+
+  const {
+    panelContent,
+    title,
+    open: rightOpen,
+    setOpen: setRightOpen,
+    collapsed: rightCollapsed,
+    setCollapsed: setRightCollapsed,
+    clearPanelContent,
+  } = useRightSidebar();
+
   const currentDrawerWidth = sidebarCollapsed ? collapsedDrawerWidth : drawerWidth;
+
+  // Only show right drawer if explicitly opened and there is content
+  const isRightVisible = rightOpen && !!panelContent;
+  const effectiveRightWidth = isRightVisible
+    ? (rightCollapsed ? rightCollapsedDrawerWidth : rightDrawerWidth)
+    : 0;
+
+  // Close and clear right panel when leaving /chat (prevents lingering portal content)
+  useEffect(() => {
+    if (!location.pathname.startsWith('/chat')) {
+      setRightOpen(false);
+      clearPanelContent();
+      // Also blur any focused element (closes open selects/menus)
+      (document.activeElement as HTMLElement | null)?.blur?.();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -159,21 +196,14 @@ const Layout: React.FC = () => {
           </ListItem>
         ))}
       </List>
-      
-      {/* Profile Menu */}
+
       <Menu
         id="profile-menu"
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleProfileMenuClose}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'right',
-        }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <MenuItem onClick={handleProfileMenuClose}>
           <ListItemIcon>
@@ -191,118 +221,137 @@ const Layout: React.FC = () => {
     </div>
   );
 
-  return (
-    <Box sx={{ display: 'flex' }}>
-      
-      <Box
-        component="nav"
-        sx={{ width: { sm: currentDrawerWidth }, flexShrink: { sm: 0 } }}
-      >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
+  const rightDrawerContent = (
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Toolbar sx={{ justifyContent: 'space-between', borderBottom: '1px solid', borderColor: 'divider' }}>
+        {!rightCollapsed && (
+          <Typography variant="h6" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+            <SettingsIcon sx={{ mr: 1 }} />
+            {title || 'Panel'}
+          </Typography>
+        )}
+        <IconButton
+          onClick={() => setRightCollapsed(!rightCollapsed)}
+          size="small"
+          sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+          aria-label={rightCollapsed ? 'expand panel' : 'collapse panel'}
         >
-          <Box>
-            <Toolbar sx={{ justifyContent: 'space-between' }}>
-              <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
-                Chatter
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Tooltip title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}>
-                  <IconButton onClick={toggleDarkMode} size="small">
-                    {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+          {rightCollapsed ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+        </IconButton>
+      </Toolbar>
+      <Box sx={{ flexGrow: 1, overflow: 'auto', p: rightCollapsed ? 1 : 2 }}>
+        {panelContent ?? (
+          <Typography variant="body2" color="text.secondary">
+            No panel content
+          </Typography>
+        )}
+      </Box>
+    </div>
+  );
+
+  return (
+    <Box sx={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
+      {/* LEFT NAV */}
+      <Box component="nav" sx={{ width: { sm: currentDrawerWidth }, flexShrink: { sm: 0 } }}>
+        {/* Mobile Left Drawer - mount only on mobile */}
+        {isMobile && (
+          <Drawer
+            variant="temporary"
+            open={mobileOpen}
+            onClose={handleDrawerToggle}
+            hideBackdrop
+            ModalProps={{
+              keepMounted: false,
+              disableEnforceFocus: true,
+              disableAutoFocus: true,
+            }}
+            sx={{
+              display: { xs: 'block', sm: 'none' },
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            }}
+          >
+            <Box>
+              <Toolbar sx={{ justifyContent: 'space-between' }}>
+                <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+                  Chatter
+                </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Tooltip title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}>
+                    <IconButton onClick={toggleDarkMode} size="small">
+                      {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
+                    </IconButton>
+                  </Tooltip>
+                  <IconButton size="small" sx={{ mr: 1 }}>
+                    <Badge badgeContent={4} color="error">
+                      <NotificationsIcon />
+                    </Badge>
                   </IconButton>
-                </Tooltip>
-                <IconButton size="small" sx={{ mr: 1 }}>
-                  <Badge badgeContent={4} color="error">
-                    <NotificationsIcon />
-                  </Badge>
-                </IconButton>
-                <IconButton
-                  size="small"
-                  aria-label="account of current user"
-                  onClick={handleProfileMenuOpen}
-                >
-                  <Avatar sx={{ width: 24, height: 24 }}>U</Avatar>
-                </IconButton>
-                <IconButton onClick={handleDrawerToggle}>
-                  <MenuIcon />
-                </IconButton>
-              </Box>
-            </Toolbar>
-            <Divider />
-            <List>
-              {navItems.map((item) => (
-                <ListItem key={item.path} disablePadding>
-                  <ListItemButton
-                    selected={location.pathname === item.path}
-                    onClick={() => {
-                      navigate(item.path);
-                      handleDrawerToggle();
-                    }}
-                    sx={{
-                      minHeight: 48,
-                      px: 2.5,
-                    }}
-                  >
-                    <ListItemIcon sx={{ mr: 3 }}>
-                      {item.icon}
-                    </ListItemIcon>
-                    <ListItemText primary={item.label} />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-            
-            {/* Profile Menu */}
-            <Menu
-              id="profile-menu"
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleProfileMenuClose}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right',
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-            >
-              <MenuItem onClick={handleProfileMenuClose}>
-                <ListItemIcon>
-                  <SettingsIcon fontSize="small" />
-                </ListItemIcon>
-                Settings
-              </MenuItem>
-              <MenuItem onClick={handleLogout}>
-                <ListItemIcon>
-                  <LogoutIcon fontSize="small" />
-                </ListItemIcon>
-                Logout
-              </MenuItem>
-            </Menu>
-          </Box>
-        </Drawer>
+                  <IconButton size="small" aria-label="account of current user" onClick={handleProfileMenuOpen}>
+                    <Avatar sx={{ width: 24, height: 24 }}>U</Avatar>
+                  </IconButton>
+                  <IconButton onClick={handleDrawerToggle}>
+                    <MenuIcon />
+                  </IconButton>
+                </Box>
+              </Toolbar>
+              <Divider />
+              <List>
+                {navItems.map((item) => (
+                  <ListItem key={item.path} disablePadding>
+                    <ListItemButton
+                      selected={location.pathname === item.path}
+                      onClick={() => {
+                        navigate(item.path);
+                        handleDrawerToggle();
+                      }}
+                      sx={{ minHeight: 48, px: 2.5 }}
+                    >
+                      <ListItemIcon sx={{ mr: 3 }}>{item.icon}</ListItemIcon>
+                      <ListItemText primary={item.label} />
+                    </ListItemButton>
+                  </ListItem>
+                ))}
+              </List>
+
+              {/* Profile Menu (mobile left) */}
+              <Menu
+                id="profile-menu"
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleProfileMenuClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              >
+                <MenuItem onClick={handleProfileMenuClose}>
+                  <ListItemIcon>
+                    <SettingsIcon fontSize="small" />
+                  </ListItemIcon>
+                  Settings
+                </MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  Logout
+                </MenuItem>
+              </Menu>
+            </Box>
+          </Drawer>
+        )}
+
+        {/* Desktop Left Drawer */}
         <Drawer
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { 
-              boxSizing: 'border-box', 
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
               width: currentDrawerWidth,
-              transition: (theme) => theme.transitions.create('width', {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
+              transition: (theme) =>
+                theme.transitions.create('width', {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.enteringScreen,
+                }),
               overflowX: 'hidden',
             },
           }}
@@ -311,22 +360,86 @@ const Layout: React.FC = () => {
           {drawer}
         </Drawer>
       </Box>
-      
+
+      {/* MAIN CONTENT (scrolls instead of window) */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${currentDrawerWidth}px)` },
-          transition: (theme) => theme.transitions.create(['width'], {
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.leavingScreen,
-          }),
+          width: { sm: `calc(100% - ${currentDrawerWidth + effectiveRightWidth}px)` },
+          minWidth: 0,
+          minHeight: 0,
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          transition: (theme) =>
+            theme.transitions.create(['width'], {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.leavingScreen,
+            }),
         }}
       >
-        <Outlet />
+        {/* Force route content to remount on path changes to drop any open Popovers/Menus */}
+        <Outlet key={location.pathname} />
+      </Box>
+
+      {/* RIGHT NAV */}
+      <Box component="nav" sx={{ width: { sm: effectiveRightWidth }, flexShrink: { sm: 0 } }}>
+        {/* Mobile Right Drawer - mount/open only on mobile */}
+        {isMobile && (
+          <Drawer
+            variant="temporary"
+            anchor="right"
+            open={isRightVisible}
+            onClose={() => setRightOpen(false)}
+            hideBackdrop
+            ModalProps={{
+              keepMounted: false,
+              disableEnforceFocus: true,
+              disableAutoFocus: true,
+            }}
+            sx={{
+              display: { xs: 'block', sm: 'none' },
+              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: rightDrawerWidth },
+            }}
+          >
+            {rightDrawerContent}
+          </Drawer>
+        )}
+
+        {/* Desktop Right Drawer - use persistent (no modal/backdrop) */}
+        <Drawer
+          variant="persistent"
+          anchor="right"
+          open={isRightVisible}
+          sx={{
+            display: { xs: 'none', sm: 'block' },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: effectiveRightWidth,
+              transition: (theme) =>
+                theme.transitions.create('width', {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.enteringScreen,
+                }),
+              overflowX: 'hidden',
+              pointerEvents: 'auto',
+            },
+          }}
+        >
+          {rightDrawerContent}
+        </Drawer>
       </Box>
     </Box>
+  );
+};
+
+const Layout: React.FC = () => {
+  return (
+    <RightSidebarProvider>
+      <LayoutFrame />
+    </RightSidebarProvider>
   );
 };
 

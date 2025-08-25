@@ -323,6 +323,82 @@ class LangGraphWorkflowManager:
 
         return app
 
+    def create_workflow(
+        self,
+        llm: BaseChatModel,
+        system_message: str | None = None,
+        retriever: Any = None,
+        tools: list[Any] = None,
+    ) -> Pregel:
+        """Create a workflow based on provided parameters.
+
+        Automatically determines workflow type based on parameters:
+        - If retriever is provided: RAG workflow
+        - If tools are provided: Tool calling workflow
+        - Otherwise: Basic conversation workflow
+
+        Args:
+            llm: Language model to use
+            system_message: Optional system message
+            retriever: Optional retriever for RAG workflow
+            tools: Optional tools for tool calling workflow
+
+        Returns:
+            Compiled LangGraph workflow
+        """
+        # Determine workflow type based on provided parameters
+        if retriever is not None:
+            # RAG workflow - retriever takes precedence
+            return self.create_rag_conversation_workflow(
+                llm=llm,
+                retriever=retriever,
+                system_message=system_message,
+            )
+        elif tools is not None and len(tools) > 0:
+            # Tool calling workflow
+            return self.create_tool_calling_workflow(
+                llm=llm,
+                tools=tools,
+                system_message=system_message,
+            )
+        else:
+            # Basic conversation workflow
+            return self.create_basic_conversation_workflow(
+                llm=llm,
+                system_message=system_message,
+            )
+
+    def create_streaming_workflow(
+        self,
+        llm: BaseChatModel,
+        system_message: str | None = None,
+        retriever: Any = None,
+        tools: list[Any] = None,
+    ) -> Pregel:
+        """Create a streaming-optimized workflow based on provided parameters.
+
+        This method creates the same workflows as create_workflow() but optimized
+        for streaming usage. Currently uses the same implementation as the
+        non-streaming version since LangGraph workflows are inherently streamable.
+
+        Args:
+            llm: Language model to use
+            system_message: Optional system message
+            retriever: Optional retriever for RAG workflow
+            tools: Optional tools for tool calling workflow
+
+        Returns:
+            Compiled LangGraph workflow optimized for streaming
+        """
+        # For now, the streaming workflow uses the same implementation
+        # as the regular workflow since LangGraph workflows are inherently streamable
+        return self.create_workflow(
+            llm=llm,
+            system_message=system_message,
+            retriever=retriever,
+            tools=tools,
+        )
+
     async def run_workflow(
         self,
         workflow: Pregel,

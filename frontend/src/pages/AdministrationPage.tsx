@@ -265,7 +265,6 @@ const AdministrationPage: React.FC = () => {
   // - Back off to 60s when all are terminal; stop if no in-progress items
   useEffect(() => {
     let timeoutId: number | undefined;
-    let delay = 15000; // fast while in-progress
     const activeDelay = 15000;
     const idleDelay = 60000;
 

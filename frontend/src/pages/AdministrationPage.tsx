@@ -43,8 +43,13 @@ import {
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
+import { useSSE } from '../services/sse-context';
+import { JobCompletedEvent, JobFailedEvent, JobStartedEvent, BackupCompletedEvent, BackupFailedEvent, BackupStartedEvent } from '../services/sse-types';
 
 const AdministrationPage: React.FC = () => {
+  // SSE hook
+  const { isConnected, on } = useSSE();
+  
   const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users' | 'tools'>('backups');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'user' | 'tool' | 'backup' | 'plugin' | 'job'>('user');
@@ -184,6 +189,101 @@ const AdministrationPage: React.FC = () => {
     // Intentionally run only once on mount to avoid refresh loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // SSE Event Listeners for real-time updates
+  useEffect(() => {
+    if (!isConnected) return;
+
+    // Job event listeners
+    const unsubscribeJobStarted = on('job.started', (event) => {
+      const jobEvent = event as JobStartedEvent;
+      console.log('Job started:', jobEvent.data);
+      addNotification({
+        title: 'Job Started',
+        message: `Job "${jobEvent.data.job_name || jobEvent.data.job_id}" has started`,
+        type: 'info',
+        jobId: jobEvent.data.job_id
+      });
+      // Refresh jobs to get latest state
+      loadJobs();
+      loadJobStats();
+    });
+
+    const unsubscribeJobCompleted = on('job.completed', (event) => {
+      const jobEvent = event as JobCompletedEvent;
+      console.log('Job completed:', jobEvent.data);
+      addNotification({
+        title: 'Job Completed',
+        message: `Job "${jobEvent.data.job_name || jobEvent.data.job_id}" completed successfully`,
+        type: 'success',
+        jobId: jobEvent.data.job_id
+      });
+      // Refresh jobs to get latest state
+      loadJobs();
+      loadJobStats();
+    });
+
+    const unsubscribeJobFailed = on('job.failed', (event) => {
+      const jobEvent = event as JobFailedEvent;
+      console.log('Job failed:', jobEvent.data);
+      addNotification({
+        title: 'Job Failed',
+        message: `Job "${jobEvent.data.job_name || jobEvent.data.job_id}" failed: ${jobEvent.data.error}`,
+        type: 'error',
+        jobId: jobEvent.data.job_id
+      });
+      // Refresh jobs to get latest state
+      loadJobs();
+      loadJobStats();
+    });
+
+    // Backup event listeners
+    const unsubscribeBackupStarted = on('backup.started', (event) => {
+      const backupEvent = event as BackupStartedEvent;
+      console.log('Backup started:', backupEvent.data);
+      addNotification({
+        title: 'Backup Started',
+        message: `Backup "${backupEvent.data.backup_id}" has started`,
+        type: 'info'
+      });
+      // Refresh backups to get latest state
+      loadBackups();
+    });
+
+    const unsubscribeBackupCompleted = on('backup.completed', (event) => {
+      const backupEvent = event as BackupCompletedEvent;
+      console.log('Backup completed:', backupEvent.data);
+      addNotification({
+        title: 'Backup Completed',
+        message: `Backup "${backupEvent.data.backup_id}" completed successfully`,
+        type: 'success'
+      });
+      // Refresh backups to get latest state
+      loadBackups();
+    });
+
+    const unsubscribeBackupFailed = on('backup.failed', (event) => {
+      const backupEvent = event as BackupFailedEvent;
+      console.log('Backup failed:', backupEvent.data);
+      addNotification({
+        title: 'Backup Failed',
+        message: `Backup "${backupEvent.data.backup_id}" failed: ${backupEvent.data.error}`,
+        type: 'error'
+      });
+      // Refresh backups to get latest state
+      loadBackups();
+    });
+
+    // Cleanup function
+    return () => {
+      unsubscribeJobStarted();
+      unsubscribeJobCompleted();
+      unsubscribeJobFailed();
+      unsubscribeBackupStarted();
+      unsubscribeBackupCompleted();
+      unsubscribeBackupFailed();
+    };
+  }, [isConnected, on, addNotification, loadJobs, loadJobStats, loadBackups]);
 
   const handleJobAction = async (action: 'cancel', jobId: string) => {
     try {

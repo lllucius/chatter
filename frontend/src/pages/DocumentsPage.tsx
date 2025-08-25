@@ -43,8 +43,13 @@ import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { DocumentResponse, DocumentSearchRequest } from '../sdk';
 import { ThemeContext } from '../App';
+import { useSSE } from '../services/sse-context';
+import { DocumentUploadedEvent, DocumentProcessingStartedEvent, DocumentProcessingCompletedEvent, DocumentProcessingFailedEvent } from '../services/sse-types';
 
 const DocumentsPage: React.FC = () => {
+  // SSE hook
+  const { isConnected, on } = useSSE();
+  
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -64,6 +69,64 @@ const DocumentsPage: React.FC = () => {
   useEffect(() => {
     loadDocuments();
   }, []);
+
+  // SSE Event Listeners for real-time document updates
+  useEffect(() => {
+    if (!isConnected) return;
+
+    // Document event listeners
+    const unsubscribeDocumentUploaded = on('document.uploaded', (event) => {
+      const docEvent = event as DocumentUploadedEvent;
+      console.log('Document uploaded:', docEvent.data);
+      // Refresh documents to get the latest list
+      loadDocuments();
+    });
+
+    const unsubscribeProcessingStarted = on('document.processing_started', (event) => {
+      const docEvent = event as DocumentProcessingStartedEvent;
+      console.log('Document processing started:', docEvent.data);
+      // Update document status to show processing
+      setDocuments(prev => prev.map(doc => 
+        doc.id === docEvent.data.document_id 
+          ? { ...doc, status: 'processing' as any } 
+          : doc
+      ));
+    });
+
+    const unsubscribeProcessingCompleted = on('document.processing_completed', (event) => {
+      const docEvent = event as DocumentProcessingCompletedEvent;
+      console.log('Document processing completed:', docEvent.data);
+      // Update document status and refresh the list
+      setDocuments(prev => prev.map(doc => 
+        doc.id === docEvent.data.document_id 
+          ? { ...doc, status: 'processed' as any }
+          : doc
+      ));
+      // Also refresh to get any updated metadata
+      loadDocuments();
+    });
+
+    const unsubscribeProcessingFailed = on('document.processing_failed', (event) => {
+      const docEvent = event as DocumentProcessingFailedEvent;
+      console.log('Document processing failed:', docEvent.data);
+      // Update document status to show error
+      setDocuments(prev => prev.map(doc => 
+        doc.id === docEvent.data.document_id 
+          ? { ...doc, status: 'failed' as any }
+          : doc
+      ));
+      // Show error message
+      setError(`Document processing failed: ${docEvent.data.error}`);
+    });
+
+    // Cleanup function
+    return () => {
+      unsubscribeDocumentUploaded();
+      unsubscribeProcessingStarted();
+      unsubscribeProcessingCompleted();
+      unsubscribeProcessingFailed();
+    };
+  }, [isConnected, on]);
 
   const loadDocuments = async () => {
     try {

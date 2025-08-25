@@ -18,6 +18,7 @@ import AdministrationPage from './pages/AdministrationPage';
 // Components
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
+import { SSEProvider } from './services/sse-context';
 
 // Create theme context
 export const ThemeContext = React.createContext<{
@@ -86,32 +87,34 @@ function App() {
   return (
     <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
       <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <Router>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<LoginPage />} />
-          
-          {/* Protected routes */}
-          <Route path="/" element={
-            <ProtectedRoute>
-              <Layout />
-            </ProtectedRoute>
-          }>
-            <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="chat" element={<ChatPage />} />
-            <Route path="conversations" element={<ConversationsPage />} />
-            <Route path="documents" element={<DocumentsPage />} />
-            <Route path="profiles" element={<ProfilesPage />} />
-            <Route path="prompts" element={<PromptsPage />} />
-            <Route path="agents" element={<AgentsPage />} />
-            <Route path="health" element={<HealthPage />} />
-            <Route path="administration" element={<AdministrationPage />} />
-          </Route>
-        </Routes>
-      </Router>
-    </ThemeProvider>
+        <CssBaseline />
+        <SSEProvider autoConnect={true}>
+          <Router>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<LoginPage />} />
+              
+              {/* Protected routes */}
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <Layout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Navigate to="/dashboard" replace />} />
+                <Route path="dashboard" element={<DashboardPage />} />
+                <Route path="chat" element={<ChatPage />} />
+                <Route path="conversations" element={<ConversationsPage />} />
+                <Route path="documents" element={<DocumentsPage />} />
+                <Route path="profiles" element={<ProfilesPage />} />
+                <Route path="prompts" element={<PromptsPage />} />
+                <Route path="agents" element={<AgentsPage />} />
+                <Route path="health" element={<HealthPage />} />
+                <Route path="administration" element={<AdministrationPage />} />
+              </Route>
+            </Routes>
+          </Router>
+        </SSEProvider>
+      </ThemeProvider>
     </ThemeContext.Provider>
   );
 }

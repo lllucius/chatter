@@ -1,4 +1,4 @@
-"""Advanced job queue system for background processing."""
+"""Advanced job queue system for background processing using APScheduler."""
 
 import asyncio
 import uuid
@@ -7,6 +7,11 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.executors.asyncio import AsyncIOExecutor  
+from apscheduler.executors.pool import ThreadPoolExecutor
+from apscheduler.jobstores.memory import MemoryJobStore
+from apscheduler.job import Job as APSchedulerJob
 from pydantic import BaseModel, Field
 
 from chatter.config import settings
@@ -52,6 +57,9 @@ class Job(BaseModel):
     timeout: int = 3600  # seconds
     tags: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
+    result: Any = None  # Job execution result
+    progress: int = 0  # Progress percentage (0-100)
+    progress_message: str | None = None  # Progress description
 
 
 class JobResult(BaseModel):
@@ -65,23 +73,39 @@ class JobResult(BaseModel):
 
 
 class AdvancedJobQueue:
-    """Advanced job queue with priority, retry, and monitoring capabilities."""
+    """Advanced job queue with priority, retry, and monitoring capabilities using APScheduler."""
 
     def __init__(self, max_workers: int = 4):
-        """Initialize the job queue.
+        """Initialize the job queue with APScheduler.
 
         Args:
             max_workers: Maximum number of concurrent workers
         """
         self.max_workers = max_workers
-        self.workers: list[asyncio.Task] = []
-        self.job_queue: asyncio.Queue = asyncio.Queue()
-        self.priority_queue: asyncio.PriorityQueue = asyncio.PriorityQueue()
         self.jobs: dict[str, Job] = {}
         self.results: dict[str, JobResult] = {}
         self.job_handlers: dict[str, Callable] = {}
         self.running = False
-        self._job_counter = 0
+        
+        # Configure APScheduler
+        job_stores = {
+            'default': MemoryJobStore()
+        }
+        executors = {
+            'default': AsyncIOExecutor()
+        }
+        job_defaults = {
+            'coalesce': False,
+            'max_instances': max_workers,  # Control concurrency here
+            'misfire_grace_time': 30
+        }
+        
+        self.scheduler = AsyncIOScheduler(
+            jobstores=job_stores,
+            executors=executors,
+            job_defaults=job_defaults,
+            timezone=UTC
+        )
 
     def register_handler(self, name: str, handler: Callable) -> None:
         """Register a job handler function.
@@ -104,6 +128,7 @@ class AdvancedJobQueue:
         timeout: int = 3600,
         tags: list[str] | None = None,
         metadata: dict[str, Any] | None = None,
+        schedule_at: datetime | None = None,
     ) -> str:
         """Add a job to the queue.
 
@@ -117,6 +142,7 @@ class AdvancedJobQueue:
             timeout: Job timeout in seconds
             tags: Job tags for filtering
             metadata: Additional job metadata
+            schedule_at: Optional datetime to schedule job for later execution
 
         Returns:
             Job ID
@@ -135,16 +161,47 @@ class AdvancedJobQueue:
 
         self.jobs[job.id] = job
 
-        # Add to priority queue with priority ordering
-        priority_order = {
-            JobPriority.CRITICAL: 0,
-            JobPriority.HIGH: 1,
-            JobPriority.NORMAL: 2,
-            JobPriority.LOW: 3,
-        }
-
-        await self.priority_queue.put((priority_order[priority], self._job_counter, job))
-        self._job_counter += 1
+        # Schedule job with APScheduler
+        if schedule_at:
+            # Schedule for future execution
+            ap_job = self.scheduler.add_job(
+                func=self._execute_job_wrapper,
+                trigger='date',
+                run_date=schedule_at,
+                args=[job.id],
+                id=str(job.id),  # Ensure it's a string
+                name=name,
+                max_instances=1,
+                coalesce=True,
+                misfire_grace_time=30
+            )
+        else:
+            # Execute immediately with priority handling
+            # APScheduler doesn't have built-in priority, so we'll use different queues
+            # or schedule with minimal delays based on priority
+            delay_seconds = {
+                JobPriority.CRITICAL: 0,
+                JobPriority.HIGH: 0.1,
+                JobPriority.NORMAL: 0.5,
+                JobPriority.LOW: 1.0,
+            }
+            
+            run_date = datetime.now(UTC)
+            if delay_seconds[priority] > 0:
+                from datetime import timedelta
+                run_date += timedelta(seconds=delay_seconds[priority])
+            
+            ap_job = self.scheduler.add_job(
+                func=self._execute_job_wrapper,
+                trigger='date',
+                run_date=run_date,
+                args=[job.id],
+                id=str(job.id),  # Ensure it's a string
+                name=name,
+                max_instances=1,
+                coalesce=True,
+                misfire_grace_time=30
+            )
 
         logger.info(
             "Added job to queue",
@@ -152,6 +209,46 @@ class AdvancedJobQueue:
             name=job.name,
             priority=job.priority,
             function_name=job.function_name,
+            scheduled_at=schedule_at,
+        )
+
+        return job.id
+
+    async def schedule_job(self, job: Job, schedule_at: datetime) -> str:
+        """Schedule a job for later execution.
+        
+        This method is for backwards compatibility with the API.
+        
+        Args:
+            job: Job object (pre-created)
+            schedule_at: When to execute the job
+            
+        Returns:
+            Job ID
+        """
+        # Store the job
+        self.jobs[job.id] = job
+        
+        # Schedule with APScheduler
+        ap_job = self.scheduler.add_job(
+            func=self._execute_job_wrapper,
+            trigger='date',
+            run_date=schedule_at,
+            args=[job.id],
+            id=str(job.id),  # Ensure it's a string
+            name=job.name,
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=30
+        )
+
+        logger.info(
+            "Scheduled job",
+            job_id=job.id,
+            name=job.name,
+            priority=job.priority,
+            function_name=job.function_name,
+            scheduled_at=schedule_at,
         )
 
         return job.id
@@ -193,11 +290,18 @@ class AdvancedJobQueue:
             return False
 
         if job.status in [JobStatus.PENDING, JobStatus.RETRYING]:
-            job.status = JobStatus.CANCELLED
-            logger.info(f"Cancelled job {job_id}")
-            return True
+            try:
+                # Cancel the APScheduler job
+                self.scheduler.remove_job(job_id)
+                job.status = JobStatus.CANCELLED
+                logger.info(f"Cancelled job {job_id}")
+                return True
+            except Exception as e:
+                logger.warning(f"Failed to cancel APScheduler job {job_id}: {e}")
+                return False
         elif job.status == JobStatus.RUNNING:
-            # Mark for cancellation - worker will handle it
+            # For running jobs, mark for cancellation
+            # APScheduler doesn't support stopping running jobs, but we can mark it
             job.status = JobStatus.CANCELLED
             logger.info(f"Marked running job {job_id} for cancellation")
             return True
@@ -250,10 +354,13 @@ class AdvancedJobQueue:
                 1 for job in self.jobs.values() if job.status == status
             )
 
+        # Get APScheduler stats
+        scheduled_jobs = len(self.scheduler.get_jobs()) if self.running else 0
+
         return {
             "total_jobs": total_jobs,
-            "queue_size": self.priority_queue.qsize(),
-            "active_workers": len([w for w in self.workers if not w.done()]),
+            "queue_size": scheduled_jobs,
+            "active_workers": scheduled_jobs,  # APScheduler manages workers internally
             "max_workers": self.max_workers,
             "status_counts": status_counts,
         }
@@ -267,7 +374,28 @@ class AdvancedJobQueue:
         Returns:
             Dictionary with queue statistics
         """
-        return await self.get_queue_stats()
+        total_jobs = len(self.jobs)
+        status_counts = {}
+
+        for status in JobStatus:
+            status_counts[status.value] = sum(
+                1 for job in self.jobs.values() if job.status == status
+            )
+
+        # Get APScheduler stats
+        scheduled_jobs = len(self.scheduler.get_jobs()) if self.running else 0
+
+        return {
+            "total_jobs": total_jobs,
+            "pending_jobs": status_counts.get("pending", 0),
+            "running_jobs": status_counts.get("running", 0),
+            "completed_jobs": status_counts.get("completed", 0),
+            "failed_jobs": status_counts.get("failed", 0),
+            "queue_size": scheduled_jobs,
+            "active_workers": scheduled_jobs,  # APScheduler manages workers internally
+            "max_workers": self.max_workers,
+            "status_counts": status_counts,
+        }
 
     async def start(self) -> None:
         """Start the job queue workers."""
@@ -275,13 +403,10 @@ class AdvancedJobQueue:
             return
 
         self.running = True
-        logger.info(f"Starting job queue with {self.max_workers} workers")
+        logger.info(f"Starting job queue with APScheduler (max_workers: {self.max_workers})")
 
-        # Start worker tasks
-        self.workers = [
-            asyncio.create_task(self._worker(f"worker-{i}"))
-            for i in range(self.max_workers)
-        ]
+        # Start APScheduler
+        self.scheduler.start()
 
         logger.info("Job queue started")
 
@@ -293,60 +418,42 @@ class AdvancedJobQueue:
         logger.info("Stopping job queue")
         self.running = False
 
-        # Cancel all workers
-        for worker in self.workers:
-            worker.cancel()
-
-        # Wait for workers to finish
-        await asyncio.gather(*self.workers, return_exceptions=True)
-        self.workers.clear()
+        # Stop APScheduler
+        if self.scheduler.running:
+            self.scheduler.shutdown(wait=True)
 
         logger.info("Job queue stopped")
 
-    async def _worker(self, worker_id: str) -> None:
-        """Worker coroutine that processes jobs from the queue.
+    async def _execute_job_wrapper(self, job_id: str) -> None:
+        """Wrapper function for APScheduler to execute jobs.
 
         Args:
-            worker_id: Unique worker identifier
+            job_id: Job ID to execute
         """
-        logger.info(f"Worker {worker_id} started")
+        job = self.jobs.get(job_id)
+        if not job:
+            logger.error(f"Job {job_id} not found for execution")
+            return
 
-        while self.running:
-            try:
-                # Get job from priority queue with timeout
-                try:
-                    _, _, job = await asyncio.wait_for(
-                        self.priority_queue.get(), timeout=1.0
-                    )
-                except asyncio.TimeoutError:
-                    continue
+        # Check if job was cancelled
+        if job.status == JobStatus.CANCELLED:
+            logger.info(f"Job {job_id} was cancelled before execution")
+            return
 
-                # Check if job was cancelled
-                if job.status == JobStatus.CANCELLED:
-                    continue
+        await self._execute_job(job_id, job)
 
-                # Execute the job
-                await self._execute_job(worker_id, job)
-
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.error(f"Worker {worker_id} error: {str(e)}")
-
-        logger.info(f"Worker {worker_id} stopped")
-
-    async def _execute_job(self, worker_id: str, job: Job) -> None:
+    async def _execute_job(self, job_id: str, job: Job) -> None:
         """Execute a single job.
 
         Args:
-            worker_id: Worker identifier
+            job_id: Job identifier  
             job: Job to execute
         """
         job.status = JobStatus.RUNNING
         job.started_at = datetime.now(UTC)
 
         logger.info(
-            f"Worker {worker_id} executing job",
+            f"Executing job",
             job_id=job.id,
             name=job.name,
             function_name=job.function_name,
@@ -376,6 +483,7 @@ class AdvancedJobQueue:
             # Job completed successfully
             job.status = JobStatus.COMPLETED
             job.completed_at = datetime.now(UTC)
+            job.result = result  # Store result on job object too
 
             execution_time = (job.completed_at - start_time).total_seconds()
 
@@ -393,7 +501,6 @@ class AdvancedJobQueue:
                 "Job completed successfully",
                 job_id=job.id,
                 execution_time=execution_time,
-                worker_id=worker_id,
             )
 
             # Trigger job completed event
@@ -404,20 +511,19 @@ class AdvancedJobQueue:
                 logger.warning("Failed to trigger job completed event", error=str(e))
 
         except asyncio.TimeoutError:
-            await self._handle_job_error(job, "Job timed out", worker_id)
+            await self._handle_job_error(job, "Job timed out")
         except asyncio.CancelledError:
             job.status = JobStatus.CANCELLED
             logger.info(f"Job {job.id} was cancelled")
         except Exception as e:
-            await self._handle_job_error(job, str(e), worker_id)
+            await self._handle_job_error(job, str(e))
 
-    async def _handle_job_error(self, job: Job, error_message: str, worker_id: str) -> None:
+    async def _handle_job_error(self, job: Job, error_message: str) -> None:
         """Handle job execution errors and retries.
 
         Args:
             job: Failed job
             error_message: Error message
-            worker_id: Worker identifier
         """
         job.error_message = error_message
         job.retry_count += 1
@@ -432,11 +538,10 @@ class AdvancedJobQueue:
                 retry_count=job.retry_count,
                 max_retries=job.max_retries,
                 error=error_message,
-                worker_id=worker_id,
             )
 
-            # Schedule retry with delay
-            asyncio.create_task(self._schedule_retry(job))
+            # Schedule retry with APScheduler
+            await self._schedule_retry(job)
 
         else:
             # Max retries exceeded
@@ -460,7 +565,6 @@ class AdvancedJobQueue:
                 job_id=job.id,
                 retry_count=job.retry_count,
                 error=error_message,
-                worker_id=worker_id,
             )
 
             # Trigger job failed event
@@ -471,24 +575,47 @@ class AdvancedJobQueue:
                 logger.warning("Failed to trigger job failed event", error=str(e))
 
     async def _schedule_retry(self, job: Job) -> None:
-        """Schedule a job retry after delay.
+        """Schedule a job retry after delay using APScheduler.
 
         Args:
             job: Job to retry
         """
-        await asyncio.sleep(job.retry_delay)
+        from datetime import timedelta
+        
+        if not self.running:
+            logger.warning(f"Not scheduling retry for job {job.id} - scheduler not running")
+            return
 
-        if job.status == JobStatus.RETRYING and self.running:
-            # Add back to queue with same priority
-            priority_order = {
-                JobPriority.CRITICAL: 0,
-                JobPriority.HIGH: 1,
-                JobPriority.NORMAL: 2,
-                JobPriority.LOW: 3,
-            }
+        # Calculate retry delay (exponential backoff)
+        retry_delay = min(job.retry_delay * (2 ** (job.retry_count - 1)), 3600)  # Cap at 1 hour
+        run_date = datetime.now(UTC) + timedelta(seconds=retry_delay)
 
-            await self.priority_queue.put((priority_order[job.priority], self._job_counter, job))
-            self._job_counter += 1
+        # Remove existing job if it exists
+        try:
+            self.scheduler.remove_job(job.id)
+        except Exception:
+            pass  # Job might not exist in scheduler
+
+        # Schedule retry
+        self.scheduler.add_job(
+            func=self._execute_job_wrapper,
+            trigger='date',
+            run_date=run_date,
+            args=[job.id],
+            id=str(job.id),  # Ensure it's a string
+            name=f"{job.name} (retry {job.retry_count})",
+            max_instances=1,
+            coalesce=True,
+            misfire_grace_time=30
+        )
+
+        logger.info(
+            "Scheduled job retry",
+            job_id=job.id,
+            retry_count=job.retry_count,
+            delay_seconds=retry_delay,
+            run_date=run_date
+        )
 
 
 # Global job queue instance

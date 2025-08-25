@@ -29,7 +29,7 @@ def main():
     # Files to validate
     files_to_check = [
         "chatter/services/sse_events.py",
-        "chatter/api/events.py", 
+        "chatter/api/events.py",
         "chatter/schemas/events.py",
         "chatter/main.py",
     ]
@@ -48,7 +48,7 @@ def main():
 
             status = "✅ PASS" if valid else "❌ FAIL"
             print(f"{status} {file_path} ({lines} lines)")
-            
+
             if not valid:
                 print(f"   Error: {error}")
                 all_valid = False
@@ -56,14 +56,14 @@ def main():
             print(f"⚠️  SKIP {file_path} (not found)")
 
     print("\n" + "=" * 50)
-    
+
     # Check that webhook files are removed
     webhook_files = [
         "chatter/api/webhooks.py",
-        "chatter/services/webhooks.py", 
+        "chatter/services/webhooks.py",
         "chatter/schemas/webhooks.py",
     ]
-    
+
     removed_count = 0
     for file_path in webhook_files:
         if not Path(file_path).exists():
@@ -72,9 +72,9 @@ def main():
         else:
             print(f"❌ STILL EXISTS {file_path}")
             all_valid = False
-    
+
     print("\n" + "=" * 50)
-    
+
     # Check SSE features
     features = [
         ("SSE Event Service", "chatter/services/sse_events.py"),
@@ -83,7 +83,7 @@ def main():
         ("Test Client", "sse_test_client.html"),
         ("API Documentation", "SSE_API_DOCUMENTATION.md"),
     ]
-    
+
     implemented_features = 0
     for feature, file_path in features:
         if Path(file_path).exists():
@@ -91,14 +91,14 @@ def main():
             implemented_features += 1
         else:
             print(f"❌ {feature} - {file_path} not found")
-    
+
     print("\n" + "=" * 50)
     print("📊 Summary:")
     print(f"   Total lines of code: {total_lines:,}")
     print(f"   Files validated: {len(files_to_check)}")
     print(f"   Webhook files removed: {removed_count}/{len(webhook_files)}")
     print(f"   SSE features implemented: {implemented_features}/{len(features)}")
-    
+
     if all_valid and removed_count == len(webhook_files) and implemented_features == len(features):
         print("✅ All validations passed! SSE implementation is complete.")
         return 0

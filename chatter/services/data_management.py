@@ -567,27 +567,27 @@ class DataManager:
         status: str | None = None,
     ) -> list[dict[str, Any]]:
         """List available backups.
-        
+
         Args:
             backup_type: Filter by backup type
             status: Filter by status
-            
+
         Returns:
             List of backup information dictionaries
         """
         backups = []
-        
+
         # Get backup operations
         for operation in self.operations.values():
             if operation.operation_type == DataOperation.BACKUP.value:
                 backup_metadata = operation.metadata.get("backup_request", {})
-                
+
                 # Apply filters
                 if backup_type is not None and backup_metadata.get("backup_type") != backup_type.value:
                     continue
                 if status is not None and operation.status != status:
                     continue
-                
+
                 backup_info = {
                     "id": operation.id,
                     "name": backup_metadata.get("name", f"Backup-{operation.id[:8]}"),
@@ -604,9 +604,9 @@ class DataManager:
                     "compressed": backup_metadata.get("compress", False),
                     "metadata": backup_metadata.get("metadata", {}),
                 }
-                
+
                 backups.append(backup_info)
-        
+
         # Also include backup files from the filesystem if no operations match
         if not backups and self.backup_directory.exists():
             for backup_file in self.backup_directory.iterdir():
@@ -628,15 +628,15 @@ class DataManager:
                         "compressed": backup_file.suffix.endswith('.gz') or backup_file.suffix == '.zip',
                         "metadata": {},
                     }
-                    
+
                     # Apply filters
                     if backup_type is not None and backup_info["backup_type"] != backup_type.value:
                         continue
                     if status is not None and backup_info["status"] != status:
                         continue
-                        
+
                     backups.append(backup_info)
-        
+
         return backups
 
 
@@ -738,7 +738,9 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
 
         # Trigger progress event
         try:
-            from chatter.services.sse_events import trigger_backup_progress
+            from chatter.services.sse_events import (
+                trigger_backup_progress,
+            )
             await trigger_backup_progress(operation_id, 25.0, "Creating backup archive", user_id=operation.created_by)
         except Exception as e:
             logger.warning("Failed to trigger backup progress event", error=str(e))
@@ -757,7 +759,9 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
 
         # Trigger progress event
         try:
-            from chatter.services.sse_events import trigger_backup_progress
+            from chatter.services.sse_events import (
+                trigger_backup_progress,
+            )
             await trigger_backup_progress(operation_id, 75.0, "Finalizing backup", user_id=operation.created_by)
         except Exception as e:
             logger.warning("Failed to trigger backup progress event", error=str(e))
@@ -772,7 +776,9 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
 
         # Trigger backup completed event
         try:
-            from chatter.services.sse_events import trigger_backup_completed
+            from chatter.services.sse_events import (
+                trigger_backup_completed,
+            )
             await trigger_backup_completed(operation_id, str(backup_path), user_id=operation.created_by)
         except Exception as e:
             logger.warning("Failed to trigger backup completed event", error=str(e))
@@ -787,14 +793,16 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
         operation.status = OperationStatus.FAILED
         operation.error_message = str(e)
         logger.error("Data backup failed", operation_id=operation_id, error=str(e))
-        
+
         # Trigger backup failed event
         try:
-            from chatter.services.sse_events import trigger_backup_failed
+            from chatter.services.sse_events import (
+                trigger_backup_failed,
+            )
             await trigger_backup_failed(operation_id, str(e), user_id=operation.created_by)
         except Exception as event_e:
             logger.warning("Failed to trigger backup failed event", error=str(event_e))
-        
+
         raise
 
 

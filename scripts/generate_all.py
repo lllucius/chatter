@@ -208,7 +208,7 @@ def main():
         elif (ts_sdk_dir / "api").exists():
             expected_ts_files.append("api/")
 
-        # Check for either models.ts or models/ directory  
+        # Check for either models.ts or models/ directory
         if (ts_sdk_dir / "models.ts").exists():
             expected_ts_files.append("models.ts")
         elif (ts_sdk_dir / "models").exists():

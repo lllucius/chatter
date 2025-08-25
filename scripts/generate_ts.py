@@ -143,9 +143,9 @@ def create_sdk_package_json(sdk_dir: Path, config: dict[str, Any]):
 def create_sdk_index(sdk_dir: Path):
     """Create a main index.ts file that exports everything."""
     # Check what files were generated
-    api_files = list((sdk_dir / "api").glob("*.ts")) if (sdk_dir / "api").exists() else []
-    model_files = list((sdk_dir / "models").glob("*.ts")) if (sdk_dir / "models").exists() else []
-    
+    list((sdk_dir / "api").glob("*.ts")) if (sdk_dir / "api").exists() else []
+    list((sdk_dir / "models").glob("*.ts")) if (sdk_dir / "models").exists() else []
+
     index_content = '''/**
  * Chatter TypeScript SDK
  * Generated from OpenAPI specification
@@ -165,7 +165,7 @@ export { BaseAPI } from './base';
     # If there's a direct api.ts file, export from it
     if (sdk_dir / "api.ts").exists():
         index_content += "export * from './api';\n"
-    
+
     # If there's a direct models.ts file, export from it
     if (sdk_dir / "models.ts").exists():
         index_content += "export * from './models';\n"
@@ -214,7 +214,7 @@ async function example() {{
   try {{
     const user = await authApi.apiV1AuthMeGet();
     console.log('Current user:', user.data);
-    
+
     const conversations = await conversationsApi.apiV1ConversationsGet();
     console.log('Conversations:', conversations.data);
   }} catch (error) {{
@@ -273,7 +273,7 @@ try {{
     email: 'user@example.com',
     password: 'password123'
   }});
-  
+
   console.log('Login successful:', response.data);
 }} catch (error) {{
   if (error.response?.status === 401) {{

@@ -115,7 +115,10 @@ class DocumentProcessingService:
 
             # Trigger document processing started event
             try:
-                from chatter.services.sse_events import sse_service, EventType
+                from chatter.services.sse_events import (
+                    EventType,
+                    sse_service,
+                )
                 await sse_service.trigger_event(
                     EventType.DOCUMENT_PROCESSING_STARTED,
                     {
@@ -186,7 +189,9 @@ class DocumentProcessingService:
 
             # Trigger document processing completed event
             try:
-                from chatter.services.sse_events import trigger_document_processing_completed
+                from chatter.services.sse_events import (
+                    trigger_document_processing_completed,
+                )
                 await trigger_document_processing_completed(
                     document_id,
                     {
@@ -709,7 +714,9 @@ class DocumentProcessingService:
 
             # Trigger document processing failed event
             try:
-                from chatter.services.sse_events import trigger_document_processing_failed
+                from chatter.services.sse_events import (
+                    trigger_document_processing_failed,
+                )
                 await trigger_document_processing_failed(
                     str(document.id),
                     error_message,

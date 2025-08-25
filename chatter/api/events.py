@@ -1,7 +1,6 @@
 """Server-Sent Events (SSE) API endpoints for real-time updates."""
 
 import json
-from typing import Any
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
@@ -9,7 +8,6 @@ from fastapi.responses import StreamingResponse
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
 from chatter.schemas.events import (
-    AdminSSEStatsResponse,
     SSEStatsResponse,
     TestEventResponse,
 )
@@ -31,25 +29,25 @@ async def events_stream(
     current_user: User = Depends(get_current_user),
 ) -> StreamingResponse:
     """Stream real-time events via Server-Sent Events.
-    
+
     Args:
         request: FastAPI request object
         current_user: Current authenticated user
-        
+
     Returns:
         StreamingResponse with SSE format
     """
-    
+
     async def generate_events():
         """Generate SSE formatted events."""
         # Create connection for this user
         connection_id = sse_service.create_connection(user_id=current_user.id)
         connection = sse_service.get_connection(connection_id)
-        
+
         if not connection:
             logger.error("Failed to create SSE connection", user_id=current_user.id)
             return
-        
+
         try:
             # Send initial connection event
             initial_event = {
@@ -62,15 +60,15 @@ async def events_stream(
                 "timestamp": connection.connected_at.isoformat(),
             }
             yield f"data: {json.dumps(initial_event)}\n\n"
-            
+
             # Stream events as they arrive
             async for event in connection.get_events():
                 # Skip keepalive events for the client unless explicitly requested
-                if (event.type == EventType.SYSTEM_STATUS and 
+                if (event.type == EventType.SYSTEM_STATUS and
                     event.data.get("keepalive", False)):
                     yield ": keepalive\n\n"  # SSE comment format for keepalive
                     continue
-                
+
                 event_data = {
                     "id": event.id,
                     "type": event.type.value,
@@ -78,11 +76,11 @@ async def events_stream(
                     "timestamp": event.timestamp.isoformat(),
                     "metadata": event.metadata,
                 }
-                
+
                 yield f"id: {event.id}\n"
                 yield f"event: {event.type.value}\n"
                 yield f"data: {json.dumps(event_data)}\n\n"
-                
+
         except Exception as e:
             logger.error(
                 "Error in SSE stream",
@@ -99,7 +97,7 @@ async def events_stream(
         finally:
             # Clean up connection
             sse_service.close_connection(connection_id)
-    
+
     return StreamingResponse(
         generate_events(),
         media_type="text/event-stream",
@@ -123,27 +121,27 @@ async def admin_events_stream(
     current_user: User = Depends(get_current_user),
 ) -> StreamingResponse:
     """Stream all system events for admin users.
-    
+
     Args:
         request: FastAPI request object
         current_user: Current authenticated user (must be admin)
-        
+
     Returns:
         StreamingResponse with SSE format for all events
     """
     # TODO: Add admin role check once user roles are implemented
     # For now, allow any authenticated user to access admin stream
-    
+
     async def generate_admin_events():
         """Generate SSE formatted events for admin stream."""
         # Create connection without user filter to receive all events
         connection_id = sse_service.create_connection(user_id=None)
         connection = sse_service.get_connection(connection_id)
-        
+
         if not connection:
             logger.error("Failed to create admin SSE connection", user_id=current_user.id)
             return
-        
+
         try:
             # Send initial connection event
             initial_event = {
@@ -156,15 +154,15 @@ async def admin_events_stream(
                 "timestamp": connection.connected_at.isoformat(),
             }
             yield f"data: {json.dumps(initial_event)}\n\n"
-            
+
             # Stream all system events
             async for event in connection.get_events():
                 # Skip keepalive events for admin stream too
-                if (event.type == EventType.SYSTEM_STATUS and 
+                if (event.type == EventType.SYSTEM_STATUS and
                     event.data.get("keepalive", False)):
                     yield ": admin-keepalive\n\n"
                     continue
-                
+
                 event_data = {
                     "id": event.id,
                     "type": event.type.value,
@@ -173,11 +171,11 @@ async def admin_events_stream(
                     "user_id": event.user_id,  # Include user_id for admin
                     "metadata": event.metadata,
                 }
-                
+
                 yield f"id: {event.id}\n"
                 yield f"event: {event.type.value}\n"
                 yield f"data: {json.dumps(event_data)}\n\n"
-                
+
         except Exception as e:
             logger.error(
                 "Error in admin SSE stream",
@@ -194,7 +192,7 @@ async def admin_events_stream(
         finally:
             # Clean up connection
             sse_service.close_connection(connection_id)
-    
+
     return StreamingResponse(
         generate_admin_events(),
         media_type="text/event-stream",
@@ -212,16 +210,16 @@ async def get_sse_stats(
     current_user: User = Depends(get_current_user),
 ) -> SSEStatsResponse:
     """Get SSE service statistics.
-    
+
     Args:
         current_user: Current authenticated user
-        
+
     Returns:
         SSE service statistics
     """
     # TODO: Add admin role check for detailed stats
     stats = sse_service.get_stats()
-    
+
     # For non-admin users, only show basic stats
     return SSEStatsResponse(
         total_connections=stats["total_connections"],
@@ -234,10 +232,10 @@ async def trigger_test_event(
     current_user: User = Depends(get_current_user),
 ) -> TestEventResponse:
     """Trigger a test event for the current user.
-    
+
     Args:
         current_user: Current authenticated user
-        
+
     Returns:
         Success message with event ID
     """
@@ -250,7 +248,7 @@ async def trigger_test_event(
         },
         user_id=current_user.id
     )
-    
+
     return TestEventResponse(
         message="Test event triggered successfully",
         event_id=event_id
@@ -262,15 +260,15 @@ async def trigger_broadcast_test(
     current_user: User = Depends(get_current_user),
 ) -> TestEventResponse:
     """Trigger a broadcast test event for all users.
-    
+
     Args:
         current_user: Current authenticated user
-        
+
     Returns:
         Success message with event ID
     """
     # TODO: Add admin role check for broadcast events
-    
+
     event_id = await sse_service.trigger_event(
         EventType.SYSTEM_ALERT,
         {
@@ -280,7 +278,7 @@ async def trigger_broadcast_test(
         },
         user_id=None  # Broadcast to all users
     )
-    
+
     return TestEventResponse(
         message="Broadcast test event triggered successfully",
         event_id=event_id

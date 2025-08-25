@@ -484,7 +484,6 @@ def create_app() -> FastAPI:
 # Create the application instance
 app = create_app()
 
-
 if __name__ == "__main__":
     import uvicorn
 

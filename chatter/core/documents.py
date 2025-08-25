@@ -156,7 +156,9 @@ class DocumentService:
 
             # Trigger document uploaded event
             try:
-                from chatter.services.sse_events import trigger_document_uploaded
+                from chatter.services.sse_events import (
+                    trigger_document_uploaded,
+                )
                 await trigger_document_uploaded(
                     str(document.id),
                     upload_file.filename,
@@ -710,8 +712,11 @@ class DocumentService:
             file_content: File content bytes
         """
         try:
-            from chatter.services.job_queue import job_queue, JobPriority
-            
+            from chatter.services.job_queue import (
+                JobPriority,
+                job_queue,
+            )
+
             # Add document processing job to the queue
             job_id = await job_queue.add_job(
                 name=f"Document Processing: {document_id}",
@@ -721,13 +726,13 @@ class DocumentService:
                 tags=["document", "processing"],
                 metadata={"document_id": document_id}
             )
-            
+
             logger.info(
                 "Document processing job queued",
                 document_id=document_id,
                 job_id=job_id,
             )
-            
+
         except Exception as e:
             logger.error(
                 "Failed to queue document processing job",

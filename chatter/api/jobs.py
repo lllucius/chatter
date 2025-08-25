@@ -12,7 +12,7 @@ from chatter.schemas.jobs import (
     JobResponse,
     JobStatsResponse,
 )
-from chatter.services.job_queue import Job, job_queue
+from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,

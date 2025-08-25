@@ -1,5 +1,7 @@
 """Document management endpoints."""
 
+from pathlib import Path
+
 from fastapi import (
     APIRouter,
     Depends,
@@ -9,7 +11,6 @@ from fastapi import (
     UploadFile,
     status,
 )
-from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user

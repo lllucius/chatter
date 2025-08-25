@@ -7,11 +7,9 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.executors.asyncio import AsyncIOExecutor  
-from apscheduler.executors.pool import ThreadPoolExecutor
+from apscheduler.executors.asyncio import AsyncIOExecutor
 from apscheduler.jobstores.memory import MemoryJobStore
-from apscheduler.job import Job as APSchedulerJob
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from pydantic import BaseModel, Field
 
 from chatter.config import settings
@@ -86,7 +84,7 @@ class AdvancedJobQueue:
         self.results: dict[str, JobResult] = {}
         self.job_handlers: dict[str, Callable] = {}
         self.running = False
-        
+
         # Configure APScheduler
         job_stores = {
             'default': MemoryJobStore()
@@ -99,7 +97,7 @@ class AdvancedJobQueue:
             'max_instances': max_workers,  # Control concurrency here
             'misfire_grace_time': 30
         }
-        
+
         self.scheduler = AsyncIOScheduler(
             jobstores=job_stores,
             executors=executors,
@@ -164,7 +162,7 @@ class AdvancedJobQueue:
         # Schedule job with APScheduler
         if schedule_at:
             # Schedule for future execution
-            ap_job = self.scheduler.add_job(
+            self.scheduler.add_job(
                 func=self._execute_job_wrapper,
                 trigger='date',
                 run_date=schedule_at,
@@ -185,13 +183,13 @@ class AdvancedJobQueue:
                 JobPriority.NORMAL: 0.5,
                 JobPriority.LOW: 1.0,
             }
-            
+
             run_date = datetime.now(UTC)
             if delay_seconds[priority] > 0:
                 from datetime import timedelta
                 run_date += timedelta(seconds=delay_seconds[priority])
-            
-            ap_job = self.scheduler.add_job(
+
+            self.scheduler.add_job(
                 func=self._execute_job_wrapper,
                 trigger='date',
                 run_date=run_date,
@@ -216,21 +214,21 @@ class AdvancedJobQueue:
 
     async def schedule_job(self, job: Job, schedule_at: datetime) -> str:
         """Schedule a job for later execution.
-        
+
         This method is for backwards compatibility with the API.
-        
+
         Args:
             job: Job object (pre-created)
             schedule_at: When to execute the job
-            
+
         Returns:
             Job ID
         """
         # Store the job
         self.jobs[job.id] = job
-        
+
         # Schedule with APScheduler
-        ap_job = self.scheduler.add_job(
+        self.scheduler.add_job(
             func=self._execute_job_wrapper,
             trigger='date',
             run_date=schedule_at,
@@ -367,10 +365,10 @@ class AdvancedJobQueue:
 
     async def get_stats(self) -> dict[str, Any]:
         """Get job queue statistics.
-        
+
         This method provides the same functionality as get_queue_stats
         but with an interface that matches the API expectations.
-        
+
         Returns:
             Dictionary with queue statistics
         """
@@ -446,14 +444,14 @@ class AdvancedJobQueue:
         """Execute a single job.
 
         Args:
-            job_id: Job identifier  
+            job_id: Job identifier
             job: Job to execute
         """
         job.status = JobStatus.RUNNING
         job.started_at = datetime.now(UTC)
 
         logger.info(
-            f"Executing job",
+            "Executing job",
             job_id=job.id,
             name=job.name,
             function_name=job.function_name,
@@ -505,7 +503,9 @@ class AdvancedJobQueue:
 
             # Trigger job completed event
             try:
-                from chatter.services.sse_events import trigger_job_completed
+                from chatter.services.sse_events import (
+                    trigger_job_completed,
+                )
                 await trigger_job_completed(job.id, job.name, result or {})
             except Exception as e:
                 logger.warning("Failed to trigger job completed event", error=str(e))
@@ -569,7 +569,9 @@ class AdvancedJobQueue:
 
             # Trigger job failed event
             try:
-                from chatter.services.sse_events import trigger_job_failed
+                from chatter.services.sse_events import (
+                    trigger_job_failed,
+                )
                 await trigger_job_failed(job.id, job.name, error_message)
             except Exception as e:
                 logger.warning("Failed to trigger job failed event", error=str(e))
@@ -581,7 +583,7 @@ class AdvancedJobQueue:
             job: Job to retry
         """
         from datetime import timedelta
-        
+
         if not self.running:
             logger.warning(f"Not scheduling retry for job {job.id} - scheduler not running")
             return
@@ -628,21 +630,23 @@ async def document_processing_job(document_id: str, file_content: bytes) -> dict
     from chatter.utils.database import get_session_factory
 
     logger.info(f"Starting background processing for document {document_id}")
-    
+
     try:
         # Get a database session for background processing
         async_session = get_session_factory()
         async with async_session() as session:
-            from chatter.services.document_processing import DocumentProcessingService
-            
+            from chatter.services.document_processing import (
+                DocumentProcessingService,
+            )
+
             # Create processing service instance
             processing_service = DocumentProcessingService(session)
-            
+
             # Process the document (chunking + embeddings)
             success = await processing_service.process_document(
                 document_id, file_content
             )
-            
+
             if success:
                 logger.info(f"Document {document_id} processed successfully in background")
                 return {
@@ -658,7 +662,7 @@ async def document_processing_job(document_id: str, file_content: bytes) -> dict
                     "success": False,
                     "error": "Processing failed",
                 }
-                
+
     except Exception as e:
         logger.error(f"Document {document_id} processing error in background", error=str(e))
         return {

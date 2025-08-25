@@ -1,12 +1,11 @@
 """Server-Sent Events (SSE) service for real-time updates."""
 
 import asyncio
-import json
 import uuid
+from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Any, AsyncGenerator
-from weakref import WeakSet
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -22,40 +21,40 @@ class EventType(str, Enum):
     BACKUP_COMPLETED = "backup.completed"
     BACKUP_FAILED = "backup.failed"
     BACKUP_PROGRESS = "backup.progress"
-    
+
     # Job events
     JOB_STARTED = "job.started"
     JOB_COMPLETED = "job.completed"
     JOB_FAILED = "job.failed"
     JOB_PROGRESS = "job.progress"
-    
+
     # Tool server events
     TOOL_SERVER_STARTED = "tool_server.started"
     TOOL_SERVER_STOPPED = "tool_server.stopped"
     TOOL_SERVER_HEALTH_CHANGED = "tool_server.health_changed"
     TOOL_SERVER_ERROR = "tool_server.error"
-    
+
     # Document events
     DOCUMENT_UPLOADED = "document.uploaded"
     DOCUMENT_PROCESSING_STARTED = "document.processing_started"
     DOCUMENT_PROCESSING_COMPLETED = "document.processing_completed"
     DOCUMENT_PROCESSING_FAILED = "document.processing_failed"
     DOCUMENT_PROCESSING_PROGRESS = "document.processing_progress"
-    
+
     # Chat events
     CONVERSATION_STARTED = "conversation.started"
     CONVERSATION_ENDED = "conversation.ended"
     MESSAGE_RECEIVED = "message.received"
     MESSAGE_SENT = "message.sent"
-    
+
     # User events
     USER_REGISTERED = "user.registered"
     USER_UPDATED = "user.updated"
-    
+
     # Agent events
     AGENT_CREATED = "agent.created"
     AGENT_UPDATED = "agent.updated"
-    
+
     # System events
     SYSTEM_ALERT = "system.alert"
     SYSTEM_STATUS = "system.status"
@@ -73,7 +72,7 @@ class Event(BaseModel):
 
 class SSEConnection:
     """Represents an active SSE connection."""
-    
+
     def __init__(self, connection_id: str, user_id: str | None = None):
         self.connection_id = connection_id
         self.user_id = user_id
@@ -81,7 +80,7 @@ class SSEConnection:
         self.last_activity = datetime.now(UTC)
         self._queue: asyncio.Queue[Event] = asyncio.Queue()
         self._closed = False
-    
+
     async def send_event(self, event: Event) -> None:
         """Queue an event to be sent to this connection."""
         if not self._closed:
@@ -94,7 +93,7 @@ class SSEConnection:
                     connection_id=self.connection_id,
                     error=str(e)
                 )
-    
+
     async def get_events(self) -> AsyncGenerator[Event, None]:
         """Get events from the queue as they arrive."""
         while not self._closed:
@@ -115,7 +114,7 @@ class SSEConnection:
                     error=str(e)
                 )
                 break
-    
+
     def close(self) -> None:
         """Close the connection."""
         self._closed = True
@@ -128,17 +127,17 @@ class SSEConnection:
 
 class SSEEventService:
     """Service for managing Server-Sent Events connections and broadcasting."""
-    
+
     def __init__(self):
         self.connections: dict[str, SSEConnection] = {}
         self.user_connections: dict[str, set[str]] = {}  # user_id -> connection_ids
         self._cleanup_task: asyncio.Task | None = None
-    
+
     async def start(self) -> None:
         """Start the SSE service."""
         logger.info("Starting SSE event service")
         self._cleanup_task = asyncio.create_task(self._cleanup_inactive_connections())
-    
+
     async def stop(self) -> None:
         """Stop the SSE service."""
         logger.info("Stopping SSE event service")
@@ -148,38 +147,38 @@ class SSEEventService:
                 await self._cleanup_task
             except asyncio.CancelledError:
                 pass
-        
+
         # Close all connections
         for connection in list(self.connections.values()):
             connection.close()
         self.connections.clear()
         self.user_connections.clear()
-    
+
     def create_connection(self, user_id: str | None = None) -> str:
         """Create a new SSE connection."""
         connection_id = str(uuid.uuid4())
         connection = SSEConnection(connection_id, user_id)
-        
+
         self.connections[connection_id] = connection
-        
+
         if user_id:
             if user_id not in self.user_connections:
                 self.user_connections[user_id] = set()
             self.user_connections[user_id].add(connection_id)
-        
+
         logger.info(
             "Created SSE connection",
             connection_id=connection_id,
             user_id=user_id,
             total_connections=len(self.connections)
         )
-        
+
         return connection_id
-    
+
     def get_connection(self, connection_id: str) -> SSEConnection | None:
         """Get an SSE connection by ID."""
         return self.connections.get(connection_id)
-    
+
     def close_connection(self, connection_id: str) -> None:
         """Close and remove an SSE connection."""
         connection = self.connections.pop(connection_id, None)
@@ -189,7 +188,7 @@ class SSEEventService:
                 self.user_connections[connection.user_id].discard(connection_id)
                 if not self.user_connections[connection.user_id]:
                     del self.user_connections[connection.user_id]
-            
+
             connection.close()
             logger.info(
                 "Closed SSE connection",
@@ -197,7 +196,7 @@ class SSEEventService:
                 user_id=connection.user_id,
                 total_connections=len(self.connections)
             )
-    
+
     async def broadcast_event(self, event: Event) -> None:
         """Broadcast an event to all relevant connections."""
         logger.info(
@@ -206,9 +205,9 @@ class SSEEventService:
             event_id=event.id,
             user_specific=event.user_id is not None
         )
-        
+
         target_connections = []
-        
+
         if event.user_id:
             # Send to specific user's connections
             if event.user_id in self.user_connections:
@@ -218,18 +217,18 @@ class SSEEventService:
         else:
             # Broadcast to all connections
             target_connections = list(self.connections.values())
-        
+
         # Send event to all target connections
         send_tasks = []
         for connection in target_connections:
             send_tasks.append(connection.send_event(event))
-        
+
         if send_tasks:
             try:
                 await asyncio.gather(*send_tasks, return_exceptions=True)
             except Exception as e:
                 logger.error("Error broadcasting event", error=str(e))
-    
+
     async def trigger_event(
         self,
         event_type: EventType,
@@ -244,38 +243,38 @@ class SSEEventService:
             user_id=user_id,
             metadata=metadata or {}
         )
-        
+
         await self.broadcast_event(event)
         return event.id
-    
+
     async def _cleanup_inactive_connections(self) -> None:
         """Periodically clean up inactive connections."""
         while True:
             try:
                 await asyncio.sleep(300)  # Check every 5 minutes
-                
+
                 now = datetime.now(UTC)
                 inactive_connections = []
-                
+
                 for connection_id, connection in self.connections.items():
                     # Consider connections inactive if no activity for 1 hour
                     if (now - connection.last_activity).total_seconds() > 3600:
                         inactive_connections.append(connection_id)
-                
+
                 for connection_id in inactive_connections:
                     self.close_connection(connection_id)
-                
+
                 if inactive_connections:
                     logger.info(
                         "Cleaned up inactive SSE connections",
                         count=len(inactive_connections)
                     )
-                    
+
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 logger.error("Error during SSE connection cleanup", error=str(e))
-    
+
     def get_stats(self) -> dict[str, Any]:
         """Get service statistics."""
         return {

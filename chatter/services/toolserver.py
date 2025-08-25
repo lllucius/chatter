@@ -773,7 +773,9 @@ class ToolServerService:
 
             # Trigger health changed event
             try:
-                from chatter.services.sse_events import trigger_tool_server_health_changed
+                from chatter.services.sse_events import (
+                    trigger_tool_server_health_changed,
+                )
                 await trigger_tool_server_health_changed(
                     str(server.id),
                     server.name,
@@ -843,7 +845,9 @@ class ToolServerService:
 
                 # Trigger tool server started event
                 try:
-                    from chatter.services.sse_events import trigger_tool_server_started
+                    from chatter.services.sse_events import (
+                        trigger_tool_server_started,
+                    )
                     await trigger_tool_server_started(str(server.id), server.name)
                 except Exception as e:
                     logger.warning("Failed to trigger tool server started event", error=str(e))
@@ -857,7 +861,10 @@ class ToolServerService:
 
                 # Trigger tool server error event
                 try:
-                    from chatter.services.sse_events import sse_service, EventType
+                    from chatter.services.sse_events import (
+                        EventType,
+                        sse_service,
+                    )
                     await sse_service.trigger_event(
                         EventType.TOOL_SERVER_ERROR,
                         {
@@ -885,7 +892,10 @@ class ToolServerService:
 
             # Trigger tool server error event
             try:
-                from chatter.services.sse_events import sse_service, EventType
+                from chatter.services.sse_events import (
+                    EventType,
+                    sse_service,
+                )
                 await sse_service.trigger_event(
                     EventType.TOOL_SERVER_ERROR,
                     {
@@ -929,7 +939,9 @@ class ToolServerService:
 
             # Trigger tool server stopped event
             try:
-                from chatter.services.sse_events import trigger_tool_server_stopped
+                from chatter.services.sse_events import (
+                    trigger_tool_server_stopped,
+                )
                 await trigger_tool_server_stopped(str(server.id), server.name)
             except Exception as e:
                 logger.warning("Failed to trigger tool server stopped event", error=str(e))

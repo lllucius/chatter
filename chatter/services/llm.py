@@ -475,24 +475,55 @@ class LLMService:
 
         provider = self.get_provider(provider_name)
 
-        if workflow_type == "rag":
-            if not retriever:
-                raise LLMProviderError(
-                    "Retriever required for RAG workflow"
-                ) from None
-            return workflow_manager.create_rag_conversation_workflow(
-                llm=provider,
-                retriever=retriever,
-                system_message=system_message,
-            )
-        elif workflow_type == "tools":
-            if not tools:
-                tools = await mcp_service.get_tools()
-                tools.extend(BuiltInTools.create_builtin_tools())
-            return workflow_manager.create_tool_calling_workflow(
-                llm=provider, tools=tools, system_message=system_message
-            )
-        else:  # basic
-            return workflow_manager.create_basic_conversation_workflow(
-                llm=provider, system_message=system_message
-            )
+        # Use the new unified workflow creation method
+        # Get default tools if workflow_type is "tools" and no tools provided
+        if workflow_type == "tools" and not tools:
+            tools = await mcp_service.get_tools()
+            tools.extend(BuiltInTools.create_builtin_tools())
+
+        # Validate parameters based on workflow_type
+        if workflow_type == "rag" and not retriever:
+            raise LLMProviderError(
+                "Retriever required for RAG workflow"
+            ) from None
+
+        # Use the unified create_workflow method
+        return workflow_manager.create_workflow(
+            llm=provider,
+            system_message=system_message,
+            retriever=retriever if workflow_type == "rag" else None,
+            tools=tools if workflow_type == "tools" else None,
+        )
+
+    async def create_langgraph_streaming_workflow(
+        self,
+        provider_name: str,
+        workflow_type: str = "basic",
+        system_message: str | None = None,
+        retriever=None,
+        tools: list[Any] = None,
+    ):
+        """Create a LangGraph workflow optimized for streaming."""
+        from chatter.core.langgraph import workflow_manager
+
+        provider = self.get_provider(provider_name)
+
+        # Use the new unified workflow creation method
+        # Get default tools if workflow_type is "tools" and no tools provided
+        if workflow_type == "tools" and not tools:
+            tools = await mcp_service.get_tools()
+            tools.extend(BuiltInTools.create_builtin_tools())
+
+        # Validate parameters based on workflow_type
+        if workflow_type == "rag" and not retriever:
+            raise LLMProviderError(
+                "Retriever required for RAG workflow"
+            ) from None
+
+        # Use the unified create_streaming_workflow method
+        return workflow_manager.create_streaming_workflow(
+            llm=provider,
+            system_message=system_message,
+            retriever=retriever if workflow_type == "rag" else None,
+            tools=tools if workflow_type == "tools" else None,
+        )

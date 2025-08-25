@@ -8,7 +8,8 @@ from enum import Enum
 from typing import Any
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.executors.asyncio import AsyncIOExecutor
+from apscheduler.executors.asyncio import AsyncIOExecutor  
+from apscheduler.executors.pool import ThreadPoolExecutor
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.job import Job as APSchedulerJob
 from pydantic import BaseModel, Field
@@ -91,11 +92,11 @@ class AdvancedJobQueue:
             'default': MemoryJobStore()
         }
         executors = {
-            'default': AsyncIOExecutor(max_workers=max_workers)
+            'default': AsyncIOExecutor()
         }
         job_defaults = {
             'coalesce': False,
-            'max_instances': 1,
+            'max_instances': max_workers,  # Control concurrency here
             'misfire_grace_time': 30
         }
         
@@ -210,6 +211,8 @@ class AdvancedJobQueue:
             function_name=job.function_name,
             scheduled_at=schedule_at,
         )
+
+        return job.id
 
     async def schedule_job(self, job: Job, schedule_at: datetime) -> str:
         """Schedule a job for later execution.
@@ -371,7 +374,28 @@ class AdvancedJobQueue:
         Returns:
             Dictionary with queue statistics
         """
-        return await self.get_queue_stats()
+        total_jobs = len(self.jobs)
+        status_counts = {}
+
+        for status in JobStatus:
+            status_counts[status.value] = sum(
+                1 for job in self.jobs.values() if job.status == status
+            )
+
+        # Get APScheduler stats
+        scheduled_jobs = len(self.scheduler.get_jobs()) if self.running else 0
+
+        return {
+            "total_jobs": total_jobs,
+            "pending_jobs": status_counts.get("pending", 0),
+            "running_jobs": status_counts.get("running", 0),
+            "completed_jobs": status_counts.get("completed", 0),
+            "failed_jobs": status_counts.get("failed", 0),
+            "queue_size": scheduled_jobs,
+            "active_workers": scheduled_jobs,  # APScheduler manages workers internally
+            "max_workers": self.max_workers,
+            "status_counts": status_counts,
+        }
 
     async def start(self) -> None:
         """Start the job queue workers."""

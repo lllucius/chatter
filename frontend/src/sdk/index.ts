@@ -3,10 +3,9 @@
  * Generated from OpenAPI specification
  */
 
-// Export all APIs and models from api.ts
+// Export all APIs and types
 export * from './api';
 
 // Export configuration and base types
 export { Configuration } from './configuration';
-export type { ConfigurationParameters } from './configuration';
 export { BaseAPI } from './base';

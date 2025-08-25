@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -38,15 +38,17 @@ import {
   Download as DownloadIcon,
   Upload as UploadIcon,
   Settings as SettingsIcon,
+  Notifications as NotificationsIcon,
+  Close as CloseIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { BackupResponse, PluginResponse } from '../sdk';
+import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
 
 const AdministrationPage: React.FC = () => {
   const [expanded, setExpanded] = useState<string | false>('backups');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'user' | 'tool' | 'backup' | 'plugin'>('user');
+  const [dialogType, setDialogType] = useState<'user' | 'tool' | 'backup' | 'plugin' | 'job'>('user');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -55,7 +57,20 @@ const AdministrationPage: React.FC = () => {
   // Data states
   const [backups, setBackups] = useState<BackupResponse[]>([]);
   const [plugins, setPlugins] = useState<PluginResponse[]>([]);
+  const [jobs, setJobs] = useState<JobResponse[]>([]);
+  const [jobStats, setJobStats] = useState<JobStatsResponse | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
+  
+  // Notification state
+  const [notifications, setNotifications] = useState<Array<{
+    id: string;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'info' | 'warning';
+    timestamp: Date;
+    jobId?: string;
+  }>>([]);
+  const [lastJobStates, setLastJobStates] = useState<Map<string, JobStatus>>(new Map());
   
   const [formData, setFormData] = useState({
     userId: '',
@@ -70,13 +85,94 @@ const AdministrationPage: React.FC = () => {
     includeDocuments: true,
     includeConfigurations: true,
     pluginUrl: '',
+    // Job-specific fields
+    jobName: '',
+    jobFunction: '',
+    jobPriority: 'normal' as const,
+    jobArgs: '',
+    jobKwargs: '',
+    scheduleAt: '',
+    maxRetries: 3,
   });
+
+  // Helper functions
+  const addNotification = useCallback((notification: Omit<typeof notifications[0], 'id' | 'timestamp'>) => {
+    const newNotification = {
+      ...notification,
+      id: Math.random().toString(36).substr(2, 9),
+      timestamp: new Date(),
+    };
+    setNotifications(prev => [newNotification, ...prev.slice(0, 9)]); // Keep only last 10 notifications
+  }, []);
+
+  const removeNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const loadJobs = useCallback(async () => {
+    try {
+      setDataLoading(true);
+      const response = await chatterSDK.jobs.listJobsApiV1JobsGet({});
+      const newJobs = response.data.jobs || [];
+      
+      // Check for job state changes and create notifications
+      newJobs.forEach(job => {
+        const previousState = lastJobStates.get(job.id);
+        if (previousState && previousState !== job.status) {
+          // Job state changed, create notification
+          addNotification({
+            title: 'Job Status Update',
+            message: `Job "${job.name || job.id.substring(0, 8)}" changed from ${previousState} to ${job.status}`,
+            type: job.status === 'completed' ? 'success' : 
+                  job.status === 'failed' ? 'error' : 
+                  job.status === 'cancelled' ? 'warning' : 'info',
+            jobId: job.id
+          });
+        }
+      });
+      
+      // Update job states
+      const newStates = new Map();
+      newJobs.forEach(job => newStates.set(job.id, job.status));
+      setLastJobStates(newStates);
+      
+      setJobs(newJobs);
+    } catch (error: any) {
+      console.error('Failed to load jobs:', error);
+      setError('Failed to load jobs');
+    } finally {
+      setDataLoading(false);
+    }
+  }, [lastJobStates, addNotification]);
+
+  const loadJobStats = useCallback(async () => {
+    try {
+      const response = await chatterSDK.jobs.getJobStatsApiV1JobsStatsOverviewGet();
+      setJobStats(response.data);
+    } catch (error: any) {
+      console.error('Failed to load job stats:', error);
+    }
+  }, []);
 
   // Load data on component mount
   useEffect(() => {
     loadBackups();
     loadPlugins();
-  }, []);
+    loadJobs();
+    loadJobStats();
+  }, [loadJobs, loadJobStats]);
+
+  // Poll for job updates every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (expanded === 'jobs') {
+        loadJobs();
+        loadJobStats();
+      }
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [expanded, loadJobs, loadJobStats]);
 
   const loadBackups = async () => {
     try {
@@ -97,6 +193,27 @@ const AdministrationPage: React.FC = () => {
       setPlugins(response.data.plugins || []);
     } catch (error: any) {
       console.error('Failed to load plugins:', error);
+    }
+  };
+
+  const handleJobAction = async (action: 'cancel', jobId: string) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      switch (action) {
+        case 'cancel':
+          await chatterSDK.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId });
+          showSnackbar('Job cancelled successfully!');
+          loadJobs(); // Reload jobs
+          loadJobStats(); // Reload stats
+          break;
+      }
+    } catch (error: any) {
+      console.error(`Error ${action} job:`, error);
+      setError(error.response?.data?.detail || error.message || `Failed to ${action} job`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -138,7 +255,7 @@ const AdministrationPage: React.FC = () => {
     setExpanded(isExpanded ? panel : false);
   };
 
-  const openDialog = (type: 'user' | 'tool' | 'backup' | 'plugin') => {
+  const openDialog = (type: 'user' | 'tool' | 'backup' | 'plugin' | 'job') => {
     setDialogType(type);
     setDialogOpen(true);
     setError(''); // Clear any existing errors
@@ -156,6 +273,14 @@ const AdministrationPage: React.FC = () => {
       includeDocuments: true,
       includeConfigurations: true,
       pluginUrl: '',
+      // Job-specific fields
+      jobName: '',
+      jobFunction: '',
+      jobPriority: 'normal' as const,
+      jobArgs: '',
+      jobKwargs: '',
+      scheduleAt: '',
+      maxRetries: 3,
     });
   };
 
@@ -221,6 +346,33 @@ const AdministrationPage: React.FC = () => {
             throw new Error(pluginError.response?.data?.detail || 'Failed to install plugin');
           }
           break;
+          
+        case 'job':
+          try {
+            // Create job using the jobs API
+            const jobCreateRequest: JobCreateRequest = {
+              name: formData.jobName,
+              function_name: formData.jobFunction,
+              args: formData.jobArgs ? JSON.parse(formData.jobArgs) : [],
+              kwargs: formData.jobKwargs ? JSON.parse(formData.jobKwargs) : {},
+              priority: formData.jobPriority as JobPriority,
+              max_retries: formData.maxRetries,
+              schedule_at: formData.scheduleAt ? new Date(formData.scheduleAt).toISOString() : undefined,
+            };
+            
+            await chatterSDK.jobs.createJobApiV1JobsPost({ jobCreateRequest });
+            showSnackbar('Job created successfully!');
+            addNotification({
+              title: 'Job Created',
+              message: `Job "${formData.jobName}" has been created and ${formData.scheduleAt ? 'scheduled' : 'queued for execution'}`,
+              type: 'success'
+            });
+            loadJobs(); // Reload jobs list
+            loadJobStats(); // Reload job stats
+          } catch (jobError: any) {
+            throw new Error(jobError.response?.data?.detail || 'Failed to create job');
+          }
+          break;
       }
       
       setDialogOpen(false);
@@ -239,6 +391,14 @@ const AdministrationPage: React.FC = () => {
         includeDocuments: true,
         includeConfigurations: true,
         pluginUrl: '',
+        // Job-specific fields
+        jobName: '',
+        jobFunction: '',
+        jobPriority: 'normal' as const,
+        jobArgs: '',
+        jobKwargs: '',
+        scheduleAt: '',
+        maxRetries: 3,
       });
       
     } catch (error: any) {
@@ -288,6 +448,17 @@ const AdministrationPage: React.FC = () => {
               loadPlugins(); // Reload plugins list
             } catch (pluginError: any) {
               throw new Error(pluginError.response?.data?.detail || 'Failed to uninstall plugin');
+            }
+            break;
+            
+          case 'job':
+            try {
+              await chatterSDK.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId: id });
+              showSnackbar('Job cancelled successfully!');
+              loadJobs(); // Reload jobs list
+              loadJobStats(); // Reload job stats
+            } catch (jobError: any) {
+              throw new Error(jobError.response?.data?.detail || 'Failed to cancel job');
             }
             break;
         }
@@ -342,6 +513,41 @@ const AdministrationPage: React.FC = () => {
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
+      )}
+
+      {/* Notifications Panel */}
+      {notifications.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+            <NotificationsIcon sx={{ mr: 1 }} />
+            Recent Notifications ({notifications.length})
+          </Typography>
+          <List sx={{ maxHeight: 200, overflow: 'auto' }}>
+            {notifications.map((notification) => (
+              <ListItem key={notification.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
+                <ListItemText
+                  primary={notification.title}
+                  secondary={`${notification.message} • ${format(notification.timestamp, 'PPp')}`}
+                />
+                <Chip 
+                  label={notification.type} 
+                  color={notification.type === 'success' ? 'success' : 
+                         notification.type === 'error' ? 'error' : 
+                         notification.type === 'warning' ? 'warning' : 'info'} 
+                  size="small" 
+                  sx={{ mr: 1 }}
+                />
+                <IconButton 
+                  size="small" 
+                  onClick={() => removeNotification(notification.id)}
+                  title="Dismiss"
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
       )}
 
       <Alert severity="info" sx={{ mb: 3 }}>
@@ -427,28 +633,98 @@ const AdministrationPage: React.FC = () => {
           <Typography variant="h6">Background Jobs</Typography>
         </AccordionSummary>
         <AccordionDetails>
+          <Box sx={{ mb: 2 }}>
+            <Grid container spacing={2} alignItems="center">
+              <Grid item xs={12} sm={6}>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => openDialog('job')}
+                  sx={{ mr: 1 }}
+                >
+                  Create Job
+                </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<SettingsIcon />}
+                  onClick={loadJobs}
+                >
+                  Refresh
+                </Button>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                {jobStats && (
+                  <Box sx={{ textAlign: 'right' }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Total: {jobStats.total_jobs} | Pending: {jobStats.pending_jobs} | Running: {jobStats.running_jobs}
+                    </Typography>
+                  </Box>
+                )}
+              </Grid>
+            </Grid>
+          </Box>
           <List>
-            <ListItem>
-              <ListItemText
-                primary="Document Processing Queue"
-                secondary="Processing 3 documents | Next: document-001.pdf"
-              />
-              <Chip label="Running" color="success" size="small" />
-            </ListItem>
-            <ListItem>
-              <ListItemText
-                primary="Index Optimization"
-                secondary="Last run: 2 hours ago | Next: In 6 hours"
-              />
-              <Chip label="Scheduled" color="info" size="small" />
-            </ListItem>
-            <ListItem>
-              <ListItemText
-                primary="Cleanup Old Conversations"
-                secondary="Last run: 1 day ago | Cleaned 45 conversations"
-              />
-              <Chip label="Completed" color="default" size="small" />
-            </ListItem>
+            {dataLoading ? (
+              <ListItem>
+                <CircularProgress size={20} sx={{ mr: 2 }} />
+                <ListItemText primary="Loading jobs..." />
+              </ListItem>
+            ) : jobs.length === 0 ? (
+              <ListItem>
+                <ListItemText 
+                  primary="No jobs found" 
+                  secondary="Create your first job to get started"
+                />
+              </ListItem>
+            ) : (
+              jobs.map((job) => {
+                const getStatusColor = (status: JobStatus) => {
+                  switch (status) {
+                    case 'running': return 'success';
+                    case 'pending': return 'warning';
+                    case 'completed': return 'info';
+                    case 'failed': return 'error';
+                    case 'cancelled': return 'default';
+                    default: return 'default';
+                  }
+                };
+
+                const getSecondaryText = () => {
+                  const parts = [];
+                  if (job.function_name) parts.push(`Function: ${job.function_name}`);
+                  if (job.priority) parts.push(`Priority: ${job.priority}`);
+                  if (job.progress !== undefined) parts.push(`Progress: ${job.progress}%`);
+                  if (job.created_at) parts.push(`Created: ${format(new Date(job.created_at), 'PPp')}`);
+                  return parts.join(' | ');
+                };
+
+                return (
+                  <ListItem key={job.id}>
+                    <ListItemText
+                      primary={job.name || `Job ${job.id.substring(0, 8)}`}
+                      secondary={getSecondaryText()}
+                    />
+                    <Chip 
+                      label={job.status} 
+                      color={getStatusColor(job.status)} 
+                      size="small" 
+                      sx={{ mr: 1 }}
+                    />
+                    <ListItemSecondaryAction>
+                      {(job.status === 'pending' || job.status === 'running') && (
+                        <IconButton 
+                          edge="end" 
+                          onClick={() => handleJobAction('cancel', job.id)}
+                          title="Cancel Job"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                );
+              })
+            )}
           </List>
         </AccordionDetails>
       </Accordion>
@@ -610,6 +886,7 @@ const AdministrationPage: React.FC = () => {
           {dialogType === 'tool' && 'Add Tool Server'}
           {dialogType === 'backup' && 'Create Backup'}
           {dialogType === 'plugin' && 'Install Plugin'}
+          {dialogType === 'job' && 'Create New Job'}
         </DialogTitle>
         <DialogContent>
           {dialogType === 'user' && (
@@ -740,6 +1017,85 @@ const AdministrationPage: React.FC = () => {
                 Choose File
                 <input type="file" hidden accept=".zip,.tar.gz" />
               </Button>
+            </Box>
+          )}
+
+          {dialogType === 'job' && (
+            <Box sx={{ mt: 2 }}>
+              <TextField
+                fullWidth
+                label="Job Name"
+                margin="normal"
+                placeholder="Document Processing Job"
+                required
+                value={formData.jobName}
+                onChange={(e) => handleFormChange('jobName', e.target.value)}
+              />
+              <TextField
+                fullWidth
+                label="Function Name"
+                margin="normal"
+                placeholder="document_processing"
+                required
+                helperText="Available functions: document_processing, conversation_summarization, vector_store_maintenance, data_export, data_backup"
+                value={formData.jobFunction}
+                onChange={(e) => handleFormChange('jobFunction', e.target.value)}
+              />
+              <TextField
+                fullWidth
+                select
+                label="Priority"
+                margin="normal"
+                value={formData.jobPriority}
+                onChange={(e) => handleFormChange('jobPriority', e.target.value)}
+                SelectProps={{ native: true }}
+              >
+                <option value="low">Low</option>
+                <option value="normal">Normal</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </TextField>
+              <TextField
+                fullWidth
+                label="Arguments (JSON Array)"
+                margin="normal"
+                placeholder='["arg1", "arg2"]'
+                multiline
+                rows={2}
+                helperText="Arguments as JSON array, e.g., ['document_id', 'extract_text']"
+                value={formData.jobArgs}
+                onChange={(e) => handleFormChange('jobArgs', e.target.value)}
+              />
+              <TextField
+                fullWidth
+                label="Keyword Arguments (JSON Object)"
+                margin="normal"
+                placeholder='{"key": "value"}'
+                multiline
+                rows={2}
+                helperText="Keyword arguments as JSON object, e.g., {'timeout': 3600}"
+                value={formData.jobKwargs}
+                onChange={(e) => handleFormChange('jobKwargs', e.target.value)}
+              />
+              <TextField
+                fullWidth
+                label="Schedule At (Optional)"
+                margin="normal"
+                type="datetime-local"
+                helperText="Leave empty to run immediately, or schedule for later"
+                value={formData.scheduleAt}
+                onChange={(e) => handleFormChange('scheduleAt', e.target.value)}
+                InputLabelProps={{ shrink: true }}
+              />
+              <TextField
+                fullWidth
+                label="Max Retries"
+                margin="normal"
+                type="number"
+                value={formData.maxRetries}
+                onChange={(e) => handleFormChange('maxRetries', parseInt(e.target.value) || 0)}
+                inputProps={{ min: 0, max: 10 }}
+              />
             </Box>
           )}
         </DialogContent>

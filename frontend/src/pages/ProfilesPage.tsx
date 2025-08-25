@@ -35,17 +35,17 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { Profile, ApiV1ProfilesPostRequest, ApiV1ProfilesIdPutRequest } from '../sdk';
+import { ProfileResponse, ProfileCreate, ProfileUpdate } from '../sdk';
 
 const ProfilesPage: React.FC = () => {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profiles, setProfiles] = useState<ProfileResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [dialogError, setDialogError] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+  const [editingProfile, setEditingProfile] = useState<ProfileResponse | null>(null);
   const [saving, setSaving] = useState(false);
 
   // Form state
@@ -86,7 +86,7 @@ const ProfilesPage: React.FC = () => {
     }
   };
 
-  const handleOpenDialog = (profile?: Profile) => {
+  const handleOpenDialog = (profile?: ProfileResponse) => {
     setDialogError(''); // Clear any previous dialog errors
     if (profile) {
       setEditingProfile(profile);
@@ -123,7 +123,7 @@ const ProfilesPage: React.FC = () => {
       setSaving(true);
       setDialogError(''); // Clear any previous dialog errors
       if (editingProfile) {
-        const updateRequest: ApiV1ProfilesIdPutRequest = {
+        const updateRequest: ProfileUpdate = {
           name: formData.name,
           description: formData.description,
           llm_model: formData.llm_model,
@@ -137,7 +137,7 @@ const ProfilesPage: React.FC = () => {
         const response = await chatterSDK.profiles.updateProfileApiV1ProfilesProfileIdPut({ profileId: editingProfile.id, profileUpdate: updateRequest });
         setProfiles(prev => prev.map(p => p.id === editingProfile.id ? response.data : p));
       } else {
-        const createRequest: ApiV1ProfilesPostRequest = {
+        const createRequest: ProfileCreate = {
           name: formData.name,
           description: formData.description,
           llm_model: formData.llm_model,

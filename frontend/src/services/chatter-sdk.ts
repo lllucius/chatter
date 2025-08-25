@@ -21,6 +21,7 @@ import {
   DataManagementApi,
   PluginsApi,
   HealthApi,
+  JobsApi,
   UserLogin,
   UserCreate,
 } from '../sdk';
@@ -41,6 +42,7 @@ export class ChatterSDK {
   public dataManagement: DataManagementApi;
   public plugins: PluginsApi;
   public health: HealthApi;
+  public jobs: JobsApi;
 
   constructor(baseURL: string = 'http://localhost:8000') {
     // Load token from localStorage
@@ -67,6 +69,7 @@ export class ChatterSDK {
     this.dataManagement = new DataManagementApi(this.configuration);
     this.plugins = new PluginsApi(this.configuration);
     this.health = new HealthApi(this.configuration);
+    this.jobs = new JobsApi(this.configuration);
   }
 
   /**
@@ -125,6 +128,7 @@ export class ChatterSDK {
     this.dataManagement = new DataManagementApi(this.configuration);
     this.plugins = new PluginsApi(this.configuration);
     this.health = new HealthApi(this.configuration);
+    this.jobs = new JobsApi(this.configuration);
   }
 
   /**

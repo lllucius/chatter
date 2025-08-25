@@ -692,21 +692,34 @@ class DocumentService:
     async def _process_document_async(
         self, document_id: str, file_content: bytes
     ) -> None:
-        """Process document asynchronously.
+        """Process document asynchronously using job queue.
 
         Args:
             document_id: Document ID
             file_content: File content bytes
         """
         try:
-            # This would typically be run in a background task or worker
-            # For now, we'll just start the processing synchronously
-            await self.processing_service.process_document(
-                document_id, file_content
+            from chatter.services.job_queue import job_queue, JobPriority
+            
+            # Add document processing job to the queue
+            job_id = await job_queue.add_job(
+                name=f"Document Processing: {document_id}",
+                function_name="document_processing",
+                args=[document_id, file_content],
+                priority=JobPriority.NORMAL,
+                tags=["document", "processing"],
+                metadata={"document_id": document_id}
             )
+            
+            logger.info(
+                "Document processing job queued",
+                document_id=document_id,
+                job_id=job_id,
+            )
+            
         except Exception as e:
             logger.error(
-                "Async document processing failed",
+                "Failed to queue document processing job",
                 document_id=document_id,
                 error=str(e),
             )

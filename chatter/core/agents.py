@@ -468,7 +468,11 @@ class TaskOrientedAgent(BaseAgent):
             response_text = ""
             if result and "messages" in result:
                 last_message = result["messages"][-1]
-                response_text = last_message.content if hasattr(last_message, 'content') else str(last_message)
+                response_text = (
+                    last_message.content 
+                    if hasattr(last_message, 'content') 
+                    else str(last_message)
+                )
 
             if result and "tool_calls" in result:
                 tools_used = [call.get("name", "unknown") for call in result["tool_calls"]]

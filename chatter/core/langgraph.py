@@ -673,7 +673,11 @@ class LangGraphWorkflowManager:
 
                 try:
                     summary_response = await llm.ainvoke([HumanMessage(content=summary_prompt)])
-                    summary = summary_response.content if hasattr(summary_response, 'content') else str(summary_response)
+                    summary = (
+                        summary_response.content 
+                        if hasattr(summary_response, 'content') 
+                        else str(summary_response)
+                    )
 
                     return {
                         "messages": recent_messages,
@@ -707,7 +711,13 @@ class LangGraphWorkflowManager:
                 return {"messages": [response]}
             except Exception as e:
                 logger.error("Model call failed", error=str(e))
-                return {"messages": [AIMessage(content="I apologize, but I encountered an error processing your request.")]}
+                return {
+                    "messages": [
+                        AIMessage(
+                            content="I apologize, but I encountered an error processing your request."
+                        )
+                    ]
+                }
 
         # Build workflow
         workflow = StateGraph(ConversationState)

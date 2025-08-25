@@ -258,6 +258,17 @@ class AdvancedJobQueue:
             "status_counts": status_counts,
         }
 
+    async def get_stats(self) -> dict[str, Any]:
+        """Get job queue statistics.
+        
+        This method provides the same functionality as get_queue_stats
+        but with an interface that matches the API expectations.
+        
+        Returns:
+            Dictionary with queue statistics
+        """
+        return await self.get_queue_stats()
+
     async def start(self) -> None:
         """Start the job queue workers."""
         if self.running:

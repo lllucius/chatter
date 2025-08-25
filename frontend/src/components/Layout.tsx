@@ -102,9 +102,23 @@ const LayoutFrame: React.FC = () => {
     if (!location.pathname.startsWith('/chat')) {
       setRightOpen(false);
       clearPanelContent();
-      // Also blur any focused element (closes open selects/menus)
-      (document.activeElement as HTMLElement | null)?.blur?.();
     }
+    
+    // Always blur focused elements and close any open menus/popovers on navigation
+    // This provides the same cleanup that was intended by the forced remounting
+    (document.activeElement as HTMLElement | null)?.blur?.();
+    
+    // Close any open Material-UI menus/popovers by dispatching escape key
+    const escapeEvent = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      code: 'Escape',
+      keyCode: 27,
+      which: 27,
+      bubbles: true,
+      cancelable: true
+    });
+    document.dispatchEvent(escapeEvent);
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
@@ -380,8 +394,8 @@ const LayoutFrame: React.FC = () => {
             }),
         }}
       >
-        {/* Force route content to remount on path changes to drop any open Popovers/Menus */}
-        <Outlet key={location.pathname} />
+        {/* Remove forced remounting to allow proper React Router navigation */}
+        <Outlet />
       </Box>
 
       {/* RIGHT NAV */}

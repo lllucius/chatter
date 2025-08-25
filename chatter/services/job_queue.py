@@ -464,17 +464,50 @@ job_queue = AdvancedJobQueue(max_workers=settings.background_worker_concurrency)
 
 
 # Register some default job handlers
-async def document_processing_job(document_id: str, processing_type: str) -> dict[str, Any]:
-    """Default document processing job handler."""
-    logger.info(f"Processing document {document_id} with type {processing_type}")
-    # Simulate processing time
-    await asyncio.sleep(2)
-    return {
-        "document_id": document_id,
-        "processing_type": processing_type,
-        "status": "processed",
-        "chunks_created": 10,
-    }
+async def document_processing_job(document_id: str, file_content: bytes) -> dict[str, Any]:
+    """Document processing job handler for background processing."""
+    from chatter.utils.database import get_session_factory
+
+    logger.info(f"Starting background processing for document {document_id}")
+    
+    try:
+        # Get a database session for background processing
+        async_session = get_session_factory()
+        async with async_session() as session:
+            from chatter.services.document_processing import DocumentProcessingService
+            
+            # Create processing service instance
+            processing_service = DocumentProcessingService(session)
+            
+            # Process the document (chunking + embeddings)
+            success = await processing_service.process_document(
+                document_id, file_content
+            )
+            
+            if success:
+                logger.info(f"Document {document_id} processed successfully in background")
+                return {
+                    "document_id": document_id,
+                    "status": "processed",
+                    "success": True,
+                }
+            else:
+                logger.error(f"Document {document_id} processing failed in background")
+                return {
+                    "document_id": document_id,
+                    "status": "failed",
+                    "success": False,
+                    "error": "Processing failed",
+                }
+                
+    except Exception as e:
+        logger.error(f"Document {document_id} processing error in background", error=str(e))
+        return {
+            "document_id": document_id,
+            "status": "failed",
+            "success": False,
+            "error": str(e),
+        }
 
 
 async def conversation_summarization_job(conversation_id: str) -> dict[str, Any]:

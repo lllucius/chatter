@@ -168,6 +168,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as e:
         logger.error("Failed to start scheduler", error=str(e))
 
+    # Start background job queue
+    try:
+        from chatter.services.job_queue import job_queue
+
+        await job_queue.start()
+        logger.info("Background job queue started")
+    except Exception as e:
+        logger.error("Failed to start job queue", error=str(e))
+
     # Application startup complete
     logger.info("Chatter application started successfully")
 
@@ -184,6 +193,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info("Tool server scheduler stopped")
     except Exception as e:
         logger.error("Failed to stop scheduler", error=str(e))
+
+    # Stop background job queue
+    try:
+        from chatter.services.job_queue import job_queue
+
+        await job_queue.stop()
+        logger.info("Background job queue stopped")
+    except Exception as e:
+        logger.error("Failed to stop job queue", error=str(e))
 
     await close_database()
     logger.info("Chatter application shutdown complete")

@@ -47,6 +47,7 @@ class LLMService:
             try:
                 self._providers["openai"] = ChatOpenAI(
                     api_key=settings.openai_api_key,
+                    base_url=settings.openai_base_url,
                     model=settings.openai_model,
                     temperature=settings.openai_temperature,
                     max_tokens=settings.openai_max_tokens,
@@ -141,6 +142,7 @@ class LLMService:
         if profile.llm_provider == "openai":
             return ChatOpenAI(
                 api_key=settings.openai_api_key,
+                base_url=settings.openai_base_url,
                 model=profile.llm_model,
                 temperature=profile.temperature,
                 max_tokens=profile.max_tokens,

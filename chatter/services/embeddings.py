@@ -53,6 +53,7 @@ class EmbeddingService:
             try:
                 self._providers["openai"] = OpenAIEmbeddings(
                     api_key=settings.openai_api_key,
+                    base_url=settings.openai_base_url,
                     model=settings.openai_embedding_model,
                     chunk_size=settings.openai_embedding_chunk_size,
                 )

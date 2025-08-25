@@ -21,7 +21,7 @@ import {
   ListItemIcon,
   Divider,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import {
   CheckCircle as CheckIcon,
   Error as ErrorIcon,
@@ -132,16 +132,18 @@ const HealthPage: React.FC = () => {
           Refresh
         </Button>
       </Box>
-
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
-
       {/* Overall System Status */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={8}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 8
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -211,7 +213,11 @@ const HealthPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 4
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -245,10 +251,13 @@ const HealthPage: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-
       {/* System Metrics */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -290,7 +299,11 @@ const HealthPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -332,7 +345,6 @@ const HealthPage: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-
       {/* Tool Servers Status */}
       <Card>
         <CardContent>

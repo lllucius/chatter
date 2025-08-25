@@ -1,10 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Box,
   Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Button,
   Chip,
   List,
@@ -23,10 +20,11 @@ import {
   Alert,
   CircularProgress,
   Snackbar,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import {
-  ExpandMore as ExpandMoreIcon,
   Backup as BackupIcon,
   Work as JobIcon,
   Extension as PluginIcon,
@@ -46,7 +44,7 @@ import { chatterSDK } from '../services/chatter-sdk';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
 
 const AdministrationPage: React.FC = () => {
-  const [expanded, setExpanded] = useState<string | false>('backups');
+  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users' | 'tools'>('backups');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'user' | 'tool' | 'backup' | 'plugin' | 'job'>('user');
   const [loading, setLoading] = useState(false);
@@ -60,6 +58,10 @@ const AdministrationPage: React.FC = () => {
   const [jobs, setJobs] = useState<JobResponse[]>([]);
   const [jobStats, setJobStats] = useState<JobStatsResponse | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
+  
+  // Refs to read latest state inside timers without re-binding
+  const jobsRef = useRef<JobResponse[]>([]);
+  const backupsRef = useRef<BackupResponse[]>([]);
   
   // Notification state
   const [notifications, setNotifications] = useState<Array<{
@@ -119,7 +121,6 @@ const AdministrationPage: React.FC = () => {
       newJobs.forEach(job => {
         const previousState = lastJobStates.get(job.id);
         if (previousState && previousState !== job.status) {
-          // Job state changed, create notification
           addNotification({
             title: 'Job Status Update',
             message: `Job "${job.name || job.id.substring(0, 8)}" changed from ${previousState} to ${job.status}`,
@@ -132,11 +133,12 @@ const AdministrationPage: React.FC = () => {
       });
       
       // Update job states
-      const newStates = new Map();
+      const newStates = new Map<string, JobStatus>();
       newJobs.forEach(job => newStates.set(job.id, job.status));
       setLastJobStates(newStates);
       
       setJobs(newJobs);
+      jobsRef.current = newJobs;
     } catch (error: any) {
       console.error('Failed to load jobs:', error);
       setError('Failed to load jobs');
@@ -154,47 +156,167 @@ const AdministrationPage: React.FC = () => {
     }
   }, []);
 
-  // Load data on component mount
-  useEffect(() => {
-    loadBackups();
-    loadPlugins();
-    loadJobs();
-    loadJobStats();
-  }, [loadJobs, loadJobStats]);
-
-  // Poll for job updates every 10 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (expanded === 'jobs') {
-        loadJobs();
-        loadJobStats();
-      }
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [expanded, loadJobs, loadJobStats]);
-
-  const loadBackups = async () => {
+  const loadBackups = useCallback(async () => {
     try {
       setDataLoading(true);
       const response = await chatterSDK.dataManagement.listBackupsApiV1DataBackupsGet({});
-      setBackups(response.data.backups || []);
+      const items = response.data.backups || [];
+      setBackups(items);
+      backupsRef.current = items;
     } catch (error: any) {
       console.error('Failed to load backups:', error);
       setError('Failed to load backups');
     } finally {
       setDataLoading(false);
     }
-  };
+  }, []);
 
-  const loadPlugins = async () => {
+  const loadPlugins = useCallback(async () => {
     try {
       const response = await chatterSDK.plugins.listPluginsApiV1PluginsGet({});
       setPlugins(response.data.plugins || []);
     } catch (error: any) {
       console.error('Failed to load plugins:', error);
     }
-  };
+  }, []);
+
+  // Load data on component mount (single fetch)
+  useEffect(() => {
+    loadBackups();
+    loadPlugins();
+    loadJobs();
+    loadJobStats();
+  }, [loadJobs, loadJobStats, loadBackups, loadPlugins]);
+
+  // Focus-based light refresh (single call, no timers)
+  useEffect(() => {
+    const onFocus = () => {
+      if (document.hidden) return;
+      if (activeTab === 'jobs') {
+        loadJobs();
+        loadJobStats();
+      } else if (activeTab === 'backups') {
+        loadBackups();
+      }
+    };
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [activeTab, loadJobs, loadJobStats, loadBackups]);
+
+  // Tamed polling for Jobs:
+  // - Only when Jobs tab is active and page is visible
+  // - Poll faster (15s) only while there are pending/running jobs
+  // - Back off aggressively (up to 2 minutes) when no active work
+  useEffect(() => {
+    let timeoutId: number | undefined;
+    let delay = 15000; // fast while active work exists
+    const minActiveDelay = 15000;
+    const minIdleDelay = 30000;
+    const maxIdleDelay = 120000;
+
+    const clear = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = undefined;
+      }
+    };
+
+    const schedule = (ms: number) => {
+      clear();
+      timeoutId = window.setTimeout(tick, ms);
+    };
+
+    const tick = async () => {
+      // If not on the jobs tab or page is hidden, reschedule with idle delay to avoid hammering
+      if (activeTab !== 'jobs' || document.hidden) {
+        schedule(Math.max(delay, minIdleDelay));
+        return;
+      }
+
+      await Promise.all([loadJobs(), loadJobStats()]);
+
+      // Determine if there's active work
+      const hasActive = jobsRef.current.some(
+        j => j.status === 'pending' || j.status === 'running'
+      );
+
+      if (hasActive) {
+        delay = minActiveDelay;
+      } else {
+        // Exponential backoff up to max when idle
+        delay = Math.min(Math.max(delay * 2, minIdleDelay), maxIdleDelay);
+      }
+
+      schedule(delay);
+    };
+
+    if (activeTab === 'jobs') {
+      delay = minActiveDelay;
+      schedule(delay);
+    }
+
+    return clear;
+  }, [activeTab, loadJobs, loadJobStats]);
+
+  // Tamed conditional polling for Backups:
+  // - Only when Backups tab is active and page is visible
+  // - Only poll while there are backups not in a terminal state (completed/failed)
+  // - Back off to 60s when all are terminal; stop if no in-progress items
+  useEffect(() => {
+    let timeoutId: number | undefined;
+    let delay = 15000; // fast while in-progress
+    const activeDelay = 15000;
+    const idleDelay = 60000;
+
+    const clear = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = undefined;
+      }
+    };
+
+    const schedule = (ms: number) => {
+      clear();
+      timeoutId = window.setTimeout(tick, ms);
+    };
+
+    const hasInProgress = () =>
+      backupsRef.current.some(
+        b => {
+          const s = (b as any).status as string | undefined;
+          return s && s !== 'completed' && s !== 'failed';
+        }
+      );
+
+    const tick = async () => {
+      if (activeTab !== 'backups' || document.hidden) {
+        // When not visible/active, do not continue polling aggressively
+        schedule(idleDelay);
+        return;
+      }
+
+      // If nothing in progress, stop polling entirely to reduce traffic
+      if (!hasInProgress()) {
+        clear();
+        return;
+      }
+
+      await loadBackups();
+
+      // Continue while still in-progress
+      if (hasInProgress()) {
+        schedule(activeDelay);
+      } else {
+        clear();
+      }
+    };
+
+    if (activeTab === 'backups' && hasInProgress()) {
+      schedule(activeDelay);
+    }
+
+    return clear;
+  }, [activeTab, loadBackups]);
 
   const handleJobAction = async (action: 'cancel', jobId: string) => {
     try {
@@ -205,8 +327,9 @@ const AdministrationPage: React.FC = () => {
         case 'cancel':
           await chatterSDK.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId });
           showSnackbar('Job cancelled successfully!');
-          loadJobs(); // Reload jobs
-          loadJobStats(); // Reload stats
+          // Immediate single refresh; timers will take care of next ones if needed
+          loadJobs();
+          loadJobStats();
           break;
       }
     } catch (error: any) {
@@ -249,10 +372,6 @@ const AdministrationPage: React.FC = () => {
       console.error('Error toggling plugin:', error);
       setError('Failed to toggle plugin status');
     }
-  };
-
-  const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
-    setExpanded(isExpanded ? panel : false);
   };
 
   const openDialog = (type: 'user' | 'tool' | 'backup' | 'plugin' | 'job') => {
@@ -318,7 +437,6 @@ const AdministrationPage: React.FC = () => {
           break;
           
         case 'backup':
-          // Create backup using real API
           await chatterSDK.dataManagement.createBackupApiV1DataBackupPost({
             backupRequest: {
               name: formData.backupName,
@@ -328,12 +446,12 @@ const AdministrationPage: React.FC = () => {
             }
           });
           showSnackbar('Backup created successfully!');
-          loadBackups(); // Reload backups list
+          // Single refresh; conditional polling will kick in if it shows in-progress
+          loadBackups();
           break;
           
         case 'plugin':
           try {
-            // Install plugin using the plugins API
             await chatterSDK.plugins.installPluginApiV1PluginsInstallPost({
               pluginInstallRequest: {
                 plugin_path: formData.pluginUrl,
@@ -349,7 +467,6 @@ const AdministrationPage: React.FC = () => {
           
         case 'job':
           try {
-            // Create job using the jobs API
             const jobCreateRequest: JobCreateRequest = {
               name: formData.jobName,
               function_name: formData.jobFunction,
@@ -367,8 +484,9 @@ const AdministrationPage: React.FC = () => {
               message: `Job "${formData.jobName}" has been created and ${formData.scheduleAt ? 'scheduled' : 'queued for execution'}`,
               type: 'success'
             });
-            loadJobs(); // Reload jobs list
-            loadJobStats(); // Reload job stats
+            // Single refresh; jobs polling will take over only if needed
+            loadJobs();
+            loadJobStats();
           } catch (jobError: any) {
             throw new Error(jobError.response?.data?.detail || 'Failed to create job');
           }
@@ -417,8 +535,6 @@ const AdministrationPage: React.FC = () => {
         
         switch (type) {
           case 'user':
-            // Note: There might not be a user deletion API in the current SDK
-            // This would typically require admin privileges
             showSnackbar('User deletion functionality requires implementation of admin user management API');
             break;
             
@@ -430,9 +546,7 @@ const AdministrationPage: React.FC = () => {
             break;
             
           case 'backup':
-            // Real backup deletion - this endpoint might not exist yet, so we'll provide better feedback
             try {
-              // Assuming there might be a delete endpoint in the future
               showSnackbar('Backup deletion is not yet supported by the API');
             } catch (backupError: any) {
               showSnackbar('Backup deletion functionality not yet available');
@@ -482,8 +596,6 @@ const AdministrationPage: React.FC = () => {
           break;
           
         case 'tool server':
-          // For editing, we would typically fetch the current data and populate the form
-          // then call updateToolServerApiV1ToolserversServersServerIdPut
           showSnackbar('Tool server editing functionality would open edit dialog with current data');
           break;
           
@@ -505,9 +617,13 @@ const AdministrationPage: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3, fontWeight: 'bold' }}>
-        Administration Dashboard
-      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+          Administration Dashboard
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+        </Box>
+      </Box>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -550,20 +666,26 @@ const AdministrationPage: React.FC = () => {
         </Box>
       )}
 
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Manage system components, users, and configurations from this central dashboard.
-      </Alert>
+      <Tabs
+        value={activeTab}
+        onChange={(_, v) => setActiveTab(v)}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{ mb: 2 }}
+      >
+        <Tab value="backups" icon={<BackupIcon />} iconPosition="start" label="Backups" />
+        <Tab value="jobs" icon={<JobIcon />} iconPosition="start" label="Background Jobs" />
+        <Tab value="plugins" icon={<PluginIcon />} iconPosition="start" label="Plugins" />
+        <Tab value="users" icon={<UsersIcon />} iconPosition="start" label="User Management" />
+        <Tab value="tools" icon={<ToolsIcon />} iconPosition="start" label="Tool Servers" />
+      </Tabs>
 
-      {/* Backups Section */}
-      <Accordion expanded={expanded === 'backups'} onChange={handleChange('backups')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <BackupIcon sx={{ mr: 2 }} />
-          <Typography variant="h6">Backups</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {/* Backups Tab */}
+      {activeTab === 'backups' && (
+        <Box>
           <Box sx={{ mb: 2 }}>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={8}>
                 <Button
                   variant="contained"
                   startIcon={<BackupIcon />}
@@ -575,11 +697,19 @@ const AdministrationPage: React.FC = () => {
                 <Button
                   variant="outlined"
                   startIcon={<UploadIcon />}
+                  sx={{ mr: 1 }}
                 >
                   Restore Backup
                 </Button>
+                <Button
+                  variant="outlined"
+                  startIcon={<SettingsIcon />}
+                  onClick={loadBackups}
+                >
+                  Refresh
+                </Button>
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={4}>
                 <FormControlLabel
                   control={<Switch defaultChecked />}
                   label="Automatic Backups"
@@ -623,16 +753,12 @@ const AdministrationPage: React.FC = () => {
               ))
             )}
           </List>
-        </AccordionDetails>
-      </Accordion>
+        </Box>
+      )}
 
-      {/* Jobs Section */}
-      <Accordion expanded={expanded === 'jobs'} onChange={handleChange('jobs')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <JobIcon sx={{ mr: 2 }} />
-          <Typography variant="h6">Background Jobs</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {/* Jobs Tab */}
+      {activeTab === 'jobs' && (
+        <Box>
           <Box sx={{ mb: 2 }}>
             <Grid container spacing={2} alignItems="center">
               <Grid item xs={12} sm={6}>
@@ -690,7 +816,7 @@ const AdministrationPage: React.FC = () => {
                 };
 
                 const getSecondaryText = () => {
-                  const parts = [];
+                  const parts: string[] = [];
                   if (job.function_name) parts.push(`Function: ${job.function_name}`);
                   if (job.priority) parts.push(`Priority: ${job.priority}`);
                   if (job.progress !== undefined) parts.push(`Progress: ${job.progress}%`);
@@ -726,16 +852,12 @@ const AdministrationPage: React.FC = () => {
               })
             )}
           </List>
-        </AccordionDetails>
-      </Accordion>
+        </Box>
+      )}
 
-      {/* Plugins Section */}
-      <Accordion expanded={expanded === 'plugins'} onChange={handleChange('plugins')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <PluginIcon sx={{ mr: 2 }} />
-          <Typography variant="h6">Plugins</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {/* Plugins Tab */}
+      {activeTab === 'plugins' && (
+        <Box>
           <Box sx={{ mb: 2 }}>
             <Button
               variant="contained"
@@ -776,16 +898,12 @@ const AdministrationPage: React.FC = () => {
               ))
             )}
           </List>
-        </AccordionDetails>
-      </Accordion>
+        </Box>
+      )}
 
-      {/* Users Section */}
-      <Accordion expanded={expanded === 'users'} onChange={handleChange('users')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <UsersIcon sx={{ mr: 2 }} />
-          <Typography variant="h6">User Management</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {/* Users Tab */}
+      {activeTab === 'users' && (
+        <Box>
           <Box sx={{ mb: 2 }}>
             <Button
               variant="contained"
@@ -825,16 +943,12 @@ const AdministrationPage: React.FC = () => {
               </ListItemSecondaryAction>
             </ListItem>
           </List>
-        </AccordionDetails>
-      </Accordion>
+        </Box>
+      )}
 
-      {/* Tools Section */}
-      <Accordion expanded={expanded === 'tools'} onChange={handleChange('tools')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <ToolsIcon sx={{ mr: 2 }} />
-          <Typography variant="h6">Tool Servers</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
+      {/* Tools Tab */}
+      {activeTab === 'tools' && (
+        <Box>
           <Box sx={{ mb: 2 }}>
             <Button
               variant="contained"
@@ -852,10 +966,10 @@ const AdministrationPage: React.FC = () => {
               />
               <Chip label="Connected" color="success" size="small" sx={{ mr: 1 }} />
               <ListItemSecondaryAction>
-                <IconButton edge="end" sx={{ mr: 1 }} onClick={() => handleEditAction('tool-server', 'file-ops')}>
+                <IconButton edge="end" sx={{ mr: 1 }} onClick={() => handleEditAction('tool server', 'file-ops')}>
                   <SettingsIcon />
                 </IconButton>
-                <IconButton edge="end" onClick={() => handleDeleteAction('tool-server', 'file-ops')}>
+                <IconButton edge="end" onClick={() => handleDeleteAction('tool server', 'file-ops')}>
                   <DeleteIcon />
                 </IconButton>
               </ListItemSecondaryAction>
@@ -867,17 +981,17 @@ const AdministrationPage: React.FC = () => {
               />
               <Chip label="Disconnected" color="error" size="small" sx={{ mr: 1 }} />
               <ListItemSecondaryAction>
-                <IconButton edge="end" sx={{ mr: 1 }} onClick={() => handleEditAction('tool-server', 'web-search')}>
+                <IconButton edge="end" sx={{ mr: 1 }} onClick={() => handleEditAction('tool server', 'web-search')}>
                   <SettingsIcon />
                 </IconButton>
-                <IconButton edge="end" onClick={() => handleDeleteAction('tool-server', 'web-search')}>
+                <IconButton edge="end" onClick={() => handleDeleteAction('tool server', 'web-search')}>
                   <DeleteIcon />
                 </IconButton>
               </ListItemSecondaryAction>
             </ListItem>
           </List>
-        </AccordionDetails>
-      </Accordion>
+        </Box>
+      )}
 
       {/* Generic Dialog for Adding/Editing */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>

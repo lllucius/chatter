@@ -29,7 +29,7 @@ import {
   ListItemText,
   Fab,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import {
   CloudUpload as UploadIcon,
   Delete as DeleteIcon,
@@ -341,16 +341,19 @@ const DocumentsPage: React.FC = () => {
           </Button>
         </Box>
       </Box>
-
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
-
       {/* Statistics Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" color="primary">
@@ -362,7 +365,12 @@ const DocumentsPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" color="secondary">
@@ -374,7 +382,12 @@ const DocumentsPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" color="success.main">
@@ -386,7 +399,12 @@ const DocumentsPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" color="info.main">
@@ -399,7 +417,6 @@ const DocumentsPage: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-
       {/* Search and Filters */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
@@ -419,7 +436,6 @@ const DocumentsPage: React.FC = () => {
           />
         </CardContent>
       </Card>
-
       {/* Documents Table */}
       <Card>
         <TableContainer>
@@ -535,7 +551,6 @@ const DocumentsPage: React.FC = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
-
       {/* Upload Dialog */}
       <Dialog open={uploadDialogOpen} onClose={() => setUploadDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Upload Document</DialogTitle>
@@ -584,7 +599,6 @@ const DocumentsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Semantic Search Dialog */}
       <Dialog open={searchDialogOpen} onClose={() => setSearchDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Semantic Document Search</DialogTitle>
@@ -647,7 +661,6 @@ const DocumentsPage: React.FC = () => {
           <Button onClick={() => setSearchDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
-
       {/* Floating Action Button */}
       <Fab
         color="primary"

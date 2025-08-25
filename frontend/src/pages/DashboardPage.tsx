@@ -9,7 +9,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import {
   XAxis,
   YAxis,
@@ -200,10 +200,14 @@ const DashboardPage: React.FC = () => {
       <Typography variant="h4" component="h1" gutterBottom sx={{ mb: 3, fontWeight: 'bold' }}>
         Dashboard
       </Typography>
-
       {/* Key Metrics */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <MetricCard
             title="Total Conversations"
             value={safeLocaleString(conversationStats.total_conversations)}
@@ -213,7 +217,12 @@ const DashboardPage: React.FC = () => {
             color="primary"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <MetricCard
             title="Total Messages"
             value={safeLocaleString(conversationStats.total_messages)}
@@ -223,7 +232,12 @@ const DashboardPage: React.FC = () => {
             color="secondary"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <MetricCard
             title="Token Usage"
             value={safeLocaleString(usageMetrics.total_tokens)}
@@ -233,7 +247,12 @@ const DashboardPage: React.FC = () => {
             color="info"
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <MetricCard
             title="Documents"
             value={safeLocaleString(documentAnalytics.total_documents)}
@@ -244,10 +263,13 @@ const DashboardPage: React.FC = () => {
           />
         </Grid>
       </Grid>
-
       {/* Charts Section */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={8}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 8
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -265,7 +287,11 @@ const DashboardPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 4
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -293,10 +319,13 @@ const DashboardPage: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-
       {/* Additional Metrics */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -314,14 +343,18 @@ const DashboardPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid
+          size={{
+            xs: 12,
+            md: 6
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
                 System Health
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <People sx={{ mr: 1, color: 'primary.main' }} />
                     <Box sx={{ flexGrow: 1 }}>
@@ -332,7 +365,7 @@ const DashboardPage: React.FC = () => {
                     </Box>
                   </Box>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid size={6}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <CloudQueue sx={{ mr: 1, color: 'secondary.main' }} />
                     <Box sx={{ flexGrow: 1 }}>
@@ -343,7 +376,7 @@ const DashboardPage: React.FC = () => {
                     </Box>
                   </Box>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={12}>
                   <Box sx={{ mb: 2 }}>
                     <Typography variant="body2" gutterBottom>
                       Response Time: {safeToFixed(performanceMetrics.avg_response_time_ms, 2)}ms
@@ -370,7 +403,6 @@ const DashboardPage: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-
       {/* Status Indicators */}
       <Card>
         <CardContent>

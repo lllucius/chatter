@@ -165,6 +165,9 @@ class Settings(BaseSettings):
     # =============================================================================
 
     # OpenAI
+    openai_base_url: str | None = Field(
+        default=None, description="OpenAI URL base"
+    )
     openai_api_key: str | None = Field(
         default=None, description="OpenAI API key"
     )

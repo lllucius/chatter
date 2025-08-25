@@ -27,7 +27,7 @@ import {
   FormControlLabel,
   IconButton,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
@@ -172,16 +172,19 @@ const AgentsPage: React.FC = () => {
           </Button>
         </Box>
       </Box>
-
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
         </Alert>
       )}
-
       {/* Statistics */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" color="primary">
@@ -193,7 +196,12 @@ const AgentsPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" color="success.main">
@@ -205,7 +213,12 @@ const AgentsPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" color="info.main">
@@ -217,7 +230,12 @@ const AgentsPage: React.FC = () => {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid
+          size={{
+            xs: 12,
+            sm: 6,
+            md: 3
+          }}>
           <Card>
             <CardContent>
               <Typography variant="h6" color="secondary.main">
@@ -230,7 +248,6 @@ const AgentsPage: React.FC = () => {
           </Card>
         </Grid>
       </Grid>
-
       {/* Agents Table */}
       <Card>
         <TableContainer>
@@ -323,7 +340,6 @@ const AgentsPage: React.FC = () => {
           </Table>
         </TableContainer>
       </Card>
-
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>
@@ -331,7 +347,11 @@ const AgentsPage: React.FC = () => {
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <TextField
                 fullWidth
                 label="Name"
@@ -340,7 +360,11 @@ const AgentsPage: React.FC = () => {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid
+              size={{
+                xs: 12,
+                sm: 6
+              }}>
               <FormControl fullWidth>
                 <InputLabel>Agent Type</InputLabel>
                 <Select
@@ -356,7 +380,7 @@ const AgentsPage: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 label="Description"
@@ -366,7 +390,7 @@ const AgentsPage: React.FC = () => {
                 rows={2}
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <TextField
                 fullWidth
                 label="System Prompt"
@@ -377,7 +401,7 @@ const AgentsPage: React.FC = () => {
                 placeholder="Enter the system prompt that defines the agent's behavior and personality..."
               />
             </Grid>
-            <Grid item xs={12}>
+            <Grid size={12}>
               <FormControlLabel
                 control={
                   <Switch

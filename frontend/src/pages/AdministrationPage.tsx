@@ -38,6 +38,7 @@ import {
   Settings as SettingsIcon,
   Notifications as NotificationsIcon,
   Close as CloseIcon,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
@@ -622,6 +623,19 @@ const AdministrationPage: React.FC = () => {
           Administration Dashboard
         </Typography>
         <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={() => {
+              loadBackups();
+              loadPlugins();
+              loadJobs();
+              loadJobStats();
+            }}
+            disabled={loading}
+          >
+            Refresh
+          </Button>
         </Box>
       </Box>
 

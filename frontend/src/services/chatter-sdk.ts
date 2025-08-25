@@ -24,11 +24,13 @@ import {
   JobsApi,
   UserLogin,
   UserCreate,
+  ChatRequest,
 } from '../sdk';
 
 export class ChatterSDK {
   private configuration: Configuration;
   private token: string | null = null;
+  private baseURL: string;
 
   // API instances
   public auth: AuthenticationApi;
@@ -45,6 +47,7 @@ export class ChatterSDK {
   public jobs: JobsApi;
 
   constructor(baseURL: string = 'http://localhost:8000') {
+    this.baseURL = baseURL;
     // Load token from localStorage
     const savedToken = localStorage.getItem('chatter_token');
     if (savedToken) {
@@ -196,6 +199,30 @@ export class ChatterSDK {
       }
       throw error;
     }
+  }
+
+  /**
+   * Chat streaming helper method using native fetch for proper streaming support
+   */
+  async chatStream(chatRequest: ChatRequest): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+    const response = await fetch(`${this.baseURL}/api/v1/chat/chat/stream`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.token || ''}`,
+      },
+      body: JSON.stringify(chatRequest),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    if (!response.body) {
+      throw new Error('No response body for streaming');
+    }
+
+    return response.body.getReader();
   }
 }
 

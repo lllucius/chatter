@@ -352,6 +352,13 @@ class AdvancedJobQueue:
             function_name=job.function_name,
         )
 
+        # Trigger job started event
+        try:
+            from chatter.services.sse_events import trigger_job_started
+            await trigger_job_started(job.id, job.name)
+        except Exception as e:
+            logger.warning("Failed to trigger job started event", error=str(e))
+
         start_time = datetime.now(UTC)
 
         try:
@@ -388,6 +395,13 @@ class AdvancedJobQueue:
                 execution_time=execution_time,
                 worker_id=worker_id,
             )
+
+            # Trigger job completed event
+            try:
+                from chatter.services.sse_events import trigger_job_completed
+                await trigger_job_completed(job.id, job.name, result or {})
+            except Exception as e:
+                logger.warning("Failed to trigger job completed event", error=str(e))
 
         except asyncio.TimeoutError:
             await self._handle_job_error(job, "Job timed out", worker_id)
@@ -448,6 +462,13 @@ class AdvancedJobQueue:
                 error=error_message,
                 worker_id=worker_id,
             )
+
+            # Trigger job failed event
+            try:
+                from chatter.services.sse_events import trigger_job_failed
+                await trigger_job_failed(job.id, job.name, error_message)
+            except Exception as e:
+                logger.warning("Failed to trigger job failed event", error=str(e))
 
     async def _schedule_retry(self, job: Job) -> None:
         """Schedule a job retry after delay.

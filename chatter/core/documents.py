@@ -154,6 +154,17 @@ class DocumentService:
             await self.session.commit()
             await self.session.refresh(document)
 
+            # Trigger document uploaded event
+            try:
+                from chatter.services.sse_events import trigger_document_uploaded
+                await trigger_document_uploaded(
+                    str(document.id),
+                    upload_file.filename,
+                    user_id
+                )
+            except Exception as e:
+                logger.warning("Failed to trigger document uploaded event", error=str(e))
+
             # Start background processing
             await self._process_document_async(
                 document.id, file_content

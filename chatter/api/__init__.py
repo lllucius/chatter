@@ -8,13 +8,13 @@ from chatter.api import (
     chat,
     data_management,
     documents,
+    events,
     health,
     jobs,
     plugins,
     profiles,
     prompts,
     toolserver,
-    webhooks,
 )
 
 __all__ = [
@@ -25,11 +25,11 @@ __all__ = [
     "chat",
     "data_management",
     "documents",
+    "events",
     "health",
     "jobs",
     "plugins",
     "profiles",
     "prompts",
     "toolserver",
-    "webhooks",
 ]

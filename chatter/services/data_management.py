@@ -726,8 +726,22 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
     operation.status = OperationStatus.RUNNING
     operation.started_at = datetime.now(UTC)
 
+    # Trigger backup started event
+    try:
+        from chatter.services.sse_events import trigger_backup_started
+        await trigger_backup_started(operation_id, user_id=operation.created_by)
+    except Exception as e:
+        logger.warning("Failed to trigger backup started event", error=str(e))
+
     try:
         backup_request = BackupRequest(**operation.metadata["backup_request"])
+
+        # Trigger progress event
+        try:
+            from chatter.services.sse_events import trigger_backup_progress
+            await trigger_backup_progress(operation_id, 25.0, "Creating backup archive", user_id=operation.created_by)
+        except Exception as e:
+            logger.warning("Failed to trigger backup progress event", error=str(e))
 
         # Create backup
         backup_filename = f"{backup_request.id}.tar"
@@ -741,6 +755,13 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
             # In a real implementation, you would backup actual data files
             pass
 
+        # Trigger progress event
+        try:
+            from chatter.services.sse_events import trigger_backup_progress
+            await trigger_backup_progress(operation_id, 75.0, "Finalizing backup", user_id=operation.created_by)
+        except Exception as e:
+            logger.warning("Failed to trigger backup progress event", error=str(e))
+
         # Update operation
         operation.status = OperationStatus.COMPLETED
         operation.completed_at = datetime.now(UTC)
@@ -748,6 +769,13 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
         operation.progress = 100.0
 
         logger.info("Data backup completed", operation_id=operation_id)
+
+        # Trigger backup completed event
+        try:
+            from chatter.services.sse_events import trigger_backup_completed
+            await trigger_backup_completed(operation_id, str(backup_path), user_id=operation.created_by)
+        except Exception as e:
+            logger.warning("Failed to trigger backup completed event", error=str(e))
 
         return {
             "operation_id": operation_id,
@@ -759,6 +787,14 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
         operation.status = OperationStatus.FAILED
         operation.error_message = str(e)
         logger.error("Data backup failed", operation_id=operation_id, error=str(e))
+        
+        # Trigger backup failed event
+        try:
+            from chatter.services.sse_events import trigger_backup_failed
+            await trigger_backup_failed(operation_id, str(e), user_id=operation.created_by)
+        except Exception as event_e:
+            logger.warning("Failed to trigger backup failed event", error=str(event_e))
+        
         raise
 
 

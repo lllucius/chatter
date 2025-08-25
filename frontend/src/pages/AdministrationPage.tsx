@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -64,10 +64,6 @@ const AdministrationPage: React.FC = () => {
   const [jobs, setJobs] = useState<JobResponse[]>([]);
   const [jobStats, setJobStats] = useState<JobStatsResponse | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
-  
-  // Refs to read latest state inside timers without re-binding
-  const jobsRef = useRef<JobResponse[]>([]);
-  const backupsRef = useRef<BackupResponse[]>([]);
   
   // Notification state
   const [notifications, setNotifications] = useState<Array<{
@@ -144,7 +140,6 @@ const AdministrationPage: React.FC = () => {
       setLastJobStates(newStates);
       
       setJobs(newJobs);
-      jobsRef.current = newJobs;
     } catch (error: any) {
       console.error('Failed to load jobs:', error);
       setError('Failed to load jobs');
@@ -168,7 +163,6 @@ const AdministrationPage: React.FC = () => {
       const response = await chatterSDK.dataManagement.listBackupsApiV1DataBackupsGet({});
       const items = response.data.backups || [];
       setBackups(items);
-      backupsRef.current = items;
     } catch (error: any) {
       console.error('Failed to load backups:', error);
       setError('Failed to load backups');
@@ -186,142 +180,15 @@ const AdministrationPage: React.FC = () => {
     }
   }, []);
 
-  // Load data on component mount (single fetch)
+  // Load data on component mount (single fetch; no auto-refresh)
   useEffect(() => {
     loadBackups();
     loadPlugins();
     loadJobs();
     loadJobStats();
-  }, [loadJobs, loadJobStats, loadBackups, loadPlugins]);
-
-  // Focus-based light refresh (single call, no timers)
-  useEffect(() => {
-    const onFocus = () => {
-      if (document.hidden) return;
-      if (activeTab === 'jobs') {
-        loadJobs();
-        loadJobStats();
-      } else if (activeTab === 'backups') {
-        loadBackups();
-      }
-    };
-    window.addEventListener('focus', onFocus);
-    return () => window.removeEventListener('focus', onFocus);
-  }, [activeTab, loadJobs, loadJobStats, loadBackups]);
-
-  // Tamed polling for Jobs:
-  // - Only when Jobs tab is active and page is visible
-  // - Poll faster (15s) only while there are pending/running jobs
-  // - Back off aggressively (up to 2 minutes) when no active work
-  useEffect(() => {
-    let timeoutId: number | undefined;
-    let delay = 15000; // fast while active work exists
-    const minActiveDelay = 15000;
-    const minIdleDelay = 30000;
-    const maxIdleDelay = 120000;
-
-    const clear = () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-        timeoutId = undefined;
-      }
-    };
-
-    const schedule = (ms: number) => {
-      clear();
-      timeoutId = window.setTimeout(tick, ms);
-    };
-
-    const tick = async () => {
-      // If not on the jobs tab or page is hidden, reschedule with idle delay to avoid hammering
-      if (activeTab !== 'jobs' || document.hidden) {
-        schedule(Math.max(delay, minIdleDelay));
-        return;
-      }
-
-      await Promise.all([loadJobs(), loadJobStats()]);
-
-      // Determine if there's active work
-      const hasActive = jobsRef.current.some(
-        j => j.status === 'pending' || j.status === 'running'
-      );
-
-      if (hasActive) {
-        delay = minActiveDelay;
-      } else {
-        // Exponential backoff up to max when idle
-        delay = Math.min(Math.max(delay * 2, minIdleDelay), maxIdleDelay);
-      }
-
-      schedule(delay);
-    };
-
-    if (activeTab === 'jobs') {
-      delay = minActiveDelay;
-      schedule(delay);
-    }
-
-    return clear;
-  }, [activeTab, loadJobs, loadJobStats]);
-
-  // Tamed conditional polling for Backups:
-  // - Only when Backups tab is active and page is visible
-  // - Only poll while there are backups not in a terminal state (completed/failed)
-  // - Back off to 60s when all are terminal; stop if no in-progress items
-  useEffect(() => {
-    let timeoutId: number | undefined;
-    const activeDelay = 15000;
-    const idleDelay = 60000;
-
-    const clear = () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-        timeoutId = undefined;
-      }
-    };
-
-    const schedule = (ms: number) => {
-      clear();
-      timeoutId = window.setTimeout(tick, ms);
-    };
-
-    const hasInProgress = () =>
-      backupsRef.current.some(
-        b => {
-          const s = (b as any).status as string | undefined;
-          return s && s !== 'completed' && s !== 'failed';
-        }
-      );
-
-    const tick = async () => {
-      if (activeTab !== 'backups' || document.hidden) {
-        // When not visible/active, do not continue polling aggressively
-        schedule(idleDelay);
-        return;
-      }
-
-      // If nothing in progress, stop polling entirely to reduce traffic
-      if (!hasInProgress()) {
-        clear();
-        return;
-      }
-
-      await loadBackups();
-
-      // Continue while still in-progress
-      if (hasInProgress()) {
-        schedule(activeDelay);
-      } else {
-        clear();
-      }
-    };
-
-    if (activeTab === 'backups' && hasInProgress()) {
-      schedule(activeDelay);
-    }
-
-    return clear;
-  }, [activeTab, loadBackups]);
+    // Intentionally run only once on mount to avoid refresh loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // SSE Event Listeners for real-time updates
   useEffect(() => {
@@ -427,7 +294,7 @@ const AdministrationPage: React.FC = () => {
         case 'cancel':
           await chatterSDK.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId });
           showSnackbar('Job cancelled successfully!');
-          // Immediate single refresh; timers will take care of next ones if needed
+          // Manual refresh
           loadJobs();
           loadJobStats();
           break;
@@ -546,7 +413,7 @@ const AdministrationPage: React.FC = () => {
             }
           });
           showSnackbar('Backup created successfully!');
-          // Single refresh; conditional polling will kick in if it shows in-progress
+          // Manual refresh
           loadBackups();
           break;
           
@@ -584,7 +451,7 @@ const AdministrationPage: React.FC = () => {
               message: `Job "${formData.jobName}" has been created and ${formData.scheduleAt ? 'scheduled' : 'queued for execution'}`,
               type: 'success'
             });
-            // Single refresh; jobs polling will take over only if needed
+            // Manual refresh
             loadJobs();
             loadJobStats();
           } catch (jobError: any) {

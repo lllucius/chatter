@@ -39,19 +39,25 @@ async def create_job(
         Created job data
     """
     try:
-        job = Job(
-            name=job_data.name,
-            function_name=job_data.function_name,
-            args=job_data.args,
-            kwargs=job_data.kwargs,
-            priority=job_data.priority,
-            max_retries=job_data.max_retries,
-        )
-
         if job_data.schedule_at:
-            job_id = await job_queue.schedule_job(job, job_data.schedule_at)
+            job_id = await job_queue.add_job(
+                name=job_data.name,
+                function_name=job_data.function_name,
+                args=job_data.args,
+                kwargs=job_data.kwargs,
+                priority=job_data.priority,
+                max_retries=job_data.max_retries,
+                schedule_at=job_data.schedule_at,
+            )
         else:
-            job_id = await job_queue.add_job(job)
+            job_id = await job_queue.add_job(
+                name=job_data.name,
+                function_name=job_data.function_name,
+                args=job_data.args,
+                kwargs=job_data.kwargs,
+                priority=job_data.priority,
+                max_retries=job_data.max_retries,
+            )
 
         created_job = job_queue.jobs.get(job_id)
         if not created_job:

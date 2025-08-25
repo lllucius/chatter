@@ -37,7 +37,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { AgentResponse, AgentsApiCreateAgentApiV1AgentsPostRequest, AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest, AgentUpdateRequest, AgentCreateRequest } from '../sdk';
+import { AgentResponse, AgentUpdateRequest, AgentCreateRequest } from '../sdk';
 
 const AgentsPage: React.FC = () => {
   const [agents, setAgents] = useState<AgentResponse[]>([]);

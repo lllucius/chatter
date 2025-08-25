@@ -34,11 +34,11 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { ToolServer } from '../sdk';
+import { ToolServerResponse } from '../sdk';
 
 const HealthPage: React.FC = () => {
   const [health, setHealth] = useState<any>(null);
-  const [toolServers, setToolServers] = useState<ToolServer[]>([]);
+  const [toolServers, setToolServers] = useState<ToolServerResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 

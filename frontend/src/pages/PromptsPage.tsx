@@ -35,17 +35,17 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { Prompt, ApiV1PromptsPostRequest, ApiV1PromptsIdPutRequest } from '../sdk';
+import { PromptResponse, PromptCreate, PromptUpdate } from '../sdk';
 
 const PromptsPage: React.FC = () => {
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
+  const [prompts, setPrompts] = useState<PromptResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [dialogError, setDialogError] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingPrompt, setEditingPrompt] = useState<Prompt | null>(null);
+  const [editingPrompt, setEditingPrompt] = useState<PromptResponse | null>(null);
   const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -78,7 +78,7 @@ const PromptsPage: React.FC = () => {
     }
   };
 
-  const handleOpenDialog = (prompt?: Prompt) => {
+  const handleOpenDialog = (prompt?: PromptResponse) => {
     setDialogError(''); // Clear any previous dialog errors
     if (prompt) {
       setEditingPrompt(prompt);
@@ -109,10 +109,10 @@ const PromptsPage: React.FC = () => {
       setSaving(true);
       setDialogError(''); // Clear any previous dialog errors
       if (editingPrompt) {
-        const response = await chatterSDK.prompts.updatePromptApiV1PromptsPromptIdPut({ promptId: editingPrompt.id, promptUpdate: formData as ApiV1PromptsIdPutRequest });
+        const response = await chatterSDK.prompts.updatePromptApiV1PromptsPromptIdPut({ promptId: editingPrompt.id, promptUpdate: formData as PromptUpdate });
         setPrompts(prev => prev.map(p => p.id === editingPrompt.id ? response.data : p));
       } else {
-        const response = await chatterSDK.prompts.createPromptApiV1PromptsPost({ promptCreate: formData as ApiV1PromptsPostRequest });
+        const response = await chatterSDK.prompts.createPromptApiV1PromptsPost({ promptCreate: formData as PromptCreate });
         setPrompts(prev => [response.data, ...prev]);
       }
       setDialogOpen(false);

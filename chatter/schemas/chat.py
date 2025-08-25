@@ -159,6 +159,12 @@ class ChatRequest(BaseModel):
     enable_retrieval: bool | None = Field(
         None, description="Enable retrieval override"
     )
+    document_ids: list[str] | None = Field(
+        None, description="Document IDs to include in context"
+    )
+    system_prompt_override: str | None = Field(
+        None, description="Override system prompt for this request"
+    )
 
 
 class ChatResponse(BaseModel):

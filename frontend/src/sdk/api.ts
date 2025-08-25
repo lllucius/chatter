@@ -1575,6 +1575,18 @@ export interface ChatRequest {
      * @memberof ChatRequest
      */
     'enable_retrieval'?: boolean | null;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ChatRequest
+     */
+    'document_ids'?: Array<string> | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ChatRequest
+     */
+    'system_prompt_override'?: string | null;
 }
 /**
  * Schema for chat response.
@@ -14204,40 +14216,6 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
-        /**
-         * 
-         * @summary Serve React App
-         * @param {string} fullPath 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        serveReactAppFullPathGet: async (fullPath: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'fullPath' is not null or undefined
-            assertParamExists('serveReactAppFullPathGet', 'fullPath', fullPath)
-            const localVarPath = `/{full_path}`
-                .replace(`{${"full_path"}}`, encodeURIComponent(String(fullPath)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
     }
 };
 
@@ -14260,19 +14238,6 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['DefaultApi.rootGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
-        /**
-         * 
-         * @summary Serve React App
-         * @param {string} fullPath 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async serveReactAppFullPathGet(fullPath: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.serveReactAppFullPathGet(fullPath, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['DefaultApi.serveReactAppFullPathGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
     }
 };
 
@@ -14292,16 +14257,6 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         rootGet(options?: RawAxiosRequestConfig): AxiosPromise<any> {
             return localVarFp.rootGet(options).then((request) => request(axios, basePath));
         },
-        /**
-         * 
-         * @summary Serve React App
-         * @param {DefaultApiServeReactAppFullPathGetRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        serveReactAppFullPathGet(requestParameters: DefaultApiServeReactAppFullPathGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
-            return localVarFp.serveReactAppFullPathGet(requestParameters.fullPath, options).then((request) => request(axios, basePath));
-        },
     };
 };
 
@@ -14320,30 +14275,6 @@ export interface DefaultApiInterface {
      */
     rootGet(options?: RawAxiosRequestConfig): AxiosPromise<any>;
 
-    /**
-     * 
-     * @summary Serve React App
-     * @param {DefaultApiServeReactAppFullPathGetRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApiInterface
-     */
-    serveReactAppFullPathGet(requestParameters: DefaultApiServeReactAppFullPathGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
-
-}
-
-/**
- * Request parameters for serveReactAppFullPathGet operation in DefaultApi.
- * @export
- * @interface DefaultApiServeReactAppFullPathGetRequest
- */
-export interface DefaultApiServeReactAppFullPathGetRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof DefaultApiServeReactAppFullPathGet
-     */
-    readonly fullPath: string
 }
 
 /**
@@ -14362,18 +14293,6 @@ export class DefaultApi extends BaseAPI implements DefaultApiInterface {
      */
     public rootGet(options?: RawAxiosRequestConfig) {
         return DefaultApiFp(this.configuration).rootGet(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @summary Serve React App
-     * @param {DefaultApiServeReactAppFullPathGetRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof DefaultApi
-     */
-    public serveReactAppFullPathGet(requestParameters: DefaultApiServeReactAppFullPathGetRequest, options?: RawAxiosRequestConfig) {
-        return DefaultApiFp(this.configuration).serveReactAppFullPathGet(requestParameters.fullPath, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

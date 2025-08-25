@@ -28,7 +28,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
-import { Profile, Prompt, Document, Conversation, CreateConversationRequest, SendMessageRequest } from '../sdk';
+import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from '../sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import ChatConfigPanel from './ChatConfigPanel';
 
@@ -42,13 +42,13 @@ interface ChatMessage {
 const ChatPage: React.FC = () => {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [prompts, setPrompts] = useState<Prompt[]>([]);
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [profiles, setProfiles] = useState<ProfileResponse[]>([]);
+  const [prompts, setPrompts] = useState<PromptResponse[]>([]);
+  const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<Conversation | null>(null);
+  const [currentConversation, setCurrentConversation] = useState<ConversationResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -56,11 +56,40 @@ const ChatPage: React.FC = () => {
   // Input focus ref (works for textarea in multiline mode)
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
-  // Chat configuration state
-  const [streamingEnabled, setStreamingEnabled] = useState(false);
-  const [temperature, setTemperature] = useState(0.7);
-  const [maxTokens, setMaxTokens] = useState(2048);
-  const [enableRetrieval, setEnableRetrieval] = useState(true);
+  // Chat configuration state with localStorage persistence
+  const [streamingEnabled, setStreamingEnabled] = useState(() => {
+    const saved = localStorage.getItem('chatter_streamingEnabled');
+    return saved ? JSON.parse(saved) : false;
+  });
+  const [temperature, setTemperature] = useState(() => {
+    const saved = localStorage.getItem('chatter_temperature');
+    return saved ? parseFloat(saved) : 0.7;
+  });
+  const [maxTokens, setMaxTokens] = useState(() => {
+    const saved = localStorage.getItem('chatter_maxTokens');
+    return saved ? parseInt(saved) : 2048;
+  });
+  const [enableRetrieval, setEnableRetrieval] = useState(() => {
+    const saved = localStorage.getItem('chatter_enableRetrieval');
+    return saved ? JSON.parse(saved) : true;
+  });
+
+  // Save config to localStorage when values change
+  useEffect(() => {
+    localStorage.setItem('chatter_streamingEnabled', JSON.stringify(streamingEnabled));
+  }, [streamingEnabled]);
+  
+  useEffect(() => {
+    localStorage.setItem('chatter_temperature', temperature.toString());
+  }, [temperature]);
+  
+  useEffect(() => {
+    localStorage.setItem('chatter_maxTokens', maxTokens.toString());
+  }, [maxTokens]);
+  
+  useEffect(() => {
+    localStorage.setItem('chatter_enableRetrieval', JSON.stringify(enableRetrieval));
+  }, [enableRetrieval]);
 
   // Right drawer context
   const { setPanelContent, clearPanelContent, setTitle, open, setOpen } = useRightSidebar();
@@ -88,9 +117,19 @@ const ChatPage: React.FC = () => {
   const startNewConversation = useCallback(async () => {
     try {
       setError('');
-      const createRequest: CreateConversationRequest = {
+      
+      // Refresh config data from API when starting new conversation
+      await loadData();
+      
+      // Get system prompt if one is selected
+      const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
+      const systemPrompt = selectedPromptData?.content || undefined;
+      
+      const createRequest: ConversationCreate = {
         title: `Chat ${new Date().toLocaleString()}`,
         profile_id: selectedProfile || undefined,
+        enable_retrieval: enableRetrieval,
+        system_prompt: systemPrompt,
       };
       const response = await chatterSDK.conversations.createConversationApiV1ChatConversationsPost({
         conversationCreate: createRequest,
@@ -98,24 +137,21 @@ const ChatPage: React.FC = () => {
       setCurrentConversation(response.data);
       setMessages([]);
 
-      if (selectedPrompt) {
-        const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
-        if (selectedPromptData) {
-          setMessages([
-            {
-              id: 'system',
-              role: 'system',
-              content: `Using prompt: "${selectedPromptData.name}" - ${selectedPromptData.content}`,
-              timestamp: new Date(),
-            },
-          ]);
-        }
+      if (selectedPrompt && selectedPromptData) {
+        setMessages([
+          {
+            id: 'system',
+            role: 'system',
+            content: `Using prompt: "${selectedPromptData.name}" - ${selectedPromptData.content}`,
+            timestamp: new Date(),
+          },
+        ]);
       }
     } catch (err: any) {
       setError('Failed to start new conversation');
       console.error(err);
     }
-  }, [selectedProfile, selectedPrompt, prompts]);
+  }, [selectedProfile, selectedPrompt, prompts, enableRetrieval]);
 
   useEffect(() => {
     loadData();
@@ -184,6 +220,80 @@ const ChatPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleStreamingResponse = async (chatRequest: ChatRequest) => {
+    try {
+      const response = await chatterSDK.conversations.chatStreamApiV1ChatChatStreamPost({ chatRequest });
+      
+      if (!response.data) {
+        throw new Error('No response data from streaming API');
+      }
+
+      // Create a placeholder assistant message for streaming content
+      const messageId = `stream-${Date.now()}`;
+      const assistantMessage: ChatMessage = {
+        id: messageId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+
+      // Handle the streaming response
+      const reader = response.data.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            
+            if (data === '[DONE]') {
+              return;
+            }
+
+            try {
+              const chunk = JSON.parse(data);
+              
+              if (chunk.type === 'token') {
+                // Update the assistant message content
+                setMessages((prev) => prev.map(msg => 
+                  msg.id === messageId 
+                    ? { ...msg, content: msg.content + chunk.content }
+                    : msg
+                ));
+              } else if (chunk.type === 'usage') {
+                // Add token usage information
+                const tokenMessage: ChatMessage = {
+                  id: `token-${chunk.message_id}`,
+                  role: 'system',
+                  content: `📊 Tokens: ${chunk.usage.total_tokens || 'N/A'} | Response time: ${chunk.usage.response_time_ms || 'N/A'}ms`,
+                  timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, tokenMessage]);
+              } else if (chunk.type === 'error') {
+                throw new Error(chunk.error);
+              }
+            } catch (parseError) {
+              console.warn('Failed to parse streaming chunk:', parseError);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Streaming error:', error);
+      throw error;
+    }
+  };
+
   const sendMessage = async () => {
     if (!message.trim() || loading) return;
 
@@ -204,16 +314,51 @@ const ChatPage: React.FC = () => {
       };
       setMessages((prev) => [...prev, userMessage]);
 
-      const sendRequest: SendMessageRequest = { message: text };
-      const response = await chatterSDK.conversations.chatApiV1ChatChatPost({ chatRequest: sendRequest });
-
-      const assistantMessage: ChatMessage = {
-        id: response.data.message.id,
-        role: 'assistant',
-        content: response.data.message.content,
-        timestamp: new Date(response.data.message.created_at),
+      // Build the chat request with config panel values
+      const sendRequest: ChatRequest = {
+        message: text,
+        conversation_id: currentConversation?.id,
+        stream: streamingEnabled,
+        // Include profile ID if it differs from conversation profile
+        profile_id: selectedProfile && selectedProfile !== currentConversation?.profile_id ? selectedProfile : undefined,
+        // Include temperature if it differs from default
+        temperature: temperature !== 0.7 ? temperature : undefined,
+        // Include max_tokens if it differs from default
+        max_tokens: maxTokens !== 2048 ? maxTokens : undefined,
+        // Include retrieval setting
+        enable_retrieval: enableRetrieval,
+        // Include selected documents if any
+        document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+        // Include system prompt override if prompt is selected and differs
+        system_prompt_override: selectedPrompt ? prompts.find(p => p.id === selectedPrompt)?.content : undefined,
       };
-      setMessages((prev) => [...prev, assistantMessage]);
+
+      if (streamingEnabled) {
+        // Use streaming API
+        await handleStreamingResponse(sendRequest);
+      } else {
+        // Use regular API
+        const response = await chatterSDK.conversations.chatApiV1ChatChatPost({ chatRequest: sendRequest });
+
+        const assistantMessage: ChatMessage = {
+          id: response.data.message.id,
+          role: 'assistant',
+          content: response.data.message.content,
+          timestamp: new Date(response.data.message.created_at),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+
+        // Add token usage info if available
+        if (response.data.message.total_tokens || response.data.message.response_time_ms) {
+          const tokenMessage: ChatMessage = {
+            id: `token-${response.data.message.id}`,
+            role: 'system',
+            content: `📊 ${response.data.message.total_tokens ? `Tokens: ${response.data.message.total_tokens}` : ''}${response.data.message.total_tokens && response.data.message.response_time_ms ? ' | ' : ''}${response.data.message.response_time_ms ? `Response time: ${response.data.message.response_time_ms}ms` : ''}`,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, tokenMessage]);
+        }
+      }
     } catch (err: any) {
       setError('Failed to send message');
       console.error(err);

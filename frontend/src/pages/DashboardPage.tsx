@@ -35,7 +35,7 @@ import {
   CloudQueue,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
-import { DashboardData } from '../sdk';
+import { DashboardResponse } from '../sdk';
 
 interface MetricCardProps {
   title: string;
@@ -114,7 +114,7 @@ function safeToFixed(n: number | undefined | null, digits: number): string {
 }
 
 const DashboardPage: React.FC = () => {
-  const [data, setData] = useState<DashboardData | null>(null);
+  const [data, setData] = useState<DashboardResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 

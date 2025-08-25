@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -21,6 +21,8 @@ import {
   Switch,
   FormControlLabel,
   Alert,
+  CircularProgress,
+  Snackbar,
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import {
@@ -37,7 +39,9 @@ import {
   Upload as UploadIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material';
+import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
+import { BackupResponse, PluginResponse } from '../sdk';
 
 const AdministrationPage: React.FC = () => {
   const [expanded, setExpanded] = useState<string | false>('backups');
@@ -45,8 +49,14 @@ const AdministrationPage: React.FC = () => {
   const [dialogType, setDialogType] = useState<'user' | 'tool' | 'backup' | 'plugin'>('user');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
   
-  // Form state
+  // Data states
+  const [backups, setBackups] = useState<BackupResponse[]>([]);
+  const [plugins, setPlugins] = useState<PluginResponse[]>([]);
+  const [dataLoading, setDataLoading] = useState(false);
+  
   const [formData, setFormData] = useState({
     userId: '',
     email: '',
@@ -61,6 +71,68 @@ const AdministrationPage: React.FC = () => {
     includeConfigurations: true,
     pluginUrl: '',
   });
+
+  // Load data on component mount
+  useEffect(() => {
+    loadBackups();
+    loadPlugins();
+  }, []);
+
+  const loadBackups = async () => {
+    try {
+      setDataLoading(true);
+      const response = await chatterSDK.dataManagement.listBackupsApiV1DataBackupsGet({});
+      setBackups(response.data.backups || []);
+    } catch (error: any) {
+      console.error('Failed to load backups:', error);
+      setError('Failed to load backups');
+    } finally {
+      setDataLoading(false);
+    }
+  };
+
+  const loadPlugins = async () => {
+    try {
+      const response = await chatterSDK.plugins.listPluginsApiV1PluginsGet({});
+      setPlugins(response.data.plugins || []);
+    } catch (error: any) {
+      console.error('Failed to load plugins:', error);
+    }
+  };
+
+  const showSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setSnackbarOpen(true);
+  };
+
+  const handleBackupDownload = async (backupId: string) => {
+    try {
+      setLoading(true);
+      // This would typically return a download URL or stream
+      showSnackbar('Backup download functionality will be available soon');
+    } catch (error: any) {
+      console.error('Error downloading backup:', error);
+      setError('Failed to download backup');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePluginToggle = async (pluginId: string, enabled: boolean) => {
+    try {
+      if (enabled) {
+        await chatterSDK.plugins.enablePluginApiV1PluginsPluginIdEnablePost({ pluginId });
+        showSnackbar('Plugin enabled successfully');
+      } else {
+        await chatterSDK.plugins.disablePluginApiV1PluginsPluginIdDisablePost({ pluginId });
+        showSnackbar('Plugin disabled successfully');
+      }
+      loadPlugins(); // Reload to get updated status
+    } catch (error: any) {
+      console.error('Error toggling plugin:', error);
+      setError('Failed to toggle plugin status');
+    }
+  };
 
   const handleChange = (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false);
@@ -105,7 +177,7 @@ const AdministrationPage: React.FC = () => {
               password: formData.password,
             }
           });
-          alert('User created successfully!');
+          showSnackbar('User created successfully!');
           break;
           
         case 'tool':
@@ -117,25 +189,37 @@ const AdministrationPage: React.FC = () => {
               description: formData.description,
             }
           });
-          alert('Tool server created successfully!');
+          showSnackbar('Tool server created successfully!');
           break;
           
         case 'backup':
+          // Create backup using real API
           await chatterSDK.dataManagement.createBackupApiV1DataBackupPost({
             backupRequest: {
               name: formData.backupName,
               description: formData.description,
-              backup_type: 'full' as any, // Use 'full' as default backup type
+              backup_type: 'full' as any,
               include_files: formData.includeDocuments,
             }
           });
-          alert('Backup created successfully!');
+          showSnackbar('Backup created successfully!');
+          loadBackups(); // Reload backups list
           break;
           
         case 'plugin':
-          // For plugin installation, we'll simulate since there might not be a direct API
-          // This would typically involve downloading and installing from URL
-          alert('Plugin installation functionality would be implemented based on plugin architecture');
+          try {
+            // Install plugin using the plugins API
+            await chatterSDK.plugins.installPluginApiV1PluginsInstallPost({
+              pluginInstallRequest: {
+                plugin_path: formData.pluginUrl,
+                enable_on_install: true,
+              }
+            });
+            showSnackbar('Plugin installation started successfully!');
+            loadPlugins(); // Reload plugins list
+          } catch (pluginError: any) {
+            throw new Error(pluginError.response?.data?.detail || 'Failed to install plugin');
+          }
           break;
       }
       
@@ -175,23 +259,36 @@ const AdministrationPage: React.FC = () => {
           case 'user':
             // Note: There might not be a user deletion API in the current SDK
             // This would typically require admin privileges
-            alert('User deletion functionality requires implementation of admin user management API');
+            showSnackbar('User deletion functionality requires implementation of admin user management API');
             break;
             
           case 'tool server':
             await chatterSDK.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
               serverId: id
             });
-            alert('Tool server deleted successfully!');
+            showSnackbar('Tool server deleted successfully!');
             break;
             
           case 'backup':
-            // Note: Check if backup deletion API exists
-            alert('Backup deletion functionality would be implemented with backup management API');
+            // Real backup deletion - this endpoint might not exist yet, so we'll provide better feedback
+            try {
+              // Assuming there might be a delete endpoint in the future
+              showSnackbar('Backup deletion is not yet supported by the API');
+            } catch (backupError: any) {
+              showSnackbar('Backup deletion functionality not yet available');
+            }
             break;
             
           case 'plugin':
-            alert('Plugin deletion functionality would be implemented based on plugin architecture');
+            try {
+              await chatterSDK.plugins.uninstallPluginApiV1PluginsPluginIdDelete({
+                pluginId: id
+              });
+              showSnackbar('Plugin uninstalled successfully!');
+              loadPlugins(); // Reload plugins list
+            } catch (pluginError: any) {
+              throw new Error(pluginError.response?.data?.detail || 'Failed to uninstall plugin');
+            }
             break;
         }
       } catch (error: any) {
@@ -210,21 +307,21 @@ const AdministrationPage: React.FC = () => {
       
       switch (type) {
         case 'user':
-          alert('User editing functionality requires implementation of admin user management API');
+          showSnackbar('User editing functionality requires implementation of admin user management API');
           break;
           
         case 'tool server':
           // For editing, we would typically fetch the current data and populate the form
           // then call updateToolServerApiV1ToolserversServersServerIdPut
-          alert('Tool server editing functionality would open edit dialog with current data');
+          showSnackbar('Tool server editing functionality would open edit dialog with current data');
           break;
           
         case 'backup':
-          alert('Backup editing functionality would be implemented with backup management API');
+          showSnackbar('Backup editing functionality would be implemented with backup management API');
           break;
           
         case 'plugin':
-          alert('Plugin editing functionality would be implemented based on plugin architecture');
+          showSnackbar('Plugin editing functionality would be implemented based on plugin architecture');
           break;
       }
     } catch (error: any) {
@@ -285,34 +382,40 @@ const AdministrationPage: React.FC = () => {
             </Grid>
           </Box>
           <List>
-            <ListItem>
-              <ListItemText
-                primary="Daily Backup - 2024-01-15"
-                secondary="Size: 245 MB | Status: Complete"
-              />
-              <ListItemSecondaryAction>
-                <IconButton edge="end" onClick={() => alert('Download backup functionality will be implemented with API integration')}>
-                  <DownloadIcon />
-                </IconButton>
-                <IconButton edge="end" onClick={() => handleDeleteAction('backup', 'daily-2024-01-15')}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-            <ListItem>
-              <ListItemText
-                primary="Weekly Backup - 2024-01-14"
-                secondary="Size: 1.2 GB | Status: Complete"
-              />
-              <ListItemSecondaryAction>
-                <IconButton edge="end" onClick={() => alert('Download backup functionality will be implemented with API integration')}>
-                  <DownloadIcon />
-                </IconButton>
-                <IconButton edge="end" onClick={() => handleDeleteAction('backup', 'weekly-2024-01-14')}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
+            {dataLoading ? (
+              <ListItem>
+                <CircularProgress size={20} sx={{ mr: 2 }} />
+                <ListItemText primary="Loading backups..." />
+              </ListItem>
+            ) : backups.length === 0 ? (
+              <ListItem>
+                <ListItemText 
+                  primary="No backups found" 
+                  secondary="Create your first backup to get started"
+                />
+              </ListItem>
+            ) : (
+              backups.map((backup) => (
+                <ListItem key={backup.id}>
+                  <ListItemText
+                    primary={backup.name || `Backup ${backup.id?.substring(0, 8)}`}
+                    secondary={`Type: ${backup.backup_type} | Status: ${backup.status} | Created: ${backup.created_at ? format(new Date(backup.created_at), 'PPp') : 'Unknown'}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton 
+                      edge="end" 
+                      onClick={() => handleBackupDownload(backup.id)}
+                      disabled={backup.status !== 'completed'}
+                    >
+                      <DownloadIcon />
+                    </IconButton>
+                    <IconButton edge="end" onClick={() => handleDeleteAction('backup', backup.id)}>
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))
+            )}
           </List>
         </AccordionDetails>
       </Accordion>
@@ -367,36 +470,35 @@ const AdministrationPage: React.FC = () => {
             </Button>
           </Box>
           <List>
-            <ListItem>
-              <ListItemIcon>
-                <PluginIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="RAG Enhanced Search"
-                secondary="Version 1.2.0 | Enabled | Enhances document search capabilities"
-              />
-              <ListItemSecondaryAction>
-                <Switch defaultChecked />
-                <IconButton edge="end">
-                  <SettingsIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-            <ListItem>
-              <ListItemIcon>
-                <PluginIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Advanced Analytics"
-                secondary="Version 2.1.3 | Enabled | Provides detailed usage analytics"
-              />
-              <ListItemSecondaryAction>
-                <Switch defaultChecked />
-                <IconButton edge="end">
-                  <SettingsIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
+            {plugins.length === 0 ? (
+              <ListItem>
+                <ListItemText 
+                  primary="No plugins installed" 
+                  secondary="Install plugins to extend functionality"
+                />
+              </ListItem>
+            ) : (
+              plugins.map((plugin) => (
+                <ListItem key={plugin.id}>
+                  <ListItemIcon>
+                    <PluginIcon />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={plugin.name || 'Unknown Plugin'}
+                    secondary={`Version ${plugin.version || 'Unknown'} | ${plugin.enabled ? 'Enabled' : 'Disabled'} | ${plugin.description || 'No description'}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <Switch 
+                      checked={plugin.enabled || false}
+                      onChange={(e) => handlePluginToggle(plugin.id, e.target.checked)}
+                    />
+                    <IconButton edge="end">
+                      <SettingsIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))
+            )}
           </List>
         </AccordionDetails>
       </Accordion>
@@ -650,6 +752,14 @@ const AdministrationPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Success/Info Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarOpen(false)}
+        message={snackbarMessage}
+      />
     </Box>
   );
 };

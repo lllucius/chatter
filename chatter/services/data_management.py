@@ -561,6 +561,84 @@ class DataManager:
 
         return stats
 
+    async def list_backups(
+        self,
+        backup_type: BackupType | None = None,
+        status: str | None = None,
+    ) -> list[dict[str, Any]]:
+        """List available backups.
+        
+        Args:
+            backup_type: Filter by backup type
+            status: Filter by status
+            
+        Returns:
+            List of backup information dictionaries
+        """
+        backups = []
+        
+        # Get backup operations
+        for operation in self.operations.values():
+            if operation.operation_type == DataOperation.BACKUP.value:
+                backup_metadata = operation.metadata.get("backup_request", {})
+                
+                # Apply filters
+                if backup_type is not None and backup_metadata.get("backup_type") != backup_type.value:
+                    continue
+                if status is not None and operation.status != status:
+                    continue
+                
+                backup_info = {
+                    "id": operation.id,
+                    "name": backup_metadata.get("name", f"Backup-{operation.id[:8]}"),
+                    "description": backup_metadata.get("description"),
+                    "backup_type": backup_metadata.get("backup_type", BackupType.FULL.value),
+                    "status": operation.status,
+                    "file_size": operation.metadata.get("file_size"),
+                    "compressed_size": operation.metadata.get("compressed_size"),
+                    "record_count": operation.metadata.get("record_count"),
+                    "created_at": operation.created_at.isoformat() if operation.created_at else None,
+                    "completed_at": operation.completed_at.isoformat() if operation.completed_at else None,
+                    "expires_at": operation.metadata.get("expires_at"),
+                    "encrypted": backup_metadata.get("encrypt", False),
+                    "compressed": backup_metadata.get("compress", False),
+                    "metadata": backup_metadata.get("metadata", {}),
+                }
+                
+                backups.append(backup_info)
+        
+        # Also include backup files from the filesystem if no operations match
+        if not backups and self.backup_directory.exists():
+            for backup_file in self.backup_directory.iterdir():
+                if backup_file.is_file() and backup_file.suffix in ['.tar', '.tar.gz', '.zip']:
+                    stat = backup_file.stat()
+                    backup_info = {
+                        "id": backup_file.stem,
+                        "name": backup_file.name,
+                        "description": f"File-based backup: {backup_file.name}",
+                        "backup_type": BackupType.FULL.value,
+                        "status": "completed",
+                        "file_size": stat.st_size,
+                        "compressed_size": stat.st_size if backup_file.suffix.endswith('.gz') or backup_file.suffix == '.zip' else None,
+                        "record_count": None,
+                        "created_at": datetime.fromtimestamp(stat.st_ctime, UTC).isoformat(),
+                        "completed_at": datetime.fromtimestamp(stat.st_mtime, UTC).isoformat(),
+                        "expires_at": None,
+                        "encrypted": False,
+                        "compressed": backup_file.suffix.endswith('.gz') or backup_file.suffix == '.zip',
+                        "metadata": {},
+                    }
+                    
+                    # Apply filters
+                    if backup_type is not None and backup_info["backup_type"] != backup_type.value:
+                        continue
+                    if status is not None and backup_info["status"] != status:
+                        continue
+                        
+                    backups.append(backup_info)
+        
+        return backups
+
 
 # Global data manager
 data_manager = DataManager()

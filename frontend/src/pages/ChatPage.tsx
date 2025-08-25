@@ -239,7 +239,58 @@ const ChatPage: React.FC = () => {
       setMessages((prev) => [...prev, assistantMessage]);
 
       // Handle the streaming response
-      const reader = response.data.getReader();
+      let reader: ReadableStreamDefaultReader<Uint8Array>;
+      
+      // Try to get the reader from different possible locations
+      if (response.data instanceof ReadableStream) {
+        reader = response.data.getReader();
+      } else if (response.data && typeof response.data.getReader === 'function') {
+        reader = response.data.getReader();
+      } else if (response.data && response.data.body) {
+        reader = response.data.body.getReader();
+      } else {
+        // Fallback: treat response.data as text and process line by line
+        const text = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+        const lines = text.split('\n');
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            
+            if (data === '[DONE]') {
+              return;
+            }
+
+            try {
+              const chunk = JSON.parse(data);
+              
+              if (chunk.type === 'token') {
+                // Update the assistant message content
+                setMessages((prev) => prev.map(msg => 
+                  msg.id === messageId 
+                    ? { ...msg, content: msg.content + chunk.content }
+                    : msg
+                ));
+              } else if (chunk.type === 'usage') {
+                // Add token usage information
+                const tokenMessage: ChatMessage = {
+                  id: `token-${chunk.message_id}`,
+                  role: 'system',
+                  content: `📊 Tokens: ${chunk.usage.total_tokens || 'N/A'} | Response time: ${chunk.usage.response_time_ms || 'N/A'}ms`,
+                  timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, tokenMessage]);
+              } else if (chunk.type === 'error') {
+                throw new Error(chunk.error);
+              }
+            } catch (parseError) {
+              console.warn('Failed to parse streaming chunk:', parseError);
+            }
+          }
+        }
+        return;
+      }
+      
       const decoder = new TextDecoder();
       let buffer = '';
 

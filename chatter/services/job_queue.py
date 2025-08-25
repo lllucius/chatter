@@ -169,7 +169,7 @@ class AdvancedJobQueue:
                 trigger='date',
                 run_date=schedule_at,
                 args=[job.id],
-                id=job.id,
+                id=str(job.id),  # Ensure it's a string
                 name=name,
                 max_instances=1,
                 coalesce=True,
@@ -196,7 +196,7 @@ class AdvancedJobQueue:
                 trigger='date',
                 run_date=run_date,
                 args=[job.id],
-                id=job.id,
+                id=str(job.id),  # Ensure it's a string
                 name=name,
                 max_instances=1,
                 coalesce=True,
@@ -235,7 +235,7 @@ class AdvancedJobQueue:
             trigger='date',
             run_date=schedule_at,
             args=[job.id],
-            id=job.id,
+            id=str(job.id),  # Ensure it's a string
             name=job.name,
             max_instances=1,
             coalesce=True,
@@ -602,7 +602,7 @@ class AdvancedJobQueue:
             trigger='date',
             run_date=run_date,
             args=[job.id],
-            id=job.id,
+            id=str(job.id),  # Ensure it's a string
             name=f"{job.name} (retry {job.retry_count})",
             max_instances=1,
             coalesce=True,

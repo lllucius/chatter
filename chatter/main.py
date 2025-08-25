@@ -177,6 +177,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as e:
         logger.error("Failed to start job queue", error=str(e))
 
+    # Start SSE event service
+    try:
+        from chatter.services.sse_events import sse_service
+
+        await sse_service.start()
+        logger.info("SSE event service started")
+    except Exception as e:
+        logger.error("Failed to start SSE event service", error=str(e))
+
     # Application startup complete
     logger.info("Chatter application started successfully")
 
@@ -202,6 +211,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         logger.info("Background job queue stopped")
     except Exception as e:
         logger.error("Failed to stop job queue", error=str(e))
+
+    # Stop SSE event service
+    try:
+        from chatter.services.sse_events import sse_service
+
+        await sse_service.stop()
+        logger.info("SSE event service stopped")
+    except Exception as e:
+        logger.error("Failed to stop SSE event service", error=str(e))
 
     await close_database()
     logger.info("Chatter application shutdown complete")
@@ -335,13 +353,13 @@ def create_app() -> FastAPI:
         chat,
         data_management,
         documents,
+        events,
         health,
         jobs,
         plugins,
         profiles,
         prompts,
         toolserver,
-        webhooks,
     )
 
     app.include_router(health.router, tags=["Health"])
@@ -400,9 +418,9 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(
-        webhooks.router,
-        prefix=f"{settings.api_prefix}/webhooks",
-        tags=["Webhooks"],
+        events.router,
+        prefix=f"{settings.api_prefix}/events",
+        tags=["Events"],
     )
 
     app.include_router(

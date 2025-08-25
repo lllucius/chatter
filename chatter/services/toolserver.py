@@ -770,6 +770,23 @@ class ToolServerService:
             await self.session.refresh(server)
 
             self._last_health_check[server_id] = now
+
+            # Trigger health changed event
+            try:
+                from chatter.services.sse_events import trigger_tool_server_health_changed
+                await trigger_tool_server_health_changed(
+                    str(server.id),
+                    server.name,
+                    "healthy" if is_responsive else "unhealthy",
+                    {
+                        "is_running": is_running,
+                        "is_responsive": is_responsive,
+                        "tools_count": tools_count,
+                        "error_message": error_message,
+                    }
+                )
+            except Exception as e:
+                logger.warning("Failed to trigger tool server health changed event", error=str(e))
         else:
             # Use cached data
             is_running = server.name in self.mcp_service.tools_cache
@@ -824,12 +841,34 @@ class ToolServerService:
                 server.last_startup_error = None
                 server.consecutive_failures = 0
 
+                # Trigger tool server started event
+                try:
+                    from chatter.services.sse_events import trigger_tool_server_started
+                    await trigger_tool_server_started(str(server.id), server.name)
+                except Exception as e:
+                    logger.warning("Failed to trigger tool server started event", error=str(e))
+
                 # Discover and update tools
                 await self._discover_server_tools(server)
             else:
                 server.status = ServerStatus.ERROR
                 server.last_startup_error = "Failed to start server"
                 server.consecutive_failures += 1
+
+                # Trigger tool server error event
+                try:
+                    from chatter.services.sse_events import sse_service, EventType
+                    await sse_service.trigger_event(
+                        EventType.TOOL_SERVER_ERROR,
+                        {
+                            "server_id": str(server.id),
+                            "server_name": server.name,
+                            "error": "Failed to start server",
+                            "consecutive_failures": server.consecutive_failures,
+                        }
+                    )
+                except Exception as e:
+                    logger.warning("Failed to trigger tool server error event", error=str(e))
 
                 # Disable if too many failures
                 if server.consecutive_failures >= server.max_failures:
@@ -843,6 +882,21 @@ class ToolServerService:
             server.last_startup_error = str(e)
             server.consecutive_failures += 1
             server.updated_at = datetime.now(UTC)
+
+            # Trigger tool server error event
+            try:
+                from chatter.services.sse_events import sse_service, EventType
+                await sse_service.trigger_event(
+                    EventType.TOOL_SERVER_ERROR,
+                    {
+                        "server_id": str(server.id),
+                        "server_name": server.name,
+                        "error": str(e),
+                        "consecutive_failures": server.consecutive_failures,
+                    }
+                )
+            except Exception as event_e:
+                logger.warning("Failed to trigger tool server error event", error=str(event_e))
 
             if server.consecutive_failures >= server.max_failures:
                 server.status = ServerStatus.DISABLED
@@ -872,6 +926,13 @@ class ToolServerService:
 
             server.status = ServerStatus.DISABLED
             server.updated_at = datetime.now(UTC)
+
+            # Trigger tool server stopped event
+            try:
+                from chatter.services.sse_events import trigger_tool_server_stopped
+                await trigger_tool_server_stopped(str(server.id), server.name)
+            except Exception as e:
+                logger.warning("Failed to trigger tool server stopped event", error=str(e))
 
             return success
 

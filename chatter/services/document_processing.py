@@ -113,6 +113,21 @@ class DocumentProcessingService:
                 filename=document.filename,
             )
 
+            # Trigger document processing started event
+            try:
+                from chatter.services.sse_events import sse_service, EventType
+                await sse_service.trigger_event(
+                    EventType.DOCUMENT_PROCESSING_STARTED,
+                    {
+                        "document_id": document_id,
+                        "filename": document.filename,
+                        "started_at": document.processing_started_at.isoformat(),
+                    },
+                    user_id=document.user_id
+                )
+            except Exception as e:
+                logger.warning("Failed to trigger document processing started event", error=str(e))
+
             # Extract text from document
             extracted_text = await self._extract_text(
                 document, file_content
@@ -168,6 +183,21 @@ class DocumentProcessingService:
                 chunks_created=len(chunk_objects),
                 text_length=len(extracted_text),
             )
+
+            # Trigger document processing completed event
+            try:
+                from chatter.services.sse_events import trigger_document_processing_completed
+                await trigger_document_processing_completed(
+                    document_id,
+                    {
+                        "chunks_created": len(chunk_objects),
+                        "text_length": len(extracted_text),
+                        "processing_time": (document.processing_completed_at - document.processing_started_at).total_seconds(),
+                    },
+                    document.user_id
+                )
+            except Exception as e:
+                logger.warning("Failed to trigger document processing completed event", error=str(e))
 
             return True
 
@@ -676,6 +706,17 @@ class DocumentProcessingService:
                 document_id=document.id,
                 error=error_message,
             )
+
+            # Trigger document processing failed event
+            try:
+                from chatter.services.sse_events import trigger_document_processing_failed
+                await trigger_document_processing_failed(
+                    str(document.id),
+                    error_message,
+                    document.user_id
+                )
+            except Exception as e:
+                logger.warning("Failed to trigger document processing failed event", error=str(e))
 
         except Exception as e:
             logger.error(

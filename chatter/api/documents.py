@@ -9,6 +9,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from pathlib import Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -545,20 +546,27 @@ async def download_document(
         File download response
     """
     try:
-        from fastapi.responses import FileResponse
-        file_path = await document_service.get_document_file_path(
+        document = await document_service.get_document(
             document_id, current_user.id
         )
 
-        if not file_path:
+        if not document:
+            raise NotFoundProblem(
+                detail="Document not found",
+                resource_type="document",
+                resource_id=document_id,
+            ) from None
+
+        if not document.file_path or not Path(document.file_path).exists():
             raise NotFoundProblem(
                 detail="Document file not found",
                 resource_type="document",
                 resource_id=document_id,
             ) from None
 
+        from fastapi.responses import FileResponse
         return FileResponse(
-            path=file_path,
+            path=document.file_path,
             filename=f"document_{document_id}",
             media_type='application/octet-stream'
         )

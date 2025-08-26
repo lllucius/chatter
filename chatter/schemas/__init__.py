@@ -11,6 +11,7 @@ from chatter.schemas.health import *  # noqa: F403
 from chatter.schemas.profile import *  # noqa: F403
 from chatter.schemas.prompt import *  # noqa: F403
 from chatter.schemas.toolserver import *  # noqa: F403
+from chatter.schemas.utilities import *  # noqa: F403
 
 __all__ = [
     # Common schemas

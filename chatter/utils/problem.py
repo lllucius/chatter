@@ -8,34 +8,9 @@ from typing import Any
 
 from fastapi import HTTPException, Request, status
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
 
 from chatter.config import settings
-
-
-class ProblemDetail(BaseModel):
-    """RFC 9457 Problem Detail model."""
-
-    type: str = Field(
-        default="about:blank",
-        description="A URI reference that identifies the problem type",
-    )
-    title: str = Field(
-        description="A short, human-readable summary of the problem type"
-    )
-    status: int = Field(description="The HTTP status code")
-    detail: str | None = Field(
-        default=None,
-        description="A human-readable explanation specific to this occurrence",
-    )
-    instance: str | None = Field(
-        default=None,
-        description="A URI reference that identifies the specific occurrence",
-    )
-
-    # Additional fields can be included for context
-    class Config:
-        extra = "allow"
+from chatter.schemas.utilities import ProblemDetail
 
 
 class ProblemException(HTTPException):

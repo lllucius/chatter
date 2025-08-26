@@ -5,24 +5,13 @@ import re
 from typing import Any
 
 from fastapi import HTTPException, Request
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 
 from chatter.config import settings
+from chatter.schemas.utilities import ValidationRule
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
-
-
-class ValidationRule(BaseModel):
-    """Input validation rule definition."""
-    name: str
-    pattern: str | None = None
-    max_length: int | None = None
-    min_length: int | None = None
-    allowed_chars: str | None = None
-    forbidden_patterns: list[str] = []
-    required: bool = False
-    sanitize: bool = True
 
 
 class InputValidator:

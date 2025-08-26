@@ -1,61 +1,21 @@
 """API versioning strategy and management."""
 
 import re
-from enum import Enum
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.routing import APIRoute
-from pydantic import BaseModel
 
 from chatter.config import settings
+from chatter.schemas.utilities import (
+    APIVersion,
+    EndpointChange,
+    EndpointVersioning,
+    VersionInfo,
+    VersionStatus,
+)
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
-
-
-class APIVersion(str, Enum):
-    """Supported API versions."""
-    V1 = "v1"
-    V2 = "v2"
-    # Future versions can be added here
-
-
-class VersionStatus(str, Enum):
-    """API version status."""
-    ACTIVE = "active"
-    DEPRECATED = "deprecated"
-    SUNSET = "sunset"
-
-
-class EndpointChange(str, Enum):
-    """Types of endpoint changes between versions."""
-    ADDED = "added"
-    MODIFIED = "modified"
-    DEPRECATED = "deprecated"
-    REMOVED = "removed"
-
-
-class VersionInfo(BaseModel):
-    """API version information."""
-    version: APIVersion
-    status: VersionStatus
-    release_date: str
-    sunset_date: str | None = None
-    changelog_url: str | None = None
-    documentation_url: str | None = None
-    breaking_changes: list[str] = []
-    new_features: list[str] = []
-    deprecated_features: list[str] = []
-
-
-class EndpointVersioning(BaseModel):
-    """Endpoint versioning information."""
-    path: str
-    method: str
-    introduced_in: APIVersion
-    deprecated_in: APIVersion | None = None
-    removed_in: APIVersion | None = None
-    changes: dict[APIVersion, list[str]] = {}
 
 
 class APIVersionManager:

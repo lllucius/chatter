@@ -11,8 +11,11 @@ from chatter.schemas.auth import (
     APIKeyCreate,
     APIKeyResponse,
     APIKeyRevokeResponse,
+    LogoutResponse,
     PasswordChange,
     PasswordChangeResponse,
+    PasswordResetConfirmResponse,
+    PasswordResetRequestResponse,
     TokenRefresh,
     TokenRefreshResponse,
     TokenResponse,
@@ -263,11 +266,11 @@ async def list_api_keys(
     return [APIKeyResponse.model_validate(key) for key in api_keys]
 
 
-@router.post("/logout", response_model=dict)
+@router.post("/logout", response_model=LogoutResponse)
 async def logout(
     current_user=Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
-) -> dict:
+) -> LogoutResponse:
     """Logout and revoke current token.
 
     Args:
@@ -278,14 +281,14 @@ async def logout(
         Success message
     """
     await auth_service.revoke_token(current_user.id)
-    return {"message": "Logged out successfully"}
+    return LogoutResponse(message="Logged out successfully")
 
 
-@router.post("/password-reset/request")
+@router.post("/password-reset/request", response_model=PasswordResetRequestResponse)
 async def request_password_reset(
     email: str,
     auth_service: AuthService = Depends(get_auth_service),
-) -> dict:
+) -> PasswordResetRequestResponse:
     """Request password reset.
 
     Args:
@@ -296,15 +299,15 @@ async def request_password_reset(
         Success message
     """
     await auth_service.request_password_reset(email)
-    return {"message": "Password reset email sent if account exists"}
+    return PasswordResetRequestResponse(message="Password reset email sent if account exists")
 
 
-@router.post("/password-reset/confirm")
+@router.post("/password-reset/confirm", response_model=PasswordResetConfirmResponse)
 async def confirm_password_reset(
     token: str,
     new_password: str,
     auth_service: AuthService = Depends(get_auth_service),
-) -> dict:
+) -> PasswordResetConfirmResponse:
     """Confirm password reset.
 
     Args:
@@ -316,7 +319,7 @@ async def confirm_password_reset(
         Success message
     """
     await auth_service.confirm_password_reset(token, new_password)
-    return {"message": "Password reset successfully"}
+    return PasswordResetConfirmResponse(message="Password reset successfully")
 
 
 @router.delete("/account", response_model=AccountDeactivateResponse)

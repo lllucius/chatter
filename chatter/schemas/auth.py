@@ -183,3 +183,21 @@ class AccountDeactivateResponse(BaseModel):
     """Schema for account deactivation response."""
 
     message: str = Field(..., description="Success message")
+
+
+class LogoutResponse(BaseModel):
+    """Schema for logout response."""
+
+    message: str = Field(..., description="Success message")
+
+
+class PasswordResetRequestResponse(BaseModel):
+    """Schema for password reset request response."""
+
+    message: str = Field(..., description="Success message")
+
+
+class PasswordResetConfirmResponse(BaseModel):
+    """Schema for password reset confirmation response."""
+
+    message: str = Field(..., description="Success message")

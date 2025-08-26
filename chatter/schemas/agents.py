@@ -1,16 +1,104 @@
 """Agent management schemas."""
 
-from datetime import datetime
+import uuid
+from datetime import UTC, datetime
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-from chatter.core.agents import AgentCapability, AgentStatus, AgentType
 from chatter.schemas.common import (
     DeleteRequestBase,
     GetRequestBase,
     ListRequestBase,
 )
+
+
+class AgentType(str, Enum):
+    """Types of AI agents."""
+    CONVERSATIONAL = "conversational"
+    TASK_ORIENTED = "task_oriented"
+    ANALYTICAL = "analytical"
+    CREATIVE = "creative"
+    RESEARCH = "research"
+    SUPPORT = "support"
+    SPECIALIST = "specialist"
+
+
+class AgentStatus(str, Enum):
+    """Agent status."""
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    TRAINING = "training"
+    ERROR = "error"
+    MAINTENANCE = "maintenance"
+
+
+class AgentCapability(BaseModel):
+    """Agent capability definition."""
+    name: str
+    description: str
+    required_tools: list[str] = Field(default_factory=list)
+    required_models: list[str] = Field(default_factory=list)
+    confidence_threshold: float = 0.7
+    enabled: bool = True
+
+
+class AgentProfile(BaseModel):
+    """Agent profile and configuration."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str
+    agent_type: AgentType
+    status: AgentStatus = AgentStatus.INACTIVE
+
+    # Behavior configuration
+    system_prompt: str
+    personality_traits: list[str] = Field(default_factory=list)
+    knowledge_domains: list[str] = Field(default_factory=list)
+    response_style: str = "professional"
+
+    # Capabilities
+    capabilities: list[AgentCapability] = Field(default_factory=list)
+    available_tools: list[str] = Field(default_factory=list)
+
+    # Model configuration
+    primary_llm: str = "openai"
+    fallback_llm: str = "anthropic"
+    temperature: float = 0.7
+    max_tokens: int = 4096
+
+    # Performance settings
+    max_conversation_length: int = 50
+    context_window_size: int = 4000
+    response_timeout: int = 30
+
+    # Learning and adaptation
+    learning_enabled: bool = True
+    feedback_weight: float = 0.1
+    adaptation_threshold: float = 0.8
+
+    # Metadata
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_by: str = "system"
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class AgentInteraction(BaseModel):
+    """Record of an agent interaction."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    agent_id: str
+    conversation_id: str
+    user_message: str
+    agent_response: str
+    tools_used: list[str] = Field(default_factory=list)
+    confidence_score: float
+    response_time: float  # in seconds
+    feedback_score: float | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class AgentCreateRequest(BaseModel):

@@ -3,116 +3,28 @@
 import json
 import tarfile
 from datetime import UTC, datetime, timedelta
-from enum import Enum
 from pathlib import Path
 from typing import Any
 
 import aiofiles
-from pydantic import BaseModel, Field
 
 from chatter.config import settings
-from chatter.services.job_queue import JobPriority, job_queue
+from chatter.schemas.data_management import (
+    BackupRequest,
+    BackupType,
+    DataExportRequest,
+    DataFormat,
+    DataOperation,
+    DataOperationModel,
+    ExportScope,
+    OperationStatus,
+    RetentionPolicy,
+)
+from chatter.schemas.jobs import JobPriority
+from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
-
-
-class DataFormat(str, Enum):
-    """Supported data formats."""
-    JSON = "json"
-    CSV = "csv"
-    XML = "xml"
-    PARQUET = "parquet"
-    SQL = "sql"
-
-
-class ExportScope(str, Enum):
-    """Data export scope."""
-    USER = "user"
-    CONVERSATION = "conversation"
-    DOCUMENT = "document"
-    ANALYTICS = "analytics"
-    FULL = "full"
-    CUSTOM = "custom"
-
-
-class BackupType(str, Enum):
-    """Types of backups."""
-    FULL = "full"
-    INCREMENTAL = "incremental"
-    DIFFERENTIAL = "differential"
-
-
-class DataOperation(str, Enum):
-    """Data operation types."""
-    EXPORT = "export"
-    BACKUP = "backup"
-    RESTORE = "restore"
-    PURGE = "purge"
-    MIGRATE = "migrate"
-
-
-class OperationStatus(str, Enum):
-    """Operation status."""
-    PENDING = "pending"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
-
-
-class DataExportRequest(BaseModel):
-    """Data export request."""
-    id: str = Field(default_factory=lambda: f"export_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}")
-    user_id: str
-    scope: ExportScope
-    format: DataFormat = DataFormat.JSON
-    filters: dict[str, Any] = Field(default_factory=dict)
-    include_metadata: bool = True
-    compress: bool = True
-    encryption_key: str | None = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    expires_at: datetime | None = None
-
-
-class BackupRequest(BaseModel):
-    """Backup request."""
-    id: str = Field(default_factory=lambda: f"backup_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}")
-    backup_type: BackupType
-    include_documents: bool = True
-    include_vectors: bool = True
-    include_analytics: bool = True
-    compress: bool = True
-    encryption_key: str | None = None
-    retention_days: int = 30
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-
-
-class DataOperationModel(BaseModel):
-    """Data operation record."""
-    id: str = Field(default_factory=lambda: f"op_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}")
-    operation_type: str  # Changed from DataOperation to str to avoid circular reference
-    status: OperationStatus = OperationStatus.PENDING
-    progress: float = 0.0
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
-    error_message: str | None = None
-    result_path: str | None = None
-    metadata: dict[str, Any] = Field(default_factory=dict)
-    created_by: str = "system"
-
-
-class RetentionPolicy(BaseModel):
-    """Data retention policy."""
-    id: str = Field(default_factory=lambda: f"policy_{datetime.now(UTC).strftime('%Y%m%d')}")
-    name: str
-    description: str
-    scope: ExportScope
-    retention_days: int
-    auto_purge: bool = False
-    filters: dict[str, Any] = Field(default_factory=dict)
-    active: bool = True
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class DataManager:

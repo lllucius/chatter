@@ -25,6 +25,8 @@ import {
   Select,
   MenuItem,
   Slider,
+  Menu,
+  ListItemIcon,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
@@ -32,6 +34,7 @@ import {
   Delete as DeleteIcon,
   Add as AddIcon,
   Refresh as RefreshIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
@@ -47,6 +50,10 @@ const ProfilesPage: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingProfile, setEditingProfile] = useState<ProfileResponse | null>(null);
   const [saving, setSaving] = useState(false);
+
+  // Actions menu state
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
+  const [actionProfile, setActionProfile] = useState<ProfileResponse | null>(null);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -186,6 +193,17 @@ const ProfilesPage: React.FC = () => {
     page * rowsPerPage + rowsPerPage
   );
 
+  // IMPORTANT: accept the click event, and read e.currentTarget here
+  const openActionsMenu = (e: React.MouseEvent<HTMLElement>, profile: ProfileResponse) => {
+    setActionAnchorEl(e.currentTarget);
+    setActionProfile(profile);
+  };
+
+  const closeActionsMenu = () => {
+    setActionAnchorEl(null);
+    setActionProfile(null);
+  };
+
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -290,17 +308,10 @@ const ProfilesPage: React.FC = () => {
                   <TableCell align="center">
                     <IconButton
                       size="small"
-                      onClick={() => handleOpenDialog(profile)}
+                      onClick={(e) => openActionsMenu(e, profile)} // pass the event, not e.currentTarget
                       color="primary"
                     >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDelete(profile.id)}
-                      color="error"
-                    >
-                      <DeleteIcon />
+                      <MoreVertIcon />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -327,6 +338,37 @@ const ProfilesPage: React.FC = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
+
+      {/* Actions Menu */}
+      <Menu
+        anchorEl={actionAnchorEl}
+        open={Boolean(actionAnchorEl)}
+        onClose={closeActionsMenu}
+      >
+        <MenuItem
+          onClick={() => {
+            if (actionProfile) handleOpenDialog(actionProfile);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (actionProfile) handleDelete(actionProfile.id);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+      </Menu>
+
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>

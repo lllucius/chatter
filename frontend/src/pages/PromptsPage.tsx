@@ -24,6 +24,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Menu,
+  ListItemIcon,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
@@ -32,6 +34,7 @@ import {
   Add as AddIcon,
   Refresh as RefreshIcon,
   Code as CodeIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
@@ -56,6 +59,9 @@ const PromptsPage: React.FC = () => {
     prompt_type: 'template',
     variables: [] as string[],
   });
+
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
+  const [actionPrompt, setActionPrompt] = useState<PromptResponse | null>(null);
 
   const categories = ['general', 'chat', 'analysis', 'creative', 'technical', 'business'];
   const promptTypes = ['template', 'system', 'few_shot', 'chain_of_thought'];
@@ -140,6 +146,17 @@ const PromptsPage: React.FC = () => {
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
   );
+
+  // IMPORTANT: accept the click event, and read e.currentTarget here
+  const openActionsMenu = (e: React.MouseEvent<HTMLElement>, prompt: PromptResponse) => {
+    setActionAnchorEl(e.currentTarget);
+    setActionPrompt(prompt);
+  };
+
+  const closeActionsMenu = () => {
+    setActionAnchorEl(null);
+    setActionPrompt(null);
+  };
 
   if (loading) {
     return (
@@ -243,21 +260,23 @@ const PromptsPage: React.FC = () => {
                   <TableCell align="center">
                     <IconButton
                       size="small"
-                      onClick={() => handleOpenDialog(prompt)}
+                      onClick={(e) => openActionsMenu(e, prompt)} // pass the event
                       color="primary"
                     >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDelete(prompt.id)}
-                      color="error"
-                    >
-                      <DeleteIcon />
+                      <MoreVertIcon />
                     </IconButton>
                   </TableCell>
                 </TableRow>
               ))}
+              {paginatedPrompts.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} align="center">
+                    <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                      No prompts found
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>
@@ -274,6 +293,37 @@ const PromptsPage: React.FC = () => {
           }}
         />
       </Card>
+
+      {/* Actions Menu */}
+      <Menu
+        anchorEl={actionAnchorEl}
+        open={Boolean(actionAnchorEl)}
+        onClose={closeActionsMenu}
+      >
+        <MenuItem
+          onClick={() => {
+            if (actionPrompt) handleOpenDialog(actionPrompt);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (actionPrompt) handleDelete(actionPrompt.id);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+      </Menu>
+
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>

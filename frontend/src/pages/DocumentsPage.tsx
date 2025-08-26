@@ -28,6 +28,9 @@ import {
   ListItem,
   ListItemText,
   Fab,
+  Menu,
+  MenuItem,
+  ListItemIcon,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
@@ -38,18 +41,24 @@ import {
   GetApp as DownloadIcon,
   Visibility as ViewIcon,
   Add as AddIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { DocumentResponse, DocumentSearchRequest } from '../sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
-import { DocumentUploadedEvent, DocumentProcessingStartedEvent, DocumentProcessingCompletedEvent, DocumentProcessingFailedEvent } from '../services/sse-types';
+import {
+  DocumentUploadedEvent,
+  DocumentProcessingStartedEvent,
+  DocumentProcessingCompletedEvent,
+  DocumentProcessingFailedEvent
+} from '../services/sse-types';
 
 const DocumentsPage: React.FC = () => {
   // SSE hook
   const { isConnected, on } = useSSE();
-  
+
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -66,6 +75,10 @@ const DocumentsPage: React.FC = () => {
   const [searching, setSearching] = useState(false);
   const { darkMode } = useContext(ThemeContext);
 
+  // Actions menu
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
+  const [actionDocument, setActionDocument] = useState<DocumentResponse | null>(null);
+
   useEffect(() => {
     loadDocuments();
   }, []);
@@ -74,21 +87,18 @@ const DocumentsPage: React.FC = () => {
   useEffect(() => {
     if (!isConnected) return;
 
-    // Document event listeners
     const unsubscribeDocumentUploaded = on('document.uploaded', (event) => {
       const docEvent = event as DocumentUploadedEvent;
       console.log('Document uploaded:', docEvent.data);
-      // Refresh documents to get the latest list
       loadDocuments();
     });
 
     const unsubscribeProcessingStarted = on('document.processing_started', (event) => {
       const docEvent = event as DocumentProcessingStartedEvent;
       console.log('Document processing started:', docEvent.data);
-      // Update document status to show processing
-      setDocuments(prev => prev.map(doc => 
-        doc.id === docEvent.data.document_id 
-          ? { ...doc, status: 'processing' as any } 
+      setDocuments(prev => prev.map(doc =>
+        doc.id === docEvent.data.document_id
+          ? { ...doc, status: 'processing' as any }
           : doc
       ));
     });
@@ -96,30 +106,25 @@ const DocumentsPage: React.FC = () => {
     const unsubscribeProcessingCompleted = on('document.processing_completed', (event) => {
       const docEvent = event as DocumentProcessingCompletedEvent;
       console.log('Document processing completed:', docEvent.data);
-      // Update document status and refresh the list
-      setDocuments(prev => prev.map(doc => 
-        doc.id === docEvent.data.document_id 
+      setDocuments(prev => prev.map(doc =>
+        doc.id === docEvent.data.document_id
           ? { ...doc, status: 'processed' as any }
           : doc
       ));
-      // Also refresh to get any updated metadata
       loadDocuments();
     });
 
     const unsubscribeProcessingFailed = on('document.processing_failed', (event) => {
       const docEvent = event as DocumentProcessingFailedEvent;
       console.log('Document processing failed:', docEvent.data);
-      // Update document status to show error
-      setDocuments(prev => prev.map(doc => 
-        doc.id === docEvent.data.document_id 
+      setDocuments(prev => prev.map(doc =>
+        doc.id === docEvent.data.document_id
           ? { ...doc, status: 'failed' as any }
           : doc
       ));
-      // Show error message
       setError(`Document processing failed: ${docEvent.data.error}`);
     });
 
-    // Cleanup function
     return () => {
       unsubscribeDocumentUploaded();
       unsubscribeProcessingStarted();
@@ -178,15 +183,15 @@ const DocumentsPage: React.FC = () => {
     try {
       const response = await chatterSDK.documents.getDocumentApiV1DocumentsDocumentIdGet({ documentId });
       const document = response.data;
-      
+
       // Try to get document chunks for content preview
       let contentPreview = '';
-      
+
       try {
-        const chunksResponse = await chatterSDK.documents.getDocumentChunksApiV1DocumentsDocumentIdChunksGet({ 
-          documentId, 
-          limit: 3, 
-          offset: 0 
+        const chunksResponse = await chatterSDK.documents.getDocumentChunksApiV1DocumentsDocumentIdChunksGet({
+          documentId,
+          limit: 3,
+          offset: 0
         });
         if (chunksResponse.data && chunksResponse.data.chunks && chunksResponse.data.chunks.length > 0) {
           contentPreview = chunksResponse.data.chunks
@@ -197,15 +202,15 @@ const DocumentsPage: React.FC = () => {
             contentPreview += '...';
           }
         }
-      } catch (chunksError) {
+      } catch {
         contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
       }
-      
+
       // Create themed preview window
       const backgroundColor = darkMode ? '#121212' : '#ffffff';
       const textColor = darkMode ? '#ffffff' : '#000000';
       const borderColor = darkMode ? '#333333' : '#dddddd';
-      
+
       const newWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
       if (newWindow) {
         newWindow.document.write(`
@@ -213,9 +218,9 @@ const DocumentsPage: React.FC = () => {
             <head>
               <title>Document: ${document.title || document.filename}</title>
               <style>
-                body { 
-                  font-family: 'Roboto', Arial, sans-serif; 
-                  padding: 20px; 
+                body {
+                  font-family: 'Roboto', Arial, sans-serif;
+                  padding: 20px;
                   background-color: ${backgroundColor};
                   color: ${textColor};
                   margin: 0;
@@ -262,7 +267,7 @@ const DocumentsPage: React.FC = () => {
                   <span class="tag">${document.status}</span>
                 </div>
               </div>
-              
+
               <div class="metadata">
                 <h3>Document Information</h3>
                 <p><strong>Filename:</strong> ${document.filename}</p>
@@ -271,7 +276,7 @@ const DocumentsPage: React.FC = () => {
                 <p><strong>Chunks:</strong> ${document.chunk_count || 0}</p>
                 ${document.extra_metadata ? `<p><strong>Metadata:</strong> ${JSON.stringify(document.extra_metadata, null, 2)}</p>` : ''}
               </div>
-              
+
               <div>
                 <h3>Content Preview</h3>
                 <div class="content-preview">${contentPreview || 'No content preview available for this document type.'}</div>
@@ -288,10 +293,10 @@ const DocumentsPage: React.FC = () => {
 
   const handleDownloadDocument = async (documentId: string, filename: string) => {
     try {
-      const response = await chatterSDK.documents.downloadDocumentApiV1DocumentsDocumentIdDownloadGet({ 
-        documentId 
+      const response = await chatterSDK.documents.downloadDocumentApiV1DocumentsDocumentIdDownloadGet({
+        documentId
       });
-      
+
       // Create a blob URL and trigger download
       const blob = new Blob([response.data], { type: 'application/octet-stream' });
       const url = window.URL.createObjectURL(blob);
@@ -336,7 +341,7 @@ const DocumentsPage: React.FC = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -363,6 +368,17 @@ const DocumentsPage: React.FC = () => {
       default:
         return 'default';
     }
+  };
+
+  // More options menu handlers
+  const openActionsMenu = (e: React.MouseEvent<HTMLElement>, doc: DocumentResponse) => {
+    setActionAnchorEl(e.currentTarget);
+    setActionDocument(doc);
+  };
+
+  const closeActionsMenu = () => {
+    setActionAnchorEl(null);
+    setActionDocument(null);
   };
 
   if (loading) {
@@ -568,26 +584,11 @@ const DocumentsPage: React.FC = () => {
                     <IconButton
                       size="small"
                       color="primary"
-                      title="View Details"
-                      onClick={() => handleViewDocument(document.id)}
+                      title="More actions"
+                      aria-label="More actions"
+                      onClick={(e) => openActionsMenu(e, document)}
                     >
-                      <ViewIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      title="Download"
-                      onClick={() => handleDownloadDocument(document.id, document.filename)}
-                    >
-                      <DownloadIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteDocument(document.id)}
-                      color="error"
-                      title="Delete"
-                    >
-                      <DeleteIcon />
+                      <MoreVertIcon />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -614,6 +615,48 @@ const DocumentsPage: React.FC = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
+
+      {/* Actions Menu */}
+      <Menu
+        anchorEl={actionAnchorEl}
+        open={Boolean(actionAnchorEl)}
+        onClose={closeActionsMenu}
+      >
+        <MenuItem
+          onClick={() => {
+            if (actionDocument) handleViewDocument(actionDocument.id);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <ViewIcon fontSize="small" />
+          </ListItemIcon>
+          View Details
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (actionDocument) handleDownloadDocument(actionDocument.id, actionDocument.filename);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <DownloadIcon fontSize="small" />
+          </ListItemIcon>
+          Download
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (actionDocument) handleDeleteDocument(actionDocument.id);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+      </Menu>
+
       {/* Upload Dialog */}
       <Dialog open={uploadDialogOpen} onClose={() => setUploadDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Upload Document</DialogTitle>
@@ -662,6 +705,7 @@ const DocumentsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       {/* Semantic Search Dialog */}
       <Dialog open={searchDialogOpen} onClose={() => setSearchDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Semantic Document Search</DialogTitle>
@@ -687,13 +731,13 @@ const DocumentsPage: React.FC = () => {
               {searching ? 'Searching...' : 'Search'}
             </Button>
           </Box>
-          
+
           {searching && (
             <Box sx={{ mt: 2 }}>
               <LinearProgress />
             </Box>
           )}
-          
+
           {searchResults.length > 0 && (
             <Paper sx={{ mt: 3, maxHeight: 400, overflow: 'auto' }}>
               <List>
@@ -724,6 +768,7 @@ const DocumentsPage: React.FC = () => {
           <Button onClick={() => setSearchDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+
       {/* Floating Action Button */}
       <Fab
         color="primary"

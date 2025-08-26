@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -34,11 +34,12 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  // Redirect if already authenticated
-  if (chatterSDK.isAuthenticated()) {
-    navigate('/dashboard');
-    return null;
-  }
+  // Redirect if already authenticated (run as an effect, not during render)
+  useEffect(() => {
+    if (chatterSDK.isAuthenticated()) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   return (
     <Container component="main" maxWidth="xs">
@@ -104,12 +105,6 @@ const LoginPage: React.FC = () => {
             </Box>
           </Box>
         </Paper>
-        
-        <Box sx={{ mt: 2, textAlign: 'center' }}>
-          <Typography variant="body2" color="text.secondary">
-            Demo credentials: admin / admin
-          </Typography>
-        </Box>
       </Box>
     </Container>
   );

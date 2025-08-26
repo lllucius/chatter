@@ -24,6 +24,9 @@ import {
   InputAdornment,
   Avatar,
   Paper,
+  Menu,
+  MenuItem,
+  ListItemIcon,
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
@@ -33,6 +36,7 @@ import {
   Message as MessageIcon,
   Person as PersonIcon,
   SmartToy as BotIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
@@ -50,6 +54,10 @@ const ConversationsPage: React.FC = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
+  // Actions menu state
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
+  const [actionConversation, setActionConversation] = useState<ConversationResponse | null>(null);
+
   useEffect(() => {
     loadConversations();
   }, []);
@@ -58,7 +66,7 @@ const ConversationsPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      const response = await chatterSDK.conversations.listConversationsApiV1ChatConversationsGet({}); 
+      const response = await chatterSDK.conversations.listConversationsApiV1ChatConversationsGet({});
       const data = response.data;
       setConversations(data.conversations);
     } catch (err: any) {
@@ -72,9 +80,12 @@ const ConversationsPage: React.FC = () => {
     setSelectedConversation(conversation);
     setViewDialogOpen(true);
     setLoadingMessages(true);
-    
+
     try {
-      const response = await chatterSDK.conversations.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet({ conversationId: conversation.id }); 
+      const response =
+        await chatterSDK.conversations.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(
+          { conversationId: conversation.id }
+        );
       const messages = response.data;
       setConversationMessages(messages);
     } catch (err: any) {
@@ -109,7 +120,7 @@ const ConversationsPage: React.FC = () => {
     page * rowsPerPage + rowsPerPage
   );
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -140,6 +151,17 @@ const ConversationsPage: React.FC = () => {
       default:
         return 'grey.500';
     }
+  };
+
+  // More options menu handlers
+  const openActionsMenu = (e: React.MouseEvent<HTMLElement>, conversation: ConversationResponse) => {
+    setActionAnchorEl(e.currentTarget);
+    setActionConversation(conversation);
+  };
+
+  const closeActionsMenu = () => {
+    setActionAnchorEl(null);
+    setActionConversation(null);
   };
 
   if (loading) {
@@ -257,17 +279,11 @@ const ConversationsPage: React.FC = () => {
                   <TableCell align="center">
                     <IconButton
                       size="small"
-                      onClick={() => handleViewConversation(conversation)}
+                      onClick={(e) => openActionsMenu(e, conversation)}
                       color="primary"
+                      aria-label="More actions"
                     >
-                      <ViewIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDeleteConversation(conversation.id)}
-                      color="error"
-                    >
-                      <DeleteIcon />
+                      <MoreVertIcon />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -295,6 +311,36 @@ const ConversationsPage: React.FC = () => {
         />
       </Card>
 
+      {/* Actions Menu */}
+      <Menu
+        anchorEl={actionAnchorEl}
+        open={Boolean(actionAnchorEl)}
+        onClose={closeActionsMenu}
+      >
+        <MenuItem
+          onClick={() => {
+            if (actionConversation) handleViewConversation(actionConversation);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <ViewIcon fontSize="small" />
+          </ListItemIcon>
+          View
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (actionConversation) handleDeleteConversation(actionConversation.id);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+      </Menu>
+
       {/* View Conversation Dialog */}
       <Dialog
         open={viewDialogOpen}
@@ -316,14 +362,14 @@ const ConversationsPage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : (
-            <Box sx={{ 
-              maxHeight: 400, 
-              overflow: 'auto', 
+            <Box sx={{
+              maxHeight: 400,
+              overflow: 'auto',
               p: 2,
               display: 'flex',
               flexDirection: 'column',
             }}>
-              {conversationMessages.map((message, index) => (
+              {conversationMessages.map((message) => (
                 <Box
                   key={message.id}
                   sx={{
@@ -347,11 +393,11 @@ const ConversationsPage: React.FC = () => {
                     sx={{
                       p: 2,
                       maxWidth: '70%',
-                      bgcolor: message.role === 'user' 
-                        ? 'primary.light' 
+                      bgcolor: message.role === 'user'
+                        ? 'primary.light'
                         : (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
-                      color: message.role === 'user' 
-                        ? 'primary.contrastText' 
+                      color: message.role === 'user'
+                        ? 'primary.contrastText'
                         : 'text.primary',
                     }}
                   >

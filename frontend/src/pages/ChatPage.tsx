@@ -114,14 +114,12 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const startNewConversation = useCallback(async () => {
+  // Return the created conversation so callers can use its id immediately
+  const startNewConversation = useCallback(async (): Promise<ConversationResponse | null> => {
     try {
       setError('');
-      
-      // Refresh config data from API when starting new conversation
       await loadData();
       
-      // Get system prompt if one is selected
       const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
       const systemPrompt = selectedPromptData?.content || undefined;
       
@@ -147,9 +145,11 @@ const ChatPage: React.FC = () => {
           },
         ]);
       }
+      return response.data;
     } catch (err: any) {
       setError('Failed to start new conversation');
       console.error(err);
+      return null;
     }
   }, [selectedProfile, selectedPrompt, prompts, enableRetrieval]);
 
@@ -239,46 +239,75 @@ const ChatPage: React.FC = () => {
 
       while (true) {
         const { done, value } = await reader.read();
-        
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
+
+        // SSE frames are typically separated by \n\n; we split by \n and keep remainder in buffer
         const lines = buffer.split('\n');
         buffer = lines.pop() || '';
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            
-            if (data === '[DONE]') {
-              return;
-            }
+        for (let rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line || line.startsWith(':')) continue; // skip comments/empty
 
-            try {
-              const chunk = JSON.parse(data);
-              
-              if (chunk.type === 'token') {
-                // Update the assistant message content
-                setMessages((prev) => prev.map(msg => 
-                  msg.id === messageId 
-                    ? { ...msg, content: msg.content + chunk.content }
-                    : msg
-                ));
-              } else if (chunk.type === 'usage') {
-                // Add token usage information
+          // support both "data: ..." and raw JSON per line
+          let payload = line.startsWith('data:') ? line.slice(5).trim() :
+                        line.startsWith('data ') ? line.slice(4).trim() :
+                        line;
+
+          if (!payload) continue;
+          if (payload === '[DONE]') {
+            buffer = '';
+            return;
+          }
+
+          try {
+            const chunk = JSON.parse(payload);
+
+            // Accept multiple possible shapes
+            if (chunk.type === 'token' || chunk.type === 'delta') {
+              const textDelta =
+                chunk.content ??
+                chunk.delta ??
+                chunk.choices?.[0]?.delta?.content ??
+                '';
+
+              if (textDelta) {
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === messageId ? { ...msg, content: msg.content + textDelta } : msg
+                  )
+                );
+              }
+            } else if (chunk.type === 'message' && chunk.message?.content) {
+              setMessages((prev) =>
+                prev.map((msg) =>
+                  msg.id === messageId ? { ...msg, content: msg.content + chunk.message.content } : msg
+                )
+              );
+            } else if (chunk.type === 'usage' || chunk.usage) {
+              const usage = chunk.usage || {};
+              const parts: string[] = [];
+              if (typeof usage.total_tokens === 'number') parts.push(`Tokens: ${usage.total_tokens}`);
+              if (typeof usage.response_time_ms === 'number') parts.push(`Response time: ${usage.response_time_ms}ms`);
+              if (parts.length) {
                 const tokenMessage: ChatMessage = {
-                  id: `token-${chunk.message_id}`,
+                  id: `token-${chunk.message_id || messageId}`,
                   role: 'system',
-                  content: `📊 Tokens: ${chunk.usage.total_tokens || 'N/A'} | Response time: ${chunk.usage.response_time_ms || 'N/A'}ms`,
+                  content: `📊 ${parts.join(' | ')}`,
                   timestamp: new Date(),
                 };
                 setMessages((prev) => [...prev, tokenMessage]);
-              } else if (chunk.type === 'error') {
-                throw new Error(chunk.error);
               }
-            } catch (parseError) {
-              console.warn('Failed to parse streaming chunk:', parseError);
+            } else if (chunk.type === 'error' || chunk.error) {
+              throw new Error(chunk.error || 'Streaming error');
+            } else if (chunk.event === 'done' || chunk.type === 'end') {
+              return;
             }
+          } catch (parseError) {
+            // Not JSON or partial line; ignore until buffer completes
+            // console.warn('Failed to parse streaming chunk:', parseError, payload);
           }
         }
       }
@@ -296,8 +325,11 @@ const ChatPage: React.FC = () => {
     setLoading(true);
 
     try {
-      if (!currentConversation) {
-        await startNewConversation();
+      // Ensure we have a conversation id we can include immediately
+      let conversationId = currentConversation?.id;
+      if (!conversationId) {
+        const conv = await startNewConversation();
+        conversationId = conv?.id;
       }
 
       const userMessage: ChatMessage = {
@@ -311,43 +343,50 @@ const ChatPage: React.FC = () => {
       // Build the chat request with config panel values
       const sendRequest: ChatRequest = {
         message: text,
-        conversation_id: currentConversation?.id,
+        conversation_id: conversationId,
         stream: streamingEnabled,
-        // Include profile ID if it differs from conversation profile
         profile_id: selectedProfile && selectedProfile !== currentConversation?.profile_id ? selectedProfile : undefined,
-        // Include temperature if it differs from default
         temperature: temperature !== 0.7 ? temperature : undefined,
-        // Include max_tokens if it differs from default
         max_tokens: maxTokens !== 2048 ? maxTokens : undefined,
-        // Include retrieval setting
         enable_retrieval: enableRetrieval,
-        // Include selected documents if any
         document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
-        // Include system prompt override if prompt is selected and differs
         system_prompt_override: selectedPrompt ? prompts.find(p => p.id === selectedPrompt)?.content : undefined,
       };
 
       if (streamingEnabled) {
-        // Use streaming API
         await handleStreamingResponse(sendRequest);
       } else {
         // Use regular API
         const response = await chatterSDK.conversations.chatApiV1ChatChatPost({ chatRequest: sendRequest });
 
+        // Narrow the SDK's loosely-typed response
+        type ApiChatMessage = {
+          id: string | number;
+          content: string;
+          created_at: string | number | Date;
+          total_tokens?: number;
+          response_time_ms?: number;
+        };
+        const apiMessage = (response.data as { message: ApiChatMessage }).message;
+
         const assistantMessage: ChatMessage = {
-          id: response.data.message.id,
+          id: String(apiMessage.id),
           role: 'assistant',
-          content: response.data.message.content,
-          timestamp: new Date(response.data.message.created_at),
+          content: apiMessage.content,
+          timestamp: new Date(apiMessage.created_at),
         };
         setMessages((prev) => [...prev, assistantMessage]);
 
-        // Add token usage info if available
-        if (response.data.message.total_tokens || response.data.message.response_time_ms) {
+        const hasTokens = typeof apiMessage.total_tokens === 'number';
+        const hasTime = typeof apiMessage.response_time_ms === 'number';
+        if (hasTokens || hasTime) {
+          const parts: string[] = [];
+          if (hasTokens) parts.push(`Tokens: ${apiMessage.total_tokens}`);
+          if (hasTime) parts.push(`Response time: ${apiMessage.response_time_ms}ms`);
           const tokenMessage: ChatMessage = {
-            id: `token-${response.data.message.id}`,
+            id: `token-${String(apiMessage.id)}`,
             role: 'system',
-            content: `📊 ${response.data.message.total_tokens ? `Tokens: ${response.data.message.total_tokens}` : ''}${response.data.message.total_tokens && response.data.message.response_time_ms ? ' | ' : ''}${response.data.message.response_time_ms ? `Response time: ${response.data.message.response_time_ms}ms` : ''}`,
+            content: `📊 ${parts.join(' | ')}`,
             timestamp: new Date(),
           };
           setMessages((prev) => [...prev, tokenMessage]);

@@ -26,6 +26,8 @@ import {
   Switch,
   FormControlLabel,
   IconButton,
+  Menu,
+  ListItemIcon,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
@@ -34,6 +36,7 @@ import {
   Add as AddIcon,
   Refresh as RefreshIcon,
   SmartToy as BotIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
@@ -54,6 +57,9 @@ const AgentsPage: React.FC = () => {
     agent_type: 'conversational',
     status: 'active',
   });
+
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
+  const [actionAgent, setActionAgent] = useState<AgentResponse | null>(null);
 
   const agentTypes = [
     'conversational',
@@ -138,6 +144,17 @@ const AgentsPage: React.FC = () => {
     } catch (err: any) {
       setError('Failed to delete agent');
     }
+  };
+
+  // IMPORTANT: accept the click event, and read e.currentTarget here
+  const openActionsMenu = (e: React.MouseEvent<HTMLElement>, agent: AgentResponse) => {
+    setActionAnchorEl(e.currentTarget);
+    setActionAgent(agent);
+  };
+
+  const closeActionsMenu = () => {
+    setActionAnchorEl(null);
+    setActionAgent(null);
   };
 
   if (loading) {
@@ -312,17 +329,10 @@ const AgentsPage: React.FC = () => {
                   <TableCell align="center">
                     <IconButton
                       size="small"
-                      onClick={() => handleOpenDialog(agent)}
+                      onClick={(e) => openActionsMenu(e, agent)} // pass the event
                       color="primary"
                     >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton
-                      size="small"
-                      onClick={() => handleDelete(agent.id)}
-                      color="error"
-                    >
-                      <DeleteIcon />
+                      <MoreVertIcon />
                     </IconButton>
                   </TableCell>
                 </TableRow>
@@ -340,6 +350,37 @@ const AgentsPage: React.FC = () => {
           </Table>
         </TableContainer>
       </Card>
+
+      {/* Actions Menu */}
+      <Menu
+        anchorEl={actionAnchorEl}
+        open={Boolean(actionAnchorEl)}
+        onClose={closeActionsMenu}
+      >
+        <MenuItem
+          onClick={() => {
+            if (actionAgent) handleOpenDialog(actionAgent);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (actionAgent) handleDelete(actionAgent.id);
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+      </Menu>
+
       {/* Create/Edit Dialog */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>

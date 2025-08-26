@@ -674,8 +674,8 @@ class LangGraphWorkflowManager:
                 try:
                     summary_response = await llm.ainvoke([HumanMessage(content=summary_prompt)])
                     summary = (
-                        summary_response.content 
-                        if hasattr(summary_response, 'content') 
+                        summary_response.content
+                        if hasattr(summary_response, 'content')
                         else str(summary_response)
                     )
 

@@ -1,7 +1,6 @@
 """Utility schemas for validation, versioning, and problem details."""
 
 from enum import Enum
-from typing import Any
 
 from pydantic import BaseModel, Field
 

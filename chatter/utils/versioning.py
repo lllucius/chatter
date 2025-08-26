@@ -8,7 +8,6 @@ from fastapi.routing import APIRoute
 from chatter.config import settings
 from chatter.schemas.utilities import (
     APIVersion,
-    EndpointChange,
     EndpointVersioning,
     VersionInfo,
     VersionStatus,

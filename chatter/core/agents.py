@@ -1,6 +1,5 @@
 """AI Agent framework for creating and managing specialized AI agents."""
 
-import uuid
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
 from typing import Any
@@ -387,8 +386,8 @@ class TaskOrientedAgent(BaseAgent):
             if result and "messages" in result:
                 last_message = result["messages"][-1]
                 response_text = (
-                    last_message.content 
-                    if hasattr(last_message, 'content') 
+                    last_message.content
+                    if hasattr(last_message, 'content')
                     else str(last_message)
                 )
 

@@ -1,7 +1,6 @@
 """Advanced job queue system for background processing using APScheduler."""
 
 import asyncio
-import uuid
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any

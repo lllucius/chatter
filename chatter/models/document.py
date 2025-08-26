@@ -16,15 +16,6 @@ from sqlalchemy import (
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-try:
-    from pgvector.sqlalchemy import Vector
-
-    PGVECTOR_AVAILABLE = True
-except ImportError:
-    # Fallback for non-PostgreSQL environments
-    Vector = Text
-    PGVECTOR_AVAILABLE = False
-
 from chatter.models.base import Base, Keys
 
 
@@ -257,12 +248,6 @@ class DocumentChunk(Base):
     )
     end_char: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    # Legacy embedding field - kept for backwards compatibility during migration
-    # No longer used for new embeddings, which go to dynamic tables
-    embedding: Mapped[Any | None] = mapped_column(
-        Text, nullable=True  # Changed from Vector to Text for compatibility
-    )
-
     # Metadata
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column(
         "extra_metadata", JSON, nullable=True
@@ -322,7 +307,7 @@ class DocumentChunk(Base):
     @property
     def has_dynamic_embeddings(self) -> bool:
         """Check if chunk has embeddings in dynamic tables."""
-        return self.embedding_models and len(self.embedding_models) > 0
+        return bool(self.embedding_models and len(self.embedding_models) > 0)
 
     def add_embedding_model(self, model_name: str, set_as_primary: bool = False) -> None:
         """Add an embedding model to the list of applied models.
@@ -367,7 +352,8 @@ class DocumentChunk(Base):
             "metadata": self.extra_metadata,
             "token_count": self.token_count,
             "language": self.language,
-            "embedding_model": self.embedding_model,
+            "embedding_models": self.embedding_models,
+            "primary_embedding_model": self.primary_embedding_model,
             "embedding_provider": self.embedding_provider,
             "embedding_created_at": self.embedding_created_at.isoformat()
             if self.embedding_created_at

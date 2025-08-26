@@ -29,7 +29,7 @@ from chatter.services.document_processing import (
     DocumentProcessingService,
 )
 from chatter.services.embeddings import EmbeddingService
-from chatter.services.vector_store import VectorStoreService
+from chatter.services.dynamic_vector_store import DynamicVectorStoreService
 from chatter.utils.logging import get_logger
 
 settings = get_settings()
@@ -47,7 +47,7 @@ class DocumentService:
         """
         self.session = session
         self.processing_service = DocumentProcessingService(session)
-        self.vector_store_service = VectorStoreService(session)
+        self.vector_store_service = DynamicVectorStoreService(session)
         self.embedding_service = EmbeddingService()
         self.storage_path = Path(settings.document_storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
@@ -433,10 +433,12 @@ class DocumentService:
             # Generate query embedding
             (
                 query_embedding,
-                _,
+                usage,
             ) = await self.embedding_service.generate_embedding(
                 search_request.query
             )
+            provider = usage.get("provider") if isinstance(usage, dict) else None
+            model = usage.get("model") if isinstance(usage, dict) else None
 
             # Get accessible document IDs
             accessible_docs_result = await self.session.execute(
@@ -489,23 +491,23 @@ class DocumentService:
             if not accessible_doc_ids:
                 return []
 
-            # Perform vector search
-            similar_chunks = (
-                await self.vector_store_service.similarity_search(
-                    query_embedding=query_embedding,
-                    limit=search_request.limit,
-                    score_threshold=search_request.score_threshold,
-                    document_ids=accessible_doc_ids,
-                )
+            # Perform vector search with dynamic store (parity: returns tuples)
+            similar_chunks = await self.vector_store_service.similarity_search(
+                query_embedding=query_embedding,
+                provider_name=provider or "provider",
+                model_name=model,
+                limit=search_request.limit,
+                score_threshold=search_request.score_threshold,
+                document_ids=accessible_doc_ids,
             )
 
             # Get document information for each chunk
-            results = []
+            results: list[tuple[DocumentChunk, float, Document]] = []
             for chunk, score in similar_chunks:
                 # Increment search count
-                chunk.document.search_count += 1
-
-                results.append((chunk, score, chunk.document))
+                if chunk.document:
+                    chunk.document.search_count += 1
+                    results.append((chunk, score, chunk.document))
 
             await self.session.commit()
             for _, _, document in results:
@@ -688,6 +690,9 @@ class DocumentService:
             )
             total_chunks = chunks_result.scalar()
 
+            # Vector store embedding stats (from dynamic service)
+            embedding_stats = await self.vector_store_service.get_embedding_stats()
+
             return {
                 "total_documents": sum(status_counts.values()),
                 "status_counts": status_counts,
@@ -695,7 +700,7 @@ class DocumentService:
                 "total_storage_bytes": total_storage,
                 "total_chunks": total_chunks,
                 "processing_stats": await self.processing_service.get_processing_stats(),
-                "embedding_stats": await self.vector_store_service.get_embedding_stats(),
+                "embedding_stats": embedding_stats,
             }
 
         except Exception as e:

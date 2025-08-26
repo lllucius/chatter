@@ -236,8 +236,6 @@ async def get_document(
         return response
 
     except (NotFoundProblem, ValidationProblem):
-        import traceback
-        print(traceback.format_stack())
         raise
     except Exception as e:
         logger.error(

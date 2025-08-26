@@ -38,7 +38,7 @@ from chatter.models.document import (
     DocumentType,
 )
 from chatter.services.embeddings import EmbeddingError, EmbeddingService
-from chatter.services.vector_store import VectorStoreService
+from chatter.services.dynamic_vector_store import DynamicVectorStoreService
 from chatter.utils.logging import get_logger
 
 settings = get_settings()
@@ -56,7 +56,7 @@ class DocumentProcessingService:
         """
         self.session = session
         self.embedding_service = EmbeddingService()
-        self.vector_store_service = VectorStoreService(session)
+        self.vector_store_service = DynamicVectorStoreService(session)
         self.storage_path = Path(settings.document_storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
@@ -76,6 +76,7 @@ class DocumentProcessingService:
         Returns:
             True if processing successful, False otherwise
         """
+        document: Document | None = None
         try:
             # Get document
             result = await self.session.execute(
@@ -126,7 +127,7 @@ class DocumentProcessingService:
                         "filename": document.filename,
                         "started_at": document.processing_started_at.isoformat(),
                     },
-                    user_id=document.user_id
+                    user_id=document.owner_id
                 )
             except Exception as e:
                 logger.warning("Failed to trigger document processing started event", error=str(e))
@@ -199,7 +200,7 @@ class DocumentProcessingService:
                         "text_length": len(extracted_text),
                         "processing_time": (document.processing_completed_at - document.processing_started_at).total_seconds(),
                     },
-                    document.user_id
+                    document.owner_id
                 )
             except Exception as e:
                 logger.warning("Failed to trigger document processing completed event", error=str(e))
@@ -212,9 +213,10 @@ class DocumentProcessingService:
                 document_id=document_id,
                 error=str(e),
             )
-            await self._mark_processing_failed(
-                document, f"Processing error: {str(e)}"
-            )
+            if document:
+                await self._mark_processing_failed(
+                    document, f"Processing error: {str(e)}"
+                )
             return False
 
     async def _extract_text(
@@ -551,6 +553,7 @@ class DocumentProcessingService:
         Returns:
             List of DocumentChunk objects
         """
+        logger.info("Storing chunks")
         try:
             chunk_objects = []
 
@@ -570,7 +573,6 @@ class DocumentProcessingService:
                         chunk_text.split()
                     ),  # Simple token count approximation
                 )
-
                 chunk_objects.append(chunk)
                 self.session.add(chunk)
 
@@ -637,22 +639,28 @@ class DocumentProcessingService:
                     for chunk, embedding in zip(
                         batch, embeddings, strict=False
                     ):
+                        provider = usage_info.get("provider")
+                        model = usage_info.get("model")
                         embedding_metadata = {
-                            "model": usage_info.get("model"),
-                            "provider": usage_info.get("provider"),
+                            "model": model,
+                            "provider": provider,
                             "dimensions": len(embedding),
                         }
 
                         # Update chunk with embedding metadata
-                        chunk.embedding_model = usage_info.get("model")
-                        chunk.embedding_provider = usage_info.get(
-                            "provider"
-                        )
+                        if model:
+                            chunk.add_embedding_model(model, set_as_primary=True)
+                        if provider:
+                            chunk.embedding_provider = provider
                         chunk.embedding_created_at = datetime.now(UTC)
 
                         # Store embedding in vector store
                         success = await self.vector_store_service.store_embedding(
-                            chunk.id, embedding, embedding_metadata
+                            chunk_id=chunk.id,
+                            embedding=embedding,
+                            provider_name=provider or "provider",
+                            model_name=model,
+                            metadata=embedding_metadata,
                         )
 
                         if not success:
@@ -720,7 +728,7 @@ class DocumentProcessingService:
                 await trigger_document_processing_failed(
                     str(document.id),
                     error_message,
-                    document.user_id
+                    document.owner_id
                 )
             except Exception as e:
                 logger.warning("Failed to trigger document processing failed event", error=str(e))

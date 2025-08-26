@@ -63,7 +63,6 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             )
 
         response = await call_next(request)
-        print("TYPE", type(response))
 
         # Calculate request duration
         duration = time.time() - start_time

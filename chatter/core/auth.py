@@ -400,7 +400,6 @@ class AuthService:
         Raises:
             AuthenticationError: If token is invalid or user not found
         """
-        print("TOKEN", token)
         payload = verify_token(token)
         if not payload:
             raise AuthenticationError("Invalid token") from None

@@ -6,6 +6,7 @@ import socket
 import string
 import threading
 import time
+
 from datetime import datetime
 from enum import Enum
 
@@ -16,6 +17,58 @@ from sqlalchemy.orm import (
     declared_attr,
     mapped_column,
 )
+
+import hashlib
+import socket
+import string
+import threading
+import time
+from datetime import datetime
+
+class IDGenerator:
+    _lock = threading.Lock()
+    _last_timestamp = 0
+    _counter = 0
+
+    # Server ID: stable per machine, 0–15 (4 bits)
+    _server_id = int(
+        hashlib.sha1(socket.gethostname().encode()).hexdigest(), 16
+    ) % 16
+
+    # Custom epoch (Jan 1, 2025)
+    _epoch_ms = int(datetime(2025, 1, 1).timestamp() * 1000)
+
+    @classmethod
+    def _encode_base62(cls, num: int) -> str:
+        alphabet = string.digits + string.ascii_uppercase + string.ascii_lowercase
+        base = len(alphabet)
+        arr = []
+        while num > 0:
+            num, rem = divmod(num, base)
+            arr.append(alphabet[rem])
+        return ''.join(reversed(arr)) or "0"
+
+    @classmethod
+    def generate_id(cls, length: int = 12) -> str:
+        """
+        12-char base62 ID
+        - 35 bits: timestamp (ms since Jan 1, 2025 → good for ~34 years)
+        - 4 bits:  server ID (up to 16 machines)
+        - 20 bits: counter (1,048,576 IDs/ms per server)
+        """
+        with cls._lock:
+            now_ms = int(time.time() * 1000) - cls._epoch_ms
+
+            if now_ms == cls._last_timestamp:
+                cls._counter = (cls._counter + 1) & ((1 << 20) - 1)
+            else:
+                cls._counter = 0
+
+            cls._last_timestamp = now_ms
+
+            combined = (now_ms << (4 + 20)) | (cls._server_id << 20) | cls._counter
+            encoded = cls._encode_base62(combined)
+            return encoded.rjust(length, "0")
 
 
 class Base(DeclarativeBase):
@@ -47,61 +100,12 @@ class Base(DeclarativeBase):
             return name + "s"  # Default: add 's'
 
     # ----------------------------------------------------------------
-    # Monotonic distributed ID generator
-    # ----------------------------------------------------------------
-    _lock: threading.Lock = threading.Lock()
-    _last_timestamp: int = 0
-    _counter: int = 0
-    _server_hash: int = int(
-        hashlib.sha1(socket.gethostname().encode()).hexdigest(), 16
-    ) % (62**2)
-
-    @classmethod
-    def _encode_base62(cls, num: int, length: int = 12) -> str:
-        alphabet = (
-            string.digits
-            + string.ascii_uppercase
-            + string.ascii_lowercase
-        )
-        arr: list[str] = []
-        base: int = 62
-        while num > 0:
-            num, rem = divmod(num, base)
-            arr.append(alphabet[rem])
-        s: str = "".join(reversed(arr))
-        return s.rjust(length, "0")[:length]
-
-    @classmethod
-    def _generate_id(cls) -> str:
-        MAX_COUNTER = 62**3 - 1  # 3 chars counter
-        with cls._lock:
-            timestamp: int = int(time.time() * 1000)
-            if timestamp == cls._last_timestamp:
-                cls._counter += 1
-                if cls._counter > MAX_COUNTER:
-                    while timestamp <= cls._last_timestamp:
-                        time.sleep(0.0001)
-                        timestamp = int(time.time() * 1000)
-                    cls._counter = 0
-                    cls._last_timestamp = timestamp
-            else:
-                cls._counter = 0
-                cls._last_timestamp = timestamp
-
-            combined: int = (
-                (timestamp << 16)
-                | (cls._server_hash << 12)
-                | cls._counter
-            )
-            return cls._encode_base62(combined, length=12)
-
-    # ----------------------------------------------------------------
     # Common columns
     # ----------------------------------------------------------------
     id: Mapped[str] = mapped_column(
         String(12),
         primary_key=True,
-        default=lambda: Base._generate_id(),
+        default=lambda: IDGenerator.generate_id(),
     )
 
     created_at: Mapped[datetime] = mapped_column(

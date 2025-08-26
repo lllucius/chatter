@@ -270,7 +270,6 @@ const DocumentsPage: React.FC = () => {
 
               <div class="metadata">
                 <h3>Document Information</h3>
-                <p><strong>Filename:</strong> ${document.filename}</p>
                 <p><strong>Created:</strong> ${format(new Date(document.created_at), 'MMM dd, yyyy HH:mm')}</p>
                 <p><strong>Processing Status:</strong> ${document.status}</p>
                 <p><strong>Chunks:</strong> ${document.chunk_count || 0}</p>
@@ -522,7 +521,6 @@ const DocumentsPage: React.FC = () => {
             <TableHead>
               <TableRow>
                 <TableCell>Title</TableCell>
-                <TableCell>Filename</TableCell>
                 <TableCell>Type</TableCell>
                 <TableCell>Size</TableCell>
                 <TableCell>Chunks</TableCell>
@@ -537,11 +535,6 @@ const DocumentsPage: React.FC = () => {
                   <TableCell>
                     <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
                       {document.title}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                      {document.filename}
                     </Typography>
                   </TableCell>
                   <TableCell>

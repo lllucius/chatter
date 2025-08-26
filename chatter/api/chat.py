@@ -28,6 +28,7 @@ from chatter.schemas.chat import (
     ConversationUpdate,
     ConversationWithMessages,
     McpStatusResponse,
+    MessageCreate,
     MessageResponse,
 )
 from chatter.services.llm import LLMService
@@ -56,6 +57,23 @@ async def get_chat_service(
     """
     llm_service = LLMService()
     return ChatService(session, llm_service)
+
+
+def _map_workflow_type(workflow: str) -> str:
+    """Map API workflow to internal workflow types.
+
+    - plain -> basic (legacy name used internally)
+    - rag -> rag
+    - tools -> tools
+    - full -> full (rag + tools)
+    """
+    mapping = {
+        "plain": "basic",
+        "rag": "rag",
+        "tools": "tools",
+        "full": "full",
+    }
+    return mapping.get(workflow, "basic")
 
 
 @router.post(
@@ -87,14 +105,20 @@ async def create_conversation(
         raise BadRequestProblem(detail=str(e)) from e
 
 
-@router.get("/conversations", response_model=ConversationSearchResponse, responses={
-    401: {"description": "Unauthorized - Invalid or missing authentication token"},
-    403: {"description": "Forbidden - User lacks permission to access conversations"},
-    422: {"description": "Validation Error"},
-})
+@router.get(
+    "/conversations",
+    response_model=ConversationSearchResponse,
+    responses={
+        401: {"description": "Unauthorized - Invalid or missing authentication token"},
+        403: {"description": "Forbidden - User lacks permission to access conversations"},
+        422: {"description": "Validation Error"},
+    },
+)
 async def list_conversations(
     query: str | None = Query(None, description="Search query"),
-    status: ConversationStatus | None = Query(None, description="Filter by status"),
+    status: ConversationStatus | None = Query(
+        None, description="Filter by status"
+    ),
     limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
     sort_by: str = Query("created_at", description="Sort field"),
@@ -104,18 +128,7 @@ async def list_conversations(
 ) -> ConversationSearchResponse:
     """List user's conversations.
 
-    Args:
-        query: Search query
-        status: Filter by status
-        limit: Maximum number of results
-        offset: Number of results to skip
-        sort_by: Sort field
-        sort_order: Sort order (asc/desc)
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        List of conversations with pagination
+    Note: Filters may be ignored if not supported by the service implementation.
     """
     conversations, total = await chat_service.list_conversations(
         current_user.id, limit, offset
@@ -123,8 +136,7 @@ async def list_conversations(
 
     return ConversationSearchResponse(
         conversations=[
-            ConversationResponse.model_validate(c)
-            for c in conversations
+            ConversationResponse.model_validate(c) for c in conversations
         ],
         total=total,
         limit=limit,
@@ -142,17 +154,7 @@ async def get_conversation(
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationWithMessages:
-    """Get conversation details with messages.
-
-    Args:
-        conversation_id: Conversation ID
-        request: Get request parameters
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Conversation with messages
-    """
+    """Get conversation details with messages."""
     conversation = await chat_service.get_conversation(
         conversation_id, current_user.id, include_messages=True
     )
@@ -164,9 +166,7 @@ async def get_conversation(
         ) from None
 
     # Convert to response format
-    conversation_response = ConversationResponse.model_validate(
-        conversation
-    )
+    conversation_response = ConversationResponse.model_validate(conversation)
     messages = [
         MessageResponse.model_validate(m) for m in conversation.messages
     ]
@@ -186,17 +186,7 @@ async def update_conversation(
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationResponse:
-    """Update conversation.
-
-    Args:
-        conversation_id: Conversation ID
-        update_data: Update data
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Updated conversation
-    """
+    """Update conversation."""
     try:
         conversation = await chat_service.update_conversation(
             conversation_id, current_user.id, update_data
@@ -219,17 +209,7 @@ async def delete_conversation(
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationDeleteResponse:
-    """Delete conversation.
-
-    Args:
-        conversation_id: Conversation ID
-        request: Delete request parameters
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Success message
-    """
+    """Delete conversation."""
     try:
         await chat_service.delete_conversation(
             conversation_id, current_user.id
@@ -252,23 +232,14 @@ async def delete_conversation(
         403: {"description": "Forbidden - User lacks permission to access this conversation"},
         404: {"description": "Not Found - Conversation does not exist"},
         422: {"description": "Validation Error"},
-    }
+    },
 )
 async def get_conversation_messages(
     conversation_id: str,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
-    """Get conversation messages.
-
-    Args:
-        conversation_id: Conversation ID
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        List of messages
-    """
+    """Get conversation messages."""
     try:
         messages = await chat_service.get_conversation_messages(
             conversation_id, current_user.id
@@ -281,27 +252,20 @@ async def get_conversation_messages(
         ) from None
 
 
-@router.post("/conversations/{conversation_id}/messages", response_model=MessageResponse)
+@router.post(
+    "/conversations/{conversation_id}/messages",
+    response_model=MessageResponse,
+)
 async def add_message_to_conversation(
     conversation_id: str,
-    message: str,
+    message: MessageCreate,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> MessageResponse:
-    """Add a new message to existing conversation.
-
-    Args:
-        conversation_id: Conversation ID
-        message: Message content
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Created message
-    """
+    """Add a new message to existing conversation."""
     try:
         created_message = await chat_service.add_message_to_conversation(
-            conversation_id, current_user.id, message
+            conversation_id, current_user.id, message.content
         )
         return MessageResponse.model_validate(created_message)
     except ConversationNotFoundError:
@@ -318,17 +282,7 @@ async def delete_message(
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> dict:
-    """Delete a message from conversation.
-
-    Args:
-        conversation_id: Conversation ID
-        message_id: Message ID
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Success message
-    """
+    """Delete a message from conversation."""
     try:
         await chat_service.delete_message(
             conversation_id, message_id, current_user.id
@@ -341,192 +295,86 @@ async def delete_message(
         ) from None
 
 
-@router.post("/chat", response_model=ChatResponse)
+@router.post(
+    "/chat",
+    response_model=None,  # Important: disable response model generation to support JSON or SSE
+    responses={
+        200: {
+            "content": {
+                "application/json": {"schema": ChatResponse.model_json_schema()},
+                "text/event-stream": {"schema": {"type": "string"}},
+            },
+            "description": "Chat response as JSON or streaming SSE when stream=true",
+        }
+    },
+)
 async def chat(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
-) -> ChatResponse:
-    """Send a chat message and get response.
+):
+    """Single chat endpoint supporting plain, rag, tools, and full workflows.
 
-    Args:
-        chat_request: Chat request data
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Chat response with assistant message
+    - If chat_request.stream is True, returns SSE stream.
+    - Otherwise returns ChatResponse JSON.
     """
+    workflow_type = _map_workflow_type(chat_request.workflow)
+
     if chat_request.stream:
-        raise BadRequestProblem(
-            detail="Use /chat/stream for streaming responses"
-        ) from None
+        # Streaming mode
+        async def generate_stream():
+            """Generate streaming chat response chunks."""
+            try:
+                if workflow_type == "basic":
+                    # Use existing streaming for plain/basic
+                    async for chunk in chat_service.chat_streaming(
+                        current_user.id, chat_request
+                    ):
+                        yield f"data: {json.dumps(chunk)}\n\n"
+                else:
+                    # For workflow-based streaming
+                    if not hasattr(chat_service, "chat_workflow_streaming"):
+                        error_chunk = {
+                            "type": "error",
+                            "error": f"Streaming is not yet supported for workflow '{chat_request.workflow}'.",
+                        }
+                        yield f"data: {json.dumps(error_chunk)}\n\n"
+                    else:
+                        async for chunk in chat_service.chat_workflow_streaming(
+                            current_user.id, chat_request, workflow_type=workflow_type
+                        ):
+                            yield f"data: {json.dumps(chunk)}\n\n"
+            except (ConversationNotFoundError, ChatError) as e:
+                error_chunk = {"type": "error", "error": str(e)}
+                yield f"data: {json.dumps(error_chunk)}\n\n"
+            finally:
+                # End-of-stream marker
+                yield "data: [DONE]\n\n"
 
+        return StreamingResponse(
+            generate_stream(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+            },
+        )
+
+    # Non-streaming mode
     try:
-        conversation, assistant_message = await chat_service.chat(
-            current_user.id, chat_request
-        )
-
-        return ChatResponse(
-            conversation_id=conversation.id,
-            message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(
-                conversation
-            ),
-        )
-    except (ConversationNotFoundError, ChatError) as e:
-        raise BadRequestProblem(detail=str(e)) from None
-
-
-@router.post("/chat/stream", responses={
-    200: {
-        "content": {"text/event-stream": {"schema": {"type": "string"}}},
-        "description": "Streaming chat response in Server-Sent Events format"
-    }
-})
-async def chat_stream(
-    chat_request: ChatRequest,
-    current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
-) -> StreamingResponse:
-    """Send a chat message and get streaming response.
-
-    Args:
-        chat_request: Chat request data
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Streaming response with chat chunks
-    """
-
-    async def generate_stream():
-        """Generate streaming chat response chunks."""
-        try:
-            async for chunk in chat_service.chat_streaming(
+        if workflow_type == "basic":
+            conversation, assistant_message = await chat_service.chat(
                 current_user.id, chat_request
-            ):
-                yield f"data: {json.dumps(chunk)}\n\n"
-        except (ConversationNotFoundError, ChatError) as e:
-            error_chunk = {"type": "error", "error": str(e)}
-            yield f"data: {json.dumps(error_chunk)}\n\n"
-        finally:
-            # Send end-of-stream marker
-            yield "data: [DONE]\n\n"
-
-    return StreamingResponse(
-        generate_stream(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "Connection": "keep-alive",
-        },
-    )
-
-
-# New LangGraph workflow endpoints
-
-
-@router.post("/workflows/basic")
-async def create_basic_workflow(
-    chat_request: ChatRequest,
-    current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
-) -> ChatResponse:
-    """Create and run a basic conversation workflow with LangGraph.
-
-    Args:
-        chat_request: Chat request data
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Chat response from workflow
-    """
-    try:
-        (
-            conversation,
-            assistant_message,
-        ) = await chat_service.chat_with_workflow(
-            current_user.id, chat_request, workflow_type="basic"
-        )
+            )
+        else:
+            conversation, assistant_message = await chat_service.chat_with_workflow(
+                current_user.id, chat_request, workflow_type=workflow_type
+            )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(
-                conversation
-            ),
-        )
-    except (ConversationNotFoundError, ChatError) as e:
-        raise BadRequestProblem(detail=str(e)) from None
-
-
-@router.post("/workflows/rag")
-async def create_rag_workflow(
-    chat_request: ChatRequest,
-    current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
-) -> ChatResponse:
-    """Create and run a RAG workflow with document retrieval.
-
-    Args:
-        chat_request: Chat request data
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Chat response from RAG workflow
-    """
-    try:
-        (
-            conversation,
-            assistant_message,
-        ) = await chat_service.chat_with_workflow(
-            current_user.id, chat_request, workflow_type="rag"
-        )
-
-        return ChatResponse(
-            conversation_id=conversation.id,
-            message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(
-                conversation
-            ),
-        )
-    except (ConversationNotFoundError, ChatError) as e:
-        raise BadRequestProblem(detail=str(e)) from None
-
-
-@router.post("/workflows/tools")
-async def create_tools_workflow(
-    chat_request: ChatRequest,
-    current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
-) -> ChatResponse:
-    """Create and run a workflow with tool calling capabilities.
-
-    Args:
-        chat_request: Chat request data
-        current_user: Current authenticated user
-        chat_service: Chat service
-
-    Returns:
-        Chat response from tools workflow
-    """
-    try:
-        (
-            conversation,
-            assistant_message,
-        ) = await chat_service.chat_with_workflow(
-            current_user.id, chat_request, workflow_type="tools"
-        )
-
-        return ChatResponse(
-            conversation_id=conversation.id,
-            message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(
-                conversation
-            ),
+            conversation=ConversationResponse.model_validate(conversation),
         )
     except (ConversationNotFoundError, ChatError) as e:
         raise BadRequestProblem(detail=str(e)) from None
@@ -536,14 +384,7 @@ async def create_tools_workflow(
 async def get_available_tools(
     current_user: User = Depends(get_current_user),
 ) -> AvailableToolsResponse:
-    """Get list of available MCP tools.
-
-    Args:
-        current_user: Current authenticated user
-
-    Returns:
-        List of available tools
-    """
+    """Get list of available MCP tools."""
     from chatter.services.mcp import BuiltInTools, mcp_service
 
     try:
@@ -588,14 +429,7 @@ async def get_available_tools(
 async def get_mcp_status(
     current_user: User = Depends(get_current_user),
 ) -> McpStatusResponse:
-    """Get MCP service status.
-
-    Args:
-        current_user: Current authenticated user
-
-    Returns:
-        MCP service status
-    """
+    """Get MCP service status."""
     from chatter.services.mcp import mcp_service
 
     try:

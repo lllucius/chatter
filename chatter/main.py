@@ -240,9 +240,8 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
         docs_url="/docs" if settings.is_development else None,
         redoc_url="/redoc" if settings.is_development else None,
-        openapi_url="/openapi.json"
-        if settings.is_development
-        else None,
+        openapi_version="3.0.3",
+        openapi_url="/openapi.json" if settings.is_development else None
     )
 
     # Add security middleware

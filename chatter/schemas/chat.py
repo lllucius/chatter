@@ -1,7 +1,7 @@
 """Chat schemas for request/response models."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -131,8 +131,11 @@ class ConversationWithMessages(ConversationResponse):
     """Schema for conversation with messages."""
 
     messages: list[MessageResponse] = Field(
-        default=[], description="Conversation messages"
+        default_factory=list, description="Conversation messages"
     )
+
+
+WorkflowType = Literal["plain", "rag", "tools", "full"]
 
 
 class ChatRequest(BaseModel):
@@ -147,6 +150,17 @@ class ChatRequest(BaseModel):
     )
     stream: bool = Field(
         default=False, description="Enable streaming response"
+    )
+
+    # Workflow selection (preferred)
+    workflow: WorkflowType = Field(
+        default="plain",
+        description="Workflow type: plain, rag, tools, or full (rag + tools)",
+    )
+
+    # Provider override (optional)
+    provider: str | None = Field(
+        None, description="Override LLM provider for this request"
     )
 
     # Optional overrides

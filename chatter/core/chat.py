@@ -1,117 +1,95 @@
-"""Chat service for conversation management."""
+"""Core chat service orchestrating conversations, messages, and workflows."""
 
-import uuid
+from __future__ import annotations
+
 from collections.abc import AsyncGenerator
-from datetime import UTC, datetime
+from typing import Any
 
-from sqlalchemy import desc, select
+from langchain_core.messages import AIMessage, BaseMessage
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
+from chatter.core.langgraph import ConversationState, workflow_manager
 from chatter.models.conversation import (
     Conversation,
+    ConversationStatus,
     Message,
-    MessageRole,
 )
-from chatter.models.profile import Profile
+from chatter.schemas.chat import ChatRequest
 from chatter.schemas.chat import (
-    ChatRequest,
-    ConversationCreate,
-    ConversationUpdate,
+    ConversationCreate as ConversationCreateSchema,
 )
+from chatter.schemas.chat import (
+    ConversationUpdate as ConversationUpdateSchema,
+)
+from chatter.schemas.chat import StreamingChatChunk
 from chatter.services.llm import LLMProviderError, LLMService
+from chatter.services.mcp import BuiltInTools, mcp_service
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
 
 class ChatError(Exception):
-    """Chat service error."""
-
-    pass
+    """Chat error for invalid operations or failed processing."""
 
 
-class ConversationNotFoundError(ChatError):
-    """Conversation not found error."""
-
-    pass
+class ConversationNotFoundError(Exception):
+    """Raised when a conversation is not found or inaccessible."""
 
 
 class ChatService:
-    """Service for managing conversations and chat interactions."""
+    """Service layer to manage conversations, messages, and chat interactions."""
 
-    def __init__(self, session: AsyncSession, llm_service: LLMService):
-        """Initialize chat service.
-
-        Args:
-            session: Database session
-            llm_service: LLM service instance
-        """
+    def __init__(self, session: AsyncSession, llm_service: LLMService) -> None:
         self.session = session
         self.llm_service = llm_service
 
+    # ------------
+    # Conversation CRUD
+    # ------------
+
     async def create_conversation(
-        self, user_id: str, conversation_data: ConversationCreate
+        self, user_id: str, data: ConversationCreateSchema
     ) -> Conversation:
-        """Create a new conversation.
-
-        Args:
-            user_id: User ID
-            conversation_data: Conversation creation data
-
-        Returns:
-            Created conversation
-        """
-        # Get profile if specified
-        profile = None
-        if conversation_data.profile_id:
-            result = await self.session.execute(
-                select(Profile).where(
-                    Profile.id == conversation_data.profile_id,
-                    Profile.owner_id == user_id,
-                )
-            )
-            profile = result.scalar_one_or_none()
-            if not profile:
-                raise ChatError(
-                    "Profile not found or not accessible"
-                ) from None
-
-        # Create conversation
-        conversation = Conversation(
+        """Create a new conversation for a user."""
+        conv = Conversation(
             user_id=user_id,
-            profile_id=profile.id if profile else None,
-            title=conversation_data.title,
-            description=conversation_data.description,
-            system_prompt=conversation_data.system_prompt,
-            enable_retrieval=conversation_data.enable_retrieval,
+            title=data.title,
+            description=data.description,
+            status=ConversationStatus.ACTIVE,
+            profile_id=data.profile_id,
+            system_prompt=data.system_prompt,
+            enable_retrieval=bool(data.enable_retrieval),
+        )
+        self.session.add(conv)
+        await self.session.flush()
+        await self.session.refresh(conv)
+        return conv
+
+    async def list_conversations(
+        self, user_id: str, limit: int = 50, offset: int = 0
+    ) -> tuple[list[Conversation], int]:
+        """List conversations for a user with pagination."""
+        from sqlalchemy import func, select
+
+        q = (
+            select(Conversation)
+            .where(Conversation.user_id == user_id)
+            .order_by(Conversation.created_at.desc())
+        )
+        total_q = select(func.count()).select_from(
+            select(Conversation.id)
+            .where(Conversation.user_id == user_id)
+            .subquery()
         )
 
-        # Set LLM configuration from profile if available
-        if profile:
-            conversation.llm_provider = profile.llm_provider
-            conversation.llm_model = profile.llm_model
-            conversation.temperature = profile.temperature
-            conversation.max_tokens = profile.max_tokens
-            conversation.context_window = profile.context_window
-            conversation.memory_enabled = profile.memory_enabled
-            conversation.memory_strategy = profile.memory_strategy
-            conversation.enable_retrieval = profile.enable_retrieval
-            conversation.retrieval_limit = profile.retrieval_limit
-            conversation.retrieval_score_threshold = (
-                profile.retrieval_score_threshold
-            )
+        result = await self.session.execute(q.limit(limit).offset(offset))
+        conversations: list[Conversation] = list(result.scalars().all())
 
-        self.session.add(conversation)
-        await self.session.commit()
-        await self.session.refresh(conversation)
+        total_result = await self.session.execute(total_q)
+        total = int(total_result.scalar() or 0)
 
-        logger.info(
-            "Conversation created",
-            conversation_id=conversation.id,
-            user_id=user_id,
-        )
-        return conversation
+        return conversations, total
 
     async def get_conversation(
         self,
@@ -119,648 +97,480 @@ class ChatService:
         user_id: str,
         include_messages: bool = False,
     ) -> Conversation | None:
-        """Get conversation by ID.
+        """Get a conversation by ID if it belongs to the user."""
+        from sqlalchemy import select
+        from sqlalchemy.orm import selectinload
 
-        Args:
-            conversation_id: Conversation ID
-            user_id: User ID (for access control)
-            include_messages: Whether to include messages
-
-        Returns:
-            Conversation if found, None otherwise
-        """
-        query = select(Conversation).where(
-            Conversation.id == conversation_id,
-            Conversation.user_id == user_id,
+        q = select(Conversation).where(
+            Conversation.id == conversation_id, Conversation.user_id == user_id
         )
-
         if include_messages:
-            query = query.options(selectinload(Conversation.messages))
+            q = q.options(selectinload(Conversation.messages))
 
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none()
-
-    async def list_conversations(
-        self, user_id: str, limit: int = 20, offset: int = 0
-    ) -> tuple[list[Conversation], int]:
-        """List user's conversations.
-
-        Args:
-            user_id: User ID
-            limit: Number of conversations to return
-            offset: Offset for pagination
-
-        Returns:
-            Tuple of (conversations, total_count)
-        """
-        # Get conversations
-        result = await self.session.execute(
-            select(Conversation)
-            .where(Conversation.user_id == user_id)
-            .order_by(desc(Conversation.updated_at))
-            .limit(limit)
-            .offset(offset)
-        )
-        conversations = result.scalars().all()
-
-        # Get total count
-        count_result = await self.session.execute(
-            select(Conversation).where(Conversation.user_id == user_id)
-        )
-        total_count = len(count_result.scalars().all())
-
-        return list(conversations), total_count
+        res = await self.session.execute(q)
+        conv = res.scalars().first()
+        return conv
 
     async def update_conversation(
         self,
         conversation_id: str,
         user_id: str,
-        update_data: ConversationUpdate,
+        update: ConversationUpdateSchema,
     ) -> Conversation:
-        """Update conversation.
+        """Update conversation metadata."""
+        conv = await self.get_conversation(conversation_id, user_id)
+        if not conv:
+            raise ConversationNotFoundError()
 
-        Args:
-            conversation_id: Conversation ID
-            user_id: User ID (for access control)
-            update_data: Update data
+        if update.title is not None:
+            conv.title = update.title
+        if update.description is not None:
+            conv.description = update.description
+        if update.status is not None:
+            conv.status = update.status
 
-        Returns:
-            Updated conversation
+        await self.session.flush()
+        await self.session.refresh(conv)
+        return conv
 
-        Raises:
-            ConversationNotFoundError: If conversation not found
-        """
-        conversation = await self.get_conversation(
-            conversation_id, user_id
-        )
-        if not conversation:
-            raise ConversationNotFoundError(
-                "Conversation not found"
-            ) from None
-
-        # Update fields
-        update_dict = update_data.model_dump(exclude_unset=True)
-        for field, value in update_dict.items():
-            setattr(conversation, field, value)
-
-        await self.session.commit()
-        await self.session.refresh(conversation)
-
-        logger.info(
-            "Conversation updated", conversation_id=conversation_id
-        )
-        return conversation
-
-    async def delete_conversation(
-        self, conversation_id: str, user_id: str
-    ) -> bool:
-        """Delete conversation.
-
-        Args:
-            conversation_id: Conversation ID
-            user_id: User ID (for access control)
-
-        Returns:
-            True if deleted successfully
-
-        Raises:
-            ConversationNotFoundError: If conversation not found
-        """
-        conversation = await self.get_conversation(
-            conversation_id, user_id
-        )
-        if not conversation:
-            raise ConversationNotFoundError(
-                "Conversation not found"
-            ) from None
-
-        await self.session.delete(conversation)
-        await self.session.commit()
-
-        logger.info(
-            "Conversation deleted", conversation_id=conversation_id
-        )
-        return True
-
-    async def add_message(
-        self,
-        conversation_id: str,
-        user_id: str,
-        role: MessageRole,
-        content: str,
-        **metadata,
-    ) -> Message:
-        """Add message to conversation.
-
-        Args:
-            conversation_id: Conversation ID
-            user_id: User ID (for access control)
-            role: Message role
-            content: Message content
-            **metadata: Additional metadata
-
-        Returns:
-            Created message
-
-        Raises:
-            ConversationNotFoundError: If conversation not found
-        """
-        conversation = await self.get_conversation(
-            conversation_id, user_id
-        )
-        if not conversation:
-            raise ConversationNotFoundError(
-                "Conversation not found"
-            ) from None
-
-        # Get next sequence number
-        last_message_result = await self.session.execute(
-            select(Message)
-            .where(Message.conversation_id == conversation_id)
-            .order_by(desc(Message.sequence_number))
-            .limit(1)
-        )
-        last_message = last_message_result.scalar_one_or_none()
-        sequence_number = (
-            (last_message.sequence_number + 1) if last_message else 1
-        )
-
-        # Create message
-        message = Message(
-            conversation_id=conversation_id,
-            role=role,
-            content=content,
-            sequence_number=sequence_number,
-            **metadata,
-        )
-
-        self.session.add(message)
-
-        # Update conversation stats
-        conversation.message_count = sequence_number
-        conversation.last_message_at = datetime.now(UTC)
-
-        await self.session.commit()
-        await self.session.refresh(message)
-
-        return message
-
-    async def get_conversation_messages(
-        self,
-        conversation_id: str,
-        user_id: str,
-        limit: int | None = None,
-    ) -> list[Message]:
-        """Get conversation messages.
-
-        Args:
-            conversation_id: Conversation ID
-            user_id: User ID (for access control)
-            limit: Maximum number of messages to return
-
-        Returns:
-            List of messages
-
-        Raises:
-            ConversationNotFoundError: If conversation not found
-        """
-        conversation = await self.get_conversation(
-            conversation_id, user_id
-        )
-        if not conversation:
-            raise ConversationNotFoundError(
-                "Conversation not found"
-            ) from None
-
-        query = (
-            select(Message)
-            .where(Message.conversation_id == conversation_id)
-            .order_by(Message.sequence_number)
-        )
-
-        if limit:
-            query = query.limit(limit)
-
-        result = await self.session.execute(query)
-        return list(result.scalars().all())
-
-    async def chat(
-        self, user_id: str, chat_request: ChatRequest
-    ) -> tuple[Conversation, Message]:
-        """Process chat request and generate response.
-
-        Args:
-            user_id: User ID
-            chat_request: Chat request data
-
-        Returns:
-            Tuple of (conversation, assistant_message)
-        """
-        # Get or create conversation
-        if chat_request.conversation_id:
-            conversation = await self.get_conversation(
-                chat_request.conversation_id, user_id
-            )
-            if not conversation:
-                raise ConversationNotFoundError(
-                    "Conversation not found"
-                ) from None
-        else:
-            # Create new conversation
-            conversation_data = ConversationCreate(
-                title=f"Chat {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-                profile_id=chat_request.profile_id,
-                enable_retrieval=chat_request.enable_retrieval or False,
-                system_prompt=chat_request.system_prompt_override,
-            )
-            conversation = await self.create_conversation(
-                user_id, conversation_data
-            )
-
-        # Add user message
-        await self.add_message(
-            conversation.id,
-            user_id,
-            MessageRole.USER,
-            chat_request.message,
-        )
-
-        # Get conversation history
-        messages = await self.get_conversation_messages(
-            conversation.id, user_id
-        )
-
-        # Get LLM provider
-        provider = None
-        if conversation.profile_id:
-            profile_result = await self.session.execute(
-                select(Profile).where(
-                    Profile.id == conversation.profile_id
-                )
-            )
-            profile = profile_result.scalar_one_or_none()
-            if profile:
-                provider = (
-                    self.llm_service.create_provider_from_profile(
-                        profile
-                    )
-                )
-
-        if not provider:
-            provider = self.llm_service.get_default_provider()
-
-        # Convert to LangChain format
-        langchain_messages = (
-            self.llm_service.convert_conversation_to_messages(
-                conversation, messages
-            )
-        )
-
-        # Generate response
-        try:
-            generation_kwargs = {}
-            if chat_request.temperature is not None:
-                generation_kwargs[
-                    "temperature"
-                ] = chat_request.temperature
-            if chat_request.max_tokens is not None:
-                generation_kwargs[
-                    "max_tokens"
-                ] = chat_request.max_tokens
-
-            (
-                response_content,
-                usage_info,
-            ) = await self.llm_service.generate_response(
-                langchain_messages, provider, **generation_kwargs
-            )
-
-            # Add assistant message
-            assistant_message = await self.add_message(
-                conversation.id,
-                user_id,
-                MessageRole.ASSISTANT,
-                response_content,
-                model_used=usage_info.get("model"),
-                provider_used=usage_info.get("provider"),
-                prompt_tokens=usage_info.get("prompt_tokens"),
-                completion_tokens=usage_info.get("completion_tokens"),
-                total_tokens=usage_info.get("total_tokens"),
-                response_time_ms=usage_info.get("response_time_ms"),
-            )
-
-            # Update conversation stats
-            if usage_info.get("total_tokens"):
-                conversation.total_tokens += usage_info["total_tokens"]
-
-            await self.session.commit()
-            await self.session.refresh(conversation)
-
-            return conversation, assistant_message
-
-        except LLMProviderError as e:
-            logger.error(
-                "LLM generation failed",
-                error=str(e),
-                conversation_id=conversation.id,
-            )
-            raise ChatError(
-                f"Failed to generate response: {str(e)}"
-            ) from e
-
-    async def chat_streaming(
-        self, user_id: str, chat_request: ChatRequest
-    ) -> AsyncGenerator[dict, None]:
-        """Process chat request with streaming response.
-
-        Args:
-            user_id: User ID
-            chat_request: Chat request data
-
-        Yields:
-            Streaming response chunks
-        """
-        # Get or create conversation
-        if chat_request.conversation_id:
-            conversation = await self.get_conversation(
-                chat_request.conversation_id, user_id
-            )
-            if not conversation:
-                raise ConversationNotFoundError(
-                    "Conversation not found"
-                ) from None
-        else:
-            # Create new conversation
-            conversation_data = ConversationCreate(
-                title=f"Chat {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-                profile_id=chat_request.profile_id,
-                enable_retrieval=chat_request.enable_retrieval or False,
-                system_prompt=chat_request.system_prompt_override,
-            )
-            conversation = await self.create_conversation(
-                user_id, conversation_data
-            )
-
-        # Add user message
-        await self.add_message(
-            conversation.id,
-            user_id,
-            MessageRole.USER,
-            chat_request.message,
-        )
-
-        # Get conversation history
-        messages = await self.get_conversation_messages(
-            conversation.id, user_id
-        )
-
-        # Get LLM provider
-        provider = None
-        if conversation.profile_id:
-            profile_result = await self.session.execute(
-                select(Profile).where(
-                    Profile.id == conversation.profile_id
-                )
-            )
-            profile = profile_result.scalar_one_or_none()
-            if profile:
-                provider = (
-                    self.llm_service.create_provider_from_profile(
-                        profile
-                    )
-                )
-
-        if not provider:
-            provider = self.llm_service.get_default_provider()
-
-        # Convert to LangChain format
-        langchain_messages = (
-            self.llm_service.convert_conversation_to_messages(
-                conversation, messages
-            )
-        )
-
-        # Generate streaming response
-        try:
-            generation_kwargs = {}
-            if chat_request.temperature is not None:
-                generation_kwargs[
-                    "temperature"
-                ] = chat_request.temperature
-            if chat_request.max_tokens is not None:
-                generation_kwargs[
-                    "max_tokens"
-                ] = chat_request.max_tokens
-
-            full_content = ""
-            message_id = str(uuid.uuid4())
-
-            async for (
-                chunk
-            ) in self.llm_service.generate_streaming_response(
-                langchain_messages, provider, **generation_kwargs
-            ):
-                if chunk["type"] == "token":
-                    full_content += chunk["content"]
-                    yield {
-                        "type": "token",
-                        "content": chunk["content"],
-                        "conversation_id": conversation.id,
-                        "message_id": message_id,
-                    }
-                elif chunk["type"] == "usage":
-                    # Save assistant message
-                    usage_info = chunk["usage"]
-                    assistant_message = await self.add_message(
-                        conversation.id,
-                        user_id,
-                        MessageRole.ASSISTANT,
-                        full_content,
-                        model_used=usage_info.get("model"),
-                        provider_used=usage_info.get("provider"),
-                        response_time_ms=usage_info.get(
-                            "response_time_ms"
-                        ),
-                    )
-
-                    # Update conversation stats
-                    await self.session.commit()
-                    await self.session.refresh(conversation)
-
-                    yield {
-                        "type": "usage",
-                        "usage": usage_info,
-                        "conversation_id": conversation.id,
-                        "message_id": assistant_message.id,
-                    }
-                elif chunk["type"] == "end":
-                    yield {
-                        "type": "end",
-                        "conversation_id": conversation.id,
-                        "message_id": message_id,
-                    }
-                elif chunk["type"] == "error":
-                    yield {
-                        "type": "error",
-                        "error": chunk["error"],
-                        "conversation_id": conversation.id,
-                    }
-
-        except LLMProviderError as e:
-            logger.error(
-                "Streaming generation failed",
-                error=str(e),
-                conversation_id=conversation.id,
-            )
-            yield {
-                "type": "error",
-                "error": f"Failed to generate response: {str(e)}",
-                "conversation_id": conversation.id,
-            }
-
-    async def chat_with_workflow(
-        self,
-        user_id: str,
-        chat_request: ChatRequest,
-        workflow_type: str = "basic",
-    ) -> tuple[Conversation, Message]:
-        """Send a chat message using LangGraph workflows.
-
-        Args:
-            user_id: User ID
-            chat_request: Chat request data
-            workflow_type: Type of workflow ("basic", "rag", "tools")
-
-        Returns:
-            Tuple of conversation and assistant message
-        """
-        from chatter.core.langgraph import (
-            ConversationState,
-            workflow_manager,
-        )
-        from chatter.core.vector_store import vector_store_manager
-        from chatter.services.embeddings import EmbeddingService
-
-        # Get conversation
-        conversation = await self._get_conversation(
-            chat_request.conversation_id, user_id
-        )
-
-        # Create user message
-        user_message = Message(
-            conversation_id=conversation.id,
-            role=MessageRole.USER,
-            content=chat_request.message,
-            metadata={"workflow_type": workflow_type},
-        )
-        self.session.add(user_message)
+    async def delete_conversation(self, conversation_id: str, user_id: str) -> None:
+        """Delete a conversation and its messages."""
+        conv = await self.get_conversation(conversation_id, user_id)
+        if not conv:
+            raise ConversationNotFoundError()
+        await self.session.delete(conv)
         await self.session.flush()
 
+    async def get_conversation_messages(
+        self, conversation_id: str, user_id: str
+    ) -> list[Message]:
+        """Return messages ordered by sequence number."""
+        conv = await self.get_conversation(conversation_id, user_id, include_messages=True)
+        if not conv:
+            raise ConversationNotFoundError()
+
+        # Ensure ordered by sequence_number
+        return sorted(conv.messages, key=lambda m: m.sequence_number)
+
+    # ------------
+    # Message CRUD
+    # ------------
+
+    async def add_message_to_conversation(
+        self, conversation_id: str, user_id: str, content: str, role: str = "user"
+    ) -> Message:
+        """Append a message to the conversation."""
+        conv = await self.get_conversation(conversation_id, user_id, include_messages=True)
+        if not conv:
+            raise ConversationNotFoundError()
+
+        seq = 1 + max((m.sequence_number for m in conv.messages), default=0)
+        msg = Message(
+            conversation_id=conv.id,
+            role=role,
+            content=content,
+            sequence_number=seq,
+        )
+        self.session.add(msg)
+
+        # Update aggregates (basic: message_count)
+        conv.message_count = (conv.message_count or 0) + 1
+
+        await self.session.flush()
+        await self.session.refresh(msg)
+        return msg
+
+    async def delete_message(self, conversation_id: str, message_id: str, user_id: str) -> None:
+        """Delete a message if it belongs to the user and conversation."""
+        from sqlalchemy import select
+
+        conv = await self.get_conversation(conversation_id, user_id)
+        if not conv:
+            raise ConversationNotFoundError()
+
+        q = select(Message).where(Message.id == message_id, Message.conversation_id == conv.id)
+        res = await self.session.execute(q)
+        msg = res.scalars().first()
+        if not msg:
+            raise ConversationNotFoundError()
+
+        await self.session.delete(msg)
+        await self.session.flush()
+
+    # ------------
+    # Plain chat (legacy/basic)
+    # ------------
+
+    async def chat(self, user_id: str, chat_request: ChatRequest) -> tuple[Conversation, Message]:
+        """Basic chat without workflows."""
+        # Ensure conversation
+        conversation = None
+        if chat_request.conversation_id:
+            conversation = await self.get_conversation(chat_request.conversation_id, user_id, include_messages=True)
+        if not conversation:
+            # Create a default conversation
+            conversation = await self.create_conversation(
+                user_id,
+                ConversationCreateSchema(
+                    title="New Conversation",
+                    description=None,
+                    profile_id=chat_request.profile_id,
+                    system_prompt=chat_request.system_prompt_override,
+                    enable_retrieval=bool(chat_request.enable_retrieval),
+                ),
+            )
+
+        # User message
+        user_msg = await self.add_message_to_conversation(conversation.id, user_id, chat_request.message, role="user")
+
+        # Prepare messages for LLM
+        msgs: list[BaseMessage] = self.llm_service.convert_conversation_to_messages(
+            conversation, [*conversation.messages, user_msg]
+        )
+
+        # Provider
         try:
-            # Get provider
-            provider_name = conversation.llm_provider or "openai"
+            provider = (
+                self.llm_service.get_provider(chat_request.provider)
+                if chat_request.provider
+                else self.llm_service.get_default_provider()
+            )
+        except LLMProviderError as e:
+            raise ChatError(str(e)) from e
 
-            # Build conversation history
-            conversation_messages = (
-                await self._build_conversation_messages(
-                    conversation, chat_request.message
-                )
+        # Overrides
+        kwargs: dict[str, Any] = {}
+        if chat_request.temperature is not None:
+            kwargs["temperature"] = chat_request.temperature
+        if chat_request.max_tokens is not None:
+            kwargs["max_tokens"] = chat_request.max_tokens
+
+        content, usage = await self.llm_service.generate_response(msgs, provider=provider, **kwargs)
+
+        # Persist assistant message
+        assistant_msg = await self.add_message_to_conversation(conversation.id, user_id, content, role="assistant")
+
+        # Store usage metrics when available
+        self._apply_usage_to_message(assistant_msg, usage, provider)
+
+        await self.session.flush()
+        await self.session.refresh(conversation)
+        return conversation, assistant_msg
+
+    async def chat_streaming(self, user_id: str, chat_request: ChatRequest) -> AsyncGenerator[dict[str, Any], None]:
+        """Basic streaming without workflows (token-level from provider)."""
+        # Ensure conversation
+        conversation = None
+        if chat_request.conversation_id:
+            conversation = await self.get_conversation(chat_request.conversation_id, user_id, include_messages=True)
+        if not conversation:
+            conversation = await self.create_conversation(
+                user_id,
+                ConversationCreateSchema(
+                    title="New Conversation",
+                    description=None,
+                    profile_id=chat_request.profile_id,
+                    system_prompt=chat_request.system_prompt_override,
+                    enable_retrieval=bool(chat_request.enable_retrieval),
+                ),
             )
 
-            # Create workflow based on type
-            if workflow_type == "rag":
-                # Create retriever for RAG workflow
-                embedding_service = EmbeddingService()
-                embeddings = embedding_service.get_default_embeddings()
-                vector_store = vector_store_manager.get_default_store(
-                    embeddings
-                )
-                retriever = vector_store.as_retriever(
-                    search_kwargs={"k": 5}
-                )
+        # Persist user message first
+        user_msg = await self.add_message_to_conversation(conversation.id, user_id, chat_request.message, role="user")
 
-                workflow = (
-                    await self.llm_service.create_langgraph_workflow(
-                        provider_name=provider_name,
-                        workflow_type="rag",
-                        system_message=conversation.system_prompt,
-                        retriever=retriever,
-                    )
-                )
-            else:
-                workflow = (
-                    await self.llm_service.create_langgraph_workflow(
-                        provider_name=provider_name,
-                        workflow_type=workflow_type,
-                        system_message=conversation.system_prompt,
-                    )
-                )
+        # Prepare messages for LLM (include the just-added user_msg explicitly)
+        msgs: list[BaseMessage] = self.llm_service.convert_conversation_to_messages(
+            conversation, [*conversation.messages, user_msg]
+        )
 
-            # Prepare initial state
-            initial_state: ConversationState = {
-                "messages": conversation_messages,
-                "user_id": user_id,
-                "conversation_id": str(conversation.id),
-                "retrieval_context": None,
-                "tool_calls": [],
-                "metadata": {
-                    "workflow_type": workflow_type,
-                    "provider": provider_name,
-                },
-            }
+        # Provider
+        try:
+            provider = (
+                self.llm_service.get_provider(chat_request.provider)
+                if chat_request.provider
+                else self.llm_service.get_default_provider()
+            )
+        except LLMProviderError as e:
+            yield {"type": "error", "error": str(e)}
+            return
 
-            # Run workflow
-            result_state = await workflow_manager.run_workflow(
-                workflow=workflow,
-                initial_state=initial_state,
-                thread_id=f"{conversation.id}_{workflow_type}",
+        # Overrides
+        kwargs: dict[str, Any] = {}
+        if chat_request.temperature is not None:
+            kwargs["temperature"] = chat_request.temperature
+        if chat_request.max_tokens is not None:
+            kwargs["max_tokens"] = chat_request.max_tokens
+
+        # Buffer for final assistant content (for persistence)
+        full_content = ""
+
+        async for chunk in self.llm_service.generate_streaming_response(
+            msgs, provider=provider, **kwargs
+        ):
+            if chunk.get("type") == "token" and chunk.get("content"):
+                full_content += chunk["content"]
+            yield chunk
+
+        # Persist the assistant message if any content accumulated
+        if full_content:
+            await self.add_message_to_conversation(conversation.id, user_id, full_content, role="assistant")
+            await self.session.flush()
+
+    # ------------
+    # Unified workflow chat
+    # ------------
+
+    async def chat_with_workflow(
+        self, user_id: str, chat_request: ChatRequest, workflow_type: str = "basic"
+    ) -> tuple[Conversation, Message]:
+        """Run a chat using LangGraph workflows: basic/plain, rag, tools, full."""
+        # Normalize workflow_type
+        mode = self._normalize_workflow(workflow_type)
+
+        # Ensure conversation
+        conversation = None
+        if chat_request.conversation_id:
+            conversation = await self.get_conversation(chat_request.conversation_id, user_id, include_messages=True)
+        if not conversation:
+            conversation = await self.create_conversation(
+                user_id,
+                ConversationCreateSchema(
+                    title="New Conversation",
+                    description=None,
+                    profile_id=chat_request.profile_id,
+                    system_prompt=chat_request.system_prompt_override,
+                    enable_retrieval=bool(chat_request.enable_retrieval),
+                ),
             )
 
-            # Extract assistant response
-            assistant_response = result_state["messages"][-1]
+        # Persist user message
+        user_msg = await self.add_message_to_conversation(conversation.id, user_id, chat_request.message, role="user")
 
-            # Create assistant message
-            assistant_message = Message(
-                conversation_id=conversation.id,
-                role=MessageRole.ASSISTANT,
-                content=assistant_response.content,
-                metadata={
-                    "workflow_type": workflow_type,
-                    "tool_calls": result_state.get("tool_calls", []),
-                    "retrieval_context": result_state.get(
-                        "retrieval_context"
-                    ),
-                },
-                provider_used=provider_name,
+        # Prepare lc messages
+        history_msgs: list[BaseMessage] = self.llm_service.convert_conversation_to_messages(
+            conversation, conversation.messages + [user_msg]
+        )
+
+        # Resolve provider name (string) for workflow factory
+        provider_name = await self._resolve_provider_name(conversation, chat_request)
+
+        # Resolve retriever/tools as needed
+        retriever = await self._maybe_get_retriever(conversation, chat_request) if mode in ("rag", "full") else None
+        tools = await self._maybe_get_tools(conversation, chat_request) if mode in ("tools", "full") else None
+
+        # Build workflow
+        workflow = await self.llm_service.create_langgraph_workflow(
+            provider_name=provider_name,
+            workflow_type=self._to_public_mode(mode),  # plain|rag|tools|full
+            system_message=chat_request.system_prompt_override or getattr(conversation, "system_prompt", None),
+            retriever=retriever,
+            tools=tools,
+            enable_memory=False,
+        )
+
+        # Initial state
+        initial_state: ConversationState = {
+            "messages": history_msgs,
+            "user_id": user_id,
+            "conversation_id": conversation.id,
+            "retrieval_context": None,
+            "tool_calls": [],
+            "metadata": {},
+            "conversation_summary": None,
+            "parent_conversation_id": None,
+            "branch_id": None,
+            "memory_context": {},
+            "workflow_template": None,
+            "a_b_test_group": None,
+        }
+
+        # Run the graph
+        result = await workflow_manager.run_workflow(
+            workflow=workflow, initial_state=initial_state, thread_id=conversation.id
+        )
+
+        # Get the last AI message from result state
+        ai_message = self._extract_last_ai_message(result.get("messages", []))
+        content = ai_message.content if isinstance(ai_message, AIMessage) else (str(ai_message) if ai_message else "")
+
+        # Persist assistant message
+        assistant = await self.add_message_to_conversation(conversation.id, user_id, content, role="assistant")
+
+        await self.session.flush()
+        await self.session.refresh(conversation)
+        return conversation, assistant
+
+    async def chat_workflow_streaming(
+        self, user_id: str, chat_request: ChatRequest, workflow_type: str = "basic"
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream workflow execution (coarse-grained, node-level, not token-level)."""
+        mode = self._normalize_workflow(workflow_type)
+
+        # Ensure conversation
+        conversation = None
+        if chat_request.conversation_id:
+            conversation = await self.get_conversation(chat_request.conversation_id, user_id, include_messages=True)
+        if not conversation:
+            conversation = await self.create_conversation(
+                user_id,
+                ConversationCreateSchema(
+                    title="New Conversation",
+                    description=None,
+                    profile_id=chat_request.profile_id,
+                    system_prompt=chat_request.system_prompt_override,
+                    enable_retrieval=bool(chat_request.enable_retrieval),
+                ),
             )
-            self.session.add(assistant_message)
 
-            # Update conversation stats
-            conversation.message_count += 2  # user + assistant
-            conversation.updated_at = datetime.now(UTC)
+        # Persist user message
+        user_msg = await self.add_message_to_conversation(conversation.id, user_id, chat_request.message, role="user")
 
-            await self.session.commit()
-            await self.session.refresh(conversation)
+        # Prepare lc messages
+        history_msgs: list[BaseMessage] = self.llm_service.convert_conversation_to_messages(
+            conversation, conversation.messages + [user_msg]
+        )
 
-            logger.info(
-                "Workflow chat completed",
-                conversation_id=conversation.id,
-                workflow_type=workflow_type,
-                user_id=user_id,
-            )
+        # Provider for workflow construction
+        provider_name = await self._resolve_provider_name(conversation, chat_request)
 
-            return conversation, assistant_message
+        # Resolve retriever/tools
+        retriever = await self._maybe_get_retriever(conversation, chat_request) if mode in ("rag", "full") else None
+        tools = await self._maybe_get_tools(conversation, chat_request) if mode in ("tools", "full") else None
+
+        # Build workflow
+        workflow = await self.llm_service.create_langgraph_workflow(
+            provider_name=provider_name,
+            workflow_type=self._to_public_mode(mode),
+            system_message=chat_request.system_prompt_override or getattr(conversation, "system_prompt", None),
+            retriever=retriever,
+            tools=tools,
+            enable_memory=False,
+        )
+
+        # Initial state
+        initial_state: ConversationState = {
+            "messages": history_msgs,
+            "user_id": user_id,
+            "conversation_id": conversation.id,
+            "retrieval_context": None,
+            "tool_calls": [],
+            "metadata": {},
+            "conversation_summary": None,
+            "parent_conversation_id": None,
+            "branch_id": None,
+            "memory_context": {},
+            "workflow_template": None,
+            "a_b_test_group": None,
+        }
+
+        # Stream the graph. This yields graph events rather than token chunks.
+        full_content = ""
+        try:
+            async for event in workflow_manager.stream_workflow(
+                workflow=workflow, initial_state=initial_state, thread_id=conversation.id
+            ):
+                # Try to extract any AIMessage appended in this event
+                values = event.get("values") or event.get("state") or {}
+                msgs = values.get("messages") if isinstance(values, dict) else None
+                if msgs:
+                    last_ai = self._extract_last_ai_message(msgs)
+                    if last_ai and isinstance(last_ai, AIMessage) and last_ai.content:
+                        # Emit as a single token chunk (coarse)
+                        full_content = last_ai.content
+                        yield {
+                            "type": "token",
+                            "content": last_ai.content,
+                            "conversation_id": conversation.id,
+                        }
+
+            # Emit usage summary placeholder (coarse streaming)
+            yield {"type": "usage", "usage": {"response_time_ms": None, "model": None, "provider": None}}
 
         except Exception as e:
-            await self.session.rollback()
-            logger.error(
-                "Workflow chat failed",
-                error=str(e),
-                conversation_id=conversation.id,
-                workflow_type=workflow_type,
-            )
-            raise ChatError(f"Workflow chat failed: {str(e)}") from e
+            logger.error("Workflow streaming failed", error=str(e))
+            yield {"type": "error", "error": str(e)}
+            return
 
-        finally:
-            # Clean up any resources if needed
+        # Persist final assistant message
+        if full_content:
+            await self.add_message_to_conversation(conversation.id, user_id, full_content, role="assistant")
+            await self.session.flush()
+
+    # ------------
+    # Helpers
+    # ------------
+
+    def _apply_usage_to_message(self, message: Message, usage: dict[str, Any], provider: Any) -> None:
+        """Attach usage fields to message when available."""
+        try:
+            if not usage:
+                return
+            message.model_used = usage.get("model")
+            message.provider_used = usage.get("provider")
+            message.response_time_ms = usage.get("response_time_ms")
+            message.prompt_tokens = usage.get("prompt_tokens")
+            message.completion_tokens = usage.get("completion_tokens")
+            message.total_tokens = usage.get("total_tokens")
+        except Exception:
+            # Best effort; don't fail chat on usage persistence
             pass
+
+    async def _resolve_provider_name(self, conversation: Conversation, chat_request: ChatRequest) -> str:
+        """Decide which provider name string to use to build the workflow ('openai', 'anthropic', ...)."""
+        # Prefer explicit request override
+        if chat_request.provider:
+            return chat_request.provider
+
+        # Then conversation setting if available
+        if getattr(conversation, "llm_provider", None):
+            return conversation.llm_provider  # type: ignore[return-value]
+
+        # Fall back to configured default or first available
+        available = self.llm_service.list_available_providers()
+        from chatter.config import settings as _settings
+
+        if getattr(_settings, "default_llm_provider", None) in available:
+            return _settings.default_llm_provider  # type: ignore[return-value]
+
+        if available:
+            return available[0]
+
+        # No providers configured
+        raise ChatError("No LLM providers available")
+
+    async def _maybe_get_retriever(self, conversation: Conversation, chat_request: ChatRequest) -> Any | None:
+        """Resolve a retriever instance, if any. Placeholder for integration."""
+        # Integrate your vector store / retriever wiring here.
+        # For now, return None to allow the workflow to proceed without context.
+        return None
+
+    async def _maybe_get_tools(self, conversation: Conversation, chat_request: ChatRequest) -> list[Any]:
+        """Return available tools (MCP + built-ins)."""
+        tools = await mcp_service.get_tools()
+        tools.extend(BuiltInTools.create_builtin_tools())
+        return tools
+
+    def _normalize_workflow(self, workflow_type: str) -> str:
+        """Map API workflow types to internal modes."""
+        m = (workflow_type or "").lower().strip()
+        if m in ("plain", "basic"):
+            return "plain"
+        if m in ("rag",):
+            return "rag"
+        if m in ("tools",):
+            return "tools"
+        if m in ("full", "rag+tools", "tools+rag"):
+            return "full"
+        return "plain"
+
+    def _to_public_mode(self, mode: str) -> str:
+        """Return the public mode string used by LLMService.create_langgraph_workflow."""
+        return {"plain": "plain", "rag": "rag", "tools": "tools", "full": "full"}.get(mode, "plain")
+
+    @staticmethod
+    def _extract_last_ai_message(messages: list[BaseMessage]) -> AIMessage | None:
+        """Return the last AIMessage in a list of messages."""
+        for msg in reversed(messages):
+            if isinstance(msg, AIMessage):
+                return msg
+        return None

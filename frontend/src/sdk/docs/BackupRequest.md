@@ -1,6 +1,6 @@
 # BackupRequest
 
-Request schema for creating a backup.
+Request schema for creating a backup via API.
 
 ## Properties
 

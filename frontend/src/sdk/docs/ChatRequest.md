@@ -10,6 +10,8 @@ Name | Type | Description | Notes
 **conversation_id** | **string** |  | [optional] [default to undefined]
 **profile_id** | **string** |  | [optional] [default to undefined]
 **stream** | **boolean** | Enable streaming response | [optional] [default to false]
+**workflow** | **string** | Workflow type: plain, rag, tools, or full (rag + tools) | [optional] [default to Workflow_plain]
+**provider** | **string** |  | [optional] [default to undefined]
 **temperature** | **number** |  | [optional] [default to undefined]
 **max_tokens** | **number** |  | [optional] [default to undefined]
 **enable_retrieval** | **boolean** |  | [optional] [default to undefined]
@@ -26,6 +28,8 @@ const instance: ChatRequest = {
     conversation_id,
     profile_id,
     stream,
+    workflow,
+    provider,
     temperature,
     max_tokens,
     enable_retrieval,

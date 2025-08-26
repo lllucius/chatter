@@ -1,6 +1,6 @@
 # ExportDataRequest
 
-Request schema for data export.
+Request schema for data export API.
 
 ## Properties
 

@@ -6,11 +6,7 @@ All URIs are relative to *http://localhost:8000*
 |------------- | ------------- | -------------|
 |[**addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost**](#addmessagetoconversationapiv1chatconversationsconversationidmessagespost) | **POST** /api/v1/chat/conversations/{conversation_id}/messages | Add Message To Conversation|
 |[**chatApiV1ChatChatPost**](#chatapiv1chatchatpost) | **POST** /api/v1/chat/chat | Chat|
-|[**chatStreamApiV1ChatChatStreamPost**](#chatstreamapiv1chatchatstreampost) | **POST** /api/v1/chat/chat/stream | Chat Stream|
-|[**createBasicWorkflowApiV1ChatWorkflowsBasicPost**](#createbasicworkflowapiv1chatworkflowsbasicpost) | **POST** /api/v1/chat/workflows/basic | Create Basic Workflow|
 |[**createConversationApiV1ChatConversationsPost**](#createconversationapiv1chatconversationspost) | **POST** /api/v1/chat/conversations | Create Conversation|
-|[**createRagWorkflowApiV1ChatWorkflowsRagPost**](#createragworkflowapiv1chatworkflowsragpost) | **POST** /api/v1/chat/workflows/rag | Create Rag Workflow|
-|[**createToolsWorkflowApiV1ChatWorkflowsToolsPost**](#createtoolsworkflowapiv1chatworkflowstoolspost) | **POST** /api/v1/chat/workflows/tools | Create Tools Workflow|
 |[**deleteConversationApiV1ChatConversationsConversationIdDelete**](#deleteconversationapiv1chatconversationsconversationiddelete) | **DELETE** /api/v1/chat/conversations/{conversation_id} | Delete Conversation|
 |[**deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete**](#deletemessageapiv1chatconversationsconversationidmessagesmessageiddelete) | **DELETE** /api/v1/chat/conversations/{conversation_id}/messages/{message_id} | Delete Message|
 |[**getAvailableToolsApiV1ChatToolsAvailableGet**](#getavailabletoolsapiv1chattoolsavailableget) | **GET** /api/v1/chat/tools/available | Get Available Tools|
@@ -21,27 +17,28 @@ All URIs are relative to *http://localhost:8000*
 |[**updateConversationApiV1ChatConversationsConversationIdPut**](#updateconversationapiv1chatconversationsconversationidput) | **PUT** /api/v1/chat/conversations/{conversation_id} | Update Conversation|
 
 # **addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost**
-> MessageResponse addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost()
+> MessageResponse addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(messageCreate)
 
-Add a new message to existing conversation.  Args:     conversation_id: Conversation ID     message: Message content     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created message
+Add a new message to existing conversation.
 
 ### Example
 
 ```typescript
 import {
     ChatApi,
-    Configuration
+    Configuration,
+    MessageCreate
 } from 'chatter-sdk';
 
 const configuration = new Configuration();
 const apiInstance = new ChatApi(configuration);
 
 let conversationId: string; // (default to undefined)
-let message: string; // (default to undefined)
+let messageCreate: MessageCreate; //
 
 const { status, data } = await apiInstance.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(
     conversationId,
-    message
+    messageCreate
 );
 ```
 
@@ -49,8 +46,8 @@ const { status, data } = await apiInstance.addMessageToConversationApiV1ChatConv
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
+| **messageCreate** | **MessageCreate**|  | |
 | **conversationId** | [**string**] |  | defaults to undefined|
-| **message** | [**string**] |  | defaults to undefined|
 
 
 ### Return type
@@ -63,7 +60,7 @@ const { status, data } = await apiInstance.addMessageToConversationApiV1ChatConv
 
 ### HTTP request headers
 
- - **Content-Type**: Not defined
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 
@@ -78,7 +75,7 @@ const { status, data } = await apiInstance.addMessageToConversationApiV1ChatConv
 # **chatApiV1ChatChatPost**
 > ChatResponse chatApiV1ChatChatPost(chatRequest)
 
-Send a chat message and get response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response with assistant message
+Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
 
 ### Example
 
@@ -117,119 +114,13 @@ const { status, data } = await apiInstance.chatApiV1ChatChatPost(
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Successful Response |  -  |
-|**422** | Validation Error |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **chatStreamApiV1ChatChatStreamPost**
-> any chatStreamApiV1ChatChatStreamPost(chatRequest)
-
-Send a chat message and get streaming response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Streaming response with chat chunks
-
-### Example
-
-```typescript
-import {
-    ChatApi,
-    Configuration,
-    ChatRequest
-} from 'chatter-sdk';
-
-const configuration = new Configuration();
-const apiInstance = new ChatApi(configuration);
-
-let chatRequest: ChatRequest; //
-
-const { status, data } = await apiInstance.chatStreamApiV1ChatChatStreamPost(
-    chatRequest
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **chatRequest** | **ChatRequest**|  | |
-
-
-### Return type
-
-**any**
-
-### Authorization
-
-[HTTPBearer](../README.md#HTTPBearer)
-
-### HTTP request headers
-
- - **Content-Type**: application/json
  - **Accept**: application/json, text/event-stream
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-|**200** | Streaming chat response in Server-Sent Events format |  -  |
-|**422** | Validation Error |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **createBasicWorkflowApiV1ChatWorkflowsBasicPost**
-> ChatResponse createBasicWorkflowApiV1ChatWorkflowsBasicPost(chatRequest)
-
-Create and run a basic conversation workflow with LangGraph.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from workflow
-
-### Example
-
-```typescript
-import {
-    ChatApi,
-    Configuration,
-    ChatRequest
-} from 'chatter-sdk';
-
-const configuration = new Configuration();
-const apiInstance = new ChatApi(configuration);
-
-let chatRequest: ChatRequest; //
-
-const { status, data } = await apiInstance.createBasicWorkflowApiV1ChatWorkflowsBasicPost(
-    chatRequest
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **chatRequest** | **ChatRequest**|  | |
-
-
-### Return type
-
-**ChatResponse**
-
-### Authorization
-
-[HTTPBearer](../README.md#HTTPBearer)
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Successful Response |  -  |
+|**200** | Chat response as JSON or streaming SSE when stream&#x3D;true |  -  |
 |**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -287,116 +178,10 @@ const { status, data } = await apiInstance.createConversationApiV1ChatConversati
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **createRagWorkflowApiV1ChatWorkflowsRagPost**
-> ChatResponse createRagWorkflowApiV1ChatWorkflowsRagPost(chatRequest)
-
-Create and run a RAG workflow with document retrieval.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from RAG workflow
-
-### Example
-
-```typescript
-import {
-    ChatApi,
-    Configuration,
-    ChatRequest
-} from 'chatter-sdk';
-
-const configuration = new Configuration();
-const apiInstance = new ChatApi(configuration);
-
-let chatRequest: ChatRequest; //
-
-const { status, data } = await apiInstance.createRagWorkflowApiV1ChatWorkflowsRagPost(
-    chatRequest
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **chatRequest** | **ChatRequest**|  | |
-
-
-### Return type
-
-**ChatResponse**
-
-### Authorization
-
-[HTTPBearer](../README.md#HTTPBearer)
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Successful Response |  -  |
-|**422** | Validation Error |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **createToolsWorkflowApiV1ChatWorkflowsToolsPost**
-> ChatResponse createToolsWorkflowApiV1ChatWorkflowsToolsPost(chatRequest)
-
-Create and run a workflow with tool calling capabilities.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from tools workflow
-
-### Example
-
-```typescript
-import {
-    ChatApi,
-    Configuration,
-    ChatRequest
-} from 'chatter-sdk';
-
-const configuration = new Configuration();
-const apiInstance = new ChatApi(configuration);
-
-let chatRequest: ChatRequest; //
-
-const { status, data } = await apiInstance.createToolsWorkflowApiV1ChatWorkflowsToolsPost(
-    chatRequest
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **chatRequest** | **ChatRequest**|  | |
-
-
-### Return type
-
-**ChatResponse**
-
-### Authorization
-
-[HTTPBearer](../README.md#HTTPBearer)
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Successful Response |  -  |
-|**422** | Validation Error |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
 # **deleteConversationApiV1ChatConversationsConversationIdDelete**
 > ConversationDeleteResponse deleteConversationApiV1ChatConversationsConversationIdDelete()
 
-Delete conversation.  Args:     conversation_id: Conversation ID     request: Delete request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+Delete conversation.
 
 ### Example
 
@@ -448,7 +233,7 @@ const { status, data } = await apiInstance.deleteConversationApiV1ChatConversati
 # **deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete**
 > { [key: string]: any; } deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete()
 
-Delete a message from conversation.  Args:     conversation_id: Conversation ID     message_id: Message ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+Delete a message from conversation.
 
 ### Example
 
@@ -503,7 +288,7 @@ const { status, data } = await apiInstance.deleteMessageApiV1ChatConversationsCo
 # **getAvailableToolsApiV1ChatToolsAvailableGet**
 > AvailableToolsResponse getAvailableToolsApiV1ChatToolsAvailableGet()
 
-Get list of available MCP tools.  Args:     current_user: Current authenticated user  Returns:     List of available tools
+Get list of available MCP tools.
 
 ### Example
 
@@ -547,7 +332,7 @@ This endpoint does not have any parameters.
 # **getConversationApiV1ChatConversationsConversationIdGet**
 > ConversationWithMessages getConversationApiV1ChatConversationsConversationIdGet()
 
-Get conversation details with messages.  Args:     conversation_id: Conversation ID     request: Get request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Conversation with messages
+Get conversation details with messages.
 
 ### Example
 
@@ -599,7 +384,7 @@ const { status, data } = await apiInstance.getConversationApiV1ChatConversations
 # **getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet**
 > Array<MessageResponse> getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet()
 
-Get conversation messages.  Args:     conversation_id: Conversation ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of messages
+Get conversation messages.
 
 ### Example
 
@@ -654,7 +439,7 @@ const { status, data } = await apiInstance.getConversationMessagesApiV1ChatConve
 # **getMcpStatusApiV1ChatMcpStatusGet**
 > McpStatusResponse getMcpStatusApiV1ChatMcpStatusGet()
 
-Get MCP service status.  Args:     current_user: Current authenticated user  Returns:     MCP service status
+Get MCP service status.
 
 ### Example
 
@@ -698,7 +483,7 @@ This endpoint does not have any parameters.
 # **listConversationsApiV1ChatConversationsGet**
 > ConversationSearchResponse listConversationsApiV1ChatConversationsGet()
 
-List user\'s conversations.  Args:     query: Search query     status: Filter by status     limit: Maximum number of results     offset: Number of results to skip     sort_by: Sort field     sort_order: Sort order (asc/desc)     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of conversations with pagination
+List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
 
 ### Example
 
@@ -767,7 +552,7 @@ const { status, data } = await apiInstance.listConversationsApiV1ChatConversatio
 # **updateConversationApiV1ChatConversationsConversationIdPut**
 > ConversationResponse updateConversationApiV1ChatConversationsConversationIdPut(conversationUpdate)
 
-Update conversation.  Args:     conversation_id: Conversation ID     update_data: Update data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Updated conversation
+Update conversation.
 
 ### Example
 

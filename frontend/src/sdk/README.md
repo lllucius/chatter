@@ -33,7 +33,7 @@ async function example() {
   try {
     const user = await authApi.apiV1AuthMeGet();
     console.log('Current user:', user.data);
-    
+
     const conversations = await conversationsApi.apiV1ConversationsGet();
     console.log('Conversations:', conversations.data);
   } catch (error) {
@@ -92,7 +92,7 @@ try {
     email: 'user@example.com',
     password: 'password123'
   });
-  
+
   console.log('Login successful:', response.data);
 } catch (error) {
   if (error.response?.status === 401) {

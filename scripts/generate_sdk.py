@@ -56,6 +56,7 @@ def generate_python_sdk():
         json.dump(config, f, indent=2)
 
     try:
+        """
         # Generate the SDK using openapi-generator-cli
         cmd = [
             "openapi-generator-cli",
@@ -72,7 +73,17 @@ def generate_python_sdk():
             f"pythonPackageName={config['packageName']}",
             "--skip-validate-spec",
         ]
-
+        """
+        cmd = [
+            "openapi-python-client",
+            "generate",
+            "--path",
+            str(temp_spec_path),
+            "--output-path",
+            str(sdk_output_dir),
+            "--overwrite"
+        ]
+        print("CMD:\n", cmd)
         print(f"🔧 Running command: {' '.join(cmd)}")
         result = subprocess.run(
             cmd, capture_output=True, text=True, cwd=str(project_root)

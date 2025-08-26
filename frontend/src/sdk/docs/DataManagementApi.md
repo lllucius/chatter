@@ -16,7 +16,7 @@ All URIs are relative to *http://localhost:8000*
 # **bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost**
 > { [key: string]: any; } bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestBody)
 
-Bulk delete conversations.  Args:     conversation_ids: List of conversation IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+Bulk delete conversations.
 
 ### Example
 
@@ -68,7 +68,7 @@ const { status, data } = await apiInstance.bulkDeleteConversationsApiV1DataBulkD
 # **bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost**
 > { [key: string]: any; } bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestBody)
 
-Bulk delete documents.  Args:     document_ids: List of document IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+Bulk delete documents.
 
 ### Example
 
@@ -120,7 +120,7 @@ const { status, data } = await apiInstance.bulkDeleteDocumentsApiV1DataBulkDelet
 # **bulkDeletePromptsApiV1DataBulkDeletePromptsPost**
 > { [key: string]: any; } bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestBody)
 
-Bulk delete prompts.  Args:     prompt_ids: List of prompt IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+Bulk delete prompts.
 
 ### Example
 
@@ -172,7 +172,7 @@ const { status, data } = await apiInstance.bulkDeletePromptsApiV1DataBulkDeleteP
 # **createBackupApiV1DataBackupPost**
 > BackupResponse createBackupApiV1DataBackupPost(backupRequest)
 
-Create a data backup.  Args:     backup_request: Backup request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Backup operation details
+Create a data backup.
 
 ### Example
 
@@ -225,7 +225,7 @@ const { status, data } = await apiInstance.createBackupApiV1DataBackupPost(
 # **exportDataApiV1DataExportPost**
 > ExportDataResponse exportDataApiV1DataExportPost(exportDataRequest)
 
-Export data in specified format.  Args:     export_request: Export request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Export operation details
+Export data in specified format.
 
 ### Example
 
@@ -278,7 +278,7 @@ const { status, data } = await apiInstance.exportDataApiV1DataExportPost(
 # **getStorageStatsApiV1DataStatsGet**
 > StorageStatsResponse getStorageStatsApiV1DataStatsGet()
 
-Get storage statistics and usage information.  Args:     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Storage statistics
+Get storage statistics and usage information.
 
 ### Example
 
@@ -322,7 +322,7 @@ This endpoint does not have any parameters.
 # **listBackupsApiV1DataBackupsGet**
 > BackupListResponse listBackupsApiV1DataBackupsGet()
 
-List available backups.  Args:     request: List request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     List of backups
+List available backups.
 
 ### Example
 
@@ -377,7 +377,7 @@ const { status, data } = await apiInstance.listBackupsApiV1DataBackupsGet(
 # **restoreFromBackupApiV1DataRestorePost**
 > RestoreResponse restoreFromBackupApiV1DataRestorePost(restoreRequest)
 
-Restore data from a backup.  Args:     restore_request: Restore request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Restore operation details
+Restore data from a backup.
 
 ### Example
 

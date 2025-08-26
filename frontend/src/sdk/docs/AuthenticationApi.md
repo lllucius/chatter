@@ -72,7 +72,7 @@ const { status, data } = await apiInstance.changePasswordApiV1AuthChangePassword
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **confirmPasswordResetApiV1AuthPasswordResetConfirmPost**
-> { [key: string]: any; } confirmPasswordResetApiV1AuthPasswordResetConfirmPost()
+> PasswordResetConfirmResponse confirmPasswordResetApiV1AuthPasswordResetConfirmPost()
 
 Confirm password reset.  Args:     token: Reset token     new_password: New password     auth_service: Authentication service  Returns:     Success message
 
@@ -106,7 +106,7 @@ const { status, data } = await apiInstance.confirmPasswordResetApiV1AuthPassword
 
 ### Return type
 
-**{ [key: string]: any; }**
+**PasswordResetConfirmResponse**
 
 ### Authorization
 
@@ -365,7 +365,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **logoutApiV1AuthLogoutPost**
-> { [key: string]: any; } logoutApiV1AuthLogoutPost()
+> LogoutResponse logoutApiV1AuthLogoutPost()
 
 Logout and revoke current token.  Args:     current_user: Current authenticated user     auth_service: Authentication service  Returns:     Success message
 
@@ -389,7 +389,7 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-**{ [key: string]: any; }**
+**LogoutResponse**
 
 ### Authorization
 
@@ -515,7 +515,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **requestPasswordResetApiV1AuthPasswordResetRequestPost**
-> { [key: string]: any; } requestPasswordResetApiV1AuthPasswordResetRequestPost()
+> PasswordResetRequestResponse requestPasswordResetApiV1AuthPasswordResetRequestPost()
 
 Request password reset.  Args:     email: User email     auth_service: Authentication service  Returns:     Success message
 
@@ -546,7 +546,7 @@ const { status, data } = await apiInstance.requestPasswordResetApiV1AuthPassword
 
 ### Return type
 
-**{ [key: string]: any; }**
+**PasswordResetRequestResponse**
 
 ### Authorization
 

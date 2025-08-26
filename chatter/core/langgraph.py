@@ -1,7 +1,7 @@
 """LangGraph workflows for advanced conversation logic."""
 
 from collections.abc import Sequence
-from typing import Annotated, Any, TypedDict
+from typing import Annotated, Any, Literal, TypedDict
 from uuid import uuid4
 
 from langchain_core.language_models import BaseChatModel
@@ -10,6 +10,7 @@ from langchain_core.messages import (
     BaseMessage,
     HumanMessage,
     SystemMessage,
+    ToolMessage,
 )
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.postgres import PostgresSaver
@@ -41,6 +42,9 @@ class ConversationState(TypedDict):
     a_b_test_group: str | None  # For A/B testing
 
 
+WorkflowMode = Literal["plain", "rag", "tools", "full"]
+
+
 class LangGraphWorkflowManager:
     """Manager for LangGraph conversation workflows."""
 
@@ -65,75 +69,53 @@ class LangGraphWorkflowManager:
         except Exception as e:
             logger.warning(
                 "Failed to initialize PostgreSQL checkpointer, falling back to memory",
-                error=str(e)
+                error=str(e),
             )
             # Always fallback to memory checkpointer if PostgreSQL fails
             try:
                 self.checkpointer = MemorySaver()
-                logger.info("LangGraph Memory checkpointer initialized as fallback")
+                logger.info(
+                    "LangGraph Memory checkpointer initialized as fallback"
+                )
             except Exception as fallback_error:
                 logger.error(
                     "Failed to initialize any checkpointer",
-                    error=str(fallback_error)
+                    error=str(fallback_error),
                 )
                 self.checkpointer = None
 
-    def create_basic_conversation_workflow(
-        self, llm: BaseChatModel, system_message: str | None = None
-    ) -> Pregel:
-        """Create a basic conversation workflow."""
-
-        async def call_model(
-            state: ConversationState
-        ) -> dict[str, Any]:
-            """Call the language model."""
-            messages = state["messages"]
-
-            # Add system message if provided and not already present
-            if system_message and not any(
-                isinstance(msg, SystemMessage) for msg in messages
-            ):
-                messages = [
-                    SystemMessage(content=system_message)
-                ] + list(messages)
-
-            try:
-                response = await llm.ainvoke(messages)
-                return {"messages": [response]}
-            except Exception as e:
-                logger.error("Model call failed", error=str(e))
-                error_response = AIMessage(
-                    content=f"I'm sorry, I encountered an error: {str(e)}"
-                )
-                return {"messages": [error_response]}
-
-        # Build workflow
-        workflow = StateGraph(ConversationState)
-        workflow.add_node("call_model", call_model)
-        workflow.set_entry_point("call_model")
-        workflow.add_edge("call_model", END)
-
-        # Compile with checkpointer
-        app = workflow.compile(
-            checkpointer=self.checkpointer,
-            interrupt_before=[],
-            interrupt_after=[],
-        )
-
-        return app
-
-    def create_rag_conversation_workflow(
+    def create_workflow(
         self,
         llm: BaseChatModel,
-        retriever: Any,
+        *,
+        mode: WorkflowMode = "plain",
         system_message: str | None = None,
+        retriever: Any | None = None,
+        tools: list[Any] | None = None,
+        enable_memory: bool = False,
+        memory_window: int = 20,
     ) -> Pregel:
-        """Create a RAG-enabled conversation workflow."""
+        """Create a unified conversation workflow.
 
-        async def retrieve_context(
-            state: ConversationState
-        ) -> dict[str, Any]:
+        Modes:
+        - plain: just the model
+        - rag: retrieval then model
+        - tools: model with tool-calling loop
+        - full: retrieval, then model+tools loop
+
+        Optional:
+        - enable_memory: summarize older messages and prepend summary as context
+        """
+        use_retriever = mode in ("rag", "full")
+        use_tools = mode in ("tools", "full")
+
+        llm_for_call = llm.bind_tools(tools) if (use_tools and tools) else llm
+
+        async def retrieve_context(state: ConversationState) -> dict[str, Any]:
             """Retrieve relevant context for the current query."""
+            if not use_retriever or retriever is None:
+                return {"retrieval_context": ""}
+
             messages = state["messages"]
 
             # Get the last human message
@@ -147,172 +129,217 @@ class LangGraphWorkflowManager:
                 return {"retrieval_context": ""}
 
             try:
-                # Retrieve relevant documents
-                docs = await retriever.ainvoke(
-                    last_human_message.content
+                docs = await retriever.ainvoke(last_human_message.content)
+                context = "\n\n".join(
+                    getattr(doc, "page_content", str(doc)) for doc in docs
                 )
-                context = "\n\n".join(doc.page_content for doc in docs)
                 return {"retrieval_context": context}
             except Exception as e:
                 logger.error("Retrieval failed", error=str(e))
                 return {"retrieval_context": ""}
 
-        async def call_model_with_context(
-            state: ConversationState
-        ) -> dict[str, Any]:
-            """Call the language model with retrieved context."""
-            messages = list(state["messages"])
-            context = state.get("retrieval_context", "")
-
-            # Prepare system message with context
-            rag_system_message = system_message or (
-                "You are a helpful assistant. Use the following context to answer questions. "
-                "If the context doesn't contain relevant information, say so clearly."
-            )
-
-            if context:
-                rag_system_message += f"\n\nContext:\n{context}"
-
-            # Add or update system message
-            if messages and isinstance(messages[0], SystemMessage):
-                messages[0] = SystemMessage(content=rag_system_message)
-            else:
-                messages.insert(
-                    0, SystemMessage(content=rag_system_message)
-                )
-
-            try:
-                response = await llm.ainvoke(messages)
-                return {"messages": [response]}
-            except Exception as e:
-                logger.error(
-                    "Model call with context failed", error=str(e)
-                )
-                error_response = AIMessage(
-                    content=f"I'm sorry, I encountered an error: {str(e)}"
-                )
-                return {"messages": [error_response]}
-
-        # Build workflow
-        workflow = StateGraph(ConversationState)
-        workflow.add_node("retrieve_context", retrieve_context)
-        workflow.add_node("call_model", call_model_with_context)
-
-        workflow.set_entry_point("retrieve_context")
-        workflow.add_edge("retrieve_context", "call_model")
-        workflow.add_edge("call_model", END)
-
-        # Compile with checkpointer
-        app = workflow.compile(
-            checkpointer=self.checkpointer,
-            interrupt_before=[],
-            interrupt_after=[],
-        )
-
-        return app
-
-    def create_tool_calling_workflow(
-        self,
-        llm: BaseChatModel,
-        tools: list[Any],
-        system_message: str | None = None,
-    ) -> Pregel:
-        """Create a workflow with tool calling capabilities."""
-
-        # Bind tools to the model
-        llm_with_tools = llm.bind_tools(tools)
-
-        async def call_model(
-            state: ConversationState
-        ) -> dict[str, Any]:
-            """Call the language model with tools."""
-            messages = state["messages"]
-
-            # Add system message if provided
-            if system_message and not any(
-                isinstance(msg, SystemMessage) for msg in messages
-            ):
-                messages = [
-                    SystemMessage(content=system_message)
-                ] + list(messages)
-
-            try:
-                response = await llm_with_tools.ainvoke(messages)
-                return {"messages": [response]}
-            except Exception as e:
-                logger.error(
-                    "Model call with tools failed", error=str(e)
-                )
-                error_response = AIMessage(
-                    content=f"I'm sorry, I encountered an error: {str(e)}"
-                )
-                return {"messages": [error_response]}
-
-        async def execute_tools(
-            state: ConversationState
-        ) -> dict[str, Any]:
-            """Execute any tool calls from the model."""
-            messages = state["messages"]
-            last_message = messages[-1] if messages else None
-
-            if not last_message or not hasattr(
-                last_message, "tool_calls"
-            ):
+        async def manage_memory(state: ConversationState) -> dict[str, Any]:
+            """Summarize older messages and keep a sliding window."""
+            if not enable_memory:
                 return {}
 
-            tool_results = []
-            for tool_call in last_message.tool_calls:
-                try:
-                    # Find and execute the tool
-                    tool_name = tool_call["name"]
-                    tool_args = tool_call["args"]
+            messages = list(state["messages"])
+            if len(messages) <= memory_window:
+                return {}
 
-                    # Execute tool (this is a simplified version)
-                    # In a real implementation, you'd have a tool registry
-                    result = f"Tool {tool_name} executed with args {tool_args}"
-                    tool_results.append(
-                        {
-                            "tool_call_id": tool_call["id"],
-                            "result": result,
-                        }
+            recent_messages = messages[-memory_window:]
+            older_messages = messages[:-memory_window]
+
+            if not state.get("conversation_summary"):
+                summary_prompt = "Summarize this conversation history:\n\n"
+                for msg in older_messages:
+                    role = "Human" if isinstance(msg, HumanMessage) else "Assistant"
+                    summary_prompt += f"{role}: {msg.content}\n"
+
+                try:
+                    summary_response = await llm.ainvoke(
+                        [HumanMessage(content=summary_prompt)]
+                    )
+                    summary = getattr(summary_response, "content", str(summary_response))
+                    return {
+                        "messages": recent_messages,
+                        "conversation_summary": summary,
+                        "memory_context": {
+                            "summarized_messages": len(older_messages)
+                        },
+                    }
+                except Exception as e:
+                    logger.error("Memory management failed", error=str(e))
+                    return {"messages": recent_messages}
+
+            return {"messages": recent_messages}
+
+        def apply_system_and_context(
+            state: ConversationState, messages: list[BaseMessage]
+        ) -> list[BaseMessage]:
+            """Apply system message, memory summary, and retrieval context if present."""
+            prefixed: list[BaseMessage] = []
+
+            if state.get("conversation_summary"):
+                prefixed.append(
+                    SystemMessage(
+                        content=f"Previous conversation summary: {state['conversation_summary']}"
+                    )
+                )
+
+            rag_system_message = None
+            if use_retriever:
+                # If retrieval context present, weave it into the system prompt
+                context = state.get("retrieval_context") or ""
+                base = system_message or (
+                    "You are a helpful assistant. Use the following context to answer questions. "
+                    "If the context doesn't contain relevant information, say so clearly."
+                )
+                rag_system_message = base + (f"\n\nContext:\n{context}" if context else "")
+            elif system_message:
+                rag_system_message = system_message
+
+            if rag_system_message:
+                prefixed.append(SystemMessage(content=rag_system_message))
+
+            return prefixed + messages
+
+        async def call_model(state: ConversationState) -> dict[str, Any]:
+            """Call the model (with optional tools) using applied context."""
+            messages = list(state["messages"])
+            messages = apply_system_and_context(state, messages)
+
+            try:
+                response = await llm_for_call.ainvoke(messages)
+                return {"messages": [response]}
+            except Exception as e:
+                logger.error("Model call failed", error=str(e))
+                return {
+                    "messages": [
+                        AIMessage(
+                            content=f"I'm sorry, I encountered an error: {str(e)}"
+                        )
+                    ]
+                }
+
+        async def execute_tools(state: ConversationState) -> dict[str, Any]:
+            """Execute tool calls from the last AI message and push ToolMessage results."""
+            if not use_tools or not tools:
+                return {}
+
+            messages = list(state["messages"])
+            last_message = messages[-1] if messages else None
+            if not last_message or not hasattr(last_message, "tool_calls"):
+                return {}
+
+            tool_messages: list[ToolMessage] = []
+
+            for tool_call in getattr(last_message, "tool_calls", []) or []:
+                tool_name = tool_call.get("name")
+                tool_args = tool_call.get("args", {})
+                tool_id = tool_call.get("id")
+
+                # Find a matching tool by name
+                tool_obj = None
+                for t in tools:
+                    t_name = (
+                        getattr(t, "name", None)
+                        or getattr(t, "name_", None)
+                        or getattr(t, "__name__", None)
+                    )
+                    if t_name == tool_name:
+                        tool_obj = t
+                        break
+
+                if not tool_obj:
+                    logger.error("Tool not found", tool=tool_name)
+                    tool_messages.append(
+                        ToolMessage(
+                            content=f"Error: tool '{tool_name}' not found.",
+                            tool_call_id=tool_id or "",
+                        )
+                    )
+                    continue
+
+                try:
+                    # Prefer async invocation when available
+                    if hasattr(tool_obj, "ainvoke"):
+                        result = await tool_obj.ainvoke(tool_args)
+                    elif hasattr(tool_obj, "invoke"):
+                        result = tool_obj.invoke(tool_args)
+                    elif callable(tool_obj):
+                        result = tool_obj(tool_args)
+                    else:
+                        result = f"Tool {tool_name} cannot be executed."
+
+                    tool_messages.append(
+                        ToolMessage(
+                            content=str(result),
+                            tool_call_id=tool_id or "",
+                        )
                     )
                 except Exception as e:
                     logger.error(
-                        "Tool execution failed",
-                        tool=tool_call.get("name"),
-                        error=str(e),
+                        "Tool execution failed", tool=tool_name, error=str(e)
                     )
-                    tool_results.append(
-                        {
-                            "tool_call_id": tool_call.get("id"),
-                            "result": f"Error: {str(e)}",
-                        }
+                    tool_messages.append(
+                        ToolMessage(
+                            content=f"Error: {str(e)}", tool_call_id=tool_id or ""
+                        )
                     )
 
-            return {"tool_calls": tool_results}
+            # Returning ToolMessage(s) appends to state["messages"] via add_messages
+            return {"messages": tool_messages}
 
         def should_continue(state: ConversationState) -> str:
-            """Determine if we should continue or end."""
-            messages = state["messages"]
-            last_message = messages[-1] if messages else None
-
+            """If there are tool calls, execute them; otherwise end."""
+            last_message = state["messages"][-1] if state["messages"] else None
             if (
-                last_message
+                use_tools
+                and last_message
                 and hasattr(last_message, "tool_calls")
                 and last_message.tool_calls
             ):
                 return "execute_tools"
-            end_result: str = str(END)
-            return end_result
+            return str(END)
 
-        # Build workflow
+        # Build graph dynamically
         workflow = StateGraph(ConversationState)
-        workflow.add_node("call_model", call_model)
-        workflow.add_node("execute_tools", execute_tools)
 
-        workflow.set_entry_point("call_model")
-        workflow.add_conditional_edges("call_model", should_continue)
-        workflow.add_edge("execute_tools", "call_model")
+        if enable_memory:
+            workflow.add_node("manage_memory", manage_memory)
+
+        if use_retriever:
+            workflow.add_node("retrieve_context", retrieve_context)
+
+        workflow.add_node("call_model", call_model)
+
+        if use_tools:
+            workflow.add_node("execute_tools", execute_tools)
+
+        # Entry point and edges
+        entry = None
+        if enable_memory:
+            entry = "manage_memory"
+            if use_retriever:
+                workflow.add_edge("manage_memory", "retrieve_context")
+                workflow.add_edge("retrieve_context", "call_model")
+            else:
+                workflow.add_edge("manage_memory", "call_model")
+        else:
+            if use_retriever:
+                entry = "retrieve_context"
+                workflow.add_edge("retrieve_context", "call_model")
+            else:
+                entry = "call_model"
+
+        workflow.set_entry_point(entry)
+
+        if use_tools:
+            workflow.add_conditional_edges("call_model", should_continue)
+            workflow.add_edge("execute_tools", "call_model")
+        else:
+            workflow.add_edge("call_model", END)
 
         # Compile with checkpointer
         app = workflow.compile(
@@ -320,84 +347,7 @@ class LangGraphWorkflowManager:
             interrupt_before=[],
             interrupt_after=[],
         )
-
         return app
-
-    def create_workflow(
-        self,
-        llm: BaseChatModel,
-        system_message: str | None = None,
-        retriever: Any = None,
-        tools: list[Any] = None,
-    ) -> Pregel:
-        """Create a workflow based on provided parameters.
-
-        Automatically determines workflow type based on parameters:
-        - If retriever is provided: RAG workflow
-        - If tools are provided: Tool calling workflow
-        - Otherwise: Basic conversation workflow
-
-        Args:
-            llm: Language model to use
-            system_message: Optional system message
-            retriever: Optional retriever for RAG workflow
-            tools: Optional tools for tool calling workflow
-
-        Returns:
-            Compiled LangGraph workflow
-        """
-        # Determine workflow type based on provided parameters
-        if retriever is not None:
-            # RAG workflow - retriever takes precedence
-            return self.create_rag_conversation_workflow(
-                llm=llm,
-                retriever=retriever,
-                system_message=system_message,
-            )
-        elif tools is not None and len(tools) > 0:
-            # Tool calling workflow
-            return self.create_tool_calling_workflow(
-                llm=llm,
-                tools=tools,
-                system_message=system_message,
-            )
-        else:
-            # Basic conversation workflow
-            return self.create_basic_conversation_workflow(
-                llm=llm,
-                system_message=system_message,
-            )
-
-    def create_streaming_workflow(
-        self,
-        llm: BaseChatModel,
-        system_message: str | None = None,
-        retriever: Any = None,
-        tools: list[Any] = None,
-    ) -> Pregel:
-        """Create a streaming-optimized workflow based on provided parameters.
-
-        This method creates the same workflows as create_workflow() but optimized
-        for streaming usage. Currently uses the same implementation as the
-        non-streaming version since LangGraph workflows are inherently streamable.
-
-        Args:
-            llm: Language model to use
-            system_message: Optional system message
-            retriever: Optional retriever for RAG workflow
-            tools: Optional tools for tool calling workflow
-
-        Returns:
-            Compiled LangGraph workflow optimized for streaming
-        """
-        # For now, the streaming workflow uses the same implementation
-        # as the regular workflow since LangGraph workflows are inherently streamable
-        return self.create_workflow(
-            llm=llm,
-            system_message=system_message,
-            retriever=retriever,
-            tools=tools,
-        )
 
     async def run_workflow(
         self,
@@ -412,17 +362,12 @@ class LangGraphWorkflowManager:
         config = {"configurable": {"thread_id": thread_id}}
 
         try:
-            # Run the workflow
-            result = await workflow.ainvoke(
-                initial_state, config=config
-            )
+            result = await workflow.ainvoke(initial_state, config=config)
             typed_result: ConversationState = result
             return typed_result
         except Exception as e:
             logger.error(
-                "Workflow execution failed",
-                error=str(e),
-                thread_id=thread_id,
+                "Workflow execution failed", error=str(e), thread_id=thread_id
             )
             raise
 
@@ -439,15 +384,11 @@ class LangGraphWorkflowManager:
         config = {"configurable": {"thread_id": thread_id}}
 
         try:
-            async for event in workflow.astream(
-                initial_state, config=config
-            ):
+            async for event in workflow.astream(initial_state, config=config):
                 yield event
         except Exception as e:
             logger.error(
-                "Workflow streaming failed",
-                error=str(e),
-                thread_id=thread_id,
+                "Workflow streaming failed", error=str(e), thread_id=thread_id
             )
             raise
 
@@ -493,9 +434,13 @@ class LangGraphWorkflowManager:
             new_thread_id = str(uuid4())
 
         # Get parent conversation state
-        parent_state = await self.get_conversation_history(workflow, parent_thread_id)
+        parent_state = await self.get_conversation_history(
+            workflow, parent_thread_id
+        )
         if not parent_state:
-            raise ValueError(f"Parent conversation {parent_thread_id} not found")
+            raise ValueError(
+                f"Parent conversation {parent_thread_id} not found"
+            )
 
         # Create branched state
         branch_state = dict(parent_state)
@@ -503,7 +448,9 @@ class LangGraphWorkflowManager:
         # Trim messages to branch point if specified
         if branch_point_message_index >= 0:
             messages = list(parent_state["messages"])
-            branch_state["messages"] = messages[:branch_point_message_index + 1]
+            branch_state["messages"] = messages[
+                : branch_point_message_index + 1
+            ]
 
         # Update metadata for branch
         branch_state["conversation_id"] = new_thread_id
@@ -548,9 +495,13 @@ class LangGraphWorkflowManager:
             fork_id = str(uuid4())
 
         # Get source conversation state
-        source_state = await self.get_conversation_history(workflow, source_thread_id)
+        source_state = await self.get_conversation_history(
+            workflow, source_thread_id
+        )
         if not source_state:
-            raise ValueError(f"Source conversation {source_thread_id} not found")
+            raise ValueError(
+                f"Source conversation {source_thread_id} not found"
+            )
 
         # Create forked state (complete copy)
         fork_state = dict(source_state)
@@ -602,7 +553,11 @@ class LangGraphWorkflowManager:
             return ""
 
         # Get recent messages for summarization
-        recent_messages = messages[-max_messages:] if len(messages) > max_messages else messages
+        recent_messages = (
+            messages[-max_messages:]
+            if len(messages) > max_messages
+            else messages
+        )
 
         # Create summarization prompt
         summary_prompt = "Please provide a concise summary of this conversation:\n\n"
@@ -616,11 +571,17 @@ class LangGraphWorkflowManager:
         try:
             summary_message = HumanMessage(content=summary_prompt)
             response = await llm.ainvoke([summary_message])
-            summary = response.content if hasattr(response, 'content') else str(response)
+            summary = (
+                response.content
+                if hasattr(response, "content")
+                else str(response)
+            )
 
             # Update conversation state with summary
             config = {"configurable": {"thread_id": thread_id}}
-            await workflow.aupdate_state(config, {"conversation_summary": summary})
+            await workflow.aupdate_state(
+                config, {"conversation_summary": summary}
+            )
 
             logger.info(
                 "Generated conversation summary",
@@ -636,106 +597,6 @@ class LangGraphWorkflowManager:
                 thread_id=thread_id,
             )
             return ""
-
-    def create_conversation_workflow_with_memory(
-        self,
-        llm: BaseChatModel,
-        system_message: str | None = None,
-        memory_window: int = 20,
-    ) -> Pregel:
-        """Create a conversation workflow with automatic memory management.
-
-        Args:
-            llm: Language model to use
-            system_message: Optional system message
-            memory_window: Number of messages to keep in active memory
-
-        Returns:
-            Compiled LangGraph workflow
-        """
-        async def manage_memory(state: ConversationState) -> dict[str, Any]:
-            """Manage conversation memory by summarizing old messages."""
-            messages = state["messages"]
-
-            if len(messages) <= memory_window:
-                return {}  # No memory management needed
-
-            # Keep recent messages in active memory
-            recent_messages = messages[-memory_window:]
-
-            # Summarize older messages if not already summarized
-            if not state.get("conversation_summary"):
-                older_messages = messages[:-memory_window]
-                summary_prompt = "Summarize this conversation history:\n\n"
-                for msg in older_messages:
-                    role = "Human" if isinstance(msg, HumanMessage) else "Assistant"
-                    summary_prompt += f"{role}: {msg.content}\n"
-
-                try:
-                    summary_response = await llm.ainvoke([HumanMessage(content=summary_prompt)])
-                    summary = (
-                        summary_response.content
-                        if hasattr(summary_response, 'content')
-                        else str(summary_response)
-                    )
-
-                    return {
-                        "messages": recent_messages,
-                        "conversation_summary": summary,
-                        "memory_context": {"summarized_messages": len(older_messages)},
-                    }
-                except Exception as e:
-                    logger.error("Memory management failed", error=str(e))
-                    return {"messages": recent_messages}  # Fallback: just trim messages
-
-            return {"messages": recent_messages}
-
-        async def call_model_with_memory(state: ConversationState) -> dict[str, Any]:
-            """Call the language model with memory context."""
-            messages = list(state["messages"])
-
-            # Add conversation summary as context if available
-            if state.get("conversation_summary"):
-                context_msg = SystemMessage(
-                    content=f"Previous conversation summary: {state['conversation_summary']}"
-                )
-                messages = [context_msg] + messages
-
-            # Add system message if provided
-            if system_message:
-                system_msg = SystemMessage(content=system_message)
-                messages = [system_msg] + messages
-
-            try:
-                response = await llm.ainvoke(messages)
-                return {"messages": [response]}
-            except Exception as e:
-                logger.error("Model call failed", error=str(e))
-                return {
-                    "messages": [
-                        AIMessage(
-                            content="I apologize, but I encountered an error processing your request."
-                        )
-                    ]
-                }
-
-        # Build workflow
-        workflow = StateGraph(ConversationState)
-        workflow.add_node("manage_memory", manage_memory)
-        workflow.add_node("call_model", call_model_with_memory)
-
-        workflow.set_entry_point("manage_memory")
-        workflow.add_edge("manage_memory", "call_model")
-        workflow.add_edge("call_model", END)
-
-        # Compile with checkpointer
-        app = workflow.compile(
-            checkpointer=self.checkpointer,
-            interrupt_before=[],
-            interrupt_after=[],
-        )
-
-        return app
 
 
 # Global workflow manager instance

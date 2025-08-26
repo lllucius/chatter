@@ -184,24 +184,26 @@ class LLMService:
         langchain_messages = []
 
         # Add system message if present
-        if conversation.system_prompt:
+        if getattr(conversation, "system_prompt", None):
             langchain_messages.append(
                 SystemMessage(content=conversation.system_prompt)
             )
 
         # Convert messages
         for message in messages:
-            if message.role == "user":
+            role_value = getattr(message, "role", None)
+            content = getattr(message, "content", "")
+            if role_value == "user":
                 langchain_messages.append(
-                    HumanMessage(content=message.content)
+                    HumanMessage(content=content)
                 )
-            elif message.role == "assistant":
+            elif role_value == "assistant":
                 langchain_messages.append(
-                    AIMessage(content=message.content)
+                    AIMessage(content=content)
                 )
-            elif message.role == "system":
+            elif role_value == "system":
                 langchain_messages.append(
-                    SystemMessage(content=message.content)
+                    SystemMessage(content=content)
                 )
 
         return langchain_messages
@@ -299,15 +301,16 @@ class LLMService:
 
         try:
             async for chunk in provider.astream(messages, **kwargs):
-                if chunk.content:
+                if getattr(chunk, "content", None):
                     full_content += chunk.content
                     yield {
                         "type": "token",
                         "content": chunk.content,
                     }
 
-            end_time = asyncio.get_event_loop().time()
-            response_time_ms = int((end_time - start_time) * 1000)
+            response_time_ms = int(
+                (asyncio.get_event_loop().time() - start_time) * 1000
+            )
 
             # Send final usage information
             yield {
@@ -465,65 +468,37 @@ class LLMService:
     async def create_langgraph_workflow(
         self,
         provider_name: str,
-        workflow_type: str = "basic",
+        workflow_type: str = "plain",  # "plain" | "rag" | "tools" | "full"
         system_message: str | None = None,
         retriever=None,
-        tools: list[Any] = None,
+        tools: list[Any] | None = None,
+        enable_memory: bool = False,
+        memory_window: int = 20,
     ):
         """Create a LangGraph workflow."""
         from chatter.core.langgraph import workflow_manager
 
         provider = self.get_provider(provider_name)
 
-        # Use the new unified workflow creation method
-        # Get default tools if workflow_type is "tools" and no tools provided
-        if workflow_type == "tools" and not tools:
+        # Get default tools if needed
+        if workflow_type in ("tools", "full") and not tools:
             tools = await mcp_service.get_tools()
             tools.extend(BuiltInTools.create_builtin_tools())
 
-        # Validate parameters based on workflow_type
-        if workflow_type == "rag" and not retriever:
-            raise LLMProviderError(
-                "Retriever required for RAG workflow"
-            ) from None
+        # Note: do NOT hard-require a retriever; the workflow handles missing retriever gracefully.
+        mode = (
+            workflow_type
+            if workflow_type in ("plain", "rag", "tools", "full")
+            else "plain"
+        )
 
         # Use the unified create_workflow method
         return workflow_manager.create_workflow(
             llm=provider,
+            mode=mode,
             system_message=system_message,
-            retriever=retriever if workflow_type == "rag" else None,
-            tools=tools if workflow_type == "tools" else None,
-        )
-
-    async def create_langgraph_streaming_workflow(
-        self,
-        provider_name: str,
-        workflow_type: str = "basic",
-        system_message: str | None = None,
-        retriever=None,
-        tools: list[Any] = None,
-    ):
-        """Create a LangGraph workflow optimized for streaming."""
-        from chatter.core.langgraph import workflow_manager
-
-        provider = self.get_provider(provider_name)
-
-        # Use the new unified workflow creation method
-        # Get default tools if workflow_type is "tools" and no tools provided
-        if workflow_type == "tools" and not tools:
-            tools = await mcp_service.get_tools()
-            tools.extend(BuiltInTools.create_builtin_tools())
-
-        # Validate parameters based on workflow_type
-        if workflow_type == "rag" and not retriever:
-            raise LLMProviderError(
-                "Retriever required for RAG workflow"
-            ) from None
-
-        # Use the unified create_streaming_workflow method
-        return workflow_manager.create_streaming_workflow(
-            llm=provider,
-            system_message=system_message,
-            retriever=retriever if workflow_type == "rag" else None,
-            tools=tools if workflow_type == "tools" else None,
+            retriever=retriever if mode in ("rag", "full") else None,
+            tools=tools if mode in ("tools", "full") else None,
+            enable_memory=enable_memory,
+            memory_window=memory_window,
         )

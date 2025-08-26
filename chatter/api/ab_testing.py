@@ -1,5 +1,7 @@
 """A/B testing management endpoints."""
 
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, status
 
 from chatter.api.auth import get_current_user
@@ -613,7 +615,6 @@ async def get_ab_test_metrics(
     try:
         # This would need to be implemented in the AB test manager
         # For now, return a placeholder response
-        from datetime import UTC, datetime
 
         from chatter.schemas.ab_testing import TestMetric
 

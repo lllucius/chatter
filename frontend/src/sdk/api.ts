@@ -1301,7 +1301,7 @@ export interface BackupListResponse {
     'total': number;
 }
 /**
- * Request schema for creating a backup.
+ * Request schema for creating a backup via API.
  * @export
  * @interface BackupRequest
  */
@@ -1558,6 +1558,18 @@ export interface ChatRequest {
      */
     'stream'?: boolean;
     /**
+     * Workflow type: plain, rag, tools, or full (rag + tools)
+     * @type {string}
+     * @memberof ChatRequest
+     */
+    'workflow'?: ChatRequestWorkflow;
+    /**
+     * 
+     * @type {string}
+     * @memberof ChatRequest
+     */
+    'provider'?: string | null;
+    /**
      * 
      * @type {number}
      * @memberof ChatRequest
@@ -1588,6 +1600,16 @@ export interface ChatRequest {
      */
     'system_prompt_override'?: string | null;
 }
+
+export const ChatRequestWorkflow = {
+    plain: 'plain',
+    rag: 'rag',
+    tools: 'tools',
+    full: 'full'
+} as const;
+
+export type ChatRequestWorkflow = typeof ChatRequestWorkflow[keyof typeof ChatRequestWorkflow];
+
 /**
  * Schema for chat response.
  * @export
@@ -1602,16 +1624,16 @@ export interface ChatResponse {
     'conversation_id': string;
     /**
      * Assistant response message
-     * @type {MessageResponse}
+     * @type {object}
      * @memberof ChatResponse
      */
-    'message': MessageResponse;
+    'message': object;
     /**
      * Updated conversation
-     * @type {ConversationResponse}
+     * @type {object}
      * @memberof ChatResponse
      */
-    'conversation': ConversationResponse;
+    'conversation': object;
 }
 /**
  * Schema for creating a conversation.
@@ -2851,7 +2873,7 @@ export interface DocumentUpdate {
     'is_public'?: boolean | null;
 }
 /**
- * Request schema for data export.
+ * Request schema for data export API.
  * @export
  * @interface ExportDataRequest
  */
@@ -3314,6 +3336,19 @@ export type JobStatus = typeof JobStatus[keyof typeof JobStatus];
 
 
 /**
+ * Schema for logout response.
+ * @export
+ * @interface LogoutResponse
+ */
+export interface LogoutResponse {
+    /**
+     * Success message
+     * @type {string}
+     * @memberof LogoutResponse
+     */
+    'message': string;
+}
+/**
  * Schema for MCP status response.
  * @export
  * @interface McpStatusResponse
@@ -3344,6 +3379,27 @@ export interface McpStatusResponse {
      */
     'errors'?: Array<string>;
 }
+/**
+ * Schema for creating a message.
+ * @export
+ * @interface MessageCreate
+ */
+export interface MessageCreate {
+    /**
+     * Message role
+     * @type {MessageRole}
+     * @memberof MessageCreate
+     */
+    'role': MessageRole;
+    /**
+     * Message content
+     * @type {string}
+     * @memberof MessageCreate
+     */
+    'content': string;
+}
+
+
 /**
  * Schema for message response.
  * @export
@@ -3496,6 +3552,32 @@ export interface PasswordChangeResponse {
      * Success message
      * @type {string}
      * @memberof PasswordChangeResponse
+     */
+    'message': string;
+}
+/**
+ * Schema for password reset confirmation response.
+ * @export
+ * @interface PasswordResetConfirmResponse
+ */
+export interface PasswordResetConfirmResponse {
+    /**
+     * Success message
+     * @type {string}
+     * @memberof PasswordResetConfirmResponse
+     */
+    'message': string;
+}
+/**
+ * Schema for password reset request response.
+ * @export
+ * @interface PasswordResetRequestResponse
+ */
+export interface PasswordResetRequestResponse {
+    /**
+     * Success message
+     * @type {string}
+     * @memberof PasswordResetRequestResponse
      */
     'message': string;
 }
@@ -5581,6 +5663,25 @@ export interface RestoreResponse {
     'error_message'?: string | null;
 }
 /**
+ * Response schema for SSE service statistics.
+ * @export
+ * @interface SSEStatsResponse
+ */
+export interface SSEStatsResponse {
+    /**
+     * Total active connections
+     * @type {number}
+     * @memberof SSEStatsResponse
+     */
+    'total_connections': number;
+    /**
+     * Your active connections
+     * @type {number}
+     * @memberof SSEStatsResponse
+     */
+    'your_connections': number;
+}
+/**
  * Enumeration for server status.
  * @export
  * @enum {string}
@@ -5914,6 +6015,25 @@ export interface SystemAnalyticsResponse {
      * @memberof SystemAnalyticsResponse
      */
     'cache_hit_rate': number;
+}
+/**
+ * Response schema for test event.
+ * @export
+ * @interface TestEventResponse
+ */
+export interface TestEventResponse {
+    /**
+     * Response message
+     * @type {string}
+     * @memberof TestEventResponse
+     */
+    'message': string;
+    /**
+     * Generated event ID
+     * @type {string}
+     * @memberof TestEventResponse
+     */
+    'event_id': string;
 }
 /**
  * Test metric data.
@@ -6873,483 +6993,6 @@ export const VariantAllocation = {
 export type VariantAllocation = typeof VariantAllocation[keyof typeof VariantAllocation];
 
 
-/**
- * Request schema for creating a webhook endpoint.
- * @export
- * @interface WebhookCreateRequest
- */
-export interface WebhookCreateRequest {
-    /**
-     * Webhook endpoint name
-     * @type {string}
-     * @memberof WebhookCreateRequest
-     */
-    'name': string;
-    /**
-     * Webhook URL
-     * @type {string}
-     * @memberof WebhookCreateRequest
-     */
-    'url': string;
-    /**
-     * Events to subscribe to
-     * @type {Array<WebhookEventType>}
-     * @memberof WebhookCreateRequest
-     */
-    'events': Array<WebhookEventType>;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookCreateRequest
-     */
-    'secret'?: string | null;
-    /**
-     * 
-     * @type {{ [key: string]: string; }}
-     * @memberof WebhookCreateRequest
-     */
-    'headers'?: { [key: string]: string; } | null;
-    /**
-     * Request timeout in seconds
-     * @type {number}
-     * @memberof WebhookCreateRequest
-     */
-    'timeout'?: number;
-    /**
-     * Maximum retry attempts
-     * @type {number}
-     * @memberof WebhookCreateRequest
-     */
-    'max_retries'?: number;
-    /**
-     * Additional metadata
-     * @type {{ [key: string]: any; }}
-     * @memberof WebhookCreateRequest
-     */
-    'metadata'?: { [key: string]: any; };
-}
-/**
- * Response schema for webhook deletion.
- * @export
- * @interface WebhookDeleteResponse
- */
-export interface WebhookDeleteResponse {
-    /**
-     * Whether deletion was successful
-     * @type {boolean}
-     * @memberof WebhookDeleteResponse
-     */
-    'success': boolean;
-    /**
-     * Deletion result message
-     * @type {string}
-     * @memberof WebhookDeleteResponse
-     */
-    'message': string;
-}
-/**
- * Response schema for webhook deliveries list.
- * @export
- * @interface WebhookDeliveriesListResponse
- */
-export interface WebhookDeliveriesListResponse {
-    /**
-     * List of webhook deliveries
-     * @type {Array<WebhookDeliveryResponse>}
-     * @memberof WebhookDeliveriesListResponse
-     */
-    'deliveries': Array<WebhookDeliveryResponse>;
-    /**
-     * Total number of deliveries
-     * @type {number}
-     * @memberof WebhookDeliveriesListResponse
-     */
-    'total': number;
-}
-/**
- * Response schema for webhook delivery data.
- * @export
- * @interface WebhookDeliveryResponse
- */
-export interface WebhookDeliveryResponse {
-    /**
-     * Delivery ID
-     * @type {string}
-     * @memberof WebhookDeliveryResponse
-     */
-    'id': string;
-    /**
-     * Webhook endpoint ID
-     * @type {string}
-     * @memberof WebhookDeliveryResponse
-     */
-    'webhook_endpoint_id': string;
-    /**
-     * Event ID
-     * @type {string}
-     * @memberof WebhookDeliveryResponse
-     */
-    'event_id': string;
-    /**
-     * Event type
-     * @type {WebhookEventType}
-     * @memberof WebhookDeliveryResponse
-     */
-    'event_type': WebhookEventType;
-    /**
-     * Delivery attempt number
-     * @type {number}
-     * @memberof WebhookDeliveryResponse
-     */
-    'attempt_number': number;
-    /**
-     * Delivery status
-     * @type {string}
-     * @memberof WebhookDeliveryResponse
-     */
-    'status': string;
-    /**
-     * 
-     * @type {number}
-     * @memberof WebhookDeliveryResponse
-     */
-    'response_status'?: number | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookDeliveryResponse
-     */
-    'response_body'?: string | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof WebhookDeliveryResponse
-     */
-    'response_time'?: number | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookDeliveryResponse
-     */
-    'error_message'?: string | null;
-    /**
-     * Delivery attempt timestamp
-     * @type {string}
-     * @memberof WebhookDeliveryResponse
-     */
-    'attempted_at': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookDeliveryResponse
-     */
-    'completed_at'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookDeliveryResponse
-     */
-    'next_retry_at'?: string | null;
-}
-
-
-/**
- * Response schema for webhook event data.
- * @export
- * @interface WebhookEventResponse
- */
-export interface WebhookEventResponse {
-    /**
-     * Event ID
-     * @type {string}
-     * @memberof WebhookEventResponse
-     */
-    'id': string;
-    /**
-     * Event type
-     * @type {WebhookEventType}
-     * @memberof WebhookEventResponse
-     */
-    'event_type': WebhookEventType;
-    /**
-     * Event data
-     * @type {{ [key: string]: any; }}
-     * @memberof WebhookEventResponse
-     */
-    'data': { [key: string]: any; };
-    /**
-     * Event timestamp
-     * @type {string}
-     * @memberof WebhookEventResponse
-     */
-    'timestamp': string;
-    /**
-     * Event metadata
-     * @type {{ [key: string]: any; }}
-     * @memberof WebhookEventResponse
-     */
-    'metadata': { [key: string]: any; };
-}
-
-
-/**
- * Types of webhook events.
- * @export
- * @enum {string}
- */
-
-export const WebhookEventType = {
-    conversation_started: 'conversation.started',
-    conversation_ended: 'conversation.ended',
-    message_received: 'message.received',
-    message_sent: 'message.sent',
-    document_uploaded: 'document.uploaded',
-    document_processed: 'document.processed',
-    user_registered: 'user.registered',
-    user_updated: 'user.updated',
-    agent_created: 'agent.created',
-    agent_updated: 'agent.updated',
-    job_completed: 'job.completed',
-    job_failed: 'job.failed',
-    system_alert: 'system.alert'
-} as const;
-
-export type WebhookEventType = typeof WebhookEventType[keyof typeof WebhookEventType];
-
-
-/**
- * Response schema for webhook events list.
- * @export
- * @interface WebhookEventsListResponse
- */
-export interface WebhookEventsListResponse {
-    /**
-     * List of webhook events
-     * @type {Array<WebhookEventResponse>}
-     * @memberof WebhookEventsListResponse
-     */
-    'events': Array<WebhookEventResponse>;
-    /**
-     * Total number of events
-     * @type {number}
-     * @memberof WebhookEventsListResponse
-     */
-    'total': number;
-}
-/**
- * Response schema for webhook endpoint list.
- * @export
- * @interface WebhookListResponse
- */
-export interface WebhookListResponse {
-    /**
-     * List of webhook endpoints
-     * @type {Array<WebhookResponse>}
-     * @memberof WebhookListResponse
-     */
-    'webhooks': Array<WebhookResponse>;
-    /**
-     * Total number of webhooks
-     * @type {number}
-     * @memberof WebhookListResponse
-     */
-    'total': number;
-}
-/**
- * Response schema for webhook endpoint data.
- * @export
- * @interface WebhookResponse
- */
-export interface WebhookResponse {
-    /**
-     * Webhook endpoint ID
-     * @type {string}
-     * @memberof WebhookResponse
-     */
-    'id': string;
-    /**
-     * Webhook endpoint name
-     * @type {string}
-     * @memberof WebhookResponse
-     */
-    'name': string;
-    /**
-     * Webhook URL
-     * @type {string}
-     * @memberof WebhookResponse
-     */
-    'url': string;
-    /**
-     * Subscribed events
-     * @type {Array<WebhookEventType>}
-     * @memberof WebhookResponse
-     */
-    'events': Array<WebhookEventType>;
-    /**
-     * Whether webhook is active
-     * @type {boolean}
-     * @memberof WebhookResponse
-     */
-    'active': boolean;
-    /**
-     * Request timeout in seconds
-     * @type {number}
-     * @memberof WebhookResponse
-     */
-    'timeout': number;
-    /**
-     * Maximum retry attempts
-     * @type {number}
-     * @memberof WebhookResponse
-     */
-    'max_retries': number;
-    /**
-     * Total delivery attempts
-     * @type {number}
-     * @memberof WebhookResponse
-     */
-    'total_deliveries'?: number;
-    /**
-     * Successful deliveries
-     * @type {number}
-     * @memberof WebhookResponse
-     */
-    'successful_deliveries'?: number;
-    /**
-     * Failed deliveries
-     * @type {number}
-     * @memberof WebhookResponse
-     */
-    'failed_deliveries'?: number;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookResponse
-     */
-    'last_delivery_at'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookResponse
-     */
-    'last_success_at'?: string | null;
-    /**
-     * Creation timestamp
-     * @type {string}
-     * @memberof WebhookResponse
-     */
-    'created_at': string;
-    /**
-     * Last update timestamp
-     * @type {string}
-     * @memberof WebhookResponse
-     */
-    'updated_at': string;
-    /**
-     * Additional metadata
-     * @type {{ [key: string]: any; }}
-     * @memberof WebhookResponse
-     */
-    'metadata': { [key: string]: any; };
-}
-/**
- * Response schema for webhook endpoint testing.
- * @export
- * @interface WebhookTestResponse
- */
-export interface WebhookTestResponse {
-    /**
-     * Whether test was successful
-     * @type {boolean}
-     * @memberof WebhookTestResponse
-     */
-    'success': boolean;
-    /**
-     * 
-     * @type {number}
-     * @memberof WebhookTestResponse
-     */
-    'status_code'?: number | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookTestResponse
-     */
-    'response_body'?: string | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof WebhookTestResponse
-     */
-    'response_time'?: number | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookTestResponse
-     */
-    'error'?: string | null;
-}
-/**
- * Request schema for updating a webhook endpoint.
- * @export
- * @interface WebhookUpdateRequest
- */
-export interface WebhookUpdateRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookUpdateRequest
-     */
-    'name'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookUpdateRequest
-     */
-    'url'?: string | null;
-    /**
-     * 
-     * @type {Array<WebhookEventType>}
-     * @memberof WebhookUpdateRequest
-     */
-    'events'?: Array<WebhookEventType> | null;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof WebhookUpdateRequest
-     */
-    'active'?: boolean | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhookUpdateRequest
-     */
-    'secret'?: string | null;
-    /**
-     * 
-     * @type {{ [key: string]: string; }}
-     * @memberof WebhookUpdateRequest
-     */
-    'headers'?: { [key: string]: string; } | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof WebhookUpdateRequest
-     */
-    'timeout'?: number | null;
-    /**
-     * 
-     * @type {number}
-     * @memberof WebhookUpdateRequest
-     */
-    'max_retries'?: number | null;
-    /**
-     * 
-     * @type {{ [key: string]: any; }}
-     * @memberof WebhookUpdateRequest
-     */
-    'metadata'?: { [key: string]: any; } | null;
-}
 
 /**
  * ABTestingApi - axios parameter creator
@@ -11081,7 +10724,7 @@ export const AuthenticationApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async confirmPasswordResetApiV1AuthPasswordResetConfirmPost(token: string, newPassword: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async confirmPasswordResetApiV1AuthPasswordResetConfirmPost(token: string, newPassword: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PasswordResetConfirmResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.confirmPasswordResetApiV1AuthPasswordResetConfirmPost(token, newPassword, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AuthenticationApi.confirmPasswordResetApiV1AuthPasswordResetConfirmPost']?.[localVarOperationServerIndex]?.url;
@@ -11155,7 +10798,7 @@ export const AuthenticationApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async logoutApiV1AuthLogoutPost(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async logoutApiV1AuthLogoutPost(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<LogoutResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.logoutApiV1AuthLogoutPost(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AuthenticationApi.logoutApiV1AuthLogoutPost']?.[localVarOperationServerIndex]?.url;
@@ -11194,7 +10837,7 @@ export const AuthenticationApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async requestPasswordResetApiV1AuthPasswordResetRequestPost(email: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async requestPasswordResetApiV1AuthPasswordResetRequestPost(email: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PasswordResetRequestResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.requestPasswordResetApiV1AuthPasswordResetRequestPost(email, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['AuthenticationApi.requestPasswordResetApiV1AuthPasswordResetRequestPost']?.[localVarOperationServerIndex]?.url;
@@ -11252,7 +10895,7 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        confirmPasswordResetApiV1AuthPasswordResetConfirmPost(requestParameters: AuthenticationApiConfirmPasswordResetApiV1AuthPasswordResetConfirmPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        confirmPasswordResetApiV1AuthPasswordResetConfirmPost(requestParameters: AuthenticationApiConfirmPasswordResetApiV1AuthPasswordResetConfirmPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<PasswordResetConfirmResponse> {
             return localVarFp.confirmPasswordResetApiV1AuthPasswordResetConfirmPost(requestParameters.token, requestParameters.newPassword, options).then((request) => request(axios, basePath));
         },
         /**
@@ -11308,7 +10951,7 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        logoutApiV1AuthLogoutPost(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        logoutApiV1AuthLogoutPost(options?: RawAxiosRequestConfig): AxiosPromise<LogoutResponse> {
             return localVarFp.logoutApiV1AuthLogoutPost(options).then((request) => request(axios, basePath));
         },
         /**
@@ -11338,7 +10981,7 @@ export const AuthenticationApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        requestPasswordResetApiV1AuthPasswordResetRequestPost(requestParameters: AuthenticationApiRequestPasswordResetApiV1AuthPasswordResetRequestPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        requestPasswordResetApiV1AuthPasswordResetRequestPost(requestParameters: AuthenticationApiRequestPasswordResetApiV1AuthPasswordResetRequestPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<PasswordResetRequestResponse> {
             return localVarFp.requestPasswordResetApiV1AuthPasswordResetRequestPost(requestParameters.email, options).then((request) => request(axios, basePath));
         },
         /**
@@ -11387,7 +11030,7 @@ export interface AuthenticationApiInterface {
      * @throws {RequiredError}
      * @memberof AuthenticationApiInterface
      */
-    confirmPasswordResetApiV1AuthPasswordResetConfirmPost(requestParameters: AuthenticationApiConfirmPasswordResetApiV1AuthPasswordResetConfirmPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    confirmPasswordResetApiV1AuthPasswordResetConfirmPost(requestParameters: AuthenticationApiConfirmPasswordResetApiV1AuthPasswordResetConfirmPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<PasswordResetConfirmResponse>;
 
     /**
      * Create API key for current user.  Args:     key_data: API key creation data     current_user: Current authenticated user     auth_service: Authentication service  Returns:     Created API key
@@ -11443,7 +11086,7 @@ export interface AuthenticationApiInterface {
      * @throws {RequiredError}
      * @memberof AuthenticationApiInterface
      */
-    logoutApiV1AuthLogoutPost(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    logoutApiV1AuthLogoutPost(options?: RawAxiosRequestConfig): AxiosPromise<LogoutResponse>;
 
     /**
      * Refresh access token.  Args:     token_data: Refresh token data     auth_service: Authentication service  Returns:     New access and refresh tokens
@@ -11473,7 +11116,7 @@ export interface AuthenticationApiInterface {
      * @throws {RequiredError}
      * @memberof AuthenticationApiInterface
      */
-    requestPasswordResetApiV1AuthPasswordResetRequestPost(requestParameters: AuthenticationApiRequestPasswordResetApiV1AuthPasswordResetRequestPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    requestPasswordResetApiV1AuthPasswordResetRequestPost(requestParameters: AuthenticationApiRequestPasswordResetApiV1AuthPasswordResetRequestPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<PasswordResetRequestResponse>;
 
     /**
      * Revoke current user\'s API key.  Args:     current_user: Current authenticated user     auth_service: Authentication service  Returns:     Success message
@@ -11783,18 +11426,18 @@ export class AuthenticationApi extends BaseAPI implements AuthenticationApiInter
 export const ChatApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Add a new message to existing conversation.  Args:     conversation_id: Conversation ID     message: Message content     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created message
+         * Add a new message to existing conversation.
          * @summary Add Message To Conversation
          * @param {string} conversationId 
-         * @param {string} message 
+         * @param {MessageCreate} messageCreate 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost: async (conversationId: string, message: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost: async (conversationId: string, messageCreate: MessageCreate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'conversationId' is not null or undefined
             assertParamExists('addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost', 'conversationId', conversationId)
-            // verify required parameter 'message' is not null or undefined
-            assertParamExists('addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost', 'message', message)
+            // verify required parameter 'messageCreate' is not null or undefined
+            assertParamExists('addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost', 'messageCreate', messageCreate)
             const localVarPath = `/api/v1/chat/conversations/{conversation_id}/messages`
                 .replace(`{${"conversation_id"}}`, encodeURIComponent(String(conversationId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -11812,15 +11455,14 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-            if (message !== undefined) {
-                localVarQueryParameter['message'] = message;
-            }
-
 
     
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(messageCreate, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -11828,7 +11470,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Send a chat message and get response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response with assistant message
+         * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
          * @summary Chat
          * @param {ChatRequest} chatRequest 
          * @param {*} [options] Override http request option.
@@ -11838,86 +11480,6 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             // verify required parameter 'chatRequest' is not null or undefined
             assertParamExists('chatApiV1ChatChatPost', 'chatRequest', chatRequest)
             const localVarPath = `/api/v1/chat/chat`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(chatRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Send a chat message and get streaming response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Streaming response with chat chunks
-         * @summary Chat Stream
-         * @param {ChatRequest} chatRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        chatStreamApiV1ChatChatStreamPost: async (chatRequest: ChatRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'chatRequest' is not null or undefined
-            assertParamExists('chatStreamApiV1ChatChatStreamPost', 'chatRequest', chatRequest)
-            const localVarPath = `/api/v1/chat/chat/stream`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(chatRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Create and run a basic conversation workflow with LangGraph.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from workflow
-         * @summary Create Basic Workflow
-         * @param {ChatRequest} chatRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createBasicWorkflowApiV1ChatWorkflowsBasicPost: async (chatRequest: ChatRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'chatRequest' is not null or undefined
-            assertParamExists('createBasicWorkflowApiV1ChatWorkflowsBasicPost', 'chatRequest', chatRequest)
-            const localVarPath = `/api/v1/chat/workflows/basic`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -11988,87 +11550,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Create and run a RAG workflow with document retrieval.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from RAG workflow
-         * @summary Create Rag Workflow
-         * @param {ChatRequest} chatRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createRagWorkflowApiV1ChatWorkflowsRagPost: async (chatRequest: ChatRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'chatRequest' is not null or undefined
-            assertParamExists('createRagWorkflowApiV1ChatWorkflowsRagPost', 'chatRequest', chatRequest)
-            const localVarPath = `/api/v1/chat/workflows/rag`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(chatRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Create and run a workflow with tool calling capabilities.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from tools workflow
-         * @summary Create Tools Workflow
-         * @param {ChatRequest} chatRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createToolsWorkflowApiV1ChatWorkflowsToolsPost: async (chatRequest: ChatRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'chatRequest' is not null or undefined
-            assertParamExists('createToolsWorkflowApiV1ChatWorkflowsToolsPost', 'chatRequest', chatRequest)
-            const localVarPath = `/api/v1/chat/workflows/tools`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(chatRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Delete conversation.  Args:     conversation_id: Conversation ID     request: Delete request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+         * Delete conversation.
          * @summary Delete Conversation
          * @param {string} conversationId 
          * @param {*} [options] Override http request option.
@@ -12106,7 +11588,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Delete a message from conversation.  Args:     conversation_id: Conversation ID     message_id: Message ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+         * Delete a message from conversation.
          * @summary Delete Message
          * @param {string} conversationId 
          * @param {string} messageId 
@@ -12148,7 +11630,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Get list of available MCP tools.  Args:     current_user: Current authenticated user  Returns:     List of available tools
+         * Get list of available MCP tools.
          * @summary Get Available Tools
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12182,7 +11664,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Get conversation details with messages.  Args:     conversation_id: Conversation ID     request: Get request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Conversation with messages
+         * Get conversation details with messages.
          * @summary Get Conversation
          * @param {string} conversationId 
          * @param {*} [options] Override http request option.
@@ -12220,7 +11702,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Get conversation messages.  Args:     conversation_id: Conversation ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of messages
+         * Get conversation messages.
          * @summary Get Conversation Messages
          * @param {string} conversationId 
          * @param {*} [options] Override http request option.
@@ -12258,7 +11740,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Get MCP service status.  Args:     current_user: Current authenticated user  Returns:     MCP service status
+         * Get MCP service status.
          * @summary Get Mcp Status
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12292,7 +11774,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * List user\'s conversations.  Args:     query: Search query     status: Filter by status     limit: Maximum number of results     offset: Number of results to skip     sort_by: Sort field     sort_order: Sort order (asc/desc)     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of conversations with pagination
+         * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
          * @summary List Conversations
          * @param {string | null} [query] Search query
          * @param {ConversationStatus | null} [status] Filter by status
@@ -12356,7 +11838,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Update conversation.  Args:     conversation_id: Conversation ID     update_data: Update data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Updated conversation
+         * Update conversation.
          * @summary Update Conversation
          * @param {string} conversationId 
          * @param {ConversationUpdate} conversationUpdate 
@@ -12410,21 +11892,21 @@ export const ChatApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ChatApiAxiosParamCreator(configuration)
     return {
         /**
-         * Add a new message to existing conversation.  Args:     conversation_id: Conversation ID     message: Message content     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created message
+         * Add a new message to existing conversation.
          * @summary Add Message To Conversation
          * @param {string} conversationId 
-         * @param {string} message 
+         * @param {MessageCreate} messageCreate 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(conversationId: string, message: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MessageResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(conversationId, message, options);
+        async addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(conversationId: string, messageCreate: MessageCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MessageResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(conversationId, messageCreate, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ChatApi.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Send a chat message and get response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response with assistant message
+         * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
          * @summary Chat
          * @param {ChatRequest} chatRequest 
          * @param {*} [options] Override http request option.
@@ -12434,32 +11916,6 @@ export const ChatApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.chatApiV1ChatChatPost(chatRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ChatApi.chatApiV1ChatChatPost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Send a chat message and get streaming response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Streaming response with chat chunks
-         * @summary Chat Stream
-         * @param {ChatRequest} chatRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async chatStreamApiV1ChatChatStreamPost(chatRequest: ChatRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.chatStreamApiV1ChatChatStreamPost(chatRequest, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ChatApi.chatStreamApiV1ChatChatStreamPost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Create and run a basic conversation workflow with LangGraph.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from workflow
-         * @summary Create Basic Workflow
-         * @param {ChatRequest} chatRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createBasicWorkflowApiV1ChatWorkflowsBasicPost(chatRequest: ChatRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ChatResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createBasicWorkflowApiV1ChatWorkflowsBasicPost(chatRequest, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ChatApi.createBasicWorkflowApiV1ChatWorkflowsBasicPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -12476,33 +11932,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Create and run a RAG workflow with document retrieval.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from RAG workflow
-         * @summary Create Rag Workflow
-         * @param {ChatRequest} chatRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createRagWorkflowApiV1ChatWorkflowsRagPost(chatRequest: ChatRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ChatResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createRagWorkflowApiV1ChatWorkflowsRagPost(chatRequest, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ChatApi.createRagWorkflowApiV1ChatWorkflowsRagPost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Create and run a workflow with tool calling capabilities.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from tools workflow
-         * @summary Create Tools Workflow
-         * @param {ChatRequest} chatRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createToolsWorkflowApiV1ChatWorkflowsToolsPost(chatRequest: ChatRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ChatResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createToolsWorkflowApiV1ChatWorkflowsToolsPost(chatRequest, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ChatApi.createToolsWorkflowApiV1ChatWorkflowsToolsPost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Delete conversation.  Args:     conversation_id: Conversation ID     request: Delete request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+         * Delete conversation.
          * @summary Delete Conversation
          * @param {string} conversationId 
          * @param {*} [options] Override http request option.
@@ -12515,7 +11945,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Delete a message from conversation.  Args:     conversation_id: Conversation ID     message_id: Message ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+         * Delete a message from conversation.
          * @summary Delete Message
          * @param {string} conversationId 
          * @param {string} messageId 
@@ -12529,7 +11959,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get list of available MCP tools.  Args:     current_user: Current authenticated user  Returns:     List of available tools
+         * Get list of available MCP tools.
          * @summary Get Available Tools
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12541,7 +11971,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get conversation details with messages.  Args:     conversation_id: Conversation ID     request: Get request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Conversation with messages
+         * Get conversation details with messages.
          * @summary Get Conversation
          * @param {string} conversationId 
          * @param {*} [options] Override http request option.
@@ -12554,7 +11984,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get conversation messages.  Args:     conversation_id: Conversation ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of messages
+         * Get conversation messages.
          * @summary Get Conversation Messages
          * @param {string} conversationId 
          * @param {*} [options] Override http request option.
@@ -12567,7 +11997,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get MCP service status.  Args:     current_user: Current authenticated user  Returns:     MCP service status
+         * Get MCP service status.
          * @summary Get Mcp Status
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12579,7 +12009,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List user\'s conversations.  Args:     query: Search query     status: Filter by status     limit: Maximum number of results     offset: Number of results to skip     sort_by: Sort field     sort_order: Sort order (asc/desc)     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of conversations with pagination
+         * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
          * @summary List Conversations
          * @param {string | null} [query] Search query
          * @param {ConversationStatus | null} [status] Filter by status
@@ -12597,7 +12027,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Update conversation.  Args:     conversation_id: Conversation ID     update_data: Update data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Updated conversation
+         * Update conversation.
          * @summary Update Conversation
          * @param {string} conversationId 
          * @param {ConversationUpdate} conversationUpdate 
@@ -12621,17 +12051,17 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
     const localVarFp = ChatApiFp(configuration)
     return {
         /**
-         * Add a new message to existing conversation.  Args:     conversation_id: Conversation ID     message: Message content     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created message
+         * Add a new message to existing conversation.
          * @summary Add Message To Conversation
          * @param {ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters: ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<MessageResponse> {
-            return localVarFp.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters.conversationId, requestParameters.message, options).then((request) => request(axios, basePath));
+            return localVarFp.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters.conversationId, requestParameters.messageCreate, options).then((request) => request(axios, basePath));
         },
         /**
-         * Send a chat message and get response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response with assistant message
+         * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
          * @summary Chat
          * @param {ChatApiChatApiV1ChatChatPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -12639,26 +12069,6 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
          */
         chatApiV1ChatChatPost(requestParameters: ChatApiChatApiV1ChatChatPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse> {
             return localVarFp.chatApiV1ChatChatPost(requestParameters.chatRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Send a chat message and get streaming response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Streaming response with chat chunks
-         * @summary Chat Stream
-         * @param {ChatApiChatStreamApiV1ChatChatStreamPostRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        chatStreamApiV1ChatChatStreamPost(requestParameters: ChatApiChatStreamApiV1ChatChatStreamPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
-            return localVarFp.chatStreamApiV1ChatChatStreamPost(requestParameters.chatRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Create and run a basic conversation workflow with LangGraph.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from workflow
-         * @summary Create Basic Workflow
-         * @param {ChatApiCreateBasicWorkflowApiV1ChatWorkflowsBasicPostRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createBasicWorkflowApiV1ChatWorkflowsBasicPost(requestParameters: ChatApiCreateBasicWorkflowApiV1ChatWorkflowsBasicPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse> {
-            return localVarFp.createBasicWorkflowApiV1ChatWorkflowsBasicPost(requestParameters.chatRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
@@ -12671,27 +12081,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.createConversationApiV1ChatConversationsPost(requestParameters.conversationCreate, options).then((request) => request(axios, basePath));
         },
         /**
-         * Create and run a RAG workflow with document retrieval.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from RAG workflow
-         * @summary Create Rag Workflow
-         * @param {ChatApiCreateRagWorkflowApiV1ChatWorkflowsRagPostRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createRagWorkflowApiV1ChatWorkflowsRagPost(requestParameters: ChatApiCreateRagWorkflowApiV1ChatWorkflowsRagPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse> {
-            return localVarFp.createRagWorkflowApiV1ChatWorkflowsRagPost(requestParameters.chatRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Create and run a workflow with tool calling capabilities.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from tools workflow
-         * @summary Create Tools Workflow
-         * @param {ChatApiCreateToolsWorkflowApiV1ChatWorkflowsToolsPostRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createToolsWorkflowApiV1ChatWorkflowsToolsPost(requestParameters: ChatApiCreateToolsWorkflowApiV1ChatWorkflowsToolsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse> {
-            return localVarFp.createToolsWorkflowApiV1ChatWorkflowsToolsPost(requestParameters.chatRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Delete conversation.  Args:     conversation_id: Conversation ID     request: Delete request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+         * Delete conversation.
          * @summary Delete Conversation
          * @param {ChatApiDeleteConversationApiV1ChatConversationsConversationIdDeleteRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -12701,7 +12091,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.deleteConversationApiV1ChatConversationsConversationIdDelete(requestParameters.conversationId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Delete a message from conversation.  Args:     conversation_id: Conversation ID     message_id: Message ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+         * Delete a message from conversation.
          * @summary Delete Message
          * @param {ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -12711,7 +12101,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(requestParameters.conversationId, requestParameters.messageId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get list of available MCP tools.  Args:     current_user: Current authenticated user  Returns:     List of available tools
+         * Get list of available MCP tools.
          * @summary Get Available Tools
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12720,7 +12110,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.getAvailableToolsApiV1ChatToolsAvailableGet(options).then((request) => request(axios, basePath));
         },
         /**
-         * Get conversation details with messages.  Args:     conversation_id: Conversation ID     request: Get request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Conversation with messages
+         * Get conversation details with messages.
          * @summary Get Conversation
          * @param {ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -12730,7 +12120,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.getConversationApiV1ChatConversationsConversationIdGet(requestParameters.conversationId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get conversation messages.  Args:     conversation_id: Conversation ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of messages
+         * Get conversation messages.
          * @summary Get Conversation Messages
          * @param {ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -12740,7 +12130,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(requestParameters.conversationId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get MCP service status.  Args:     current_user: Current authenticated user  Returns:     MCP service status
+         * Get MCP service status.
          * @summary Get Mcp Status
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -12749,7 +12139,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.getMcpStatusApiV1ChatMcpStatusGet(options).then((request) => request(axios, basePath));
         },
         /**
-         * List user\'s conversations.  Args:     query: Search query     status: Filter by status     limit: Maximum number of results     offset: Number of results to skip     sort_by: Sort field     sort_order: Sort order (asc/desc)     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of conversations with pagination
+         * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
          * @summary List Conversations
          * @param {ChatApiListConversationsApiV1ChatConversationsGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -12759,7 +12149,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.listConversationsApiV1ChatConversationsGet(requestParameters.query, requestParameters.status, requestParameters.limit, requestParameters.offset, requestParameters.sortBy, requestParameters.sortOrder, options).then((request) => request(axios, basePath));
         },
         /**
-         * Update conversation.  Args:     conversation_id: Conversation ID     update_data: Update data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Updated conversation
+         * Update conversation.
          * @summary Update Conversation
          * @param {ChatApiUpdateConversationApiV1ChatConversationsConversationIdPutRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -12778,7 +12168,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
  */
 export interface ChatApiInterface {
     /**
-     * Add a new message to existing conversation.  Args:     conversation_id: Conversation ID     message: Message content     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created message
+     * Add a new message to existing conversation.
      * @summary Add Message To Conversation
      * @param {ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -12788,7 +12178,7 @@ export interface ChatApiInterface {
     addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters: ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<MessageResponse>;
 
     /**
-     * Send a chat message and get response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response with assistant message
+     * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
      * @summary Chat
      * @param {ChatApiChatApiV1ChatChatPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -12796,26 +12186,6 @@ export interface ChatApiInterface {
      * @memberof ChatApiInterface
      */
     chatApiV1ChatChatPost(requestParameters: ChatApiChatApiV1ChatChatPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse>;
-
-    /**
-     * Send a chat message and get streaming response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Streaming response with chat chunks
-     * @summary Chat Stream
-     * @param {ChatApiChatStreamApiV1ChatChatStreamPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApiInterface
-     */
-    chatStreamApiV1ChatChatStreamPost(requestParameters: ChatApiChatStreamApiV1ChatChatStreamPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
-
-    /**
-     * Create and run a basic conversation workflow with LangGraph.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from workflow
-     * @summary Create Basic Workflow
-     * @param {ChatApiCreateBasicWorkflowApiV1ChatWorkflowsBasicPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApiInterface
-     */
-    createBasicWorkflowApiV1ChatWorkflowsBasicPost(requestParameters: ChatApiCreateBasicWorkflowApiV1ChatWorkflowsBasicPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse>;
 
     /**
      * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
@@ -12828,27 +12198,7 @@ export interface ChatApiInterface {
     createConversationApiV1ChatConversationsPost(requestParameters: ChatApiCreateConversationApiV1ChatConversationsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConversationResponse>;
 
     /**
-     * Create and run a RAG workflow with document retrieval.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from RAG workflow
-     * @summary Create Rag Workflow
-     * @param {ChatApiCreateRagWorkflowApiV1ChatWorkflowsRagPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApiInterface
-     */
-    createRagWorkflowApiV1ChatWorkflowsRagPost(requestParameters: ChatApiCreateRagWorkflowApiV1ChatWorkflowsRagPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse>;
-
-    /**
-     * Create and run a workflow with tool calling capabilities.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from tools workflow
-     * @summary Create Tools Workflow
-     * @param {ChatApiCreateToolsWorkflowApiV1ChatWorkflowsToolsPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApiInterface
-     */
-    createToolsWorkflowApiV1ChatWorkflowsToolsPost(requestParameters: ChatApiCreateToolsWorkflowApiV1ChatWorkflowsToolsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse>;
-
-    /**
-     * Delete conversation.  Args:     conversation_id: Conversation ID     request: Delete request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+     * Delete conversation.
      * @summary Delete Conversation
      * @param {ChatApiDeleteConversationApiV1ChatConversationsConversationIdDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -12858,7 +12208,7 @@ export interface ChatApiInterface {
     deleteConversationApiV1ChatConversationsConversationIdDelete(requestParameters: ChatApiDeleteConversationApiV1ChatConversationsConversationIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConversationDeleteResponse>;
 
     /**
-     * Delete a message from conversation.  Args:     conversation_id: Conversation ID     message_id: Message ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+     * Delete a message from conversation.
      * @summary Delete Message
      * @param {ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -12868,7 +12218,7 @@ export interface ChatApiInterface {
     deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(requestParameters: ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
 
     /**
-     * Get list of available MCP tools.  Args:     current_user: Current authenticated user  Returns:     List of available tools
+     * Get list of available MCP tools.
      * @summary Get Available Tools
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -12877,7 +12227,7 @@ export interface ChatApiInterface {
     getAvailableToolsApiV1ChatToolsAvailableGet(options?: RawAxiosRequestConfig): AxiosPromise<AvailableToolsResponse>;
 
     /**
-     * Get conversation details with messages.  Args:     conversation_id: Conversation ID     request: Get request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Conversation with messages
+     * Get conversation details with messages.
      * @summary Get Conversation
      * @param {ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -12887,7 +12237,7 @@ export interface ChatApiInterface {
     getConversationApiV1ChatConversationsConversationIdGet(requestParameters: ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConversationWithMessages>;
 
     /**
-     * Get conversation messages.  Args:     conversation_id: Conversation ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of messages
+     * Get conversation messages.
      * @summary Get Conversation Messages
      * @param {ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -12897,7 +12247,7 @@ export interface ChatApiInterface {
     getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(requestParameters: ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<Array<MessageResponse>>;
 
     /**
-     * Get MCP service status.  Args:     current_user: Current authenticated user  Returns:     MCP service status
+     * Get MCP service status.
      * @summary Get Mcp Status
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -12906,7 +12256,7 @@ export interface ChatApiInterface {
     getMcpStatusApiV1ChatMcpStatusGet(options?: RawAxiosRequestConfig): AxiosPromise<McpStatusResponse>;
 
     /**
-     * List user\'s conversations.  Args:     query: Search query     status: Filter by status     limit: Maximum number of results     offset: Number of results to skip     sort_by: Sort field     sort_order: Sort order (asc/desc)     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of conversations with pagination
+     * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
      * @summary List Conversations
      * @param {ChatApiListConversationsApiV1ChatConversationsGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -12916,7 +12266,7 @@ export interface ChatApiInterface {
     listConversationsApiV1ChatConversationsGet(requestParameters?: ChatApiListConversationsApiV1ChatConversationsGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConversationSearchResponse>;
 
     /**
-     * Update conversation.  Args:     conversation_id: Conversation ID     update_data: Update data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Updated conversation
+     * Update conversation.
      * @summary Update Conversation
      * @param {ChatApiUpdateConversationApiV1ChatConversationsConversationIdPutRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -12942,10 +12292,10 @@ export interface ChatApiAddMessageToConversationApiV1ChatConversationsConversati
 
     /**
      * 
-     * @type {string}
+     * @type {MessageCreate}
      * @memberof ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPost
      */
-    readonly message: string
+    readonly messageCreate: MessageCreate
 }
 
 /**
@@ -12963,34 +12313,6 @@ export interface ChatApiChatApiV1ChatChatPostRequest {
 }
 
 /**
- * Request parameters for chatStreamApiV1ChatChatStreamPost operation in ChatApi.
- * @export
- * @interface ChatApiChatStreamApiV1ChatChatStreamPostRequest
- */
-export interface ChatApiChatStreamApiV1ChatChatStreamPostRequest {
-    /**
-     * 
-     * @type {ChatRequest}
-     * @memberof ChatApiChatStreamApiV1ChatChatStreamPost
-     */
-    readonly chatRequest: ChatRequest
-}
-
-/**
- * Request parameters for createBasicWorkflowApiV1ChatWorkflowsBasicPost operation in ChatApi.
- * @export
- * @interface ChatApiCreateBasicWorkflowApiV1ChatWorkflowsBasicPostRequest
- */
-export interface ChatApiCreateBasicWorkflowApiV1ChatWorkflowsBasicPostRequest {
-    /**
-     * 
-     * @type {ChatRequest}
-     * @memberof ChatApiCreateBasicWorkflowApiV1ChatWorkflowsBasicPost
-     */
-    readonly chatRequest: ChatRequest
-}
-
-/**
  * Request parameters for createConversationApiV1ChatConversationsPost operation in ChatApi.
  * @export
  * @interface ChatApiCreateConversationApiV1ChatConversationsPostRequest
@@ -13002,34 +12324,6 @@ export interface ChatApiCreateConversationApiV1ChatConversationsPostRequest {
      * @memberof ChatApiCreateConversationApiV1ChatConversationsPost
      */
     readonly conversationCreate: ConversationCreate
-}
-
-/**
- * Request parameters for createRagWorkflowApiV1ChatWorkflowsRagPost operation in ChatApi.
- * @export
- * @interface ChatApiCreateRagWorkflowApiV1ChatWorkflowsRagPostRequest
- */
-export interface ChatApiCreateRagWorkflowApiV1ChatWorkflowsRagPostRequest {
-    /**
-     * 
-     * @type {ChatRequest}
-     * @memberof ChatApiCreateRagWorkflowApiV1ChatWorkflowsRagPost
-     */
-    readonly chatRequest: ChatRequest
-}
-
-/**
- * Request parameters for createToolsWorkflowApiV1ChatWorkflowsToolsPost operation in ChatApi.
- * @export
- * @interface ChatApiCreateToolsWorkflowApiV1ChatWorkflowsToolsPostRequest
- */
-export interface ChatApiCreateToolsWorkflowApiV1ChatWorkflowsToolsPostRequest {
-    /**
-     * 
-     * @type {ChatRequest}
-     * @memberof ChatApiCreateToolsWorkflowApiV1ChatWorkflowsToolsPost
-     */
-    readonly chatRequest: ChatRequest
 }
 
 /**
@@ -13173,7 +12467,7 @@ export interface ChatApiUpdateConversationApiV1ChatConversationsConversationIdPu
  */
 export class ChatApi extends BaseAPI implements ChatApiInterface {
     /**
-     * Add a new message to existing conversation.  Args:     conversation_id: Conversation ID     message: Message content     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created message
+     * Add a new message to existing conversation.
      * @summary Add Message To Conversation
      * @param {ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13181,11 +12475,11 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
      * @memberof ChatApi
      */
     public addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters: ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest, options?: RawAxiosRequestConfig) {
-        return ChatApiFp(this.configuration).addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters.conversationId, requestParameters.message, options).then((request) => request(this.axios, this.basePath));
+        return ChatApiFp(this.configuration).addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters.conversationId, requestParameters.messageCreate, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Send a chat message and get response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response with assistant message
+     * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
      * @summary Chat
      * @param {ChatApiChatApiV1ChatChatPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13194,30 +12488,6 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
      */
     public chatApiV1ChatChatPost(requestParameters: ChatApiChatApiV1ChatChatPostRequest, options?: RawAxiosRequestConfig) {
         return ChatApiFp(this.configuration).chatApiV1ChatChatPost(requestParameters.chatRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Send a chat message and get streaming response.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Streaming response with chat chunks
-     * @summary Chat Stream
-     * @param {ChatApiChatStreamApiV1ChatChatStreamPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApi
-     */
-    public chatStreamApiV1ChatChatStreamPost(requestParameters: ChatApiChatStreamApiV1ChatChatStreamPostRequest, options?: RawAxiosRequestConfig) {
-        return ChatApiFp(this.configuration).chatStreamApiV1ChatChatStreamPost(requestParameters.chatRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Create and run a basic conversation workflow with LangGraph.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from workflow
-     * @summary Create Basic Workflow
-     * @param {ChatApiCreateBasicWorkflowApiV1ChatWorkflowsBasicPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApi
-     */
-    public createBasicWorkflowApiV1ChatWorkflowsBasicPost(requestParameters: ChatApiCreateBasicWorkflowApiV1ChatWorkflowsBasicPostRequest, options?: RawAxiosRequestConfig) {
-        return ChatApiFp(this.configuration).createBasicWorkflowApiV1ChatWorkflowsBasicPost(requestParameters.chatRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -13233,31 +12503,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Create and run a RAG workflow with document retrieval.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from RAG workflow
-     * @summary Create Rag Workflow
-     * @param {ChatApiCreateRagWorkflowApiV1ChatWorkflowsRagPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApi
-     */
-    public createRagWorkflowApiV1ChatWorkflowsRagPost(requestParameters: ChatApiCreateRagWorkflowApiV1ChatWorkflowsRagPostRequest, options?: RawAxiosRequestConfig) {
-        return ChatApiFp(this.configuration).createRagWorkflowApiV1ChatWorkflowsRagPost(requestParameters.chatRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Create and run a workflow with tool calling capabilities.  Args:     chat_request: Chat request data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Chat response from tools workflow
-     * @summary Create Tools Workflow
-     * @param {ChatApiCreateToolsWorkflowApiV1ChatWorkflowsToolsPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApi
-     */
-    public createToolsWorkflowApiV1ChatWorkflowsToolsPost(requestParameters: ChatApiCreateToolsWorkflowApiV1ChatWorkflowsToolsPostRequest, options?: RawAxiosRequestConfig) {
-        return ChatApiFp(this.configuration).createToolsWorkflowApiV1ChatWorkflowsToolsPost(requestParameters.chatRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Delete conversation.  Args:     conversation_id: Conversation ID     request: Delete request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+     * Delete conversation.
      * @summary Delete Conversation
      * @param {ChatApiDeleteConversationApiV1ChatConversationsConversationIdDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13269,7 +12515,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Delete a message from conversation.  Args:     conversation_id: Conversation ID     message_id: Message ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     Success message
+     * Delete a message from conversation.
      * @summary Delete Message
      * @param {ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13281,7 +12527,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Get list of available MCP tools.  Args:     current_user: Current authenticated user  Returns:     List of available tools
+     * Get list of available MCP tools.
      * @summary Get Available Tools
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -13292,7 +12538,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Get conversation details with messages.  Args:     conversation_id: Conversation ID     request: Get request parameters     current_user: Current authenticated user     chat_service: Chat service  Returns:     Conversation with messages
+     * Get conversation details with messages.
      * @summary Get Conversation
      * @param {ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13304,7 +12550,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Get conversation messages.  Args:     conversation_id: Conversation ID     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of messages
+     * Get conversation messages.
      * @summary Get Conversation Messages
      * @param {ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13316,7 +12562,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Get MCP service status.  Args:     current_user: Current authenticated user  Returns:     MCP service status
+     * Get MCP service status.
      * @summary Get Mcp Status
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -13327,7 +12573,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * List user\'s conversations.  Args:     query: Search query     status: Filter by status     limit: Maximum number of results     offset: Number of results to skip     sort_by: Sort field     sort_order: Sort order (asc/desc)     current_user: Current authenticated user     chat_service: Chat service  Returns:     List of conversations with pagination
+     * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
      * @summary List Conversations
      * @param {ChatApiListConversationsApiV1ChatConversationsGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13339,7 +12585,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Update conversation.  Args:     conversation_id: Conversation ID     update_data: Update data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Updated conversation
+     * Update conversation.
      * @summary Update Conversation
      * @param {ChatApiUpdateConversationApiV1ChatConversationsConversationIdPutRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13360,7 +12606,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
 export const DataManagementApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Bulk delete conversations.  Args:     conversation_ids: List of conversation IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+         * Bulk delete conversations.
          * @summary Bulk Delete Conversations
          * @param {Array<string | null>} requestBody 
          * @param {*} [options] Override http request option.
@@ -13400,7 +12646,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Bulk delete documents.  Args:     document_ids: List of document IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+         * Bulk delete documents.
          * @summary Bulk Delete Documents
          * @param {Array<string | null>} requestBody 
          * @param {*} [options] Override http request option.
@@ -13440,7 +12686,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Bulk delete prompts.  Args:     prompt_ids: List of prompt IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+         * Bulk delete prompts.
          * @summary Bulk Delete Prompts
          * @param {Array<string | null>} requestBody 
          * @param {*} [options] Override http request option.
@@ -13480,7 +12726,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Create a data backup.  Args:     backup_request: Backup request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Backup operation details
+         * Create a data backup.
          * @summary Create Backup
          * @param {BackupRequest} backupRequest 
          * @param {*} [options] Override http request option.
@@ -13520,7 +12766,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Export data in specified format.  Args:     export_request: Export request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Export operation details
+         * Export data in specified format.
          * @summary Export Data
          * @param {ExportDataRequest} exportDataRequest 
          * @param {*} [options] Override http request option.
@@ -13560,7 +12806,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Get storage statistics and usage information.  Args:     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Storage statistics
+         * Get storage statistics and usage information.
          * @summary Get Storage Stats
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -13594,7 +12840,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * List available backups.  Args:     request: List request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     List of backups
+         * List available backups.
          * @summary List Backups
          * @param {BackupType | null} [backupType] 
          * @param {string | null} [status] 
@@ -13638,7 +12884,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
-         * Restore data from a backup.  Args:     restore_request: Restore request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Restore operation details
+         * Restore data from a backup.
          * @summary Restore From Backup
          * @param {RestoreRequest} restoreRequest 
          * @param {*} [options] Override http request option.
@@ -13688,7 +12934,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = DataManagementApiAxiosParamCreator(configuration)
     return {
         /**
-         * Bulk delete conversations.  Args:     conversation_ids: List of conversation IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+         * Bulk delete conversations.
          * @summary Bulk Delete Conversations
          * @param {Array<string | null>} requestBody 
          * @param {*} [options] Override http request option.
@@ -13701,7 +12947,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Bulk delete documents.  Args:     document_ids: List of document IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+         * Bulk delete documents.
          * @summary Bulk Delete Documents
          * @param {Array<string | null>} requestBody 
          * @param {*} [options] Override http request option.
@@ -13714,7 +12960,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Bulk delete prompts.  Args:     prompt_ids: List of prompt IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+         * Bulk delete prompts.
          * @summary Bulk Delete Prompts
          * @param {Array<string | null>} requestBody 
          * @param {*} [options] Override http request option.
@@ -13727,7 +12973,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Create a data backup.  Args:     backup_request: Backup request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Backup operation details
+         * Create a data backup.
          * @summary Create Backup
          * @param {BackupRequest} backupRequest 
          * @param {*} [options] Override http request option.
@@ -13740,7 +12986,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Export data in specified format.  Args:     export_request: Export request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Export operation details
+         * Export data in specified format.
          * @summary Export Data
          * @param {ExportDataRequest} exportDataRequest 
          * @param {*} [options] Override http request option.
@@ -13753,7 +12999,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get storage statistics and usage information.  Args:     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Storage statistics
+         * Get storage statistics and usage information.
          * @summary Get Storage Stats
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -13765,7 +13011,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List available backups.  Args:     request: List request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     List of backups
+         * List available backups.
          * @summary List Backups
          * @param {BackupType | null} [backupType] 
          * @param {string | null} [status] 
@@ -13779,7 +13025,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Restore data from a backup.  Args:     restore_request: Restore request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Restore operation details
+         * Restore data from a backup.
          * @summary Restore From Backup
          * @param {RestoreRequest} restoreRequest 
          * @param {*} [options] Override http request option.
@@ -13802,7 +13048,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
     const localVarFp = DataManagementApiFp(configuration)
     return {
         /**
-         * Bulk delete conversations.  Args:     conversation_ids: List of conversation IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+         * Bulk delete conversations.
          * @summary Bulk Delete Conversations
          * @param {DataManagementApiBulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -13812,7 +13058,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
             return localVarFp.bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestParameters.requestBody, options).then((request) => request(axios, basePath));
         },
         /**
-         * Bulk delete documents.  Args:     document_ids: List of document IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+         * Bulk delete documents.
          * @summary Bulk Delete Documents
          * @param {DataManagementApiBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -13822,7 +13068,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
             return localVarFp.bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestParameters.requestBody, options).then((request) => request(axios, basePath));
         },
         /**
-         * Bulk delete prompts.  Args:     prompt_ids: List of prompt IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+         * Bulk delete prompts.
          * @summary Bulk Delete Prompts
          * @param {DataManagementApiBulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -13832,7 +13078,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
             return localVarFp.bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestParameters.requestBody, options).then((request) => request(axios, basePath));
         },
         /**
-         * Create a data backup.  Args:     backup_request: Backup request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Backup operation details
+         * Create a data backup.
          * @summary Create Backup
          * @param {DataManagementApiCreateBackupApiV1DataBackupPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -13842,7 +13088,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
             return localVarFp.createBackupApiV1DataBackupPost(requestParameters.backupRequest, options).then((request) => request(axios, basePath));
         },
         /**
-         * Export data in specified format.  Args:     export_request: Export request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Export operation details
+         * Export data in specified format.
          * @summary Export Data
          * @param {DataManagementApiExportDataApiV1DataExportPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -13852,7 +13098,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
             return localVarFp.exportDataApiV1DataExportPost(requestParameters.exportDataRequest, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get storage statistics and usage information.  Args:     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Storage statistics
+         * Get storage statistics and usage information.
          * @summary Get Storage Stats
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -13861,7 +13107,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
             return localVarFp.getStorageStatsApiV1DataStatsGet(options).then((request) => request(axios, basePath));
         },
         /**
-         * List available backups.  Args:     request: List request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     List of backups
+         * List available backups.
          * @summary List Backups
          * @param {DataManagementApiListBackupsApiV1DataBackupsGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -13871,7 +13117,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
             return localVarFp.listBackupsApiV1DataBackupsGet(requestParameters.backupType, requestParameters.status, options).then((request) => request(axios, basePath));
         },
         /**
-         * Restore data from a backup.  Args:     restore_request: Restore request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Restore operation details
+         * Restore data from a backup.
          * @summary Restore From Backup
          * @param {DataManagementApiRestoreFromBackupApiV1DataRestorePostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -13890,7 +13136,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
  */
 export interface DataManagementApiInterface {
     /**
-     * Bulk delete conversations.  Args:     conversation_ids: List of conversation IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+     * Bulk delete conversations.
      * @summary Bulk Delete Conversations
      * @param {DataManagementApiBulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13900,7 +13146,7 @@ export interface DataManagementApiInterface {
     bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestParameters: DataManagementApiBulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
 
     /**
-     * Bulk delete documents.  Args:     document_ids: List of document IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+     * Bulk delete documents.
      * @summary Bulk Delete Documents
      * @param {DataManagementApiBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13910,7 +13156,7 @@ export interface DataManagementApiInterface {
     bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestParameters: DataManagementApiBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
 
     /**
-     * Bulk delete prompts.  Args:     prompt_ids: List of prompt IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+     * Bulk delete prompts.
      * @summary Bulk Delete Prompts
      * @param {DataManagementApiBulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13920,7 +13166,7 @@ export interface DataManagementApiInterface {
     bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestParameters: DataManagementApiBulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
 
     /**
-     * Create a data backup.  Args:     backup_request: Backup request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Backup operation details
+     * Create a data backup.
      * @summary Create Backup
      * @param {DataManagementApiCreateBackupApiV1DataBackupPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13930,7 +13176,7 @@ export interface DataManagementApiInterface {
     createBackupApiV1DataBackupPost(requestParameters: DataManagementApiCreateBackupApiV1DataBackupPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<BackupResponse>;
 
     /**
-     * Export data in specified format.  Args:     export_request: Export request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Export operation details
+     * Export data in specified format.
      * @summary Export Data
      * @param {DataManagementApiExportDataApiV1DataExportPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13940,7 +13186,7 @@ export interface DataManagementApiInterface {
     exportDataApiV1DataExportPost(requestParameters: DataManagementApiExportDataApiV1DataExportPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ExportDataResponse>;
 
     /**
-     * Get storage statistics and usage information.  Args:     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Storage statistics
+     * Get storage statistics and usage information.
      * @summary Get Storage Stats
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -13949,7 +13195,7 @@ export interface DataManagementApiInterface {
     getStorageStatsApiV1DataStatsGet(options?: RawAxiosRequestConfig): AxiosPromise<StorageStatsResponse>;
 
     /**
-     * List available backups.  Args:     request: List request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     List of backups
+     * List available backups.
      * @summary List Backups
      * @param {DataManagementApiListBackupsApiV1DataBackupsGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -13959,7 +13205,7 @@ export interface DataManagementApiInterface {
     listBackupsApiV1DataBackupsGet(requestParameters?: DataManagementApiListBackupsApiV1DataBackupsGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<BackupListResponse>;
 
     /**
-     * Restore data from a backup.  Args:     restore_request: Restore request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Restore operation details
+     * Restore data from a backup.
      * @summary Restore From Backup
      * @param {DataManagementApiRestoreFromBackupApiV1DataRestorePostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -14083,7 +13329,7 @@ export interface DataManagementApiRestoreFromBackupApiV1DataRestorePostRequest {
  */
 export class DataManagementApi extends BaseAPI implements DataManagementApiInterface {
     /**
-     * Bulk delete conversations.  Args:     conversation_ids: List of conversation IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+     * Bulk delete conversations.
      * @summary Bulk Delete Conversations
      * @param {DataManagementApiBulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -14095,7 +13341,7 @@ export class DataManagementApi extends BaseAPI implements DataManagementApiInter
     }
 
     /**
-     * Bulk delete documents.  Args:     document_ids: List of document IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+     * Bulk delete documents.
      * @summary Bulk Delete Documents
      * @param {DataManagementApiBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -14107,7 +13353,7 @@ export class DataManagementApi extends BaseAPI implements DataManagementApiInter
     }
 
     /**
-     * Bulk delete prompts.  Args:     prompt_ids: List of prompt IDs to delete     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Bulk operation results
+     * Bulk delete prompts.
      * @summary Bulk Delete Prompts
      * @param {DataManagementApiBulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -14119,7 +13365,7 @@ export class DataManagementApi extends BaseAPI implements DataManagementApiInter
     }
 
     /**
-     * Create a data backup.  Args:     backup_request: Backup request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Backup operation details
+     * Create a data backup.
      * @summary Create Backup
      * @param {DataManagementApiCreateBackupApiV1DataBackupPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -14131,7 +13377,7 @@ export class DataManagementApi extends BaseAPI implements DataManagementApiInter
     }
 
     /**
-     * Export data in specified format.  Args:     export_request: Export request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Export operation details
+     * Export data in specified format.
      * @summary Export Data
      * @param {DataManagementApiExportDataApiV1DataExportPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -14143,7 +13389,7 @@ export class DataManagementApi extends BaseAPI implements DataManagementApiInter
     }
 
     /**
-     * Get storage statistics and usage information.  Args:     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Storage statistics
+     * Get storage statistics and usage information.
      * @summary Get Storage Stats
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -14154,7 +13400,7 @@ export class DataManagementApi extends BaseAPI implements DataManagementApiInter
     }
 
     /**
-     * List available backups.  Args:     request: List request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     List of backups
+     * List available backups.
      * @summary List Backups
      * @param {DataManagementApiListBackupsApiV1DataBackupsGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -14166,7 +13412,7 @@ export class DataManagementApi extends BaseAPI implements DataManagementApiInter
     }
 
     /**
-     * Restore data from a backup.  Args:     restore_request: Restore request parameters     current_user: Current authenticated user     data_manager: Data manager instance  Returns:     Restore operation details
+     * Restore data from a backup.
      * @summary Restore From Backup
      * @param {DataManagementApiRestoreFromBackupApiV1DataRestorePostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -14216,6 +13462,40 @@ export const DefaultApiAxiosParamCreator = function (configuration?: Configurati
                 options: localVarRequestOptions,
             };
         },
+        /**
+         * 
+         * @summary Serve React App
+         * @param {string} fullPath 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serveReactAppFullPathGet: async (fullPath: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'fullPath' is not null or undefined
+            assertParamExists('serveReactAppFullPathGet', 'fullPath', fullPath)
+            const localVarPath = `/{full_path}`
+                .replace(`{${"full_path"}}`, encodeURIComponent(String(fullPath)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
     }
 };
 
@@ -14238,6 +13518,19 @@ export const DefaultApiFp = function(configuration?: Configuration) {
             const localVarOperationServerBasePath = operationServerMap['DefaultApi.rootGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
+        /**
+         * 
+         * @summary Serve React App
+         * @param {string} fullPath 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async serveReactAppFullPathGet(fullPath: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.serveReactAppFullPathGet(fullPath, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['DefaultApi.serveReactAppFullPathGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
     }
 };
 
@@ -14257,6 +13550,16 @@ export const DefaultApiFactory = function (configuration?: Configuration, basePa
         rootGet(options?: RawAxiosRequestConfig): AxiosPromise<any> {
             return localVarFp.rootGet(options).then((request) => request(axios, basePath));
         },
+        /**
+         * 
+         * @summary Serve React App
+         * @param {DefaultApiServeReactAppFullPathGetRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        serveReactAppFullPathGet(requestParameters: DefaultApiServeReactAppFullPathGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.serveReactAppFullPathGet(requestParameters.fullPath, options).then((request) => request(axios, basePath));
+        },
     };
 };
 
@@ -14275,6 +13578,30 @@ export interface DefaultApiInterface {
      */
     rootGet(options?: RawAxiosRequestConfig): AxiosPromise<any>;
 
+    /**
+     * 
+     * @summary Serve React App
+     * @param {DefaultApiServeReactAppFullPathGetRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApiInterface
+     */
+    serveReactAppFullPathGet(requestParameters: DefaultApiServeReactAppFullPathGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
+
+}
+
+/**
+ * Request parameters for serveReactAppFullPathGet operation in DefaultApi.
+ * @export
+ * @interface DefaultApiServeReactAppFullPathGetRequest
+ */
+export interface DefaultApiServeReactAppFullPathGetRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof DefaultApiServeReactAppFullPathGet
+     */
+    readonly fullPath: string
 }
 
 /**
@@ -14293,6 +13620,18 @@ export class DefaultApi extends BaseAPI implements DefaultApiInterface {
      */
     public rootGet(options?: RawAxiosRequestConfig) {
         return DefaultApiFp(this.configuration).rootGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Serve React App
+     * @param {DefaultApiServeReactAppFullPathGetRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DefaultApi
+     */
+    public serveReactAppFullPathGet(requestParameters: DefaultApiServeReactAppFullPathGetRequest, options?: RawAxiosRequestConfig) {
+        return DefaultApiFp(this.configuration).serveReactAppFullPathGet(requestParameters.fullPath, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -15618,6 +14957,428 @@ export class DocumentsApi extends BaseAPI implements DocumentsApiInterface {
      */
     public uploadDocumentApiV1DocumentsUploadPost(requestParameters: DocumentsApiUploadDocumentApiV1DocumentsUploadPostRequest, options?: RawAxiosRequestConfig) {
         return DocumentsApiFp(this.configuration).uploadDocumentApiV1DocumentsUploadPost(requestParameters.file, requestParameters.title, requestParameters.description, requestParameters.tags, requestParameters.chunkSize, requestParameters.chunkOverlap, requestParameters.isPublic, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+
+/**
+ * EventsApi - axios parameter creator
+ * @export
+ */
+export const EventsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Stream all system events for admin users.  Args:     request: FastAPI request object     current_user: Current authenticated user (must be admin)  Returns:     StreamingResponse with SSE format for all events
+         * @summary Admin Events Stream
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminEventsStreamApiV1EventsAdminStreamGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/events/admin/stream`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Stream real-time events via Server-Sent Events.  Args:     request: FastAPI request object     current_user: Current authenticated user  Returns:     StreamingResponse with SSE format
+         * @summary Events Stream
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        eventsStreamApiV1EventsStreamGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/events/stream`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get SSE service statistics.  Args:     current_user: Current authenticated user  Returns:     SSE service statistics
+         * @summary Get Sse Stats
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSseStatsApiV1EventsStatsGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/events/stats`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Trigger a broadcast test event for all users.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+         * @summary Trigger Broadcast Test
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        triggerBroadcastTestApiV1EventsBroadcastTestPost: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/events/broadcast-test`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Trigger a test event for the current user.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+         * @summary Trigger Test Event
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        triggerTestEventApiV1EventsTestEventPost: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/events/test-event`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * EventsApi - functional programming interface
+ * @export
+ */
+export const EventsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = EventsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Stream all system events for admin users.  Args:     request: FastAPI request object     current_user: Current authenticated user (must be admin)  Returns:     StreamingResponse with SSE format for all events
+         * @summary Admin Events Stream
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async adminEventsStreamApiV1EventsAdminStreamGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.adminEventsStreamApiV1EventsAdminStreamGet(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['EventsApi.adminEventsStreamApiV1EventsAdminStreamGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Stream real-time events via Server-Sent Events.  Args:     request: FastAPI request object     current_user: Current authenticated user  Returns:     StreamingResponse with SSE format
+         * @summary Events Stream
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async eventsStreamApiV1EventsStreamGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.eventsStreamApiV1EventsStreamGet(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['EventsApi.eventsStreamApiV1EventsStreamGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get SSE service statistics.  Args:     current_user: Current authenticated user  Returns:     SSE service statistics
+         * @summary Get Sse Stats
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getSseStatsApiV1EventsStatsGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SSEStatsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getSseStatsApiV1EventsStatsGet(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['EventsApi.getSseStatsApiV1EventsStatsGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Trigger a broadcast test event for all users.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+         * @summary Trigger Broadcast Test
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async triggerBroadcastTestApiV1EventsBroadcastTestPost(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TestEventResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.triggerBroadcastTestApiV1EventsBroadcastTestPost(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['EventsApi.triggerBroadcastTestApiV1EventsBroadcastTestPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Trigger a test event for the current user.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+         * @summary Trigger Test Event
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async triggerTestEventApiV1EventsTestEventPost(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TestEventResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.triggerTestEventApiV1EventsTestEventPost(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['EventsApi.triggerTestEventApiV1EventsTestEventPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+    }
+};
+
+/**
+ * EventsApi - factory interface
+ * @export
+ */
+export const EventsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = EventsApiFp(configuration)
+    return {
+        /**
+         * Stream all system events for admin users.  Args:     request: FastAPI request object     current_user: Current authenticated user (must be admin)  Returns:     StreamingResponse with SSE format for all events
+         * @summary Admin Events Stream
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        adminEventsStreamApiV1EventsAdminStreamGet(options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.adminEventsStreamApiV1EventsAdminStreamGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Stream real-time events via Server-Sent Events.  Args:     request: FastAPI request object     current_user: Current authenticated user  Returns:     StreamingResponse with SSE format
+         * @summary Events Stream
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        eventsStreamApiV1EventsStreamGet(options?: RawAxiosRequestConfig): AxiosPromise<any> {
+            return localVarFp.eventsStreamApiV1EventsStreamGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get SSE service statistics.  Args:     current_user: Current authenticated user  Returns:     SSE service statistics
+         * @summary Get Sse Stats
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getSseStatsApiV1EventsStatsGet(options?: RawAxiosRequestConfig): AxiosPromise<SSEStatsResponse> {
+            return localVarFp.getSseStatsApiV1EventsStatsGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Trigger a broadcast test event for all users.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+         * @summary Trigger Broadcast Test
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        triggerBroadcastTestApiV1EventsBroadcastTestPost(options?: RawAxiosRequestConfig): AxiosPromise<TestEventResponse> {
+            return localVarFp.triggerBroadcastTestApiV1EventsBroadcastTestPost(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Trigger a test event for the current user.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+         * @summary Trigger Test Event
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        triggerTestEventApiV1EventsTestEventPost(options?: RawAxiosRequestConfig): AxiosPromise<TestEventResponse> {
+            return localVarFp.triggerTestEventApiV1EventsTestEventPost(options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * EventsApi - interface
+ * @export
+ * @interface EventsApi
+ */
+export interface EventsApiInterface {
+    /**
+     * Stream all system events for admin users.  Args:     request: FastAPI request object     current_user: Current authenticated user (must be admin)  Returns:     StreamingResponse with SSE format for all events
+     * @summary Admin Events Stream
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApiInterface
+     */
+    adminEventsStreamApiV1EventsAdminStreamGet(options?: RawAxiosRequestConfig): AxiosPromise<any>;
+
+    /**
+     * Stream real-time events via Server-Sent Events.  Args:     request: FastAPI request object     current_user: Current authenticated user  Returns:     StreamingResponse with SSE format
+     * @summary Events Stream
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApiInterface
+     */
+    eventsStreamApiV1EventsStreamGet(options?: RawAxiosRequestConfig): AxiosPromise<any>;
+
+    /**
+     * Get SSE service statistics.  Args:     current_user: Current authenticated user  Returns:     SSE service statistics
+     * @summary Get Sse Stats
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApiInterface
+     */
+    getSseStatsApiV1EventsStatsGet(options?: RawAxiosRequestConfig): AxiosPromise<SSEStatsResponse>;
+
+    /**
+     * Trigger a broadcast test event for all users.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+     * @summary Trigger Broadcast Test
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApiInterface
+     */
+    triggerBroadcastTestApiV1EventsBroadcastTestPost(options?: RawAxiosRequestConfig): AxiosPromise<TestEventResponse>;
+
+    /**
+     * Trigger a test event for the current user.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+     * @summary Trigger Test Event
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApiInterface
+     */
+    triggerTestEventApiV1EventsTestEventPost(options?: RawAxiosRequestConfig): AxiosPromise<TestEventResponse>;
+
+}
+
+/**
+ * EventsApi - object-oriented interface
+ * @export
+ * @class EventsApi
+ * @extends {BaseAPI}
+ */
+export class EventsApi extends BaseAPI implements EventsApiInterface {
+    /**
+     * Stream all system events for admin users.  Args:     request: FastAPI request object     current_user: Current authenticated user (must be admin)  Returns:     StreamingResponse with SSE format for all events
+     * @summary Admin Events Stream
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApi
+     */
+    public adminEventsStreamApiV1EventsAdminStreamGet(options?: RawAxiosRequestConfig) {
+        return EventsApiFp(this.configuration).adminEventsStreamApiV1EventsAdminStreamGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Stream real-time events via Server-Sent Events.  Args:     request: FastAPI request object     current_user: Current authenticated user  Returns:     StreamingResponse with SSE format
+     * @summary Events Stream
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApi
+     */
+    public eventsStreamApiV1EventsStreamGet(options?: RawAxiosRequestConfig) {
+        return EventsApiFp(this.configuration).eventsStreamApiV1EventsStreamGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get SSE service statistics.  Args:     current_user: Current authenticated user  Returns:     SSE service statistics
+     * @summary Get Sse Stats
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApi
+     */
+    public getSseStatsApiV1EventsStatsGet(options?: RawAxiosRequestConfig) {
+        return EventsApiFp(this.configuration).getSseStatsApiV1EventsStatsGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Trigger a broadcast test event for all users.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+     * @summary Trigger Broadcast Test
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApi
+     */
+    public triggerBroadcastTestApiV1EventsBroadcastTestPost(options?: RawAxiosRequestConfig) {
+        return EventsApiFp(this.configuration).triggerBroadcastTestApiV1EventsBroadcastTestPost(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Trigger a test event for the current user.  Args:     current_user: Current authenticated user  Returns:     Success message with event ID
+     * @summary Trigger Test Event
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApi
+     */
+    public triggerTestEventApiV1EventsTestEventPost(options?: RawAxiosRequestConfig) {
+        return EventsApiFp(this.configuration).triggerTestEventApiV1EventsTestEventPost(options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -20964,838 +20725,6 @@ export class ToolServersApi extends BaseAPI implements ToolServersApiInterface {
      */
     public updateToolServerApiV1ToolserversServersServerIdPut(requestParameters: ToolServersApiUpdateToolServerApiV1ToolserversServersServerIdPutRequest, options?: RawAxiosRequestConfig) {
         return ToolServersApiFp(this.configuration).updateToolServerApiV1ToolserversServersServerIdPut(requestParameters.serverId, requestParameters.toolServerUpdate, options).then((request) => request(this.axios, this.basePath));
-    }
-}
-
-
-
-/**
- * WebhooksApi - axios parameter creator
- * @export
- */
-export const WebhooksApiAxiosParamCreator = function (configuration?: Configuration) {
-    return {
-        /**
-         * Create a new webhook endpoint.  Args:     webhook_data: Webhook creation data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Created webhook data
-         * @summary Create Webhook
-         * @param {WebhookCreateRequest} webhookCreateRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createWebhookApiV1WebhooksPost: async (webhookCreateRequest: WebhookCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'webhookCreateRequest' is not null or undefined
-            assertParamExists('createWebhookApiV1WebhooksPost', 'webhookCreateRequest', webhookCreateRequest)
-            const localVarPath = `/api/v1/webhooks/`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(webhookCreateRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Delete a webhook endpoint.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Deletion result
-         * @summary Delete Webhook
-         * @param {string} webhookId 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        deleteWebhookApiV1WebhooksWebhookIdDelete: async (webhookId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'webhookId' is not null or undefined
-            assertParamExists('deleteWebhookApiV1WebhooksWebhookIdDelete', 'webhookId', webhookId)
-            const localVarPath = `/api/v1/webhooks/{webhook_id}`
-                .replace(`{${"webhook_id"}}`, encodeURIComponent(String(webhookId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Get webhook endpoint by ID.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Webhook endpoint data
-         * @summary Get Webhook
-         * @param {string} webhookId 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getWebhookApiV1WebhooksWebhookIdGet: async (webhookId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'webhookId' is not null or undefined
-            assertParamExists('getWebhookApiV1WebhooksWebhookIdGet', 'webhookId', webhookId)
-            const localVarPath = `/api/v1/webhooks/{webhook_id}`
-                .replace(`{${"webhook_id"}}`, encodeURIComponent(String(webhookId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * List webhook delivery attempts.  Args:     webhook_id: Optional webhook ID to filter by     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook deliveries
-         * @summary List Webhook Deliveries
-         * @param {string | null} [webhookId] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listWebhookDeliveriesApiV1WebhooksDeliveriesListGet: async (webhookId?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/webhooks/deliveries/list`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            if (webhookId !== undefined) {
-                localVarQueryParameter['webhook_id'] = webhookId;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * List recent webhook events.  Args:     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of recent webhook events
-         * @summary List Webhook Events
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listWebhookEventsApiV1WebhooksEventsListGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/webhooks/events/list`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * List webhook endpoints with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook endpoints
-         * @summary List Webhooks
-         * @param {boolean | null} [active] 
-         * @param {WebhookEventType | null} [eventType] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listWebhooksApiV1WebhooksGet: async (active?: boolean | null, eventType?: WebhookEventType | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/webhooks/`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            if (active !== undefined) {
-                localVarQueryParameter['active'] = active;
-            }
-
-            if (eventType !== undefined) {
-                localVarQueryParameter['event_type'] = eventType;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Test a webhook endpoint by sending a test event.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Test result
-         * @summary Test Webhook
-         * @param {string} webhookId 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        testWebhookApiV1WebhooksWebhookIdTestPost: async (webhookId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'webhookId' is not null or undefined
-            assertParamExists('testWebhookApiV1WebhooksWebhookIdTestPost', 'webhookId', webhookId)
-            const localVarPath = `/api/v1/webhooks/{webhook_id}/test`
-                .replace(`{${"webhook_id"}}`, encodeURIComponent(String(webhookId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Update a webhook endpoint.  Args:     webhook_id: Webhook ID     webhook_data: Webhook update data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Updated webhook data
-         * @summary Update Webhook
-         * @param {string} webhookId 
-         * @param {WebhookUpdateRequest} webhookUpdateRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        updateWebhookApiV1WebhooksWebhookIdPut: async (webhookId: string, webhookUpdateRequest: WebhookUpdateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'webhookId' is not null or undefined
-            assertParamExists('updateWebhookApiV1WebhooksWebhookIdPut', 'webhookId', webhookId)
-            // verify required parameter 'webhookUpdateRequest' is not null or undefined
-            assertParamExists('updateWebhookApiV1WebhooksWebhookIdPut', 'webhookUpdateRequest', webhookUpdateRequest)
-            const localVarPath = `/api/v1/webhooks/{webhook_id}`
-                .replace(`{${"webhook_id"}}`, encodeURIComponent(String(webhookId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(webhookUpdateRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-    }
-};
-
-/**
- * WebhooksApi - functional programming interface
- * @export
- */
-export const WebhooksApiFp = function(configuration?: Configuration) {
-    const localVarAxiosParamCreator = WebhooksApiAxiosParamCreator(configuration)
-    return {
-        /**
-         * Create a new webhook endpoint.  Args:     webhook_data: Webhook creation data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Created webhook data
-         * @summary Create Webhook
-         * @param {WebhookCreateRequest} webhookCreateRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async createWebhookApiV1WebhooksPost(webhookCreateRequest: WebhookCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createWebhookApiV1WebhooksPost(webhookCreateRequest, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.createWebhookApiV1WebhooksPost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Delete a webhook endpoint.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Deletion result
-         * @summary Delete Webhook
-         * @param {string} webhookId 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async deleteWebhookApiV1WebhooksWebhookIdDelete(webhookId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookDeleteResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteWebhookApiV1WebhooksWebhookIdDelete(webhookId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.deleteWebhookApiV1WebhooksWebhookIdDelete']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Get webhook endpoint by ID.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Webhook endpoint data
-         * @summary Get Webhook
-         * @param {string} webhookId 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getWebhookApiV1WebhooksWebhookIdGet(webhookId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getWebhookApiV1WebhooksWebhookIdGet(webhookId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.getWebhookApiV1WebhooksWebhookIdGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * List webhook delivery attempts.  Args:     webhook_id: Optional webhook ID to filter by     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook deliveries
-         * @summary List Webhook Deliveries
-         * @param {string | null} [webhookId] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async listWebhookDeliveriesApiV1WebhooksDeliveriesListGet(webhookId?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookDeliveriesListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listWebhookDeliveriesApiV1WebhooksDeliveriesListGet(webhookId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.listWebhookDeliveriesApiV1WebhooksDeliveriesListGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * List recent webhook events.  Args:     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of recent webhook events
-         * @summary List Webhook Events
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async listWebhookEventsApiV1WebhooksEventsListGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookEventsListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listWebhookEventsApiV1WebhooksEventsListGet(options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.listWebhookEventsApiV1WebhooksEventsListGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * List webhook endpoints with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook endpoints
-         * @summary List Webhooks
-         * @param {boolean | null} [active] 
-         * @param {WebhookEventType | null} [eventType] 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async listWebhooksApiV1WebhooksGet(active?: boolean | null, eventType?: WebhookEventType | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listWebhooksApiV1WebhooksGet(active, eventType, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.listWebhooksApiV1WebhooksGet']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Test a webhook endpoint by sending a test event.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Test result
-         * @summary Test Webhook
-         * @param {string} webhookId 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async testWebhookApiV1WebhooksWebhookIdTestPost(webhookId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookTestResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.testWebhookApiV1WebhooksWebhookIdTestPost(webhookId, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.testWebhookApiV1WebhooksWebhookIdTestPost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Update a webhook endpoint.  Args:     webhook_id: Webhook ID     webhook_data: Webhook update data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Updated webhook data
-         * @summary Update Webhook
-         * @param {string} webhookId 
-         * @param {WebhookUpdateRequest} webhookUpdateRequest 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async updateWebhookApiV1WebhooksWebhookIdPut(webhookId: string, webhookUpdateRequest: WebhookUpdateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WebhookResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateWebhookApiV1WebhooksWebhookIdPut(webhookId, webhookUpdateRequest, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['WebhooksApi.updateWebhookApiV1WebhooksWebhookIdPut']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-    }
-};
-
-/**
- * WebhooksApi - factory interface
- * @export
- */
-export const WebhooksApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-    const localVarFp = WebhooksApiFp(configuration)
-    return {
-        /**
-         * Create a new webhook endpoint.  Args:     webhook_data: Webhook creation data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Created webhook data
-         * @summary Create Webhook
-         * @param {WebhooksApiCreateWebhookApiV1WebhooksPostRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        createWebhookApiV1WebhooksPost(requestParameters: WebhooksApiCreateWebhookApiV1WebhooksPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookResponse> {
-            return localVarFp.createWebhookApiV1WebhooksPost(requestParameters.webhookCreateRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Delete a webhook endpoint.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Deletion result
-         * @summary Delete Webhook
-         * @param {WebhooksApiDeleteWebhookApiV1WebhooksWebhookIdDeleteRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        deleteWebhookApiV1WebhooksWebhookIdDelete(requestParameters: WebhooksApiDeleteWebhookApiV1WebhooksWebhookIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookDeleteResponse> {
-            return localVarFp.deleteWebhookApiV1WebhooksWebhookIdDelete(requestParameters.webhookId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Get webhook endpoint by ID.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Webhook endpoint data
-         * @summary Get Webhook
-         * @param {WebhooksApiGetWebhookApiV1WebhooksWebhookIdGetRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getWebhookApiV1WebhooksWebhookIdGet(requestParameters: WebhooksApiGetWebhookApiV1WebhooksWebhookIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookResponse> {
-            return localVarFp.getWebhookApiV1WebhooksWebhookIdGet(requestParameters.webhookId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * List webhook delivery attempts.  Args:     webhook_id: Optional webhook ID to filter by     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook deliveries
-         * @summary List Webhook Deliveries
-         * @param {WebhooksApiListWebhookDeliveriesApiV1WebhooksDeliveriesListGetRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listWebhookDeliveriesApiV1WebhooksDeliveriesListGet(requestParameters: WebhooksApiListWebhookDeliveriesApiV1WebhooksDeliveriesListGetRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<WebhookDeliveriesListResponse> {
-            return localVarFp.listWebhookDeliveriesApiV1WebhooksDeliveriesListGet(requestParameters.webhookId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * List recent webhook events.  Args:     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of recent webhook events
-         * @summary List Webhook Events
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listWebhookEventsApiV1WebhooksEventsListGet(options?: RawAxiosRequestConfig): AxiosPromise<WebhookEventsListResponse> {
-            return localVarFp.listWebhookEventsApiV1WebhooksEventsListGet(options).then((request) => request(axios, basePath));
-        },
-        /**
-         * List webhook endpoints with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook endpoints
-         * @summary List Webhooks
-         * @param {WebhooksApiListWebhooksApiV1WebhooksGetRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        listWebhooksApiV1WebhooksGet(requestParameters: WebhooksApiListWebhooksApiV1WebhooksGetRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<WebhookListResponse> {
-            return localVarFp.listWebhooksApiV1WebhooksGet(requestParameters.active, requestParameters.eventType, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Test a webhook endpoint by sending a test event.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Test result
-         * @summary Test Webhook
-         * @param {WebhooksApiTestWebhookApiV1WebhooksWebhookIdTestPostRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        testWebhookApiV1WebhooksWebhookIdTestPost(requestParameters: WebhooksApiTestWebhookApiV1WebhooksWebhookIdTestPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookTestResponse> {
-            return localVarFp.testWebhookApiV1WebhooksWebhookIdTestPost(requestParameters.webhookId, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Update a webhook endpoint.  Args:     webhook_id: Webhook ID     webhook_data: Webhook update data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Updated webhook data
-         * @summary Update Webhook
-         * @param {WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPutRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        updateWebhookApiV1WebhooksWebhookIdPut(requestParameters: WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookResponse> {
-            return localVarFp.updateWebhookApiV1WebhooksWebhookIdPut(requestParameters.webhookId, requestParameters.webhookUpdateRequest, options).then((request) => request(axios, basePath));
-        },
-    };
-};
-
-/**
- * WebhooksApi - interface
- * @export
- * @interface WebhooksApi
- */
-export interface WebhooksApiInterface {
-    /**
-     * Create a new webhook endpoint.  Args:     webhook_data: Webhook creation data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Created webhook data
-     * @summary Create Webhook
-     * @param {WebhooksApiCreateWebhookApiV1WebhooksPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApiInterface
-     */
-    createWebhookApiV1WebhooksPost(requestParameters: WebhooksApiCreateWebhookApiV1WebhooksPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookResponse>;
-
-    /**
-     * Delete a webhook endpoint.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Deletion result
-     * @summary Delete Webhook
-     * @param {WebhooksApiDeleteWebhookApiV1WebhooksWebhookIdDeleteRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApiInterface
-     */
-    deleteWebhookApiV1WebhooksWebhookIdDelete(requestParameters: WebhooksApiDeleteWebhookApiV1WebhooksWebhookIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookDeleteResponse>;
-
-    /**
-     * Get webhook endpoint by ID.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Webhook endpoint data
-     * @summary Get Webhook
-     * @param {WebhooksApiGetWebhookApiV1WebhooksWebhookIdGetRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApiInterface
-     */
-    getWebhookApiV1WebhooksWebhookIdGet(requestParameters: WebhooksApiGetWebhookApiV1WebhooksWebhookIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookResponse>;
-
-    /**
-     * List webhook delivery attempts.  Args:     webhook_id: Optional webhook ID to filter by     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook deliveries
-     * @summary List Webhook Deliveries
-     * @param {WebhooksApiListWebhookDeliveriesApiV1WebhooksDeliveriesListGetRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApiInterface
-     */
-    listWebhookDeliveriesApiV1WebhooksDeliveriesListGet(requestParameters?: WebhooksApiListWebhookDeliveriesApiV1WebhooksDeliveriesListGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookDeliveriesListResponse>;
-
-    /**
-     * List recent webhook events.  Args:     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of recent webhook events
-     * @summary List Webhook Events
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApiInterface
-     */
-    listWebhookEventsApiV1WebhooksEventsListGet(options?: RawAxiosRequestConfig): AxiosPromise<WebhookEventsListResponse>;
-
-    /**
-     * List webhook endpoints with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook endpoints
-     * @summary List Webhooks
-     * @param {WebhooksApiListWebhooksApiV1WebhooksGetRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApiInterface
-     */
-    listWebhooksApiV1WebhooksGet(requestParameters?: WebhooksApiListWebhooksApiV1WebhooksGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookListResponse>;
-
-    /**
-     * Test a webhook endpoint by sending a test event.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Test result
-     * @summary Test Webhook
-     * @param {WebhooksApiTestWebhookApiV1WebhooksWebhookIdTestPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApiInterface
-     */
-    testWebhookApiV1WebhooksWebhookIdTestPost(requestParameters: WebhooksApiTestWebhookApiV1WebhooksWebhookIdTestPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookTestResponse>;
-
-    /**
-     * Update a webhook endpoint.  Args:     webhook_id: Webhook ID     webhook_data: Webhook update data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Updated webhook data
-     * @summary Update Webhook
-     * @param {WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPutRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApiInterface
-     */
-    updateWebhookApiV1WebhooksWebhookIdPut(requestParameters: WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<WebhookResponse>;
-
-}
-
-/**
- * Request parameters for createWebhookApiV1WebhooksPost operation in WebhooksApi.
- * @export
- * @interface WebhooksApiCreateWebhookApiV1WebhooksPostRequest
- */
-export interface WebhooksApiCreateWebhookApiV1WebhooksPostRequest {
-    /**
-     * 
-     * @type {WebhookCreateRequest}
-     * @memberof WebhooksApiCreateWebhookApiV1WebhooksPost
-     */
-    readonly webhookCreateRequest: WebhookCreateRequest
-}
-
-/**
- * Request parameters for deleteWebhookApiV1WebhooksWebhookIdDelete operation in WebhooksApi.
- * @export
- * @interface WebhooksApiDeleteWebhookApiV1WebhooksWebhookIdDeleteRequest
- */
-export interface WebhooksApiDeleteWebhookApiV1WebhooksWebhookIdDeleteRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhooksApiDeleteWebhookApiV1WebhooksWebhookIdDelete
-     */
-    readonly webhookId: string
-}
-
-/**
- * Request parameters for getWebhookApiV1WebhooksWebhookIdGet operation in WebhooksApi.
- * @export
- * @interface WebhooksApiGetWebhookApiV1WebhooksWebhookIdGetRequest
- */
-export interface WebhooksApiGetWebhookApiV1WebhooksWebhookIdGetRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhooksApiGetWebhookApiV1WebhooksWebhookIdGet
-     */
-    readonly webhookId: string
-}
-
-/**
- * Request parameters for listWebhookDeliveriesApiV1WebhooksDeliveriesListGet operation in WebhooksApi.
- * @export
- * @interface WebhooksApiListWebhookDeliveriesApiV1WebhooksDeliveriesListGetRequest
- */
-export interface WebhooksApiListWebhookDeliveriesApiV1WebhooksDeliveriesListGetRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhooksApiListWebhookDeliveriesApiV1WebhooksDeliveriesListGet
-     */
-    readonly webhookId?: string | null
-}
-
-/**
- * Request parameters for listWebhooksApiV1WebhooksGet operation in WebhooksApi.
- * @export
- * @interface WebhooksApiListWebhooksApiV1WebhooksGetRequest
- */
-export interface WebhooksApiListWebhooksApiV1WebhooksGetRequest {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof WebhooksApiListWebhooksApiV1WebhooksGet
-     */
-    readonly active?: boolean | null
-
-    /**
-     * 
-     * @type {WebhookEventType}
-     * @memberof WebhooksApiListWebhooksApiV1WebhooksGet
-     */
-    readonly eventType?: WebhookEventType | null
-}
-
-/**
- * Request parameters for testWebhookApiV1WebhooksWebhookIdTestPost operation in WebhooksApi.
- * @export
- * @interface WebhooksApiTestWebhookApiV1WebhooksWebhookIdTestPostRequest
- */
-export interface WebhooksApiTestWebhookApiV1WebhooksWebhookIdTestPostRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhooksApiTestWebhookApiV1WebhooksWebhookIdTestPost
-     */
-    readonly webhookId: string
-}
-
-/**
- * Request parameters for updateWebhookApiV1WebhooksWebhookIdPut operation in WebhooksApi.
- * @export
- * @interface WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPutRequest
- */
-export interface WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPutRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPut
-     */
-    readonly webhookId: string
-
-    /**
-     * 
-     * @type {WebhookUpdateRequest}
-     * @memberof WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPut
-     */
-    readonly webhookUpdateRequest: WebhookUpdateRequest
-}
-
-/**
- * WebhooksApi - object-oriented interface
- * @export
- * @class WebhooksApi
- * @extends {BaseAPI}
- */
-export class WebhooksApi extends BaseAPI implements WebhooksApiInterface {
-    /**
-     * Create a new webhook endpoint.  Args:     webhook_data: Webhook creation data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Created webhook data
-     * @summary Create Webhook
-     * @param {WebhooksApiCreateWebhookApiV1WebhooksPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApi
-     */
-    public createWebhookApiV1WebhooksPost(requestParameters: WebhooksApiCreateWebhookApiV1WebhooksPostRequest, options?: RawAxiosRequestConfig) {
-        return WebhooksApiFp(this.configuration).createWebhookApiV1WebhooksPost(requestParameters.webhookCreateRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Delete a webhook endpoint.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Deletion result
-     * @summary Delete Webhook
-     * @param {WebhooksApiDeleteWebhookApiV1WebhooksWebhookIdDeleteRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApi
-     */
-    public deleteWebhookApiV1WebhooksWebhookIdDelete(requestParameters: WebhooksApiDeleteWebhookApiV1WebhooksWebhookIdDeleteRequest, options?: RawAxiosRequestConfig) {
-        return WebhooksApiFp(this.configuration).deleteWebhookApiV1WebhooksWebhookIdDelete(requestParameters.webhookId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Get webhook endpoint by ID.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Webhook endpoint data
-     * @summary Get Webhook
-     * @param {WebhooksApiGetWebhookApiV1WebhooksWebhookIdGetRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApi
-     */
-    public getWebhookApiV1WebhooksWebhookIdGet(requestParameters: WebhooksApiGetWebhookApiV1WebhooksWebhookIdGetRequest, options?: RawAxiosRequestConfig) {
-        return WebhooksApiFp(this.configuration).getWebhookApiV1WebhooksWebhookIdGet(requestParameters.webhookId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * List webhook delivery attempts.  Args:     webhook_id: Optional webhook ID to filter by     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook deliveries
-     * @summary List Webhook Deliveries
-     * @param {WebhooksApiListWebhookDeliveriesApiV1WebhooksDeliveriesListGetRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApi
-     */
-    public listWebhookDeliveriesApiV1WebhooksDeliveriesListGet(requestParameters: WebhooksApiListWebhookDeliveriesApiV1WebhooksDeliveriesListGetRequest = {}, options?: RawAxiosRequestConfig) {
-        return WebhooksApiFp(this.configuration).listWebhookDeliveriesApiV1WebhooksDeliveriesListGet(requestParameters.webhookId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * List recent webhook events.  Args:     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of recent webhook events
-     * @summary List Webhook Events
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApi
-     */
-    public listWebhookEventsApiV1WebhooksEventsListGet(options?: RawAxiosRequestConfig) {
-        return WebhooksApiFp(this.configuration).listWebhookEventsApiV1WebhooksEventsListGet(options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * List webhook endpoints with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     List of webhook endpoints
-     * @summary List Webhooks
-     * @param {WebhooksApiListWebhooksApiV1WebhooksGetRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApi
-     */
-    public listWebhooksApiV1WebhooksGet(requestParameters: WebhooksApiListWebhooksApiV1WebhooksGetRequest = {}, options?: RawAxiosRequestConfig) {
-        return WebhooksApiFp(this.configuration).listWebhooksApiV1WebhooksGet(requestParameters.active, requestParameters.eventType, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Test a webhook endpoint by sending a test event.  Args:     webhook_id: Webhook ID     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Test result
-     * @summary Test Webhook
-     * @param {WebhooksApiTestWebhookApiV1WebhooksWebhookIdTestPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApi
-     */
-    public testWebhookApiV1WebhooksWebhookIdTestPost(requestParameters: WebhooksApiTestWebhookApiV1WebhooksWebhookIdTestPostRequest, options?: RawAxiosRequestConfig) {
-        return WebhooksApiFp(this.configuration).testWebhookApiV1WebhooksWebhookIdTestPost(requestParameters.webhookId, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Update a webhook endpoint.  Args:     webhook_id: Webhook ID     webhook_data: Webhook update data     current_user: Current authenticated user     webhook_manager: Webhook manager instance  Returns:     Updated webhook data
-     * @summary Update Webhook
-     * @param {WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPutRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof WebhooksApi
-     */
-    public updateWebhookApiV1WebhooksWebhookIdPut(requestParameters: WebhooksApiUpdateWebhookApiV1WebhooksWebhookIdPutRequest, options?: RawAxiosRequestConfig) {
-        return WebhooksApiFp(this.configuration).updateWebhookApiV1WebhooksWebhookIdPut(requestParameters.webhookId, requestParameters.webhookUpdateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

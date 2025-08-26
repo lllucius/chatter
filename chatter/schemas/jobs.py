@@ -1,6 +1,8 @@
 """Job management schemas."""
 
-from datetime import datetime
+import uuid
+from datetime import UTC, datetime
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -8,7 +10,58 @@ from pydantic import BaseModel, Field
 from chatter.schemas.common import (
     ListRequestBase,
 )
-from chatter.services.job_queue import JobPriority, JobStatus
+
+
+class JobStatus(str, Enum):
+    """Job execution status."""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+    RETRYING = "retrying"
+
+
+class JobPriority(str, Enum):
+    """Job priority levels."""
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+class Job(BaseModel):
+    """Job definition."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    function_name: str
+    args: list[Any] = Field(default_factory=list)
+    kwargs: dict[str, Any] = Field(default_factory=dict)
+    priority: JobPriority = JobPriority.NORMAL
+    status: JobStatus = JobStatus.PENDING
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error_message: str | None = None
+    retry_count: int = 0
+    max_retries: int = 3
+    retry_delay: int = 60  # seconds
+    timeout: int = 3600  # seconds
+    tags: list[str] = Field(default_factory=list)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    result: Any = None  # Job execution result
+    progress: int = 0  # Progress percentage (0-100)
+    progress_message: str | None = None  # Progress description
+
+
+class JobResult(BaseModel):
+    """Job execution result."""
+    job_id: str
+    status: JobStatus
+    result: Any = None
+    error: str | None = None
+    execution_time: float = 0.0
+    completed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 
 class JobCreateRequest(BaseModel):

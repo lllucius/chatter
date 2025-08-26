@@ -1,20 +1,114 @@
 """Data management schemas."""
 
-from datetime import datetime
+from datetime import UTC, datetime
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 from chatter.schemas.common import ListRequestBase
-from chatter.services.data_management import (
-    BackupType,
-    DataFormat,
-    ExportScope,
-)
 
 
-class ExportDataRequest(BaseModel):
-    """Request schema for data export."""
+class DataFormat(str, Enum):
+    """Supported data formats."""
+    JSON = "json"
+    CSV = "csv"
+    XML = "xml"
+    PARQUET = "parquet"
+    SQL = "sql"
+
+
+class ExportScope(str, Enum):
+    """Data export scope."""
+    USER = "user"
+    CONVERSATION = "conversation"
+    DOCUMENT = "document"
+    ANALYTICS = "analytics"
+    FULL = "full"
+    CUSTOM = "custom"
+
+
+class BackupType(str, Enum):
+    """Types of backups."""
+    FULL = "full"
+    INCREMENTAL = "incremental"
+    DIFFERENTIAL = "differential"
+
+
+class DataOperation(str, Enum):
+    """Data operation types."""
+    EXPORT = "export"
+    BACKUP = "backup"
+    RESTORE = "restore"
+    PURGE = "purge"
+    MIGRATE = "migrate"
+
+
+class OperationStatus(str, Enum):
+    """Operation status."""
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+
+
+class RetentionPolicy(BaseModel):
+    """Data retention policy."""
+    enabled: bool = True
+    default_retention_days: int = 365
+    user_data_retention_days: int = 730
+    analytics_retention_days: int = 1095
+    backup_retention_days: int = 90
+    log_retention_days: int = 30
+    conversation_retention_days: int = 365
+    document_retention_days: int = 1825  # 5 years
+    auto_cleanup_enabled: bool = True
+    cleanup_schedule: str = "0 2 * * *"  # Daily at 2 AM
+
+
+class DataExportRequest(BaseModel):
+    """Data export request."""
+    id: str = Field(default_factory=lambda: f"export_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}")
+    user_id: str
+    scope: ExportScope
+    format: DataFormat = DataFormat.JSON
+    filters: dict[str, Any] = Field(default_factory=dict)
+    include_metadata: bool = True
+    compress: bool = True
+    encryption_key: str | None = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    expires_at: datetime | None = None
+
+
+class BackupRequest(BaseModel):
+    """Backup request."""
+    id: str = Field(default_factory=lambda: f"backup_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}")
+    backup_type: BackupType
+    include_documents: bool = True
+    include_vectors: bool = True
+    include_analytics: bool = True
+    compress: bool = True
+    encryption_key: str | None = None
+    retention_days: int = 30
+    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+
+
+class DataOperationModel(BaseModel):
+    """Data operation record."""
+    id: str = Field(default_factory=lambda: f"op_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}")
+    operation_type: str  # Changed from DataOperation to str to avoid circular reference
+    status: OperationStatus = OperationStatus.PENDING
+    progress: float = 0.0
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    error_message: str | None = None
+    result_path: str | None = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class ExportDataAPIRequest(BaseModel):
+    """Request schema for data export API."""
 
     scope: ExportScope = Field(..., description="Export scope")
     format: DataFormat = Field(DataFormat.JSON, description="Export format")
@@ -47,8 +141,8 @@ class ExportDataResponse(BaseModel):
     expires_at: datetime | None = Field(None, description="Download link expiration")
 
 
-class BackupRequest(BaseModel):
-    """Request schema for creating a backup."""
+class BackupAPIRequest(BaseModel):
+    """Request schema for creating a backup via API."""
 
     backup_type: BackupType = Field(BackupType.FULL, description="Backup type")
     name: str | None = Field(None, description="Backup name")

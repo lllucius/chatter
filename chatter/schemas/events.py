@@ -1,11 +1,76 @@
 """Schemas for SSE events API."""
 
-from datetime import datetime
+import uuid
+from datetime import UTC, datetime
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
-from chatter.services.sse_events import EventType
+
+class EventType(str, Enum):
+    """Types of real-time events."""
+    # Backup events
+    BACKUP_STARTED = "backup.started"
+    BACKUP_COMPLETED = "backup.completed"
+    BACKUP_FAILED = "backup.failed"
+    BACKUP_PROGRESS = "backup.progress"
+
+    # Job events
+    JOB_STARTED = "job.started"
+    JOB_COMPLETED = "job.completed"
+    JOB_FAILED = "job.failed"
+    JOB_PROGRESS = "job.progress"
+
+    # Tool server events
+    TOOL_SERVER_STARTED = "tool_server.started"
+    TOOL_SERVER_STOPPED = "tool_server.stopped"
+    TOOL_SERVER_HEALTH_CHANGED = "tool_server.health_changed"
+    TOOL_SERVER_ERROR = "tool_server.error"
+
+    # Document events
+    DOCUMENT_UPLOADED = "document.uploaded"
+    DOCUMENT_PROCESSING_STARTED = "document.processing_started"
+    DOCUMENT_PROCESSING_COMPLETED = "document.processing_completed"
+    DOCUMENT_PROCESSING_FAILED = "document.processing_failed"
+    DOCUMENT_PROCESSING_PROGRESS = "document.processing_progress"
+
+    # Chat events
+    CONVERSATION_STARTED = "conversation.started"
+    CONVERSATION_ENDED = "conversation.ended"
+    MESSAGE_RECEIVED = "message.received"
+    MESSAGE_SENT = "message.sent"
+
+    # User events
+    USER_REGISTERED = "user.registered"
+    USER_UPDATED = "user.updated"
+    USER_CONNECTED = "user.connected"
+    USER_DISCONNECTED = "user.disconnected"
+    USER_STATUS_CHANGED = "user.status_changed"
+
+    # Plugin events
+    PLUGIN_INSTALLED = "plugin.installed"
+    PLUGIN_ACTIVATED = "plugin.activated"
+    PLUGIN_DEACTIVATED = "plugin.deactivated"
+    PLUGIN_ERROR = "plugin.error"
+
+    # Agent events
+    AGENT_CREATED = "agent.created"
+    AGENT_UPDATED = "agent.updated"
+
+    # System events
+    SYSTEM_ALERT = "system.alert"
+    SYSTEM_STATUS = "system.status"
+
+
+class Event(BaseModel):
+    """Real-time event data."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    type: EventType
+    data: dict[str, Any]
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    user_id: str | None = None  # If event is user-specific
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class EventResponse(BaseModel):

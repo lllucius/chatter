@@ -7,79 +7,23 @@ import json
 import uuid
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime
-from enum import Enum
 from pathlib import Path
 from typing import Any
 
 from langchain_core.tools import BaseTool
-from pydantic import BaseModel, Field
 
 from chatter.config import settings
+from chatter.schemas.plugins import (
+    PluginCapability,
+    PluginInstance,
+    PluginManifest,
+    PluginStatus,
+    PluginType,
+)
 from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
-
-
-class PluginType(str, Enum):
-    """Types of plugins."""
-    TOOL = "tool"
-    WORKFLOW = "workflow"
-    INTEGRATION = "integration"
-    MIDDLEWARE = "middleware"
-    HANDLER = "handler"
-    EXTENSION = "extension"
-
-
-class PluginStatus(str, Enum):
-    """Plugin status."""
-    INSTALLED = "installed"
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-    ERROR = "error"
-    UPDATING = "updating"
-
-
-class PluginCapability(BaseModel):
-    """Plugin capability definition."""
-    name: str
-    description: str
-    required_permissions: list[str] = Field(default_factory=list)
-    optional_permissions: list[str] = Field(default_factory=list)
-    dependencies: list[str] = Field(default_factory=list)
-    api_endpoints: list[str] = Field(default_factory=list)
-
-
-class PluginManifest(BaseModel):
-    """Plugin manifest file structure."""
-    name: str
-    version: str
-    description: str
-    author: str
-    license: str
-    plugin_type: PluginType
-    entry_point: str
-    capabilities: list[PluginCapability] = Field(default_factory=list)
-    dependencies: list[str] = Field(default_factory=list)
-    python_version: str = ">=3.11"
-    chatter_version: str = ">=0.1.0"
-    configuration_schema: dict[str, Any] = Field(default_factory=dict)
-    permissions: list[str] = Field(default_factory=list)
-    metadata: dict[str, Any] = Field(default_factory=dict)
-
-
-class PluginInstance(BaseModel):
-    """Plugin instance information."""
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    manifest: PluginManifest
-    status: PluginStatus = PluginStatus.INSTALLED
-    installation_path: str
-    configuration: dict[str, Any] = Field(default_factory=dict)
-    enabled_capabilities: list[str] = Field(default_factory=list)
-    error_message: str | None = None
-    installed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    usage_stats: dict[str, Any] = Field(default_factory=dict)
 
 
 class BasePlugin(ABC):

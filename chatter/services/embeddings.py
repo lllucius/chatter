@@ -32,6 +32,7 @@ except ImportError:
     COHERE_AVAILABLE = False
 
 from chatter.config import get_settings
+from chatter.core.dynamic_embeddings import get_model_dimensions
 from chatter.utils.logging import get_logger
 
 settings = get_settings()
@@ -181,26 +182,44 @@ class EmbeddingService:
             info.update(
                 {
                     "model": settings.openai_embedding_model,
-                    "dimensions": settings.openai_embedding_dimensions,
+                    "dimensions": get_model_dimensions("openai"),
                     "chunk_size": settings.openai_embedding_chunk_size,
+                }
+            )
+        elif provider_name == "anthropic":
+            info.update(
+                {
+                    "model": getattr(settings, "anthropic_embedding_model", "claude-3-sonnet"),
+                    "dimensions": get_model_dimensions("anthropic"),
                 }
             )
         elif provider_name == "google":
             info.update(
                 {
                     "model": settings.google_embedding_model,
-                    "dimensions": settings.google_embedding_dimensions,
+                    "dimensions": get_model_dimensions("google"),
                 }
             )
         elif provider_name == "cohere":
             info.update(
                 {
                     "model": settings.cohere_embedding_model,
-                    "dimensions": settings.cohere_embedding_dimensions,
+                    "dimensions": get_model_dimensions("cohere"),
                 }
             )
 
         return info
+
+    def get_all_provider_info(self) -> dict[str, dict[str, Any]]:
+        """Get information for all available providers.
+        
+        Returns:
+            Dictionary mapping provider names to their info
+        """
+        all_info = {}
+        for provider_name in self._providers.keys():
+            all_info[provider_name] = self.get_provider_info(provider_name)
+        return all_info
 
     async def generate_embedding(
         self, text: str, provider_name: str | None = None

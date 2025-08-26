@@ -1,4 +1,4 @@
-"""Document and document chunk models for knowledge base."""
+"""Updated document models to support dynamic embedding tables."""
 
 from datetime import datetime
 from enum import Enum
@@ -15,15 +15,6 @@ from sqlalchemy import (
 )
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
-try:
-    from pgvector.sqlalchemy import Vector
-
-    PGVECTOR_AVAILABLE = True
-except ImportError:
-    # Fallback for non-PostgreSQL environments
-    Vector = Text
-    PGVECTOR_AVAILABLE = False
 
 from chatter.models.base import Base, Keys
 
@@ -48,54 +39,31 @@ class DocumentType(str, Enum):
     DOC = "doc"
     DOCX = "docx"
     RTF = "rtf"
-    ODT = "odt"
-    CSV = "csv"
-    JSON = "json"
-    XML = "xml"
-    OTHER = "other"
 
 
 class Document(Base):
-    """Document model for knowledge base files."""
-
-    # Foreign keys
-    owner_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
-    )
+    """Document model for knowledge base."""
 
     # File information
-    filename: Mapped[str] = mapped_column(String(255), nullable=False)
     original_filename: Mapped[str] = mapped_column(
         String(255), nullable=False
     )
-    file_path: Mapped[str | None] = mapped_column(
-        String(500), nullable=True
-    )
     file_size: Mapped[int] = mapped_column(Integer, nullable=False)
     file_hash: Mapped[str] = mapped_column(
-        String(64), nullable=False, index=True
-    )  # SHA-256
-    mime_type: Mapped[str] = mapped_column(String(100), nullable=False)
+        String(64), nullable=False, unique=True, index=True
+    )
+    mime_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
+
+    # Document metadata
     document_type: Mapped[DocumentType] = mapped_column(
         SQLEnum(DocumentType), nullable=False, index=True
     )
-
-    # Content
-    title: Mapped[str | None] = mapped_column(
-        String(500), nullable=True
-    )
+    title: Mapped[str | None] = mapped_column(String(500), nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    content: Mapped[str | None] = mapped_column(Text, nullable=True)
-    extracted_text: Mapped[str | None] = mapped_column(
-        Text, nullable=True
-    )
 
     # Processing status
     status: Mapped[DocumentStatus] = mapped_column(
-        SQLEnum(DocumentStatus),
-        default=DocumentStatus.PENDING,
-        nullable=False,
-        index=True,
+        SQLEnum(DocumentStatus), nullable=False, index=True
     )
     processing_started_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
@@ -103,100 +71,66 @@ class Document(Base):
     processing_completed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    processing_error: Mapped[str | None] = mapped_column(
-        Text, nullable=True
-    )
+    processing_error: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Chunking configuration
-    chunk_size: Mapped[int] = mapped_column(
-        Integer, default=1000, nullable=False
-    )
-    chunk_overlap: Mapped[int] = mapped_column(
-        Integer, default=200, nullable=False
-    )
-    chunk_count: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False
-    )
+    chunk_size: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    chunk_overlap: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    chunk_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    # Metadata and tags
+    # Metadata
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column(
         "extra_metadata", JSON, nullable=True
     )
     tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
-    # Version control
-    version: Mapped[int] = mapped_column(
-        Integer, default=1, nullable=False
-    )
+    # Versioning
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     parent_document_id: Mapped[str | None] = mapped_column(
-        String(12),
-        ForeignKey(Keys.DOCUMENTS),
-        nullable=True,
-        index=True,
+        String(12), nullable=True, index=True
     )
 
     # Access control
     is_public: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False
+        Boolean, nullable=False, default=False
     )
 
-    # Usage statistics
+    # Analytics
     view_count: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False
+        Integer, nullable=False, default=0
     )
     search_count: Mapped[int] = mapped_column(
-        Integer, default=0, nullable=False
+        Integer, nullable=False, default=0
     )
     last_accessed_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
 
     # Relationships
-    owner: Mapped["User"] = relationship(
-        "User", back_populates="documents"
-    )
     chunks: Mapped[list["DocumentChunk"]] = relationship(
         "DocumentChunk",
         back_populates="document",
         cascade="all, delete-orphan",
     )
-    parent_document: Mapped[Optional["Document"]] = relationship(
-        "Document",
-        remote_side="Document.id",
-        back_populates="child_documents",
-    )
-    child_documents: Mapped[list["Document"]] = relationship(
-        "Document", back_populates="parent_document"
-    )
 
     def __repr__(self) -> str:
         """String representation of document."""
-        return f"<Document(id={self.id}, filename={self.filename}, status={self.status})>"
+        return f"<Document(id={self.id}, filename={self.original_filename}, status={self.status.value})>"
+
+    @property
+    def has_chunks(self) -> bool:
+        """Check if document has chunks."""
+        return self.chunk_count is not None and self.chunk_count > 0
 
     @property
     def is_processed(self) -> bool:
-        """Check if document is fully processed."""
-        processed: bool = self.status == DocumentStatus.PROCESSED
-        return processed
-
-    @property
-    def processing_duration(self) -> float | None:
-        """Get processing duration in seconds."""
-        if self.processing_started_at and self.processing_completed_at:
-            delta = (
-                self.processing_completed_at
-                - self.processing_started_at
-            )
-            duration: float = delta.total_seconds()
-            return duration
-        return None
+        """Check if document is processed."""
+        return self.status == DocumentStatus.PROCESSED
 
     def to_dict(self) -> dict[str, Any]:
         """Convert document to dictionary."""
         return {
             "id": self.id,
-            "owner_id": self.owner_id,
-            "filename": self.filename,
             "original_filename": self.original_filename,
             "file_size": self.file_size,
             "file_hash": self.file_hash,
@@ -237,7 +171,12 @@ class Document(Base):
 
 
 class DocumentChunk(Base):
-    """Document chunk model for vector storage."""
+    """Document chunk model for vector storage.
+    
+    Updated to support dynamic embedding models. The actual embeddings
+    are now stored in separate per-model tables, while this table
+    contains metadata about which embedding models have been applied.
+    """
 
     # Foreign keys
     document_id: Mapped[str] = mapped_column(
@@ -364,16 +303,18 @@ class DocumentChunk(Base):
             "chunk_index": self.chunk_index,
             "start_char": self.start_char,
             "end_char": self.end_char,
-            "metadata": self.extra_metadata,
-            "token_count": self.token_count,
-            "language": self.language,
-            "embedding_model": self.embedding_model,
+            "has_embedding": self.has_embedding,
+            "has_dynamic_embeddings": self.has_dynamic_embeddings,
+            "embedding_models": self.embedding_models,
+            "primary_embedding_model": self.primary_embedding_model,
             "embedding_provider": self.embedding_provider,
             "embedding_created_at": self.embedding_created_at.isoformat()
             if self.embedding_created_at
             else None,
+            "token_count": self.token_count,
+            "language": self.language,
             "content_hash": self.content_hash,
-            "has_embedding": self.has_embedding,
+            "extra_metadata": self.extra_metadata,
             "created_at": self.created_at.isoformat()
             if self.created_at
             else None,

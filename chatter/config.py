@@ -126,7 +126,7 @@ class Settings(BaseSettings):
         description="PGVector collection name",
     )
     pgvector_embedding_dimension: int = Field(
-        default=1536, description="PGVector embedding dimension"
+        default=3072, description="PGVector embedding dimension"
     )
 
     # Pinecone settings
@@ -179,7 +179,7 @@ class Settings(BaseSettings):
         description="OpenAI embedding model",
     )
     openai_embedding_dimensions: int = Field(
-        default=1536, description="OpenAI embedding dimensions"
+        default=3072, description="OpenAI embedding dimensions"
     )
     openai_embedding_chunk_size: int = Field(
         default=1000, description="OpenAI embedding chunk size"

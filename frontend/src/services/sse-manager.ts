@@ -224,7 +224,8 @@ export class SSEEventManager {
    */
   private processSSELine(line: string): void {
     if (line.startsWith('data: ')) {
-      const data = line.slice(6); // Remove 'data: ' prefix
+      const raw = line.slice(6); // Remove 'data: ' prefix
+      const data = raw.trim();   // Be robust to \r\n endings and whitespace
       try {
         const event = JSON.parse(data) as AnySSEEvent;
         this.emitEvent(event);

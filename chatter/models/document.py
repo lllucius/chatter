@@ -208,7 +208,7 @@ class Document(Base):
             "chunk_size": self.chunk_size,
             "chunk_overlap": self.chunk_overlap,
             "chunk_count": self.chunk_count,
-            "metadata": self.extra_metadata,
+            "extra_metadata": self.extra_metadata,
             "tags": self.tags,
             "version": self.version,
             "parent_document_id": self.parent_document_id,
@@ -297,14 +297,6 @@ class DocumentChunk(Base):
         return f"<DocumentChunk(id={self.id}, document_id={self.document_id}, index={self.chunk_index}, content={content_preview})>"
 
     @property
-    def has_embedding(self) -> bool:
-        """Check if chunk has any embeddings (legacy or dynamic)."""
-        return (
-            self.embedding is not None 
-            or (self.embedding_models and len(self.embedding_models) > 0)
-        )
-
-    @property
     def has_dynamic_embeddings(self) -> bool:
         """Check if chunk has embeddings in dynamic tables."""
         return bool(self.embedding_models and len(self.embedding_models) > 0)
@@ -349,7 +341,7 @@ class DocumentChunk(Base):
             "chunk_index": self.chunk_index,
             "start_char": self.start_char,
             "end_char": self.end_char,
-            "metadata": self.extra_metadata,
+            "extra_metadata": self.extra_metadata,
             "token_count": self.token_count,
             "language": self.language,
             "embedding_models": self.embedding_models,
@@ -359,7 +351,6 @@ class DocumentChunk(Base):
             if self.embedding_created_at
             else None,
             "content_hash": self.content_hash,
-            "has_embedding": self.has_embedding,
             "created_at": self.created_at.isoformat()
             if self.created_at
             else None,

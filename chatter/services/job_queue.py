@@ -1,11 +1,15 @@
 """Advanced job queue system for background processing using APScheduler."""
 
 import asyncio
+import inspect
+import concurrent.futures
+from dataclasses import dataclass
 from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 
 from apscheduler.executors.asyncio import AsyncIOExecutor
+from apscheduler.executors.pool import ThreadPoolExecutor as APSchedulerThreadPoolExecutor
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -14,6 +18,15 @@ from chatter.schemas.jobs import Job, JobPriority, JobResult, JobStatus
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+@dataclass
+class JobHandlerInfo:
+    func: Callable[..., Any]
+    is_async: bool
+    # "asyncio" = run orchestration on event loop; if func is sync we offload with to_thread
+    # "default" = run orchestration in a worker thread; async handlers are bounced back to main loop
+    executor: str  # "asyncio" or "default"
 
 
 class AdvancedJobQueue:
@@ -28,38 +41,57 @@ class AdvancedJobQueue:
         self.max_workers = max_workers
         self.jobs: dict[str, Job] = {}
         self.results: dict[str, JobResult] = {}
-        self.job_handlers: dict[str, Callable] = {}
+        self.job_handlers: dict[str, JobHandlerInfo] = {}
         self.running = False
+        self._main_loop: asyncio.AbstractEventLoop | None = None
 
         # Configure APScheduler
         job_stores = {
-            'default': MemoryJobStore()
+            "default": MemoryJobStore()
         }
+        # Two executors:
+        # - "asyncio" runs jobs inside the event loop (for true async jobs)
+        # - "default" runs jobs in a worker thread
         executors = {
-            'default': AsyncIOExecutor()
+            "default": APSchedulerThreadPoolExecutor(max_workers=self.max_workers),
+            "asyncio": AsyncIOExecutor(),
         }
         job_defaults = {
-            'coalesce': False,
-            'max_instances': max_workers,  # Control concurrency here
-            'misfire_grace_time': 30
+            "coalesce": False,
+            "max_instances": max_workers,  # Control concurrency here
+            "misfire_grace_time": 30,
         }
 
         self.scheduler = AsyncIOScheduler(
             jobstores=job_stores,
             executors=executors,
             job_defaults=job_defaults,
-            timezone=UTC
+            timezone=UTC,
         )
 
-    def register_handler(self, name: str, handler: Callable) -> None:
+    def register_handler(self, name: str, handler: Callable, executor: str | None = None) -> None:
         """Register a job handler function.
 
         Args:
             name: Name of the job handler
-            handler: Async function to handle the job
+            handler: Function to handle the job (async or sync)
+            executor: Optional override. "asyncio" or "default".
+                      - If None (recommended):
+                        - async def handler -> "asyncio"
+                        - sync def handler  -> "asyncio" (we'll offload the call with asyncio.to_thread)
+                      - Use "default" to run orchestration in a worker thread; note:
+                        async handlers will still execute on the main loop via run_coroutine_threadsafe
+                        to avoid cross-loop issues with loop-bound resources (DB drivers, etc.).
         """
-        self.job_handlers[name] = handler
-        logger.info(f"Registered job handler: {name}")
+        is_async = inspect.iscoroutinefunction(handler)
+        # Default policy: use "asyncio" unless explicitly forced
+        chosen = executor or "asyncio"
+
+        if chosen not in ("asyncio", "default"):
+            raise ValueError("executor must be 'asyncio', 'default', or None")
+
+        self.job_handlers[name] = JobHandlerInfo(func=handler, is_async=is_async, executor=chosen)
+        logger.info(f"Registered job handler: {name} (is_async={is_async}, executor={chosen})")
 
     async def add_job(
         self,
@@ -91,6 +123,11 @@ class AdvancedJobQueue:
         Returns:
             Job ID
         """
+        if function_name not in self.job_handlers:
+            raise ValueError(f"No handler registered for function: {function_name}")
+
+        info = self.job_handlers[function_name]
+
         job = Job(
             name=name,
             function_name=function_name,
@@ -105,24 +142,26 @@ class AdvancedJobQueue:
 
         self.jobs[job.id] = job
 
+        # Pick correct wrapper and executor up front
+        job_func, executor_name = self._select_wrapper_and_executor(info)
+
         # Schedule job with APScheduler
         if schedule_at:
             # Schedule for future execution
             self.scheduler.add_job(
-                func=self._execute_job_wrapper,
-                trigger='date',
+                func=job_func,
+                trigger="date",
                 run_date=schedule_at,
                 args=[job.id],
                 id=str(job.id),  # Ensure it's a string
                 name=name,
+                executor=executor_name,
                 max_instances=1,
                 coalesce=True,
-                misfire_grace_time=30
+                misfire_grace_time=30,
             )
         else:
             # Execute immediately with priority handling
-            # APScheduler doesn't have built-in priority, so we'll use different queues
-            # or schedule with minimal delays based on priority
             delay_seconds = {
                 JobPriority.CRITICAL: 0,
                 JobPriority.HIGH: 0.1,
@@ -136,15 +175,16 @@ class AdvancedJobQueue:
                 run_date += timedelta(seconds=delay_seconds[priority])
 
             self.scheduler.add_job(
-                func=self._execute_job_wrapper,
-                trigger='date',
+                func=job_func,
+                trigger="date",
                 run_date=run_date,
                 args=[job.id],
                 id=str(job.id),  # Ensure it's a string
                 name=name,
+                executor=executor_name,
                 max_instances=1,
                 coalesce=True,
-                misfire_grace_time=30
+                misfire_grace_time=30,
             )
 
         logger.info(
@@ -154,6 +194,7 @@ class AdvancedJobQueue:
             priority=job.priority,
             function_name=job.function_name,
             scheduled_at=schedule_at,
+            executor=executor_name,
         )
 
         return job.id
@@ -173,17 +214,24 @@ class AdvancedJobQueue:
         # Store the job
         self.jobs[job.id] = job
 
+        info = self.job_handlers.get(job.function_name)
+        if not info:
+            raise ValueError(f"No handler registered for function: {job.function_name}")
+
+        job_func, executor_name = self._select_wrapper_and_executor(info)
+
         # Schedule with APScheduler
         self.scheduler.add_job(
-            func=self._execute_job_wrapper,
-            trigger='date',
+            func=job_func,
+            trigger="date",
             run_date=schedule_at,
             args=[job.id],
             id=str(job.id),  # Ensure it's a string
             name=job.name,
+            executor=executor_name,
             max_instances=1,
             coalesce=True,
-            misfire_grace_time=30
+            misfire_grace_time=30,
         )
 
         logger.info(
@@ -193,6 +241,7 @@ class AdvancedJobQueue:
             priority=job.priority,
             function_name=job.function_name,
             scheduled_at=schedule_at,
+            executor=executor_name,
         )
 
         return job.id
@@ -274,10 +323,7 @@ class AdvancedJobQueue:
             jobs = [job for job in jobs if job.status == status]
 
         if tags:
-            jobs = [
-                job for job in jobs
-                if any(tag in job.tags for tag in tags)
-            ]
+            jobs = [job for job in jobs if any(tag in job.tags for tag in tags)]
 
         # Sort by created_at descending
         jobs.sort(key=lambda x: x.created_at, reverse=True)
@@ -291,12 +337,10 @@ class AdvancedJobQueue:
             Dictionary with queue statistics
         """
         total_jobs = len(self.jobs)
-        status_counts = {}
+        status_counts: dict[str, int] = {}
 
         for status in JobStatus:
-            status_counts[status.value] = sum(
-                1 for job in self.jobs.values() if job.status == status
-            )
+            status_counts[status.value] = sum(1 for job in self.jobs.values() if job.status == status)
 
         # Get APScheduler stats
         scheduled_jobs = len(self.scheduler.get_jobs()) if self.running else 0
@@ -319,12 +363,10 @@ class AdvancedJobQueue:
             Dictionary with queue statistics
         """
         total_jobs = len(self.jobs)
-        status_counts = {}
+        status_counts: dict[str, int] = {}
 
         for status in JobStatus:
-            status_counts[status.value] = sum(
-                1 for job in self.jobs.values() if job.status == status
-            )
+            status_counts[status.value] = sum(1 for job in self.jobs.values() if job.status == status)
 
         # Get APScheduler stats
         scheduled_jobs = len(self.scheduler.get_jobs()) if self.running else 0
@@ -349,6 +391,12 @@ class AdvancedJobQueue:
         self.running = True
         logger.info(f"Starting job queue with APScheduler (max_workers: {self.max_workers})")
 
+        # Capture the main event loop so thread workers can bounce async callbacks here
+        try:
+            self._main_loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self._main_loop = None
+
         # Start APScheduler
         self.scheduler.start()
 
@@ -368,31 +416,50 @@ class AdvancedJobQueue:
 
         logger.info("Job queue stopped")
 
-    async def _execute_job_wrapper(self, job_id: str) -> None:
-        """Wrapper function for APScheduler to execute jobs.
+    # ----------------- Internal helpers -----------------
 
-        Args:
-            job_id: Job ID to execute
-        """
+    def _select_wrapper_and_executor(self, info: JobHandlerInfo) -> tuple[Callable[..., Any], str]:
+        """Choose the correct callable and executor name for APScheduler."""
+        if info.executor == "default":
+            # Orchestration in a worker thread
+            return (self._execute_job_wrapper_sync, "default")
+        else:
+            # Orchestration on the event loop; offload sync handlers as needed
+            return (self._execute_job_wrapper_async, "asyncio")
+
+    # ----------------- Execution wrappers -----------------
+
+    async def _execute_job_wrapper_async(self, job_id: str) -> None:
+        """Wrapper function for APScheduler to execute jobs on the event loop."""
         job = self.jobs.get(job_id)
         if not job:
             logger.error(f"Job {job_id} not found for execution")
             return
 
-        # Check if job was cancelled
         if job.status == JobStatus.CANCELLED:
             logger.info(f"Job {job_id} was cancelled before execution")
             return
 
-        await self._execute_job(job_id, job)
+        await self._execute_job_async(job)
 
-    async def _execute_job(self, job_id: str, job: Job) -> None:
-        """Execute a single job.
+    def _execute_job_wrapper_sync(self, job_id: str) -> None:
+        """Wrapper function for APScheduler to execute jobs in a worker thread."""
+        job = self.jobs.get(job_id)
+        if not job:
+            logger.error(f"Job {job_id} not found for execution")
+            return
 
-        Args:
-            job_id: Job identifier
-            job: Job to execute
-        """
+        if job.status == JobStatus.CANCELLED:
+            logger.info(f"Job {job_id} was cancelled before execution")
+            return
+
+        # Run the full execution flow in this worker thread
+        self._execute_job_sync(job)
+
+    # ----------------- Execution flows -----------------
+
+    async def _execute_job_async(self, job: Job) -> None:
+        """Execute a single job with orchestration on the event loop."""
         job.status = JobStatus.RUNNING
         job.started_at = datetime.now(UTC)
 
@@ -413,16 +480,23 @@ class AdvancedJobQueue:
         start_time = datetime.now(UTC)
 
         try:
-            # Get job handler
-            handler = self.job_handlers.get(job.function_name)
-            if not handler:
+            # Get job handler info
+            info = self.job_handlers.get(job.function_name)
+            if not info:
                 raise ValueError(f"No handler registered for function: {job.function_name}")
 
             # Execute job with timeout
-            result = await asyncio.wait_for(
-                handler(*job.args, **job.kwargs),
-                timeout=job.timeout,
-            )
+            if info.is_async:
+                result = await asyncio.wait_for(
+                    info.func(*job.args, **job.kwargs),
+                    timeout=job.timeout,
+                )
+            else:
+                # Run sync work without blocking the loop
+                result = await asyncio.wait_for(
+                    asyncio.to_thread(info.func, *job.args, **job.kwargs),
+                    timeout=job.timeout,
+                )
 
             # Job completed successfully
             job.status = JobStatus.COMPLETED
@@ -449,9 +523,7 @@ class AdvancedJobQueue:
 
             # Trigger job completed event
             try:
-                from chatter.services.sse_events import (
-                    trigger_job_completed,
-                )
+                from chatter.services.sse_events import trigger_job_completed
                 await trigger_job_completed(job.id, job.name, result or {})
             except Exception as e:
                 logger.warning("Failed to trigger job completed event", error=str(e))
@@ -463,6 +535,122 @@ class AdvancedJobQueue:
             logger.info(f"Job {job.id} was cancelled")
         except Exception as e:
             await self._handle_job_error(job, str(e))
+
+    def _execute_job_sync(self, job: Job) -> None:
+        """Execute a single job with orchestration in a worker thread.
+
+        Note: If the handler is async, we dispatch it back to the main loop
+        with run_coroutine_threadsafe to avoid cross-loop resource issues.
+        """
+        job.status = JobStatus.RUNNING
+        job.started_at = datetime.now(UTC)
+
+        logger.info(
+            "Executing job (thread)",
+            job_id=job.id,
+            name=job.name,
+            function_name=job.function_name,
+        )
+
+        # Trigger job started event on the main loop if available
+        try:
+            from chatter.services.sse_events import trigger_job_started
+            if self._main_loop:
+                asyncio.run_coroutine_threadsafe(
+                    trigger_job_started(job.id, job.name), self._main_loop
+                )
+        except Exception as e:
+            logger.warning("Failed to trigger job started event (thread)", error=str(e))
+
+        start_time = datetime.now(UTC)
+
+        def _complete_success(result: Any) -> None:
+            job.status = JobStatus.COMPLETED
+            job.completed_at = datetime.now(UTC)
+            job.result = result
+            execution_time = (job.completed_at - start_time).total_seconds()
+            self.results[job.id] = JobResult(
+                job_id=job.id,
+                status=JobStatus.COMPLETED,
+                result=result,
+                execution_time=execution_time,
+                completed_at=job.completed_at,
+            )
+            logger.info(
+                "Job completed successfully (thread)",
+                job_id=job.id,
+                execution_time=execution_time,
+            )
+            # Trigger job completed on the main loop if available
+            try:
+                from chatter.services.sse_events import trigger_job_completed
+                if self._main_loop:
+                    asyncio.run_coroutine_threadsafe(
+                        trigger_job_completed(job.id, job.name, result or {}),
+                        self._main_loop,
+                    )
+            except Exception as e:
+                logger.warning(
+                    "Failed to trigger job completed event (thread)", error=str(e)
+                )
+
+        def _handle_error_sync(msg: str) -> None:
+            # Run async error handler on the main loop if available
+            try:
+                if self._main_loop:
+                    fut = asyncio.run_coroutine_threadsafe(
+                        self._handle_job_error(job, msg), self._main_loop
+                    )
+                    fut.result()  # wait to keep state consistent
+                else:
+                    # Fallback: no loop available; mark failed locally
+                    job.status = JobStatus.FAILED
+                    job.completed_at = datetime.now(UTC)
+                    execution_time = (
+                        (job.completed_at - job.started_at).total_seconds()
+                        if job.started_at
+                        else 0
+                    )
+                    self.results[job.id] = JobResult(
+                        job_id=job.id,
+                        status=JobStatus.FAILED,
+                        error=msg,
+                        execution_time=execution_time,
+                        completed_at=job.completed_at,
+                    )
+            except Exception as e:
+                logger.warning("Error during sync error handling", error=str(e))
+
+        try:
+            info = self.job_handlers.get(job.function_name)
+            if not info:
+                _handle_error_sync(f"No handler registered for function: {job.function_name}")
+                return
+
+            if info.is_async:
+                if not self._main_loop:
+                    _handle_error_sync("No main event loop available for async handler")
+                    return
+
+                # Schedule coroutine on the main loop and wait here with a timeout
+                fut = asyncio.run_coroutine_threadsafe(
+                    info.func(*job.args, **job.kwargs), self._main_loop
+                )
+                try:
+                    result = fut.result(timeout=job.timeout)
+                except concurrent.futures.TimeoutError:
+                    fut.cancel()
+                    _handle_error_sync("Job timed out")
+                    return
+
+                _complete_success(result)
+            else:
+                # Best-effort: run sync handler directly (no preemptive timeout for arbitrary blocking calls)
+                result = info.func(*job.args, **job.kwargs)
+                _complete_success(result)
+
+        except Exception as e:
+            _handle_error_sync(str(e))
 
     async def _handle_job_error(self, job: Job, error_message: str) -> None:
         """Handle job execution errors and retries.
@@ -494,7 +682,9 @@ class AdvancedJobQueue:
             job.status = JobStatus.FAILED
             job.completed_at = datetime.now(UTC)
 
-            execution_time = (job.completed_at - job.started_at).total_seconds() if job.started_at else 0
+            execution_time = (
+                (job.completed_at - job.started_at).total_seconds() if job.started_at else 0
+            )
 
             job_result = JobResult(
                 job_id=job.id,
@@ -515,9 +705,8 @@ class AdvancedJobQueue:
 
             # Trigger job failed event
             try:
-                from chatter.services.sse_events import (
-                    trigger_job_failed,
-                )
+                from chatter.services.sse_events import trigger_job_failed
+
                 await trigger_job_failed(job.id, job.name, error_message)
             except Exception as e:
                 logger.warning("Failed to trigger job failed event", error=str(e))
@@ -534,6 +723,11 @@ class AdvancedJobQueue:
             logger.warning(f"Not scheduling retry for job {job.id} - scheduler not running")
             return
 
+        info = self.job_handlers.get(job.function_name)
+        if not info:
+            logger.error(f"No handler registered for function: {job.function_name}")
+            return
+
         # Calculate retry delay (exponential backoff)
         retry_delay = min(job.retry_delay * (2 ** (job.retry_count - 1)), 3600)  # Cap at 1 hour
         run_date = datetime.now(UTC) + timedelta(seconds=retry_delay)
@@ -544,17 +738,21 @@ class AdvancedJobQueue:
         except Exception:
             pass  # Job might not exist in scheduler
 
+        # Pick correct wrapper and executor up front
+        job_func, executor_name = self._select_wrapper_and_executor(info)
+
         # Schedule retry
         self.scheduler.add_job(
-            func=self._execute_job_wrapper,
-            trigger='date',
+            func=job_func,
+            trigger="date",
             run_date=run_date,
             args=[job.id],
             id=str(job.id),  # Ensure it's a string
             name=f"{job.name} (retry {job.retry_count})",
+            executor=executor_name,
             max_instances=1,
             coalesce=True,
-            misfire_grace_time=30
+            misfire_grace_time=30,
         )
 
         logger.info(
@@ -562,7 +760,8 @@ class AdvancedJobQueue:
             job_id=job.id,
             retry_count=job.retry_count,
             delay_seconds=retry_delay,
-            run_date=run_date
+            run_date=run_date,
+            executor=executor_name,
         )
 
 
@@ -589,6 +788,7 @@ async def document_processing_job(document_id: str, file_content: bytes) -> dict
             processing_service = DocumentProcessingService(session)
 
             # Process the document (chunking + embeddings)
+            # If process_document does any blocking work, ensure it offloads with asyncio.to_thread
             success = await processing_service.process_document(
                 document_id, file_content
             )
@@ -657,6 +857,8 @@ async def data_export_job(user_id: str, export_type: str) -> dict[str, Any]:
 
 
 # Register default handlers
+# Note: document_processing stays on the 'asyncio' executor by default to keep async DB work
+# on the main loop. Offload any blocking bits inside the handler/service with asyncio.to_thread.
 job_queue.register_handler("document_processing", document_processing_job)
 job_queue.register_handler("conversation_summarization", conversation_summarization_job)
 job_queue.register_handler("vector_store_maintenance", vector_store_maintenance_job)

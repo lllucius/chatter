@@ -155,7 +155,7 @@ class Conversation(Base):
             "total_tokens": self.total_tokens,
             "total_cost": self.total_cost,
             "tags": self.tags,
-            "metadata": self.extra_metadata,
+            "extra_metadata": self.extra_metadata,
             "created_at": self.created_at.isoformat()
             if self.created_at
             else None,
@@ -277,7 +277,7 @@ class Message(Base):
             "retry_count": self.retry_count,
             "retrieved_documents": self.retrieved_documents,
             "context_used": self.context_used,
-            "metadata": self.extra_metadata,
+            "extra_metadata": self.extra_metadata,
             "sequence_number": self.sequence_number,
             "created_at": self.created_at.isoformat()
             if self.created_at

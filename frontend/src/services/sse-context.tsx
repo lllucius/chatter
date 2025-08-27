@@ -4,7 +4,7 @@
  * Provides SSE event manager to React components via context
  */
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { sseEventManager } from './sse-manager';
 import { AnySSEEvent, SSEEventListener } from './sse-types';
 import { chatterSDK } from './chatter-sdk';
@@ -60,30 +60,30 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
     }
   }, [autoConnect, isConnected]);
 
-  const connect = () => {
+  const connect = useCallback(() => {
     sseEventManager.connect();
-  };
+  }, []);
 
-  const disconnect = () => {
+  const disconnect = useCallback(() => {
     sseEventManager.disconnect();
-  };
+  }, []);
 
-  const on = (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => {
+  const on = useCallback((eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => {
     return sseEventManager.on(eventType, listener);
-  };
+  }, []);
 
-  const off = (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => {
+  const off = useCallback((eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => {
     sseEventManager.off(eventType, listener);
-  };
+  }, []);
 
-  const value: SSEContextValue = {
+  const value: SSEContextValue = useMemo(() => ({
     isConnected,
     connectionState,
     connect,
     disconnect,
     on,
     off,
-  };
+  }), [isConnected, connectionState, connect, disconnect, on, off]);
 
   return (
     <SSEContext.Provider value={value}>

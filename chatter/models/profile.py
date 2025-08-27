@@ -249,7 +249,7 @@ class Profile(Base):
             if self.last_used_at
             else None,
             "tags": self.tags,
-            "metadata": self.extra_metadata,
+            "extra_metadata": self.extra_metadata,
             "created_at": self.created_at.isoformat()
             if self.created_at
             else None,

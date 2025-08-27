@@ -358,7 +358,7 @@ class Prompt(Base):
             "total_cost": self.total_cost,
             "avg_tokens_per_use": self.avg_tokens_per_use,
             "tags": self.tags,
-            "metadata": self.extra_metadata,
+            "extra_metadata": self.extra_metadata,
             "content_hash": self.content_hash,
             "estimated_tokens": self.estimated_tokens,
             "language": self.language,

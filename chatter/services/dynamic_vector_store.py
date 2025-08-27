@@ -6,6 +6,7 @@ Parity with legacy VectorStoreService:
 - hybrid_search implemented
 """
 
+import asyncio
 import json
 import math
 from typing import Any, Dict, List, Optional, Tuple
@@ -57,21 +58,9 @@ class DynamicVectorStoreService:
         metadata: Optional[Dict[str, Any]] = None,
         **index_params,
     ) -> bool:
-        """Store embedding for a document chunk using dynamic model tables.
-
-        Args:
-            chunk_id: Document chunk ID
-            embedding: Embedding vector
-            provider_name: Name of the embedding provider (e.g., "openai")
-            model_name: Optional specific model name for the table
-            metadata: Additional metadata
-            **index_params: Index configuration parameters
-
-        Returns:
-            True if successful, False otherwise
-        """
+        """Store embedding for a document chunk using dynamic model tables."""
         try:
-            # Get the chunk from the main documents table
+            # Get the chunk from the main documents table (async, on main loop)
             result = await self.session.execute(
                 select(DocumentChunk).where(DocumentChunk.id == chunk_id)
             )
@@ -97,16 +86,22 @@ class DynamicVectorStoreService:
 
             # Store embedding based on vector store type
             if self.store_type == "pgvector" and PGVECTOR_AVAILABLE:
-                ok = await self._store_dynamic_pgvector_embedding(
-                    chunk, embedding, table_model_name, dim, metadata, **index_params
+                ok = await asyncio.to_thread(
+                    self._store_dynamic_pgvector_embedding_sync,
+                    chunk,
+                    embedding,
+                    table_model_name,
+                    dim,
+                    metadata,
+                    index_params,
                 )
             else:
-                # Fallback: update the main chunk table
+                # Fallback: update the main chunk table (async)
                 ok = await self._store_fallback_embedding(
                     chunk, embedding, provider_name, metadata
                 )
 
-            # Update the main chunk with embedding metadata (common)
+            # Update the main chunk with embedding metadata (common) - async on main loop
             if ok:
                 chunk.add_embedding_model(table_model_name, set_as_primary=True)
                 chunk.embedding_provider = provider_name
@@ -124,37 +119,25 @@ class DynamicVectorStoreService:
             )
             return False
 
-    async def _store_dynamic_pgvector_embedding(
+    # Synchronous helper: runs entirely on a worker thread via asyncio.to_thread
+    def _store_dynamic_pgvector_embedding_sync(
         self,
         chunk: DocumentChunk,
         embedding: List[float],
         model_name: str,
         dim: int,
         metadata: Optional[Dict[str, Any]] = None,
-        **index_params,
+        index_params: Optional[Dict[str, Any]] = None,
     ) -> bool:
-        """Store embedding using dynamic PGVector tables.
-
-        Args:
-            chunk: Document chunk
-            embedding: Embedding vector
-            model_name: Name for the embedding table
-            dim: Vector dimension
-            metadata: Additional metadata
-            **index_params: Index configuration parameters
-
-        Returns:
-            True if successful
-        """
+        """Store embedding using dynamic PGVector tables (sync path, threaded)."""
         try:
             # Get or create the embedding model for this provider
             embedding_model_class = get_embedding_model(
-                model_name, dim, self.sync_engine, **index_params
+                model_name, dim, self.sync_engine, **(index_params or {})
             )
 
             # Create synchronous session for the embedding table
             sync_session_maker = sessionmaker(bind=self.sync_engine)
-            
             with sync_session_maker() as sync_session:
                 # Check if embedding already exists
                 existing = sync_session.execute(
@@ -175,7 +158,7 @@ class DynamicVectorStoreService:
                         chunk_id=chunk.id,
                         embedding=embedding,
                         content=chunk.content,
-                        metadata=json.dumps(metadata) if metadata else None,
+                        extra_metadata=json.dumps(metadata) if metadata else None,
                     )
                     sync_session.add(embedding_record)
 
@@ -190,7 +173,7 @@ class DynamicVectorStoreService:
             return True
 
         except Exception as e:
-            await self.session.rollback()
+            # Note: do not touch AsyncSession here (we're in a worker thread)
             logger.error(
                 "Failed to store dynamic PGVector embedding",
                 chunk_id=chunk.id,
@@ -250,14 +233,56 @@ class DynamicVectorStoreService:
             table_model_name = model_name or provider_name
             
             if self.store_type == "pgvector" and PGVECTOR_AVAILABLE:
-                return await self._similarity_search_pgvector(
-                    query_embedding,
+                rows = await asyncio.to_thread(
+                    self._pgvector_search_rows_sync,
                     table_model_name,
+                    query_embedding,
                     limit,
-                    score_threshold,
                     document_ids,
-                    metadata_filter,
                 )
+                # Convert to similarity and fetch chunks asynchronously
+                id_with_scores: List[Tuple[str, float]] = []
+                for chunk_id, distance in rows:
+                    similarity_score = 1.0 - float(distance)
+                    if similarity_score >= score_threshold:
+                        id_with_scores.append((chunk_id, similarity_score))
+
+                if not id_with_scores:
+                    return []
+
+                # Fetch chunks in one async query
+                chunk_ids = [cid for cid, _ in id_with_scores]
+                result = await self.session.execute(
+                    select(DocumentChunk).where(DocumentChunk.id.in_(chunk_ids))
+                )
+                chunks = result.scalars().all()
+                chunk_map = {c.id: c for c in chunks}
+
+                # Preserve order and filter out any missing
+                ordered: List[Tuple[DocumentChunk, float]] = []
+                for cid, score in id_with_scores:
+                    chunk = chunk_map.get(cid)
+                    if not chunk:
+                        continue
+                    # Optional metadata filter
+                    if metadata_filter:
+                        ok = True
+                        for k, v in metadata_filter.items():
+                            if not chunk.extra_metadata or str(chunk.extra_metadata.get(k)) != str(v):
+                                ok = False
+                                break
+                        if not ok:
+                            continue
+                    ordered.append((chunk, score))
+
+                logger.debug(
+                    "PGVector similarity search completed",
+                    results_count=len(ordered),
+                    model=table_model_name,
+                    limit=limit,
+                    threshold=score_threshold,
+                )
+                return ordered
             else:
                 return await self._similarity_search_fallback(
                     query_embedding,
@@ -275,24 +300,20 @@ class DynamicVectorStoreService:
             )
             return []
 
-    async def _similarity_search_pgvector(
+    # Sync helper for PGVector similarity, runs in thread
+    def _pgvector_search_rows_sync(
         self,
-        query_embedding: List[float],
         model_name: str,
+        query_embedding: List[float],
         limit: int,
-        score_threshold: float,
         document_ids: Optional[List[str]],
-        metadata_filter: Optional[Dict[str, Any]],
-    ) -> List[Tuple[DocumentChunk, float]]:
-        """Perform similarity search using PGVector on dynamic tables."""
+    ) -> List[Tuple[str, float]]:
+        """Perform PGVector query synchronously and return (chunk_id, distance) rows."""
         try:
             # Get the embedding model for this provider (don't create if it doesn't exist)
             embedding_models_dict = list_embedding_models()
             if model_name not in embedding_models_dict:
-                logger.warning(
-                    "No embedding model found for provider",
-                    model=model_name,
-                )
+                logger.warning("No embedding model found for provider", model=model_name)
                 return []
 
             embedding_model_class = embedding_models_dict[model_name]
@@ -315,56 +336,9 @@ class DynamicVectorStoreService:
                 # Execute query synchronously
                 rows = sync_session.execute(query).fetchall()
 
-            # Convert to similarity and fetch chunks asynchronously
-            # Prepare IDs in order, filter by score_threshold
-            id_with_scores: List[Tuple[str, float]] = []
-            for chunk_id, distance in rows:
-                similarity_score = 1.0 - float(distance)
-                if similarity_score >= score_threshold:
-                    id_with_scores.append((chunk_id, similarity_score))
-
-            if not id_with_scores:
-                return []
-
-            # Fetch chunks in one async query
-            chunk_ids = [cid for cid, _ in id_with_scores]
-            result = await self.session.execute(
-                select(DocumentChunk).where(DocumentChunk.id.in_(chunk_ids))
-            )
-            chunks = result.scalars().all()
-            chunk_map = {c.id: c for c in chunks}
-
-            # Preserve order and filter out any missing
-            ordered: List[Tuple[DocumentChunk, float]] = []
-            for cid, score in id_with_scores:
-                chunk = chunk_map.get(cid)
-                if not chunk:
-                    continue
-                # Optional metadata filter
-                if metadata_filter:
-                    # Simple equals filtering for JSON fields
-                    ok = True
-                    for k, v in metadata_filter.items():
-                        if not chunk.extra_metadata or str(chunk.extra_metadata.get(k)) != str(v):
-                            ok = False
-                            break
-                    if not ok:
-                        continue
-                ordered.append((chunk, score))
-
-            logger.debug(
-                "PGVector similarity search completed",
-                results_count=len(ordered),
-                model=model_name,
-                limit=limit,
-                threshold=score_threshold,
-            )
-            return ordered
-
+            return rows
         except Exception as e:
-            logger.error(
-                "PGVector similarity search failed", error=str(e)
-            )
+            logger.error("PGVector similarity search failed", error=str(e))
             return []
 
     async def _similarity_search_fallback(
@@ -534,22 +508,25 @@ class DynamicVectorStoreService:
             embedding_models_dict = list_embedding_models()
             if embedding_models_dict and PGVECTOR_AVAILABLE:
                 sync_session_maker = sessionmaker(bind=self.sync_engine)
-                with sync_session_maker() as sync_session:
-                    for model_name, model_class in embedding_models_dict.items():
-                        try:
-                            count_result = sync_session.execute(
-                                select(func.count(model_class.id))
-                            ).scalar()
-                            stats["models_used"][model_name] = {
-                                "embeddings_count": int(count_result or 0),
-                                "table_name": model_class.__tablename__,
-                            }
-                        except Exception as e:
-                            logger.warning(
-                                "Failed to get stats for model",
-                                model=model_name,
-                                error=str(e),
-                            )
+                rows: Dict[str, Dict[str, Any]] = {}
+                # Offload the synchronous count queries
+                def _count_sync() -> Dict[str, Dict[str, Any]]:
+                    with sync_session_maker() as sync_session:
+                        out: Dict[str, Dict[str, Any]] = {}
+                        for model_name, model_class in embedding_models_dict.items():
+                            try:
+                                count_result = sync_session.execute(
+                                    select(func.count(model_class.id))
+                                ).scalar()
+                                out[model_name] = {
+                                    "embeddings_count": int(count_result or 0),
+                                    "table_name": model_class.__tablename__,
+                                }
+                            except Exception as e:
+                                logger.warning("Failed to get stats for model", model=model_name, error=str(e))
+                        return out
+                rows = await asyncio.to_thread(_count_sync)
+                stats["models_used"] = rows
 
             stats["embedding_coverage"] = (
                 (stats["embedded_chunks"] / stats["total_chunks"]) * 100.0

@@ -261,9 +261,6 @@ class DocumentChunkResponse(BaseModel):
         None, description="Embedding creation time"
     )
     content_hash: str = Field(..., description="Content hash")
-    has_embedding: bool = Field(
-        ..., description="Whether chunk has embedding"
-    )
     created_at: datetime = Field(..., description="Creation time")
     updated_at: datetime = Field(..., description="Last update time")
 

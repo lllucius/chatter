@@ -128,6 +128,10 @@ class PGVectorStore(AbstractVectorStore):
             connection_string or settings.database_url
         )
 
+        # Set query-time accuracy/speed. Higher = more accurate, slower.
+        # (This should be made configurable per workflow.)
+        self.connection_string += "?options=-c%20hnsw.ef_search%3D60"
+
         # Remove async driver from connection string for pgvector
         if "+asyncpg" in self.connection_string:
             self.connection_string = self.connection_string.replace(

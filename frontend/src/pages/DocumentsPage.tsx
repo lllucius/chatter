@@ -57,7 +57,7 @@ import {
 
 const DocumentsPage: React.FC = () => {
   // SSE hook
-  const { isConnected, on } = useSSE();
+  const { on } = useSSE();
 
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -85,8 +85,7 @@ const DocumentsPage: React.FC = () => {
 
   // SSE Event Listeners for real-time document updates
   useEffect(() => {
-    if (!isConnected) return;
-
+    // Attach listeners regardless of current connection; they will receive events when the stream is open
     const unsubscribeDocumentUploaded = on('document.uploaded', (event) => {
       const docEvent = event as DocumentUploadedEvent;
       console.log('Document uploaded:', docEvent.data);
@@ -97,7 +96,7 @@ const DocumentsPage: React.FC = () => {
       const docEvent = event as DocumentProcessingStartedEvent;
       console.log('Document processing started:', docEvent.data);
       setDocuments(prev => prev.map(doc =>
-        doc.id === docEvent.data.document_id
+        String(doc.id) === String(docEvent.data.document_id)
           ? { ...doc, status: 'processing' as any }
           : doc
       ));
@@ -107,8 +106,12 @@ const DocumentsPage: React.FC = () => {
       const docEvent = event as DocumentProcessingCompletedEvent;
       console.log('Document processing completed:', docEvent.data);
       setDocuments(prev => prev.map(doc =>
-        doc.id === docEvent.data.document_id
-          ? { ...doc, status: 'processed' as any }
+        String(doc.id) === String(docEvent.data.document_id)
+          ? { 
+              ...doc, 
+              status: 'processed' as any,
+              chunk_count: docEvent.data.result?.chunks_created ?? doc.chunk_count
+            }
           : doc
       ));
       loadDocuments();
@@ -118,7 +121,7 @@ const DocumentsPage: React.FC = () => {
       const docEvent = event as DocumentProcessingFailedEvent;
       console.log('Document processing failed:', docEvent.data);
       setDocuments(prev => prev.map(doc =>
-        doc.id === docEvent.data.document_id
+        String(doc.id) === String(docEvent.data.document_id)
           ? { ...doc, status: 'failed' as any }
           : doc
       ));
@@ -131,7 +134,7 @@ const DocumentsPage: React.FC = () => {
       unsubscribeProcessingCompleted();
       unsubscribeProcessingFailed();
     };
-  }, [isConnected, on]);
+  }, [on]);
 
   const loadDocuments = async () => {
     try {

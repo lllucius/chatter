@@ -300,6 +300,13 @@ class ModelRegistryService:
         )
         return result.scalar_one_or_none()
 
+    async def get_embedding_space_by_table_name(self, table_name: str) -> EmbeddingSpace | None:
+        """Get embedding space by table name."""
+        result = await self.session.execute(
+            select(EmbeddingSpace).where(EmbeddingSpace.table_name == table_name)
+        )
+        return result.scalar_one_or_none()
+
     async def create_embedding_space(self, space_data: EmbeddingSpaceCreate) -> EmbeddingSpace:
         """Create a new embedding space with backing table and index."""
         # Create the space record

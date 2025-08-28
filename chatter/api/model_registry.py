@@ -399,6 +399,17 @@ async def create_embedding_space(
             detail="Embedding space with this name already exists"
         )
     
+    # Check if table name already exists
+    existing_table = await service.get_embedding_space_by_table_name(space_data.table_name)
+    if existing_table:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Embedding space with this table name already exists"
+        )
+    
+    # Get user ID before any potential rollback
+    user_id = current_user.id
+    
     try:
         space = await service.create_embedding_space(space_data)
         
@@ -411,7 +422,7 @@ async def create_embedding_space(
             space_name=space.name,
             table_name=space.table_name,
             model_id=space.model_id,
-            user_id=current_user.id
+            user_id=user_id
         )
         
         return space
@@ -420,7 +431,7 @@ async def create_embedding_space(
             "Failed to create embedding space",
             space_name=space_data.name,
             error=str(e),
-            user_id=current_user.id
+            user_id=user_id
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

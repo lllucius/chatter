@@ -40,11 +40,10 @@ def generate_typescript_sdk():
         "npmRepository": "https://github.com/lllucius/chatter",
         "npmDescription": "TypeScript SDK for Chatter AI Chatbot API",
         "apiPackage": "api",
-        "modelPackage": "models",
         "withInterfaces": True,
         "useSingleRequestParameter": True,
         "supportsES6": True,
-        "withSeparateModelsAndApi": True,
+        "withSeparateModelsAndApi": False,
         "enumNameSuffix": "",
         "enumPropertyNaming": "original",
     }
@@ -155,9 +154,6 @@ def create_sdk_index(sdk_dir: Path):
 
 // Export all APIs
 export * from './api';
-
-// Export all models
-export * from './models';
 
 // Export configuration and base types
 export { Configuration } from './configuration';

@@ -1,12 +1,14 @@
 """Embedding generation service."""
 
 import hashlib
+import os
 import time
 from typing import Any
 import numpy as np
 
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
+from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
     from langchain_anthropic import AnthropicEmbeddings
@@ -40,6 +42,9 @@ except ImportError:
 
 from chatter.config import get_settings
 from chatter.core.dynamic_embeddings import get_model_dimensions
+from chatter.core.model_registry import ModelRegistryService
+from chatter.models.registry import ModelType, ProviderType
+from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 
 settings = get_settings()
@@ -134,137 +139,87 @@ class DimensionalReductionEmbeddings(Embeddings):
 class EmbeddingService:
     """Service for generating text embeddings."""
 
-    def __init__(self) -> None:
+    def __init__(self, session: AsyncSession | None = None) -> None:
         """Initialize embedding service."""
+        self._session = session
         self._providers: dict[str, Embeddings] = {}
-        self._initialize_providers()
+        # We'll load providers dynamically as needed
+
+    async def _get_session(self) -> AsyncSession:
+        """Get database session."""
+        if self._session:
+            return self._session
+        async for session in get_session():
+            return session
+
+    async def _create_embedding_provider_instance(self, provider, model_def) -> Embeddings | None:
+        """Create an embedding provider instance based on registry data."""
+        try:
+            if provider.provider_type == ProviderType.OPENAI:
+                # Get API key from environment
+                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+                if not api_key:
+                    logger.warning(f"No API key found for provider {provider.name}")
+                    return None
+                
+                config = model_def.default_config or {}
+                base_provider = OpenAIEmbeddings(
+                    api_key=api_key,
+                    base_url=provider.base_url,
+                    model=model_def.model_name,
+                    chunk_size=model_def.chunk_size or config.get('chunk_size', 1000),
+                )
+                
+                # Apply dimensional reduction if configured for this model
+                if settings.embedding_reduction_enabled:
+                    return DimensionalReductionEmbeddings(
+                        base_embeddings=base_provider,
+                        target_dim=settings.embedding_reduction_target_dim,
+                        strategy=settings.embedding_reduction_strategy,
+                        reducer_path=settings.embedding_reducer_path,
+                        normalize=settings.embedding_reduction_normalize,
+                    )
+                else:
+                    return base_provider
+            
+            elif provider.provider_type == ProviderType.GOOGLE and GOOGLE_AVAILABLE:
+                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+                if not api_key:
+                    logger.warning(f"No API key found for provider {provider.name}")
+                    return None
+                    
+                return GoogleGenerativeAIEmbeddings(
+                    google_api_key=api_key,
+                    model=model_def.model_name,
+                )
+            
+            elif provider.provider_type == ProviderType.COHERE and COHERE_AVAILABLE:
+                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+                if not api_key:
+                    logger.warning(f"No API key found for provider {provider.name}")
+                    return None
+                    
+                return CohereEmbeddings(
+                    cohere_api_key=api_key,
+                    model=model_def.model_name,
+                )
+            
+            else:
+                logger.warning(f"Unsupported embedding provider type: {provider.provider_type}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Failed to create embedding provider instance for {provider.name}: {e}")
+            return None
 
     def _initialize_providers(self) -> None:
-        """Initialize available embedding providers."""
-        # OpenAI
-        if settings.openai_api_key:
-            try:
-                base_provider = OpenAIEmbeddings(
-                    api_key=settings.openai_api_key,
-                    base_url=settings.openai_base_url,
-                    model=settings.openai_embedding_model,
-                    chunk_size=settings.openai_embedding_chunk_size,
-                )
-                
-                # Apply dimensional reduction if enabled
-                if settings.embedding_reduction_enabled:
-                    self._providers["openai"] = DimensionalReductionEmbeddings(
-                        base_embeddings=base_provider,
-                        target_dim=settings.embedding_reduction_target_dim,
-                        strategy=settings.embedding_reduction_strategy,
-                        reducer_path=settings.embedding_reducer_path,
-                        normalize=settings.embedding_reduction_normalize,
-                    )
-                    logger.info(
-                        "OpenAI embedding provider initialized with dimensional reduction",
-                        model=settings.openai_embedding_model,
-                        target_dim=settings.embedding_reduction_target_dim,
-                        strategy=settings.embedding_reduction_strategy,
-                    )
-                else:
-                    self._providers["openai"] = base_provider
-                    logger.info(
-                        "OpenAI embedding provider initialized",
-                        model=settings.openai_embedding_model,
-                    )
-            except Exception as e:
-                logger.warning(
-                    "Failed to initialize OpenAI embedding provider",
-                    error=str(e),
-                )
+        """Initialize available embedding providers.
+        
+        Note: This is kept for backward compatibility but providers are now loaded dynamically.
+        """
+        logger.info("Embedding providers will be loaded dynamically from model registry")
 
-        # Anthropic (if available)
-        if (
-            settings.anthropic_api_key
-            and ANTHROPIC_EMBEDDINGS_AVAILABLE
-        ):
-            try:
-                # Note: Anthropic doesn't have dedicated embedding models in langchain_anthropic yet
-                # This is a placeholder for when they become available
-                pass
-            except Exception as e:
-                logger.warning(
-                    "Failed to initialize Anthropic embedding provider",
-                    error=str(e),
-                )
-
-        # Google Generative AI
-        if settings.google_api_key and GOOGLE_AVAILABLE:
-            try:
-                base_provider = GoogleGenerativeAIEmbeddings(
-                    model=settings.google_embedding_model,
-                    google_api_key=settings.google_api_key,
-                )
-                
-                # Apply dimensional reduction if enabled
-                if settings.embedding_reduction_enabled:
-                    self._providers["google"] = DimensionalReductionEmbeddings(
-                        base_embeddings=base_provider,
-                        target_dim=settings.embedding_reduction_target_dim,
-                        strategy=settings.embedding_reduction_strategy,
-                        reducer_path=settings.embedding_reducer_path,
-                        normalize=settings.embedding_reduction_normalize,
-                    )
-                    logger.info(
-                        "Google Generative AI embedding provider initialized with dimensional reduction",
-                        model=settings.google_embedding_model,
-                        target_dim=settings.embedding_reduction_target_dim,
-                    )
-                else:
-                    self._providers["google"] = base_provider
-                    logger.info(
-                        "Google Generative AI embedding provider initialized",
-                        model=settings.google_embedding_model,
-                    )
-            except Exception as e:
-                logger.warning(
-                    "Failed to initialize Google Generative AI embedding provider",
-                    error=str(e),
-                )
-
-        # Cohere
-        if settings.cohere_api_key and COHERE_AVAILABLE:
-            try:
-                base_provider = CohereEmbeddings(
-                    model=settings.cohere_embedding_model,
-                    cohere_api_key=settings.cohere_api_key,
-                )
-                
-                # Apply dimensional reduction if enabled
-                if settings.embedding_reduction_enabled:
-                    self._providers["cohere"] = DimensionalReductionEmbeddings(
-                        base_embeddings=base_provider,
-                        target_dim=settings.embedding_reduction_target_dim,
-                        strategy=settings.embedding_reduction_strategy,
-                        reducer_path=settings.embedding_reducer_path,
-                        normalize=settings.embedding_reduction_normalize,
-                    )
-                    logger.info(
-                        "Cohere embedding provider initialized with dimensional reduction",
-                        model=settings.cohere_embedding_model,
-                        target_dim=settings.embedding_reduction_target_dim,
-                    )
-                else:
-                    self._providers["cohere"] = base_provider
-                    logger.info(
-                        "Cohere embedding provider initialized",
-                        model=settings.cohere_embedding_model,
-                    )
-            except Exception as e:
-                logger.warning(
-                    "Failed to initialize Cohere embedding provider",
-                    error=str(e),
-                )
-
-        if not self._providers:
-            logger.warning("No embedding providers available")
-
-    def get_provider(self, provider_name: str) -> Embeddings | None:
+    async def get_provider(self, provider_name: str) -> Embeddings | None:
         """Get embedding provider by name.
 
         Args:
@@ -273,34 +228,83 @@ class EmbeddingService:
         Returns:
             Embedding provider or None if not available
         """
-        return self._providers.get(provider_name)
+        # Check if we already have this provider cached
+        if provider_name in self._providers:
+            return self._providers[provider_name]
+        
+        # Load from registry
+        session = await self._get_session()
+        registry = ModelRegistryService(session)
+        
+        # Get provider by name
+        provider = await registry.get_provider_by_name(provider_name)
+        if not provider or not provider.is_active:
+            logger.warning(f"Provider '{provider_name}' not found or inactive")
+            return None
+        
+        # Get default embedding model for this provider
+        models, _ = await registry.list_models(provider.id, ModelType.EMBEDDING)
+        default_model = None
+        for model in models:
+            if model.is_default and model.is_active:
+                default_model = model
+                break
+        
+        if not default_model:
+            # Get first active model if no default
+            for model in models:
+                if model.is_active:
+                    default_model = model
+                    break
+        
+        if not default_model:
+            logger.warning(f"No active embedding model found for provider '{provider_name}'")
+            return None
+        
+        # Create provider instance
+        instance = await self._create_embedding_provider_instance(provider, default_model)
+        if not instance:
+            logger.warning(f"Failed to create instance for provider '{provider_name}'")
+            return None
+        
+        # Cache the instance
+        self._providers[provider_name] = instance
+        logger.info(f"Initialized embedding provider: {provider_name} with model: {default_model.model_name}")
+        
+        return instance
 
-    def get_default_provider(self) -> Embeddings | None:
+    async def get_default_provider(self) -> Embeddings | None:
         """Get default embedding provider.
 
         Returns:
-            Default embedding provider or None if none available
+            Default embedding provider or None if not available
         """
-        if not self._providers:
+        session = await self._get_session()
+        registry = ModelRegistryService(session)
+        
+        # Get default provider for embeddings
+        provider = await registry.get_default_provider(ModelType.EMBEDDING)
+        if not provider:
+            logger.warning("No default embedding provider configured")
             return None
+        
+        return await self.get_provider(provider.name)
 
-        # Try to get the configured default provider
-        default_provider = settings.default_embedding_provider
-        if default_provider in self._providers:
-            return self._providers[default_provider]
-
-        # Fall back to first available provider
-        return next(iter(self._providers.values()))
-
-    def list_available_providers(self) -> list[str]:
+    async def list_available_providers(self) -> list[str]:
         """List available embedding providers.
 
         Returns:
             List of provider names
         """
-        return list(self._providers.keys())
+        session = await self._get_session()
+        registry = ModelRegistryService(session)
+        
+        providers, _ = await registry.list_providers()
+        active_providers = [p.name for p in providers if p.is_active]
+        
+        return active_providers
 
-    def get_provider_info(self, provider_name: str) -> dict[str, Any]:
+    async def get_provider_info(self, provider_name: str) -> dict[str, Any]:
         """Get information about an embedding provider.
 
         Args:
@@ -309,58 +313,49 @@ class EmbeddingService:
         Returns:
             Provider information
         """
-        provider = self._providers.get(provider_name)
+        session = await self._get_session()
+        registry = ModelRegistryService(session)
+        
+        provider = await registry.get_provider_by_name(provider_name)
         if not provider:
             return {}
-
-        info = {
-            "name": provider_name,
-            "available": True,
-            "class": provider.__class__.__name__,
+        
+        # Get models for this provider
+        models, _ = await registry.list_models(provider.id, ModelType.EMBEDDING)
+        active_models = [m for m in models if m.is_active]
+        
+        return {
+            "name": provider.name,
+            "display_name": provider.display_name,
+            "provider_type": provider.provider_type,
+            "description": provider.description,
+            "is_active": provider.is_active,
+            "is_default": provider.is_default,
+            "models": [
+                {
+                    "name": m.name,
+                    "model_name": m.model_name,
+                    "display_name": m.display_name,
+                    "is_default": m.is_default,
+                    "dimensions": m.dimensions,
+                    "chunk_size": m.chunk_size,
+                    "supports_batch": m.supports_batch,
+                    "max_batch_size": m.max_batch_size,
+                }
+                for m in active_models
+            ],
         }
 
-        # Add provider-specific information
-        if provider_name == "openai":
-            info.update(
-                {
-                    "model": settings.openai_embedding_model,
-                    "dimensions": get_model_dimensions("openai"),
-                    "chunk_size": settings.openai_embedding_chunk_size,
-                }
-            )
-        elif provider_name == "anthropic":
-            info.update(
-                {
-                    "model": getattr(settings, "anthropic_embedding_model", "claude-3-sonnet"),
-                    "dimensions": get_model_dimensions("anthropic"),
-                }
-            )
-        elif provider_name == "google":
-            info.update(
-                {
-                    "model": settings.google_embedding_model,
-                    "dimensions": get_model_dimensions("google"),
-                }
-            )
-        elif provider_name == "cohere":
-            info.update(
-                {
-                    "model": settings.cohere_embedding_model,
-                    "dimensions": get_model_dimensions("cohere"),
-                }
-            )
-
-        return info
-
-    def get_all_provider_info(self) -> dict[str, dict[str, Any]]:
+    async def get_all_provider_info(self) -> dict[str, dict[str, Any]]:
         """Get information for all available providers.
         
         Returns:
             Dictionary mapping provider names to their info
         """
+        providers = await self.list_available_providers()
         all_info = {}
-        for provider_name in self._providers.keys():
-            all_info[provider_name] = self.get_provider_info(provider_name)
+        for provider_name in providers:
+            all_info[provider_name] = await self.get_provider_info(provider_name)
         return all_info
 
     async def generate_embedding(
@@ -382,13 +377,13 @@ class EmbeddingService:
 
         # Get provider
         if provider_name:
-            provider = self.get_provider(provider_name)
+            provider = await self.get_provider(provider_name)
             if not provider:
                 raise EmbeddingError(
                     f"Provider '{provider_name}' not available"
                 ) from None
         else:
-            provider = self.get_default_provider()
+            provider = await self.get_default_provider()
             if not provider:
                 raise EmbeddingError(
                     "No embedding providers available"
@@ -455,13 +450,13 @@ class EmbeddingService:
 
         # Get provider
         if provider_name:
-            provider = self.get_provider(provider_name)
+            provider = await self.get_provider(provider_name)
             if not provider:
                 raise EmbeddingError(
                     f"Provider '{provider_name}' not available"
                 ) from None
         else:
-            provider = self.get_default_provider()
+            provider = await self.get_default_provider()
             if not provider:
                 raise EmbeddingError(
                     "No embedding providers available"

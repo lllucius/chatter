@@ -39,18 +39,20 @@ import {
   Notifications as NotificationsIcon,
   Close as CloseIcon,
   Refresh as RefreshIcon,
+  Storage as ModelsIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
 import { useSSE } from '../services/sse-context';
 import { JobCompletedEvent, JobFailedEvent, JobStartedEvent, BackupCompletedEvent, BackupFailedEvent, BackupStartedEvent } from '../services/sse-types';
+import ModelManagement from './admin/ModelManagement';
 
 const AdministrationPage: React.FC = () => {
   // SSE hook
   const { isConnected, on } = useSSE();
   
-  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users' | 'tools'>('backups');
+  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users' | 'tools' | 'models'>('backups');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'user' | 'tool' | 'backup' | 'plugin' | 'job'>('user');
   const [loading, setLoading] = useState(false);
@@ -658,6 +660,7 @@ const AdministrationPage: React.FC = () => {
         <Tab value="plugins" icon={<PluginIcon />} iconPosition="start" label="Plugins" />
         <Tab value="users" icon={<UsersIcon />} iconPosition="start" label="User Management" />
         <Tab value="tools" icon={<ToolsIcon />} iconPosition="start" label="Tool Servers" />
+        <Tab value="models" icon={<ModelsIcon />} iconPosition="start" label="Model Management" />
       </Tabs>
 
       {/* Backups Tab */}
@@ -971,6 +974,11 @@ const AdministrationPage: React.FC = () => {
             </ListItem>
           </List>
         </Box>
+      )}
+
+      {/* Models Tab */}
+      {activeTab === 'models' && (
+        <ModelManagement />
       )}
 
       {/* Generic Dialog for Adding/Editing */}

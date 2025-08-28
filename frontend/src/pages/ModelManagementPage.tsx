@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -30,14 +30,19 @@ import {
   Refresh as RefreshIcon,
   Star as DefaultIcon,
   StarBorder as NotDefaultIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
 import {
   Provider,
   ProviderCreate,
+  ProviderUpdate,
   ModelDefCreate,
+  ModelDefUpdate,
   ModelDefWithProvider,
   EmbeddingSpaceCreate,
+  EmbeddingSpaceUpdate,
   EmbeddingSpaceWithModel,
   DefaultProvider,
 } from '../sdk';
@@ -61,6 +66,11 @@ const ModelManagementPage: React.FC = () => {
   const [providerDialogOpen, setProviderDialogOpen] = useState(false);
   const [modelDialogOpen, setModelDialogOpen] = useState(false);
   const [spaceDialogOpen, setSpaceDialogOpen] = useState(false);
+
+  // Edit state
+  const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
+  const [editingModel, setEditingModel] = useState<ModelDefWithProvider | null>(null);
+  const [editingSpace, setEditingSpace] = useState<EmbeddingSpaceWithModel | null>(null);
 
   // Forms
   const [providerForm, setProviderForm] = useState<ProviderCreate>({
@@ -131,7 +141,7 @@ const ModelManagementPage: React.FC = () => {
     return [];
   };
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -154,11 +164,11 @@ const ModelManagementPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   // Defaults for dialogs
   useEffect(() => {
@@ -211,6 +221,7 @@ const ModelManagementPage: React.FC = () => {
     try {
       await chatterSDK.modelRegistry.createProviderApiV1ModelsProvidersPost({ providerCreate: providerForm });
       setProviderDialogOpen(false);
+      setEditingProvider(null);
       showSnackbar('Provider created');
       loadData();
     } catch (e: any) {
@@ -223,6 +234,7 @@ const ModelManagementPage: React.FC = () => {
     try {
       await chatterSDK.modelRegistry.createModelApiV1ModelsModelsPost({ modelDefCreate: modelForm });
       setModelDialogOpen(false);
+      setEditingModel(null);
       showSnackbar('Model created');
       loadData();
     } catch (e: any) {
@@ -235,6 +247,7 @@ const ModelManagementPage: React.FC = () => {
     try {
       await chatterSDK.modelRegistry.createEmbeddingSpaceApiV1ModelsEmbeddingSpacesPost({ embeddingSpaceCreate: spaceForm });
       setSpaceDialogOpen(false);
+      setEditingSpace(null);
       showSnackbar('Embedding space created');
       loadData();
     } catch (e: any) {
@@ -287,6 +300,187 @@ const ModelManagementPage: React.FC = () => {
     }
   };
 
+  // Update handlers
+  const handleUpdateProvider = async () => {
+    if (!editingProvider) return;
+    try {
+      const updateData: ProviderUpdate = {
+        display_name: providerForm.display_name,
+        description: providerForm.description,
+        api_key_required: providerForm.api_key_required,
+        base_url: providerForm.base_url,
+        is_active: providerForm.is_active,
+      };
+      await chatterSDK.modelRegistry.updateProviderApiV1ModelsProvidersProviderIdPut({ 
+        providerId: editingProvider.id, 
+        providerUpdate: updateData 
+      });
+      setProviderDialogOpen(false);
+      setEditingProvider(null);
+      showSnackbar('Provider updated');
+      loadData();
+    } catch (e: any) {
+      console.error(e);
+      setError(e?.message || 'Failed to update provider');
+    }
+  };
+
+  const handleUpdateModel = async () => {
+    if (!editingModel) return;
+    try {
+      const updateData: ModelDefUpdate = {
+        display_name: modelForm.display_name,
+        description: modelForm.description,
+        model_name: modelForm.model_name,
+        dimensions: modelForm.dimensions,
+        supports_batch: modelForm.supports_batch,
+        is_active: modelForm.is_active,
+      };
+      await chatterSDK.modelRegistry.updateModelApiV1ModelsModelsModelIdPut({ 
+        modelId: editingModel.id, 
+        modelDefUpdate: updateData 
+      });
+      setModelDialogOpen(false);
+      setEditingModel(null);
+      showSnackbar('Model updated');
+      loadData();
+    } catch (e: any) {
+      console.error(e);
+      setError(e?.message || 'Failed to update model');
+    }
+  };
+
+  const handleUpdateSpace = async () => {
+    if (!editingSpace) return;
+    try {
+      const updateData: EmbeddingSpaceUpdate = {
+        display_name: spaceForm.display_name,
+        description: spaceForm.description,
+        reduction_strategy: spaceForm.reduction_strategy,
+        normalize_vectors: spaceForm.normalize_vectors,
+        distance_metric: spaceForm.distance_metric,
+        is_active: spaceForm.is_active,
+      };
+      await chatterSDK.modelRegistry.updateEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdPut({ 
+        spaceId: editingSpace.id, 
+        embeddingSpaceUpdate: updateData 
+      });
+      setSpaceDialogOpen(false);
+      setEditingSpace(null);
+      showSnackbar('Embedding space updated');
+      loadData();
+    } catch (e: any) {
+      console.error(e);
+      setError(e?.message || 'Failed to update embedding space');
+    }
+  };
+
+  // Delete handlers
+  const handleDeleteProvider = async (provider: Provider) => {
+    if (window.confirm(`Are you sure you want to delete provider "${provider.display_name}"?`)) {
+      try {
+        await chatterSDK.modelRegistry.deleteProviderApiV1ModelsProvidersProviderIdDelete({ providerId: provider.id });
+        showSnackbar('Provider deleted');
+        loadData();
+      } catch (e: any) {
+        console.error(e);
+        setError(e?.message || 'Failed to delete provider');
+      }
+    }
+  };
+
+  const handleDeleteModel = async (model: ModelDefWithProvider) => {
+    if (window.confirm(`Are you sure you want to delete model "${model.display_name}"?`)) {
+      try {
+        await chatterSDK.modelRegistry.deleteModelApiV1ModelsModelsModelIdDelete({ modelId: model.id });
+        showSnackbar('Model deleted');
+        loadData();
+      } catch (e: any) {
+        console.error(e);
+        setError(e?.message || 'Failed to delete model');
+      }
+    }
+  };
+
+  const handleDeleteSpace = async (space: EmbeddingSpaceWithModel) => {
+    if (window.confirm(`Are you sure you want to delete embedding space "${space.display_name}"?`)) {
+      try {
+        await chatterSDK.modelRegistry.deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete({ spaceId: space.id });
+        showSnackbar('Embedding space deleted');
+        loadData();
+      } catch (e: any) {
+        console.error(e);
+        setError(e?.message || 'Failed to delete embedding space');
+      }
+    }
+  };
+
+  // Dialog close handlers
+  const handleProviderDialogClose = () => {
+    setProviderDialogOpen(false);
+    setEditingProvider(null);
+  };
+
+  const handleModelDialogClose = () => {
+    setModelDialogOpen(false);
+    setEditingModel(null);
+  };
+
+  const handleSpaceDialogClose = () => {
+    setSpaceDialogOpen(false);
+    setEditingSpace(null);
+  };
+
+  // Edit handlers
+  const handleEditProvider = (provider: Provider) => {
+    setEditingProvider(provider);
+    setProviderForm({
+      name: provider.name,
+      provider_type: provider.provider_type,
+      display_name: provider.display_name,
+      description: provider.description || '',
+      api_key_required: provider.api_key_required,
+      base_url: provider.base_url || '',
+      is_active: provider.is_active,
+    });
+    setProviderDialogOpen(true);
+  };
+
+  const handleEditModel = (model: ModelDefWithProvider) => {
+    setEditingModel(model);
+    setModelForm({
+      provider_id: model.provider_id,
+      name: model.name,
+      model_type: model.model_type,
+      display_name: model.display_name,
+      description: model.description || '',
+      model_name: model.model_name,
+      dimensions: model.dimensions,
+      supports_batch: model.supports_batch,
+      is_active: model.is_active,
+    });
+    setModelDialogOpen(true);
+  };
+
+  const handleEditSpace = (space: EmbeddingSpaceWithModel) => {
+    setEditingSpace(space);
+    setSpaceForm({
+      model_id: space.model_id,
+      name: space.name,
+      display_name: space.display_name,
+      description: space.description || '',
+      base_dimensions: space.base_dimensions,
+      effective_dimensions: space.effective_dimensions,
+      reduction_strategy: space.reduction_strategy,
+      distance_metric: space.distance_metric,
+      table_name: space.table_name,
+      index_type: space.index_type,
+      normalize_vectors: space.normalize_vectors,
+      is_active: space.is_active,
+    });
+    setSpaceDialogOpen(true);
+  };
+
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
@@ -330,7 +524,19 @@ const ModelManagementPage: React.FC = () => {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
-              onClick={() => setProviderDialogOpen(true)}
+              onClick={() => {
+                setEditingProvider(null);
+                setProviderForm({
+                  name: '',
+                  provider_type: 'openai',
+                  display_name: '',
+                  description: '',
+                  api_key_required: true,
+                  base_url: '',
+                  is_active: true,
+                });
+                setProviderDialogOpen(true);
+              }}
             >
               Add Provider
             </Button>
@@ -386,22 +592,34 @@ const ModelManagementPage: React.FC = () => {
                     }
                   />
                   <ListItemSecondaryAction>
-                    {!p.is_default && (
-                      <Tooltip title="Set as default">
-                        <IconButton onClick={() => handleSetDefaultProvider(p.id)}>
-                          <NotDefaultIcon />
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Tooltip title="Edit provider">
+                        <IconButton onClick={() => handleEditProvider(p)}>
+                          <EditIcon />
                         </IconButton>
                       </Tooltip>
-                    )}
-                    {p.is_default && (
-                      <Tooltip title="Default provider">
-                        <span>
-                          <IconButton disabled>
-                            <DefaultIcon color="primary" />
-                          </IconButton>
-                        </span>
+                      <Tooltip title="Delete provider">
+                        <IconButton onClick={() => handleDeleteProvider(p)}>
+                          <DeleteIcon />
+                        </IconButton>
                       </Tooltip>
-                    )}
+                      {!p.is_default && (
+                        <Tooltip title="Set as default">
+                          <IconButton onClick={() => handleSetDefaultProvider(p.id)}>
+                            <NotDefaultIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {p.is_default && (
+                        <Tooltip title="Default provider">
+                          <span>
+                            <IconButton disabled>
+                              <DefaultIcon color="primary" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
+                    </Box>
                   </ListItemSecondaryAction>
                 </ListItem>
               ))}
@@ -417,7 +635,21 @@ const ModelManagementPage: React.FC = () => {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
-              onClick={() => setModelDialogOpen(true)}
+              onClick={() => {
+                setEditingModel(null);
+                setModelForm({
+                  provider_id: providers[0]?.id || '',
+                  name: '',
+                  model_type: 'embedding',
+                  display_name: '',
+                  description: '',
+                  model_name: '',
+                  dimensions: 1536,
+                  supports_batch: true,
+                  is_active: true,
+                });
+                setModelDialogOpen(true);
+              }}
               disabled={providers.length === 0}
             >
               Add Model
@@ -489,22 +721,34 @@ const ModelManagementPage: React.FC = () => {
                     }
                   />
                   <ListItemSecondaryAction>
-                    {!m.is_default && (
-                      <Tooltip title="Set as default">
-                        <IconButton onClick={() => handleSetDefaultModel(m.id)}>
-                          <NotDefaultIcon />
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Tooltip title="Edit model">
+                        <IconButton onClick={() => handleEditModel(m)}>
+                          <EditIcon />
                         </IconButton>
                       </Tooltip>
-                    )}
-                    {m.is_default && (
-                      <Tooltip title="Default model">
-                        <span>
-                          <IconButton disabled>
-                            <DefaultIcon color="primary" />
-                          </IconButton>
-                        </span>
+                      <Tooltip title="Delete model">
+                        <IconButton onClick={() => handleDeleteModel(m)}>
+                          <DeleteIcon />
+                        </IconButton>
                       </Tooltip>
-                    )}
+                      {!m.is_default && (
+                        <Tooltip title="Set as default">
+                          <IconButton onClick={() => handleSetDefaultModel(m.id)}>
+                            <NotDefaultIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {m.is_default && (
+                        <Tooltip title="Default model">
+                          <span>
+                            <IconButton disabled>
+                              <DefaultIcon color="primary" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
+                    </Box>
                   </ListItemSecondaryAction>
                 </ListItem>
               ))}
@@ -520,7 +764,25 @@ const ModelManagementPage: React.FC = () => {
             <Button
               variant="contained"
               startIcon={<AddIcon />}
-              onClick={() => setSpaceDialogOpen(true)}
+              onClick={() => {
+                const firstEmbedding = embeddingModels[0];
+                setEditingSpace(null);
+                setSpaceForm({
+                  model_id: firstEmbedding?.id || '',
+                  name: '',
+                  display_name: '',
+                  description: '',
+                  base_dimensions: firstEmbedding?.dimensions || 1536,
+                  effective_dimensions: firstEmbedding?.dimensions || 1536,
+                  reduction_strategy: 'none',
+                  distance_metric: 'cosine',
+                  table_name: '',
+                  index_type: 'hnsw',
+                  normalize_vectors: true,
+                  is_active: true,
+                });
+                setSpaceDialogOpen(true);
+              }}
               disabled={embeddingModels.length === 0}
             >
               Add Embedding Space
@@ -596,22 +858,34 @@ const ModelManagementPage: React.FC = () => {
                     }
                   />
                   <ListItemSecondaryAction>
-                    {!s.is_default && (
-                      <Tooltip title="Set as default">
-                        <IconButton onClick={() => handleSetDefaultSpace(s.id)}>
-                          <NotDefaultIcon />
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Tooltip title="Edit embedding space">
+                        <IconButton onClick={() => handleEditSpace(s)}>
+                          <EditIcon />
                         </IconButton>
                       </Tooltip>
-                    )}
-                    {s.is_default && (
-                      <Tooltip title="Default space">
-                        <span>
-                          <IconButton disabled>
-                            <DefaultIcon color="primary" />
-                          </IconButton>
-                        </span>
+                      <Tooltip title="Delete embedding space">
+                        <IconButton onClick={() => handleDeleteSpace(s)}>
+                          <DeleteIcon />
+                        </IconButton>
                       </Tooltip>
-                    )}
+                      {!s.is_default && (
+                        <Tooltip title="Set as default">
+                          <IconButton onClick={() => handleSetDefaultSpace(s.id)}>
+                            <NotDefaultIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
+                      {s.is_default && (
+                        <Tooltip title="Default space">
+                          <span>
+                            <IconButton disabled>
+                              <DefaultIcon color="primary" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      )}
+                    </Box>
                   </ListItemSecondaryAction>
                 </ListItem>
               ))}
@@ -621,8 +895,8 @@ const ModelManagementPage: React.FC = () => {
       )}
 
       {/* Provider Dialog */}
-      <Dialog open={providerDialogOpen} onClose={() => setProviderDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Provider</DialogTitle>
+      <Dialog open={providerDialogOpen} onClose={handleProviderDialogClose} maxWidth="sm" fullWidth>
+        <DialogTitle>{editingProvider ? 'Edit Provider' : 'Add Provider'}</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
@@ -688,14 +962,16 @@ const ModelManagementPage: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setProviderDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreateProvider}>Create Provider</Button>
+          <Button onClick={handleProviderDialogClose}>Cancel</Button>
+          <Button variant="contained" onClick={editingProvider ? handleUpdateProvider : handleCreateProvider}>
+            {editingProvider ? 'Update Provider' : 'Create Provider'}
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Model Dialog */}
-      <Dialog open={modelDialogOpen} onClose={() => setModelDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Model</DialogTitle>
+      <Dialog open={modelDialogOpen} onClose={handleModelDialogClose} maxWidth="sm" fullWidth>
+        <DialogTitle>{editingModel ? 'Edit Model' : 'Add Model'}</DialogTitle>
         <DialogContent>
           <TextField
             select
@@ -793,14 +1069,16 @@ const ModelManagementPage: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setModelDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreateModel}>Create Model</Button>
+          <Button onClick={handleModelDialogClose}>Cancel</Button>
+          <Button variant="contained" onClick={editingModel ? handleUpdateModel : handleCreateModel}>
+            {editingModel ? 'Update Model' : 'Create Model'}
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Embedding Space Dialog */}
-      <Dialog open={spaceDialogOpen} onClose={() => setSpaceDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Embedding Space</DialogTitle>
+      <Dialog open={spaceDialogOpen} onClose={handleSpaceDialogClose} maxWidth="sm" fullWidth>
+        <DialogTitle>{editingSpace ? 'Edit Embedding Space' : 'Add Embedding Space'}</DialogTitle>
         <DialogContent>
           <TextField
             select
@@ -949,8 +1227,10 @@ const ModelManagementPage: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setSpaceDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleCreateSpace}>Create Embedding Space</Button>
+          <Button onClick={handleSpaceDialogClose}>Cancel</Button>
+          <Button variant="contained" onClick={editingSpace ? handleUpdateSpace : handleCreateSpace}>
+            {editingSpace ? 'Update Embedding Space' : 'Create Embedding Space'}
+          </Button>
         </DialogActions>
       </Dialog>
 

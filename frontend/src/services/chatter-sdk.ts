@@ -25,6 +25,7 @@ import {
   UserLogin,
   UserCreate,
   ChatRequest,
+  ModelRegistryApi,
 } from '../sdk';
 
 type StoredAuth = {
@@ -56,6 +57,7 @@ export class ChatterSDK {
   public plugins: PluginsApi;
   public health: HealthApi;
   public jobs: JobsApi;
+  public modelRegistry: ModelRegistryApi;
 
   constructor(baseURL: string = 'http://localhost:8000') {
     this.baseURL = baseURL;
@@ -82,6 +84,7 @@ export class ChatterSDK {
     this.plugins = new PluginsApi(this.configuration);
     this.health = new HealthApi(this.configuration);
     this.jobs = new JobsApi(this.configuration);
+    this.modelRegistry = new ModelRegistryApi(this.configuration);
 
     // Keep auth in sync across tabs/windows
     window.addEventListener('storage', this.onStorageChange);
@@ -162,6 +165,7 @@ export class ChatterSDK {
     this.plugins = new PluginsApi(this.configuration);
     this.health = new HealthApi(this.configuration);
     this.jobs = new JobsApi(this.configuration);
+    this.modelRegistry = new ModelRegistryApi(this.configuration);
   }
 
   /**

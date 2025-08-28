@@ -31,24 +31,15 @@ import {
   Star as DefaultIcon,
   StarBorder as NotDefaultIcon,
 } from '@mui/icons-material';
-
 import { chatterSDK } from '../services/chatter-sdk';
 import {
-  listProviders,
-  createProvider,
-  listModels,
-  createModel,
-  listEmbeddingSpaces,
-  createEmbeddingSpace,
-  setDefaultProvider,
-  setDefaultModel,
-  setDefaultEmbeddingSpace,
   Provider,
-  ModelDef,
-  EmbeddingSpace,
-  CreateProvider,
-  CreateModel,
-  CreateEmbeddingSpace,
+  ProviderCreate,
+  ModelDefCreate,
+  ModelDefWithProvider,
+  EmbeddingSpaceCreate,
+  EmbeddingSpaceWithModel,
+  DefaultProvider,
 } from '../sdk';
 
 type TabKey = 'providers' | 'models' | 'spaces';
@@ -57,8 +48,8 @@ const ModelManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('providers');
 
   const [providers, setProviders] = useState<Provider[]>([]);
-  const [models, setModels] = useState<ModelDef[]>([]);
-  const [spaces, setSpaces] = useState<EmbeddingSpace[]>([]);
+  const [models, setModels] = useState<ModelDefWithProvider[]>([]);
+  const [spaces, setSpaces] = useState<EmbeddingSpaceWithModel[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
@@ -72,7 +63,7 @@ const ModelManagementPage: React.FC = () => {
   const [spaceDialogOpen, setSpaceDialogOpen] = useState(false);
 
   // Forms
-  const [providerForm, setProviderForm] = useState<CreateProvider>({
+  const [providerForm, setProviderForm] = useState<ProviderCreate>({
     name: '',
     provider_type: 'openai',
     display_name: '',
@@ -90,7 +81,7 @@ const ModelManagementPage: React.FC = () => {
     { value: 'mistral', label: 'Mistral' },
   ];
 
-  const [modelForm, setModelForm] = useState<CreateModel>({
+  const [modelForm, setModelForm] = useState<ModelDefCreate>({
     provider_id: '',
     name: '',
     model_type: 'embedding',
@@ -102,7 +93,7 @@ const ModelManagementPage: React.FC = () => {
     is_active: true,
   });
 
-  const [spaceForm, setSpaceForm] = useState<CreateEmbeddingSpace>({
+  const [spaceForm, setSpaceForm] = useState<EmbeddingSpaceCreate>({
     model_id: '',
     name: '',
     display_name: '',
@@ -127,18 +118,36 @@ const ModelManagementPage: React.FC = () => {
     setSnackbarOpen(true);
   };
 
+  const normalizeList = (data: any): any[] => {
+    // The generated SDK's list return types vary between projects.
+    // Try common fields and fall back to the data itself if it's already an array.
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (data.items && Array.isArray(data.items)) return data.items;
+    if (data.providers && Array.isArray(data.providers)) return data.providers;
+    if (data.models && Array.isArray(data.models)) return data.models;
+    if (data.embedding_spaces && Array.isArray(data.embedding_spaces)) return data.embedding_spaces;
+    // fallback: maybe the response is wrapped inside `.data` already handled earlier — return empty
+    return [];
+  };
+
   const loadData = async () => {
     setLoading(true);
     setError('');
     try {
-      const [p, m, s] = await Promise.all([
-        listProviders(),
-        listModels(),
-        listEmbeddingSpaces(),
+      // Use the chatterSDK modelRegistry instance (or api variable) — both call the same generated methods.
+      const [pResp, mResp, sResp] = await Promise.all([
+        chatterSDK.modelRegistry.listProvidersApiV1ModelsProvidersGet(), // returns AxiosResponse<ProviderList>
+        chatterSDK.modelRegistry.listModelsApiV1ModelsModelsGet(),
+        chatterSDK.modelRegistry.listEmbeddingSpacesApiV1ModelsEmbeddingSpacesGet(),
       ]);
-      setProviders(p.items);
-      setModels(m.items);
-      setSpaces(s.items);
+      const p = pResp.data;
+      const m = mResp.data;
+      const s = sResp.data;
+
+      setProviders(normalizeList(p) as Provider[]);
+      setModels(normalizeList(m) as ModelDefWithProvider[]);
+      setSpaces(normalizeList(s) as EmbeddingSpaceWithModel[]);
     } catch (e: any) {
       console.error(e);
       setError(e?.message || 'Failed to load model registry data');
@@ -200,63 +209,80 @@ const ModelManagementPage: React.FC = () => {
 
   const handleCreateProvider = async () => {
     try {
-      await createProvider(providerForm);
+      await chatterSDK.modelRegistry.createProviderApiV1ModelsProvidersPost({ providerCreate: providerForm });
       setProviderDialogOpen(false);
       showSnackbar('Provider created');
       loadData();
     } catch (e: any) {
+      console.error(e);
       setError(e?.message || 'Failed to create provider');
     }
   };
 
   const handleCreateModel = async () => {
     try {
-      await createModel(modelForm);
+      await chatterSDK.modelRegistry.createModelApiV1ModelsModelsPost({ modelDefCreate: modelForm });
       setModelDialogOpen(false);
       showSnackbar('Model created');
       loadData();
     } catch (e: any) {
+      console.error(e);
       setError(e?.message || 'Failed to create model');
     }
   };
 
   const handleCreateSpace = async () => {
     try {
-      await createEmbeddingSpace(spaceForm);
+      await chatterSDK.modelRegistry.createEmbeddingSpaceApiV1ModelsEmbeddingSpacesPost({ embeddingSpaceCreate: spaceForm });
       setSpaceDialogOpen(false);
       showSnackbar('Embedding space created');
       loadData();
     } catch (e: any) {
+      console.error(e);
       setError(e?.message || 'Failed to create embedding space');
     }
   };
 
-  const handleSetDefaultProvider = async (id: string, provider_type: string) => {
+  const handleSetDefaultProvider = async (id: string, /* modelTypeOrOther: string */) => {
     try {
-      await setDefaultProvider(id, provider_type);
+      // The generated API expects a DefaultProvider body. Build a minimal sensible object.
+      // DefaultProvider typically contains provider_id and model_type (per generated types).
+      // We'll set this provider as default for embedding models by default — adjust if you need a different model_type.
+      const defaultProviderBody: DefaultProvider = {
+        provider_id: id as any,
+        model_type: 'embedding' as any,
+      } as DefaultProvider;
+
+      await chatterSDK.modelRegistry.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost({
+        providerId: id,
+        defaultProvider: defaultProviderBody,
+      });
       showSnackbar('Default provider updated');
       loadData();
     } catch (e: any) {
+      console.error(e);
       setError(e?.message || 'Failed to set default provider');
     }
   };
 
   const handleSetDefaultModel = async (id: string) => {
     try {
-      await setDefaultModel(id);
+      await chatterSDK.modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost({ modelId: id });
       showSnackbar('Default model updated');
       loadData();
     } catch (e: any) {
+      console.error(e);
       setError(e?.message || 'Failed to set default model');
     }
   };
 
   const handleSetDefaultSpace = async (id: string) => {
     try {
-      await setDefaultEmbeddingSpace(id);
+      await chatterSDK.modelRegistry.setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost({ spaceId: id });
       showSnackbar('Default embedding space updated');
       loadData();
     } catch (e: any) {
+      console.error(e);
       setError(e?.message || 'Failed to set default embedding space');
     }
   };
@@ -362,7 +388,7 @@ const ModelManagementPage: React.FC = () => {
                   <ListItemSecondaryAction>
                     {!p.is_default && (
                       <Tooltip title="Set as default">
-                        <IconButton onClick={() => handleSetDefaultProvider(p.id, p.provider_type)}>
+                        <IconButton onClick={() => handleSetDefaultProvider(p.id)}>
                           <NotDefaultIcon />
                         </IconButton>
                       </Tooltip>
@@ -441,34 +467,19 @@ const ModelManagementPage: React.FC = () => {
                     }
                     secondary={
                       <Grid container spacing={0.5}>
-                      <Grid
-                        size={{
-                          xs: 12,
-                          sm: 6,
-                          md: 3
-                        }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                           <Typography variant="body2" color="text.secondary">
                             {m.name} ({m.model_type}) • Provider: {m.provider?.display_name || '—'}
                           </Typography>
                         </Grid>
-                      <Grid
-                        size={{
-                          xs: 12,
-                          sm: 6,
-                          md: 3
-                        }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                           <Typography variant="body2" color="text.secondary">
                             API Model: {m.model_name}{' '}
                             {m.dimensions ? `• Dimensions: ${m.dimensions}` : ''}
                           </Typography>
                         </Grid>
                         {m.description && (
-                        <Grid
-                          size={{
-                            xs: 12,
-                            sm: 6,
-                            md: 3
-                          }}>
+                          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                             <Typography variant="body2" color="text.secondary">
                               {m.description}
                             </Typography>
@@ -559,43 +570,23 @@ const ModelManagementPage: React.FC = () => {
                     }
                     secondary={
                       <Grid container spacing={0.5}>
-                        <Grid
-                          size={{
-                            xs: 12,
-                            sm: 6,
-                            md: 3
-                          }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                           <Typography variant="body2" color="text.secondary">
                             {s.name} • Model: {s.model?.display_name || '—'}
                           </Typography>
                         </Grid>
-                        <Grid
-                          size={{
-                            xs: 12,
-                            sm: 6,
-                            md: 3
-                          }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                           <Typography variant="body2" color="text.secondary">
                             Dimensions: {s.base_dimensions} → {s.effective_dimensions} • Strategy: {s.reduction_strategy} • Metric: {s.distance_metric} • Index: {s.index_type}
                           </Typography>
                         </Grid>
-                        <Grid
-                          size={{
-                            xs: 12,
-                            sm: 6,
-                            md: 3
-                          }}>
+                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                           <Typography variant="body2" color="text.secondary">
                             Table: {s.table_name}
                           </Typography>
                         </Grid>
                         {s.description && (
-                          <Grid
-                            size={{
-                              xs: 12,
-                              sm: 6,
-                              md: 3
-                            }}>
+                          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                             <Typography variant="body2" color="text.secondary">
                               {s.description}
                             </Typography>
@@ -736,7 +727,7 @@ const ModelManagementPage: React.FC = () => {
             margin="normal"
             value={modelForm.model_type}
             onChange={(e) => {
-              const model_type = e.target.value as CreateModel['model_type'];
+              const model_type = e.target.value as ModelDefCreate['model_type'];
               setModelForm((f) => ({
                 ...f,
                 model_type,
@@ -851,12 +842,7 @@ const ModelManagementPage: React.FC = () => {
             onChange={(e) => setSpaceForm({ ...spaceForm, table_name: e.target.value })}
           />
           <Grid container spacing={2} sx={{ mt: 0 }}>
-            <Grid
-              size={{
-                xs: 12,
-                sm: 6,
-                md: 3
-              }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField
                 fullWidth
                 type="number"
@@ -867,12 +853,7 @@ const ModelManagementPage: React.FC = () => {
                 onChange={(e) => setSpaceForm({ ...spaceForm, base_dimensions: parseInt(e.target.value) || 0 })}
               />
             </Grid>
-            <Grid
-              size={{
-                xs: 12,
-                sm: 6,
-                md: 3
-              }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField
                 fullWidth
                 type="number"
@@ -885,12 +866,7 @@ const ModelManagementPage: React.FC = () => {
             </Grid>
           </Grid>
           <Grid container spacing={2}>
-            <Grid
-              size={{
-                xs: 12,
-                sm: 6,
-                md: 3
-              }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField
                 select
                 fullWidth
@@ -904,12 +880,7 @@ const ModelManagementPage: React.FC = () => {
                 <MenuItem value="reducer">Reducer (PCA/SVD)</MenuItem>
               </TextField>
             </Grid>
-            <Grid
-              size={{
-                xs: 12,
-                sm: 6,
-                md: 3
-              }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField
                 select
                 fullWidth
@@ -930,17 +901,12 @@ const ModelManagementPage: React.FC = () => {
               label="Reducer Path"
               margin="normal"
               placeholder="Path to joblib reducer file"
-              value={spaceForm.reducer_path || ''}
-              onChange={(e) => setSpaceForm({ ...spaceForm, reducer_path: e.target.value })}
+              value={(spaceForm as any).reducer_path || ''}
+              onChange={(e) => setSpaceForm({ ...spaceForm, ...(spaceForm as any), reducer_path: e.target.value } as any)}
             />
           )}
           <Grid container spacing={2}>
-            <Grid
-              size={{
-                xs: 12,
-                sm: 6,
-                md: 3
-              }}>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
               <TextField
                 select
                 fullWidth

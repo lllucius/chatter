@@ -32,6 +32,7 @@ import {
   StarBorder as NotDefaultIcon,
 } from '@mui/icons-material';
 
+import { chatterSDK } from '../services/chatter-sdk';
 import {
   listProviders,
   createProvider,
@@ -48,7 +49,7 @@ import {
   CreateProvider,
   CreateModel,
   CreateEmbeddingSpace,
-} from '../api/modelRegistry';
+} from '../sdk';
 
 type TabKey = 'providers' | 'models' | 'spaces';
 

@@ -7,7 +7,7 @@
 export * from './api';
 
 // Export all models
-//export * from './models';
+export * from './models';
 
 // Export configuration and base types
 export { Configuration } from './configuration';

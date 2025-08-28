@@ -32,17 +32,19 @@ def generate_typescript_sdk():
     with open(temp_spec_path, "w", encoding="utf-8") as f:
         json.dump(spec, f, indent=2, ensure_ascii=False)
 
-#        "modelPackage": "models"
     # Configuration for the SDK generation
     config = {
+        "basePath": "http://localhost:8000",
         "npmName": "chatter-sdk",
         "npmVersion": spec.get("info", {}).get("version", "0.1.0"),
         "npmRepository": "https://github.com/lllucius/chatter",
         "npmDescription": "TypeScript SDK for Chatter AI Chatbot API",
         "apiPackage": "api",
+        "modelPackage": "models",
         "withInterfaces": True,
         "useSingleRequestParameter": True,
         "supportsES6": True,
+        "withSeparateModelsAndApi": True,
         "enumNameSuffix": "",
         "enumPropertyNaming": "original",
     }
@@ -158,7 +160,7 @@ export * from './api';
 export * from './models';
 
 // Export configuration and base types
-export { Configuration, ConfigurationParameters } from './configuration';
+export { Configuration } from './configuration';
 export { BaseAPI } from './base';
 '''
 

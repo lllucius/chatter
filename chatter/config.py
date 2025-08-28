@@ -250,6 +250,35 @@ class Settings(BaseSettings):
     )
 
     # =============================================================================
+    # EMBEDDING DIMENSIONAL REDUCTION SETTINGS
+    # =============================================================================
+    
+    # Enable dimensional reduction for embeddings
+    embedding_reduction_enabled: bool = Field(
+        default=False, description="Enable dimensional reduction for embeddings"
+    )
+    
+    # Target dimension after reduction
+    embedding_reduction_target_dim: int = Field(
+        default=1536, description="Target dimensions after reduction"
+    )
+    
+    # Reduction strategy: "reducer" (PCA/SVD) or "truncate" (simple truncation)
+    embedding_reduction_strategy: str = Field(
+        default="truncate", description="Dimensional reduction strategy"
+    )
+    
+    # Path to fitted reducer (joblib file)
+    embedding_reducer_path: str | None = Field(
+        default=None, description="Path to fitted dimensional reducer"
+    )
+    
+    # Whether to L2-normalize vectors after reduction
+    embedding_reduction_normalize: bool = Field(
+        default=True, description="Normalize vectors after dimensional reduction"
+    )
+
+    # =============================================================================
     # AUTHENTICATION & SECURITY
     # =============================================================================
 

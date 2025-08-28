@@ -3,6 +3,7 @@
 import hashlib
 import time
 from typing import Any
+import numpy as np
 
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
@@ -31,12 +32,103 @@ except ImportError:
     CohereEmbeddings = None
     COHERE_AVAILABLE = False
 
+try:
+    import joblib
+    JOBLIB_AVAILABLE = True
+except ImportError:
+    JOBLIB_AVAILABLE = False
+
 from chatter.config import get_settings
 from chatter.core.dynamic_embeddings import get_model_dimensions
 from chatter.utils.logging import get_logger
 
 settings = get_settings()
 logger = get_logger(__name__)
+
+
+class DimensionalReductionEmbeddings(Embeddings):
+    """Embedding wrapper that supports optional dimensional reduction."""
+    
+    def __init__(
+        self,
+        base_embeddings: Embeddings,
+        target_dim: int,
+        strategy: str = "truncate",
+        reducer_path: str | None = None,
+        normalize: bool = True,
+    ):
+        """Initialize dimensional reduction wrapper.
+        
+        Args:
+            base_embeddings: Base embedding provider
+            target_dim: Target dimension after reduction
+            strategy: "truncate" for simple truncation, "reducer" for fitted reducer
+            reducer_path: Path to joblib reducer file (required for "reducer" strategy)
+            normalize: Whether to L2-normalize vectors after reduction
+        """
+        self.base = base_embeddings
+        self.target_dim = target_dim
+        self.strategy = strategy
+        self.normalize = normalize
+        self.reducer = None
+        
+        if strategy == "reducer":
+            if not reducer_path:
+                raise ValueError("reducer_path required for 'reducer' strategy")
+            if not JOBLIB_AVAILABLE:
+                raise ImportError("joblib required for dimensional reduction")
+            
+            try:
+                self.reducer = joblib.load(reducer_path)
+                logger.info(
+                    "Loaded dimensional reducer",
+                    reducer_path=reducer_path,
+                    target_dim=target_dim
+                )
+            except Exception as e:
+                logger.error(
+                    "Failed to load dimensional reducer",
+                    reducer_path=reducer_path,
+                    error=str(e)
+                )
+                raise
+    
+    def _reduce_vector(self, vector: list[float]) -> list[float]:
+        """Apply dimensional reduction to a single vector."""
+        if self.strategy == "truncate":
+            # Simple truncation to target dimension
+            reduced = vector[:self.target_dim]
+            # Pad with zeros if vector is shorter than target
+            if len(reduced) < self.target_dim:
+                reduced.extend([0.0] * (self.target_dim - len(reduced)))
+        elif self.strategy == "reducer":
+            # Use fitted reducer (PCA/SVD)
+            if self.reducer is None:
+                raise RuntimeError("Reducer not loaded")
+            
+            vector_array = np.array(vector).reshape(1, -1)
+            reduced_array = self.reducer.transform(vector_array)[0]
+            reduced = reduced_array.tolist()
+        else:
+            raise ValueError(f"Unknown reduction strategy: {self.strategy}")
+        
+        # L2 normalize if requested
+        if self.normalize:
+            norm = np.linalg.norm(reduced)
+            if norm > 0:
+                reduced = (np.array(reduced) / norm).tolist()
+        
+        return reduced
+    
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        """Embed documents and apply dimensional reduction."""
+        base_embeddings = self.base.embed_documents(texts)
+        return [self._reduce_vector(embedding) for embedding in base_embeddings]
+    
+    def embed_query(self, text: str) -> list[float]:
+        """Embed query and apply dimensional reduction."""
+        base_embedding = self.base.embed_query(text)
+        return self._reduce_vector(base_embedding)
 
 
 class EmbeddingService:
@@ -52,16 +144,34 @@ class EmbeddingService:
         # OpenAI
         if settings.openai_api_key:
             try:
-                self._providers["openai"] = OpenAIEmbeddings(
+                base_provider = OpenAIEmbeddings(
                     api_key=settings.openai_api_key,
                     base_url=settings.openai_base_url,
                     model=settings.openai_embedding_model,
                     chunk_size=settings.openai_embedding_chunk_size,
                 )
-                logger.info(
-                    "OpenAI embedding provider initialized",
-                    model=settings.openai_embedding_model,
-                )
+                
+                # Apply dimensional reduction if enabled
+                if settings.embedding_reduction_enabled:
+                    self._providers["openai"] = DimensionalReductionEmbeddings(
+                        base_embeddings=base_provider,
+                        target_dim=settings.embedding_reduction_target_dim,
+                        strategy=settings.embedding_reduction_strategy,
+                        reducer_path=settings.embedding_reducer_path,
+                        normalize=settings.embedding_reduction_normalize,
+                    )
+                    logger.info(
+                        "OpenAI embedding provider initialized with dimensional reduction",
+                        model=settings.openai_embedding_model,
+                        target_dim=settings.embedding_reduction_target_dim,
+                        strategy=settings.embedding_reduction_strategy,
+                    )
+                else:
+                    self._providers["openai"] = base_provider
+                    logger.info(
+                        "OpenAI embedding provider initialized",
+                        model=settings.openai_embedding_model,
+                    )
             except Exception as e:
                 logger.warning(
                     "Failed to initialize OpenAI embedding provider",
@@ -86,16 +196,31 @@ class EmbeddingService:
         # Google Generative AI
         if settings.google_api_key and GOOGLE_AVAILABLE:
             try:
-                self._providers[
-                    "google"
-                ] = GoogleGenerativeAIEmbeddings(
+                base_provider = GoogleGenerativeAIEmbeddings(
                     model=settings.google_embedding_model,
                     google_api_key=settings.google_api_key,
                 )
-                logger.info(
-                    "Google Generative AI embedding provider initialized",
-                    model=settings.google_embedding_model,
-                )
+                
+                # Apply dimensional reduction if enabled
+                if settings.embedding_reduction_enabled:
+                    self._providers["google"] = DimensionalReductionEmbeddings(
+                        base_embeddings=base_provider,
+                        target_dim=settings.embedding_reduction_target_dim,
+                        strategy=settings.embedding_reduction_strategy,
+                        reducer_path=settings.embedding_reducer_path,
+                        normalize=settings.embedding_reduction_normalize,
+                    )
+                    logger.info(
+                        "Google Generative AI embedding provider initialized with dimensional reduction",
+                        model=settings.google_embedding_model,
+                        target_dim=settings.embedding_reduction_target_dim,
+                    )
+                else:
+                    self._providers["google"] = base_provider
+                    logger.info(
+                        "Google Generative AI embedding provider initialized",
+                        model=settings.google_embedding_model,
+                    )
             except Exception as e:
                 logger.warning(
                     "Failed to initialize Google Generative AI embedding provider",
@@ -105,14 +230,31 @@ class EmbeddingService:
         # Cohere
         if settings.cohere_api_key and COHERE_AVAILABLE:
             try:
-                self._providers["cohere"] = CohereEmbeddings(
+                base_provider = CohereEmbeddings(
                     model=settings.cohere_embedding_model,
                     cohere_api_key=settings.cohere_api_key,
                 )
-                logger.info(
-                    "Cohere embedding provider initialized",
-                    model=settings.cohere_embedding_model,
-                )
+                
+                # Apply dimensional reduction if enabled
+                if settings.embedding_reduction_enabled:
+                    self._providers["cohere"] = DimensionalReductionEmbeddings(
+                        base_embeddings=base_provider,
+                        target_dim=settings.embedding_reduction_target_dim,
+                        strategy=settings.embedding_reduction_strategy,
+                        reducer_path=settings.embedding_reducer_path,
+                        normalize=settings.embedding_reduction_normalize,
+                    )
+                    logger.info(
+                        "Cohere embedding provider initialized with dimensional reduction",
+                        model=settings.cohere_embedding_model,
+                        target_dim=settings.embedding_reduction_target_dim,
+                    )
+                else:
+                    self._providers["cohere"] = base_provider
+                    logger.info(
+                        "Cohere embedding provider initialized",
+                        model=settings.cohere_embedding_model,
+                    )
             except Exception as e:
                 logger.warning(
                     "Failed to initialize Cohere embedding provider",

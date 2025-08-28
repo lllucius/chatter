@@ -32,7 +32,6 @@ import {
   Build as ToolsIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon,
   Download as DownloadIcon,
   Upload as UploadIcon,
   Settings as SettingsIcon,
@@ -40,7 +39,6 @@ import {
   Close as CloseIcon,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
 import { useSSE } from '../services/sse-context';

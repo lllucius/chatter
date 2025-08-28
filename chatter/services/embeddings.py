@@ -345,23 +345,6 @@ class EmbeddingService:
                 for m in active_models
             ],
         }
-            )
-        elif provider_name == "google":
-            info.update(
-                {
-                    "model": settings.google_embedding_model,
-                    "dimensions": get_model_dimensions("google"),
-                }
-            )
-        elif provider_name == "cohere":
-            info.update(
-                {
-                    "model": settings.cohere_embedding_model,
-                    "dimensions": get_model_dimensions("cohere"),
-                }
-            )
-
-        return info
 
     async def get_all_provider_info(self) -> dict[str, dict[str, Any]]:
         """Get information for all available providers.

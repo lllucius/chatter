@@ -11,6 +11,5 @@ export * from './api';
 
 // Export configuration and base types
 export { Configuration } from './configuration';
-//export { Configuration, ConfigurationParameters } from './configuration';
 export { BaseAPI } from './base';
 export * from './api';

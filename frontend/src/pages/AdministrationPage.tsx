@@ -39,20 +39,16 @@ import {
   Notifications as NotificationsIcon,
   Close as CloseIcon,
   Refresh as RefreshIcon,
-  Storage as ModelsIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
 import { useSSE } from '../services/sse-context';
-import { JobCompletedEvent, JobFailedEvent, JobStartedEvent, BackupCompletedEvent, BackupFailedEvent, BackupStartedEvent } from '../services/sse-types';
-import ModelManagement from './admin/ModelManagement';
 
 const AdministrationPage: React.FC = () => {
-  // SSE hook
   const { isConnected, on } = useSSE();
   
-  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users' | 'tools' | 'models'>('backups');
+  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users' | 'tools'>('backups');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'user' | 'tool' | 'backup' | 'plugin' | 'job'>('user');
   const [loading, setLoading] = useState(false);
@@ -60,14 +56,12 @@ const AdministrationPage: React.FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   
-  // Data states
   const [backups, setBackups] = useState<BackupResponse[]>([]);
   const [plugins, setPlugins] = useState<PluginResponse[]>([]);
   const [jobs, setJobs] = useState<JobResponse[]>([]);
   const [jobStats, setJobStats] = useState<JobStatsResponse | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
   
-  // Notification state
   const [notifications, setNotifications] = useState<Array<{
     id: string;
     title: string;
@@ -91,7 +85,6 @@ const AdministrationPage: React.FC = () => {
     includeDocuments: true,
     includeConfigurations: true,
     pluginUrl: '',
-    // Job-specific fields
     jobName: '',
     jobFunction: '',
     jobPriority: 'normal' as const,
@@ -101,14 +94,13 @@ const AdministrationPage: React.FC = () => {
     maxRetries: 3,
   });
 
-  // Helper functions
   const addNotification = useCallback((notification: Omit<typeof notifications[0], 'id' | 'timestamp'>) => {
     const newNotification = {
       ...notification,
       id: Math.random().toString(36).substr(2, 9),
       timestamp: new Date(),
     };
-    setNotifications(prev => [newNotification, ...prev.slice(0, 9)]); // Keep only last 10 notifications
+    setNotifications(prev => [newNotification, ...prev.slice(0, 9)]);
   }, []);
 
   const removeNotification = (id: string) => {
@@ -120,8 +112,6 @@ const AdministrationPage: React.FC = () => {
       setDataLoading(true);
       const response = await chatterSDK.jobs.listJobsApiV1JobsGet({});
       const newJobs = response.data.jobs || [];
-      
-      // Check for job state changes and create notifications
       newJobs.forEach(job => {
         const previousState = lastJobStates.get(job.id);
         if (previousState && previousState !== job.status) {
@@ -135,12 +125,9 @@ const AdministrationPage: React.FC = () => {
           });
         }
       });
-      
-      // Update job states
       const newStates = new Map<string, JobStatus>();
       newJobs.forEach(job => newStates.set(job.id, job.status));
       setLastJobStates(newStates);
-      
       setJobs(newJobs);
     } catch (error: any) {
       console.error('Failed to load jobs:', error);
@@ -182,101 +169,77 @@ const AdministrationPage: React.FC = () => {
     }
   }, []);
 
-  // Load data on component mount (single fetch; no auto-refresh)
   useEffect(() => {
     loadBackups();
     loadPlugins();
     loadJobs();
     loadJobStats();
-    // Intentionally run only once on mount to avoid refresh loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // SSE Event Listeners for real-time updates
   useEffect(() => {
     if (!isConnected) return;
 
-    // Job event listeners
     const unsubscribeJobStarted = on('job.started', (event) => {
-      const jobEvent = event as JobStartedEvent;
-      console.log('Job started:', jobEvent.data);
       addNotification({
         title: 'Job Started',
-        message: `Job "${jobEvent.data.job_name || jobEvent.data.job_id}" has started`,
+        message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" has started`,
         type: 'info',
-        jobId: jobEvent.data.job_id
+        jobId: (event as any).data.job_id
       });
-      // Refresh jobs to get latest state
       loadJobs();
       loadJobStats();
     });
 
     const unsubscribeJobCompleted = on('job.completed', (event) => {
-      const jobEvent = event as JobCompletedEvent;
-      console.log('Job completed:', jobEvent.data);
       addNotification({
         title: 'Job Completed',
-        message: `Job "${jobEvent.data.job_name || jobEvent.data.job_id}" completed successfully`,
+        message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" completed successfully`,
         type: 'success',
-        jobId: jobEvent.data.job_id
+        jobId: (event as any).data.job_id
       });
-      // Refresh jobs to get latest state
       loadJobs();
       loadJobStats();
     });
 
     const unsubscribeJobFailed = on('job.failed', (event) => {
-      const jobEvent = event as JobFailedEvent;
-      console.log('Job failed:', jobEvent.data);
       addNotification({
         title: 'Job Failed',
-        message: `Job "${jobEvent.data.job_name || jobEvent.data.job_id}" failed: ${jobEvent.data.error}`,
+        message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" failed: ${(event as any).data.error}`,
         type: 'error',
-        jobId: jobEvent.data.job_id
+        jobId: (event as any).data.job_id
       });
-      // Refresh jobs to get latest state
       loadJobs();
       loadJobStats();
     });
 
-    // Backup event listeners
     const unsubscribeBackupStarted = on('backup.started', (event) => {
-      const backupEvent = event as BackupStartedEvent;
-      console.log('Backup started:', backupEvent.data);
       addNotification({
         title: 'Backup Started',
-        message: `Backup "${backupEvent.data.backup_id}" has started`,
+        message: `Backup "${(event as any).data.backup_id}" has started`,
         type: 'info'
       });
-      // Refresh backups to get latest state
       loadBackups();
     });
 
     const unsubscribeBackupCompleted = on('backup.completed', (event) => {
-      const backupEvent = event as BackupCompletedEvent;
-      console.log('Backup completed:', backupEvent.data);
       addNotification({
         title: 'Backup Completed',
-        message: `Backup "${backupEvent.data.backup_id}" completed successfully`,
+        message: `Backup "${(event as any).data.backup_id}" completed successfully`,
         type: 'success'
       });
-      // Refresh backups to get latest state
       loadBackups();
     });
 
     const unsubscribeBackupFailed = on('backup.failed', (event) => {
-      const backupEvent = event as BackupFailedEvent;
-      console.log('Backup failed:', backupEvent.data);
       addNotification({
         title: 'Backup Failed',
-        message: `Backup "${backupEvent.data.backup_id}" failed: ${backupEvent.data.error}`,
+        message: `Backup "${(event as any).data.backup_id}" failed: ${(event as any).data.error}`,
         type: 'error'
       });
-      // Refresh backups to get latest state
       loadBackups();
     });
 
-    // Cleanup function
     return () => {
       unsubscribeJobStarted();
       unsubscribeJobCompleted();
@@ -291,12 +254,11 @@ const AdministrationPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      
       switch (action) {
         case 'cancel':
           await chatterSDK.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId });
-          showSnackbar('Job cancelled successfully!');
-          // Manual refresh
+          setSnackbarMessage('Job cancelled successfully!');
+          setSnackbarOpen(true);
           loadJobs();
           loadJobStats();
           break;
@@ -317,7 +279,6 @@ const AdministrationPage: React.FC = () => {
   const handleBackupDownload = async (backupId: string) => {
     try {
       setLoading(true);
-      // This would typically return a download URL or stream
       showSnackbar('Backup download functionality will be available soon');
     } catch (error: any) {
       console.error('Error downloading backup:', error);
@@ -336,7 +297,7 @@ const AdministrationPage: React.FC = () => {
         await chatterSDK.plugins.disablePluginApiV1PluginsPluginIdDisablePost({ pluginId });
         showSnackbar('Plugin disabled successfully');
       }
-      loadPlugins(); // Reload to get updated status
+      loadPlugins();
     } catch (error: any) {
       console.error('Error toggling plugin:', error);
       setError('Failed to toggle plugin status');
@@ -346,8 +307,7 @@ const AdministrationPage: React.FC = () => {
   const openDialog = (type: 'user' | 'tool' | 'backup' | 'plugin' | 'job') => {
     setDialogType(type);
     setDialogOpen(true);
-    setError(''); // Clear any existing errors
-    // Reset form data
+    setError('');
     setFormData({
       userId: '',
       email: '',
@@ -361,7 +321,6 @@ const AdministrationPage: React.FC = () => {
       includeDocuments: true,
       includeConfigurations: true,
       pluginUrl: '',
-      // Job-specific fields
       jobName: '',
       jobFunction: '',
       jobPriority: 'normal' as const,
@@ -380,7 +339,6 @@ const AdministrationPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      
       switch (dialogType) {
         case 'user':
           await chatterSDK.auth.registerApiV1AuthRegisterPost({
@@ -392,19 +350,17 @@ const AdministrationPage: React.FC = () => {
           });
           showSnackbar('User created successfully!');
           break;
-          
         case 'tool':
           await chatterSDK.toolServers.createToolServerApiV1ToolserversServersPost({
             toolServerCreate: {
               name: formData.serverName,
               display_name: formData.serverName,
-              command: formData.serverUrl, // Use serverUrl as command for now
+              command: formData.serverUrl,
               description: formData.description,
             }
           });
           showSnackbar('Tool server created successfully!');
           break;
-          
         case 'backup':
           await chatterSDK.dataManagement.createBackupApiV1DataBackupPost({
             backupRequest: {
@@ -415,27 +371,20 @@ const AdministrationPage: React.FC = () => {
             }
           });
           showSnackbar('Backup created successfully!');
-          // Manual refresh
           loadBackups();
           break;
-          
         case 'plugin':
-          try {
-            await chatterSDK.plugins.installPluginApiV1PluginsInstallPost({
-              pluginInstallRequest: {
-                plugin_path: formData.pluginUrl,
-                enable_on_install: true,
-              }
-            });
-            showSnackbar('Plugin installation started successfully!');
-            loadPlugins(); // Reload plugins list
-          } catch (pluginError: any) {
-            throw new Error(pluginError.response?.data?.detail || 'Failed to install plugin');
-          }
+          await chatterSDK.plugins.installPluginApiV1PluginsInstallPost({
+            pluginInstallRequest: {
+              plugin_path: formData.pluginUrl,
+              enable_on_install: true,
+            }
+          });
+          showSnackbar('Plugin installation started successfully!');
+          loadPlugins();
           break;
-          
         case 'job':
-          try {
+          {
             const jobCreateRequest: JobCreateRequest = {
               name: formData.jobName,
               function_name: formData.jobFunction,
@@ -445,7 +394,6 @@ const AdministrationPage: React.FC = () => {
               max_retries: formData.maxRetries,
               schedule_at: formData.scheduleAt ? new Date(formData.scheduleAt).toISOString() : undefined,
             };
-            
             await chatterSDK.jobs.createJobApiV1JobsPost({ jobCreateRequest });
             showSnackbar('Job created successfully!');
             addNotification({
@@ -453,18 +401,12 @@ const AdministrationPage: React.FC = () => {
               message: `Job "${formData.jobName}" has been created and ${formData.scheduleAt ? 'scheduled' : 'queued for execution'}`,
               type: 'success'
             });
-            // Manual refresh
             loadJobs();
             loadJobStats();
-          } catch (jobError: any) {
-            throw new Error(jobError.response?.data?.detail || 'Failed to create job');
           }
           break;
       }
-      
       setDialogOpen(false);
-      
-      // Reset form
       setFormData({
         userId: '',
         email: '',
@@ -478,7 +420,6 @@ const AdministrationPage: React.FC = () => {
         includeDocuments: true,
         includeConfigurations: true,
         pluginUrl: '',
-        // Job-specific fields
         jobName: '',
         jobFunction: '',
         jobPriority: 'normal' as const,
@@ -487,7 +428,6 @@ const AdministrationPage: React.FC = () => {
         scheduleAt: '',
         maxRetries: 3,
       });
-      
     } catch (error: any) {
       console.error('Error submitting form:', error);
       setError(error.response?.data?.detail || error.message || 'An error occurred. Please try again.');
@@ -501,48 +441,31 @@ const AdministrationPage: React.FC = () => {
       try {
         setLoading(true);
         setError('');
-        
         switch (type) {
           case 'user':
             showSnackbar('User deletion functionality requires implementation of admin user management API');
             break;
-            
           case 'tool server':
             await chatterSDK.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
               serverId: id
             });
             showSnackbar('Tool server deleted successfully!');
             break;
-            
           case 'backup':
-            try {
-              showSnackbar('Backup deletion is not yet supported by the API');
-            } catch (backupError: any) {
-              showSnackbar('Backup deletion functionality not yet available');
-            }
+            showSnackbar('Backup deletion is not yet supported by the API');
             break;
-            
           case 'plugin':
-            try {
-              await chatterSDK.plugins.uninstallPluginApiV1PluginsPluginIdDelete({
-                pluginId: id
-              });
-              showSnackbar('Plugin uninstalled successfully!');
-              loadPlugins(); // Reload plugins list
-            } catch (pluginError: any) {
-              throw new Error(pluginError.response?.data?.detail || 'Failed to uninstall plugin');
-            }
+            await chatterSDK.plugins.uninstallPluginApiV1PluginsPluginIdDelete({
+              pluginId: id
+            });
+            showSnackbar('Plugin uninstalled successfully!');
+            loadPlugins();
             break;
-            
           case 'job':
-            try {
-              await chatterSDK.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId: id });
-              showSnackbar('Job cancelled successfully!');
-              loadJobs(); // Reload jobs list
-              loadJobStats(); // Reload job stats
-            } catch (jobError: any) {
-              throw new Error(jobError.response?.data?.detail || 'Failed to cancel job');
-            }
+            await chatterSDK.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId: id });
+            showSnackbar('Job cancelled successfully!');
+            loadJobs();
+            loadJobStats();
             break;
         }
       } catch (error: any) {
@@ -558,20 +481,16 @@ const AdministrationPage: React.FC = () => {
     try {
       setLoading(true);
       setError('');
-      
       switch (type) {
         case 'user':
           showSnackbar('User editing functionality requires implementation of admin user management API');
           break;
-          
         case 'tool server':
           showSnackbar('Tool server editing functionality would open edit dialog with current data');
           break;
-          
         case 'backup':
           showSnackbar('Backup editing functionality would be implemented with backup management API');
           break;
-          
         case 'plugin':
           showSnackbar('Plugin editing functionality would be implemented based on plugin architecture');
           break;
@@ -625,7 +544,7 @@ const AdministrationPage: React.FC = () => {
               <ListItem key={notification.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
                 <ListItemText
                   primary={notification.title}
-                  secondary={`${notification.message} • ${format(notification.timestamp, 'PPp')}`}
+                  secondary={`${notification.message} • ${new Date(notification.timestamp).toLocaleString()}`}
                 />
                 <Chip 
                   label={notification.type} 
@@ -660,7 +579,6 @@ const AdministrationPage: React.FC = () => {
         <Tab value="plugins" icon={<PluginIcon />} iconPosition="start" label="Plugins" />
         <Tab value="users" icon={<UsersIcon />} iconPosition="start" label="User Management" />
         <Tab value="tools" icon={<ToolsIcon />} iconPosition="start" label="Tool Servers" />
-        <Tab value="models" icon={<ModelsIcon />} iconPosition="start" label="Model Management" />
       </Tabs>
 
       {/* Backups Tab */}
@@ -718,7 +636,7 @@ const AdministrationPage: React.FC = () => {
                 <ListItem key={backup.id}>
                   <ListItemText
                     primary={backup.name || `Backup ${backup.id?.substring(0, 8)}`}
-                    secondary={`Type: ${backup.backup_type} | Status: ${backup.status} | Created: ${backup.created_at ? format(new Date(backup.created_at), 'PPp') : 'Unknown'}`}
+                    secondary={`Type: ${backup.backup_type} | Status: ${backup.status} | Created: ${backup.created_at ? new Date(backup.created_at).toLocaleString() : 'Unknown'}`}
                   />
                   <ListItemSecondaryAction>
                     <IconButton 
@@ -803,7 +721,7 @@ const AdministrationPage: React.FC = () => {
                   if (job.function_name) parts.push(`Function: ${job.function_name}`);
                   if (job.priority) parts.push(`Priority: ${job.priority}`);
                   if (job.progress !== undefined) parts.push(`Progress: ${job.progress}%`);
-                  if (job.created_at) parts.push(`Created: ${format(new Date(job.created_at), 'PPp')}`);
+                  if (job.created_at) parts.push(`Created: ${new Date(job.created_at).toLocaleString()}`);
                   return parts.join(' | ');
                 };
 
@@ -861,9 +779,7 @@ const AdministrationPage: React.FC = () => {
             ) : (
               plugins.map((plugin) => (
                 <ListItem key={plugin.id}>
-                  <ListItemIcon>
-                    <PluginIcon />
-                  </ListItemIcon>
+                  <ListItemIcon />
                   <ListItemText
                     primary={plugin.name || 'Unknown Plugin'}
                     secondary={`Version ${plugin.version || 'Unknown'} | ${plugin.enabled ? 'Enabled' : 'Disabled'} | ${plugin.description || 'No description'}`}
@@ -904,7 +820,7 @@ const AdministrationPage: React.FC = () => {
               />
               <ListItemSecondaryAction>
                 <IconButton edge="end" onClick={() => handleEditAction('user', 'admin@chatter.ai')}>
-                  <EditIcon />
+                  <SettingsIcon />
                 </IconButton>
                 <IconButton edge="end" onClick={() => handleDeleteAction('user', 'admin@chatter.ai')}>
                   <DeleteIcon />
@@ -918,7 +834,7 @@ const AdministrationPage: React.FC = () => {
               />
               <ListItemSecondaryAction>
                 <IconButton edge="end" onClick={() => handleEditAction('user', 'user@example.com')}>
-                  <EditIcon />
+                  <SettingsIcon />
                 </IconButton>
                 <IconButton edge="end" onClick={() => handleDeleteAction('user', 'user@example.com')}>
                   <DeleteIcon />
@@ -976,12 +892,6 @@ const AdministrationPage: React.FC = () => {
         </Box>
       )}
 
-      {/* Models Tab */}
-      {activeTab === 'models' && (
-        <ModelManagement />
-      )}
-
-      {/* Generic Dialog for Adding/Editing */}
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
           {dialogType === 'user' && 'Add New User'}
@@ -1211,7 +1121,6 @@ const AdministrationPage: React.FC = () => {
         </DialogActions>
       </Dialog>
 
-      {/* Success/Info Snackbar */}
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={6000}

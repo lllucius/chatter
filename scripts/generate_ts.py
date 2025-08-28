@@ -32,13 +32,13 @@ def generate_typescript_sdk():
     with open(temp_spec_path, "w", encoding="utf-8") as f:
         json.dump(spec, f, indent=2, ensure_ascii=False)
 
+#        "modelPackage": "models"
     # Configuration for the SDK generation
     config = {
         "npmName": "chatter-sdk",
         "npmVersion": spec.get("info", {}).get("version", "0.1.0"),
         "npmRepository": "https://github.com/lllucius/chatter",
         "npmDescription": "TypeScript SDK for Chatter AI Chatbot API",
-        "modelPackage": "models",
         "apiPackage": "api",
         "withInterfaces": True,
         "useSingleRequestParameter": True,

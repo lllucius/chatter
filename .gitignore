@@ -215,3 +215,7 @@ __marimo__/
 # Test files created during development
 test_*.py
 demo_*.py
+
+#
+data/
+

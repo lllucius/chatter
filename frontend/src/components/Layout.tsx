@@ -36,6 +36,7 @@ import {
   LightMode as LightModeIcon,
   DarkMode as DarkModeIcon,
   AdminPanelSettings as AdminIcon,
+  Storage as ModelsIcon,
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -62,6 +63,7 @@ const navItems: NavItem[] = [
   { label: 'Documents', path: '/documents', icon: <DocumentIcon /> },
   { label: 'Profiles', path: '/profiles', icon: <ProfileIcon /> },
   { label: 'Prompts', path: '/prompts', icon: <PromptIcon /> },
+  { label: 'Models', path: '/models', icon: <ModelsIcon /> },
   { label: 'Agents', path: '/agents', icon: <AgentIcon /> },
   { label: 'Administration', path: '/administration', icon: <AdminIcon /> },
   { label: 'Health', path: '/health', icon: <HealthIcon /> },
@@ -90,25 +92,17 @@ const LayoutFrame: React.FC = () => {
   } = useRightSidebar();
 
   const currentDrawerWidth = sidebarCollapsed ? collapsedDrawerWidth : drawerWidth;
-
-  // Only show right drawer if explicitly opened and there is content
   const isRightVisible = rightOpen && !!panelContent;
   const effectiveRightWidth = isRightVisible
     ? (rightCollapsed ? rightCollapsedDrawerWidth : rightDrawerWidth)
     : 0;
 
-  // Close and clear right panel when leaving /chat (prevents lingering portal content)
   useEffect(() => {
     if (!location.pathname.startsWith('/chat')) {
       setRightOpen(false);
       clearPanelContent();
     }
-    
-    // Always blur focused elements and close any open menus/popovers on navigation
-    // This provides the same cleanup that was intended by the forced remounting
     (document.activeElement as HTMLElement | null)?.blur?.();
-    
-    // Close any open Material-UI menus/popovers by dispatching escape key
     const escapeEvent = new KeyboardEvent('keydown', {
       key: 'Escape',
       code: 'Escape',
@@ -118,7 +112,6 @@ const LayoutFrame: React.FC = () => {
       cancelable: true
     });
     document.dispatchEvent(escapeEvent);
-    
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
 
@@ -394,7 +387,6 @@ const LayoutFrame: React.FC = () => {
             }),
         }}
       >
-        {/* Remove forced remounting to allow proper React Router navigation */}
         <Outlet />
       </Box>
 

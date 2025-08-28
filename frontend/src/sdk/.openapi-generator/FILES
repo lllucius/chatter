@@ -56,6 +56,8 @@ docs/DashboardResponse.md
 docs/DataFormat.md
 docs/DataManagementApi.md
 docs/DefaultApi.md
+docs/DefaultProvider.md
+docs/DistanceMetric.md
 docs/DocumentAnalyticsResponse.md
 docs/DocumentChunkResponse.md
 docs/DocumentChunksResponse.md
@@ -71,6 +73,10 @@ docs/DocumentStatus.md
 docs/DocumentType.md
 docs/DocumentUpdate.md
 docs/DocumentsApi.md
+docs/EmbeddingSpaceCreate.md
+docs/EmbeddingSpaceList.md
+docs/EmbeddingSpaceUpdate.md
+docs/EmbeddingSpaceWithModel.md
 docs/EventsApi.md
 docs/ExportDataRequest.md
 docs/ExportDataResponse.md
@@ -92,6 +98,12 @@ docs/MessageCreate.md
 docs/MessageResponse.md
 docs/MessageRole.md
 docs/MetricType.md
+docs/ModelDefCreate.md
+docs/ModelDefList.md
+docs/ModelDefUpdate.md
+docs/ModelDefWithProvider.md
+docs/ModelRegistryApi.md
+docs/ModelType.md
 docs/PasswordChange.md
 docs/PasswordChangeResponse.md
 docs/PasswordResetConfirmResponse.md
@@ -129,7 +141,13 @@ docs/PromptTestResponse.md
 docs/PromptType.md
 docs/PromptUpdate.md
 docs/PromptsApi.md
+docs/Provider.md
+docs/ProviderCreate.md
+docs/ProviderList.md
+docs/ProviderType.md
+docs/ProviderUpdate.md
 docs/ReadinessCheckResponse.md
+docs/ReductionStrategy.md
 docs/RestoreRequest.md
 docs/RestoreResponse.md
 docs/SSEStatsResponse.md

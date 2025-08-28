@@ -4644,6 +4644,701 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
       - HTTPBearer: []
+  /api/v1/models/providers:
+    get:
+      tags:
+      - Model Registry
+      summary: List Providers
+      description: List all providers.
+      operationId: list_providers_api_v1_models_providers_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number
+          default: 1
+          title: Page
+        description: Page number
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Items per page
+          default: 20
+          title: Per Page
+        description: Items per page
+      - name: active_only
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Show only active providers
+          default: true
+          title: Active Only
+        description: Show only active providers
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderList'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Model Registry
+      summary: Create Provider
+      description: Create a new provider.
+      operationId: create_provider_api_v1_models_providers_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/providers/{provider_id}:
+    get:
+      tags:
+      - Model Registry
+      summary: Get Provider
+      description: Get a specific provider.
+      operationId: get_provider_api_v1_models_providers__provider_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: provider_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Provider Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Model Registry
+      summary: Update Provider
+      description: Update a provider.
+      operationId: update_provider_api_v1_models_providers__provider_id__put
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: provider_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Provider Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProviderUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Model Registry
+      summary: Delete Provider
+      description: Delete a provider.
+      operationId: delete_provider_api_v1_models_providers__provider_id__delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: provider_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Provider Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/providers/{provider_id}/set-default:
+    post:
+      tags:
+      - Model Registry
+      summary: Set Default Provider
+      description: Set a provider as default for a model type.
+      operationId: set_default_provider_api_v1_models_providers__provider_id__set_default_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: provider_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Provider Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DefaultProvider'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/models:
+    get:
+      tags:
+      - Model Registry
+      summary: List Models
+      description: List all model definitions.
+      operationId: list_models_api_v1_models_models_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: provider_id
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Filter by provider ID
+          title: Provider Id
+        description: Filter by provider ID
+      - name: model_type
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/ModelType'
+          description: Filter by model type
+        description: Filter by model type
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number
+          default: 1
+          title: Page
+        description: Page number
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Items per page
+          default: 20
+          title: Per Page
+        description: Items per page
+      - name: active_only
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Show only active models
+          default: true
+          title: Active Only
+        description: Show only active models
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelDefList'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Model Registry
+      summary: Create Model
+      description: Create a new model definition.
+      operationId: create_model_api_v1_models_models_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelDefCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelDefWithProvider'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/models/{model_id}:
+    get:
+      tags:
+      - Model Registry
+      summary: Get Model
+      description: Get a specific model definition.
+      operationId: get_model_api_v1_models_models__model_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Model Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelDefWithProvider'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Model Registry
+      summary: Update Model
+      description: Update a model definition.
+      operationId: update_model_api_v1_models_models__model_id__put
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Model Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModelDefUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelDefWithProvider'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Model Registry
+      summary: Delete Model
+      description: Delete a model definition.
+      operationId: delete_model_api_v1_models_models__model_id__delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Model Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/models/{model_id}/set-default:
+    post:
+      tags:
+      - Model Registry
+      summary: Set Default Model
+      description: Set a model as default for its type.
+      operationId: set_default_model_api_v1_models_models__model_id__set_default_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: model_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Model Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/embedding-spaces:
+    get:
+      tags:
+      - Model Registry
+      summary: List Embedding Spaces
+      description: List all embedding spaces.
+      operationId: list_embedding_spaces_api_v1_models_embedding_spaces_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: model_id
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Filter by model ID
+          title: Model Id
+        description: Filter by model ID
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Page number
+          default: 1
+          title: Page
+        description: Page number
+      - name: per_page
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Items per page
+          default: 20
+          title: Per Page
+        description: Items per page
+      - name: active_only
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Show only active spaces
+          default: true
+          title: Active Only
+        description: Show only active spaces
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbeddingSpaceList'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    post:
+      tags:
+      - Model Registry
+      summary: Create Embedding Space
+      description: Create a new embedding space with backing table and index.
+      operationId: create_embedding_space_api_v1_models_embedding_spaces_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmbeddingSpaceCreate'
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbeddingSpaceWithModel'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/embedding-spaces/{space_id}:
+    get:
+      tags:
+      - Model Registry
+      summary: Get Embedding Space
+      description: Get a specific embedding space.
+      operationId: get_embedding_space_api_v1_models_embedding_spaces__space_id__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Space Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbeddingSpaceWithModel'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Model Registry
+      summary: Update Embedding Space
+      description: Update an embedding space.
+      operationId: update_embedding_space_api_v1_models_embedding_spaces__space_id__put
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Space Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmbeddingSpaceUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbeddingSpaceWithModel'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Model Registry
+      summary: Delete Embedding Space
+      description: Delete an embedding space (does not drop the table).
+      operationId: delete_embedding_space_api_v1_models_embedding_spaces__space_id__delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Space Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/embedding-spaces/{space_id}/set-default:
+    post:
+      tags:
+      - Model Registry
+      summary: Set Default Embedding Space
+      description: Set an embedding space as default.
+      operationId: set_default_embedding_space_api_v1_models_embedding_spaces__space_id__set_default_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: space_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Space Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/defaults/provider/{model_type}:
+    get:
+      tags:
+      - Model Registry
+      summary: Get Default Provider
+      description: Get the default provider for a model type.
+      operationId: get_default_provider_api_v1_models_defaults_provider__model_type__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: model_type
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/ModelType'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Provider'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/defaults/model/{model_type}:
+    get:
+      tags:
+      - Model Registry
+      summary: Get Default Model
+      description: Get the default model for a type.
+      operationId: get_default_model_api_v1_models_defaults_model__model_type__get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: model_type
+        in: path
+        required: true
+        schema:
+          $ref: '#/components/schemas/ModelType'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelDefWithProvider'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/models/defaults/embedding-space:
+    get:
+      tags:
+      - Model Registry
+      summary: Get Default Embedding Space
+      description: Get the default embedding space.
+      operationId: get_default_embedding_space_api_v1_models_defaults_embedding_space_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmbeddingSpaceWithModel'
+      security:
+      - HTTPBearer: []
   /{full_path}:
     get:
       summary: Serve React App
@@ -6626,6 +7321,27 @@ components:
       - sql
       title: DataFormat
       description: Supported data formats.
+    DefaultProvider:
+      properties:
+        provider_id:
+          type: string
+          title: Provider Id
+        model_type:
+          $ref: '#/components/schemas/ModelType'
+      type: object
+      required:
+      - provider_id
+      - model_type
+      title: DefaultProvider
+      description: Schema for setting default provider.
+    DistanceMetric:
+      type: string
+      enum:
+      - cosine
+      - l2
+      - ip
+      title: DistanceMetric
+      description: Distance metrics for vector similarity.
     DocumentAnalyticsResponse:
       properties:
         total_documents:
@@ -6797,10 +7513,6 @@ components:
           type: string
           title: Content Hash
           description: Content hash
-        has_embedding:
-          type: boolean
-          title: Has Embedding
-          description: Whether chunk has embedding
         created_at:
           type: string
           format: date-time
@@ -6818,7 +7530,6 @@ components:
       - content
       - chunk_index
       - content_hash
-      - has_embedding
       - created_at
       - updated_at
       title: DocumentChunkResponse
@@ -7312,6 +8023,279 @@ components:
       type: object
       title: DocumentUpdate
       description: Schema for updating a document.
+    EmbeddingSpaceCreate:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Unique space name
+        display_name:
+          type: string
+          title: Display Name
+          description: Human-readable name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Space description
+        base_dimensions:
+          type: integer
+          title: Base Dimensions
+          description: Original model dimensions
+        effective_dimensions:
+          type: integer
+          title: Effective Dimensions
+          description: Effective dimensions after reduction
+        reduction_strategy:
+          $ref: '#/components/schemas/ReductionStrategy'
+          description: Reduction strategy
+          default: none
+        reducer_path:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reducer Path
+          description: Path to reducer file
+        reducer_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reducer Version
+          description: Reducer version/hash
+        normalize_vectors:
+          type: boolean
+          title: Normalize Vectors
+          description: Whether to normalize vectors
+          default: true
+        distance_metric:
+          $ref: '#/components/schemas/DistanceMetric'
+          description: Distance metric
+          default: cosine
+        table_name:
+          type: string
+          title: Table Name
+          description: Database table name
+        index_type:
+          type: string
+          title: Index Type
+          description: Index type
+          default: hnsw
+        index_config:
+          additionalProperties: true
+          type: object
+          title: Index Config
+          description: Index configuration
+        is_active:
+          type: boolean
+          title: Is Active
+          description: Whether space is active
+          default: true
+        is_default:
+          type: boolean
+          title: Is Default
+          description: Whether this is the default space
+          default: false
+        model_id:
+          type: string
+          title: Model Id
+          description: Model ID
+      type: object
+      required:
+      - name
+      - display_name
+      - base_dimensions
+      - effective_dimensions
+      - table_name
+      - model_id
+      title: EmbeddingSpaceCreate
+      description: Schema for creating an embedding space.
+    EmbeddingSpaceList:
+      properties:
+        spaces:
+          items:
+            $ref: '#/components/schemas/EmbeddingSpaceWithModel'
+          type: array
+          title: Spaces
+        total:
+          type: integer
+          title: Total
+        page:
+          type: integer
+          title: Page
+        per_page:
+          type: integer
+          title: Per Page
+      type: object
+      required:
+      - spaces
+      - total
+      - page
+      - per_page
+      title: EmbeddingSpaceList
+      description: List of embedding spaces with pagination.
+    EmbeddingSpaceUpdate:
+      properties:
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        reduction_strategy:
+          anyOf:
+          - $ref: '#/components/schemas/ReductionStrategy'
+          - type: 'null'
+        reducer_path:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reducer Path
+        reducer_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reducer Version
+        normalize_vectors:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Normalize Vectors
+        distance_metric:
+          anyOf:
+          - $ref: '#/components/schemas/DistanceMetric'
+          - type: 'null'
+        index_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Index Type
+        index_config:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Index Config
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+        is_default:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Default
+      type: object
+      title: EmbeddingSpaceUpdate
+      description: Schema for updating an embedding space.
+    EmbeddingSpaceWithModel:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Unique space name
+        display_name:
+          type: string
+          title: Display Name
+          description: Human-readable name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Space description
+        base_dimensions:
+          type: integer
+          title: Base Dimensions
+          description: Original model dimensions
+        effective_dimensions:
+          type: integer
+          title: Effective Dimensions
+          description: Effective dimensions after reduction
+        reduction_strategy:
+          $ref: '#/components/schemas/ReductionStrategy'
+          description: Reduction strategy
+          default: none
+        reducer_path:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reducer Path
+          description: Path to reducer file
+        reducer_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Reducer Version
+          description: Reducer version/hash
+        normalize_vectors:
+          type: boolean
+          title: Normalize Vectors
+          description: Whether to normalize vectors
+          default: true
+        distance_metric:
+          $ref: '#/components/schemas/DistanceMetric'
+          description: Distance metric
+          default: cosine
+        table_name:
+          type: string
+          title: Table Name
+          description: Database table name
+        index_type:
+          type: string
+          title: Index Type
+          description: Index type
+          default: hnsw
+        index_config:
+          additionalProperties: true
+          type: object
+          title: Index Config
+          description: Index configuration
+        is_active:
+          type: boolean
+          title: Is Active
+          description: Whether space is active
+          default: true
+        is_default:
+          type: boolean
+          title: Is Default
+          description: Whether this is the default space
+          default: false
+        id:
+          type: string
+          title: Id
+        model_id:
+          type: string
+          title: Model Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        model:
+          $ref: '#/components/schemas/ModelDefWithProvider'
+      type: object
+      required:
+      - name
+      - display_name
+      - base_dimensions
+      - effective_dimensions
+      - table_name
+      - id
+      - model_id
+      - created_at
+      - updated_at
+      - model
+      title: EmbeddingSpaceWithModel
+      description: Embedding space with model and provider information.
     ExportDataRequest:
       properties:
         scope:
@@ -7867,6 +8851,291 @@ components:
       - custom
       title: MetricType
       description: Types of metrics to track.
+    ModelDefCreate:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Model name
+        model_type:
+          $ref: '#/components/schemas/ModelType'
+          description: Type of model
+        display_name:
+          type: string
+          title: Display Name
+          description: Human-readable name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Model description
+        model_name:
+          type: string
+          title: Model Name
+          description: Actual model name for API calls
+        max_tokens:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max Tokens
+          description: Maximum tokens
+        context_length:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Context Length
+          description: Context length
+        dimensions:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Dimensions
+          description: Embedding dimensions
+        chunk_size:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Chunk Size
+          description: Default chunk size
+        supports_batch:
+          type: boolean
+          title: Supports Batch
+          description: Supports batch processing
+          default: true
+        max_batch_size:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max Batch Size
+          description: Maximum batch size
+        default_config:
+          additionalProperties: true
+          type: object
+          title: Default Config
+          description: Default configuration
+        is_active:
+          type: boolean
+          title: Is Active
+          description: Whether model is active
+          default: true
+        is_default:
+          type: boolean
+          title: Is Default
+          description: Whether this is the default model
+          default: false
+        provider_id:
+          type: string
+          title: Provider Id
+          description: Provider ID
+      type: object
+      required:
+      - name
+      - model_type
+      - display_name
+      - model_name
+      - provider_id
+      title: ModelDefCreate
+      description: Schema for creating a model definition.
+    ModelDefList:
+      properties:
+        models:
+          items:
+            $ref: '#/components/schemas/ModelDefWithProvider'
+          type: array
+          title: Models
+        total:
+          type: integer
+          title: Total
+        page:
+          type: integer
+          title: Page
+        per_page:
+          type: integer
+          title: Per Page
+      type: object
+      required:
+      - models
+      - total
+      - page
+      - per_page
+      title: ModelDefList
+      description: List of model definitions with pagination.
+    ModelDefUpdate:
+      properties:
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        model_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model Name
+        max_tokens:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max Tokens
+        context_length:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Context Length
+        dimensions:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Dimensions
+        chunk_size:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Chunk Size
+        supports_batch:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Supports Batch
+        max_batch_size:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max Batch Size
+        default_config:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Default Config
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+        is_default:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Default
+      type: object
+      title: ModelDefUpdate
+      description: Schema for updating a model definition.
+    ModelDefWithProvider:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Model name
+        model_type:
+          $ref: '#/components/schemas/ModelType'
+          description: Type of model
+        display_name:
+          type: string
+          title: Display Name
+          description: Human-readable name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Model description
+        model_name:
+          type: string
+          title: Model Name
+          description: Actual model name for API calls
+        max_tokens:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max Tokens
+          description: Maximum tokens
+        context_length:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Context Length
+          description: Context length
+        dimensions:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Dimensions
+          description: Embedding dimensions
+        chunk_size:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Chunk Size
+          description: Default chunk size
+        supports_batch:
+          type: boolean
+          title: Supports Batch
+          description: Supports batch processing
+          default: true
+        max_batch_size:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Max Batch Size
+          description: Maximum batch size
+        default_config:
+          additionalProperties: true
+          type: object
+          title: Default Config
+          description: Default configuration
+        is_active:
+          type: boolean
+          title: Is Active
+          description: Whether model is active
+          default: true
+        is_default:
+          type: boolean
+          title: Is Default
+          description: Whether this is the default model
+          default: false
+        id:
+          type: string
+          title: Id
+        provider_id:
+          type: string
+          title: Provider Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+        provider:
+          $ref: '#/components/schemas/Provider'
+      type: object
+      required:
+      - name
+      - model_type
+      - display_name
+      - model_name
+      - id
+      - provider_id
+      - created_at
+      - updated_at
+      - provider
+      title: ModelDefWithProvider
+      description: Model definition with provider information.
+    ModelType:
+      type: string
+      enum:
+      - llm
+      - embedding
+      title: ModelType
+      description: Types of AI models.
     PasswordChange:
       properties:
         current_password:
@@ -9877,6 +11146,199 @@ components:
       type: object
       title: PromptUpdate
       description: Schema for updating a prompt.
+    Provider:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Unique provider name
+        provider_type:
+          $ref: '#/components/schemas/ProviderType'
+          description: Type of provider
+        display_name:
+          type: string
+          title: Display Name
+          description: Human-readable name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Provider description
+        api_key_required:
+          type: boolean
+          title: Api Key Required
+          description: Whether API key is required
+          default: true
+        base_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Base Url
+          description: Base URL for API
+        default_config:
+          additionalProperties: true
+          type: object
+          title: Default Config
+          description: Default configuration
+        is_active:
+          type: boolean
+          title: Is Active
+          description: Whether provider is active
+          default: true
+        is_default:
+          type: boolean
+          title: Is Default
+          description: Whether this is the default provider
+          default: false
+        id:
+          type: string
+          title: Id
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+        updated_at:
+          type: string
+          format: date-time
+          title: Updated At
+      type: object
+      required:
+      - name
+      - provider_type
+      - display_name
+      - id
+      - created_at
+      - updated_at
+      title: Provider
+      description: Full provider schema.
+    ProviderCreate:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Unique provider name
+        provider_type:
+          $ref: '#/components/schemas/ProviderType'
+          description: Type of provider
+        display_name:
+          type: string
+          title: Display Name
+          description: Human-readable name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+          description: Provider description
+        api_key_required:
+          type: boolean
+          title: Api Key Required
+          description: Whether API key is required
+          default: true
+        base_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Base Url
+          description: Base URL for API
+        default_config:
+          additionalProperties: true
+          type: object
+          title: Default Config
+          description: Default configuration
+        is_active:
+          type: boolean
+          title: Is Active
+          description: Whether provider is active
+          default: true
+        is_default:
+          type: boolean
+          title: Is Default
+          description: Whether this is the default provider
+          default: false
+      type: object
+      required:
+      - name
+      - provider_type
+      - display_name
+      title: ProviderCreate
+      description: Schema for creating a provider.
+    ProviderList:
+      properties:
+        providers:
+          items:
+            $ref: '#/components/schemas/Provider'
+          type: array
+          title: Providers
+        total:
+          type: integer
+          title: Total
+        page:
+          type: integer
+          title: Page
+        per_page:
+          type: integer
+          title: Per Page
+      type: object
+      required:
+      - providers
+      - total
+      - page
+      - per_page
+      title: ProviderList
+      description: List of providers with pagination.
+    ProviderType:
+      type: string
+      enum:
+      - openai
+      - anthropic
+      - google
+      - cohere
+      - mistral
+      title: ProviderType
+      description: Types of AI providers.
+    ProviderUpdate:
+      properties:
+        display_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Display Name
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Description
+        api_key_required:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Api Key Required
+        base_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Base Url
+        default_config:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Default Config
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+        is_default:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Default
+      type: object
+      title: ProviderUpdate
+      description: Schema for updating a provider.
     ReadinessCheckResponse:
       properties:
         status:
@@ -9909,6 +11371,14 @@ components:
       - checks
       title: ReadinessCheckResponse
       description: Schema for readiness check response.
+    ReductionStrategy:
+      type: string
+      enum:
+      - none
+      - truncate
+      - reducer
+      title: ReductionStrategy
+      description: Dimensionality reduction strategies.
     RestoreRequest:
       properties:
         backup_id:

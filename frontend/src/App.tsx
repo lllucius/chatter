@@ -14,6 +14,7 @@ import ChatPage from './pages/ChatPage';
 import HealthPage from './pages/HealthPage';
 import AgentsPage from './pages/AgentsPage';
 import AdministrationPage from './pages/AdministrationPage';
+import ModelManagementPage from './pages/ModelManagementPage';
 
 // Components
 import Layout from './components/Layout';
@@ -107,6 +108,7 @@ function App() {
                 <Route path="documents" element={<DocumentsPage />} />
                 <Route path="profiles" element={<ProfilesPage />} />
                 <Route path="prompts" element={<PromptsPage />} />
+                <Route path="models" element={<ModelManagementPage />} />
                 <Route path="agents" element={<AgentsPage />} />
                 <Route path="health" element={<HealthPage />} />
                 <Route path="administration" element={<AdministrationPage />} />

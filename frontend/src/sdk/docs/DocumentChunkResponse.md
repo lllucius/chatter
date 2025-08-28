@@ -19,7 +19,6 @@ Name | Type | Description | Notes
 **embedding_provider** | **string** |  | [optional] [default to undefined]
 **embedding_created_at** | **string** |  | [optional] [default to undefined]
 **content_hash** | **string** | Content hash | [default to undefined]
-**has_embedding** | **boolean** | Whether chunk has embedding | [default to undefined]
 **created_at** | **string** | Creation time | [default to undefined]
 **updated_at** | **string** | Last update time | [default to undefined]
 
@@ -42,7 +41,6 @@ const instance: DocumentChunkResponse = {
     embedding_provider,
     embedding_created_at,
     content_hash,
-    has_embedding,
     created_at,
     updated_at,
 };

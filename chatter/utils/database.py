@@ -99,12 +99,55 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         AsyncSession: Database session
     """
     session_maker = get_session_maker()
-    async with session_maker() as session:
+    session = session_maker()
+    
+    try:
+        yield session
+    except GeneratorExit:
+        # Handle generator cleanup gracefully
+        # On GeneratorExit, avoid operations that might conflict with ongoing transactions
+        logger.debug("Database session generator closed")
         try:
-            yield session
-        except Exception:
-            await session.rollback()
+            # Check if session is still usable before attempting cleanup
+            if session and not session.is_closed:
+                # Don't commit or rollback on GeneratorExit - just close if safe
+                if not session.in_transaction():
+                    await session.close()
+                else:
+                    # If in transaction, let the session cleanup happen naturally
+                    session.expunge_all()
+        except Exception as e:
+            logger.debug("Session cleanup during generator exit", error=str(e))
+        raise
+    except Exception:
+        # On other exceptions, attempt rollback
+        try:
+            if session and not session.is_closed:
+                await session.rollback()
+        except Exception as e:
+            logger.warning("Error rolling back session", error=str(e))
+        raise
+    else:
+        # Normal completion - commit the transaction
+        try:
+            if session and not session.is_closed:
+                await session.commit()
+        except Exception as e:
+            logger.warning("Error committing session", error=str(e))
+            try:
+                await session.rollback()
+            except Exception:
+                pass
             raise
+    finally:
+        # Final cleanup - close the session if it's still open and safe to do so
+        try:
+            if session and not session.is_closed:
+                # Only attempt close if not in the middle of a transaction operation
+                if not session.in_transaction():
+                    await session.close()
+        except Exception as e:
+            logger.debug("Error in final session cleanup", error=str(e))
 
 
 async def initialize_default_data() -> None:

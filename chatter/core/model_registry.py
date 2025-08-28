@@ -66,6 +66,9 @@ class ModelRegistryService:
         if params.active_only:
             query = query.where(Provider.is_active == True)
         
+        # Order by default first, then by display name
+        query = query.order_by(Provider.is_default.desc(), Provider.display_name)
+        
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total = await self.session.scalar(count_query)
@@ -157,6 +160,9 @@ class ModelRegistryService:
         
         if params.active_only:
             query = query.where(ModelDef.is_active == True)
+        
+        # Order by default first, then by display name
+        query = query.order_by(ModelDef.is_default.desc(), ModelDef.display_name)
         
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
@@ -257,6 +263,9 @@ class ModelRegistryService:
         
         if params.active_only:
             query = query.where(EmbeddingSpace.is_active == True)
+        
+        # Order by default first, then by display name
+        query = query.order_by(EmbeddingSpace.is_default.desc(), EmbeddingSpace.display_name)
         
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())

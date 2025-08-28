@@ -147,9 +147,9 @@ const ModelManagementPage: React.FC = () => {
     try {
       // Use the chatterSDK modelRegistry instance (or api variable) — both call the same generated methods.
       const [pResp, mResp, sResp] = await Promise.all([
-        chatterSDK.modelRegistry.listProvidersApiV1ModelsProvidersGet(), // returns AxiosResponse<ProviderList>
-        chatterSDK.modelRegistry.listModelsApiV1ModelsModelsGet(),
-        chatterSDK.modelRegistry.listEmbeddingSpacesApiV1ModelsEmbeddingSpacesGet(),
+        chatterSDK.modelRegistry.listProvidersApiV1ModelsProvidersGet({ activeOnly: false }), // Show both active and inactive providers
+        chatterSDK.modelRegistry.listModelsApiV1ModelsModelsGet({ activeOnly: false }), // Show both active and inactive models
+        chatterSDK.modelRegistry.listEmbeddingSpacesApiV1ModelsEmbeddingSpacesGet({ activeOnly: false }), // Show both active and inactive spaces
       ]);
       const p = pResp.data;
       const m = mResp.data;

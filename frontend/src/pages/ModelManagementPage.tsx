@@ -5,10 +5,13 @@ import {
   Button,
   Tabs,
   Tab,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
+  Card,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   IconButton,
   Chip,
   CircularProgress,
@@ -22,16 +25,17 @@ import {
   FormControlLabel,
   Alert,
   Snackbar,
-  Tooltip,
+  Menu,
+  ListItemIcon,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
   Add as AddIcon,
   Refresh as RefreshIcon,
-  Star as DefaultIcon,
-  StarBorder as NotDefaultIcon,
+  Star as NotDefaultIcon,
   Edit as EditIcon,
   Delete as DeleteIcon,
+  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
 import {
@@ -61,6 +65,12 @@ const ModelManagementPage: React.FC = () => {
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  // Actions menu state
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
+  const [actionProvider, setActionProvider] = useState<Provider | null>(null);
+  const [actionModel, setActionModel] = useState<ModelDefWithProvider | null>(null);
+  const [actionSpace, setActionSpace] = useState<EmbeddingSpaceWithModel | null>(null);
 
   // Dialogs
   const [providerDialogOpen, setProviderDialogOpen] = useState(false);
@@ -126,6 +136,31 @@ const ModelManagementPage: React.FC = () => {
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
     setSnackbarOpen(true);
+  };
+
+  // Action menu handlers
+  const openActionsMenu = (e: React.MouseEvent<HTMLElement>, item: Provider | ModelDefWithProvider | EmbeddingSpaceWithModel, type: 'provider' | 'model' | 'space') => {
+    setActionAnchorEl(e.currentTarget);
+    if (type === 'provider') {
+      setActionProvider(item as Provider);
+      setActionModel(null);
+      setActionSpace(null);
+    } else if (type === 'model') {
+      setActionModel(item as ModelDefWithProvider);
+      setActionProvider(null);
+      setActionSpace(null);
+    } else {
+      setActionSpace(item as EmbeddingSpaceWithModel);
+      setActionProvider(null);
+      setActionModel(null);
+    }
+  };
+
+  const closeActionsMenu = () => {
+    setActionAnchorEl(null);
+    setActionProvider(null);
+    setActionModel(null);
+    setActionSpace(null);
   };
 
   const normalizeList = (data: any): any[] => {
@@ -496,31 +531,7 @@ const ModelManagementPage: React.FC = () => {
           >
             Refresh
           </Button>
-        </Box>
-      </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
-      <Tabs
-        value={activeTab}
-        onChange={(_, v) => setActiveTab(v)}
-        variant="scrollable"
-        scrollButtons="auto"
-        sx={{ mb: 2 }}
-      >
-        <Tab value="providers" label="Providers" />
-        <Tab value="models" label="Models" />
-        <Tab value="spaces" label="Embedding Spaces" />
-      </Tabs>
-
-      {/* Providers */}
-      {activeTab === 'providers' && (
-        <Box>
-          <Box sx={{ mb: 2 }}>
+          {activeTab === 'providers' && (
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -538,100 +549,10 @@ const ModelManagementPage: React.FC = () => {
                 setProviderDialogOpen(true);
               }}
             >
-              Add Provider
+              Create Provider
             </Button>
-          </Box>
-
-          {loading ? (
-            <List>
-              <ListItem>
-                <CircularProgress size={20} sx={{ mr: 2 }} />
-                <ListItemText primary="Loading providers..." />
-              </ListItem>
-            </List>
-          ) : providers.length === 0 ? (
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="No providers found"
-                  secondary="Add a provider to get started"
-                />
-              </ListItem>
-            </List>
-          ) : (
-            <List>
-              {providers.map((p) => (
-                <ListItem key={p.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {p.display_name}
-                        </Typography>
-                        <Chip
-                          size="small"
-                          label={p.is_active ? 'Active' : 'Inactive'}
-                          color={p.is_active ? 'success' : 'default'}
-                        />
-                        {p.is_default && (
-                          <Chip size="small" label="Default" color="primary" />
-                        )}
-                      </Box>
-                    }
-                    secondary={
-                      <>
-                        <Typography variant="body2" color="text.secondary">
-                          {p.name} ({p.provider_type})
-                        </Typography>
-                        {p.description && (
-                          <Typography variant="body2" color="text.secondary">
-                            {p.description}
-                          </Typography>
-                        )}
-                      </>
-                    }
-                  />
-                  <ListItemSecondaryAction>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Tooltip title="Edit provider">
-                        <IconButton onClick={() => handleEditProvider(p)}>
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete provider">
-                        <IconButton onClick={() => handleDeleteProvider(p)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                      {!p.is_default && (
-                        <Tooltip title="Set as default">
-                          <IconButton onClick={() => handleSetDefaultProvider(p.id)}>
-                            <NotDefaultIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      {p.is_default && (
-                        <Tooltip title="Default provider">
-                          <span>
-                            <IconButton disabled>
-                              <DefaultIcon color="primary" />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-                      )}
-                    </Box>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
           )}
-        </Box>
-      )}
-
-      {/* Models */}
-      {activeTab === 'models' && (
-        <Box>
-          <Box sx={{ mb: 2 }}>
+          {activeTab === 'models' && (
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -652,115 +573,10 @@ const ModelManagementPage: React.FC = () => {
               }}
               disabled={providers.length === 0}
             >
-              Add Model
+              Create Model
             </Button>
-            {providers.length === 0 && (
-              <Typography variant="body2" color="text.secondary" sx={{ ml: 2, display: 'inline' }}>
-                Add a provider first to create models
-              </Typography>
-            )}
-          </Box>
-
-          {loading ? (
-            <List>
-              <ListItem>
-                <CircularProgress size={20} sx={{ mr: 2 }} />
-                <ListItemText primary="Loading models..." />
-              </ListItem>
-            </List>
-          ) : models.length === 0 ? (
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="No models found"
-                  secondary="Add a model to get started"
-                />
-              </ListItem>
-            </List>
-          ) : (
-            <List>
-              {models.map((m) => (
-                <ListItem key={m.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {m.display_name}
-                        </Typography>
-                        <Chip
-                          size="small"
-                          label={m.is_active ? 'Active' : 'Inactive'}
-                          color={m.is_active ? 'success' : 'default'}
-                        />
-                        {m.is_default && (
-                          <Chip size="small" label="Default" color="primary" />
-                        )}
-                      </Box>
-                    }
-                    secondary={
-                      <Grid container spacing={0.5}>
-                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            {m.name} ({m.model_type}) • Provider: {m.provider?.display_name || '—'}
-                          </Typography>
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            API Model: {m.model_name}{' '}
-                            {m.dimensions ? `• Dimensions: ${m.dimensions}` : ''}
-                          </Typography>
-                        </Grid>
-                        {m.description && (
-                          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                            <Typography variant="body2" color="text.secondary">
-                              {m.description}
-                            </Typography>
-                          </Grid>
-                        )}
-                      </Grid>
-                    }
-                  />
-                  <ListItemSecondaryAction>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Tooltip title="Edit model">
-                        <IconButton onClick={() => handleEditModel(m)}>
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete model">
-                        <IconButton onClick={() => handleDeleteModel(m)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                      {!m.is_default && (
-                        <Tooltip title="Set as default">
-                          <IconButton onClick={() => handleSetDefaultModel(m.id)}>
-                            <NotDefaultIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      {m.is_default && (
-                        <Tooltip title="Default model">
-                          <span>
-                            <IconButton disabled>
-                              <DefaultIcon color="primary" />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-                      )}
-                    </Box>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
           )}
-        </Box>
-      )}
-
-      {/* Embedding Spaces */}
-      {activeTab === 'spaces' && (
-        <Box>
-          <Box sx={{ mb: 2 }}>
+          {activeTab === 'spaces' && (
             <Button
               variant="contained"
               startIcon={<AddIcon />}
@@ -785,114 +601,395 @@ const ModelManagementPage: React.FC = () => {
               }}
               disabled={embeddingModels.length === 0}
             >
-              Add Embedding Space
+              Create Space
             </Button>
-            {embeddingModels.length === 0 && (
-              <Typography variant="body2" color="text.secondary" sx={{ ml: 2, display: 'inline' }}>
-                Create an embedding model first
-              </Typography>
-            )}
-          </Box>
+          )}
+        </Box>
+      </Box>
 
-          {loading ? (
-            <List>
-              <ListItem>
-                <CircularProgress size={20} sx={{ mr: 2 }} />
-                <ListItemText primary="Loading embedding spaces..." />
-              </ListItem>
-            </List>
-          ) : spaces.length === 0 ? (
-            <List>
-              <ListItem>
-                <ListItemText
-                  primary="No embedding spaces found"
-                  secondary="Add an embedding space to get started"
-                />
-              </ListItem>
-            </List>
-          ) : (
-            <List>
-              {spaces.map((s) => (
-                <ListItem key={s.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                          {s.display_name}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      <Tabs
+        value={activeTab}
+        onChange={(_, v) => setActiveTab(v)}
+        variant="scrollable"
+        scrollButtons="auto"
+        sx={{ mb: 2 }}
+      >
+        <Tab value="providers" label="Providers" />
+        <Tab value="models" label="Models" />
+        <Tab value="spaces" label="Embedding Spaces" />
+      </Tabs>
+
+      {/* Providers */}
+      {activeTab === 'providers' && (
+        <Card>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                        <CircularProgress size={40} />
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ) : providers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} align="center">
+                      <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                        No providers found. Create a provider to get started.
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  providers.map((p) => (
+                    <TableRow key={p.id} hover>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box>
+                            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                              {p.display_name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {p.name}
+                            </Typography>
+                          </Box>
+                          {p.is_default && (
+                            <Chip size="small" label="Default" color="primary" />
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={p.provider_type}
+                          color="secondary"
+                          variant="outlined"
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          label={p.is_active ? 'Active' : 'Inactive'}
+                          color={p.is_active ? 'success' : 'default'}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary">
+                          {p.description || '—'}
                         </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          size="small"
+                          onClick={(e) => openActionsMenu(e, p, 'provider')}
+                          color="primary"
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+      )}
+
+      {/* Models */}
+      {activeTab === 'models' && (
+        <Card>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Provider</TableCell>
+                  <TableCell>Type</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>API Model</TableCell>
+                  <TableCell>Dimensions</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                        <CircularProgress size={40} />
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ) : models.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                        No models found. Create a model to get started.
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  models.map((m) => (
+                    <TableRow key={m.id} hover>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box>
+                            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                              {m.display_name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {m.name}
+                            </Typography>
+                          </Box>
+                          {m.is_default && (
+                            <Chip size="small" label="Default" color="primary" />
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {m.provider?.display_name || '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={m.model_type}
+                          color="secondary"
+                          variant="outlined"
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          size="small"
+                          label={m.is_active ? 'Active' : 'Inactive'}
+                          color={m.is_active ? 'success' : 'default'}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                          {m.model_name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {m.dimensions ? m.dimensions.toLocaleString() : '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          size="small"
+                          onClick={(e) => openActionsMenu(e, m, 'model')}
+                          color="primary"
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
+      )}
+
+      {/* Embedding Spaces */}
+      {activeTab === 'spaces' && (
+        <Card>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Model</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Dimensions</TableCell>
+                  <TableCell>Strategy</TableCell>
+                  <TableCell>Metric</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+                        <CircularProgress size={40} />
+                      </Box>
+                    </TableCell>
+                  </TableRow>
+                ) : spaces.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} align="center">
+                      <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                        No embedding spaces found. Create an embedding space to get started.
+                      </Typography>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  spaces.map((s) => (
+                    <TableRow key={s.id} hover>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Box>
+                            <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                              {s.display_name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              {s.name} • Table: {s.table_name}
+                            </Typography>
+                          </Box>
+                          {s.is_default && (
+                            <Chip size="small" label="Default" color="primary" />
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {s.model?.display_name || '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
                         <Chip
                           size="small"
                           label={s.is_active ? 'Active' : 'Inactive'}
                           color={s.is_active ? 'success' : 'default'}
                         />
-                        {s.is_default && (
-                          <Chip size="small" label="Default" color="primary" />
-                        )}
-                      </Box>
-                    }
-                    secondary={
-                      <Grid container spacing={0.5}>
-                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            {s.name} • Model: {s.model?.display_name || '—'}
-                          </Typography>
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            Dimensions: {s.base_dimensions} → {s.effective_dimensions} • Strategy: {s.reduction_strategy} • Metric: {s.distance_metric} • Index: {s.index_type}
-                          </Typography>
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                          <Typography variant="body2" color="text.secondary">
-                            Table: {s.table_name}
-                          </Typography>
-                        </Grid>
-                        {s.description && (
-                          <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                            <Typography variant="body2" color="text.secondary">
-                              {s.description}
-                            </Typography>
-                          </Grid>
-                        )}
-                      </Grid>
-                    }
-                  />
-                  <ListItemSecondaryAction>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                      <Tooltip title="Edit embedding space">
-                        <IconButton onClick={() => handleEditSpace(s)}>
-                          <EditIcon />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {s.base_dimensions} → {s.effective_dimensions}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={s.reduction_strategy}
+                          color="secondary"
+                          variant="outlined"
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {s.distance_metric}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="center">
+                        <IconButton
+                          size="small"
+                          onClick={(e) => openActionsMenu(e, s, 'space')}
+                          color="primary"
+                        >
+                          <MoreVertIcon />
                         </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete embedding space">
-                        <IconButton onClick={() => handleDeleteSpace(s)}>
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
-                      {!s.is_default && (
-                        <Tooltip title="Set as default">
-                          <IconButton onClick={() => handleSetDefaultSpace(s.id)}>
-                            <NotDefaultIcon />
-                          </IconButton>
-                        </Tooltip>
-                      )}
-                      {s.is_default && (
-                        <Tooltip title="Default space">
-                          <span>
-                            <IconButton disabled>
-                              <DefaultIcon color="primary" />
-                            </IconButton>
-                          </span>
-                        </Tooltip>
-                      )}
-                    </Box>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Card>
       )}
+
+      {/* Actions Menu */}
+      <Menu
+        anchorEl={actionAnchorEl}
+        open={Boolean(actionAnchorEl)}
+        onClose={closeActionsMenu}
+      >
+        <MenuItem
+          onClick={() => {
+            if (actionProvider) {
+              handleEditProvider(actionProvider);
+            } else if (actionModel) {
+              handleEditModel(actionModel);
+            } else if (actionSpace) {
+              handleEditSpace(actionSpace);
+            }
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          Edit
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            if (actionProvider) {
+              handleDeleteProvider(actionProvider);
+            } else if (actionModel) {
+              handleDeleteModel(actionModel);
+            } else if (actionSpace) {
+              handleDeleteSpace(actionSpace);
+            }
+            closeActionsMenu();
+          }}
+        >
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+        {(actionProvider && !actionProvider.is_default) && (
+          <MenuItem
+            onClick={() => {
+              if (actionProvider) handleSetDefaultProvider(actionProvider.id);
+              closeActionsMenu();
+            }}
+          >
+            <ListItemIcon>
+              <NotDefaultIcon fontSize="small" />
+            </ListItemIcon>
+            Set as Default
+          </MenuItem>
+        )}
+        {(actionModel && !actionModel.is_default) && (
+          <MenuItem
+            onClick={() => {
+              if (actionModel) handleSetDefaultModel(actionModel.id);
+              closeActionsMenu();
+            }}
+          >
+            <ListItemIcon>
+              <NotDefaultIcon fontSize="small" />
+            </ListItemIcon>
+            Set as Default
+          </MenuItem>
+        )}
+        {(actionSpace && !actionSpace.is_default) && (
+          <MenuItem
+            onClick={() => {
+              if (actionSpace) handleSetDefaultSpace(actionSpace.id);
+              closeActionsMenu();
+            }}
+          >
+            <ListItemIcon>
+              <NotDefaultIcon fontSize="small" />
+            </ListItemIcon>
+            Set as Default
+          </MenuItem>
+        )}
+      </Menu>
 
       {/* Provider Dialog */}
       <Dialog open={providerDialogOpen} onClose={handleProviderDialogClose} maxWidth="sm" fullWidth>

@@ -1,0 +1,565 @@
+"""Model and embedding registry endpoints."""
+
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from chatter.api.auth import get_current_user
+from chatter.core.model_registry import ModelRegistryService, ListParams
+from chatter.models.registry import ModelType, ProviderType
+from chatter.models.user import User
+from chatter.schemas.model_registry import (
+    Provider,
+    ProviderCreate,
+    ProviderUpdate,
+    ProviderList,
+    ModelDef,
+    ModelDefCreate,
+    ModelDefUpdate,
+    ModelDefList,
+    ModelDefWithProvider,
+    EmbeddingSpace,
+    EmbeddingSpaceCreate,
+    EmbeddingSpaceUpdate,
+    EmbeddingSpaceList,
+    EmbeddingSpaceWithModel,
+    DefaultProvider,
+    DefaultModel,
+    DefaultEmbeddingSpace,
+)
+from chatter.utils.database import get_session
+from chatter.utils.logging import get_logger
+
+logger = get_logger(__name__)
+router = APIRouter()
+
+
+# Provider endpoints
+@router.get("/providers", response_model=ProviderList)
+async def list_providers(
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(20, ge=1, le=100, description="Items per page"),
+    active_only: bool = Query(True, description="Show only active providers"),
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """List all providers."""
+    service = ModelRegistryService(session)
+    params = ListParams(page=page, per_page=per_page, active_only=active_only)
+    
+    providers, total = await service.list_providers(params)
+    
+    return ProviderList(
+        providers=providers,
+        total=total,
+        page=page,
+        per_page=per_page
+    )
+
+
+@router.get("/providers/{provider_id}", response_model=Provider)
+async def get_provider(
+    provider_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Get a specific provider."""
+    service = ModelRegistryService(session)
+    provider = await service.get_provider(provider_id)
+    
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Provider not found"
+        )
+    
+    return provider
+
+
+@router.post("/providers", response_model=Provider, status_code=status.HTTP_201_CREATED)
+async def create_provider(
+    provider_data: ProviderCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Create a new provider."""
+    service = ModelRegistryService(session)
+    
+    # Check if provider name already exists
+    existing = await service.get_provider_by_name(provider_data.name)
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Provider with this name already exists"
+        )
+    
+    provider = await service.create_provider(provider_data)
+    logger.info(
+        "Created provider",
+        provider_id=provider.id,
+        provider_name=provider.name,
+        user_id=current_user.id
+    )
+    
+    return provider
+
+
+@router.put("/providers/{provider_id}", response_model=Provider)
+async def update_provider(
+    provider_id: str,
+    provider_data: ProviderUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Update a provider."""
+    service = ModelRegistryService(session)
+    provider = await service.update_provider(provider_id, provider_data)
+    
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Provider not found"
+        )
+    
+    logger.info(
+        "Updated provider",
+        provider_id=provider.id,
+        provider_name=provider.name,
+        user_id=current_user.id
+    )
+    
+    return provider
+
+
+@router.delete("/providers/{provider_id}")
+async def delete_provider(
+    provider_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Delete a provider."""
+    service = ModelRegistryService(session)
+    deleted = await service.delete_provider(provider_id)
+    
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Provider not found"
+        )
+    
+    logger.info(
+        "Deleted provider",
+        provider_id=provider_id,
+        user_id=current_user.id
+    )
+    
+    return {"message": "Provider deleted successfully"}
+
+
+@router.post("/providers/{provider_id}/set-default")
+async def set_default_provider(
+    provider_id: str,
+    default_data: DefaultProvider,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Set a provider as default for a model type."""
+    service = ModelRegistryService(session)
+    success = await service.set_default_provider(provider_id, default_data.model_type)
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Provider not found"
+        )
+    
+    logger.info(
+        "Set default provider",
+        provider_id=provider_id,
+        model_type=default_data.model_type,
+        user_id=current_user.id
+    )
+    
+    return {"message": "Default provider set successfully"}
+
+
+# Model endpoints
+@router.get("/models", response_model=ModelDefList)
+async def list_models(
+    provider_id: str = Query(None, description="Filter by provider ID"),
+    model_type: ModelType = Query(None, description="Filter by model type"),
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(20, ge=1, le=100, description="Items per page"),
+    active_only: bool = Query(True, description="Show only active models"),
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """List all model definitions."""
+    service = ModelRegistryService(session)
+    params = ListParams(page=page, per_page=per_page, active_only=active_only)
+    
+    models, total = await service.list_models(provider_id, model_type, params)
+    
+    return ModelDefList(
+        models=models,
+        total=total,
+        page=page,
+        per_page=per_page
+    )
+
+
+@router.get("/models/{model_id}", response_model=ModelDefWithProvider)
+async def get_model(
+    model_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Get a specific model definition."""
+    service = ModelRegistryService(session)
+    model = await service.get_model(model_id)
+    
+    if not model:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found"
+        )
+    
+    return model
+
+
+@router.post("/models", response_model=ModelDefWithProvider, status_code=status.HTTP_201_CREATED)
+async def create_model(
+    model_data: ModelDefCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Create a new model definition."""
+    service = ModelRegistryService(session)
+    
+    # Check if model name already exists for this provider
+    existing = await service.get_model_by_name(model_data.provider_id, model_data.name)
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Model with this name already exists for this provider"
+        )
+    
+    model = await service.create_model(model_data)
+    
+    # Refresh to get provider relationship
+    model = await service.get_model(model.id)
+    
+    logger.info(
+        "Created model",
+        model_id=model.id,
+        model_name=model.name,
+        provider_id=model.provider_id,
+        user_id=current_user.id
+    )
+    
+    return model
+
+
+@router.put("/models/{model_id}", response_model=ModelDefWithProvider)
+async def update_model(
+    model_id: str,
+    model_data: ModelDefUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Update a model definition."""
+    service = ModelRegistryService(session)
+    model = await service.update_model(model_id, model_data)
+    
+    if not model:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found"
+        )
+    
+    # Refresh to get provider relationship
+    model = await service.get_model(model.id)
+    
+    logger.info(
+        "Updated model",
+        model_id=model.id,
+        model_name=model.name,
+        user_id=current_user.id
+    )
+    
+    return model
+
+
+@router.delete("/models/{model_id}")
+async def delete_model(
+    model_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Delete a model definition."""
+    service = ModelRegistryService(session)
+    deleted = await service.delete_model(model_id)
+    
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found"
+        )
+    
+    logger.info(
+        "Deleted model",
+        model_id=model_id,
+        user_id=current_user.id
+    )
+    
+    return {"message": "Model deleted successfully"}
+
+
+@router.post("/models/{model_id}/set-default")
+async def set_default_model(
+    model_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Set a model as default for its type."""
+    service = ModelRegistryService(session)
+    success = await service.set_default_model(model_id)
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Model not found"
+        )
+    
+    logger.info(
+        "Set default model",
+        model_id=model_id,
+        user_id=current_user.id
+    )
+    
+    return {"message": "Default model set successfully"}
+
+
+# Embedding space endpoints
+@router.get("/embedding-spaces", response_model=EmbeddingSpaceList)
+async def list_embedding_spaces(
+    model_id: str = Query(None, description="Filter by model ID"),
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(20, ge=1, le=100, description="Items per page"),
+    active_only: bool = Query(True, description="Show only active spaces"),
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """List all embedding spaces."""
+    service = ModelRegistryService(session)
+    params = ListParams(page=page, per_page=per_page, active_only=active_only)
+    
+    spaces, total = await service.list_embedding_spaces(model_id, params)
+    
+    return EmbeddingSpaceList(
+        spaces=spaces,
+        total=total,
+        page=page,
+        per_page=per_page
+    )
+
+
+@router.get("/embedding-spaces/{space_id}", response_model=EmbeddingSpaceWithModel)
+async def get_embedding_space(
+    space_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Get a specific embedding space."""
+    service = ModelRegistryService(session)
+    space = await service.get_embedding_space(space_id)
+    
+    if not space:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Embedding space not found"
+        )
+    
+    return space
+
+
+@router.post("/embedding-spaces", response_model=EmbeddingSpaceWithModel, status_code=status.HTTP_201_CREATED)
+async def create_embedding_space(
+    space_data: EmbeddingSpaceCreate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Create a new embedding space with backing table and index."""
+    service = ModelRegistryService(session)
+    
+    # Check if space name already exists
+    existing = await service.get_embedding_space_by_name(space_data.name)
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Embedding space with this name already exists"
+        )
+    
+    try:
+        space = await service.create_embedding_space(space_data)
+        
+        # Refresh to get full relationships
+        space = await service.get_embedding_space(space.id)
+        
+        logger.info(
+            "Created embedding space",
+            space_id=space.id,
+            space_name=space.name,
+            table_name=space.table_name,
+            model_id=space.model_id,
+            user_id=current_user.id
+        )
+        
+        return space
+    except Exception as e:
+        logger.error(
+            "Failed to create embedding space",
+            space_name=space_data.name,
+            error=str(e),
+            user_id=current_user.id
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create embedding space: {str(e)}"
+        )
+
+
+@router.put("/embedding-spaces/{space_id}", response_model=EmbeddingSpaceWithModel)
+async def update_embedding_space(
+    space_id: str,
+    space_data: EmbeddingSpaceUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Update an embedding space."""
+    service = ModelRegistryService(session)
+    space = await service.update_embedding_space(space_id, space_data)
+    
+    if not space:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Embedding space not found"
+        )
+    
+    # Refresh to get full relationships
+    space = await service.get_embedding_space(space.id)
+    
+    logger.info(
+        "Updated embedding space",
+        space_id=space.id,
+        space_name=space.name,
+        user_id=current_user.id
+    )
+    
+    return space
+
+
+@router.delete("/embedding-spaces/{space_id}")
+async def delete_embedding_space(
+    space_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Delete an embedding space (does not drop the table)."""
+    service = ModelRegistryService(session)
+    deleted = await service.delete_embedding_space(space_id)
+    
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Embedding space not found"
+        )
+    
+    logger.info(
+        "Deleted embedding space",
+        space_id=space_id,
+        user_id=current_user.id
+    )
+    
+    return {"message": "Embedding space deleted successfully"}
+
+
+@router.post("/embedding-spaces/{space_id}/set-default")
+async def set_default_embedding_space(
+    space_id: str,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Set an embedding space as default."""
+    service = ModelRegistryService(session)
+    success = await service.set_default_embedding_space(space_id)
+    
+    if not success:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Embedding space not found"
+        )
+    
+    logger.info(
+        "Set default embedding space",
+        space_id=space_id,
+        user_id=current_user.id
+    )
+    
+    return {"message": "Default embedding space set successfully"}
+
+
+# Default lookup endpoints
+@router.get("/defaults/provider/{model_type}", response_model=Provider)
+async def get_default_provider(
+    model_type: ModelType,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Get the default provider for a model type."""
+    service = ModelRegistryService(session)
+    provider = await service.get_default_provider(model_type)
+    
+    if not provider:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No default provider found for {model_type}"
+        )
+    
+    return provider
+
+
+@router.get("/defaults/model/{model_type}", response_model=ModelDefWithProvider)
+async def get_default_model(
+    model_type: ModelType,
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Get the default model for a type."""
+    service = ModelRegistryService(session)
+    model = await service.get_default_model(model_type)
+    
+    if not model:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No default model found for {model_type}"
+        )
+    
+    return model
+
+
+@router.get("/defaults/embedding-space", response_model=EmbeddingSpaceWithModel)
+async def get_default_embedding_space(
+    session: AsyncSession = Depends(get_session),
+    current_user: User = Depends(get_current_user),
+):
+    """Get the default embedding space."""
+    service = ModelRegistryService(session)
+    space = await service.get_default_embedding_space()
+    
+    if not space:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No default embedding space found"
+        )
+    
+    return space

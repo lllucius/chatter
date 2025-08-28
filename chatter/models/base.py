@@ -139,3 +139,6 @@ class Keys(str, Enum):
     DOCUMENT_STATS = "document_stats.id"
     PROMPT_STATS = "prompt_stats.id"
     PROFILE_STATS = "profile_stats.id"
+    PROVIDERS = "providers.id"
+    MODEL_DEFS = "model_defs.id"
+    EMBEDDING_SPACES = "embedding_spaces.id"

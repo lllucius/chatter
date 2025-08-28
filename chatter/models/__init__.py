@@ -10,6 +10,15 @@ from chatter.models.conversation import Conversation, Message
 from chatter.models.document import Document, DocumentChunk
 from chatter.models.profile import Profile
 from chatter.models.prompt import Prompt
+from chatter.models.registry import (
+    Provider,
+    ModelDef,
+    EmbeddingSpace,
+    ProviderType,
+    ModelType,
+    DistanceMetric,
+    ReductionStrategy,
+)
 from chatter.models.toolserver import ServerTool, ToolServer, ToolUsage
 from chatter.models.user import User
 
@@ -28,4 +37,11 @@ __all__ = [
     "ToolServer",
     "ServerTool",
     "ToolUsage",
+    "Provider",
+    "ModelDef",
+    "EmbeddingSpace",
+    "ProviderType",
+    "ModelType",
+    "DistanceMetric",
+    "ReductionStrategy",
 ]

@@ -354,6 +354,7 @@ def create_app() -> FastAPI:
         events,
         health,
         jobs,
+        model_registry,
         plugins,
         profiles,
         prompts,
@@ -437,6 +438,12 @@ def create_app() -> FastAPI:
         data_management.router,
         prefix=f"{settings.api_prefix}/data",
         tags=["Data Management"],
+    )
+
+    app.include_router(
+        model_registry.router,
+        prefix=f"{settings.api_prefix}/models",
+        tags=["Model Registry"],
     )
 
     # Mount static files for the web interface

@@ -231,9 +231,9 @@ class ChatService:
         # Provider
         try:
             provider = (
-                self.llm_service.get_provider(chat_request.provider)
+                await self.llm_service.get_provider(chat_request.provider)
                 if chat_request.provider
-                else self.llm_service.get_default_provider()
+                else await self.llm_service.get_default_provider()
             )
         except LLMProviderError as e:
             raise ChatError(str(e)) from e
@@ -286,9 +286,9 @@ class ChatService:
         # Provider
         try:
             provider = (
-                self.llm_service.get_provider(chat_request.provider)
+                await self.llm_service.get_provider(chat_request.provider)
                 if chat_request.provider
-                else self.llm_service.get_default_provider()
+                else await self.llm_service.get_default_provider()
             )
         except LLMProviderError as e:
             yield {"type": "error", "error": str(e)}

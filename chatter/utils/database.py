@@ -150,7 +150,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
             logger.debug("Error in final session cleanup", error=str(e))
 
 
-async def _create_default_registry_data(session: AsyncSession, admin_user_id: str) -> None:
+async def _create_default_registry_data(session: AsyncSession) -> None:
     """Create default provider, models, and embedding spaces for the registry."""
     from sqlalchemy import select
     
@@ -706,7 +706,7 @@ Please create an improved prompt that addresses these meta-considerations.""",
         await session.commit()
 
         # Create default provider, models, and embedding spaces
-        await _create_default_registry_data(session, admin_user.id)
+        await _create_default_registry_data(session)
 
         logger.info(
             "Default data initialization completed successfully"

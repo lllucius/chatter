@@ -54,7 +54,7 @@ export function useApi<T>(
     if (immediate) {
       execute();
     }
-  }, [immediate, execute]);
+  }, [immediate]);
 
   return {
     data,

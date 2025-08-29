@@ -19,6 +19,7 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
+from chatter.models.user import User  # Import User from correct module
 
 
 class MessageRole(str, Enum):

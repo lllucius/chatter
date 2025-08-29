@@ -63,8 +63,9 @@ class ConfigurationValidator:
                 self.errors.append("DATABASE_URL format is invalid")
 
             # Check for default/weak credentials
+            weak_passwords = ["chatter_password", "password", "admin", "CHANGE_THIS_PASSWORD", "change_me"]
             if (parsed.username in ["chatter", "postgres", "admin"] and
-                parsed.password in ["chatter_password", "password", "admin"]):
+                parsed.password in weak_passwords):
                 self.errors.append(
                     "Database is using default/weak credentials. "
                     "Change username and password for security."
@@ -82,7 +83,14 @@ class ConfigurationValidator:
     def _validate_security_settings(self) -> None:
         """Validate security configuration."""
         # Check secret key strength
-        if (settings.secret_key == "your_super_secret_key_here_change_this_in_production" or
+        default_keys = [
+            "your_super_secret_key_here_change_this_in_production",
+            "CHANGE_THIS_SECRET_KEY_IN_PRODUCTION",
+            "change_me",
+            "secret",
+            "default"
+        ]
+        if (settings.secret_key in default_keys or
             len(settings.secret_key) < 32):
             self.errors.append(
                 "SECRET_KEY is too weak or using default value. "

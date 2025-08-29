@@ -301,11 +301,17 @@ async def initialize_default_data() -> None:
             "Virgin database detected, initializing default data"
         )
 
-        # Create admin user
+        # Create admin user with secure random password
+        import secrets
+        import string
+        
+        # Generate a secure random password
+        admin_password = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$%^&*") for _ in range(16))
+        
         admin_user = User(
             email="admin@admin.net",
             username="admin",
-            hashed_password=hash_password("admin123"),
+            hashed_password=hash_password(admin_password),
             full_name="System Administrator",
             is_active=True,
             is_verified=True,
@@ -317,6 +323,11 @@ async def initialize_default_data() -> None:
         await session.refresh(admin_user)
 
         logger.info("Created admin user", user_id=admin_user.id)
+        logger.warning(
+            "IMPORTANT: Admin user created with random password. "
+            f"Email: admin@admin.net, Password: {admin_password}. "
+            "Please change this password immediately after first login!"
+        )
 
         # Create default prompts
         default_prompts = [

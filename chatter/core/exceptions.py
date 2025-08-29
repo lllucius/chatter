@@ -387,3 +387,9 @@ def create_error_response(error: Exception) -> Dict[str, Any]:
             error=error
         )
         return chatter_error.to_problem_detail().model_dump(exclude_none=True)
+
+
+# Alias for backward compatibility with tests
+ChatterBaseException = ChatterError
+DatabaseError = ServiceError
+RateLimitError = ServiceError

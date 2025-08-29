@@ -342,7 +342,7 @@ class TestCacheUtilities:
         """Set up test fixtures."""
         self.cache_service = CacheService()
 
-    def test_key_validation(self):
+    async def test_key_validation(self):
         """Test cache key validation."""
         # Valid keys
         valid_keys = [
@@ -367,7 +367,7 @@ class TestCacheUtilities:
         for key in invalid_keys:
             assert not self.cache_service.is_valid_key(key)
 
-    def test_cache_statistics(self):
+    async def test_cache_statistics(self):
         """Test cache statistics collection."""
         with patch('aioredis.Redis') as mock_redis:
             mock_client = AsyncMock()
@@ -387,7 +387,7 @@ class TestCacheUtilities:
             assert stats["hit_rate"] == 0.909  # 1000/(1000+100)
             assert stats["connected_clients"] == 5
 
-    def test_cache_warming(self):
+    async def test_cache_warming(self):
         """Test cache warming functionality."""
         with patch('aioredis.Redis') as mock_redis:
             mock_client = AsyncMock()
@@ -407,7 +407,7 @@ class TestCacheUtilities:
             # Should have called set for each item
             assert mock_client.set.call_count == len(warm_data)
 
-    def test_cache_invalidation(self):
+    async def test_cache_invalidation(self):
         """Test cache invalidation strategies."""
         with patch('aioredis.Redis') as mock_redis:
             mock_client = AsyncMock()

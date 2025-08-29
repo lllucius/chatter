@@ -516,3 +516,63 @@ def validate_user_input(data: dict[str, Any]) -> dict[str, Any]:
         field_rules["api_key"] = "api_key"
 
     return input_validator.validate_dict(data, field_rules)
+
+
+# Standalone validation functions for backward compatibility
+def validate_email(email: str) -> bool:
+    """Validate email address format.
+    
+    Args:
+        email: Email address to validate
+        
+    Returns:
+        True if email is valid, False otherwise
+    """
+    try:
+        input_validator.validate_and_sanitize(email, "email")
+        return True
+    except ValidationError:
+        return False
+
+
+def validate_username(username: str) -> bool:
+    """Validate username format.
+    
+    Args:
+        username: Username to validate
+        
+    Returns:
+        True if username is valid, False otherwise
+    """
+    try:
+        input_validator.validate_and_sanitize(username, "username")
+        return True
+    except ValidationError:
+        return False
+
+
+def validate_password(password: str) -> dict[str, Any]:
+    """Validate password strength.
+    
+    Args:
+        password: Password to validate
+        
+    Returns:
+        Dictionary with validation results including valid, errors, and score
+    """
+    from chatter.utils.security import validate_password_strength
+    return validate_password_strength(password)
+
+
+def sanitize_input(input_string: str, max_length: int = 1000) -> str:
+    """Sanitize user input by removing potentially dangerous characters.
+    
+    Args:
+        input_string: Input string to sanitize
+        max_length: Maximum allowed length
+        
+    Returns:
+        Sanitized string
+    """
+    from chatter.utils.security import sanitize_input as sec_sanitize
+    return sec_sanitize(input_string, max_length)

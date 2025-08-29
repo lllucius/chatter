@@ -261,3 +261,7 @@ def validate_startup_configuration() -> None:
     """
     validator = ConfigurationValidator()
     validator.validate_all()
+
+
+# Alias for backward compatibility with tests
+ConfigValidator = ConfigurationValidator

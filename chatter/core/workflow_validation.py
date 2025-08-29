@@ -10,6 +10,97 @@ from enum import Enum
 from chatter.core.exceptions import WorkflowValidationError, WorkflowConfigurationError
 
 
+class ValidationResult:
+    """Result of validation operation."""
+    
+    def __init__(self, valid: bool = True, errors: Optional[List[str]] = None):
+        self.valid = valid
+        self.errors = errors or []
+
+
+class ValidationRule:
+    """Base class for validation rules."""
+    
+    def __init__(self, name: str, message: str):
+        self.name = name
+        self.message = message
+    
+    def validate(self, value: Any) -> bool:
+        """Validate a value. Override in subclasses."""
+        return True
+
+
+class InputSanitizer:
+    """Sanitize and validate user inputs."""
+    
+    @staticmethod
+    def sanitize_text(text: str, max_length: int = 10000) -> str:
+        """Sanitize text input."""
+        if not text:
+            return ""
+        
+        # Remove null bytes and control characters
+        sanitized = "".join(
+            char for char in text
+            if ord(char) >= 32 or char in "\t\n\r"
+        )
+        
+        # Truncate to max length
+        sanitized = sanitized[:max_length]
+        
+        # Strip whitespace
+        return sanitized.strip()
+    
+    @staticmethod
+    def sanitize_html(html: str) -> str:
+        """Remove potentially dangerous HTML tags."""
+        # Basic HTML sanitization - remove script tags and other dangerous elements
+        import re
+        
+        # Remove script tags
+        html = re.sub(r'<script[^>]*>.*?</script>', '', html, flags=re.IGNORECASE | re.DOTALL)
+        
+        # Remove other dangerous tags
+        dangerous_tags = ['iframe', 'object', 'embed', 'link', 'meta', 'style']
+        for tag in dangerous_tags:
+            html = re.sub(f'<{tag}[^>]*>.*?</{tag}>', '', html, flags=re.IGNORECASE | re.DOTALL)
+            html = re.sub(f'<{tag}[^>]*/?>', '', html, flags=re.IGNORECASE)
+        
+        return html
+    
+    @staticmethod
+    def validate_input_length(text: str, max_length: int) -> ValidationResult:
+        """Validate input length."""
+        if len(text) > max_length:
+            return ValidationResult(
+                valid=False,
+                errors=[f"Input too long (maximum {max_length} characters)"]
+            )
+        return ValidationResult()
+    
+    @staticmethod  
+    def validate_no_suspicious_patterns(text: str) -> ValidationResult:
+        """Check for suspicious patterns in text."""
+        import re
+        
+        # Check for potential SQL injection patterns
+        sql_patterns = [
+            r'\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b',
+            r'[;\'"]\s*(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER)\b',
+            r'--\s*',
+            r'/\*.*?\*/',
+        ]
+        
+        for pattern in sql_patterns:
+            if re.search(pattern, text, re.IGNORECASE):
+                return ValidationResult(
+                    valid=False,
+                    errors=["Text contains potentially malicious patterns"]
+                )
+        
+        return ValidationResult()
+
+
 class WorkflowType(str, Enum):
     """Supported workflow types."""
     PLAIN = "plain"

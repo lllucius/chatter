@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from collections.abc import AsyncGenerator
 from typing import Any
 
@@ -9,6 +10,9 @@ from langchain_core.messages import AIMessage, BaseMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.langgraph import ConversationState, workflow_manager
+from chatter.core.workflow_performance import workflow_cache, lazy_tool_loader, performance_monitor
+from chatter.core.workflow_templates import WorkflowTemplateManager
+from chatter.core.workflow_validation import WorkflowValidator
 from chatter.models.conversation import (
     Conversation,
     ConversationStatus,
@@ -315,6 +319,128 @@ class ChatService:
             await self.add_message_to_conversation(conversation.id, user_id, full_content, role="assistant")
             await self.session.flush()
 
+    async def chat_with_template(
+        self, user_id: str, chat_request: ChatRequest, template_name: str
+    ) -> tuple[Conversation, Message]:
+        """Run a chat using a pre-configured workflow template."""
+        try:
+            # Get template configuration
+            template = WorkflowTemplateManager.get_template(template_name)
+            
+            # Ensure conversation
+            conversation = None
+            if chat_request.conversation_id:
+                conversation = await self.get_conversation(chat_request.conversation_id, user_id, include_messages=True)
+            if not conversation:
+                conversation = await self.create_conversation(
+                    user_id,
+                    ConversationCreateSchema(
+                        title=f"New {template.description}",
+                        description=f"Using template: {template_name}",
+                        profile_id=chat_request.profile_id,
+                        system_prompt=template.default_params.get("system_message"),
+                        enable_retrieval=template.workflow_type in ["rag", "full"],
+                    ),
+                )
+
+            # Resolve provider
+            provider_name = await self._resolve_provider_name(conversation, chat_request)
+            
+            # Get required resources
+            retriever = None
+            tools = None
+            
+            if template.required_retrievers:
+                retriever = await self._maybe_get_retriever(conversation, chat_request)
+                if not retriever:
+                    logger.warning(
+                        "Template requires retriever but none available",
+                        template=template_name,
+                        required_retrievers=template.required_retrievers
+                    )
+            
+            if template.required_tools:
+                # Load only required tools for efficiency
+                tools = await lazy_tool_loader.get_tools(template.required_tools)
+                missing_tools = [
+                    tool for tool in template.required_tools
+                    if not any(getattr(t, 'name', '') == tool for t in tools)
+                ]
+                if missing_tools:
+                    logger.warning(
+                        "Some required tools not available",
+                        template=template_name,
+                        missing_tools=missing_tools
+                    )
+            
+            # Create workflow from template
+            workflow = await WorkflowTemplateManager.create_workflow_from_template(
+                template_name=template_name,
+                llm_service=self.llm_service,
+                provider_name=provider_name,
+                overrides=getattr(chat_request, 'template_overrides', None),
+                retriever=retriever,
+                tools=tools
+            )
+            
+            # Persist user message
+            user_msg = await self.add_message_to_conversation(conversation.id, user_id, chat_request.message, role="user")
+
+            # Prepare messages
+            history_msgs: list[BaseMessage] = self.llm_service.convert_conversation_to_messages(
+                conversation, conversation.messages + [user_msg]
+            )
+
+            # Initial state
+            initial_state: ConversationState = {
+                "messages": history_msgs,
+                "user_id": user_id,
+                "conversation_id": conversation.id,
+                "retrieval_context": None,
+                "tool_calls": [],
+                "metadata": {"template_used": template_name},
+                "conversation_summary": None,
+                "parent_conversation_id": None,
+                "branch_id": None,
+                "memory_context": {},
+                "workflow_template": template_name,
+                "a_b_test_group": None,
+            }
+
+            # Run workflow
+            result = await workflow_manager.run_workflow(
+                workflow=workflow, initial_state=initial_state, thread_id=conversation.id
+            )
+
+            # Extract response
+            ai_message = self._extract_last_ai_message(result.get("messages", []))
+            content = ai_message.content if isinstance(ai_message, AIMessage) else (str(ai_message) if ai_message else "")
+
+            # Persist assistant message
+            assistant = await self.add_message_to_conversation(conversation.id, user_id, content, role="assistant")
+
+            await self.session.flush()
+            await self.session.refresh(conversation)
+            
+            return conversation, assistant
+            
+        except Exception as e:
+            logger.error(
+                "Template workflow execution failed",
+                template=template_name,
+                error=str(e),
+                user_id=user_id
+            )
+            raise
+
+    def get_available_templates(self) -> dict[str, Any]:
+        """Get information about available workflow templates."""
+        return WorkflowTemplateManager.get_template_info()
+
+    def get_performance_stats(self) -> dict[str, Any]:
+        """Get workflow performance statistics."""
+        return performance_monitor.get_performance_stats()
+
     # ------------
     # Unified workflow chat
     # ------------
@@ -323,81 +449,148 @@ class ChatService:
         self, user_id: str, chat_request: ChatRequest, workflow_type: str = "basic"
     ) -> tuple[Conversation, Message]:
         """Run a chat using LangGraph workflows: basic/plain, rag, tools, full."""
-        # Normalize workflow_type
-        mode = self._normalize_workflow(workflow_type)
+        # Generate unique ID for performance tracking
+        workflow_id = str(uuid.uuid4())
+        performance_monitor.start_workflow(workflow_id, workflow_type)
+        
+        try:
+            # Normalize workflow_type
+            mode = self._normalize_workflow(workflow_type)
 
-        # Ensure conversation
-        conversation = None
-        if chat_request.conversation_id:
-            conversation = await self.get_conversation(chat_request.conversation_id, user_id, include_messages=True)
-        if not conversation:
-            conversation = await self.create_conversation(
-                user_id,
-                ConversationCreateSchema(
-                    title="New Conversation",
-                    description=None,
-                    profile_id=chat_request.profile_id,
-                    system_prompt=chat_request.system_prompt_override,
-                    enable_retrieval=bool(chat_request.enable_retrieval),
-                ),
+            # Ensure conversation
+            conversation = None
+            if chat_request.conversation_id:
+                conversation = await self.get_conversation(chat_request.conversation_id, user_id, include_messages=True)
+            if not conversation:
+                conversation = await self.create_conversation(
+                    user_id,
+                    ConversationCreateSchema(
+                        title="New Conversation",
+                        description=None,
+                        profile_id=chat_request.profile_id,
+                        system_prompt=chat_request.system_prompt_override,
+                        enable_retrieval=bool(chat_request.enable_retrieval),
+                    ),
+                )
+
+            # Persist user message
+            user_msg = await self.add_message_to_conversation(conversation.id, user_id, chat_request.message, role="user")
+
+            # Prepare lc messages
+            history_msgs: list[BaseMessage] = self.llm_service.convert_conversation_to_messages(
+                conversation, conversation.messages + [user_msg]
             )
 
-        # Persist user message
-        user_msg = await self.add_message_to_conversation(conversation.id, user_id, chat_request.message, role="user")
+            # Resolve provider name (string) for workflow factory
+            provider_name = await self._resolve_provider_name(conversation, chat_request)
 
-        # Prepare lc messages
-        history_msgs: list[BaseMessage] = self.llm_service.convert_conversation_to_messages(
-            conversation, conversation.messages + [user_msg]
-        )
+            # Resolve retriever/tools as needed
+            retriever = await self._maybe_get_retriever(conversation, chat_request) if mode in ("rag", "full") else None
+            tools = await self._maybe_get_tools(conversation, chat_request) if mode in ("tools", "full") else None
 
-        # Resolve provider name (string) for workflow factory
-        provider_name = await self._resolve_provider_name(conversation, chat_request)
+            # Validate workflow configuration
+            try:
+                WorkflowValidator.validate_workflow_request(
+                    workflow_type=self._to_public_mode(mode),
+                    retriever=retriever,
+                    tools=tools,
+                    system_message=chat_request.system_prompt_override,
+                    enable_memory=False  # Conversations handle memory differently
+                )
+            except Exception as validation_error:
+                logger.warning(
+                    "Workflow validation failed",
+                    workflow_type=workflow_type,
+                    error=str(validation_error)
+                )
+                # Continue execution but log the validation issue
+            
+            # Check workflow cache for performance optimization
+            workflow_config = {
+                "system_message": chat_request.system_prompt_override or getattr(conversation, "system_prompt", None),
+                "enable_memory": False,
+                "retriever_available": retriever is not None,
+                "tools_count": len(tools) if tools else 0
+            }
+            
+            cached_workflow = workflow_cache.get(
+                provider_name=provider_name,
+                workflow_type=self._to_public_mode(mode),
+                config=workflow_config
+            )
+            
+            if cached_workflow:
+                workflow = cached_workflow
+                logger.debug("Using cached workflow", workflow_id=workflow_id)
+            else:
+                # Build workflow
+                workflow = await self.llm_service.create_langgraph_workflow(
+                    provider_name=provider_name,
+                    workflow_type=self._to_public_mode(mode),  # plain|rag|tools|full
+                    system_message=chat_request.system_prompt_override or getattr(conversation, "system_prompt", None),
+                    retriever=retriever,
+                    tools=tools,
+                    enable_memory=False,
+                )
+                
+                # Cache the workflow for future use
+                workflow_cache.put(
+                    provider_name=provider_name,
+                    workflow_type=self._to_public_mode(mode),
+                    config=workflow_config,
+                    workflow=workflow
+                )
+                logger.debug("Workflow compiled and cached", workflow_id=workflow_id)
 
-        # Resolve retriever/tools as needed
-        retriever = await self._maybe_get_retriever(conversation, chat_request) if mode in ("rag", "full") else None
-        tools = await self._maybe_get_tools(conversation, chat_request) if mode in ("tools", "full") else None
+            # Initial state
+            initial_state: ConversationState = {
+                "messages": history_msgs,
+                "user_id": user_id,
+                "conversation_id": conversation.id,
+                "retrieval_context": None,
+                "tool_calls": [],
+                "metadata": {},
+                "conversation_summary": None,
+                "parent_conversation_id": None,
+                "branch_id": None,
+                "memory_context": {},
+                "workflow_template": None,
+                "a_b_test_group": None,
+            }
 
-        # Build workflow
-        workflow = await self.llm_service.create_langgraph_workflow(
-            provider_name=provider_name,
-            workflow_type=self._to_public_mode(mode),  # plain|rag|tools|full
-            system_message=chat_request.system_prompt_override or getattr(conversation, "system_prompt", None),
-            retriever=retriever,
-            tools=tools,
-            enable_memory=False,
-        )
+            # Run the graph
+            result = await workflow_manager.run_workflow(
+                workflow=workflow, initial_state=initial_state, thread_id=conversation.id
+            )
 
-        # Initial state
-        initial_state: ConversationState = {
-            "messages": history_msgs,
-            "user_id": user_id,
-            "conversation_id": conversation.id,
-            "retrieval_context": None,
-            "tool_calls": [],
-            "metadata": {},
-            "conversation_summary": None,
-            "parent_conversation_id": None,
-            "branch_id": None,
-            "memory_context": {},
-            "workflow_template": None,
-            "a_b_test_group": None,
-        }
+            # Get the last AI message from result state
+            ai_message = self._extract_last_ai_message(result.get("messages", []))
+            content = ai_message.content if isinstance(ai_message, AIMessage) else (str(ai_message) if ai_message else "")
 
-        # Run the graph
-        result = await workflow_manager.run_workflow(
-            workflow=workflow, initial_state=initial_state, thread_id=conversation.id
-        )
+            # Persist assistant message
+            assistant = await self.add_message_to_conversation(conversation.id, user_id, content, role="assistant")
 
-        # Get the last AI message from result state
-        ai_message = self._extract_last_ai_message(result.get("messages", []))
-        content = ai_message.content if isinstance(ai_message, AIMessage) else (str(ai_message) if ai_message else "")
-
-        # Persist assistant message
-        assistant = await self.add_message_to_conversation(conversation.id, user_id, content, role="assistant")
-
-        await self.session.flush()
-        await self.session.refresh(conversation)
-        return conversation, assistant
+            await self.session.flush()
+            await self.session.refresh(conversation)
+            
+            # Track successful completion
+            performance_monitor.end_workflow(workflow_id, success=True)
+            
+            return conversation, assistant
+            
+        except Exception as e:
+            # Track failed execution
+            error_type = type(e).__name__
+            performance_monitor.end_workflow(workflow_id, success=False, error_type=error_type)
+            
+            logger.error(
+                "Workflow execution failed",
+                workflow_id=workflow_id,
+                workflow_type=workflow_type,
+                error=str(e),
+                user_id=user_id
+            )
+            raise
 
     async def chat_workflow_streaming(
         self, user_id: str, chat_request: ChatRequest, workflow_type: str = "basic"
@@ -464,30 +657,95 @@ class ChatService:
 
         # Stream the graph. This yields graph events rather than token chunks.
         full_content = ""
+        node_outputs = []
+        workflow_start_time = None
+        
         try:
+            workflow_start_time = __import__('time').time()
+            
             async for event in workflow_manager.stream_workflow(
                 workflow=workflow, initial_state=initial_state, thread_id=conversation.id
             ):
+                # Extract node information for better debugging
+                if isinstance(event, dict):
+                    for node_name, node_data in event.items():
+                        if node_name != "__end__":  # Skip end marker
+                            # Emit node start event
+                            yield {
+                                "type": "node_start",
+                                "node": node_name,
+                                "conversation_id": conversation.id,
+                            }
+                
                 # Try to extract any AIMessage appended in this event
                 values = event.get("values") or event.get("state") or {}
                 msgs = values.get("messages") if isinstance(values, dict) else None
                 if msgs:
                     last_ai = self._extract_last_ai_message(msgs)
                     if last_ai and isinstance(last_ai, AIMessage) and last_ai.content:
-                        # Emit as a single token chunk (coarse)
-                        full_content = last_ai.content
-                        yield {
-                            "type": "token",
-                            "content": last_ai.content,
-                            "conversation_id": conversation.id,
-                        }
+                        # Emit content as token chunks for better streaming experience
+                        content = last_ai.content
+                        if content != full_content:  # Only emit new content
+                            new_content = content[len(full_content):] if full_content else content
+                            full_content = content
+                            
+                            # Emit as token chunk
+                            yield {
+                                "type": "token",
+                                "content": new_content,
+                                "conversation_id": conversation.id,
+                            }
+                            
+                            node_outputs.append({
+                                "node": list(event.keys())[0] if isinstance(event, dict) else "unknown",
+                                "content": new_content,
+                                "timestamp": __import__('time').time()
+                            })
+                
+                # Emit node completion event if we have node data
+                if isinstance(event, dict):
+                    for node_name, node_data in event.items():
+                        if node_name != "__end__":
+                            yield {
+                                "type": "node_complete", 
+                                "node": node_name,
+                                "conversation_id": conversation.id,
+                            }
 
-            # Emit usage summary placeholder (coarse streaming)
-            yield {"type": "usage", "usage": {"response_time_ms": None, "model": None, "provider": None}}
+            # Calculate timing
+            workflow_end_time = __import__('time').time()
+            response_time_ms = int((workflow_end_time - workflow_start_time) * 1000) if workflow_start_time else None
+            
+            # Emit enhanced usage summary
+            yield {
+                "type": "usage", 
+                "usage": {
+                    "response_time_ms": response_time_ms,
+                    "workflow_type": workflow_type,
+                    "nodes_executed": len(node_outputs),
+                    "total_content_length": len(full_content),
+                    "conversation_id": conversation.id,
+                }
+            }
 
         except Exception as e:
-            logger.error("Workflow streaming failed", error=str(e))
-            yield {"type": "error", "error": str(e)}
+            from chatter.core.exceptions import WorkflowExecutionError
+            logger.error("Workflow streaming failed", error=str(e), conversation_id=conversation.id)
+            
+            # Create proper workflow error
+            if "timeout" in str(e).lower():
+                error_msg = f"Workflow execution timed out: {str(e)}"
+            elif "validation" in str(e).lower():
+                error_msg = f"Workflow validation failed: {str(e)}"
+            else:
+                error_msg = f"Workflow execution failed: {str(e)}"
+            
+            yield {
+                "type": "error", 
+                "error": error_msg,
+                "error_code": "WORKFLOW_EXECUTION_ERROR",
+                "conversation_id": conversation.id,
+            }
             return
 
         # Persist final assistant message
@@ -544,9 +802,22 @@ class ChatService:
         return None
 
     async def _maybe_get_tools(self, conversation: Conversation, chat_request: ChatRequest) -> list[Any]:
-        """Return available tools (MCP + built-ins)."""
-        tools = await mcp_service.get_tools()
-        tools.extend(BuiltInTools.create_builtin_tools())
+        """Return available tools (MCP + built-ins) with lazy loading optimization."""
+        # Check if specific tools are requested
+        required_tools = None
+        if hasattr(chat_request, 'allowed_tools') and chat_request.allowed_tools:
+            required_tools = chat_request.allowed_tools
+        
+        # Use lazy loader for performance optimization
+        tools = await lazy_tool_loader.get_tools(required_tools)
+        
+        logger.debug(
+            "Tools loaded for workflow",
+            conversation_id=conversation.id,
+            requested_tools=required_tools,
+            loaded_count=len(tools)
+        )
+        
         return tools
 
     def _normalize_workflow(self, workflow_type: str) -> str:

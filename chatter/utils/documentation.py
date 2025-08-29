@@ -133,6 +133,98 @@ class APIDocumentationEnhancer:
                 description = self.descriptions.get(key)
                 if description:
                     operation["description"] = operation.get("description", "") + f"\n\n{description}"
+                    
+                # Add workflow-specific documentation
+                if "/chat" in path and method.upper() == "POST":
+                    self._enhance_chat_endpoint_docs(operation)
+
+        return schema
+    
+    def _enhance_chat_endpoint_docs(self, operation: dict) -> None:
+        """Enhance chat endpoint documentation with workflow examples."""
+        # Add comprehensive description
+        enhanced_description = """
+        ## Workflow Types
+
+        This endpoint supports multiple workflow types through the `workflow` parameter:
+
+        ### Plain Chat (`plain`)
+        Basic conversation without tools or retrieval.
+        ```json
+        {
+            "message": "Hello, how are you?",
+            "workflow": "plain"
+        }
+        ```
+
+        ### RAG Workflow (`rag`)
+        Retrieval-Augmented Generation with document search.
+        ```json
+        {
+            "message": "What are the latest sales figures?",
+            "workflow": "rag",
+            "enable_retrieval": true
+        }
+        ```
+
+        ### Tools Workflow (`tools`)
+        Function calling with available tools.
+        ```json
+        {
+            "message": "Calculate the square root of 144",
+            "workflow": "tools"
+        }
+        ```
+
+        ### Full Workflow (`full`)
+        Combination of RAG and tools for complex tasks.
+        ```json
+        {
+            "message": "Find recent customer feedback and create a summary report",
+            "workflow": "full",
+            "enable_retrieval": true
+        }
+        ```
+
+        ## Streaming
+
+        Set `stream: true` to receive real-time responses:
+        ```json
+        {
+            "message": "Tell me a story",
+            "workflow": "plain",
+            "stream": true
+        }
+        ```
+
+        Streaming responses use Server-Sent Events (SSE) format with event types:
+        - `token`: Content chunks
+        - `node_start`: Workflow node started
+        - `node_complete`: Workflow node completed  
+        - `usage`: Final usage statistics
+        - `error`: Error occurred
+
+        ## Templates
+
+        Use pre-configured templates for common scenarios:
+        ```json
+        {
+            "message": "I need help with my order",
+            "workflow_template": "customer_support"
+        }
+        ```
+
+        Available templates:
+        - `customer_support`: Customer service with knowledge base
+        - `code_assistant`: Programming help with code tools
+        - `research_assistant`: Document research and analysis
+        - `general_chat`: General conversation
+        - `document_qa`: Document question answering
+        - `data_analyst`: Data analysis with computation tools
+        """
+        
+        current_desc = operation.get("description", "")
+        operation["description"] = current_desc + enhanced_description
 
         return schema
 
@@ -148,14 +240,94 @@ class APIDocumentationEnhancer:
                 "password": "secure_password"
             },
             response_example={
-                "success": True,
+                "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
+                "token_type": "bearer",
+                "expires_in": 3600
+            }
+        )
+        
+        # Chat workflow examples
+        self.add_endpoint_example(
+            "/api/v1/chat",
+            "POST",
+            request_example={
+                "message": "What are the latest customer satisfaction metrics?",
+                "workflow": "rag",
+                "enable_retrieval": True,
+                "stream": False
+            },
+            response_example={
+                "conversation_id": "conv_123",
+                "message_id": "msg_456",
+                "content": "Based on the latest data from our customer feedback system...",
+                "usage": {
+                    "tokens": 150,
+                    "response_time_ms": 1200
+                }
+            }
+        )
+        
+        # Streaming chat example
+        self.add_endpoint_example(
+            "/api/v1/chat/stream",
+            "POST",
+            request_example={
+                "message": "Write a Python function to calculate fibonacci numbers",
+                "workflow": "tools",
+                "stream": True
+            },
+            response_example={
+                "event": "token",
                 "data": {
-                    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-                    "refresh_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-                    "token_type": "bearer",
-                    "expires_in": 3600,
-                    "user": {
-                        "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
+                    "type": "token",
+                    "content": "Here's a Python function to calculate Fibonacci numbers:\n\n```python\ndef fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)\n```"
+                }
+            }
+        )
+        
+        # Template-based chat example
+        self.add_endpoint_example(
+            "/api/v1/chat/template",
+            "POST", 
+            request_example={
+                "message": "I'm having trouble with my recent order",
+                "workflow_template": "customer_support",
+                "stream": False
+            },
+            response_example={
+                "conversation_id": "conv_789",
+                "template_used": "customer_support",
+                "content": "I understand you're having trouble with your order. Let me help you with that...",
+                "tools_used": ["search_kb", "create_ticket"]
+            }
+        )
+        
+        # Workflow templates list example
+        self.add_endpoint_example(
+            "/api/v1/chat/templates",
+            "GET",
+            request_example=None,
+            response_example={
+                "templates": {
+                    "customer_support": {
+                        "name": "customer_support",
+                        "workflow_type": "full",
+                        "description": "Customer support with knowledge base and tools",
+                        "required_tools": ["search_kb", "create_ticket", "escalate"],
+                        "required_retrievers": ["support_docs"]
+                    },
+                    "code_assistant": {
+                        "name": "code_assistant", 
+                        "workflow_type": "tools",
+                        "description": "Programming assistant with code tools",
+                        "required_tools": ["execute_code", "search_docs", "generate_tests"]
+                    }
+                }
+            }
+        )
+        
+        # Add more examples as needed
+        print("📝 Enhanced documentation examples loaded successfully")
                         "email": "user@example.com",
                         "username": "user",
                         "full_name": "John Doe"

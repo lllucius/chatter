@@ -179,7 +179,7 @@ class LLMService:
             LLMProviderError: If no providers available
         """
         session = await self._get_session()
-        registry = ModelRegistryService(session)
+        registry = _get_model_registry()(session)
 
         # Get default provider for LLM
         provider = await registry.get_default_provider(ModelType.LLM)

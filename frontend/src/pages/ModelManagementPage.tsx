@@ -171,6 +171,7 @@ const ModelManagementPage: React.FC = () => {
     if (data.items && Array.isArray(data.items)) return data.items;
     if (data.providers && Array.isArray(data.providers)) return data.providers;
     if (data.models && Array.isArray(data.models)) return data.models;
+    if (data.spaces && Array.isArray(data.spaces)) return data.spaces;
     if (data.embedding_spaces && Array.isArray(data.embedding_spaces)) return data.embedding_spaces;
     // fallback: maybe the response is wrapped inside `.data` already handled earlier — return empty
     return [];

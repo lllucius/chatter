@@ -10,7 +10,18 @@ export default defineConfig({
   },
   build: {
     outDir: 'build',
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate vendor libraries
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: ['@mui/material', '@mui/icons-material'],
+          charts: ['recharts'],
+          utils: ['date-fns', 'axios'],
+        },
+      },
+    },
   },
   define: {
     global: 'globalThis',

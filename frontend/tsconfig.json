@@ -17,6 +17,9 @@
     /* Linting */
     "strict": true,
     "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
 
     /* Additional React/TS options */
     "allowJs": true,

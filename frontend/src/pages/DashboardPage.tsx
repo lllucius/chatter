@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, memo } from 'react';
 import {
   Card,
   CardContent,
@@ -36,6 +36,7 @@ import {
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
 import { DashboardResponse } from '../sdk';
+import { useApi } from '../hooks/useApi';
 
 interface MetricCardProps {
   title: string;
@@ -46,7 +47,8 @@ interface MetricCardProps {
   color: string;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({
+// Memoized MetricCard component
+const MetricCard = memo<MetricCardProps>(({
   title,
   value,
   change,
@@ -95,7 +97,9 @@ const MetricCard: React.FC<MetricCardProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+MetricCard.displayName = 'MetricCard';
 
 // Helper: safely get .toLocaleString(), fallback to "0"
 function safeLocaleString(n: number | undefined | null): string {
@@ -114,27 +118,53 @@ function safeToFixed(n: number | undefined | null, digits: number): string {
 }
 
 const DashboardPage: React.FC = () => {
-  const [data, setData] = useState<DashboardResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // Use custom API hook for dashboard data
+  const dashboardApi = useApi(
+    () => chatterSDK.analytics.getDashboardApiV1AnalyticsDashboardGet(),
+    { immediate: true }
+  );
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        const response = await chatterSDK.analytics.getDashboardApiV1AnalyticsDashboardGet();
-        setData(response.data);
-      } catch (err: any) {
-        setError(err?.response?.data?.detail || 'Failed to load dashboard data');
-      } finally {
-        setLoading(false);
-      }
+  const data = dashboardApi.data?.data;
+
+  // Memoized chart data calculations to avoid recalculation on re-renders
+  const chartData = useMemo(() => {
+    if (!data) return null;
+
+    const conversationStats = data.conversation_stats || {};
+    const usageMetrics = data.usage_metrics || {};
+
+    const conversationChartData = [
+      { name: 'Mon', conversations: (conversationStats.total_conversations ?? 0) * 0.8 },
+      { name: 'Tue', conversations: (conversationStats.total_conversations ?? 0) * 1.2 },
+      { name: 'Wed', conversations: (conversationStats.total_conversations ?? 0) * 0.9 },
+      { name: 'Thu', conversations: (conversationStats.total_conversations ?? 0) * 1.1 },
+      { name: 'Fri', conversations: (conversationStats.total_conversations ?? 0) * 1.3 },
+      { name: 'Sat', conversations: (conversationStats.total_conversations ?? 0) * 0.7 },
+      { name: 'Sun', conversations: (conversationStats.total_conversations ?? 0) },
+    ];
+
+    const tokenUsageData = [
+      { name: 'Week 1', tokens: (usageMetrics.total_tokens ?? 0) * 0.6 },
+      { name: 'Week 2', tokens: (usageMetrics.total_tokens ?? 0) * 0.8 },
+      { name: 'Week 3', tokens: (usageMetrics.total_tokens ?? 0) * 1.1 },
+      { name: 'Week 4', tokens: usageMetrics.total_tokens ?? 0 },
+    ];
+
+    const systemHealthData = [
+      { name: 'CPU', value: 65, color: '#8884d8' },
+      { name: 'Memory', value: 45, color: '#82ca9d' },
+      { name: 'Storage', value: 30, color: '#ffc658' },
+      { name: 'Network', value: 80, color: '#ff7c7c' },
+    ];
+
+    return {
+      conversationChartData,
+      tokenUsageData,
+      systemHealthData,
     };
+  }, [data]);
 
-    fetchDashboardData();
-  }, []);
-
-  if (loading) {
+  if (dashboardApi.loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress size={60} />
@@ -142,49 +172,24 @@ const DashboardPage: React.FC = () => {
     );
   }
 
-  if (error) {
+  if (dashboardApi.error) {
     return (
       <Alert severity="error" sx={{ mt: 2 }}>
-        {error}
+        {dashboardApi.error}
       </Alert>
     );
   }
 
-  if (!data) {
+  if (!data || !chartData) {
     return null;
   }
 
-  // Defensive checks for nested data (for demo, but you may want more robust validation)
+  // Defensive checks for nested data
   const conversationStats = data.conversation_stats || {};
   const usageMetrics = data.usage_metrics || {};
   const documentAnalytics = data.document_analytics || {};
   const systemHealth = data.system_health || {};
   const performanceMetrics = data.performance_metrics || {};
-
-  // Sample chart data (in a real app, this would come from the API)
-  const conversationChartData = [
-    { name: 'Mon', conversations: (conversationStats.total_conversations ?? 0) * 0.8 },
-    { name: 'Tue', conversations: (conversationStats.total_conversations ?? 0) * 1.2 },
-    { name: 'Wed', conversations: (conversationStats.total_conversations ?? 0) * 0.9 },
-    { name: 'Thu', conversations: (conversationStats.total_conversations ?? 0) * 1.1 },
-    { name: 'Fri', conversations: (conversationStats.total_conversations ?? 0) * 1.3 },
-    { name: 'Sat', conversations: (conversationStats.total_conversations ?? 0) * 0.7 },
-    { name: 'Sun', conversations: (conversationStats.total_conversations ?? 0) },
-  ];
-
-  const tokenUsageData = [
-    { name: 'Week 1', tokens: (usageMetrics.total_tokens ?? 0) * 0.6 },
-    { name: 'Week 2', tokens: (usageMetrics.total_tokens ?? 0) * 0.8 },
-    { name: 'Week 3', tokens: (usageMetrics.total_tokens ?? 0) * 1.1 },
-    { name: 'Week 4', tokens: usageMetrics.total_tokens ?? 0 },
-  ];
-
-  const systemHealthData = [
-    { name: 'CPU', value: 65, color: '#8884d8' },
-    { name: 'Memory', value: 45, color: '#82ca9d' },
-    { name: 'Storage', value: 30, color: '#ffc658' },
-    { name: 'Network', value: 80, color: '#ff7c7c' },
-  ];
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
@@ -276,7 +281,7 @@ const DashboardPage: React.FC = () => {
                 Daily Conversations
               </Typography>
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={conversationChartData}>
+                <AreaChart data={chartData.conversationChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
@@ -300,7 +305,7 @@ const DashboardPage: React.FC = () => {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={systemHealthData}
+                    data={chartData.systemHealthData}
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
@@ -308,7 +313,7 @@ const DashboardPage: React.FC = () => {
                     dataKey="value"
                     label
                   >
-                    {systemHealthData.map((entry, index) => (
+                    {chartData.systemHealthData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
@@ -332,7 +337,7 @@ const DashboardPage: React.FC = () => {
                 Token Usage Trends
               </Typography>
               <ResponsiveContainer width="100%" height={250}>
-                <LineChart data={tokenUsageData}>
+                <LineChart data={chartData.tokenUsageData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis />
@@ -441,4 +446,4 @@ const DashboardPage: React.FC = () => {
   );
 };
 
-export default DashboardPage;
+export default memo(DashboardPage);

@@ -55,7 +55,7 @@ dependencies = [
     "langchain-cohere==0.4.5",
     "langchain-postgres==0.0.15",
     "langchain-mcp-adapters==0.1.9",
-    "langgraph==0.2.77",
+    "langgraph==0.2.76",
     "langgraph-checkpoint-postgres==2.0.23",
     "langgraph-checkpoint-sqlite==2.0.11",
     "langsmith==0.1.167",

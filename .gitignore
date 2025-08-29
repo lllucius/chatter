@@ -212,8 +212,7 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 
-# Test files created during development
-test_*.py
+# Demo files created during development
 demo_*.py
 
 #

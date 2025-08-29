@@ -37,7 +37,7 @@ logger = get_logger(__name__)
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
-    """Middleware for request/response logging."""
+    """Middleware for request/response logging and metrics collection."""
 
     async def dispatch(self, request: Request, call_next) -> Response:
         """Log requests and responses when debug logging is enabled."""
@@ -66,9 +66,30 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         # Calculate request duration
         duration = time.time() - start_time
+        duration_ms = duration * 1000
 
         # Check if this is an error response (4xx or 5xx)
         is_error = response.status_code >= 400
+
+        # Get correlation ID for metrics
+        correlation_id = response.headers.get('x-correlation-id', 'unknown')
+        
+        # Check if request was rate limited
+        rate_limited = response.status_code == 429
+
+        # Record metrics
+        try:
+            from chatter.utils.monitoring import record_request_metrics
+            record_request_metrics(
+                method=request.method,
+                path=request.url.path,
+                status_code=response.status_code,
+                response_time_ms=duration_ms,
+                correlation_id=correlation_id,
+                rate_limited=rate_limited
+            )
+        except Exception as e:
+            logger.warning("Failed to record request metrics", error=str(e))
 
         # For error responses, always log detailed information regardless of debug setting
         if is_error:
@@ -85,19 +106,14 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 # If we can't capture response body, that's okay
                 pass
 
-            # Capture current stack trace to help identify where the error originated
-            try:
-                # Get the current stack trace (this will show the call path through the middleware)
-                traceback.format_stack()
-            except Exception:
-                pass
-
             logger.error(
                 "HTTP Error Response",
                 method=request.method,
                 url=str(request.url),
                 status_code=response.status_code,
                 duration=duration,
+                duration_ms=duration_ms,
+                correlation_id=correlation_id,
                 request_headers=dict(request.headers),
                 request_body=request_body.decode(
                     "utf-8", errors="ignore"
@@ -108,7 +124,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                     dict(response.headers), indent=4
                 ),
                 response_body=response_body,
-                # stack_trace=json.dumps(stack_trace)
+                rate_limited=rate_limited
             )
         elif settings.debug_http_requests:
             # Normal debug logging for non-error responses
@@ -117,6 +133,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 status_code=response.status_code,
                 headers=dict(response.headers),
                 duration=duration,
+                duration_ms=duration_ms,
+                correlation_id=correlation_id,
             )
         else:
             # Always log basic request info for non-errors
@@ -126,6 +144,8 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 url=str(request.url),
                 status_code=response.status_code,
                 duration=duration,
+                duration_ms=duration_ms,
+                correlation_id=correlation_id,
             )
 
         return response
@@ -137,6 +157,18 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info(
         "Starting Chatter application", version=settings.app_version
     )
+
+    # Validate configuration first
+    try:
+        from chatter.utils.config_validator import validate_startup_configuration
+        validate_startup_configuration()
+        logger.info("Configuration validation passed")
+    except Exception as e:
+        logger.error("Configuration validation failed", error=str(e))
+        if settings.is_production:
+            raise
+        else:
+            logger.warning("Continuing startup despite configuration issues (development mode)")
 
     # Initialize database
     await init_database()
@@ -278,6 +310,16 @@ def create_app() -> FastAPI:
 
     # Add compression middleware
     app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+    # Add correlation ID middleware (before logging)
+    from chatter.utils.correlation import CorrelationIdMiddleware
+    app.add_middleware(CorrelationIdMiddleware)
+
+    # Add rate limiting middleware
+    from chatter.utils.rate_limit import RateLimitMiddleware
+    app.add_middleware(RateLimitMiddleware, 
+                      requests_per_minute=100, 
+                      requests_per_hour=2000)
 
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
@@ -466,6 +508,14 @@ def create_app() -> FastAPI:
             from fastapi.responses import FileResponse
             index_file = os.path.join(static_dir, "index.html")
             return FileResponse(index_file)
+
+    # Setup enhanced documentation
+    try:
+        from chatter.utils.documentation import setup_enhanced_docs
+        setup_enhanced_docs(app)
+        logger.info("Enhanced API documentation configured")
+    except Exception as e:
+        logger.warning("Failed to setup enhanced documentation", error=str(e))
 
     @app.get("/")
     async def root():

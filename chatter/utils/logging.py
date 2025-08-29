@@ -10,6 +10,19 @@ from structlog.stdlib import LoggerFactory
 from chatter.config import settings
 
 
+def correlation_id_processor(logger, method_name, event_dict):
+    """Add correlation ID to log events."""
+    try:
+        from chatter.utils.correlation import get_correlation_id
+        correlation_id = get_correlation_id()
+        if correlation_id:
+            event_dict['correlation_id'] = correlation_id
+    except ImportError:
+        # Correlation module not available during startup
+        pass
+    return event_dict
+
+
 def setup_logging() -> None:
     """Set up structured logging for the application."""
 
@@ -22,6 +35,8 @@ def setup_logging() -> None:
             structlog.stdlib.add_logger_name,
             # Add timestamp
             structlog.processors.TimeStamper(fmt="ISO"),
+            # Add correlation ID
+            correlation_id_processor,
             # Stack info processor
             structlog.processors.StackInfoRenderer(),
             # Exception formatting

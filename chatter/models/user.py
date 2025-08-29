@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
+from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -17,6 +17,30 @@ if TYPE_CHECKING:
 
 class User(Base):
     """User model for authentication and profile management."""
+    
+    # Add table constraints
+    __table_args__ = (
+        CheckConstraint(
+            'daily_message_limit IS NULL OR daily_message_limit > 0',
+            name='check_daily_message_limit_positive'
+        ),
+        CheckConstraint(
+            'monthly_message_limit IS NULL OR monthly_message_limit > 0',
+            name='check_monthly_message_limit_positive'
+        ),
+        CheckConstraint(
+            'max_file_size_mb IS NULL OR max_file_size_mb > 0',
+            name='check_max_file_size_positive'
+        ),
+        CheckConstraint(
+            "email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'",
+            name='check_email_format'
+        ),
+        CheckConstraint(
+            "username ~ '^[a-zA-Z0-9_-]{3,50}$'",
+            name='check_username_format'
+        ),
+    )
 
     # Authentication fields
     email: Mapped[str] = mapped_column(

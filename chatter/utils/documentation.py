@@ -328,20 +328,6 @@ class APIDocumentationEnhancer:
         
         # Add more examples as needed
         print("📝 Enhanced documentation examples loaded successfully")
-                        "email": "user@example.com",
-                        "username": "user",
-                        "full_name": "John Doe"
-                    }
-                },
-                "message": "Authentication successful",
-                "metadata": {
-                    "timestamp": "2024-01-01T12:00:00Z",
-                    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-                    "version": "0.1.0"
-                }
-            },
-            description="Authenticate user and return access token with user information"
-        )
 
         # Chat examples
         self.add_endpoint_example(

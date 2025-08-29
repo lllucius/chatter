@@ -133,13 +133,13 @@ class APIDocumentationEnhancer:
                 description = self.descriptions.get(key)
                 if description:
                     operation["description"] = operation.get("description", "") + f"\n\n{description}"
-                    
+
                 # Add workflow-specific documentation
                 if "/chat" in path and method.upper() == "POST":
                     self._enhance_chat_endpoint_docs(operation)
 
         return schema
-    
+
     def _enhance_chat_endpoint_docs(self, operation: dict) -> None:
         """Enhance chat endpoint documentation with workflow examples."""
         # Add comprehensive description
@@ -200,7 +200,7 @@ class APIDocumentationEnhancer:
         Streaming responses use Server-Sent Events (SSE) format with event types:
         - `token`: Content chunks
         - `node_start`: Workflow node started
-        - `node_complete`: Workflow node completed  
+        - `node_complete`: Workflow node completed
         - `usage`: Final usage statistics
         - `error`: Error occurred
 
@@ -222,11 +222,9 @@ class APIDocumentationEnhancer:
         - `document_qa`: Document question answering
         - `data_analyst`: Data analysis with computation tools
         """
-        
+
         current_desc = operation.get("description", "")
         operation["description"] = current_desc + enhanced_description
-
-        return schema
 
     def generate_examples(self) -> None:
         """Generate common examples for standard endpoints."""
@@ -245,7 +243,7 @@ class APIDocumentationEnhancer:
                 "expires_in": 3600
             }
         )
-        
+
         # Chat workflow examples
         self.add_endpoint_example(
             "/api/v1/chat",
@@ -266,7 +264,7 @@ class APIDocumentationEnhancer:
                 }
             }
         )
-        
+
         # Streaming chat example
         self.add_endpoint_example(
             "/api/v1/chat/stream",
@@ -284,11 +282,11 @@ class APIDocumentationEnhancer:
                 }
             }
         )
-        
+
         # Template-based chat example
         self.add_endpoint_example(
             "/api/v1/chat/template",
-            "POST", 
+            "POST",
             request_example={
                 "message": "I'm having trouble with my recent order",
                 "workflow_template": "customer_support",
@@ -301,7 +299,7 @@ class APIDocumentationEnhancer:
                 "tools_used": ["search_kb", "create_ticket"]
             }
         )
-        
+
         # Workflow templates list example
         self.add_endpoint_example(
             "/api/v1/chat/templates",
@@ -317,7 +315,7 @@ class APIDocumentationEnhancer:
                         "required_retrievers": ["support_docs"]
                     },
                     "code_assistant": {
-                        "name": "code_assistant", 
+                        "name": "code_assistant",
                         "workflow_type": "tools",
                         "description": "Programming assistant with code tools",
                         "required_tools": ["execute_code", "search_docs", "generate_tests"]
@@ -325,23 +323,9 @@ class APIDocumentationEnhancer:
                 }
             }
         )
-        
+
         # Add more examples as needed
         print("📝 Enhanced documentation examples loaded successfully")
-                        "email": "user@example.com",
-                        "username": "user",
-                        "full_name": "John Doe"
-                    }
-                },
-                "message": "Authentication successful",
-                "metadata": {
-                    "timestamp": "2024-01-01T12:00:00Z",
-                    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-                    "version": "0.1.0"
-                }
-            },
-            description="Authenticate user and return access token with user information"
-        )
 
         # Chat examples
         self.add_endpoint_example(

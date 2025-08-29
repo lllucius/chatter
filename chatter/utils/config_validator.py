@@ -74,10 +74,10 @@ class ConfigurationValidator:
             self.errors.append(f"DATABASE_URL parsing failed: {str(e)}")
 
         # Check connection pool settings
-        if settings.database_pool_size <= 0:
+        if settings.db_pool_size <= 0:
             self.errors.append("Database pool size must be positive")
 
-        if settings.database_max_overflow < 0:
+        if settings.db_max_overflow < 0:
             self.errors.append("Database max overflow cannot be negative")
 
     def _validate_security_settings(self) -> None:

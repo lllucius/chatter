@@ -106,4 +106,57 @@ describe('useApi hook', () => {
     // Should only make 1 call, not loop infinitely
     expect(callCount).toBe(1);
   });
+
+  it('should handle DashboardPage-like component pattern correctly', async () => {
+    // Simulate the exact pattern from DashboardPage
+    let callCount = 0;
+    const mockSDK = {
+      analytics: {
+        getDashboardApiV1AnalyticsDashboardGet: () => {
+          callCount++;
+          return Promise.resolve({
+            data: {
+              conversation_stats: { total_conversations: callCount },
+              usage_metrics: { total_tokens: callCount * 100 },
+              document_analytics: { total_documents: callCount * 5 },
+              system_health: { active_users_today: callCount * 2 },
+              performance_metrics: { avg_response_time_ms: 200 }
+            }
+          });
+        }
+      }
+    };
+
+    const MockDashboardPage = () => {
+      // Exact pattern from DashboardPage.tsx line 122-125
+      const dashboardApi = useApi(
+        () => mockSDK.analytics.getDashboardApiV1AnalyticsDashboardGet(),
+        { immediate: true }
+      );
+
+      return (
+        <div>
+          {dashboardApi.loading && <div>Loading...</div>}
+          {dashboardApi.data && (
+            <div>
+              Conversations: {dashboardApi.data.data.conversation_stats.total_conversations}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    render(<MockDashboardPage />);
+
+    // Wait for the component to settle
+    await waitFor(() => {
+      expect(callCount).toBe(1);
+    }, { timeout: 1000 });
+
+    // Wait additional time to ensure no more calls are made
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Should still only be 1 call
+    expect(callCount).toBe(1);
+  });
 });

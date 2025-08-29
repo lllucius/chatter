@@ -74,12 +74,14 @@ describe('useApi hook', () => {
     // Manually execute
     await result.current.execute();
 
+    // Wait for the async operation to complete
     await waitFor(() => {
-      expect(result.current.loading).toBe(false);
+      expect(result.current.data).not.toBe(null);
     });
 
     // Should have made 1 call
     expect(getCallCount()).toBe(1);
     expect(result.current.data).toEqual({ data: 'result-1' });
+    expect(result.current.loading).toBe(false);
   });
 });

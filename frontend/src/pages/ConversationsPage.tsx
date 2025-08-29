@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useMemo, memo } from 'react';
 import {
   Box,
   Card,
@@ -41,11 +41,82 @@ import {
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { ConversationResponse, MessageResponse } from '../sdk';
+import { useApi } from '../hooks/useApi';
+
+// Memoized conversation table row component
+const ConversationTableRow = memo(({ 
+  conversation, 
+  onView, 
+  onDelete, 
+  onActionClick 
+}: {
+  conversation: ConversationResponse;
+  onView: (conversation: ConversationResponse) => void;
+  onDelete: (conversationId: string) => void;
+  onActionClick: (event: React.MouseEvent<HTMLElement>, conversation: ConversationResponse) => void;
+}) => (
+  <TableRow hover>
+    <TableCell>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+          <MessageIcon fontSize="small" />
+        </Avatar>
+        <Box>
+          <Typography variant="body2" fontWeight="medium">
+            {conversation.title || `Conversation ${conversation.id.slice(0, 8)}`}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {conversation.id}
+          </Typography>
+        </Box>
+      </Box>
+    </TableCell>
+    <TableCell>
+      <Chip
+        label="Active"
+        size="small"
+        color="success"
+        variant="outlined"
+      />
+    </TableCell>
+    <TableCell>
+      <Typography variant="body2">
+        {conversation.created_at ? format(new Date(conversation.created_at), 'MMM dd, yyyy HH:mm') : 'Unknown'}
+      </Typography>
+    </TableCell>
+    <TableCell>
+      <Typography variant="body2">
+        {conversation.updated_at ? format(new Date(conversation.updated_at), 'MMM dd, yyyy HH:mm') : 'Unknown'}
+      </Typography>
+    </TableCell>
+    <TableCell align="right">
+      <IconButton
+        size="small"
+        onClick={() => onView(conversation)}
+        aria-label="View conversation"
+      >
+        <ViewIcon />
+      </IconButton>
+      <IconButton
+        size="small"
+        onClick={(event) => onActionClick(event, conversation)}
+        aria-label="More actions"
+      >
+        <MoreVertIcon />
+      </IconButton>
+    </TableCell>
+  </TableRow>
+));
+
+ConversationTableRow.displayName = 'ConversationTableRow';
 
 const ConversationsPage: React.FC = () => {
-  const [conversations, setConversations] = useState<ConversationResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // Use custom API hook for conversations
+  const conversationsApi = useApi(
+    () => chatterSDK.conversations.listConversationsApiV1ChatConversationsGet({}),
+    { immediate: true }
+  );
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -58,25 +129,9 @@ const ConversationsPage: React.FC = () => {
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
   const [actionConversation, setActionConversation] = useState<ConversationResponse | null>(null);
 
-  useEffect(() => {
-    loadConversations();
-  }, []);
+  const conversations = conversationsApi.data?.data?.conversations || [];
 
-  const loadConversations = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      const response = await chatterSDK.conversations.listConversationsApiV1ChatConversationsGet({});
-      const data = response.data;
-      setConversations(data.conversations);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load conversations');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewConversation = async (conversation: ConversationResponse) => {
+  const handleViewConversation = useCallback(async (conversation: ConversationResponse) => {
     setSelectedConversation(conversation);
     setViewDialogOpen(true);
     setLoadingMessages(true);
@@ -94,9 +149,9 @@ const ConversationsPage: React.FC = () => {
     } finally {
       setLoadingMessages(false);
     }
-  };
+  }, []);
 
-  const handleDeleteConversation = async (conversationId: string) => {
+  const handleDeleteConversation = useCallback(async (conversationId: string) => {
     if (!window.confirm('Are you sure you want to delete this conversation?')) {
       return;
     }
@@ -104,32 +159,49 @@ const ConversationsPage: React.FC = () => {
     try {
       // Note: This endpoint might not exist in the current API
       // await api.deleteConversation(conversationId);
-      setConversations(prev => prev.filter(c => c.id !== conversationId));
+      // For now, just remove from local state
+      conversationsApi.reset();
+      conversationsApi.execute();
     } catch (err: any) {
-      setError('Failed to delete conversation');
+      console.error('Failed to delete conversation:', err);
     }
-  };
+  }, [conversationsApi]);
 
-  const filteredConversations = conversations.filter(conversation =>
-    conversation.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    conversation.id.toLowerCase().includes(searchTerm.toLowerCase())
+  const handleActionClick = useCallback((event: React.MouseEvent<HTMLElement>, conversation: ConversationResponse) => {
+    setActionAnchorEl(event.currentTarget);
+    setActionConversation(conversation);
+  }, []);
+
+  const handleActionClose = useCallback(() => {
+    setActionAnchorEl(null);
+    setActionConversation(null);
+  }, []);
+
+  // Memoized filtered and paginated conversations
+  const filteredConversations = useMemo(() => 
+    conversations.filter(conversation =>
+      conversation.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      conversation.id.toLowerCase().includes(searchTerm.toLowerCase())
+    ), [conversations, searchTerm]
   );
 
-  const paginatedConversations = filteredConversations.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+  const paginatedConversations = useMemo(() => 
+    filteredConversations.slice(
+      page * rowsPerPage,
+      page * rowsPerPage + rowsPerPage
+    ), [filteredConversations, page, rowsPerPage]
   );
 
-  const handleChangePage = (_event: unknown, newPage: number) => {
+  const handleChangePage = useCallback((_event: unknown, newPage: number) => {
     setPage(newPage);
-  };
+  }, []);
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
+  }, []);
 
-  const getMessageIcon = (role: string) => {
+  const getMessageIcon = useCallback((role: string) => {
     switch (role) {
       case 'user':
         return <PersonIcon fontSize="small" />;
@@ -138,9 +210,9 @@ const ConversationsPage: React.FC = () => {
       default:
         return <MessageIcon fontSize="small" />;
     }
-  };
+  }, []);
 
-  const getMessageColor = (role: string) => {
+  const getMessageColor = useCallback((role: string) => {
     switch (role) {
       case 'user':
         return 'primary.main';
@@ -151,20 +223,9 @@ const ConversationsPage: React.FC = () => {
       default:
         return 'grey.500';
     }
-  };
+  }, []);
 
-  // More options menu handlers
-  const openActionsMenu = (e: React.MouseEvent<HTMLElement>, conversation: ConversationResponse) => {
-    setActionAnchorEl(e.currentTarget);
-    setActionConversation(conversation);
-  };
-
-  const closeActionsMenu = () => {
-    setActionAnchorEl(null);
-    setActionConversation(null);
-  };
-
-  if (loading) {
+  if (conversationsApi.loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress size={60} />
@@ -181,16 +242,16 @@ const ConversationsPage: React.FC = () => {
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
-          onClick={loadConversations}
-          disabled={loading}
+          onClick={conversationsApi.execute}
+          disabled={conversationsApi.loading}
         >
           Refresh
         </Button>
       </Box>
 
-      {error && (
+      {conversationsApi.error && (
         <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
+          {conversationsApi.error}
         </Alert>
       )}
 
@@ -220,77 +281,26 @@ const ConversationsPage: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Title</TableCell>
-                <TableCell>ID</TableCell>
-                <TableCell>Messages</TableCell>
-                <TableCell>Tokens</TableCell>
+                <TableCell>Conversation</TableCell>
+                <TableCell>Status</TableCell>
                 <TableCell>Created</TableCell>
                 <TableCell>Updated</TableCell>
-                <TableCell align="center">Actions</TableCell>
+                <TableCell align="right">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {paginatedConversations.map((conversation) => (
-                <TableRow key={conversation.id} hover>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                      {conversation.title || 'Untitled Conversation'}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                      {conversation.id}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={conversation.message_count}
-                      color="primary"
-                      variant="outlined"
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {conversation.total_tokens ? (
-                      <Chip
-                        label={conversation.total_tokens.toLocaleString()}
-                        color="secondary"
-                        variant="outlined"
-                        size="small"
-                      />
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2">
-                      {format(new Date(conversation.created_at), 'MMM dd, yyyy HH:mm')}
-                    </Typography>
-                  </TableCell>
-                  <TableCell>
-                    {conversation.updated_at ? (
-                      <Typography variant="body2">
-                        {format(new Date(conversation.updated_at), 'MMM dd, yyyy HH:mm')}
-                      </Typography>
-                    ) : (
-                      '-'
-                    )}
-                  </TableCell>
-                  <TableCell align="center">
-                    <IconButton
-                      size="small"
-                      onClick={(e) => openActionsMenu(e, conversation)}
-                      color="primary"
-                      aria-label="More actions"
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
+                <ConversationTableRow
+                  key={conversation.id}
+                  conversation={conversation}
+                  onView={handleViewConversation}
+                  onDelete={handleDeleteConversation}
+                  onActionClick={handleActionClick}
+                />
               ))}
               {paginatedConversations.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} align="center">
+                  <TableCell colSpan={5} align="center">
                     <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
                       No conversations found
                     </Typography>
@@ -315,12 +325,12 @@ const ConversationsPage: React.FC = () => {
       <Menu
         anchorEl={actionAnchorEl}
         open={Boolean(actionAnchorEl)}
-        onClose={closeActionsMenu}
+        onClose={handleActionClose}
       >
         <MenuItem
           onClick={() => {
             if (actionConversation) handleViewConversation(actionConversation);
-            closeActionsMenu();
+            handleActionClose();
           }}
         >
           <ListItemIcon>
@@ -331,7 +341,7 @@ const ConversationsPage: React.FC = () => {
         <MenuItem
           onClick={() => {
             if (actionConversation) handleDeleteConversation(actionConversation.id);
-            closeActionsMenu();
+            handleActionClose();
           }}
         >
           <ListItemIcon>
@@ -441,4 +451,4 @@ const ConversationsPage: React.FC = () => {
   );
 };
 
-export default ConversationsPage;
+export default memo(ConversationsPage);

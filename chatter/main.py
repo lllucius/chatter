@@ -304,9 +304,9 @@ def create_app() -> FastAPI:
     )
 
     # Add trusted host middleware
-    if settings.trusted_hosts:
+    if settings.trusted_hosts_for_env:
         app.add_middleware(
-            TrustedHostMiddleware, allowed_hosts=settings.trusted_hosts
+            TrustedHostMiddleware, allowed_hosts=settings.trusted_hosts_for_env
         )
 
     # Add compression middleware

@@ -12,6 +12,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   IconButton,
   Chip,
   CircularProgress,
@@ -65,6 +66,15 @@ const ModelManagementPage: React.FC = () => {
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  // Pagination state
+  const [providersPage, setProvidersPage] = useState(1);
+  const [modelsPage, setModelsPage] = useState(1);
+  const [spacesPage, setSpacesPage] = useState(1);
+  const [providersTotal, setProvidersTotal] = useState(0);
+  const [modelsTotal, setModelsTotal] = useState(0);
+  const [spacesTotal, setSpacesTotal] = useState(0);
+  const itemsPerPage = 10;
 
   // Actions menu state
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
@@ -181,26 +191,42 @@ const ModelManagementPage: React.FC = () => {
     setLoading(true);
     setError('');
     try {
-      // Use the chatterSDK modelRegistry instance (or api variable) — both call the same generated methods.
+      // Use the chatterSDK modelRegistry instance with pagination
       const [pResp, mResp, sResp] = await Promise.all([
-        chatterSDK.modelRegistry.listProvidersApiV1ModelsProvidersGet({ activeOnly: false }), // Show both active and inactive providers
-        chatterSDK.modelRegistry.listModelsApiV1ModelsModelsGet({ activeOnly: false }), // Show both active and inactive models
-        chatterSDK.modelRegistry.listEmbeddingSpacesApiV1ModelsEmbeddingSpacesGet({ activeOnly: false }), // Show both active and inactive spaces
+        chatterSDK.modelRegistry.listProvidersApiV1ModelsProvidersGet({ 
+          activeOnly: false,
+          page: providersPage,
+          perPage: itemsPerPage
+        }),
+        chatterSDK.modelRegistry.listModelsApiV1ModelsModelsGet({ 
+          activeOnly: false,
+          page: modelsPage,
+          perPage: itemsPerPage
+        }),
+        chatterSDK.modelRegistry.listEmbeddingSpacesApiV1ModelsEmbeddingSpacesGet({ 
+          activeOnly: false,
+          page: spacesPage,
+          perPage: itemsPerPage
+        }),
       ]);
       const p = pResp.data;
       const m = mResp.data;
       const s = sResp.data;
 
-      setProviders(normalizeList(p) as Provider[]);
-      setModels(normalizeList(m) as ModelDefWithProvider[]);
-      setSpaces(normalizeList(s) as EmbeddingSpaceWithModel[]);
+      setProviders(normalizeList(p.providers) as Provider[]);
+      setModels(normalizeList(m.models) as ModelDefWithProvider[]);
+      setSpaces(normalizeList(s.spaces) as EmbeddingSpaceWithModel[]);
+      
+      setProvidersTotal(p.total || 0);
+      setModelsTotal(m.total || 0);
+      setSpacesTotal(s.total || 0);
     } catch (e: any) {
       console.error(e);
       setError(e?.message || 'Failed to load model registry data');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [providersPage, modelsPage, spacesPage, itemsPerPage]);
 
   useEffect(() => {
     loadData();
@@ -415,6 +441,19 @@ const ModelManagementPage: React.FC = () => {
       console.error(e);
       setError(e?.message || 'Failed to update embedding space');
     }
+  };
+
+  // Pagination handlers
+  const handleProvidersPageChange = (event: unknown, newPage: number) => {
+    setProvidersPage(newPage + 1); // MUI pagination is 0-based, API is 1-based
+  };
+
+  const handleModelsPageChange = (event: unknown, newPage: number) => {
+    setModelsPage(newPage + 1);
+  };
+
+  const handleSpacesPageChange = (event: unknown, newPage: number) => {
+    setSpacesPage(newPage + 1);
   };
 
   // Delete handlers
@@ -716,6 +755,14 @@ const ModelManagementPage: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            component="div"
+            count={providersTotal}
+            page={providersPage - 1}
+            onPageChange={handleProvidersPageChange}
+            rowsPerPage={itemsPerPage}
+            rowsPerPageOptions={[itemsPerPage]}
+          />
         </Card>
       )}
 
@@ -815,6 +862,14 @@ const ModelManagementPage: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            component="div"
+            count={modelsTotal}
+            page={modelsPage - 1}
+            onPageChange={handleModelsPageChange}
+            rowsPerPage={itemsPerPage}
+            rowsPerPageOptions={[itemsPerPage]}
+          />
         </Card>
       )}
 
@@ -914,6 +969,14 @@ const ModelManagementPage: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          <TablePagination
+            component="div"
+            count={spacesTotal}
+            page={spacesPage - 1}
+            onPageChange={handleSpacesPageChange}
+            rowsPerPage={itemsPerPage}
+            rowsPerPageOptions={[itemsPerPage]}
+          />
         </Card>
       )}
 

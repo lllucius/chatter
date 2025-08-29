@@ -93,6 +93,11 @@ const ChatPage: React.FC = () => {
 
   // Right drawer context
   const { setPanelContent, clearPanelContent, setTitle, open, setOpen } = useRightSidebar();
+  
+  // Save right drawer state when it changes
+  useEffect(() => {
+    localStorage.setItem('chatter_rightDrawerOpen', JSON.stringify(open));
+  }, [open]);
 
   const loadData = async () => {
     try {
@@ -153,6 +158,36 @@ const ChatPage: React.FC = () => {
     }
   }, [selectedProfile, selectedPrompt, prompts, enableRetrieval]);
 
+  const onSelectConversation = useCallback(async (conversation: ConversationResponse) => {
+    try {
+      setError('');
+      
+      // Set current conversation
+      setCurrentConversation(conversation);
+      
+      // Load messages for this conversation
+      const response = await chatterSDK.conversations.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet({
+        conversationId: conversation.id
+      });
+      
+      // Convert messages to ChatMessage format
+      const chatMessages: ChatMessage[] = response.data.map(msg => ({
+        id: msg.id,
+        role: msg.role as 'user' | 'assistant' | 'system',
+        content: msg.content,
+        timestamp: new Date(msg.created_at)
+      }));
+      
+      setMessages(chatMessages);
+      
+      // Scroll to bottom after messages are set
+      setTimeout(() => scrollToBottom(), 100);
+    } catch (err: any) {
+      setError('Failed to load conversation');
+      console.error(err);
+    }
+  }, []);
+
   useEffect(() => {
     loadData();
   }, []);
@@ -169,7 +204,11 @@ const ChatPage: React.FC = () => {
   // Inject configuration panel into the right drawer
   useEffect(() => {
     setTitle('Chat Configuration');
-    setOpen(true);
+    
+    // Restore right drawer state
+    const savedDrawerState = localStorage.getItem('chatter_rightDrawerOpen');
+    const shouldOpen = savedDrawerState ? JSON.parse(savedDrawerState) : true;
+    setOpen(shouldOpen);
     setPanelContent(
       <ChatConfigPanel
         profiles={profiles}
@@ -192,6 +231,7 @@ const ChatPage: React.FC = () => {
         enableRetrieval={enableRetrieval}
         setEnableRetrieval={setEnableRetrieval}
         startNewConversation={startNewConversation}
+        onSelectConversation={onSelectConversation}
       />
     );
 
@@ -214,6 +254,7 @@ const ChatPage: React.FC = () => {
     maxTokens,
     enableRetrieval,
     startNewConversation,
+    onSelectConversation,
   ]);
 
   const scrollToBottom = () => {

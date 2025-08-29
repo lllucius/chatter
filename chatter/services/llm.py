@@ -80,7 +80,7 @@ class LLMService:
             if provider.provider_type == ProviderType.OPENAI:
                 # Get API key from environment - registry doesn't store sensitive data
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
-                if not api_key:
+                if provider.api_key_required and not api_key:
                     logger.warning(f"No API key found for provider {provider.name}")
                     return None
 
@@ -95,7 +95,7 @@ class LLMService:
 
             elif provider.provider_type == ProviderType.ANTHROPIC:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
-                if not api_key:
+                if provider.api_key_required and not api_key:
                     logger.warning(f"No API key found for provider {provider.name}")
                     return None
 
@@ -249,7 +249,7 @@ class LLMService:
         try:
             if provider.provider_type == ProviderType.OPENAI:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
-                if not api_key:
+                if provider.api_key_required and not api_key:
                     raise LLMProviderError(f"No API key found for provider {provider.name}")
 
                 return ChatOpenAI(
@@ -267,7 +267,7 @@ class LLMService:
                 )
             elif provider.provider_type == ProviderType.ANTHROPIC:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
-                if not api_key:
+                if provider.api_key_required and not api_key:
                     raise LLMProviderError(f"No API key found for provider {provider.name}")
 
                 return ChatAnthropic(

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -16,6 +16,11 @@ import {
   Button,
   Tooltip,
   IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  CircularProgress,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -24,9 +29,11 @@ import {
   Description as DocumentIcon,
   Speed as SpeedIcon,
   Refresh as RefreshIcon,
+  Chat as ConversationIcon,
 } from '@mui/icons-material';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse } from '../sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
+import { chatterSDK } from '../services/chatter-sdk';
 
 interface Props {
   profiles: ProfileResponse[];
@@ -57,6 +64,7 @@ interface Props {
   setEnableRetrieval: (v: boolean) => void;
 
   startNewConversation: () => void;
+  onSelectConversation: (conversation: ConversationResponse) => void;
 }
 
 const ChatConfigPanel: React.FC<Props> = ({
@@ -80,17 +88,52 @@ const ChatConfigPanel: React.FC<Props> = ({
   enableRetrieval,
   setEnableRetrieval,
   startNewConversation,
+  onSelectConversation,
 }) => {
   const { collapsed, setCollapsed } = useRightSidebar();
-  const [expandedPanel, setExpandedPanel] = useState<string>('profile');
+  const [expandedPanel, setExpandedPanel] = useState<string>('conversations');
+  const [conversations, setConversations] = useState<ConversationResponse[]>([]);
+  const [loadingConversations, setLoadingConversations] = useState(false);
 
   const handlePanelChange =
     (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) =>
       setExpandedPanel(isExpanded ? panel : '');
 
+  const loadConversations = useCallback(async () => {
+    setLoadingConversations(true);
+    try {
+      const response = await chatterSDK.conversations.listConversationsApiV1ChatConversationsGet({
+        limit: 20,
+        sortBy: 'updated_at',
+        sortOrder: 'desc'
+      });
+      setConversations(response.data.conversations || []);
+    } catch (error) {
+      console.error('Failed to load conversations:', error);
+      setConversations([]);
+    } finally {
+      setLoadingConversations(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadConversations();
+  }, [loadConversations]);
+
   if (collapsed) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+        <Tooltip title="Conversations" placement="left">
+          <IconButton
+            onClick={() => {
+              setCollapsed(false);
+              setExpandedPanel('conversations');
+            }}
+            sx={{ borderRadius: 1 }}
+          >
+            <ConversationIcon />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Profile Settings" placement="left">
           <IconButton
             onClick={() => {
@@ -147,6 +190,49 @@ const ChatConfigPanel: React.FC<Props> = ({
           {currentConversation.title} ({messagesCount} messages)
         </Typography>
       )}
+
+      {/* Conversations */}
+      <Accordion expanded={expandedPanel === 'conversations'} onChange={handlePanelChange('conversations')}>
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+          <ConversationIcon sx={{ mr: 1 }} />
+          <Typography>Conversations</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          {loadingConversations ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+              <CircularProgress size={24} />
+            </Box>
+          ) : conversations.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
+              No conversations found
+            </Typography>
+          ) : (
+            <List dense sx={{ p: 0 }}>
+              {conversations.map((conversation) => (
+                <ListItem key={conversation.id} disablePadding>
+                  <ListItemButton 
+                    onClick={() => onSelectConversation(conversation)}
+                    selected={currentConversation?.id === conversation.id}
+                    sx={{ borderRadius: 1, mb: 0.5 }}
+                  >
+                    <ListItemText 
+                      primary={conversation.title}
+                      secondary={new Date(conversation.updated_at).toLocaleDateString()}
+                      primaryTypographyProps={{ 
+                        variant: 'body2',
+                        noWrap: true 
+                      }}
+                      secondaryTypographyProps={{ 
+                        variant: 'caption'
+                      }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </AccordionDetails>
+      </Accordion>
 
       {/* Profile */}
       <Accordion expanded={expandedPanel === 'profile'} onChange={handlePanelChange('profile')}>

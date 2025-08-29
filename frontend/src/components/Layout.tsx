@@ -17,6 +17,8 @@ import {
   Divider,
   Badge,
   Tooltip,
+  Collapse,
+  ListSubheader,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -37,6 +39,8 @@ import {
   DarkMode as DarkModeIcon,
   AdminPanelSettings as AdminIcon,
   Storage as ModelsIcon,
+  ExpandLess,
+  ExpandMore,
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -56,23 +60,61 @@ interface NavItem {
   icon: React.ReactElement;
 }
 
-const navItems: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
-  { label: 'Chat', path: '/chat', icon: <ChatIcon /> },
-  { label: 'Conversations', path: '/conversations', icon: <AnalyticsIcon /> },
-  { label: 'Documents', path: '/documents', icon: <DocumentIcon /> },
-  { label: 'Profiles', path: '/profiles', icon: <ProfileIcon /> },
-  { label: 'Prompts', path: '/prompts', icon: <PromptIcon /> },
-  { label: 'Models', path: '/models', icon: <ModelsIcon /> },
-  { label: 'Agents', path: '/agents', icon: <AgentIcon /> },
-  { label: 'Administration', path: '/administration', icon: <AdminIcon /> },
-  { label: 'Health', path: '/health', icon: <HealthIcon /> },
+interface NavSection {
+  title: string;
+  items: NavItem[];
+  defaultExpanded?: boolean;
+}
+
+const navSections: NavSection[] = [
+  {
+    title: 'Core',
+    defaultExpanded: true,
+    items: [
+      { label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
+      { label: 'Chat', path: '/chat', icon: <ChatIcon /> },
+    ]
+  },
+  {
+    title: 'Content Management', 
+    defaultExpanded: true,
+    items: [
+      { label: 'Conversations', path: '/conversations', icon: <AnalyticsIcon /> },
+      { label: 'Documents', path: '/documents', icon: <DocumentIcon /> },
+      { label: 'Profiles', path: '/profiles', icon: <ProfileIcon /> },
+      { label: 'Prompts', path: '/prompts', icon: <PromptIcon /> },
+    ]
+  },
+  {
+    title: 'AI & Models',
+    defaultExpanded: true,
+    items: [
+      { label: 'Models', path: '/models', icon: <ModelsIcon /> },
+      { label: 'Agents', path: '/agents', icon: <AgentIcon /> },
+    ]
+  },
+  {
+    title: 'System',
+    defaultExpanded: false,
+    items: [
+      { label: 'Administration', path: '/administration', icon: <AdminIcon /> },
+      { label: 'Health', path: '/health', icon: <HealthIcon /> },
+    ]
+  }
 ];
 
 const LayoutFrame: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>(() => {
+    // Initialize expanded state based on defaultExpanded property
+    const initial: {[key: string]: boolean} = {};
+    navSections.forEach(section => {
+      initial[section.title] = section.defaultExpanded ?? false;
+    });
+    return initial;
+  });
   const navigate = useNavigate();
   const location = useLocation();
   const { darkMode, toggleDarkMode } = useContext(ThemeContext);
@@ -123,6 +165,13 @@ const LayoutFrame: React.FC = () => {
     setSidebarCollapsed(!sidebarCollapsed);
   };
 
+  const handleSectionToggle = (sectionTitle: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionTitle]: !prev[sectionTitle]
+    }));
+  };
+
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -136,6 +185,88 @@ const LayoutFrame: React.FC = () => {
     navigate('/login');
     handleProfileMenuClose();
   };
+
+  const renderNavigation = (isMobile: boolean = false) => (
+    <List sx={{ pt: 0 }}>
+      {navSections.map((section) => (
+        <React.Fragment key={section.title}>
+          {/* Section Header */}
+          {!sidebarCollapsed && (
+            <ListSubheader
+              component="div"
+              sx={{
+                py: 1,
+                px: 2.5,
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'text.secondary',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                lineHeight: 1.5,
+                bgcolor: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                '&:hover': {
+                  bgcolor: 'action.hover',
+                }
+              }}
+              onClick={() => handleSectionToggle(section.title)}
+            >
+              {section.title}
+              {section.items.length > 0 && (
+                expandedSections[section.title] ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />
+              )}
+            </ListSubheader>
+          )}
+          
+          {/* Section Items */}
+          <Collapse in={sidebarCollapsed || expandedSections[section.title]} timeout="auto" unmountOnExit>
+            {section.items.map((item) => (
+              <ListItem key={item.path} disablePadding>
+                <ListItemButton
+                  selected={location.pathname === item.path}
+                  onClick={() => {
+                    navigate(item.path);
+                    if (isMobile) {
+                      handleDrawerToggle();
+                    }
+                  }}
+                  sx={{
+                    minHeight: 48,
+                    justifyContent: sidebarCollapsed ? 'center' : 'initial',
+                    px: sidebarCollapsed ? 2.5 : 3.5,
+                    ml: sidebarCollapsed ? 0 : 1,
+                    mr: sidebarCollapsed ? 0 : 1,
+                    borderRadius: sidebarCollapsed ? 0 : 1,
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 0,
+                      mr: sidebarCollapsed ? 'auto' : 2,
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <Tooltip title={sidebarCollapsed ? item.label : ''} placement="right">
+                      {item.icon}
+                    </Tooltip>
+                  </ListItemIcon>
+                  {!sidebarCollapsed && <ListItemText primary={item.label} />}
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </Collapse>
+          
+          {/* Add divider between sections, except for the last one */}
+          {!sidebarCollapsed && navSections.indexOf(section) < navSections.length - 1 && (
+            <Divider sx={{ my: 1, mx: 2 }} />
+          )}
+        </React.Fragment>
+      ))}
+    </List>
+  );
 
   const drawer = (
     <div>
@@ -175,34 +306,7 @@ const LayoutFrame: React.FC = () => {
         </Box>
       </Toolbar>
       <Divider />
-      <List>
-        {navItems.map((item) => (
-          <ListItem key={item.path} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => navigate(item.path)}
-              sx={{
-                minHeight: 48,
-                justifyContent: sidebarCollapsed ? 'center' : 'initial',
-                px: 2.5,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: sidebarCollapsed ? 'auto' : 3,
-                  justifyContent: 'center',
-                }}
-              >
-                <Tooltip title={sidebarCollapsed ? item.label : ''} placement="right">
-                  {item.icon}
-                </Tooltip>
-              </ListItemIcon>
-              {!sidebarCollapsed && <ListItemText primary={item.label} />}
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
+      {renderNavigation()}
 
       <Menu
         id="profile-menu"
@@ -302,23 +406,7 @@ const LayoutFrame: React.FC = () => {
                 </Box>
               </Toolbar>
               <Divider />
-              <List>
-                {navItems.map((item) => (
-                  <ListItem key={item.path} disablePadding>
-                    <ListItemButton
-                      selected={location.pathname === item.path}
-                      onClick={() => {
-                        navigate(item.path);
-                        handleDrawerToggle();
-                      }}
-                      sx={{ minHeight: 48, px: 2.5 }}
-                    >
-                      <ListItemIcon sx={{ mr: 3 }}>{item.icon}</ListItemIcon>
-                      <ListItemText primary={item.label} />
-                    </ListItemButton>
-                  </ListItem>
-                ))}
-              </List>
+              {renderNavigation(true)}
 
               {/* Profile Menu (mobile left) */}
               <Menu

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Container,
@@ -11,30 +11,46 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { chatterSDK } from '../services/chatter-sdk';
+import { useForm } from '../hooks/useForm';
+
+interface LoginFormValues {
+  username: string;
+  password: string;
+}
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  const form = useForm<LoginFormValues>({
+    initialValues: {
+      username: '',
+      password: '',
+    },
+    onSubmit: async (values) => {
+      try {
+        await chatterSDK.login(values.username, values.password);
+        navigate('/dashboard');
+      } catch (err: any) {
+        form.setFieldError('password', err.message || 'Login failed');
+        throw err; // Re-throw to stop form submission
+      }
+    },
+    validate: (values) => {
+      const errors: Partial<Record<keyof LoginFormValues, string>> = {};
+      
+      if (!values.username.trim()) {
+        errors.username = 'Username is required';
+      }
+      
+      if (!values.password.trim()) {
+        errors.password = 'Password is required';
+      }
+      
+      return errors;
+    },
+  });
 
-    try {
-      await chatterSDK.login(username, password);
-      navigate('/dashboard');
-    } catch (err: any) {
-      setError(err.message || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Redirect if already authenticated (run as an effect, not during render)
+  // Redirect if already authenticated
   useEffect(() => {
     if (chatterSDK.isAuthenticated()) {
       navigate('/dashboard', { replace: true });
@@ -60,13 +76,7 @@ const LoginPage: React.FC = () => {
               Sign In
             </Typography>
             
-            {error && (
-              <Alert severity="error" sx={{ width: '100%', mb: 2 }}>
-                {error}
-              </Alert>
-            )}
-            
-            <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%' }}>
+            <Box component="form" onSubmit={form.handleSubmit} sx={{ width: '100%' }}>
               <TextField
                 margin="normal"
                 required
@@ -76,9 +86,12 @@ const LoginPage: React.FC = () => {
                 name="username"
                 autoComplete="username"
                 autoFocus
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={loading}
+                value={form.values.username}
+                onChange={form.handleChange('username')}
+                onBlur={form.handleBlur('username')}
+                error={form.touched.username && !!form.errors.username}
+                helperText={form.touched.username && form.errors.username}
+                disabled={form.isSubmitting}
               />
               <TextField
                 margin="normal"
@@ -89,18 +102,21 @@ const LoginPage: React.FC = () => {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
+                value={form.values.password}
+                onChange={form.handleChange('password')}
+                onBlur={form.handleBlur('password')}
+                error={form.touched.password && !!form.errors.password}
+                helperText={form.touched.password && form.errors.password}
+                disabled={form.isSubmitting}
               />
               <Button
                 type="submit"
                 fullWidth
                 variant="contained"
                 sx={{ mt: 3, mb: 2, py: 1.5 }}
-                disabled={loading || !username || !password}
+                disabled={form.isSubmitting || !form.isValid}
               >
-                {loading ? <CircularProgress size={24} /> : 'Sign In'}
+                {form.isSubmitting ? <CircularProgress size={24} /> : 'Sign In'}
               </Button>
             </Box>
           </Box>
@@ -110,4 +126,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default memo(LoginPage);

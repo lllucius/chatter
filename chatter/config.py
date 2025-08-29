@@ -486,13 +486,3 @@ def get_settings() -> Settings:
     """Get cached settings instance."""
     return Settings()
 
-
-# Global settings instance - only created when needed
-settings = None
-
-def get_global_settings() -> Settings:
-    """Get or create global settings instance."""
-    global settings
-    if settings is None:
-        settings = get_settings()
-    return settings

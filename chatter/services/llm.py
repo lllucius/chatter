@@ -16,7 +16,6 @@ from langchain_core.messages import (
 from langchain_openai import ChatOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.config import get_global_settings
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 

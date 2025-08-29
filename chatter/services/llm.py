@@ -133,7 +133,7 @@ class LLMService:
 
         # Load from registry
         session = await self._get_session()
-        registry = ModelRegistryService(session)
+        registry = _get_model_registry()(session)
 
         # Get provider by name
         provider = await registry.get_provider_by_name(provider_name)
@@ -211,7 +211,7 @@ class LLMService:
         """
         # Get the provider configuration from registry
         session = await self._get_session()
-        registry = ModelRegistryService(session)
+        registry = _get_model_registry()(session)
 
         provider = await registry.get_provider_by_name(profile.llm_provider)
         if not provider:
@@ -463,7 +463,7 @@ class LLMService:
             List of provider names
         """
         session = await self._get_session()
-        registry = ModelRegistryService(session)
+        registry = _get_model_registry()(session)
 
         providers, _ = await registry.list_providers()
         active_providers = [p.name for p in providers if p.is_active]
@@ -480,7 +480,7 @@ class LLMService:
             Provider information
         """
         session = await self._get_session()
-        registry = ModelRegistryService(session)
+        registry = _get_model_registry()(session)
 
         provider = await registry.get_provider_by_name(provider_name)
         if not provider:

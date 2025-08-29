@@ -339,6 +339,7 @@ export class ChatterSDK {
 }
 
 // Create and export a singleton instance
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-export const chatterSDK = new ChatterSDK(API_BASE_URL);
+//const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+//export const chatterSDK = new ChatterSDK(API_BASE_URL);
+export const chatterSDK = new ChatterSDK();
 export default chatterSDK;

@@ -18,10 +18,16 @@ class AgentListResponse:
     Attributes:
         agents (list['AgentResponse']): List of agents
         total (int): Total number of agents
+        page (int): Current page number
+        per_page (int): Number of items per page
+        total_pages (int): Total number of pages
     """
 
     agents: list["AgentResponse"]
     total: int
+    page: int
+    per_page: int
+    total_pages: int
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
@@ -32,12 +38,21 @@ class AgentListResponse:
 
         total = self.total
 
+        page = self.page
+
+        per_page = self.per_page
+
+        total_pages = self.total_pages
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
         field_dict.update(
             {
                 "agents": agents,
                 "total": total,
+                "page": page,
+                "per_page": per_page,
+                "total_pages": total_pages,
             }
         )
 
@@ -57,9 +72,18 @@ class AgentListResponse:
 
         total = d.pop("total")
 
+        page = d.pop("page")
+
+        per_page = d.pop("per_page")
+
+        total_pages = d.pop("total_pages")
+
         agent_list_response = cls(
             agents=agents,
             total=total,
+            page=page,
+            per_page=per_page,
+            total_pages=total_pages,
         )
 
         agent_list_response.additional_properties = d

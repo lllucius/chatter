@@ -56,7 +56,7 @@ def sync_detailed(
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Delete Provider
 
-     Delete a provider.
+     Delete a provider and all its dependent models and embedding spaces.
 
     Args:
         provider_id (str):
@@ -87,7 +87,7 @@ def sync(
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Delete Provider
 
-     Delete a provider.
+     Delete a provider and all its dependent models and embedding spaces.
 
     Args:
         provider_id (str):
@@ -113,7 +113,7 @@ async def asyncio_detailed(
 ) -> Response[Union[Any, HTTPValidationError]]:
     """Delete Provider
 
-     Delete a provider.
+     Delete a provider and all its dependent models and embedding spaces.
 
     Args:
         provider_id (str):
@@ -142,7 +142,7 @@ async def asyncio(
 ) -> Optional[Union[Any, HTTPValidationError]]:
     """Delete Provider
 
-     Delete a provider.
+     Delete a provider and all its dependent models and embedding spaces.
 
     Args:
         provider_id (str):

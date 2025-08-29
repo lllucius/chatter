@@ -81,6 +81,67 @@
         }
       }
     },
+    "/metrics": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Get Metrics",
+        "description": "Get application metrics and monitoring data.\n\nReturns:\n    Application metrics including performance and health data",
+        "operationId": "get_metrics_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/trace/{correlation_id}": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Get Correlation Trace",
+        "description": "Get trace of all requests for a correlation ID.\n\nArgs:\n    correlation_id: The correlation ID to trace\n    \nReturns:\n    List of requests associated with the correlation ID",
+        "operationId": "get_correlation_trace_trace__correlation_id__get",
+        "parameters": [
+          {
+            "name": "correlation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Correlation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/register": {
       "post": {
         "tags": [
@@ -4932,7 +4993,7 @@
           "Agents"
         ],
         "summary": "List Agents",
-        "description": "List all agents with optional filtering.\n\nArgs:\n    request: List request parameters\n    current_user: Current authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n    List of agents",
+        "description": "List all agents with optional filtering and pagination.\n\nArgs:\n    request: List request parameters with pagination\n    current_user: Current authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n    Paginated list of agents",
         "operationId": "list_agents_api_v1_agents__get",
         "security": [
           {
@@ -4977,18 +5038,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "anyOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Tags"
+                "$ref": "#/components/schemas/Body_list_agents_api_v1_agents__get"
               }
             }
           }
@@ -7290,7 +7340,7 @@
           "Model Registry"
         ],
         "summary": "Delete Provider",
-        "description": "Delete a provider.",
+        "description": "Delete a provider and all its dependent models and embedding spaces.",
         "operationId": "delete_provider_api_v1_models_providers__provider_id__delete",
         "security": [
           {
@@ -7638,7 +7688,7 @@
           "Model Registry"
         ],
         "summary": "Delete Model",
-        "description": "Delete a model definition.",
+        "description": "Delete a model definition and its dependent embedding spaces.",
         "operationId": "delete_model_api_v1_models_models__model_id__delete",
         "security": [
           {
@@ -9245,12 +9295,30 @@
             "type": "integer",
             "title": "Total",
             "description": "Total number of agents"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page",
+            "description": "Current page number"
+          },
+          "per_page": {
+            "type": "integer",
+            "title": "Per Page",
+            "description": "Number of items per page"
+          },
+          "total_pages": {
+            "type": "integer",
+            "title": "Total Pages",
+            "description": "Total number of pages"
           }
         },
         "type": "object",
         "required": [
           "agents",
-          "total"
+          "total",
+          "page",
+          "per_page",
+          "total_pages"
         ],
         "title": "AgentListResponse",
         "description": "Response schema for agent list."
@@ -10105,6 +10173,32 @@
         ],
         "title": "BackupType",
         "description": "Types of backups."
+      },
+      "Body_list_agents_api_v1_agents__get": {
+        "properties": {
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationRequest"
+          },
+          "sorting": {
+            "$ref": "#/components/schemas/SortingRequest"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags"
+          }
+        },
+        "type": "object",
+        "title": "Body_list_agents_api_v1_agents__get"
       },
       "Body_upload_document_api_v1_documents_upload_post": {
         "properties": {
@@ -13705,6 +13799,28 @@
         ],
         "title": "ModelType",
         "description": "Types of AI models."
+      },
+      "PaginationRequest": {
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "maximum": 100.0,
+            "minimum": 1.0,
+            "title": "Limit",
+            "description": "Maximum number of results",
+            "default": 50
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offset",
+            "description": "Number of results to skip",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "PaginationRequest",
+        "description": "Common pagination request schema."
       },
       "PasswordChange": {
         "properties": {
@@ -17529,6 +17645,26 @@
         ],
         "title": "ServerToolsResponse",
         "description": "Schema for server tools response with pagination."
+      },
+      "SortingRequest": {
+        "properties": {
+          "sort_by": {
+            "type": "string",
+            "title": "Sort By",
+            "description": "Sort field",
+            "default": "created_at"
+          },
+          "sort_order": {
+            "type": "string",
+            "pattern": "^(asc|desc)$",
+            "title": "Sort Order",
+            "description": "Sort order",
+            "default": "desc"
+          }
+        },
+        "type": "object",
+        "title": "SortingRequest",
+        "description": "Common sorting request schema."
       },
       "StorageStatsResponse": {
         "properties": {

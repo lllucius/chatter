@@ -10,11 +10,11 @@ from ...types import Response
 
 
 def _get_kwargs(
-    model_id: str,
+    correlation_id: str,
 ) -> dict[str, Any]:
     _kwargs: dict[str, Any] = {
-        "method": "delete",
-        "url": f"/api/v1/models/models/{model_id}",
+        "method": "get",
+        "url": f"/trace/{correlation_id}",
     }
 
     return _kwargs
@@ -50,16 +50,22 @@ def _build_response(
 
 
 def sync_detailed(
-    model_id: str,
+    correlation_id: str,
     *,
-    client: AuthenticatedClient,
+    client: Union[AuthenticatedClient, Client],
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """Delete Model
+    """Get Correlation Trace
 
-     Delete a model definition and its dependent embedding spaces.
+     Get trace of all requests for a correlation ID.
 
     Args:
-        model_id (str):
+        correlation_id: The correlation ID to trace
+
+    Returns:
+        List of requests associated with the correlation ID
+
+    Args:
+        correlation_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -70,7 +76,7 @@ def sync_detailed(
     """
 
     kwargs = _get_kwargs(
-        model_id=model_id,
+        correlation_id=correlation_id,
     )
 
     response = client.get_httpx_client().request(
@@ -81,16 +87,22 @@ def sync_detailed(
 
 
 def sync(
-    model_id: str,
+    correlation_id: str,
     *,
-    client: AuthenticatedClient,
+    client: Union[AuthenticatedClient, Client],
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Delete Model
+    """Get Correlation Trace
 
-     Delete a model definition and its dependent embedding spaces.
+     Get trace of all requests for a correlation ID.
 
     Args:
-        model_id (str):
+        correlation_id: The correlation ID to trace
+
+    Returns:
+        List of requests associated with the correlation ID
+
+    Args:
+        correlation_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -101,22 +113,28 @@ def sync(
     """
 
     return sync_detailed(
-        model_id=model_id,
+        correlation_id=correlation_id,
         client=client,
     ).parsed
 
 
 async def asyncio_detailed(
-    model_id: str,
+    correlation_id: str,
     *,
-    client: AuthenticatedClient,
+    client: Union[AuthenticatedClient, Client],
 ) -> Response[Union[Any, HTTPValidationError]]:
-    """Delete Model
+    """Get Correlation Trace
 
-     Delete a model definition and its dependent embedding spaces.
+     Get trace of all requests for a correlation ID.
 
     Args:
-        model_id (str):
+        correlation_id: The correlation ID to trace
+
+    Returns:
+        List of requests associated with the correlation ID
+
+    Args:
+        correlation_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -127,7 +145,7 @@ async def asyncio_detailed(
     """
 
     kwargs = _get_kwargs(
-        model_id=model_id,
+        correlation_id=correlation_id,
     )
 
     response = await client.get_async_httpx_client().request(**kwargs)
@@ -136,16 +154,22 @@ async def asyncio_detailed(
 
 
 async def asyncio(
-    model_id: str,
+    correlation_id: str,
     *,
-    client: AuthenticatedClient,
+    client: Union[AuthenticatedClient, Client],
 ) -> Optional[Union[Any, HTTPValidationError]]:
-    """Delete Model
+    """Get Correlation Trace
 
-     Delete a model definition and its dependent embedding spaces.
+     Get trace of all requests for a correlation ID.
 
     Args:
-        model_id (str):
+        correlation_id: The correlation ID to trace
+
+    Returns:
+        List of requests associated with the correlation ID
+
+    Args:
+        correlation_id (str):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -157,7 +181,7 @@ async def asyncio(
 
     return (
         await asyncio_detailed(
-            model_id=model_id,
+            correlation_id=correlation_id,
             client=client,
         )
     ).parsed

@@ -8,13 +8,14 @@ from ...client import AuthenticatedClient, Client
 from ...models.agent_list_response import AgentListResponse
 from ...models.agent_status import AgentStatus
 from ...models.agent_type import AgentType
+from ...models.body_list_agents_api_v1_agents_get import BodyListAgentsApiV1AgentsGet
 from ...models.http_validation_error import HTTPValidationError
 from ...types import UNSET, Response, Unset
 
 
 def _get_kwargs(
     *,
-    body: Union[None, list[str]],
+    body: BodyListAgentsApiV1AgentsGet,
     agent_type: Union[AgentType, None, Unset] = UNSET,
     status: Union[AgentStatus, None, Unset] = UNSET,
 ) -> dict[str, Any]:
@@ -48,12 +49,7 @@ def _get_kwargs(
         "params": params,
     }
 
-    _kwargs["json"]: Union[None, list[str]]
-    if isinstance(body, list):
-        _kwargs["json"] = body
-
-    else:
-        _kwargs["json"] = body
+    _kwargs["json"] = body.to_dict()
 
     headers["Content-Type"] = "application/json"
 
@@ -94,26 +90,26 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-    body: Union[None, list[str]],
+    body: BodyListAgentsApiV1AgentsGet,
     agent_type: Union[AgentType, None, Unset] = UNSET,
     status: Union[AgentStatus, None, Unset] = UNSET,
 ) -> Response[Union[AgentListResponse, HTTPValidationError]]:
     """List Agents
 
-     List all agents with optional filtering.
+     List all agents with optional filtering and pagination.
 
     Args:
-        request: List request parameters
+        request: List request parameters with pagination
         current_user: Current authenticated user
         agent_manager: Agent manager instance
 
     Returns:
-        List of agents
+        Paginated list of agents
 
     Args:
         agent_type (Union[AgentType, None, Unset]):
         status (Union[AgentStatus, None, Unset]):
-        body (Union[None, list[str]]):
+        body (BodyListAgentsApiV1AgentsGet):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -139,26 +135,26 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-    body: Union[None, list[str]],
+    body: BodyListAgentsApiV1AgentsGet,
     agent_type: Union[AgentType, None, Unset] = UNSET,
     status: Union[AgentStatus, None, Unset] = UNSET,
 ) -> Optional[Union[AgentListResponse, HTTPValidationError]]:
     """List Agents
 
-     List all agents with optional filtering.
+     List all agents with optional filtering and pagination.
 
     Args:
-        request: List request parameters
+        request: List request parameters with pagination
         current_user: Current authenticated user
         agent_manager: Agent manager instance
 
     Returns:
-        List of agents
+        Paginated list of agents
 
     Args:
         agent_type (Union[AgentType, None, Unset]):
         status (Union[AgentStatus, None, Unset]):
-        body (Union[None, list[str]]):
+        body (BodyListAgentsApiV1AgentsGet):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -179,26 +175,26 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-    body: Union[None, list[str]],
+    body: BodyListAgentsApiV1AgentsGet,
     agent_type: Union[AgentType, None, Unset] = UNSET,
     status: Union[AgentStatus, None, Unset] = UNSET,
 ) -> Response[Union[AgentListResponse, HTTPValidationError]]:
     """List Agents
 
-     List all agents with optional filtering.
+     List all agents with optional filtering and pagination.
 
     Args:
-        request: List request parameters
+        request: List request parameters with pagination
         current_user: Current authenticated user
         agent_manager: Agent manager instance
 
     Returns:
-        List of agents
+        Paginated list of agents
 
     Args:
         agent_type (Union[AgentType, None, Unset]):
         status (Union[AgentStatus, None, Unset]):
-        body (Union[None, list[str]]):
+        body (BodyListAgentsApiV1AgentsGet):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -222,26 +218,26 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-    body: Union[None, list[str]],
+    body: BodyListAgentsApiV1AgentsGet,
     agent_type: Union[AgentType, None, Unset] = UNSET,
     status: Union[AgentStatus, None, Unset] = UNSET,
 ) -> Optional[Union[AgentListResponse, HTTPValidationError]]:
     """List Agents
 
-     List all agents with optional filtering.
+     List all agents with optional filtering and pagination.
 
     Args:
-        request: List request parameters
+        request: List request parameters with pagination
         current_user: Current authenticated user
         agent_manager: Agent manager instance
 
     Returns:
-        List of agents
+        Paginated list of agents
 
     Args:
         agent_type (Union[AgentType, None, Unset]):
         status (Union[AgentStatus, None, Unset]):
-        body (Union[None, list[str]]):
+        body (BodyListAgentsApiV1AgentsGet):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

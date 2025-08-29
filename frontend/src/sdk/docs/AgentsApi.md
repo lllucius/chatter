@@ -272,14 +272,15 @@ const { status, data } = await apiInstance.interactWithAgentApiV1AgentsAgentIdIn
 # **listAgentsApiV1AgentsGet**
 > AgentListResponse listAgentsApiV1AgentsGet()
 
-List all agents with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     List of agents
+List all agents with optional filtering and pagination.  Args:     request: List request parameters with pagination     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Paginated list of agents
 
 ### Example
 
 ```typescript
 import {
     AgentsApi,
-    Configuration
+    Configuration,
+    BodyListAgentsApiV1AgentsGet
 } from 'chatter-sdk';
 
 const configuration = new Configuration();
@@ -287,12 +288,12 @@ const apiInstance = new AgentsApi(configuration);
 
 let agentType: AgentType; // (optional) (default to undefined)
 let status: AgentStatus; // (optional) (default to undefined)
-let requestBody: Array<string>; // (optional)
+let bodyListAgentsApiV1AgentsGet: BodyListAgentsApiV1AgentsGet; // (optional)
 
 const { status, data } = await apiInstance.listAgentsApiV1AgentsGet(
     agentType,
     status,
-    requestBody
+    bodyListAgentsApiV1AgentsGet
 );
 ```
 
@@ -300,7 +301,7 @@ const { status, data } = await apiInstance.listAgentsApiV1AgentsGet(
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **requestBody** | **Array<string>**|  | |
+| **bodyListAgentsApiV1AgentsGet** | **BodyListAgentsApiV1AgentsGet**|  | |
 | **agentType** | **AgentType** |  | (optional) defaults to undefined|
 | **status** | **AgentStatus** |  | (optional) defaults to undefined|
 

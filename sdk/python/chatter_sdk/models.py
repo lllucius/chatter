@@ -9,6 +9,7 @@ from typing import Optional
 @dataclass
 class HealthResponse:
     """Health check response model."""
+
     status: str
     timestamp: str
 
@@ -16,6 +17,7 @@ class HealthResponse:
 @dataclass
 class UserCreate:
     """User creation model."""
+
     email: str
     username: str
     password: str
@@ -24,5 +26,6 @@ class UserCreate:
 @dataclass
 class ChatRequest:
     """Chat request model."""
+
     message: str
     conversation_id: Optional[str] = None

@@ -13,14 +13,14 @@ class ConversationStats(Base):
 
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey(Keys.CONVERSATIONS),
         nullable=False,
         index=True,
     )
 
     user_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
     )
 
     # Time period
@@ -130,14 +130,14 @@ class DocumentStats(Base):
 
     # Foreign keys
     document_id: Mapped[str] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey(Keys.DOCUMENTS),
         nullable=False,
         index=True,
     )
 
     user_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
     )
 
     # Time period
@@ -209,11 +209,11 @@ class PromptStats(Base):
 
     # Foreign keys
     prompt_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.PROMPTS), nullable=False, index=True
+        String(26), ForeignKey(Keys.PROMPTS), nullable=False, index=True
     )
 
     user_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
     )
 
     # Time period
@@ -282,14 +282,14 @@ class ProfileStats(Base):
 
     # Foreign keys
     profile_id: Mapped[str] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey(Keys.PROFILES),
         nullable=False,
         index=True,
     )
 
     user_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
     )
 
     # Time period

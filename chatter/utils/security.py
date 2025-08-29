@@ -6,7 +6,7 @@ from typing import Any
 import bcrypt
 from jose import JWTError, jwt
 
-from chatter.config import settings
+from chatter.config import get_global_settings
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -57,13 +57,13 @@ def create_access_token(
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(
-            minutes=settings.access_token_expire_minutes
+            minutes=get_global_settings().access_token_expire_minutes
         )
 
     to_encode.update({"exp": expire})
 
     encoded_jwt = jwt.encode(
-        to_encode, settings.secret_key, algorithm=settings.algorithm
+        to_encode, get_global_settings().secret_key, algorithm=get_global_settings().algorithm
     )
 
     return encoded_jwt
@@ -87,13 +87,13 @@ def create_refresh_token(
         expire = datetime.now(UTC) + expires_delta
     else:
         expire = datetime.now(UTC) + timedelta(
-            days=settings.refresh_token_expire_days
+            days=get_global_settings().refresh_token_expire_days
         )
 
     to_encode.update({"exp": expire, "type": "refresh"})
 
     encoded_jwt = jwt.encode(
-        to_encode, settings.secret_key, algorithm=settings.algorithm
+        to_encode, get_global_settings().secret_key, algorithm=get_global_settings().algorithm
     )
 
     return encoded_jwt
@@ -110,7 +110,7 @@ def verify_token(token: str) -> dict[str, Any] | None:
     """
     try:
         payload = jwt.decode(
-            token, settings.secret_key, algorithms=[settings.algorithm]
+            token, get_global_settings().secret_key, algorithms=[get_global_settings().algorithm]
         )
         return payload
     except JWTError as e:
@@ -204,6 +204,33 @@ def generate_api_key(length: int = 32) -> str:
 
     alphabet = string.ascii_letters + string.digits
     return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def hash_api_key(api_key: str) -> str:
+    """Hash an API key using bcrypt.
+
+    Args:
+        api_key: Plain text API key
+
+    Returns:
+        Hashed API key string
+    """
+    return bcrypt.hashpw(api_key.encode(), bcrypt.gensalt()).decode()
+
+
+def verify_api_key(plain_api_key: str, hashed_api_key: str) -> bool:
+    """Verify an API key against its hash.
+
+    Args:
+        plain_api_key: Plain text API key to verify
+        hashed_api_key: Hashed API key to verify against
+
+    Returns:
+        True if API key matches, False otherwise
+    """
+    return bcrypt.checkpw(
+        plain_api_key.encode(), hashed_api_key.encode()
+    )
 
 
 def sanitize_input(input_string: str, max_length: int = 1000) -> str:

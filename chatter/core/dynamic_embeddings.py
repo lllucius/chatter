@@ -65,8 +65,8 @@ def make_embedding_model(name: str, dim: int):
         {
             "__tablename__": name,
             "id": Column(Integer, primary_key=True),
-            "document_id": Column(String(12), nullable=False, index=True),
-            "chunk_id": Column(String(12), nullable=False, index=True),
+            "document_id": Column(String(26), nullable=False, index=True),
+            "chunk_id": Column(String(26), nullable=False, index=True),
             "embedding": Column(Vector(dim) if PGVECTOR_AVAILABLE else String, nullable=False),
             "content": Column(String, nullable=False),
             "extra_metadata": Column(String, nullable=True),

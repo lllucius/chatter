@@ -62,7 +62,7 @@ class User(Base):
         String(50), nullable=True
     )
     default_profile_id: Mapped[str | None] = mapped_column(
-        String(12), ForeignKey(Keys.PROFILES), nullable=True, index=True
+        String(26), ForeignKey(Keys.PROFILES), nullable=True, index=True
     )
 
     # Usage limits

@@ -54,7 +54,7 @@ class Prompt(Base):
 
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
     )
 
     # Prompt metadata
@@ -128,7 +128,7 @@ class Prompt(Base):
         JSON, nullable=True
     )
     parent_prompt_id: Mapped[str | None] = mapped_column(
-        String(12), ForeignKey(Keys.PROMPTS), nullable=True, index=True
+        String(26), ForeignKey(Keys.PROMPTS), nullable=True, index=True
     )
 
     # Version control

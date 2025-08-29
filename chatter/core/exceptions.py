@@ -337,6 +337,36 @@ class WorkflowValidationError(WorkflowError):
         return "workflow-validation-error"
 
 
+class WorkflowExecutionError(WorkflowError):
+    """Workflow execution errors."""
+    
+    def __init__(
+        self, 
+        message: str, 
+        workflow_id: Optional[str] = None, 
+        step: Optional[str] = None,
+        **kwargs
+    ):
+        details = {}
+        if workflow_id:
+            details["workflow_id"] = workflow_id
+        if step:
+            details["failed_step"] = step
+            
+        super().__init__(
+            message=message,
+            status_code=500,
+            details=details,
+            **kwargs
+        )
+    
+    def _get_error_title(self) -> str:
+        return "Workflow Execution Error"
+    
+    def _get_type_suffix(self) -> str:
+        return "workflow-execution-error"
+
+
 # Error handling utilities
 def handle_service_error(
     func_name: str,

@@ -76,7 +76,8 @@ class Settings(BaseSettings):
 
     # Security
     trusted_hosts: str | list[str] = Field(
-        default=["localhost", "127.0.0.1"], description="Trusted hosts"
+        default=["localhost", "127.0.0.1", "0.0.0.0", "localhost:8000", "127.0.0.1:8000", "0.0.0.0:8000"], 
+        description="Trusted hosts"
     )
     force_https: bool = Field(
         default=False, description="Force HTTPS redirect"

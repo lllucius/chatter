@@ -20,9 +20,11 @@ from chatter.utils.security import (
     create_access_token,
     create_refresh_token,
     generate_api_key,
+    hash_api_key,
     hash_password,
     validate_email,
     validate_password_strength,
+    verify_api_key,
     verify_password,
     verify_token,
 )
@@ -194,15 +196,23 @@ class AuthService:
         """Get user by API key.
 
         Args:
-            api_key: API key
+            api_key: API key (plaintext)
 
         Returns:
-            User if found, None otherwise
+            User if found and API key is valid, None otherwise
         """
+        # Get all users with API keys to verify the hash
         result = await self.session.execute(
-            select(User).where(User.api_key == api_key)
+            select(User).where(User.api_key.isnot(None))
         )
-        return result.scalar_one_or_none()
+        users_with_keys = result.scalars().all()
+        
+        # Check each user's hashed API key
+        for user in users_with_keys:
+            if user.api_key and verify_api_key(api_key, user.api_key):
+                return user
+        
+        return None
 
     async def update_user(
         self, user_id: str, user_data: UserUpdate
@@ -286,7 +296,7 @@ class AuthService:
             key_name: API key name
 
         Returns:
-            Generated API key
+            Generated API key (plaintext, only returned once)
 
         Raises:
             UserNotFoundError: If user not found
@@ -295,9 +305,12 @@ class AuthService:
         if not user:
             raise UserNotFoundError() from None
 
-        # Generate API key
+        # Generate API key and hash it before storage
         api_key = generate_api_key()
-        user.api_key = api_key
+        hashed_api_key = hash_api_key(api_key)
+        
+        # Store only the hash in the database
+        user.api_key = hashed_api_key
         user.api_key_name = key_name
 
         await self.session.commit()
@@ -306,6 +319,7 @@ class AuthService:
         logger.info(
             "API key created", user_id=user.id, key_name=key_name
         )
+        # Return the plaintext API key only once - it won't be stored
         return api_key
 
     async def revoke_api_key(self, user_id: str) -> bool:

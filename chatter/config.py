@@ -1,8 +1,10 @@
 """Configuration management for Chatter application."""
 
 from functools import lru_cache
+import os
+import sys
 
-from pydantic import Field
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -88,13 +90,14 @@ class Settings(BaseSettings):
     # =============================================================================
     # DATABASE SETTINGS
     # =============================================================================
+    # DATABASE SETTINGS
+    # =============================================================================
 
     database_url: str = Field(
-        default="postgresql+asyncpg://chatter:chatter_password@localhost:5432/chatter",
-        description="Database URL",
+        description="Database URL (required, no default for security)",
     )
     test_database_url: str = Field(
-        default="postgresql+asyncpg://chatter:chatter_password@localhost:5432/chatter_test",
+        default="postgresql+asyncpg://test_user:test_pass@localhost:5432/chatter_test",
         description="Test database URL",
     )
 
@@ -107,6 +110,22 @@ class Settings(BaseSettings):
     )
     db_pool_pre_ping: bool = Field(
         default=True, description="Database pool pre-ping"
+    )
+
+    # =============================================================================
+    # REDIS CACHE SETTINGS
+    # =============================================================================
+
+    redis_url: str = Field(
+        default="redis://localhost:6379/0",
+        description="Redis URL for caching"
+    )
+    test_redis_url: str = Field(
+        default="redis://localhost:6379/1",
+        description="Test Redis URL"
+    )
+    cache_ttl: int = Field(
+        default=3600, description="Default cache TTL in seconds"
     )
     db_pool_recycle: int = Field(
         default=3600, description="Database pool recycle time"
@@ -385,6 +404,53 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
+    @model_validator(mode='after')
+    def validate_configuration(self):
+        """Validate configuration for security and production readiness."""
+        # Validate database URL is provided
+        if not self.database_url:
+            raise ValueError(
+                "DATABASE_URL must be provided - no default database credentials allowed for security"
+            )
+        
+        # Validate production settings
+        if self.is_production:
+            if self.debug:
+                raise ValueError(
+                    "Debug mode must be disabled in production"
+                )
+            
+            # Validate secret key strength in production
+            if self.secret_key == "your-secret-key-here" or len(self.secret_key) < 32:
+                raise ValueError(
+                    "SECRET_KEY must be a strong secret (32+ characters) in production"
+                )
+        
+        return self
+
+    @field_validator('database_url')
+    @classmethod
+    def validate_database_url(cls, v):
+        """Validate database URL format."""
+        if not v:
+            raise ValueError("Database URL is required")
+        
+        # Prevent default/weak credentials
+        weak_patterns = [
+            "chatter:chatter_password",
+            "user:password",
+            "postgres:postgres",
+            "root:root"
+        ]
+        for pattern in weak_patterns:
+            if pattern in v:
+                raise ValueError(
+                    f"Default/weak database credentials detected: {pattern}. "
+                    "Please use strong, unique credentials."
+                )
+        
+        return v
+
     @property
     def is_development(self) -> bool:
         """Check if running in development environment."""
@@ -421,5 +487,12 @@ def get_settings() -> Settings:
     return Settings()
 
 
-# Global settings instance
-settings = get_settings()
+# Global settings instance - only created when needed
+settings = None
+
+def get_global_settings() -> Settings:
+    """Get or create global settings instance."""
+    global settings
+    if settings is None:
+        settings = get_settings()
+    return settings

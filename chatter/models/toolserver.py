@@ -97,7 +97,7 @@ class ToolServer(Base):
 
     # Metadata
     created_by: Mapped[str | None] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=True, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=True, index=True
     )
 
     # Relationships
@@ -118,7 +118,7 @@ class ServerTool(Base):
 
     # Foreign keys
     server_id: Mapped[str] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey("tool_servers.id"),
         nullable=False,
         index=True,
@@ -188,22 +188,22 @@ class ToolUsage(Base):
 
     # Foreign keys
     server_id: Mapped[str] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey(Keys.TOOL_SERVERS),
         nullable=False,
         index=True,
     )
     tool_id: Mapped[str] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey(Keys.SERVER_TOOLS),
         nullable=False,
         index=True,
     )
     user_id: Mapped[str | None] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=True, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=True, index=True
     )
     conversation_id: Mapped[str | None] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey(Keys.CONVERSATIONS),
         nullable=True,
         index=True,

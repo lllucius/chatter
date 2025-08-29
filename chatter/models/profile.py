@@ -35,7 +35,7 @@ class Profile(Base):
 
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
     )
 
     # Profile metadata

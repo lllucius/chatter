@@ -69,7 +69,7 @@ class ModelDef(Base):
     
     __tablename__ = "model_defs"
     
-    provider_id: Mapped[str] = mapped_column(String(12), ForeignKey("providers.id"), nullable=False)
+    provider_id: Mapped[str] = mapped_column(String(26), ForeignKey("providers.id"), nullable=False)
     
     # Model identification
     name: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -113,7 +113,7 @@ class EmbeddingSpace(Base):
     
     __tablename__ = "embedding_spaces"
     
-    model_id: Mapped[str] = mapped_column(String(12), ForeignKey("model_defs.id"), nullable=False)
+    model_id: Mapped[str] = mapped_column(String(26), ForeignKey("model_defs.id"), nullable=False)
     
     # Space identification
     name: Mapped[str] = mapped_column(String(200), nullable=False, unique=True, index=True)

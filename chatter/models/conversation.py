@@ -40,11 +40,11 @@ class Conversation(Base):
 
     # Foreign keys
     user_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
     )
 
     profile_id: Mapped[str | None] = mapped_column(
-        String(12), ForeignKey(Keys.PROFILES), nullable=True, index=True
+        String(26), ForeignKey(Keys.PROFILES), nullable=True, index=True
     )
 
     # Conversation metadata
@@ -170,7 +170,7 @@ class Message(Base):
 
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey(Keys.CONVERSATIONS),
         nullable=False,
         index=True,

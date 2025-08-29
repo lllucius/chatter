@@ -51,7 +51,7 @@ class Document(Base):
 
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(
-        String(12), ForeignKey(Keys.USERS), nullable=False, index=True
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
     )
 
     # File information
@@ -120,7 +120,7 @@ class Document(Base):
         Integer, default=1, nullable=False
     )
     parent_document_id: Mapped[str | None] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey(Keys.DOCUMENTS),
         nullable=True,
         index=True,
@@ -232,7 +232,7 @@ class DocumentChunk(Base):
 
     # Foreign keys
     document_id: Mapped[str] = mapped_column(
-        String(12),
+        String(26),
         ForeignKey(Keys.DOCUMENTS),
         nullable=False,
         index=True,

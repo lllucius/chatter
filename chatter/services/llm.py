@@ -3,7 +3,7 @@
 import asyncio
 import os
 from collections.abc import AsyncGenerator
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
@@ -16,19 +16,36 @@ from langchain_core.messages import (
 from langchain_openai import ChatOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.config import settings
-from chatter.core.model_registry import ModelRegistryService
-from chatter.models.registry import ModelType, ProviderType
-
-# Delayed imports to avoid circular dependencies - moved to module level
-from chatter.core.langchain import orchestrator
-from chatter.models.conversation import Conversation
-from chatter.models.profile import Profile
-from chatter.services.mcp import BuiltInTools, mcp_service
+from chatter.config import get_global_settings
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 
+# Use TYPE_CHECKING to avoid circular imports at runtime
+if TYPE_CHECKING:
+    from chatter.core.langchain import LangChainOrchestrator
+    from chatter.models.conversation import Conversation
+    from chatter.models.profile import Profile
+    from chatter.services.mcp import BuiltInTools, MCPService
+
 logger = get_logger(__name__)
+
+
+def _get_orchestrator():
+    """Lazy import of orchestrator to avoid circular imports."""
+    from chatter.core.langchain import orchestrator
+    return orchestrator
+
+
+def _get_mcp_service():
+    """Lazy import of MCP service to avoid circular imports."""
+    from chatter.services.mcp import mcp_service
+    return mcp_service
+
+
+def _get_model_registry():
+    """Lazy import of model registry to avoid circular imports."""
+    from chatter.core.model_registry import ModelRegistryService
+    return ModelRegistryService
 
 
 class LLMProviderError(Exception):
@@ -496,7 +513,7 @@ class LLMService:
     ) -> Any:
         """Create a conversation chain using LangChain orchestrator."""
         provider = await self.get_provider(provider_name)
-        return orchestrator.create_chat_chain(
+        return _get_orchestrator().create_chat_chain(
             llm=provider,
             system_message=system_message,
             include_history=include_history,
@@ -510,7 +527,7 @@ class LLMService:
     ) -> Any:
         """Create a RAG chain using LangChain orchestrator."""
         provider = await self.get_provider(provider_name)
-        return orchestrator.create_rag_chain(
+        return _get_orchestrator().create_rag_chain(
             llm=provider,
             retriever=retriever,
             system_message=system_message,
@@ -529,7 +546,7 @@ class LLMService:
 
         # Get MCP tools if none provided
         if tools is None:
-            tools = await mcp_service.get_tools()
+            tools = await _get_mcp_service().get_tools()
             tools.extend(BuiltInTools.create_builtin_tools())
 
         if tools:
@@ -603,7 +620,7 @@ class LLMService:
 
         # Get default tools if needed
         if workflow_type in ("tools", "full") and not tools:
-            tools = await mcp_service.get_tools()
+            tools = await _get_mcp_service().get_tools()
             tools.extend(BuiltInTools.create_builtin_tools())
 
         # Note: do NOT hard-require a retriever; the workflow handles missing retriever gracefully.

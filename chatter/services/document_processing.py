@@ -140,12 +140,7 @@ class DocumentProcessingService:
             # Generate embeddings for chunks (async HTTP + async DB; PGVector sync parts are offloaded internally)
             embedding_success = await self._generate_embeddings(document, chunk_objects)
             if not embedding_success:
-                # Check if embedding providers are available
-                if not self.embedding_service.list_available_providers():
-                    await self._mark_processing_failed(document, "No embedding providers available")
-                    return False
-                else:
-                    logger.warning("Failed to generate embeddings for some chunks", document_id=document_id)
+                logger.warning("Failed to generate embeddings for some chunks", document_id=document_id)
 
             # Update document status
             document.status = DocumentStatus.PROCESSED

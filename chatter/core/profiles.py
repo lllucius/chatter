@@ -6,7 +6,7 @@ from typing import Any
 from sqlalchemy import and_, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.models.profile import Profile, ProfileType
 from chatter.schemas.profile import (
     ProfileCreate,
@@ -16,8 +16,6 @@ from chatter.schemas.profile import (
 )
 from chatter.services.llm import LLMService
 from chatter.utils.logging import get_logger
-
-settings = get_settings()
 logger = get_logger(__name__)
 
 

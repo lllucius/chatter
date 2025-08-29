@@ -28,11 +28,10 @@ from chatter.schemas.model_registry import (
 )
 from chatter.core.dynamic_embeddings import ensure_table_and_index, get_embedding_model
 from sqlalchemy import create_engine
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
-settings = get_settings()
 
 
 def get_sync_engine():

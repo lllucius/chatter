@@ -6,10 +6,8 @@ from typing import Any
 import bcrypt
 from jose import JWTError, jwt
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.utils.logging import get_logger
-
-settings = get_settings()
 logger = get_logger(__name__)
 
 

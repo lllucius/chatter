@@ -7,7 +7,7 @@ from typing import Any
 import structlog
 from structlog.stdlib import LoggerFactory
 
-from chatter.config import get_settings
+from chatter.config import settings
 
 
 def correlation_id_processor(logger, method_name, event_dict):
@@ -25,8 +25,6 @@ def correlation_id_processor(logger, method_name, event_dict):
 
 def setup_logging() -> None:
     """Set up structured logging for the application."""
-    
-    settings = get_settings()
 
     # Configure structlog
     structlog.configure(

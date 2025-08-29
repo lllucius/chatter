@@ -16,7 +16,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.utils.database import close_database, init_database
 from chatter.utils.logging import get_logger, setup_logging
 from chatter.utils.problem import (
@@ -31,8 +31,6 @@ try:
     asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 except ImportError:
     pass  # uvloop not available
-
-settings = get_settings()
 
 # Set up logging
 logger = get_logger(__name__)

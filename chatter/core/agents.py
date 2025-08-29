@@ -521,15 +521,19 @@ class AgentManager:
         self,
         agent_type: AgentType | None = None,
         status: AgentStatus | None = None,
-    ) -> list[AgentProfile]:
-        """List agents with optional filtering.
+        offset: int = 0,
+        limit: int = 50,
+    ) -> tuple[list[AgentProfile], int]:
+        """List agents with optional filtering and pagination.
 
         Args:
             agent_type: Filter by agent type
             status: Filter by agent status
+            offset: Number of items to skip
+            limit: Maximum number of items to return
 
         Returns:
-            List of agent profiles
+            Tuple of (list of agent profiles, total count)
         """
         profiles = [agent.profile for agent in self.agents.values()]
 
@@ -539,7 +543,12 @@ class AgentManager:
         if status:
             profiles = [p for p in profiles if p.status == status]
 
-        return profiles
+        total = len(profiles)
+        
+        # Apply pagination
+        paginated_profiles = profiles[offset:offset + limit]
+
+        return paginated_profiles, total
 
     async def delete_agent(self, agent_id: str) -> bool:
         """Delete an agent.

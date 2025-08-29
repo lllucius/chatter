@@ -119,7 +119,25 @@ class ModelRegistryService:
         return provider
 
     async def delete_provider(self, provider_id: str) -> bool:
-        """Delete a provider."""
+        """Delete a provider and its dependent models and embedding spaces."""
+        # Check if provider has any models
+        models_result = await self.session.execute(
+            select(ModelDef).where(ModelDef.provider_id == provider_id)
+        )
+        models = models_result.scalars().all()
+        
+        # Delete all embedding spaces for all models under this provider
+        for model in models:
+            await self.session.execute(
+                delete(EmbeddingSpace).where(EmbeddingSpace.model_id == model.id)
+            )
+        
+        # Delete all models under this provider
+        await self.session.execute(
+            delete(ModelDef).where(ModelDef.provider_id == provider_id)
+        )
+        
+        # Finally delete the provider
         result = await self.session.execute(
             delete(Provider).where(Provider.id == provider_id)
         )
@@ -218,7 +236,13 @@ class ModelRegistryService:
         return model
 
     async def delete_model(self, model_id: str) -> bool:
-        """Delete a model definition."""
+        """Delete a model definition and its dependent embedding spaces."""
+        # First delete all embedding spaces that depend on this model
+        await self.session.execute(
+            delete(EmbeddingSpace).where(EmbeddingSpace.model_id == model_id)
+        )
+        
+        # Then delete the model
         result = await self.session.execute(
             delete(ModelDef).where(ModelDef.id == model_id)
         )

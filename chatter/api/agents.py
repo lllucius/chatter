@@ -98,20 +98,25 @@ async def list_agents(
     current_user: User = Depends(get_current_user),
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentListResponse:
-    """List all agents with optional filtering.
+    """List all agents with optional filtering and pagination.
 
     Args:
-        request: List request parameters
+        request: List request parameters with pagination
         current_user: Current authenticated user
         agent_manager: Agent manager instance
 
     Returns:
-        List of agents
+        Paginated list of agents
     """
     try:
-        agents = await agent_manager.list_agents(
+        offset = request.pagination.offset
+        limit = request.pagination.limit
+        
+        agents, total = await agent_manager.list_agents(
             agent_type=request.agent_type,
             status=request.status,
+            offset=offset,
+            limit=limit,
         )
 
         # Filter by tags if specified
@@ -121,12 +126,20 @@ async def list_agents(
                 if any(tag in agent.tags for tag in request.tags):
                     filtered_agents.append(agent)
             agents = filtered_agents
+            total = len(agents)  # Update total after tag filtering
 
         agent_responses = [AgentResponse.model_validate(agent.model_dump()) for agent in agents]
 
+        # Calculate pagination info
+        current_page = (offset // limit) + 1
+        total_pages = (total + limit - 1) // limit  # Ceiling division
+
         return AgentListResponse(
             agents=agent_responses,
-            total=len(agent_responses)
+            total=total,
+            page=current_page,
+            per_page=limit,
+            total_pages=total_pages
         )
 
     except Exception as e:

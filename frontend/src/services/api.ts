@@ -1,7 +1,7 @@
 /**
  * API client for Chatter backend
  */
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 // Types for API responses
 export interface User {

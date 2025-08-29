@@ -27,7 +27,7 @@ import {
   Settings as SettingsIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { api, Profile, Prompt, Document, Conversation, ConversationMessage } from '../services/api';
+import { api, Profile, Prompt, Document, Conversation } from '../services/api';
 
 interface ChatMessage {
   id: string;

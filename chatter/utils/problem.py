@@ -292,3 +292,66 @@ def create_problem_response(
         **extra_fields,
     )
     return problem.to_response(request)
+
+
+def create_problem_detail(
+    status_code: int,
+    title: str,
+    detail: str | None = None,
+    type_suffix: str | None = None,
+    instance: str | None = None,
+    **extra_fields: Any,
+) -> ProblemDetail:
+    """Create a RFC 9457 compliant problem detail.
+
+    Args:
+        status_code: HTTP status code
+        title: Human-readable summary of the problem type
+        detail: Human-readable explanation specific to this occurrence
+        type_suffix: Suffix to append to the base problem type URI
+        instance: URI reference identifying the specific occurrence
+        **extra_fields: Additional problem details
+
+    Returns:
+        ProblemDetail object
+    """
+    problem = ProblemException(
+        status_code=status_code,
+        title=title,
+        detail=detail,
+        type_suffix=type_suffix,
+        instance=instance,
+        **extra_fields,
+    )
+    return problem.to_problem_detail()
+
+
+class ProblemDetailResponse(JSONResponse):
+    """RFC 9457 compliant JSON response for problem details."""
+    
+    def __init__(
+        self,
+        problem_detail: ProblemDetail,
+        status_code: int | None = None,
+        headers: dict[str, str] | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """Initialize problem detail response.
+        
+        Args:
+            problem_detail: Problem detail object
+            status_code: HTTP status code (defaults to problem detail status)
+            headers: Additional HTTP headers
+            **kwargs: Additional JSONResponse arguments
+        """
+        final_headers = {
+            "Content-Type": "application/problem+json",
+            **(headers or {})
+        }
+        
+        super().__init__(
+            content=problem_detail.model_dump(exclude_none=True),
+            status_code=status_code or problem_detail.status,
+            headers=final_headers,
+            **kwargs,
+        )

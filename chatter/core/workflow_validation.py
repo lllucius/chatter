@@ -7,7 +7,7 @@ and parameters, addressing the input validation gap identified in the review.
 from typing import Any, Dict, List, Optional, Union
 from enum import Enum
 
-from chatter.core.exceptions import WorkflowValidationError, WorkflowConfigurationError
+from chatter.core.exceptions import WorkflowValidationError, WorkflowConfigurationError, WorkflowExecutionError
 
 
 class ValidationResult:

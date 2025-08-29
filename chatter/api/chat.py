@@ -425,6 +425,67 @@ async def get_available_tools(
         ) from None
 
 
+@router.get("/templates")
+async def get_workflow_templates(
+    current_user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Get available workflow templates."""
+    try:
+        from chatter.core.workflow_templates import WorkflowTemplateManager
+        
+        templates = WorkflowTemplateManager.get_template_info()
+        return {
+            "templates": templates,
+            "total_count": len(templates)
+        }
+    except Exception as e:
+        raise InternalServerProblem(
+            detail=f"Failed to get workflow templates: {str(e)}"
+        ) from None
+
+
+@router.post("/template/{template_name}")
+async def chat_with_template(
+    template_name: str,
+    chat_request: ChatRequest,
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service),
+) -> ChatResponse:
+    """Chat using a specific workflow template."""
+    try:
+        conversation, assistant_message = await chat_service.chat_with_template(
+            current_user.id, chat_request, template_name
+        )
+        
+        return ChatResponse(
+            conversation_id=conversation.id,
+            message=MessageResponse.model_validate(assistant_message),
+            conversation=ConversationResponse.model_validate(conversation),
+        )
+    except Exception as e:
+        if "not found" in str(e).lower():
+            raise NotFoundProblem(detail=f"Template '{template_name}' not found") from None
+        raise BadRequestProblem(detail=str(e)) from None
+
+
+@router.get("/performance/stats")
+async def get_performance_stats(
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service),
+) -> dict[str, Any]:
+    """Get workflow performance statistics."""
+    try:
+        stats = chat_service.get_performance_stats()
+        return {
+            "performance_stats": stats,
+            "timestamp": __import__('time').time()
+        }
+    except Exception as e:
+        raise InternalServerProblem(
+            detail=f"Failed to get performance stats: {str(e)}"
+        ) from None
+
+
 @router.get("/mcp/status", response_model=McpStatusResponse)
 async def get_mcp_status(
     current_user: User = Depends(get_current_user),

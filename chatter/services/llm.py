@@ -16,6 +16,7 @@ from langchain_core.messages import (
 from langchain_openai import ChatOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from chatter.models.registry import ProviderType, ModelType
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 
@@ -27,6 +28,12 @@ if TYPE_CHECKING:
     from chatter.services.mcp import BuiltInTools, MCPService
 
 logger = get_logger(__name__)
+
+
+def _get_builtin_tools():
+    """Lazy import of BuiltInTools to avoid circular imports."""
+    from chatter.services.mcp import BuiltInTools
+    return BuiltInTools.create_builtin_tools()
 
 
 def _get_orchestrator():
@@ -191,7 +198,7 @@ class LLMService:
         logger.info("LLM providers will be loaded dynamically from model registry")
 
     async def create_provider_from_profile(
-        self, profile: Profile
+        self, profile: "Profile"
     ) -> BaseChatModel:
         """Create LLM provider from profile configuration.
 
@@ -285,7 +292,7 @@ class LLMService:
             return provider
 
     def convert_conversation_to_messages(
-        self, conversation: Conversation, messages: list[Any]
+        self, conversation: "Conversation", messages: list[Any]
     ) -> list[BaseMessage]:
         """Convert conversation messages to LangChain format.
 
@@ -546,7 +553,7 @@ class LLMService:
         # Get MCP tools if none provided
         if tools is None:
             tools = await _get_mcp_service().get_tools()
-            tools.extend(BuiltInTools.create_builtin_tools())
+            tools.extend(_get_builtin_tools())
 
         if tools:
             # Bind tools to the provider
@@ -620,7 +627,7 @@ class LLMService:
         # Get default tools if needed
         if workflow_type in ("tools", "full") and not tools:
             tools = await _get_mcp_service().get_tools()
-            tools.extend(BuiltInTools.create_builtin_tools())
+            tools.extend(_get_builtin_tools())
 
         # Note: do NOT hard-require a retriever; the workflow handles missing retriever gracefully.
         mode = (

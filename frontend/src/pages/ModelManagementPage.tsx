@@ -253,6 +253,7 @@ const ModelManagementPage: React.FC = () => {
   }, [spaceDialogOpen, embeddingModels]);
 
   const handleCreateProvider = async () => {
+    setError(''); // Clear any previous errors
     try {
       await chatterSDK.modelRegistry.createProviderApiV1ModelsProvidersPost({ providerCreate: providerForm });
       setProviderDialogOpen(false);
@@ -261,11 +262,13 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to create provider');
+      const errorMessage = e?.response?.data?.detail || e?.message || 'Failed to create provider';
+      setError(errorMessage);
     }
   };
 
   const handleCreateModel = async () => {
+    setError(''); // Clear any previous errors
     try {
       await chatterSDK.modelRegistry.createModelApiV1ModelsModelsPost({ modelDefCreate: modelForm });
       setModelDialogOpen(false);
@@ -274,11 +277,13 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to create model');
+      const errorMessage = e?.response?.data?.detail || e?.message || 'Failed to create model';
+      setError(errorMessage);
     }
   };
 
   const handleCreateSpace = async () => {
+    setError(''); // Clear any previous errors
     try {
       await chatterSDK.modelRegistry.createEmbeddingSpaceApiV1ModelsEmbeddingSpacesPost({ embeddingSpaceCreate: spaceForm });
       setSpaceDialogOpen(false);
@@ -287,7 +292,8 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to create embedding space');
+      const errorMessage = e?.response?.data?.detail || e?.message || 'Failed to create embedding space';
+      setError(errorMessage);
     }
   };
 

@@ -40,14 +40,12 @@ try:
 except ImportError:
     JOBLIB_AVAILABLE = False
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.core.dynamic_embeddings import get_model_dimensions
 from chatter.core.model_registry import ModelRegistryService
 from chatter.models.registry import ModelType, ProviderType
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
-
-settings = get_settings()
 logger = get_logger(__name__)
 
 

@@ -11,7 +11,7 @@ from fastapi import UploadFile
 from sqlalchemy import and_, asc, desc, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.models.document import (
     Document,
     DocumentChunk,
@@ -31,8 +31,6 @@ from chatter.services.document_processing import (
 from chatter.services.embeddings import EmbeddingService
 from chatter.services.dynamic_vector_store import DynamicVectorStoreService
 from chatter.utils.logging import get_logger
-
-settings = get_settings()
 logger = get_logger(__name__)
 
 

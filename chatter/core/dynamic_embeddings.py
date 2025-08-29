@@ -15,10 +15,8 @@ except ImportError:
     from sqlalchemy import Text as Vector
     PGVECTOR_AVAILABLE = False
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.utils.logging import get_logger
-
-settings = get_settings()
 logger = get_logger(__name__)
 
 Base = declarative_base()

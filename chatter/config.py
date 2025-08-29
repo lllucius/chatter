@@ -481,8 +481,16 @@ class Settings(BaseSettings):
         return self.redis_url
 
 
+# Create module-level settings instance
+settings = Settings()
+
+
 @lru_cache
 def get_settings() -> Settings:
-    """Get cached settings instance."""
-    return Settings()
+    """Get cached settings instance.
+    
+    DEPRECATED: Use 'from chatter.config import settings' instead.
+    This function is kept for backward compatibility.
+    """
+    return settings
 

@@ -15,7 +15,7 @@ from sqlalchemy import create_engine, select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.core.dynamic_embeddings import (
     get_embedding_model,
     get_model_dimensions,
@@ -24,8 +24,6 @@ from chatter.core.dynamic_embeddings import (
 )
 from chatter.models.document import DocumentChunk
 from chatter.utils.logging import get_logger
-
-settings = get_settings()
 logger = get_logger(__name__)
 
 

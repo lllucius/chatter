@@ -14,7 +14,7 @@ from sklearn.decomposition import TruncatedSVD
 # Add the chatter package to the path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.services.embeddings import EmbeddingService
 from chatter.utils.logging import get_logger
 

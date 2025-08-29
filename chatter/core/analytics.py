@@ -7,7 +7,7 @@ from typing import Any
 from sqlalchemy import and_, desc, func, literal, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.models.conversation import (
     Conversation,
     Message,
@@ -18,7 +18,6 @@ from chatter.models.user import User
 from chatter.schemas.analytics import AnalyticsTimeRange
 from chatter.utils.logging import get_logger
 
-settings = get_settings()
 logger = get_logger(__name__)
 
 

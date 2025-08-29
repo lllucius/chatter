@@ -31,7 +31,7 @@ try:
 except ImportError:
     PYPDF_AVAILABLE = False
 
-from chatter.config import get_settings
+from chatter.config import settings
 from chatter.models.document import (
     Document,
     DocumentChunk,
@@ -41,8 +41,6 @@ from chatter.models.document import (
 from chatter.services.embeddings import EmbeddingError, EmbeddingService
 from chatter.services.dynamic_vector_store import DynamicVectorStoreService
 from chatter.utils.logging import get_logger
-
-settings = get_settings()
 logger = get_logger(__name__)
 
 

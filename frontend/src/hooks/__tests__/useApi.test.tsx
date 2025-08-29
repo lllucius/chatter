@@ -84,4 +84,26 @@ describe('useApi hook', () => {
     expect(result.current.data).toEqual({ data: 'result-1' });
     expect(result.current.loading).toBe(false);
   });
+
+  it('should not cause infinite loop with anonymous function and immediate=true', async () => {
+    // Track API calls
+    let callCount = 0;
+    const TestComponent = () => {
+      // This simulates the DashboardPage pattern with anonymous function
+      const api = useApi(() => {
+        callCount++;
+        return Promise.resolve({ data: `result-${callCount}` });
+      }, { immediate: true });
+      
+      return <div>{api.data?.data || 'loading'}</div>;
+    };
+
+    render(<TestComponent />);
+
+    // Wait for initial call and any potential loop
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    // Should only make 1 call, not loop infinitely
+    expect(callCount).toBe(1);
+  });
 });

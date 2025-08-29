@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface UseApiOptions<T> {
   immediate?: boolean;
@@ -26,23 +26,33 @@ export function useApi<T>(
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  // Use refs to store the current values to avoid dependency issues
+  const apiCallRef = useRef(apiCall);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+  
+  // Update refs when values change
+  apiCallRef.current = apiCall;
+  onSuccessRef.current = onSuccess;
+  onErrorRef.current = onError;
 
   const execute = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
-      const result = await apiCall();
+      const result = await apiCallRef.current();
       setData(result);
-      onSuccess?.(result);
+      onSuccessRef.current?.(result);
     } catch (err: any) {
       const errorMessage = err.message || 'An error occurred';
       setError(errorMessage);
-      onError?.(err);
+      onErrorRef.current?.(err);
       console.error('API call failed:', err);
     } finally {
       setLoading(false);
     }
-  }, [apiCall, onSuccess, onError]);
+  }, []); // No dependencies since we use refs
 
   const reset = useCallback(() => {
     setData(null);
@@ -50,8 +60,12 @@ export function useApi<T>(
     setLoading(false);
   }, []);
 
+  // Use a ref to track if the immediate call has been made
+  const immediateCalledRef = useRef(false);
+
   useEffect(() => {
-    if (immediate) {
+    if (immediate && !immediateCalledRef.current) {
+      immediateCalledRef.current = true;
       execute();
     }
   }, [immediate, execute]);

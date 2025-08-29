@@ -18,8 +18,7 @@ import AgentsPage from './pages/AgentsPage';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Services
-import { api } from './services/api';
+// Services - removed unused api import
 
 const theme = createTheme({
   palette: {

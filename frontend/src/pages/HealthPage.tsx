@@ -29,7 +29,6 @@ import {
   Info as InfoIcon,
   Refresh as RefreshIcon,
   Storage as StorageIcon,
-  Memory as MemoryIcon,
   Speed as SpeedIcon,
   NetworkCheck as NetworkIcon,
 } from '@mui/icons-material';

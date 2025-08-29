@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -77,33 +77,24 @@ const AgentsPage: React.FC = () => {
     'assistant',
   ];
 
-  useEffect(() => {
-    loadAgents();
-  }, [page]);
-
-  const loadAgents = async () => {
+  const loadAgents = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
-      
-      const offset = (page - 1) * perPage;
-      const response = await chatterSDK.agents.listAgentsApiV1AgentsGet({
-        requestBody: [], // tags filter
-        pagination: {
-          limit: perPage,
-          offset: offset
-        }
-      });
-      
+      const response = await chatterSDK.agents.listAgentsApiV1AgentsGet();
       setAgents(response.data.agents);
       setTotal(response.data.total);
-      setTotalPages(response.data.total_pages || Math.ceil(response.data.total / perPage));
+      setTotalPages(Math.ceil(response.data.total / perPage));
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load agents');
     } finally {
       setLoading(false);
     }
-  };
+  }, [perPage]);
+
+  useEffect(() => {
+    loadAgents();
+  }, [loadAgents]);
 
   const handleOpenDialog = (agent?: AgentResponse) => {
     if (agent) {

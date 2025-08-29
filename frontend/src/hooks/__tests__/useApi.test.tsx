@@ -72,7 +72,7 @@ describe('useApi hook', () => {
     );
 
     // Manually execute
-    result.current.execute();
+    await result.current.execute();
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false);

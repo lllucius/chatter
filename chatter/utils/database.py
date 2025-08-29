@@ -109,7 +109,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
         logger.debug("Database session generator closed")
         try:
             # Check if session is still usable before attempting cleanup
-            if session and not session.is_closed:
+            if session:
                 # Don't commit or rollback on GeneratorExit - just close if safe
                 if not session.in_transaction():
                     await session.close()
@@ -122,7 +122,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     except Exception:
         # On other exceptions, attempt rollback
         try:
-            if session and not session.is_closed:
+            if session:
                 await session.rollback()
         except Exception as e:
             logger.warning("Error rolling back session", error=str(e))
@@ -130,7 +130,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     else:
         # Normal completion - commit the transaction
         try:
-            if session and not session.is_closed:
+            if session:
                 await session.commit()
         except Exception as e:
             logger.warning("Error committing session", error=str(e))
@@ -142,7 +142,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     finally:
         # Final cleanup - close the session if it's still open and safe to do so
         try:
-            if session and not session.is_closed:
+            if session:
                 # Only attempt close if not in the middle of a transaction operation
                 if not session.in_transaction():
                     await session.close()

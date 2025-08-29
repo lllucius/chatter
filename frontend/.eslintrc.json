@@ -7,6 +7,7 @@
   "extends": [
     "eslint:recommended"
   ],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
@@ -14,9 +15,26 @@
     "ecmaVersion": 11,
     "sourceType": "module"
   },
+  "plugins": [
+    "@typescript-eslint",
+    "react-hooks"
+  ],
   "rules": {
-    "no-unused-vars": "warn",
-    "no-console": "warn"
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": "warn",
+    "no-console": "warn",
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  },
+  "globals": {
+    "React": "readonly",
+    "test": "readonly",
+    "expect": "readonly",
+    "describe": "readonly",
+    "it": "readonly",
+    "beforeEach": "readonly",
+    "afterEach": "readonly",
+    "vi": "readonly"
   },
   "ignorePatterns": ["node_modules/", "dist/", "build/", "*.d.ts"]
 }

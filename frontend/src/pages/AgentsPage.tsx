@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -28,6 +28,7 @@ import {
   IconButton,
   Menu,
   ListItemIcon,
+  Pagination,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
@@ -50,6 +51,12 @@ const AgentsPage: React.FC = () => {
   const [editingAgent, setEditingAgent] = useState<AgentResponse | null>(null);
   const [saving, setSaving] = useState(false);
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [perPage] = useState(20);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -70,22 +77,24 @@ const AgentsPage: React.FC = () => {
     'assistant',
   ];
 
-  useEffect(() => {
-    loadAgents();
-  }, []);
-
-  const loadAgents = async () => {
+  const loadAgents = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
       const response = await chatterSDK.agents.listAgentsApiV1AgentsGet();
       setAgents(response.data.agents);
+      setTotal(response.data.total);
+      setTotalPages(Math.ceil(response.data.total / perPage));
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Failed to load agents');
     } finally {
       setLoading(false);
     }
-  };
+  }, [perPage]);
+
+  useEffect(() => {
+    loadAgents();
+  }, [loadAgents]);
 
   const handleOpenDialog = (agent?: AgentResponse) => {
     if (agent) {
@@ -349,6 +358,30 @@ const AgentsPage: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        
+        {/* Pagination Controls */}
+        {total > perPage && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, mb: 2 }}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(event, newPage) => setPage(newPage)}
+              color="primary"
+              showFirstButton
+              showLastButton
+            />
+          </Box>
+        )}
+        
+        {/* Summary */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, borderTop: 1, borderColor: 'divider' }}>
+          <Typography variant="body2" color="text.secondary">
+            Showing {agents.length} of {total} agents
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Page {page} of {totalPages}
+          </Typography>
+        </Box>
       </Card>
 
       {/* Actions Menu */}

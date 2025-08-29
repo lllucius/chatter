@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import IntegrityError
 
 from chatter.api.auth import get_current_user
 from chatter.core.model_registry import ModelRegistryService, ListParams
@@ -136,23 +137,30 @@ async def delete_provider(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a provider."""
+    """Delete a provider and all its dependent models and embedding spaces."""
     service = ModelRegistryService(session)
-    deleted = await service.delete_provider(provider_id)
-    
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Provider not found"
+    try:
+        deleted = await service.delete_provider(provider_id)
+        
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Provider not found"
+            )
+        
+        logger.info(
+            "Deleted provider and its dependencies",
+            provider_id=provider_id,
+            user_id=current_user.id
         )
-    
-    logger.info(
-        "Deleted provider",
-        provider_id=provider_id,
-        user_id=current_user.id
-    )
-    
-    return {"message": "Provider deleted successfully"}
+        
+        return {"message": "Provider and its dependent models/embedding spaces deleted successfully"}
+    except IntegrityError as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete provider due to existing dependencies"
+        ) from e
 
 
 @router.post("/providers/{provider_id}/set-default")
@@ -295,23 +303,30 @@ async def delete_model(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
-    """Delete a model definition."""
+    """Delete a model definition and its dependent embedding spaces."""
     service = ModelRegistryService(session)
-    deleted = await service.delete_model(model_id)
-    
-    if not deleted:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found"
+    try:
+        deleted = await service.delete_model(model_id)
+        
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Model not found"
+            )
+        
+        logger.info(
+            "Deleted model and its dependencies",
+            model_id=model_id,
+            user_id=current_user.id
         )
-    
-    logger.info(
-        "Deleted model",
-        model_id=model_id,
-        user_id=current_user.id
-    )
-    
-    return {"message": "Model deleted successfully"}
+        
+        return {"message": "Model and its dependent embedding spaces deleted successfully"}
+    except IntegrityError as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete model due to existing dependencies"
+        ) from e
 
 
 @router.post("/models/{model_id}/set-default")

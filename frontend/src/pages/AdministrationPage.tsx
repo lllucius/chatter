@@ -22,6 +22,11 @@ import {
   Snackbar,
   Tabs,
   Tab,
+  Menu,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Select,
 } from '@mui/material';
 import Grid from '@mui/material/GridLegacy';
 import {
@@ -38,6 +43,8 @@ import {
   Notifications as NotificationsIcon,
   Close as CloseIcon,
   Refresh as RefreshIcon,
+  MoreVert as MoreVertIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
@@ -54,11 +61,60 @@ const AdministrationPage: React.FC = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   
+  // More options menu state
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
+  const [actionUser, setActionUser] = useState<any>(null);
+  const [actionToolServer, setActionToolServer] = useState<any>(null);
+  
+  // User settings dialog state
+  const [userSettingsOpen, setUserSettingsOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  
   const [backups, setBackups] = useState<BackupResponse[]>([]);
   const [plugins, setPlugins] = useState<PluginResponse[]>([]);
   const [jobs, setJobs] = useState<JobResponse[]>([]);
   const [jobStats, setJobStats] = useState<JobStatsResponse | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
+  
+  // Mock user data - in real app this would come from API
+  const [users] = useState([
+    {
+      id: 'admin@chatter.ai',
+      email: 'admin@chatter.ai',
+      role: 'Administrator',
+      lastLogin: '2 hours ago',
+      status: 'Active',
+      name: 'Admin User',
+      isActive: true
+    },
+    {
+      id: 'user@example.com',
+      email: 'user@example.com',
+      role: 'User',
+      lastLogin: '1 day ago',
+      status: 'Active',
+      name: 'Regular User',
+      isActive: true
+    }
+  ]);
+
+  // Mock tool server data - in real app this would come from API
+  const [toolServers] = useState([
+    {
+      id: 'file-ops',
+      name: 'File Operations Server',
+      url: 'http://localhost:3000',
+      status: 'Connected',
+      toolsCount: 8
+    },
+    {
+      id: 'web-search',
+      name: 'Web Search Server',
+      url: 'http://localhost:3001',
+      status: 'Disconnected',
+      toolsCount: 4
+    }
+  ]);
   
   const [notifications, setNotifications] = useState<Array<{
     id: string;
@@ -272,6 +328,39 @@ const AdministrationPage: React.FC = () => {
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
     setSnackbarOpen(true);
+  };
+
+  const openUserActionsMenu = (e: React.MouseEvent<HTMLElement>, user: any) => {
+    setActionAnchorEl(e.currentTarget);
+    setActionUser(user);
+  };
+
+  const openToolServerActionsMenu = (e: React.MouseEvent<HTMLElement>, toolServer: any) => {
+    setActionAnchorEl(e.currentTarget);
+    setActionToolServer(toolServer);
+  };
+
+  const closeActionsMenu = () => {
+    setActionAnchorEl(null);
+    setActionUser(null);
+    setActionToolServer(null);
+  };
+
+  const handleUserSettings = (user: any) => {
+    setEditingUser(user);
+    setUserSettingsOpen(true);
+    closeActionsMenu();
+  };
+
+  const handleUserSettingsSave = async () => {
+    try {
+      // In a real app, this would call the API to update the user
+      showSnackbar('User settings updated successfully!');
+      setUserSettingsOpen(false);
+      setEditingUser(null);
+    } catch (error: any) {
+      showSnackbar('Failed to update user settings');
+    }
   };
 
   const handleBackupDownload = async (backupId: string) => {
@@ -811,34 +900,19 @@ const AdministrationPage: React.FC = () => {
             </Button>
           </Box>
           <List>
-            <ListItem>
-              <ListItemText
-                primary="admin@chatter.ai"
-                secondary="Role: Administrator | Last login: 2 hours ago | Status: Active"
-              />
-              <ListItemSecondaryAction>
-                <IconButton edge="end" onClick={() => handleEditAction('user', 'admin@chatter.ai')}>
-                  <SettingsIcon />
-                </IconButton>
-                <IconButton edge="end" onClick={() => handleDeleteAction('user', 'admin@chatter.ai')}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-            <ListItem>
-              <ListItemText
-                primary="user@example.com"
-                secondary="Role: User | Last login: 1 day ago | Status: Active"
-              />
-              <ListItemSecondaryAction>
-                <IconButton edge="end" onClick={() => handleEditAction('user', 'user@example.com')}>
-                  <SettingsIcon />
-                </IconButton>
-                <IconButton edge="end" onClick={() => handleDeleteAction('user', 'user@example.com')}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
+            {users.map((user) => (
+              <ListItem key={user.id}>
+                <ListItemText
+                  primary={user.email}
+                  secondary={`Role: ${user.role} | Last login: ${user.lastLogin} | Status: ${user.status}`}
+                />
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" onClick={(e) => openUserActionsMenu(e, user)}>
+                    <MoreVertIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
           </List>
         </Box>
       )}
@@ -856,36 +930,25 @@ const AdministrationPage: React.FC = () => {
             </Button>
           </Box>
           <List>
-            <ListItem>
-              <ListItemText
-                primary="File Operations Server"
-                secondary="URL: http://localhost:3000 | Status: Connected | Tools: 8"
-              />
-              <Chip label="Connected" color="success" size="small" sx={{ mr: 1 }} />
-              <ListItemSecondaryAction>
-                <IconButton edge="end" sx={{ mr: 1 }} onClick={() => handleEditAction('tool server', 'file-ops')}>
-                  <SettingsIcon />
-                </IconButton>
-                <IconButton edge="end" onClick={() => handleDeleteAction('tool server', 'file-ops')}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-            <ListItem>
-              <ListItemText
-                primary="Web Search Server"
-                secondary="URL: http://localhost:3001 | Status: Disconnected | Tools: 4"
-              />
-              <Chip label="Disconnected" color="error" size="small" sx={{ mr: 1 }} />
-              <ListItemSecondaryAction>
-                <IconButton edge="end" sx={{ mr: 1 }} onClick={() => handleEditAction('tool server', 'web-search')}>
-                  <SettingsIcon />
-                </IconButton>
-                <IconButton edge="end" onClick={() => handleDeleteAction('tool server', 'web-search')}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
+            {toolServers.map((server) => (
+              <ListItem key={server.id}>
+                <ListItemText
+                  primary={server.name}
+                  secondary={`URL: ${server.url} | Status: ${server.status} | Tools: ${server.toolsCount}`}
+                />
+                <Chip 
+                  label={server.status} 
+                  color={server.status === 'Connected' ? 'success' : 'error'} 
+                  size="small" 
+                  sx={{ mr: 1 }} 
+                />
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" onClick={(e) => openToolServerActionsMenu(e, server)}>
+                    <MoreVertIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
           </List>
         </Box>
       )}
@@ -1116,6 +1179,96 @@ const AdministrationPage: React.FC = () => {
           <Button variant="contained" onClick={handleSubmit} disabled={loading}>
             {loading ? 'Processing...' : (dialogType === 'backup' ? 'Create' : 'Add')}
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* User Actions Menu */}
+      <Menu
+        anchorEl={actionAnchorEl}
+        open={Boolean(actionAnchorEl) && Boolean(actionUser)}
+        onClose={closeActionsMenu}
+      >
+        <MenuItem onClick={() => handleUserSettings(actionUser)}>
+          <ListItemIcon>
+            <SettingsIcon fontSize="small" />
+          </ListItemIcon>
+          Settings
+        </MenuItem>
+        <MenuItem onClick={() => {
+          if (actionUser) handleDeleteAction('user', actionUser.id);
+          closeActionsMenu();
+        }}>
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+      </Menu>
+
+      {/* Tool Server Actions Menu */}
+      <Menu
+        anchorEl={actionAnchorEl}
+        open={Boolean(actionAnchorEl) && Boolean(actionToolServer)}
+        onClose={closeActionsMenu}
+      >
+        <MenuItem onClick={() => {
+          if (actionToolServer) handleEditAction('tool server', actionToolServer.id);
+          closeActionsMenu();
+        }}>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          Edit
+        </MenuItem>
+        <MenuItem onClick={() => {
+          if (actionToolServer) handleDeleteAction('tool server', actionToolServer.id);
+          closeActionsMenu();
+        }}>
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete
+        </MenuItem>
+      </Menu>
+
+      {/* User Settings Dialog */}
+      <Dialog open={userSettingsOpen} onClose={() => setUserSettingsOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>User Settings - {editingUser?.email}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ mt: 2 }}>
+            <TextField
+              fullWidth
+              label="Name"
+              value={editingUser?.name || ''}
+              onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+              sx={{ mb: 2 }}
+            />
+            <FormControl fullWidth sx={{ mb: 2 }}>
+              <InputLabel>Role</InputLabel>
+              <Select
+                value={editingUser?.role || 'User'}
+                label="Role"
+                onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
+              >
+                <MenuItem value="User">User</MenuItem>
+                <MenuItem value="Administrator">Administrator</MenuItem>
+                <MenuItem value="Moderator">Moderator</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={editingUser?.isActive || false}
+                  onChange={(e) => setEditingUser({...editingUser, isActive: e.target.checked})}
+                />
+              }
+              label="Active"
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUserSettingsOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleUserSettingsSave}>Save</Button>
         </DialogActions>
       </Dialog>
 

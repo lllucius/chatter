@@ -11,6 +11,7 @@ from chatter.schemas.common import (
     DeleteRequestBase,
     GetRequestBase,
     ListRequestBase,
+    PaginatedRequest,
 )
 
 
@@ -216,7 +217,7 @@ class AgentResponse(BaseModel):
     metadata: dict[str, Any] = Field(..., description="Additional metadata")
 
 
-class AgentListRequest(ListRequestBase):
+class AgentListRequest(PaginatedRequest):
     """Request schema for listing agents."""
 
     agent_type: AgentType | None = Field(None, description="Filter by agent type")
@@ -229,6 +230,9 @@ class AgentListResponse(BaseModel):
 
     agents: list[AgentResponse] = Field(..., description="List of agents")
     total: int = Field(..., description="Total number of agents")
+    page: int = Field(..., description="Current page number")
+    per_page: int = Field(..., description="Number of items per page")
+    total_pages: int = Field(..., description="Total number of pages")
 
 
 class AgentGetRequest(GetRequestBase):

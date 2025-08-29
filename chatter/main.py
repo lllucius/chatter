@@ -279,6 +279,16 @@ def create_app() -> FastAPI:
     # Add compression middleware
     app.add_middleware(GZipMiddleware, minimum_size=1000)
 
+    # Add correlation ID middleware (before logging)
+    from chatter.utils.correlation import CorrelationIdMiddleware
+    app.add_middleware(CorrelationIdMiddleware)
+
+    # Add rate limiting middleware
+    from chatter.utils.rate_limit import RateLimitMiddleware
+    app.add_middleware(RateLimitMiddleware, 
+                      requests_per_minute=100, 
+                      requests_per_hour=2000)
+
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
 

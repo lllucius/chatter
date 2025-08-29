@@ -1,7 +1,7 @@
 """LangGraph workflows for advanced conversation logic."""
 
 from collections.abc import Sequence
-from typing import Annotated, Any, Literal, TypedDict
+from typing import Annotated, Any, Literal, TypedDict, Optional
 from uuid import uuid4
 
 from langchain_core.language_models import BaseChatModel
@@ -22,6 +22,17 @@ from chatter.config import settings
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+# Import new workflow components
+try:
+    from chatter.core.workflow_metrics import workflow_metrics_collector
+    from chatter.core.workflow_security import workflow_security_manager
+    METRICS_ENABLED = True
+    SECURITY_ENABLED = True
+except ImportError:
+    logger.warning("Workflow metrics or security modules not available")
+    METRICS_ENABLED = False
+    SECURITY_ENABLED = False
 
 
 class ConversationState(TypedDict):
@@ -94,6 +105,10 @@ class LangGraphWorkflowManager:
         tools: list[Any] | None = None,
         enable_memory: bool = False,
         memory_window: int = 20,
+        user_id: Optional[str] = None,
+        conversation_id: Optional[str] = None,
+        provider_name: Optional[str] = None,
+        model_name: Optional[str] = None,
     ) -> Pregel:
         """Create a unified conversation workflow.
 
@@ -105,7 +120,36 @@ class LangGraphWorkflowManager:
 
         Optional:
         - enable_memory: summarize older messages and prepend summary as context
+
+        Args:
+            llm: Language model to use
+            mode: Workflow mode
+            system_message: Optional system message
+            retriever: Optional retriever for RAG
+            tools: Optional tools for tool-calling
+            enable_memory: Whether to enable memory management
+            memory_window: Number of recent messages to keep
+            user_id: ID of the user (for metrics and security)
+            conversation_id: ID of the conversation (for metrics)
+            provider_name: Name of the LLM provider (for metrics)
+            model_name: Name of the model (for metrics)
         """
+        # Start metrics tracking if enabled
+        workflow_metrics_id = None
+        if METRICS_ENABLED and user_id and conversation_id:
+            workflow_metrics_id = workflow_metrics_collector.start_workflow_tracking(
+                workflow_type=mode,
+                user_id=user_id,
+                conversation_id=conversation_id,
+                provider_name=provider_name or "",
+                model_name=model_name or "",
+                workflow_config={
+                    "enable_memory": enable_memory,
+                    "memory_window": memory_window,
+                    "has_retriever": retriever is not None,
+                    "has_tools": tools is not None and len(tools) > 0,
+                }
+            )
         use_retriever = mode in ("rag", "full")
         use_tools = mode in ("tools", "full")
 
@@ -262,6 +306,26 @@ class LangGraphWorkflowManager:
                     continue
 
                 try:
+                    # Security check if enabled
+                    if SECURITY_ENABLED and user_id:
+                        authorized = workflow_security_manager.authorize_tool_execution(
+                            user_id=user_id,
+                            workflow_id=workflow_metrics_id or "",
+                            workflow_type=mode,
+                            tool_name=tool_name,
+                            method=None,
+                            parameters=tool_args
+                        )
+                        
+                        if not authorized:
+                            tool_messages.append(
+                                ToolMessage(
+                                    content="Access denied: Insufficient permissions for this tool",
+                                    tool_call_id=tool_id or "",
+                                )
+                            )
+                            continue
+
                     # Prefer async invocation when available
                     if hasattr(tool_obj, "ainvoke"):
                         result = await tool_obj.ainvoke(tool_args)
@@ -278,15 +342,31 @@ class LangGraphWorkflowManager:
                             tool_call_id=tool_id or "",
                         )
                     )
+                    
+                    # Update metrics
+                    if METRICS_ENABLED and workflow_metrics_id:
+                        workflow_metrics_collector.update_workflow_metrics(
+                            workflow_metrics_id,
+                            tool_calls=1
+                        )
+                        
                 except Exception as e:
+                    error_msg = str(e)
                     logger.error(
-                        "Tool execution failed", tool=tool_name, error=str(e)
+                        "Tool execution failed", tool=tool_name, error=error_msg
                     )
                     tool_messages.append(
                         ToolMessage(
-                            content=f"Error: {str(e)}", tool_call_id=tool_id or ""
+                            content=f"Error: {error_msg}", tool_call_id=tool_id or ""
                         )
                     )
+                    
+                    # Update metrics with error
+                    if METRICS_ENABLED and workflow_metrics_id:
+                        workflow_metrics_collector.update_workflow_metrics(
+                            workflow_metrics_id,
+                            error=f"Tool execution failed: {error_msg}"
+                        )
 
             # Returning ToolMessage(s) appends to state["messages"] via add_messages
             return {"messages": tool_messages}

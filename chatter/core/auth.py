@@ -206,12 +206,12 @@ class AuthService:
             select(User).where(User.api_key.isnot(None))
         )
         users_with_keys = result.scalars().all()
-        
+
         # Check each user's hashed API key
         for user in users_with_keys:
             if user.api_key and verify_api_key(api_key, user.api_key):
                 return user
-        
+
         return None
 
     async def update_user(
@@ -308,7 +308,7 @@ class AuthService:
         # Generate API key and hash it before storage
         api_key = generate_api_key()
         hashed_api_key = hash_api_key(api_key)
-        
+
         # Store only the hash in the database
         user.api_key = hashed_api_key
         user.api_key_name = key_name

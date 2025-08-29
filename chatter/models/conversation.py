@@ -6,14 +6,14 @@ from typing import Any, Optional
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
-    CheckConstraint,
     UniqueConstraint,
-    Index,
 )
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -40,7 +40,7 @@ class ConversationStatus(str, Enum):
 
 class Conversation(Base):
     """Conversation model for chat sessions."""
-    
+
     # Add table constraints
     __table_args__ = (
         CheckConstraint(
@@ -212,7 +212,7 @@ class Conversation(Base):
 
 class Message(Base):
     """Message model for individual chat messages."""
-    
+
     # Add table constraints
     __table_args__ = (
         CheckConstraint(
@@ -247,7 +247,7 @@ class Message(Base):
             "content != ''",
             name='check_content_not_empty'
         ),
-        UniqueConstraint('conversation_id', 'sequence_number', 
+        UniqueConstraint('conversation_id', 'sequence_number',
                         name='uq_conversation_sequence'),
         Index('idx_conversation_sequence', 'conversation_id', 'sequence_number'),
         Index('idx_conversation_role', 'conversation_id', 'role'),

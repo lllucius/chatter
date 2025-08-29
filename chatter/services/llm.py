@@ -3,7 +3,7 @@
 import asyncio
 import os
 from collections.abc import AsyncGenerator
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
@@ -16,16 +16,14 @@ from langchain_core.messages import (
 from langchain_openai import ChatOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.models.registry import ProviderType, ModelType
+from chatter.models.registry import ModelType, ProviderType
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
 
 # Use TYPE_CHECKING to avoid circular imports at runtime
 if TYPE_CHECKING:
-    from chatter.core.langchain import LangChainOrchestrator
     from chatter.models.conversation import Conversation
     from chatter.models.profile import Profile
-    from chatter.services.mcp import BuiltInTools, MCPService
 
 logger = get_logger(__name__)
 
@@ -85,7 +83,7 @@ class LLMService:
                 if not api_key:
                     logger.warning(f"No API key found for provider {provider.name}")
                     return None
-                
+
                 config = model_def.default_config or {}
                 return ChatOpenAI(
                     api_key=api_key,
@@ -94,13 +92,13 @@ class LLMService:
                     temperature=config.get('temperature', 0.7),
                     max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
                 )
-            
+
             elif provider.provider_type == ProviderType.ANTHROPIC:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
                 if not api_key:
                     logger.warning(f"No API key found for provider {provider.name}")
                     return None
-                
+
                 config = model_def.default_config or {}
                 return ChatAnthropic(
                     api_key=api_key,
@@ -108,11 +106,11 @@ class LLMService:
                     temperature=config.get('temperature', 0.7),
                     max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
                 )
-            
+
             else:
                 logger.warning(f"Unsupported provider type: {provider.provider_type}")
                 return None
-                
+
         except Exception as e:
             logger.error(f"Failed to create provider instance for {provider.name}: {e}")
             return None
@@ -132,16 +130,16 @@ class LLMService:
         # Check if we already have this provider cached
         if provider_name in self._providers:
             return self._providers[provider_name]
-        
+
         # Load from registry
         session = await self._get_session()
         registry = ModelRegistryService(session)
-        
+
         # Get provider by name
         provider = await registry.get_provider_by_name(provider_name)
         if not provider or not provider.is_active:
             raise LLMProviderError(f"Provider '{provider_name}' not found or inactive")
-        
+
         # Get default LLM model for this provider
         models, _ = await registry.list_models(provider.id, ModelType.LLM)
         default_model = None
@@ -149,26 +147,26 @@ class LLMService:
             if model.is_default and model.is_active:
                 default_model = model
                 break
-        
+
         if not default_model:
             # Get first active model if no default
             for model in models:
                 if model.is_active:
                     default_model = model
                     break
-        
+
         if not default_model:
             raise LLMProviderError(f"No active LLM model found for provider '{provider_name}'")
-        
+
         # Create provider instance
         instance = await self._create_provider_instance(provider, default_model)
         if not instance:
             raise LLMProviderError(f"Failed to create instance for provider '{provider_name}'")
-        
+
         # Cache the instance
         self._providers[provider_name] = instance
         logger.info(f"Initialized LLM provider: {provider_name} with model: {default_model.model_name}")
-        
+
         return instance
 
     async def get_default_provider(self) -> BaseChatModel:
@@ -182,12 +180,12 @@ class LLMService:
         """
         session = await self._get_session()
         registry = ModelRegistryService(session)
-        
+
         # Get default provider for LLM
         provider = await registry.get_default_provider(ModelType.LLM)
         if not provider:
             raise LLMProviderError("No default LLM provider configured")
-        
+
         return await self.get_provider(provider.name)
 
     def _initialize_providers(self) -> None:
@@ -214,11 +212,11 @@ class LLMService:
         # Get the provider configuration from registry
         session = await self._get_session()
         registry = ModelRegistryService(session)
-        
+
         provider = await registry.get_provider_by_name(profile.llm_provider)
         if not provider:
             raise LLMProviderError(f"Provider '{profile.llm_provider}' not found in registry")
-        
+
         # Get the specific model from the profile or default
         model_def = None
         if profile.llm_model:
@@ -228,7 +226,7 @@ class LLMService:
                 if model.model_name == profile.llm_model and model.is_active:
                     model_def = model
                     break
-        
+
         if not model_def:
             # Get default model for provider
             models, _ = await registry.list_models(provider.id, ModelType.LLM)
@@ -236,14 +234,14 @@ class LLMService:
                 if model.is_default and model.is_active:
                     model_def = model
                     break
-            
+
             if not model_def and models:
                 # Get first active model
                 for model in models:
                     if model.is_active:
                         model_def = model
                         break
-        
+
         if not model_def:
             raise LLMProviderError(f"No suitable model found for provider '{profile.llm_provider}'")
 
@@ -253,7 +251,7 @@ class LLMService:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
                 if not api_key:
                     raise LLMProviderError(f"No API key found for provider {provider.name}")
-                
+
                 return ChatOpenAI(
                     api_key=api_key,
                     base_url=provider.base_url,
@@ -271,7 +269,7 @@ class LLMService:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
                 if not api_key:
                     raise LLMProviderError(f"No API key found for provider {provider.name}")
-                    
+
                 return ChatAnthropic(
                     api_key=api_key,
                     model=model_def.model_name,
@@ -282,7 +280,7 @@ class LLMService:
                 )
             else:
                 raise LLMProviderError(f"Unsupported provider type: {provider.provider_type}")
-                
+
         except Exception as e:
             raise LLMProviderError(f"Failed to create provider from profile: {e}") from e
             # For other providers, use base configuration with parameter updates
@@ -466,10 +464,10 @@ class LLMService:
         """
         session = await self._get_session()
         registry = ModelRegistryService(session)
-        
+
         providers, _ = await registry.list_providers()
         active_providers = [p.name for p in providers if p.is_active]
-        
+
         return active_providers
 
     async def get_provider_info(self, provider_name: str) -> dict[str, Any]:
@@ -483,15 +481,15 @@ class LLMService:
         """
         session = await self._get_session()
         registry = ModelRegistryService(session)
-        
+
         provider = await registry.get_provider_by_name(provider_name)
         if not provider:
             raise LLMProviderError(f"Provider '{provider_name}' not found") from None
-        
+
         # Get models for this provider
         models, _ = await registry.list_models(provider.id, ModelType.LLM)
         active_models = [m for m in models if m.is_active]
-        
+
         return {
             "name": provider.name,
             "display_name": provider.display_name,

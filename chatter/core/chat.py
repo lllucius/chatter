@@ -14,14 +14,13 @@ from chatter.models.conversation import (
     ConversationStatus,
     Message,
 )
-from chatter.schemas.chat import ChatRequest
+from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.schemas.chat import (
     ConversationCreate as ConversationCreateSchema,
 )
 from chatter.schemas.chat import (
     ConversationUpdate as ConversationUpdateSchema,
 )
-from chatter.schemas.chat import StreamingChatChunk
 from chatter.services.llm import LLMProviderError, LLMService
 from chatter.services.mcp import BuiltInTools, mcp_service
 from chatter.utils.logging import get_logger

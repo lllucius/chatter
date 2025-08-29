@@ -86,11 +86,11 @@ async def get_metrics():
     """
     try:
         from chatter.utils.monitoring import metrics_collector
-        
+
         overall_stats = metrics_collector.get_overall_stats(window_minutes=60)
         health_metrics = metrics_collector.get_health_metrics()
         endpoint_stats = metrics_collector.get_endpoint_stats()
-        
+
         return {
             "timestamp": "2024-01-01T12:00:00Z",  # Would use actual timestamp
             "service": "chatter",
@@ -104,7 +104,7 @@ async def get_metrics():
         # Fallback metrics if monitoring fails
         return {
             "timestamp": "2024-01-01T12:00:00Z",
-            "service": "chatter", 
+            "service": "chatter",
             "version": settings.app_version,
             "environment": settings.environment,
             "error": f"Metrics collection failed: {str(e)}"
@@ -123,9 +123,9 @@ async def get_correlation_trace(correlation_id: str):
     """
     try:
         from chatter.utils.monitoring import metrics_collector
-        
+
         trace = metrics_collector.get_correlation_trace(correlation_id)
-        
+
         return {
             "correlation_id": correlation_id,
             "trace_length": len(trace),

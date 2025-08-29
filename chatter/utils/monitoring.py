@@ -2,9 +2,9 @@
 
 import time
 from collections import defaultdict, deque
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 
 from chatter.utils.logging import get_logger
 
@@ -20,7 +20,7 @@ class RequestMetrics:
     status_code: int
     response_time_ms: float
     correlation_id: str
-    user_id: Optional[str] = None
+    user_id: str | None = None
     rate_limited: bool = False
 
 
@@ -37,7 +37,7 @@ class PerformanceStats:
 
 class MetricsCollector:
     """Simple in-memory metrics collector."""
-    
+
     def __init__(self, max_history: int = 10000):
         """Initialize metrics collector.
         
@@ -46,9 +46,9 @@ class MetricsCollector:
         """
         self.max_history = max_history
         self.requests: deque = deque(maxlen=max_history)
-        self.stats_by_endpoint: Dict[str, PerformanceStats] = defaultdict(PerformanceStats)
-        self.correlation_tracking: Dict[str, List[RequestMetrics]] = defaultdict(list)
-        
+        self.stats_by_endpoint: dict[str, PerformanceStats] = defaultdict(PerformanceStats)
+        self.correlation_tracking: dict[str, list[RequestMetrics]] = defaultdict(list)
+
     def record_request(self, metrics: RequestMetrics) -> None:
         """Record a request's metrics.
         
@@ -57,13 +57,13 @@ class MetricsCollector:
         """
         # Add to main history
         self.requests.append(metrics)
-        
+
         # Update endpoint stats
         endpoint_key = f"{metrics.method}:{metrics.path}"
         stats = self.stats_by_endpoint[endpoint_key]
-        
+
         stats.total_requests += 1
-        
+
         # Update response time stats
         if stats.total_requests == 1:
             stats.avg_response_time = metrics.response_time_ms
@@ -74,23 +74,23 @@ class MetricsCollector:
             total_time = stats.avg_response_time * (stats.total_requests - 1)
             total_time += metrics.response_time_ms
             stats.avg_response_time = total_time / stats.total_requests
-            
+
             # Update min/max
             stats.min_response_time = min(stats.min_response_time, metrics.response_time_ms)
             stats.max_response_time = max(stats.max_response_time, metrics.response_time_ms)
-        
+
         # Track errors and rate limiting
         if metrics.status_code >= 400:
             stats.error_count += 1
-        
+
         if metrics.rate_limited:
             stats.rate_limited_count += 1
-        
+
         # Track correlation chain (keep last 100 per correlation ID)
         self.correlation_tracking[metrics.correlation_id].append(metrics)
         if len(self.correlation_tracking[metrics.correlation_id]) > 100:
             self.correlation_tracking[metrics.correlation_id].pop(0)
-        
+
         # Clean old correlation tracking (remove IDs older than 1 hour)
         cutoff_time = time.time() - 3600
         expired_ids = [
@@ -99,8 +99,8 @@ class MetricsCollector:
         ]
         for corr_id in expired_ids:
             del self.correlation_tracking[corr_id]
-    
-    def get_overall_stats(self, window_minutes: int = 60) -> Dict[str, Any]:
+
+    def get_overall_stats(self, window_minutes: int = 60) -> dict[str, Any]:
         """Get overall system statistics.
         
         Args:
@@ -111,7 +111,7 @@ class MetricsCollector:
         """
         cutoff_time = time.time() - (window_minutes * 60)
         recent_requests = [r for r in self.requests if r.timestamp >= cutoff_time]
-        
+
         if not recent_requests:
             return {
                 "window_minutes": window_minutes,
@@ -120,11 +120,11 @@ class MetricsCollector:
                 "error_rate": 0.0,
                 "rate_limited_rate": 0.0
             }
-        
+
         total_time = sum(r.response_time_ms for r in recent_requests)
         error_count = sum(1 for r in recent_requests if r.status_code >= 400)
         rate_limited_count = sum(1 for r in recent_requests if r.rate_limited)
-        
+
         return {
             "window_minutes": window_minutes,
             "total_requests": len(recent_requests),
@@ -133,8 +133,8 @@ class MetricsCollector:
             "rate_limited_rate": rate_limited_count / len(recent_requests),
             "requests_per_minute": len(recent_requests) / window_minutes
         }
-    
-    def get_endpoint_stats(self, endpoint: Optional[str] = None) -> Dict[str, Any]:
+
+    def get_endpoint_stats(self, endpoint: str | None = None) -> dict[str, Any]:
         """Get statistics for endpoints.
         
         Args:
@@ -147,7 +147,7 @@ class MetricsCollector:
             stats = self.stats_by_endpoint.get(endpoint)
             if not stats:
                 return {}
-            
+
             return {
                 "endpoint": endpoint,
                 "total_requests": stats.total_requests,
@@ -158,7 +158,7 @@ class MetricsCollector:
                 "rate_limited_count": stats.rate_limited_count,
                 "error_rate": stats.error_count / stats.total_requests if stats.total_requests > 0 else 0
             }
-        
+
         # Return stats for all endpoints
         result = {}
         for endpoint_key, stats in self.stats_by_endpoint.items():
@@ -167,10 +167,10 @@ class MetricsCollector:
                 "avg_response_time": stats.avg_response_time,
                 "error_rate": stats.error_count / stats.total_requests if stats.total_requests > 0 else 0
             }
-        
+
         return result
-    
-    def get_correlation_trace(self, correlation_id: str) -> List[Dict[str, Any]]:
+
+    def get_correlation_trace(self, correlation_id: str) -> list[dict[str, Any]]:
         """Get trace of all requests for a correlation ID.
         
         Args:
@@ -192,22 +192,22 @@ class MetricsCollector:
             }
             for r in requests
         ]
-    
-    def get_health_metrics(self) -> Dict[str, Any]:
+
+    def get_health_metrics(self) -> dict[str, Any]:
         """Get health-related metrics for monitoring.
         
         Returns:
             Dictionary of health metrics
         """
         recent_stats = self.get_overall_stats(window_minutes=5)  # Last 5 minutes
-        
+
         # Determine health status
         health_status = "healthy"
         if recent_stats["error_rate"] > 0.1:  # More than 10% errors
             health_status = "degraded"
         if recent_stats["error_rate"] > 0.5:  # More than 50% errors
             health_status = "unhealthy"
-        
+
         return {
             "status": health_status,
             "metrics": recent_stats,
@@ -227,7 +227,7 @@ def record_request_metrics(
     status_code: int,
     response_time_ms: float,
     correlation_id: str,
-    user_id: Optional[str] = None,
+    user_id: str | None = None,
     rate_limited: bool = False
 ) -> None:
     """Record metrics for a request.
@@ -251,5 +251,5 @@ def record_request_metrics(
         user_id=user_id,
         rate_limited=rate_limited
     )
-    
+
     metrics_collector.record_request(metrics)

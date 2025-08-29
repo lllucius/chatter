@@ -1,7 +1,7 @@
 """Standardized API response utilities."""
 
 from datetime import datetime
-from typing import Any, Dict, Optional, Union
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -11,22 +11,22 @@ from chatter.utils.correlation import get_correlation_id
 
 class ResponseMetadata(BaseModel):
     """Standard metadata for API responses."""
-    
+
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    correlation_id: Optional[str] = Field(default=None)
+    correlation_id: str | None = Field(default=None)
     version: str = Field(default=settings.api_version)
-    request_id: Optional[str] = Field(default=None)
+    request_id: str | None = Field(default=None)
 
 
 class StandardResponse(BaseModel):
     """Standard API response envelope."""
-    
+
     success: bool = Field(description="Whether the request was successful")
-    data: Optional[Any] = Field(default=None, description="Response data")
-    message: Optional[str] = Field(default=None, description="Human-readable message")
-    errors: Optional[list[str]] = Field(default=None, description="List of error messages")
+    data: Any | None = Field(default=None, description="Response data")
+    message: str | None = Field(default=None, description="Human-readable message")
+    errors: list[str] | None = Field(default=None, description="List of error messages")
     metadata: ResponseMetadata = Field(default_factory=ResponseMetadata)
-    
+
     def model_post_init(self, __context: Any) -> None:
         """Set correlation ID from context after initialization."""
         if self.metadata.correlation_id is None:
@@ -35,8 +35,8 @@ class StandardResponse(BaseModel):
 
 class PaginatedResponse(StandardResponse):
     """Standard paginated response envelope."""
-    
-    pagination: Optional[Dict[str, Any]] = Field(
+
+    pagination: dict[str, Any] | None = Field(
         default=None,
         description="Pagination metadata"
     )
@@ -44,9 +44,9 @@ class PaginatedResponse(StandardResponse):
 
 def create_success_response(
     data: Any = None,
-    message: Optional[str] = None,
-    pagination: Optional[Dict[str, Any]] = None
-) -> Union[StandardResponse, PaginatedResponse]:
+    message: str | None = None,
+    pagination: dict[str, Any] | None = None
+) -> StandardResponse | PaginatedResponse:
     """Create a standardized success response.
     
     Args:
@@ -64,7 +64,7 @@ def create_success_response(
             message=message,
             pagination=pagination
         )
-    
+
     return StandardResponse(
         success=True,
         data=data,
@@ -74,7 +74,7 @@ def create_success_response(
 
 def create_error_response(
     message: str,
-    errors: Optional[list[str]] = None,
+    errors: list[str] | None = None,
     data: Any = None
 ) -> StandardResponse:
     """Create a standardized error response.
@@ -95,7 +95,7 @@ def create_error_response(
     )
 
 
-def wrap_response(response_data: Any, message: Optional[str] = None) -> StandardResponse:
+def wrap_response(response_data: Any, message: str | None = None) -> StandardResponse:
     """Wrap existing response data in standard envelope.
     
     Args:

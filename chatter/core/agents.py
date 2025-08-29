@@ -544,7 +544,7 @@ class AgentManager:
             profiles = [p for p in profiles if p.status == status]
 
         total = len(profiles)
-        
+
         # Apply pagination
         paginated_profiles = profiles[offset:offset + limit]
 

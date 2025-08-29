@@ -263,7 +263,7 @@ class DocumentChunk(Base):
 
     # Embedding metadata - tracks which models have been applied
     embedding_models: Mapped[list[str] | None] = mapped_column(
-        "embedding_models", JSON, nullable=True, 
+        "embedding_models", JSON, nullable=True,
         comment="List of embedding model names that have been applied to this chunk"
     )
     primary_embedding_model: Mapped[str | None] = mapped_column(
@@ -310,10 +310,10 @@ class DocumentChunk(Base):
         """
         if not self.embedding_models:
             self.embedding_models = []
-        
+
         if model_name not in self.embedding_models:
             self.embedding_models.append(model_name)
-        
+
         if set_as_primary or not self.primary_embedding_model:
             self.primary_embedding_model = model_name
 
@@ -325,7 +325,7 @@ class DocumentChunk(Base):
         """
         if self.embedding_models and model_name in self.embedding_models:
             self.embedding_models.remove(model_name)
-            
+
             # Update primary if it was the removed model
             if self.primary_embedding_model == model_name:
                 self.primary_embedding_model = (

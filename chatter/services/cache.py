@@ -1,8 +1,8 @@
 """Redis caching service for performance optimization."""
 
 import json
-from typing import Any, Optional
 from datetime import timedelta
+from typing import Any
 
 import redis.asyncio as redis
 from redis.asyncio import Redis
@@ -15,12 +15,12 @@ logger = get_logger(__name__)
 
 class CacheService:
     """Redis-based caching service."""
-    
+
     def __init__(self):
         """Initialize cache service."""
-        self.redis: Optional[Redis] = None
+        self.redis: Redis | None = None
         self._connected = False
-    
+
     async def connect(self) -> None:
         """Connect to Redis server."""
         try:
@@ -36,14 +36,14 @@ class CacheService:
         except Exception as e:
             logger.warning(f"Failed to connect to Redis: {e}")
             self._connected = False
-    
+
     async def disconnect(self) -> None:
         """Disconnect from Redis server."""
         if self.redis:
             await self.redis.close()
             self._connected = False
             logger.info("Disconnected from Redis cache")
-    
+
     async def get(self, key: str) -> Any:
         """Get value from cache.
         
@@ -55,7 +55,7 @@ class CacheService:
         """
         if not self._connected or not self.redis:
             return None
-        
+
         try:
             value = await self.redis.get(key)
             if value:
@@ -64,12 +64,12 @@ class CacheService:
         except Exception as e:
             logger.warning(f"Cache get error for key {key}: {e}")
             return None
-    
+
     async def set(
-        self, 
-        key: str, 
-        value: Any, 
-        expire: Optional[timedelta] = None
+        self,
+        key: str,
+        value: Any,
+        expire: timedelta | None = None
     ) -> bool:
         """Set value in cache.
         
@@ -83,7 +83,7 @@ class CacheService:
         """
         if not self._connected or not self.redis:
             return False
-        
+
         try:
             serialized = json.dumps(value, default=str)
             if expire:
@@ -94,7 +94,7 @@ class CacheService:
         except Exception as e:
             logger.warning(f"Cache set error for key {key}: {e}")
             return False
-    
+
     async def delete(self, key: str) -> bool:
         """Delete value from cache.
         
@@ -106,14 +106,14 @@ class CacheService:
         """
         if not self._connected or not self.redis:
             return False
-        
+
         try:
             await self.redis.delete(key)
             return True
         except Exception as e:
             logger.warning(f"Cache delete error for key {key}: {e}")
             return False
-    
+
     async def clear(self) -> bool:
         """Clear all cached values.
         
@@ -122,7 +122,7 @@ class CacheService:
         """
         if not self._connected or not self.redis:
             return False
-        
+
         try:
             await self.redis.flushdb()
             logger.info("Cache cleared")
@@ -130,7 +130,7 @@ class CacheService:
         except Exception as e:
             logger.warning(f"Cache clear error: {e}")
             return False
-    
+
     def is_connected(self) -> bool:
         """Check if cache is connected.
         

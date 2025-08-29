@@ -1,31 +1,27 @@
 """Model and embedding registry endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.core.model_registry import ModelRegistryService, ListParams
-from chatter.models.registry import ModelType, ProviderType
+from chatter.core.model_registry import ListParams, ModelRegistryService
+from chatter.models.registry import ModelType
 from chatter.models.user import User
 from chatter.schemas.model_registry import (
+    DefaultProvider,
+    EmbeddingSpaceCreate,
+    EmbeddingSpaceList,
+    EmbeddingSpaceUpdate,
+    EmbeddingSpaceWithModel,
+    ModelDefCreate,
+    ModelDefList,
+    ModelDefUpdate,
+    ModelDefWithProvider,
     Provider,
     ProviderCreate,
-    ProviderUpdate,
     ProviderList,
-    ModelDef,
-    ModelDefCreate,
-    ModelDefUpdate,
-    ModelDefList,
-    ModelDefWithProvider,
-    EmbeddingSpace,
-    EmbeddingSpaceCreate,
-    EmbeddingSpaceUpdate,
-    EmbeddingSpaceList,
-    EmbeddingSpaceWithModel,
-    DefaultProvider,
-    DefaultModel,
-    DefaultEmbeddingSpace,
+    ProviderUpdate,
 )
 from chatter.utils.database import get_session
 from chatter.utils.logging import get_logger
@@ -46,9 +42,9 @@ async def list_providers(
     """List all providers."""
     service = ModelRegistryService(session)
     params = ListParams(page=page, per_page=per_page, active_only=active_only)
-    
+
     providers, total = await service.list_providers(params)
-    
+
     return ProviderList(
         providers=providers,
         total=total,
@@ -66,13 +62,13 @@ async def get_provider(
     """Get a specific provider."""
     service = ModelRegistryService(session)
     provider = await service.get_provider(provider_id)
-    
+
     if not provider:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Provider not found"
         )
-    
+
     return provider
 
 
@@ -84,7 +80,7 @@ async def create_provider(
 ):
     """Create a new provider."""
     service = ModelRegistryService(session)
-    
+
     # Check if provider name already exists
     existing = await service.get_provider_by_name(provider_data.name)
     if existing:
@@ -92,7 +88,7 @@ async def create_provider(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Provider with this name already exists"
         )
-    
+
     provider = await service.create_provider(provider_data)
     logger.info(
         "Created provider",
@@ -100,7 +96,7 @@ async def create_provider(
         provider_name=provider.name,
         user_id=current_user.id
     )
-    
+
     return provider
 
 
@@ -114,20 +110,20 @@ async def update_provider(
     """Update a provider."""
     service = ModelRegistryService(session)
     provider = await service.update_provider(provider_id, provider_data)
-    
+
     if not provider:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Provider not found"
         )
-    
+
     logger.info(
         "Updated provider",
         provider_id=provider.id,
         provider_name=provider.name,
         user_id=current_user.id
     )
-    
+
     return provider
 
 
@@ -141,19 +137,19 @@ async def delete_provider(
     service = ModelRegistryService(session)
     try:
         deleted = await service.delete_provider(provider_id)
-        
+
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Provider not found"
             )
-        
+
         logger.info(
             "Deleted provider and its dependencies",
             provider_id=provider_id,
             user_id=current_user.id
         )
-        
+
         return {"message": "Provider and its dependent models/embedding spaces deleted successfully"}
     except IntegrityError as e:
         await session.rollback()
@@ -173,20 +169,20 @@ async def set_default_provider(
     """Set a provider as default for a model type."""
     service = ModelRegistryService(session)
     success = await service.set_default_provider(provider_id, default_data.model_type)
-    
+
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Provider not found"
         )
-    
+
     logger.info(
         "Set default provider",
         provider_id=provider_id,
         model_type=default_data.model_type,
         user_id=current_user.id
     )
-    
+
     return {"message": "Default provider set successfully"}
 
 
@@ -204,9 +200,9 @@ async def list_models(
     """List all model definitions."""
     service = ModelRegistryService(session)
     params = ListParams(page=page, per_page=per_page, active_only=active_only)
-    
+
     models, total = await service.list_models(provider_id, model_type, params)
-    
+
     return ModelDefList(
         models=models,
         total=total,
@@ -224,13 +220,13 @@ async def get_model(
     """Get a specific model definition."""
     service = ModelRegistryService(session)
     model = await service.get_model(model_id)
-    
+
     if not model:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Model not found"
         )
-    
+
     return model
 
 
@@ -242,7 +238,7 @@ async def create_model(
 ):
     """Create a new model definition."""
     service = ModelRegistryService(session)
-    
+
     # Check if model name already exists for this provider
     existing = await service.get_model_by_name(model_data.provider_id, model_data.name)
     if existing:
@@ -250,12 +246,12 @@ async def create_model(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Model with this name already exists for this provider"
         )
-    
+
     model = await service.create_model(model_data)
-    
+
     # Refresh to get provider relationship
     model = await service.get_model(model.id)
-    
+
     logger.info(
         "Created model",
         model_id=model.id,
@@ -263,7 +259,7 @@ async def create_model(
         provider_id=model.provider_id,
         user_id=current_user.id
     )
-    
+
     return model
 
 
@@ -277,23 +273,23 @@ async def update_model(
     """Update a model definition."""
     service = ModelRegistryService(session)
     model = await service.update_model(model_id, model_data)
-    
+
     if not model:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Model not found"
         )
-    
+
     # Refresh to get provider relationship
     model = await service.get_model(model.id)
-    
+
     logger.info(
         "Updated model",
         model_id=model.id,
         model_name=model.name,
         user_id=current_user.id
     )
-    
+
     return model
 
 
@@ -307,19 +303,19 @@ async def delete_model(
     service = ModelRegistryService(session)
     try:
         deleted = await service.delete_model(model_id)
-        
+
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Model not found"
             )
-        
+
         logger.info(
             "Deleted model and its dependencies",
             model_id=model_id,
             user_id=current_user.id
         )
-        
+
         return {"message": "Model and its dependent embedding spaces deleted successfully"}
     except IntegrityError as e:
         await session.rollback()
@@ -338,19 +334,19 @@ async def set_default_model(
     """Set a model as default for its type."""
     service = ModelRegistryService(session)
     success = await service.set_default_model(model_id)
-    
+
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Model not found"
         )
-    
+
     logger.info(
         "Set default model",
         model_id=model_id,
         user_id=current_user.id
     )
-    
+
     return {"message": "Default model set successfully"}
 
 
@@ -367,9 +363,9 @@ async def list_embedding_spaces(
     """List all embedding spaces."""
     service = ModelRegistryService(session)
     params = ListParams(page=page, per_page=per_page, active_only=active_only)
-    
+
     spaces, total = await service.list_embedding_spaces(model_id, params)
-    
+
     return EmbeddingSpaceList(
         spaces=spaces,
         total=total,
@@ -387,13 +383,13 @@ async def get_embedding_space(
     """Get a specific embedding space."""
     service = ModelRegistryService(session)
     space = await service.get_embedding_space(space_id)
-    
+
     if not space:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Embedding space not found"
         )
-    
+
     return space
 
 
@@ -405,7 +401,7 @@ async def create_embedding_space(
 ):
     """Create a new embedding space with backing table and index."""
     service = ModelRegistryService(session)
-    
+
     # Check if space name already exists
     existing = await service.get_embedding_space_by_name(space_data.name)
     if existing:
@@ -413,7 +409,7 @@ async def create_embedding_space(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Embedding space with this name already exists"
         )
-    
+
     # Check if table name already exists
     existing_table = await service.get_embedding_space_by_table_name(space_data.table_name)
     if existing_table:
@@ -421,16 +417,16 @@ async def create_embedding_space(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Embedding space with this table name already exists"
         )
-    
+
     # Get user ID before any potential rollback
     user_id = current_user.id
-    
+
     try:
         space = await service.create_embedding_space(space_data)
-        
+
         # Refresh to get full relationships
         space = await service.get_embedding_space(space.id)
-        
+
         logger.info(
             "Created embedding space",
             space_id=space.id,
@@ -439,7 +435,7 @@ async def create_embedding_space(
             model_id=space.model_id,
             user_id=user_id
         )
-        
+
         return space
     except Exception as e:
         logger.error(
@@ -464,23 +460,23 @@ async def update_embedding_space(
     """Update an embedding space."""
     service = ModelRegistryService(session)
     space = await service.update_embedding_space(space_id, space_data)
-    
+
     if not space:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Embedding space not found"
         )
-    
+
     # Refresh to get full relationships
     space = await service.get_embedding_space(space.id)
-    
+
     logger.info(
         "Updated embedding space",
         space_id=space.id,
         space_name=space.name,
         user_id=current_user.id
     )
-    
+
     return space
 
 
@@ -493,19 +489,19 @@ async def delete_embedding_space(
     """Delete an embedding space (does not drop the table)."""
     service = ModelRegistryService(session)
     deleted = await service.delete_embedding_space(space_id)
-    
+
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Embedding space not found"
         )
-    
+
     logger.info(
         "Deleted embedding space",
         space_id=space_id,
         user_id=current_user.id
     )
-    
+
     return {"message": "Embedding space deleted successfully"}
 
 
@@ -518,19 +514,19 @@ async def set_default_embedding_space(
     """Set an embedding space as default."""
     service = ModelRegistryService(session)
     success = await service.set_default_embedding_space(space_id)
-    
+
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Embedding space not found"
         )
-    
+
     logger.info(
         "Set default embedding space",
         space_id=space_id,
         user_id=current_user.id
     )
-    
+
     return {"message": "Default embedding space set successfully"}
 
 
@@ -544,13 +540,13 @@ async def get_default_provider(
     """Get the default provider for a model type."""
     service = ModelRegistryService(session)
     provider = await service.get_default_provider(model_type)
-    
+
     if not provider:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No default provider found for {model_type}"
         )
-    
+
     return provider
 
 
@@ -563,13 +559,13 @@ async def get_default_model(
     """Get the default model for a type."""
     service = ModelRegistryService(session)
     model = await service.get_default_model(model_type)
-    
+
     if not model:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"No default model found for {model_type}"
         )
-    
+
     return model
 
 
@@ -581,11 +577,11 @@ async def get_default_embedding_space(
     """Get the default embedding space."""
     service = ModelRegistryService(session)
     space = await service.get_default_embedding_space()
-    
+
     if not space:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No default embedding space found"
         )
-    
+
     return space

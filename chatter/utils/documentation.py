@@ -1,19 +1,16 @@
 """Enhanced API documentation and examples."""
 
-from typing import Dict, List, Any, Optional
-from datetime import datetime
-import json
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
-from chatter.config import settings
 from chatter.utils.versioning import version_manager
 
 
 class APIDocumentationEnhancer:
     """Enhanced API documentation generator."""
-    
+
     def __init__(self, app: FastAPI):
         """Initialize the documentation enhancer.
         
@@ -21,16 +18,16 @@ class APIDocumentationEnhancer:
             app: FastAPI application instance
         """
         self.app = app
-        self.examples: Dict[str, Dict[str, Any]] = {}
-        self.descriptions: Dict[str, str] = {}
-        
+        self.examples: dict[str, dict[str, Any]] = {}
+        self.descriptions: dict[str, str] = {}
+
     def add_endpoint_example(
-        self, 
-        path: str, 
-        method: str, 
-        request_example: Optional[Dict[str, Any]] = None,
-        response_example: Optional[Dict[str, Any]] = None,
-        description: Optional[str] = None
+        self,
+        path: str,
+        method: str,
+        request_example: dict[str, Any] | None = None,
+        response_example: dict[str, Any] | None = None,
+        description: str | None = None
     ) -> None:
         """Add examples for an endpoint.
         
@@ -46,11 +43,11 @@ class APIDocumentationEnhancer:
             "request": request_example,
             "response": response_example
         }
-        
+
         if description:
             self.descriptions[key] = description
-    
-    def enhance_openapi_schema(self) -> Dict[str, Any]:
+
+    def enhance_openapi_schema(self) -> dict[str, Any]:
         """Generate enhanced OpenAPI schema with examples.
         
         Returns:
@@ -62,7 +59,7 @@ class APIDocumentationEnhancer:
             description=self.app.description,
             routes=self.app.routes,
         )
-        
+
         # Add version information
         schema["info"]["x-api-versions"] = [
             {
@@ -76,7 +73,7 @@ class APIDocumentationEnhancer:
             }
             for version in version_manager.get_all_versions()
         ]
-        
+
         # Add correlation ID to all responses
         for path_item in schema.get("paths", {}).values():
             for operation in path_item.values():
@@ -88,7 +85,7 @@ class APIDocumentationEnhancer:
                             "description": "Request correlation ID for tracing",
                             "schema": {"type": "string", "format": "uuid"}
                         }
-                        
+
                         # Add rate limiting headers
                         response["headers"].update({
                             "X-RateLimit-Limit-Minute": {
@@ -96,7 +93,7 @@ class APIDocumentationEnhancer:
                                 "schema": {"type": "integer"}
                             },
                             "X-RateLimit-Limit-Hour": {
-                                "description": "Requests allowed per hour", 
+                                "description": "Requests allowed per hour",
                                 "schema": {"type": "integer"}
                             },
                             "X-RateLimit-Remaining-Minute": {
@@ -108,40 +105,40 @@ class APIDocumentationEnhancer:
                                 "schema": {"type": "integer"}
                             }
                         })
-        
+
         # Add examples to endpoints
         for path, path_item in schema.get("paths", {}).items():
             for method, operation in path_item.items():
                 if not isinstance(operation, dict):
                     continue
-                    
+
                 key = f"{method.upper()}:{path}"
                 example_data = self.examples.get(key)
-                
+
                 if example_data:
                     # Add request example
                     if example_data["request"] and "requestBody" in operation:
                         content = operation["requestBody"].get("content", {})
                         for media_type in content.values():
                             media_type["example"] = example_data["request"]
-                    
+
                     # Add response example
                     if example_data["response"] and "responses" in operation:
                         for response in operation["responses"].values():
                             if "content" in response:
                                 for media_type in response["content"].values():
                                     media_type["example"] = example_data["response"]
-                
+
                 # Add additional description
                 description = self.descriptions.get(key)
                 if description:
                     operation["description"] = operation.get("description", "") + f"\n\n{description}"
-        
+
         return schema
-    
+
     def generate_examples(self) -> None:
         """Generate common examples for standard endpoints."""
-        
+
         # Authentication examples
         self.add_endpoint_example(
             "/api/v1/auth/login",
@@ -173,7 +170,7 @@ class APIDocumentationEnhancer:
             },
             description="Authenticate user and return access token with user information"
         )
-        
+
         # Chat examples
         self.add_endpoint_example(
             "/api/v1/chat/conversations",
@@ -210,7 +207,7 @@ class APIDocumentationEnhancer:
             },
             description="Create a new conversation with specified configuration"
         )
-        
+
         # Error response example
         self.add_endpoint_example(
             "/api/v1/chat/conversations/{conversation_id}/messages",
@@ -244,14 +241,14 @@ def setup_enhanced_docs(app: FastAPI) -> APIDocumentationEnhancer:
     """
     enhancer = APIDocumentationEnhancer(app)
     enhancer.generate_examples()
-    
+
     # Override the default OpenAPI schema generator
     def custom_openapi():
         if app.openapi_schema:
             return app.openapi_schema
-        
+
         app.openapi_schema = enhancer.enhance_openapi_schema()
         return app.openapi_schema
-    
+
     app.openapi = custom_openapi
     return enhancer

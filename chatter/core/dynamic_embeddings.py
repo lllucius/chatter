@@ -2,10 +2,7 @@
 
 import re
 
-from typing import Any, Dict, Type
-
 from sqlalchemy import Column, Integer, String, text
-from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base
 
 try:
@@ -17,12 +14,13 @@ except ImportError:
 
 from chatter.config import settings
 from chatter.utils.logging import get_logger
+
 logger = get_logger(__name__)
 
 Base = declarative_base()
 
 # Global registry for embedding models
-embedding_models: Dict[str, Type] = {}
+embedding_models: dict[str, type] = {}
 
 
 def _to_name(name: str, dim: int) -> str:
@@ -70,14 +68,14 @@ def make_embedding_model(name: str, dim: int):
             "extra_metadata": Column(String, nullable=True),
         },
     )
-    
+
     embedding_models[name] = model_class
     return model_class
 
 
 def ensure_table_and_index(
     engine,
-    model_class: Type,
+    model_class: type,
     metric: str = "cosine",
     m: int = 16,
     ef_construction: int = 64,
@@ -100,30 +98,30 @@ def ensure_table_and_index(
         # Create table without vector index
         Base.metadata.create_all(engine, tables=[table_name])
         return
-    
+
     # Create the table if missing
     Base.metadata.create_all(engine, tables=[table_name])
-    
+
     # Pick operator family
     ops = {
         "cosine": "vector_cosine_ops",
         "l2": "vector_l2_ops",
         "ip": "vector_ip_ops"
     }.get(metric, "vector_cosine_ops")
-    
+
     index_name = f"{table_name}_idx"
     index_sql = f"""
     CREATE INDEX IF NOT EXISTS {index_name}
     ON {table_name} USING hnsw (embedding {ops})
     WITH (m = {m}, ef_construction = {ef_construction});
     """
-    
+
     # Run index creation + analyze
     with engine.connect() as conn:
         conn.execute(text(index_sql))
         conn.execute(text(f"ANALYZE {table_name};"))
         conn.commit()
-        
+
     logger.info(
         "Created embedding table and index",
         table=table_name,
@@ -158,13 +156,13 @@ def get_embedding_model(
         SQLAlchemy model class for the embedding table
     """
     name = _to_name(model_name, dim)
-    
+
     if name in embedding_models:
         return embedding_models[name]
-    
+
     # Not registered → create dynamically
     model_class = make_embedding_model(name, dim)
-    
+
     if engine is not None:
         ensure_table_and_index(
             engine,
@@ -173,7 +171,7 @@ def get_embedding_model(
             m=m,
             ef_construction=ef_construction,
         )
-    
+
     return model_class
 
 
@@ -195,11 +193,11 @@ def get_model_dimensions(provider_name: str) -> int:
         "cohere": settings.cohere_embedding_dimensions or 1024,
         "mistral": 4096,
     }
-    
+
     return dimensions.get(provider_name.lower(), 1536)
 
 
-def list_embedding_models() -> Dict[str, Type]:
+def list_embedding_models() -> dict[str, type]:
     """
     List all registered embedding models.
     

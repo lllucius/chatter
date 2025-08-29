@@ -3,7 +3,14 @@
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text, CheckConstraint
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    String,
+    Text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -17,7 +24,7 @@ if TYPE_CHECKING:
 
 class User(Base):
     """User model for authentication and profile management."""
-    
+
     # Add table constraints
     __table_args__ = (
         CheckConstraint(

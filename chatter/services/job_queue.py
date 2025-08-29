@@ -1,15 +1,17 @@
 """Advanced job queue system for background processing using APScheduler."""
 
 import asyncio
-import inspect
 import concurrent.futures
-from dataclasses import dataclass
+import inspect
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
 from apscheduler.executors.asyncio import AsyncIOExecutor
-from apscheduler.executors.pool import ThreadPoolExecutor as APSchedulerThreadPoolExecutor
+from apscheduler.executors.pool import (
+    ThreadPoolExecutor as APSchedulerThreadPoolExecutor,
+)
 from apscheduler.jobstores.memory import MemoryJobStore
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -523,12 +525,14 @@ class AdvancedJobQueue:
 
             # Trigger job completed event
             try:
-                from chatter.services.sse_events import trigger_job_completed
+                from chatter.services.sse_events import (
+                    trigger_job_completed,
+                )
                 await trigger_job_completed(job.id, job.name, result or {})
             except Exception as e:
                 logger.warning("Failed to trigger job completed event", error=str(e))
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             await self._handle_job_error(job, "Job timed out")
         except asyncio.CancelledError:
             job.status = JobStatus.CANCELLED
@@ -583,7 +587,9 @@ class AdvancedJobQueue:
             )
             # Trigger job completed on the main loop if available
             try:
-                from chatter.services.sse_events import trigger_job_completed
+                from chatter.services.sse_events import (
+                    trigger_job_completed,
+                )
                 if self._main_loop:
                     asyncio.run_coroutine_threadsafe(
                         trigger_job_completed(job.id, job.name, result or {}),
@@ -705,7 +711,9 @@ class AdvancedJobQueue:
 
             # Trigger job failed event
             try:
-                from chatter.services.sse_events import trigger_job_failed
+                from chatter.services.sse_events import (
+                    trigger_job_failed,
+                )
 
                 await trigger_job_failed(job.id, job.name, error_message)
             except Exception as e:

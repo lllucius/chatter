@@ -1,9 +1,9 @@
 """Advanced usage example with document upload and profiles."""
 
 import asyncio
-from pathlib import Path
+
 from chatter_sdk import ChatterClient
-from chatter_sdk.models import ProfileCreate, DocumentSearchRequest
+from chatter_sdk.models import DocumentSearchRequest, ProfileCreate
 
 
 async def main():

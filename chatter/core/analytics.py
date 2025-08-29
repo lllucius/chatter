@@ -7,7 +7,6 @@ from typing import Any
 from sqlalchemy import and_, desc, func, literal, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.config import settings
 from chatter.models.conversation import (
     Conversation,
     Message,

@@ -3,7 +3,6 @@
 import asyncio
 import json
 import time
-import traceback
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -73,7 +72,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         # Get correlation ID for metrics
         correlation_id = response.headers.get('x-correlation-id', 'unknown')
-        
+
         # Check if request was rate limited
         rate_limited = response.status_code == 429
 
@@ -160,7 +159,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Validate configuration first
     try:
-        from chatter.utils.config_validator import validate_startup_configuration
+        from chatter.utils.config_validator import (
+            validate_startup_configuration,
+        )
         validate_startup_configuration()
         logger.info("Configuration validation passed")
     except Exception as e:
@@ -317,8 +318,8 @@ def create_app() -> FastAPI:
 
     # Add rate limiting middleware
     from chatter.utils.rate_limit import RateLimitMiddleware
-    app.add_middleware(RateLimitMiddleware, 
-                      requests_per_minute=100, 
+    app.add_middleware(RateLimitMiddleware,
+                      requests_per_minute=100,
                       requests_per_hour=2000)
 
     # Add custom middleware

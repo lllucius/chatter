@@ -2,14 +2,13 @@
 
 import uuid
 from contextvars import ContextVar
-from typing import Optional
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
 # Context variable to store correlation ID for the current request
-correlation_id_var: ContextVar[Optional[str]] = ContextVar(
+correlation_id_var: ContextVar[str | None] = ContextVar(
     'correlation_id', default=None
 )
 
@@ -23,7 +22,7 @@ def generate_correlation_id() -> str:
     return str(uuid.uuid4())
 
 
-def get_correlation_id() -> Optional[str]:
+def get_correlation_id() -> str | None:
     """Get the current correlation ID from context.
     
     Returns:
@@ -43,7 +42,7 @@ def set_correlation_id(correlation_id: str) -> None:
 
 class CorrelationIdMiddleware(BaseHTTPMiddleware):
     """Middleware to add correlation IDs to requests and responses."""
-    
+
     async def dispatch(self, request: Request, call_next) -> Response:
         """Add correlation ID to request and response.
         
@@ -56,17 +55,17 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
         """
         # Get correlation ID from header or generate new one
         correlation_id = request.headers.get(
-            'x-correlation-id', 
+            'x-correlation-id',
             generate_correlation_id()
         )
-        
+
         # Set in context for logging and other services
         set_correlation_id(correlation_id)
-        
+
         # Process request
         response = await call_next(request)
-        
+
         # Add correlation ID to response headers
         response.headers['x-correlation-id'] = correlation_id
-        
+
         return response

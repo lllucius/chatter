@@ -1,8 +1,6 @@
 """Configuration management for Chatter application."""
 
 from functools import lru_cache
-import os
-import sys
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -187,27 +185,27 @@ class Settings(BaseSettings):
     # =============================================================================
     # EMBEDDING DIMENSIONAL REDUCTION SETTINGS
     # =============================================================================
-    
+
     # Enable dimensional reduction for embeddings
     embedding_reduction_enabled: bool = Field(
         default=False, description="Enable dimensional reduction for embeddings"
     )
-    
+
     # Target dimension after reduction
     embedding_reduction_target_dim: int = Field(
         default=1536, description="Target dimensions after reduction"
     )
-    
+
     # Reduction strategy: "reducer" (PCA/SVD) or "truncate" (simple truncation)
     embedding_reduction_strategy: str = Field(
         default="truncate", description="Dimensional reduction strategy"
     )
-    
+
     # Path to fitted reducer (joblib file)
     embedding_reducer_path: str | None = Field(
         default=None, description="Path to fitted dimensional reducer"
     )
-    
+
     # Whether to L2-normalize vectors after reduction
     embedding_reduction_normalize: bool = Field(
         default=True, description="Normalize vectors after dimensional reduction"
@@ -412,20 +410,20 @@ class Settings(BaseSettings):
             raise ValueError(
                 "DATABASE_URL must be provided - no default database credentials allowed for security"
             )
-        
+
         # Validate production settings
         if self.is_production:
             if self.debug:
                 raise ValueError(
                     "Debug mode must be disabled in production"
                 )
-            
+
             # Validate secret key strength in production
             if self.secret_key == "your-secret-key-here" or len(self.secret_key) < 32:
                 raise ValueError(
                     "SECRET_KEY must be a strong secret (32+ characters) in production"
                 )
-        
+
         return self
 
     @field_validator('database_url')
@@ -434,7 +432,7 @@ class Settings(BaseSettings):
         """Validate database URL format."""
         if not v:
             raise ValueError("Database URL is required")
-        
+
         # Prevent default/weak credentials
         weak_patterns = [
             "chatter:chatter_password",
@@ -448,7 +446,7 @@ class Settings(BaseSettings):
                     f"Default/weak database credentials detected: {pattern}. "
                     "Please use strong, unique credentials."
                 )
-        
+
         return v
 
     @property

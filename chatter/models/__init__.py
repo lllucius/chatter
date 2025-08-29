@@ -11,12 +11,12 @@ from chatter.models.document import Document, DocumentChunk
 from chatter.models.profile import Profile
 from chatter.models.prompt import Prompt
 from chatter.models.registry import (
-    Provider,
-    ModelDef,
-    EmbeddingSpace,
-    ProviderType,
-    ModelType,
     DistanceMetric,
+    EmbeddingSpace,
+    ModelDef,
+    ModelType,
+    Provider,
+    ProviderType,
     ReductionStrategy,
 )
 from chatter.models.toolserver import ServerTool, ToolServer, ToolUsage

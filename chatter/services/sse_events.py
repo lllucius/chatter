@@ -43,7 +43,7 @@ class SSEConnection:
                 # Wait for an event with a timeout to allow periodic checks
                 event = await asyncio.wait_for(self._queue.get(), timeout=30.0)
                 yield event
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 # Send keepalive/heartbeat
                 yield Event(
                     type=EventType.SYSTEM_STATUS,

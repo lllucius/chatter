@@ -28,9 +28,12 @@ from chatter.schemas.document import (
 from chatter.services.document_processing import (
     DocumentProcessingService,
 )
+from chatter.services.dynamic_vector_store import (
+    DynamicVectorStoreService,
+)
 from chatter.services.embeddings import EmbeddingService
-from chatter.services.dynamic_vector_store import DynamicVectorStoreService
 from chatter.utils.logging import get_logger
+
 logger = get_logger(__name__)
 
 
@@ -435,7 +438,7 @@ class DocumentService:
             ) = await self.embedding_service.generate_embedding(
                 search_request.query
             )
-            
+
             provider = usage.get("provider") if isinstance(usage, dict) else None
             model = usage.get("model") if isinstance(usage, dict) else None
 

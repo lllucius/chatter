@@ -100,7 +100,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """
     session_maker = get_session_maker()
     session = session_maker()
-    
+
     try:
         yield session
     except GeneratorExit:

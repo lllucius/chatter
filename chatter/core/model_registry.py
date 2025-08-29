@@ -2,33 +2,32 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Sequence
 
-from sqlalchemy import select, update, delete, func
+from sqlalchemy import create_engine, delete, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from chatter.config import settings
+from chatter.core.dynamic_embeddings import (
+    ensure_table_and_index,
+    get_embedding_model,
+)
 from chatter.models.registry import (
-    Provider,
-    ModelDef,
     EmbeddingSpace,
-    ProviderType,
+    ModelDef,
     ModelType,
-    DistanceMetric,
-    ReductionStrategy,
+    Provider,
 )
 from chatter.schemas.model_registry import (
-    ProviderCreate,
-    ProviderUpdate,
-    ModelDefCreate,
-    ModelDefUpdate,
     EmbeddingSpaceCreate,
     EmbeddingSpaceUpdate,
+    ModelDefCreate,
+    ModelDefUpdate,
+    ProviderCreate,
+    ProviderUpdate,
 )
-from chatter.core.dynamic_embeddings import ensure_table_and_index, get_embedding_model
-from sqlalchemy import create_engine
-from chatter.config import settings
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -61,22 +60,22 @@ class ModelRegistryService:
     ) -> tuple[Sequence[Provider], int]:
         """List providers with pagination."""
         query = select(Provider)
-        
+
         if params.active_only:
             query = query.where(Provider.is_active == True)
-        
+
         # Order by default first, then by display name
         query = query.order_by(Provider.is_default.desc(), Provider.display_name)
-        
+
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total = await self.session.scalar(count_query)
-        
+
         # Apply pagination
         query = query.offset((params.page - 1) * params.per_page).limit(params.per_page)
         result = await self.session.execute(query)
         providers = result.scalars().all()
-        
+
         return providers, total or 0
 
     async def get_provider(self, provider_id: str) -> Provider | None:
@@ -108,11 +107,11 @@ class ModelRegistryService:
         provider = await self.get_provider(provider_id)
         if not provider:
             return None
-        
+
         update_data = provider_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(provider, field, value)
-        
+
         await self.session.commit()
         await self.session.refresh(provider)
         return provider
@@ -124,18 +123,18 @@ class ModelRegistryService:
             select(ModelDef).where(ModelDef.provider_id == provider_id)
         )
         models = models_result.scalars().all()
-        
+
         # Delete all embedding spaces for all models under this provider
         for model in models:
             await self.session.execute(
                 delete(EmbeddingSpace).where(EmbeddingSpace.model_id == model.id)
             )
-        
+
         # Delete all models under this provider
         await self.session.execute(
             delete(ModelDef).where(ModelDef.provider_id == provider_id)
         )
-        
+
         # Finally delete the provider
         result = await self.session.execute(
             delete(Provider).where(Provider.id == provider_id)
@@ -149,7 +148,7 @@ class ModelRegistryService:
         await self.session.execute(
             update(Provider).where(Provider.is_default == True).values(is_default=False)
         )
-        
+
         # Set new default
         result = await self.session.execute(
             update(Provider)
@@ -161,35 +160,35 @@ class ModelRegistryService:
 
     # Model definition methods
     async def list_models(
-        self, 
+        self,
         provider_id: str | None = None,
         model_type: ModelType | None = None,
         params: ListParams = ListParams()
     ) -> tuple[Sequence[ModelDef], int]:
         """List model definitions with pagination."""
         query = select(ModelDef).options(selectinload(ModelDef.provider))
-        
+
         if provider_id:
             query = query.where(ModelDef.provider_id == provider_id)
-        
+
         if model_type:
             query = query.where(ModelDef.model_type == model_type)
-        
+
         if params.active_only:
             query = query.where(ModelDef.is_active == True)
-        
+
         # Order by default first, then by display name
         query = query.order_by(ModelDef.is_default.desc(), ModelDef.display_name)
-        
+
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total = await self.session.scalar(count_query)
-        
+
         # Apply pagination
         query = query.offset((params.page - 1) * params.per_page).limit(params.per_page)
         result = await self.session.execute(query)
         models = result.scalars().all()
-        
+
         return models, total or 0
 
     async def get_model(self, model_id: str) -> ModelDef | None:
@@ -225,11 +224,11 @@ class ModelRegistryService:
         model = await self.get_model(model_id)
         if not model:
             return None
-        
+
         update_data = model_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(model, field, value)
-        
+
         await self.session.commit()
         await self.session.refresh(model)
         return model
@@ -240,7 +239,7 @@ class ModelRegistryService:
         await self.session.execute(
             delete(EmbeddingSpace).where(EmbeddingSpace.model_id == model_id)
         )
-        
+
         # Then delete the model
         result = await self.session.execute(
             delete(ModelDef).where(ModelDef.id == model_id)
@@ -253,14 +252,14 @@ class ModelRegistryService:
         model = await self.get_model(model_id)
         if not model:
             return False
-        
+
         # First, unset current default for this model type
         await self.session.execute(
             update(ModelDef)
             .where(ModelDef.model_type == model.model_type, ModelDef.is_default == True)
             .values(is_default=False)
         )
-        
+
         # Set new default
         result = await self.session.execute(
             update(ModelDef)
@@ -280,25 +279,25 @@ class ModelRegistryService:
         query = select(EmbeddingSpace).options(
             selectinload(EmbeddingSpace.model).selectinload(ModelDef.provider)
         )
-        
+
         if model_id:
             query = query.where(EmbeddingSpace.model_id == model_id)
-        
+
         if params.active_only:
             query = query.where(EmbeddingSpace.is_active == True)
-        
+
         # Order by default first, then by display name
         query = query.order_by(EmbeddingSpace.is_default.desc(), EmbeddingSpace.display_name)
-        
+
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total = await self.session.scalar(count_query)
-        
+
         # Apply pagination
         query = query.offset((params.page - 1) * params.per_page).limit(params.per_page)
         result = await self.session.execute(query)
         spaces = result.scalars().all()
-        
+
         return spaces, total or 0
 
     async def get_embedding_space(self, space_id: str) -> EmbeddingSpace | None:
@@ -336,14 +335,14 @@ class ModelRegistryService:
         space = EmbeddingSpace(**space_data.model_dump())
         self.session.add(space)
         await self.session.flush()  # Get the ID
-        
+
         try:
             # Create the backing table and index
             await self._create_embedding_table(space)
-            
+
             await self.session.commit()
             await self.session.refresh(space)
-            
+
             logger.info(
                 "Created embedding space",
                 space_id=space.id,
@@ -351,7 +350,7 @@ class ModelRegistryService:
                 table_name=space.table_name,
                 dimensions=space.effective_dimensions
             )
-            
+
             return space
         except Exception as e:
             await self.session.rollback()
@@ -366,24 +365,24 @@ class ModelRegistryService:
         """Create the physical embedding table and index."""
         # Get sync engine for table creation
         sync_engine = get_sync_engine()
-        
+
         # Create the dynamic model and table
         model_class = get_embedding_model(
             space.table_name,
             space.effective_dimensions,
             sync_engine
         )
-        
+
         # Configure index parameters
         index_config = space.index_config or {}
-        
+
         if space.index_type == "hnsw":
             m = index_config.get("m", 16)
             ef_construction = index_config.get("ef_construction", 200)
         else:  # ivfflat
             m = 16  # not used for ivfflat
             ef_construction = index_config.get("lists", 100)
-        
+
         # Create the index
         ensure_table_and_index(
             sync_engine,
@@ -400,11 +399,11 @@ class ModelRegistryService:
         space = await self.get_embedding_space(space_id)
         if not space:
             return None
-        
+
         update_data = space_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(space, field, value)
-        
+
         await self.session.commit()
         await self.session.refresh(space)
         return space
@@ -425,7 +424,7 @@ class ModelRegistryService:
             .where(EmbeddingSpace.is_default == True)
             .values(is_default=False)
         )
-        
+
         # Set new default
         result = await self.session.execute(
             update(EmbeddingSpace)

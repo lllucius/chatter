@@ -9,21 +9,22 @@ Parity with legacy VectorStoreService:
 import asyncio
 import json
 import math
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
-from sqlalchemy import create_engine, select, func, or_
+from sqlalchemy import create_engine, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 from chatter.config import settings
 from chatter.core.dynamic_embeddings import (
+    PGVECTOR_AVAILABLE,
     get_embedding_model,
     get_model_dimensions,
     list_embedding_models,
-    PGVECTOR_AVAILABLE,
 )
 from chatter.models.document import DocumentChunk
 from chatter.utils.logging import get_logger
+
 logger = get_logger(__name__)
 
 
@@ -38,22 +39,22 @@ class DynamicVectorStoreService:
         """
         self.session = session
         self.store_type = settings.vector_store_type
-        
+
         # Create synchronous engine for dynamic table operations
         # Remove async driver from connection string
         sync_db_url = settings.database_url
         if "+asyncpg" in sync_db_url:
             sync_db_url = sync_db_url.replace("+asyncpg", "")
-        
+
         self.sync_engine = create_engine(sync_db_url)
 
     async def store_embedding(
         self,
         chunk_id: str,
-        embedding: List[float],
+        embedding: list[float],
         provider_name: str,
         model_name: str | None = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
         **index_params,
     ) -> bool:
         """Store embedding for a document chunk using dynamic model tables."""
@@ -70,7 +71,7 @@ class DynamicVectorStoreService:
 
             # Use provider name as model name if not specified
             table_model_name = model_name or provider_name
-            
+
             # Validate vector dimension for this provider if known
             dim = len(embedding)
             expected_dim = get_model_dimensions(provider_name)
@@ -121,11 +122,11 @@ class DynamicVectorStoreService:
     def _store_dynamic_pgvector_embedding_sync(
         self,
         chunk: DocumentChunk,
-        embedding: List[float],
+        embedding: list[float],
         model_name: str,
         dim: int,
-        metadata: Optional[Dict[str, Any]] = None,
-        index_params: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
+        index_params: dict[str, Any] | None = None,
     ) -> bool:
         """Store embedding using dynamic PGVector tables (sync path, threaded)."""
         try:
@@ -183,9 +184,9 @@ class DynamicVectorStoreService:
     async def _store_fallback_embedding(
         self,
         chunk: DocumentChunk,
-        embedding: List[float],
+        embedding: list[float],
         provider_name: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> bool:
         """Store embedding as JSON string in main table (fallback)."""
         try:
@@ -214,14 +215,14 @@ class DynamicVectorStoreService:
 
     async def similarity_search(
         self,
-        query_embedding: List[float],
+        query_embedding: list[float],
         provider_name: str,
         model_name: str | None = None,
         limit: int = 10,
         score_threshold: float = 0.5,
-        document_ids: Optional[List[str]] = None,
-        metadata_filter: Optional[Dict[str, Any]] = None,
-    ) -> List[Tuple[DocumentChunk, float]]:
+        document_ids: list[str] | None = None,
+        metadata_filter: dict[str, Any] | None = None,
+    ) -> list[tuple[DocumentChunk, float]]:
         """Perform similarity search using dynamic model tables.
 
         Returns:
@@ -229,7 +230,7 @@ class DynamicVectorStoreService:
         """
         try:
             table_model_name = model_name or provider_name
-            
+
             if self.store_type == "pgvector" and PGVECTOR_AVAILABLE:
                 rows = await asyncio.to_thread(
                     self._pgvector_search_rows_sync,
@@ -239,7 +240,7 @@ class DynamicVectorStoreService:
                     document_ids,
                 )
                 # Convert to similarity and fetch chunks asynchronously
-                id_with_scores: List[Tuple[str, float]] = []
+                id_with_scores: list[tuple[str, float]] = []
                 for chunk_id, distance in rows:
                     similarity_score = 1.0 - float(distance)
                     if similarity_score >= score_threshold:
@@ -257,7 +258,7 @@ class DynamicVectorStoreService:
                 chunk_map = {c.id: c for c in chunks}
 
                 # Preserve order and filter out any missing
-                ordered: List[Tuple[DocumentChunk, float]] = []
+                ordered: list[tuple[DocumentChunk, float]] = []
                 for cid, score in id_with_scores:
                     chunk = chunk_map.get(cid)
                     if not chunk:
@@ -302,10 +303,10 @@ class DynamicVectorStoreService:
     def _pgvector_search_rows_sync(
         self,
         model_name: str,
-        query_embedding: List[float],
+        query_embedding: list[float],
         limit: int,
-        document_ids: Optional[List[str]],
-    ) -> List[Tuple[str, float]]:
+        document_ids: list[str] | None,
+    ) -> list[tuple[str, float]]:
         """Perform PGVector query synchronously and return (chunk_id, distance) rows."""
         try:
             # Get the embedding model for this provider (don't create if it doesn't exist)
@@ -315,7 +316,7 @@ class DynamicVectorStoreService:
                 return []
 
             embedding_model_class = embedding_models_dict[model_name]
-            
+
             # Create synchronous session for querying
             sync_session_maker = sessionmaker(bind=self.sync_engine)
             with sync_session_maker() as sync_session:
@@ -341,12 +342,12 @@ class DynamicVectorStoreService:
 
     async def _similarity_search_fallback(
         self,
-        query_embedding: List[float],
+        query_embedding: list[float],
         limit: int,
         score_threshold: float,
-        document_ids: Optional[List[str]],
-        metadata_filter: Optional[Dict[str, Any]],
-    ) -> List[Tuple[DocumentChunk, float]]:
+        document_ids: list[str] | None,
+        metadata_filter: dict[str, Any] | None,
+    ) -> list[tuple[DocumentChunk, float]]:
         """Perform similarity search using JSON embeddings (fallback)."""
         try:
             # Select chunks that have legacy JSON embeddings
@@ -366,7 +367,7 @@ class DynamicVectorStoreService:
             result = await self.session.execute(query)
             chunks = result.scalars().all()
 
-            matches: List[Tuple[DocumentChunk, float]] = []
+            matches: list[tuple[DocumentChunk, float]] = []
             for chunk in chunks:
                 try:
                     # Parse JSON embedding
@@ -393,16 +394,16 @@ class DynamicVectorStoreService:
 
     async def hybrid_search(
         self,
-        query_embedding: List[float],
+        query_embedding: list[float],
         provider_name: str,
         model_name: str | None = None,
         text_query: str = "",
         limit: int = 10,
         score_threshold: float = 0.5,
-        document_ids: Optional[List[str]] = None,
+        document_ids: list[str] | None = None,
         semantic_weight: float = 0.7,
         text_weight: float = 0.3,
-    ) -> List[Tuple[DocumentChunk, float]]:
+    ) -> list[tuple[DocumentChunk, float]]:
         """Perform hybrid search combining semantic and text search.
 
         Returns:
@@ -420,7 +421,8 @@ class DynamicVectorStoreService:
             )
 
             # Text search (simple LIKE-based)
-            from sqlalchemy import select as sa_select, func as sa_func
+            from sqlalchemy import func as sa_func
+            from sqlalchemy import select as sa_select
             text_query_words = (text_query or "").lower().split()
             text_query_obj = sa_select(DocumentChunk)
 
@@ -458,7 +460,7 @@ class DynamicVectorStoreService:
                         "text_score": text_score,
                     }
 
-            results: List[Tuple[DocumentChunk, float]] = []
+            results: list[tuple[DocumentChunk, float]] = []
             for data in combined_scores.values():
                 semantic_score = float(data["semantic_score"])
                 text_score = float(data["text_score"])
@@ -474,10 +476,10 @@ class DynamicVectorStoreService:
             logger.error("Hybrid search failed", error=str(e))
             return []
 
-    async def get_embedding_stats(self) -> Dict[str, Any]:
+    async def get_embedding_stats(self) -> dict[str, Any]:
         """Get statistics about stored embeddings across all models."""
         try:
-            stats: Dict[str, Any] = {
+            stats: dict[str, Any] = {
                 "total_chunks": 0,
                 "embedded_chunks": 0,
                 "models_used": {},
@@ -506,11 +508,11 @@ class DynamicVectorStoreService:
             embedding_models_dict = list_embedding_models()
             if embedding_models_dict and PGVECTOR_AVAILABLE:
                 sync_session_maker = sessionmaker(bind=self.sync_engine)
-                rows: Dict[str, Dict[str, Any]] = {}
+                rows: dict[str, dict[str, Any]] = {}
                 # Offload the synchronous count queries
-                def _count_sync() -> Dict[str, Dict[str, Any]]:
+                def _count_sync() -> dict[str, dict[str, Any]]:
                     with sync_session_maker() as sync_session:
-                        out: Dict[str, Dict[str, Any]] = {}
+                        out: dict[str, dict[str, Any]] = {}
                         for model_name, model_class in embedding_models_dict.items():
                             try:
                                 count_result = sync_session.execute(
@@ -545,7 +547,7 @@ class DynamicVectorStoreService:
                 "pgvector_available": PGVECTOR_AVAILABLE,
             }
 
-    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """Calculate cosine similarity between two vectors."""
         try:
             if not vec1 or not vec2 or len(vec1) != len(vec2):

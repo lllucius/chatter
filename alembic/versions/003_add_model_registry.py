@@ -5,9 +5,9 @@ Revises: 002_add_dynamic_embeddings
 Create Date: 2025-01-27 14:30:00.000000
 
 """
-from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = '003_add_model_registry'
@@ -34,7 +34,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_providers_name'), 'providers', ['name'], unique=True)
-    
+
     # Create model_defs table
     op.create_table('model_defs',
         sa.Column('id', sa.String(length=12), nullable=False),
@@ -59,7 +59,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id'),
         sa.UniqueConstraint('provider_id', 'name', name='uq_provider_model_name')
     )
-    
+
     # Create embedding_spaces table
     op.create_table('embedding_spaces',
         sa.Column('id', sa.String(length=12), nullable=False),

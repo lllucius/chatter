@@ -16,6 +16,7 @@ from chatter.schemas.profile import (
 )
 from chatter.services.llm import LLMService
 from chatter.utils.logging import get_logger
+
 logger = get_logger(__name__)
 
 

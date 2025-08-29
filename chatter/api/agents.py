@@ -111,7 +111,7 @@ async def list_agents(
     try:
         offset = request.pagination.offset
         limit = request.pagination.limit
-        
+
         agents, total = await agent_manager.list_agents(
             agent_type=request.agent_type,
             status=request.status,

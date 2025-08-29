@@ -1,19 +1,18 @@
 """Test configuration and utilities."""
 
-import pytest
 import asyncio
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock
 
+import pytest
+from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from httpx import AsyncClient
 
 from chatter.main import app
 from chatter.models.base import Base
-from chatter.utils.database import get_session
 from chatter.services.cache import cache_service
-
+from chatter.utils.database import get_session
 
 # Test database URL (in-memory SQLite for testing)
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -35,13 +34,13 @@ async def test_engine():
         echo=False,
         future=True
     )
-    
+
     # Create all tables
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     yield engine
-    
+
     await engine.dispose()
 
 
@@ -51,7 +50,7 @@ async def test_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
     async_session = sessionmaker(
         test_engine, class_=AsyncSession, expire_on_commit=False
     )
-    
+
     async with async_session() as session:
         yield session
 
@@ -60,10 +59,10 @@ async def test_session(test_engine) -> AsyncGenerator[AsyncSession, None]:
 async def test_client(test_session):
     """Create test HTTP client."""
     app.dependency_overrides[get_session] = lambda: test_session
-    
+
     async with AsyncClient(app=app, base_url="http://test") as client:
         yield client
-    
+
     app.dependency_overrides.clear()
 
 
@@ -75,12 +74,12 @@ async def mock_cache():
     mock_cache.set.return_value = True
     mock_cache.delete.return_value = True
     mock_cache.is_connected.return_value = False
-    
+
     # Override the global cache service
     original_cache = cache_service
     cache_service.__dict__.update(mock_cache.__dict__)
-    
+
     yield mock_cache
-    
+
     # Restore original cache service
     cache_service.__dict__.update(original_cache.__dict__)

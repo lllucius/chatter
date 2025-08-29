@@ -66,6 +66,7 @@ from .bulk_tool_server_operation import BulkToolServerOperation
 from .bulk_tool_server_operation_parameters_type_0 import BulkToolServerOperationParametersType0
 from .chat_request import ChatRequest
 from .chat_request_workflow import ChatRequestWorkflow
+from .chat_response import ChatResponse
 from .conversation_create import ConversationCreate
 from .conversation_delete_response import ConversationDeleteResponse
 from .conversation_response import ConversationResponse
@@ -132,11 +133,17 @@ from .export_scope import ExportScope
 from .get_ab_test_performance_api_v1_ab_tests_test_id_performance_get_response_get_ab_test_performance_api_v1_ab_tests_test_id_performance_get import (
     GetAbTestPerformanceApiV1AbTestsTestIdPerformanceGetResponseGetAbTestPerformanceApiV1AbTestsTestIdPerformanceGet,
 )
+from .get_performance_stats_api_v1_chat_performance_stats_get_response_get_performance_stats_api_v1_chat_performance_stats_get import (
+    GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet,
+)
 from .get_tool_server_analytics_api_v1_analytics_toolservers_get_response_get_tool_server_analytics_api_v1_analytics_toolservers_get import (
     GetToolServerAnalyticsApiV1AnalyticsToolserversGetResponseGetToolServerAnalyticsApiV1AnalyticsToolserversGet,
 )
 from .get_user_analytics_api_v1_analytics_users_user_id_get_response_get_user_analytics_api_v1_analytics_users_user_id_get import (
     GetUserAnalyticsApiV1AnalyticsUsersUserIdGetResponseGetUserAnalyticsApiV1AnalyticsUsersUserIdGet,
+)
+from .get_workflow_templates_api_v1_chat_templates_get_response_get_workflow_templates_api_v1_chat_templates_get import (
+    GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet,
 )
 from .health_check_response import HealthCheckResponse
 from .http_validation_error import HTTPValidationError
@@ -371,6 +378,7 @@ __all__ = (
     "BulkToolServerOperationParametersType0",
     "ChatRequest",
     "ChatRequestWorkflow",
+    "ChatResponse",
     "ConversationCreate",
     "ConversationDeleteResponse",
     "ConversationResponse",
@@ -431,8 +439,10 @@ __all__ = (
     "ExportDataResponse",
     "ExportScope",
     "GetAbTestPerformanceApiV1AbTestsTestIdPerformanceGetResponseGetAbTestPerformanceApiV1AbTestsTestIdPerformanceGet",
+    "GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet",
     "GetToolServerAnalyticsApiV1AnalyticsToolserversGetResponseGetToolServerAnalyticsApiV1AnalyticsToolserversGet",
     "GetUserAnalyticsApiV1AnalyticsUsersUserIdGetResponseGetUserAnalyticsApiV1AnalyticsUsersUserIdGet",
+    "GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet",
     "HealthCheckResponse",
     "HTTPValidationError",
     "JobActionResponse",

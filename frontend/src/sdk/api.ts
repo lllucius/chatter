@@ -1667,14 +1667,39 @@ export interface ChatResponse {
     'conversation_id': string;
     /**
      * Assistant response message
-     * @type {object}
+     * @type {MessageResponse}
      * @memberof ChatResponse
+     */
+    'message': MessageResponse;
+    /**
+     * Updated conversation
+     * @type {ConversationResponse}
+     * @memberof ChatResponse
+     */
+    'conversation': ConversationResponse;
+}
+/**
+ * Schema for chat response.
+ * @export
+ * @interface ChatResponse1
+ */
+export interface ChatResponse1 {
+    /**
+     * Conversation ID
+     * @type {string}
+     * @memberof ChatResponse1
+     */
+    'conversation_id': string;
+    /**
+     * Assistant response message
+     * @type {object}
+     * @memberof ChatResponse1
      */
     'message': object;
     /**
      * Updated conversation
      * @type {object}
-     * @memberof ChatResponse
+     * @memberof ChatResponse1
      */
     'conversation': object;
 }
@@ -12563,6 +12588,50 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
+         * Chat using a specific workflow template.
+         * @summary Chat With Template
+         * @param {string} templateName 
+         * @param {ChatRequest} chatRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        chatWithTemplateApiV1ChatTemplateTemplateNamePost: async (templateName: string, chatRequest: ChatRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'templateName' is not null or undefined
+            assertParamExists('chatWithTemplateApiV1ChatTemplateTemplateNamePost', 'templateName', templateName)
+            // verify required parameter 'chatRequest' is not null or undefined
+            assertParamExists('chatWithTemplateApiV1ChatTemplateTemplateNamePost', 'chatRequest', chatRequest)
+            const localVarPath = `/api/v1/chat/template/{template_name}`
+                .replace(`{${"template_name"}}`, encodeURIComponent(String(templateName)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(chatRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
          * @summary Create Conversation
          * @param {ConversationCreate} conversationCreate 
@@ -12827,6 +12896,74 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
+         * Get workflow performance statistics.
+         * @summary Get Performance Stats
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPerformanceStatsApiV1ChatPerformanceStatsGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/chat/performance/stats`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get available workflow templates.
+         * @summary Get Workflow Templates
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkflowTemplatesApiV1ChatTemplatesGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/chat/templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
          * @summary List Conversations
          * @param {string | null} [query] Search query
@@ -12965,10 +13102,24 @@ export const ChatApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async chatApiV1ChatChatPost(chatRequest: ChatRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ChatResponse>> {
+        async chatApiV1ChatChatPost(chatRequest: ChatRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ChatResponse1>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.chatApiV1ChatChatPost(chatRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ChatApi.chatApiV1ChatChatPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Chat using a specific workflow template.
+         * @summary Chat With Template
+         * @param {string} templateName 
+         * @param {ChatRequest} chatRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async chatWithTemplateApiV1ChatTemplateTemplateNamePost(templateName: string, chatRequest: ChatRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ChatResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.chatWithTemplateApiV1ChatTemplateTemplateNamePost(templateName, chatRequest, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ChatApi.chatWithTemplateApiV1ChatTemplateTemplateNamePost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -13062,6 +13213,30 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Get workflow performance statistics.
+         * @summary Get Performance Stats
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getPerformanceStatsApiV1ChatPerformanceStatsGet(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ChatApi.getPerformanceStatsApiV1ChatPerformanceStatsGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get available workflow templates.
+         * @summary Get Workflow Templates
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkflowTemplatesApiV1ChatTemplatesGet(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ChatApi.getWorkflowTemplatesApiV1ChatTemplatesGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
          * @summary List Conversations
          * @param {string | null} [query] Search query
@@ -13120,8 +13295,18 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        chatApiV1ChatChatPost(requestParameters: ChatApiChatApiV1ChatChatPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse> {
+        chatApiV1ChatChatPost(requestParameters: ChatApiChatApiV1ChatChatPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse1> {
             return localVarFp.chatApiV1ChatChatPost(requestParameters.chatRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Chat using a specific workflow template.
+         * @summary Chat With Template
+         * @param {ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        chatWithTemplateApiV1ChatTemplateTemplateNamePost(requestParameters: ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse> {
+            return localVarFp.chatWithTemplateApiV1ChatTemplateTemplateNamePost(requestParameters.templateName, requestParameters.chatRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
@@ -13192,6 +13377,24 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.getMcpStatusApiV1ChatMcpStatusGet(options).then((request) => request(axios, basePath));
         },
         /**
+         * Get workflow performance statistics.
+         * @summary Get Performance Stats
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+            return localVarFp.getPerformanceStatsApiV1ChatPerformanceStatsGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get available workflow templates.
+         * @summary Get Workflow Templates
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+            return localVarFp.getWorkflowTemplatesApiV1ChatTemplatesGet(options).then((request) => request(axios, basePath));
+        },
+        /**
          * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
          * @summary List Conversations
          * @param {ChatApiListConversationsApiV1ChatConversationsGetRequest} requestParameters Request parameters.
@@ -13238,7 +13441,17 @@ export interface ChatApiInterface {
      * @throws {RequiredError}
      * @memberof ChatApiInterface
      */
-    chatApiV1ChatChatPost(requestParameters: ChatApiChatApiV1ChatChatPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse>;
+    chatApiV1ChatChatPost(requestParameters: ChatApiChatApiV1ChatChatPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse1>;
+
+    /**
+     * Chat using a specific workflow template.
+     * @summary Chat With Template
+     * @param {ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ChatApiInterface
+     */
+    chatWithTemplateApiV1ChatTemplateTemplateNamePost(requestParameters: ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse>;
 
     /**
      * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
@@ -13309,6 +13522,24 @@ export interface ChatApiInterface {
     getMcpStatusApiV1ChatMcpStatusGet(options?: RawAxiosRequestConfig): AxiosPromise<McpStatusResponse>;
 
     /**
+     * Get workflow performance statistics.
+     * @summary Get Performance Stats
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ChatApiInterface
+     */
+    getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+
+    /**
+     * Get available workflow templates.
+     * @summary Get Workflow Templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ChatApiInterface
+     */
+    getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+
+    /**
      * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
      * @summary List Conversations
      * @param {ChatApiListConversationsApiV1ChatConversationsGetRequest} requestParameters Request parameters.
@@ -13361,6 +13592,27 @@ export interface ChatApiChatApiV1ChatChatPostRequest {
      * 
      * @type {ChatRequest}
      * @memberof ChatApiChatApiV1ChatChatPost
+     */
+    readonly chatRequest: ChatRequest
+}
+
+/**
+ * Request parameters for chatWithTemplateApiV1ChatTemplateTemplateNamePost operation in ChatApi.
+ * @export
+ * @interface ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest
+ */
+export interface ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePost
+     */
+    readonly templateName: string
+
+    /**
+     * 
+     * @type {ChatRequest}
+     * @memberof ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePost
      */
     readonly chatRequest: ChatRequest
 }
@@ -13544,6 +13796,18 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
+     * Chat using a specific workflow template.
+     * @summary Chat With Template
+     * @param {ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ChatApi
+     */
+    public chatWithTemplateApiV1ChatTemplateTemplateNamePost(requestParameters: ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest, options?: RawAxiosRequestConfig) {
+        return ChatApiFp(this.configuration).chatWithTemplateApiV1ChatTemplateTemplateNamePost(requestParameters.templateName, requestParameters.chatRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
      * @summary Create Conversation
      * @param {ChatApiCreateConversationApiV1ChatConversationsPostRequest} requestParameters Request parameters.
@@ -13623,6 +13887,28 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
      */
     public getMcpStatusApiV1ChatMcpStatusGet(options?: RawAxiosRequestConfig) {
         return ChatApiFp(this.configuration).getMcpStatusApiV1ChatMcpStatusGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get workflow performance statistics.
+     * @summary Get Performance Stats
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ChatApi
+     */
+    public getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig) {
+        return ChatApiFp(this.configuration).getPerformanceStatsApiV1ChatPerformanceStatsGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get available workflow templates.
+     * @summary Get Workflow Templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ChatApi
+     */
+    public getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig) {
+        return ChatApiFp(this.configuration).getWorkflowTemplatesApiV1ChatTemplatesGet(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

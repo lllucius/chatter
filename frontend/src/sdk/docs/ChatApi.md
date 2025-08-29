@@ -6,6 +6,7 @@ All URIs are relative to *http://localhost:8000*
 |------------- | ------------- | -------------|
 |[**addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost**](#addmessagetoconversationapiv1chatconversationsconversationidmessagespost) | **POST** /api/v1/chat/conversations/{conversation_id}/messages | Add Message To Conversation|
 |[**chatApiV1ChatChatPost**](#chatapiv1chatchatpost) | **POST** /api/v1/chat/chat | Chat|
+|[**chatWithTemplateApiV1ChatTemplateTemplateNamePost**](#chatwithtemplateapiv1chattemplatetemplatenamepost) | **POST** /api/v1/chat/template/{template_name} | Chat With Template|
 |[**createConversationApiV1ChatConversationsPost**](#createconversationapiv1chatconversationspost) | **POST** /api/v1/chat/conversations | Create Conversation|
 |[**deleteConversationApiV1ChatConversationsConversationIdDelete**](#deleteconversationapiv1chatconversationsconversationiddelete) | **DELETE** /api/v1/chat/conversations/{conversation_id} | Delete Conversation|
 |[**deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete**](#deletemessageapiv1chatconversationsconversationidmessagesmessageiddelete) | **DELETE** /api/v1/chat/conversations/{conversation_id}/messages/{message_id} | Delete Message|
@@ -13,6 +14,8 @@ All URIs are relative to *http://localhost:8000*
 |[**getConversationApiV1ChatConversationsConversationIdGet**](#getconversationapiv1chatconversationsconversationidget) | **GET** /api/v1/chat/conversations/{conversation_id} | Get Conversation|
 |[**getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet**](#getconversationmessagesapiv1chatconversationsconversationidmessagesget) | **GET** /api/v1/chat/conversations/{conversation_id}/messages | Get Conversation Messages|
 |[**getMcpStatusApiV1ChatMcpStatusGet**](#getmcpstatusapiv1chatmcpstatusget) | **GET** /api/v1/chat/mcp/status | Get Mcp Status|
+|[**getPerformanceStatsApiV1ChatPerformanceStatsGet**](#getperformancestatsapiv1chatperformancestatsget) | **GET** /api/v1/chat/performance/stats | Get Performance Stats|
+|[**getWorkflowTemplatesApiV1ChatTemplatesGet**](#getworkflowtemplatesapiv1chattemplatesget) | **GET** /api/v1/chat/templates | Get Workflow Templates|
 |[**listConversationsApiV1ChatConversationsGet**](#listconversationsapiv1chatconversationsget) | **GET** /api/v1/chat/conversations | List Conversations|
 |[**updateConversationApiV1ChatConversationsConversationIdPut**](#updateconversationapiv1chatconversationsconversationidput) | **PUT** /api/v1/chat/conversations/{conversation_id} | Update Conversation|
 
@@ -73,7 +76,7 @@ const { status, data } = await apiInstance.addMessageToConversationApiV1ChatConv
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **chatApiV1ChatChatPost**
-> ChatResponse chatApiV1ChatChatPost(chatRequest)
+> ChatResponse1 chatApiV1ChatChatPost(chatRequest)
 
 Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
 
@@ -105,7 +108,7 @@ const { status, data } = await apiInstance.chatApiV1ChatChatPost(
 
 ### Return type
 
-**ChatResponse**
+**ChatResponse1**
 
 ### Authorization
 
@@ -121,6 +124,62 @@ const { status, data } = await apiInstance.chatApiV1ChatChatPost(
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Chat response as JSON or streaming SSE when stream&#x3D;true |  -  |
+|**422** | Validation Error |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **chatWithTemplateApiV1ChatTemplateTemplateNamePost**
+> ChatResponse chatWithTemplateApiV1ChatTemplateTemplateNamePost(chatRequest)
+
+Chat using a specific workflow template.
+
+### Example
+
+```typescript
+import {
+    ChatApi,
+    Configuration,
+    ChatRequest
+} from 'chatter-sdk';
+
+const configuration = new Configuration();
+const apiInstance = new ChatApi(configuration);
+
+let templateName: string; // (default to undefined)
+let chatRequest: ChatRequest; //
+
+const { status, data } = await apiInstance.chatWithTemplateApiV1ChatTemplateTemplateNamePost(
+    templateName,
+    chatRequest
+);
+```
+
+### Parameters
+
+|Name | Type | Description  | Notes|
+|------------- | ------------- | ------------- | -------------|
+| **chatRequest** | **ChatRequest**|  | |
+| **templateName** | [**string**] |  | defaults to undefined|
+
+
+### Return type
+
+**ChatResponse**
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
 |**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -462,6 +521,94 @@ This endpoint does not have any parameters.
 ### Return type
 
 **McpStatusResponse**
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getPerformanceStatsApiV1ChatPerformanceStatsGet**
+> { [key: string]: any; } getPerformanceStatsApiV1ChatPerformanceStatsGet()
+
+Get workflow performance statistics.
+
+### Example
+
+```typescript
+import {
+    ChatApi,
+    Configuration
+} from 'chatter-sdk';
+
+const configuration = new Configuration();
+const apiInstance = new ChatApi(configuration);
+
+const { status, data } = await apiInstance.getPerformanceStatsApiV1ChatPerformanceStatsGet();
+```
+
+### Parameters
+This endpoint does not have any parameters.
+
+
+### Return type
+
+**{ [key: string]: any; }**
+
+### Authorization
+
+[HTTPBearer](../README.md#HTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+|**200** | Successful Response |  -  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **getWorkflowTemplatesApiV1ChatTemplatesGet**
+> { [key: string]: any; } getWorkflowTemplatesApiV1ChatTemplatesGet()
+
+Get available workflow templates.
+
+### Example
+
+```typescript
+import {
+    ChatApi,
+    Configuration
+} from 'chatter-sdk';
+
+const configuration = new Configuration();
+const apiInstance = new ChatApi(configuration);
+
+const { status, data } = await apiInstance.getWorkflowTemplatesApiV1ChatTemplatesGet();
+```
+
+### Parameters
+This endpoint does not have any parameters.
+
+
+### Return type
+
+**{ [key: string]: any; }**
 
 ### Authorization
 

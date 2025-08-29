@@ -1537,6 +1537,122 @@
         ]
       }
     },
+    "/api/v1/chat/templates": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Get Workflow Templates",
+        "description": "Get available workflow templates.",
+        "operationId": "get_workflow_templates_api_v1_chat_templates_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Workflow Templates Api V1 Chat Templates Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/chat/template/{template_name}": {
+      "post": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Chat With Template",
+        "description": "Chat using a specific workflow template.",
+        "operationId": "chat_with_template_api_v1_chat_template__template_name__post",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "template_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Template Name"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/performance/stats": {
+      "get": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Get Performance Stats",
+        "description": "Get workflow performance statistics.",
+        "operationId": "get_performance_stats_api_v1_chat_performance_stats_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Get Performance Stats Api V1 Chat Performance Stats Get"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/chat/mcp/status": {
       "get": {
         "tags": [
@@ -10459,6 +10575,31 @@
         ],
         "title": "ChatRequest",
         "description": "Schema for chat request."
+      },
+      "ChatResponse": {
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id",
+            "description": "Conversation ID"
+          },
+          "message": {
+            "$ref": "#/components/schemas/MessageResponse",
+            "description": "Assistant response message"
+          },
+          "conversation": {
+            "$ref": "#/components/schemas/ConversationResponse",
+            "description": "Updated conversation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "message",
+          "conversation"
+        ],
+        "title": "ChatResponse",
+        "description": "Schema for chat response."
       },
       "ConversationCreate": {
         "properties": {

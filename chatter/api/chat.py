@@ -5,6 +5,7 @@ import json
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any
 
 from chatter.api.auth import get_current_user
 from chatter.core.chat import (

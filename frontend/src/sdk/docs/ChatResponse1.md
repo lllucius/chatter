@@ -1,4 +1,4 @@
-# ChatResponse
+# ChatResponse1
 
 Schema for chat response.
 
@@ -7,15 +7,15 @@ Schema for chat response.
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **conversation_id** | **string** | Conversation ID | [default to undefined]
-**message** | [**MessageResponse**](MessageResponse.md) | Assistant response message | [default to undefined]
-**conversation** | [**ConversationResponse**](ConversationResponse.md) | Updated conversation | [default to undefined]
+**message** | **object** | Assistant response message | [default to undefined]
+**conversation** | **object** | Updated conversation | [default to undefined]
 
 ## Example
 
 ```typescript
-import { ChatResponse } from 'chatter-sdk';
+import { ChatResponse1 } from 'chatter-sdk';
 
-const instance: ChatResponse = {
+const instance: ChatResponse1 = {
     conversation_id,
     message,
     conversation,

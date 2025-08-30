@@ -240,7 +240,7 @@ async def get_sse_stats(
                 detail="Admin privileges required for detailed system statistics"
             )
     
-    # TODO: Add admin role check for detailed stats
+    
     stats = sse_service.get_stats()
 
     # For non-admin users, only show basic stats

@@ -75,16 +75,20 @@ class ToolServerService:
                     f"Server with name '{server_data.name}' already exists"
                 ) from None
 
-            # Create server model
+            # Create server model for remote server
             server = ToolServer(
                 name=server_data.name,
                 display_name=server_data.display_name,
                 description=server_data.description,
-                command=server_data.command,
-                args=server_data.args,
-                env=server_data.env,
+                base_url=str(server_data.base_url),
+                transport_type=server_data.transport_type,
+                oauth_client_id=server_data.oauth_config.client_id if server_data.oauth_config else None,
+                oauth_client_secret=server_data.oauth_config.client_secret if server_data.oauth_config else None,
+                oauth_token_url=str(server_data.oauth_config.token_url) if server_data.oauth_config else None,
+                oauth_scope=server_data.oauth_config.scope if server_data.oauth_config else None,
+                headers=server_data.headers,
+                timeout=server_data.timeout,
                 auto_start=server_data.auto_start,
-                auto_update=server_data.auto_update,
                 max_failures=server_data.max_failures,
                 created_by=user_id,
                 status=ServerStatus.DISABLED,
@@ -93,9 +97,9 @@ class ToolServerService:
             self.session.add(server)
             await self.session.flush()
 
-            # Auto-start if requested
+            # Auto-connect if requested
             if server_data.auto_start:
-                await self._start_server_internal(server)
+                await self._connect_remote_server(server)
 
             await self.session.commit()
 
@@ -315,7 +319,7 @@ class ToolServerService:
                     f"Server not found: {server_id}"
                 ) from None
 
-            success = await self._start_server_internal(server)
+            success = await self._connect_remote_server(server)
             await self.session.commit()
             await self.session.refresh(server)
 
@@ -412,7 +416,7 @@ class ToolServerService:
 
             # Auto-start if configured
             if server.auto_start:
-                await self._start_server_internal(server)
+                await self._connect_remote_server(server)
 
             await self.session.commit()
             await self.session.refresh(server)
@@ -834,33 +838,44 @@ class ToolServerService:
             error_message=error_message,
         )
 
-    async def _start_server_internal(self, server: ToolServer) -> bool:
-        """Internal method to start a server.
+    async def _connect_remote_server(self, server: ToolServer) -> bool:
+        """Internal method to connect to a remote server.
 
         Args:
             server: Server model
 
         Returns:
-            True if started successfully
+            True if connected successfully
         """
         try:
             server.status = ServerStatus.STARTING
             server.updated_at = datetime.now(UTC)
 
-            # Add server to MCP service if not already there
-            if server.name not in self.mcp_service.servers:
-                from chatter.services.mcp import MCPServer
-
-                mcp_server = MCPServer(
-                    name=server.name,
-                    command=server.command,
-                    args=server.args,
-                    env=server.env,
+            # Create OAuth config if present
+            oauth_config = None
+            if server.oauth_client_id and server.oauth_client_secret and server.oauth_token_url:
+                from chatter.services.mcp import OAuthConfig
+                oauth_config = OAuthConfig(
+                    client_id=server.oauth_client_id,
+                    client_secret=server.oauth_client_secret,
+                    token_url=server.oauth_token_url,
+                    scope=server.oauth_scope,
                 )
-                self.mcp_service.servers[server.name] = mcp_server
 
-            # Start the server
-            success = await self.mcp_service.start_server(server.name)
+            # Create remote server config
+            from chatter.services.mcp import RemoteMCPServer
+            remote_server = RemoteMCPServer(
+                name=server.name,
+                base_url=server.base_url,
+                transport_type=server.transport_type,
+                oauth_config=oauth_config,
+                headers=server.headers,
+                timeout=server.timeout,
+                enabled=True,
+            )
+
+            # Add to MCP service
+            success = await self.mcp_service.add_remote_server(remote_server)
 
             if success:
                 server.status = ServerStatus.ENABLED
@@ -881,7 +896,7 @@ class ToolServerService:
                 await self._discover_server_tools(server)
             else:
                 server.status = ServerStatus.ERROR
-                server.last_startup_error = "Failed to start server"
+                server.last_startup_error = "Failed to connect to remote server"
                 server.consecutive_failures += 1
 
                 # Trigger tool server error event
@@ -894,6 +909,29 @@ class ToolServerService:
                         EventType.TOOL_SERVER_ERROR,
                         {
                             "server_id": str(server.id),
+                            "server_name": server.name,
+                            "error": "Failed to connect to remote server",
+                        },
+                    )
+                except Exception as e:
+                    logger.warning("Failed to trigger error event", error=str(e))
+
+            server.updated_at = datetime.now(UTC)
+            return success
+
+        except Exception as e:
+            server.status = ServerStatus.ERROR
+            server.last_startup_error = str(e)
+            server.consecutive_failures += 1
+            server.updated_at = datetime.now(UTC)
+
+            logger.error(
+                "Failed to connect to remote server",
+                server_id=server.id,
+                server_name=server.name,
+                error=str(e),
+            )
+            return False
                             "server_name": server.name,
                             "error": "Failed to start server",
                             "consecutive_failures": server.consecutive_failures,
@@ -985,16 +1023,14 @@ class ToolServerService:
             return False
 
     async def _discover_server_tools(self, server: ToolServer) -> None:
-        """Discover and update tools for a server.
+        """Discover and update tools for a remote server.
 
         Args:
             server: Server model
         """
         try:
-            # Get tools from MCP service
-            mcp_tools = self.mcp_service.tools_cache.get(
-                server.name, []
-            )
+            # Get tools from remote MCP service
+            remote_tools = await self.mcp_service.discover_tools(server.name)
 
             # Get existing tools from database
             result = await self.session.execute(
@@ -1007,16 +1043,16 @@ class ToolServerService:
             }
 
             # Update or create tools
-            for mcp_tool in mcp_tools:
-                tool_name = mcp_tool.name
+            for tool_data in remote_tools:
+                tool_name = tool_data.get("name")
+                if not tool_name:
+                    continue
 
                 if tool_name in existing_tools:
                     # Update existing tool
                     tool = existing_tools[tool_name]
-                    tool.description = mcp_tool.description
-                    tool.args_schema = getattr(
-                        mcp_tool, "args_schema", None
-                    )
+                    tool.description = tool_data.get("description")
+                    tool.args_schema = tool_data.get("args_schema")
                     tool.is_available = True
                     tool.updated_at = datetime.now(UTC)
                 else:
@@ -1024,22 +1060,28 @@ class ToolServerService:
                     tool = ServerTool(
                         server_id=server.id,
                         name=tool_name,
-                        display_name=tool_name.replace(
-                            "_", " "
-                        ).title(),
-                        description=mcp_tool.description,
-                        args_schema=getattr(
-                            mcp_tool, "args_schema", None
-                        ),
+                        display_name=tool_data.get("display_name") or tool_name.replace("_", " ").title(),
+                        description=tool_data.get("description"),
+                        args_schema=tool_data.get("args_schema"),
                         status=ToolStatus.ENABLED,
                         is_available=True,
                     )
                     self.session.add(tool)
 
             # Mark tools not found as unavailable
-            found_tool_names = {tool.name for tool in mcp_tools}
+            found_tool_names = {tool_data.get("name") for tool_data in remote_tools if tool_data.get("name")}
             for tool_name, tool in existing_tools.items():
                 if tool_name not in found_tool_names:
+                    tool.is_available = False
+                    tool.updated_at = datetime.now(UTC)
+
+        except Exception as e:
+            logger.error(
+                "Failed to discover remote server tools",
+                server_id=server.id,
+                server_name=server.name,
+                error=str(e),
+            )
                     tool.is_available = False
                     tool.updated_at = datetime.now(UTC)
 

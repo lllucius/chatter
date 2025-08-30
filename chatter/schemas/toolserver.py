@@ -1,16 +1,31 @@
 """Tool server schemas for API requests and responses."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
-from chatter.models.toolserver import ServerStatus, ToolStatus
+from chatter.models.toolserver import (
+    ServerStatus, 
+    ToolStatus, 
+    ToolAccessLevel, 
+    UserRole
+)
+
+
+# OAuth configuration schema
+class OAuthConfigSchema(BaseModel):
+    """OAuth configuration for remote servers."""
+    
+    client_id: str = Field(..., description="OAuth client ID")
+    client_secret: str = Field(..., description="OAuth client secret")
+    token_url: HttpUrl = Field(..., description="OAuth token endpoint URL")
+    scope: Optional[str] = Field(None, description="OAuth scope")
 
 
 # Base schemas
 class ToolServerBase(BaseModel):
-    """Base schema for tool server."""
+    """Base schema for remote tool server."""
 
     name: str = Field(
         ..., min_length=1, max_length=100, description="Server name"
@@ -21,23 +36,28 @@ class ToolServerBase(BaseModel):
     description: str | None = Field(
         None, description="Server description"
     )
-    command: str = Field(
-        ...,
-        min_length=1,
-        max_length=500,
-        description="Command to start server",
+    base_url: HttpUrl = Field(
+        ..., description="Base URL for the remote server"
     )
-    args: list[str] = Field(
-        default_factory=list, description="Command arguments"
+    transport_type: str = Field(
+        "http", 
+        pattern="^(http|sse)$",
+        description="Transport type: http or sse"
     )
-    env: dict[str, str] | None = Field(
-        None, description="Environment variables"
+    oauth_config: Optional[OAuthConfigSchema] = Field(
+        None, description="OAuth configuration if required"
+    )
+    headers: dict[str, str] | None = Field(
+        None, description="Additional HTTP headers"
+    )
+    timeout: int = Field(
+        30,
+        ge=5,
+        le=300,
+        description="Request timeout in seconds",
     )
     auto_start: bool = Field(
-        True, description="Auto-start server on system startup"
-    )
-    auto_update: bool = Field(
-        True, description="Auto-update server capabilities"
+        True, description="Auto-connect to server on system startup"
     )
     max_failures: int = Field(
         3,
@@ -54,15 +74,16 @@ class ToolServerCreate(ToolServerBase):
 
 
 class ToolServerUpdate(BaseModel):
-    """Schema for updating a tool server."""
+    """Schema for updating a remote tool server."""
 
     display_name: str | None = Field(None, min_length=1, max_length=200)
     description: str | None = Field(None)
-    command: str | None = Field(None, min_length=1, max_length=500)
-    args: list[str] | None = Field(None)
-    env: dict[str, str] | None = Field(None)
+    base_url: HttpUrl | None = Field(None)
+    transport_type: str | None = Field(None, pattern="^(http|sse)$")
+    oauth_config: Optional[OAuthConfigSchema] = Field(None)
+    headers: dict[str, str] | None = Field(None)
+    timeout: int | None = Field(None, ge=5, le=300)
     auto_start: bool | None = Field(None)
-    auto_update: bool | None = Field(None)
     max_failures: int | None = Field(None, ge=1, le=10)
 
 
@@ -432,3 +453,97 @@ class ToolOperationResponse(BaseModel):
 
     success: bool = Field(..., description="Operation success status")
     message: str = Field(..., description="Operation result message")
+
+
+# Role-based access control schemas
+class ToolPermissionBase(BaseModel):
+    """Base schema for tool permissions."""
+    
+    user_id: str = Field(..., description="User ID")
+    tool_id: str | None = Field(None, description="Specific tool ID")
+    server_id: str | None = Field(None, description="Server ID (for all tools)")
+    access_level: ToolAccessLevel = Field(..., description="Access level")
+    rate_limit_per_hour: int | None = Field(None, ge=0, description="Hourly rate limit")
+    rate_limit_per_day: int | None = Field(None, ge=0, description="Daily rate limit")
+    allowed_hours: list[int] | None = Field(
+        None, description="Allowed hours (0-23)"
+    )
+    allowed_days: list[int] | None = Field(
+        None, description="Allowed weekdays (0-6)"
+    )
+    expires_at: datetime | None = Field(None, description="Permission expiry")
+
+
+class ToolPermissionCreate(ToolPermissionBase):
+    """Schema for creating tool permissions."""
+    pass
+
+
+class ToolPermissionUpdate(BaseModel):
+    """Schema for updating tool permissions."""
+    
+    access_level: ToolAccessLevel | None = Field(None)
+    rate_limit_per_hour: int | None = Field(None, ge=0)
+    rate_limit_per_day: int | None = Field(None, ge=0)
+    allowed_hours: list[int] | None = Field(None)
+    allowed_days: list[int] | None = Field(None)
+    expires_at: datetime | None = Field(None)
+
+
+class ToolPermissionResponse(ToolPermissionBase):
+    """Schema for tool permission response."""
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: str = Field(..., description="Permission ID")
+    granted_by: str = Field(..., description="Granter user ID")
+    granted_at: datetime = Field(..., description="Grant timestamp")
+    usage_count: int = Field(..., description="Usage count")
+    last_used: datetime | None = Field(None, description="Last used timestamp")
+
+
+class RoleToolAccessBase(BaseModel):
+    """Base schema for role-based tool access."""
+    
+    role: UserRole = Field(..., description="User role")
+    tool_pattern: str | None = Field(None, description="Tool name pattern")
+    server_pattern: str | None = Field(None, description="Server name pattern")
+    access_level: ToolAccessLevel = Field(..., description="Access level")
+    default_rate_limit_per_hour: int | None = Field(None, ge=0)
+    default_rate_limit_per_day: int | None = Field(None, ge=0)
+    allowed_hours: list[int] | None = Field(None)
+    allowed_days: list[int] | None = Field(None)
+
+
+class RoleToolAccessCreate(RoleToolAccessBase):
+    """Schema for creating role-based tool access."""
+    pass
+
+
+class RoleToolAccessResponse(RoleToolAccessBase):
+    """Schema for role-based tool access response."""
+    
+    model_config = ConfigDict(from_attributes=True)
+    
+    id: str = Field(..., description="Access rule ID")
+    created_by: str = Field(..., description="Creator user ID")
+    created_at: datetime = Field(..., description="Creation timestamp")
+
+
+class UserToolAccessCheck(BaseModel):
+    """Schema for checking user tool access."""
+    
+    user_id: str = Field(..., description="User ID")
+    tool_name: str = Field(..., description="Tool name")
+    server_name: str | None = Field(None, description="Server name")
+
+
+class ToolAccessResult(BaseModel):
+    """Schema for tool access check result."""
+    
+    allowed: bool = Field(..., description="Whether access is allowed")
+    access_level: ToolAccessLevel = Field(..., description="Access level")
+    rate_limit_remaining_hour: int | None = Field(None, description="Remaining hourly calls")
+    rate_limit_remaining_day: int | None = Field(None, description="Remaining daily calls")
+    restriction_reason: str | None = Field(None, description="Reason if restricted")
+    expires_at: datetime | None = Field(None, description="Permission expiry")

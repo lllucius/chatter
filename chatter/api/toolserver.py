@@ -9,9 +9,15 @@ from chatter.models.user import User
 from chatter.schemas.toolserver import (
     BulkOperationResult,
     BulkToolServerOperation,
+    RoleToolAccessCreate,
+    RoleToolAccessResponse,
     ServerToolsRequest,
     ServerToolsResponse,
+    ToolAccessResult,
     ToolOperationResponse,
+    ToolPermissionCreate,
+    ToolPermissionResponse,
+    ToolPermissionUpdate,
     ToolServerCreate,
     ToolServerDeleteResponse,
     ToolServerHealthCheck,
@@ -20,7 +26,9 @@ from chatter.schemas.toolserver import (
     ToolServerOperationResponse,
     ToolServerResponse,
     ToolServerUpdate,
+    UserToolAccessCheck,
 )
+from chatter.services.tool_access import ToolAccessService
 from chatter.services.toolserver import (
     ToolServerService,
     ToolServerServiceError,
@@ -50,6 +58,20 @@ async def get_tool_server_service(
         ToolServerService instance
     """
     return ToolServerService(session)
+
+
+async def get_tool_access_service(
+    session: AsyncSession = Depends(get_session)
+) -> ToolAccessService:
+    """Get tool access service instance.
+
+    Args:
+        session: Database session
+
+    Returns:
+        ToolAccessService instance
+    """
+    return ToolAccessService(session)
 
 
 # Server CRUD Operations
@@ -768,4 +790,253 @@ async def test_server_connectivity(
         )
         raise InternalServerProblem(
             detail="Failed to test server connectivity"
+        ) from None
+
+
+# Tool Access Control Endpoints
+
+
+@router.post("/permissions", response_model=ToolPermissionResponse)
+async def grant_tool_permission(
+    permission_data: ToolPermissionCreate,
+    current_user: User = Depends(get_current_user),
+    access_service: ToolAccessService = Depends(get_tool_access_service),
+) -> ToolPermissionResponse:
+    """Grant tool permission to a user.
+
+    Args:
+        permission_data: Permission data
+        current_user: Current authenticated user
+        access_service: Tool access service
+
+    Returns:
+        Created permission
+    """
+    try:
+        return await access_service.grant_tool_permission(
+            permission_data, current_user.id
+        )
+    except Exception as e:
+        logger.error("Failed to grant tool permission", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to grant tool permission"
+        ) from None
+
+
+@router.put("/permissions/{permission_id}", response_model=ToolPermissionResponse)
+async def update_tool_permission(
+    permission_id: str,
+    update_data: ToolPermissionUpdate,
+    current_user: User = Depends(get_current_user),
+    access_service: ToolAccessService = Depends(get_tool_access_service),
+) -> ToolPermissionResponse:
+    """Update tool permission.
+
+    Args:
+        permission_id: Permission ID
+        update_data: Update data
+        current_user: Current authenticated user
+        access_service: Tool access service
+
+    Returns:
+        Updated permission
+    """
+    try:
+        return await access_service.update_tool_permission(
+            permission_id, update_data
+        )
+    except Exception as e:
+        logger.error("Failed to update tool permission", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to update tool permission"
+        ) from None
+
+
+@router.delete("/permissions/{permission_id}", response_model=dict)
+async def revoke_tool_permission(
+    permission_id: str,
+    current_user: User = Depends(get_current_user),
+    access_service: ToolAccessService = Depends(get_tool_access_service),
+) -> dict:
+    """Revoke tool permission.
+
+    Args:
+        permission_id: Permission ID
+        current_user: Current authenticated user
+        access_service: Tool access service
+
+    Returns:
+        Success message
+    """
+    try:
+        success = await access_service.revoke_tool_permission(permission_id)
+        if not success:
+            raise NotFoundProblem(
+                detail="Permission not found", resource_type="tool_permission"
+            )
+        return {"message": "Permission revoked successfully"}
+    except Exception as e:
+        logger.error("Failed to revoke tool permission", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to revoke tool permission"
+        ) from None
+
+
+@router.get("/users/{user_id}/permissions", response_model=list[ToolPermissionResponse])
+async def get_user_permissions(
+    user_id: str,
+    current_user: User = Depends(get_current_user),
+    access_service: ToolAccessService = Depends(get_tool_access_service),
+) -> list[ToolPermissionResponse]:
+    """Get all permissions for a user.
+
+    Args:
+        user_id: User ID
+        current_user: Current authenticated user
+        access_service: Tool access service
+
+    Returns:
+        List of user permissions
+    """
+    try:
+        return await access_service.get_user_permissions(user_id)
+    except Exception as e:
+        logger.error("Failed to get user permissions", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to get user permissions"
+        ) from None
+
+
+@router.post("/role-access", response_model=RoleToolAccessResponse)
+async def create_role_access_rule(
+    rule_data: RoleToolAccessCreate,
+    current_user: User = Depends(get_current_user),
+    access_service: ToolAccessService = Depends(get_tool_access_service),
+) -> RoleToolAccessResponse:
+    """Create role-based access rule.
+
+    Args:
+        rule_data: Rule data
+        current_user: Current authenticated user
+        access_service: Tool access service
+
+    Returns:
+        Created rule
+    """
+    try:
+        return await access_service.create_role_access_rule(
+            rule_data, current_user.id
+        )
+    except Exception as e:
+        logger.error("Failed to create role access rule", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to create role access rule"
+        ) from None
+
+
+@router.get("/role-access", response_model=list[RoleToolAccessResponse])
+async def get_role_access_rules(
+    role: str | None = None,
+    current_user: User = Depends(get_current_user),
+    access_service: ToolAccessService = Depends(get_tool_access_service),
+) -> list[RoleToolAccessResponse]:
+    """Get role-based access rules.
+
+    Args:
+        role: Optional role filter
+        current_user: Current authenticated user
+        access_service: Tool access service
+
+    Returns:
+        List of access rules
+    """
+    try:
+        from chatter.models.toolserver import UserRole
+        user_role = UserRole(role) if role else None
+        return await access_service.get_role_access_rules(user_role)
+    except Exception as e:
+        logger.error("Failed to get role access rules", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to get role access rules"
+        ) from None
+
+
+@router.post("/access-check", response_model=ToolAccessResult)
+async def check_tool_access(
+    check_data: UserToolAccessCheck,
+    current_user: User = Depends(get_current_user),
+    access_service: ToolAccessService = Depends(get_tool_access_service),
+) -> ToolAccessResult:
+    """Check if user has access to a tool.
+
+    Args:
+        check_data: Access check data
+        current_user: Current authenticated user
+        access_service: Tool access service
+
+    Returns:
+        Access check result
+    """
+    try:
+        return await access_service.check_tool_access(check_data)
+    except Exception as e:
+        logger.error("Failed to check tool access", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to check tool access"
+        ) from None
+
+
+@router.post("/servers/{server_id}/refresh-tools", response_model=dict)
+async def refresh_server_tools(
+    server_id: str,
+    current_user: User = Depends(get_current_user),
+    service: ToolServerService = Depends(get_tool_server_service),
+) -> dict:
+    """Refresh tools for a remote server.
+
+    Args:
+        server_id: Server ID
+        current_user: Current authenticated user
+        service: Tool server service
+
+    Returns:
+        Refresh result
+    """
+    try:
+        # Get server first to ensure it exists
+        server = await service.get_server(server_id)
+        if not server:
+            raise NotFoundProblem(
+                detail="Server not found", 
+                resource_type="tool_server",
+                resource_id=server_id
+            )
+
+        # Refresh tools from remote server
+        from chatter.services.mcp import mcp_service
+        success = await mcp_service.refresh_server_tools(server.name)
+        
+        if success:
+            # Update database with new tools
+            from chatter.models.toolserver import ToolServer
+            from sqlalchemy import select
+            
+            # This would be better in the service, but for now:
+            result = await service.session.execute(
+                select(ToolServer).where(ToolServer.id == server_id)
+            )
+            db_server = result.scalar_one_or_none()
+            if db_server:
+                await service._discover_server_tools(db_server)
+                await service.session.commit()
+
+        return {
+            "success": success,
+            "message": "Tools refreshed successfully" if success else "Failed to refresh tools"
+        }
+
+    except Exception as e:
+        logger.error("Failed to refresh server tools", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to refresh server tools"
         ) from None

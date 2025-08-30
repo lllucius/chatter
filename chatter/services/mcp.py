@@ -1,21 +1,14 @@
-"""MCP (Model Context Protocol) service for tool calling integration."""
+"""MCP (Model Context Protocol) service for remote HTTP/SSE server integration."""
 
 import asyncio
 import time
-from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Optional
 
-from langchain_core.tools import BaseTool, StructuredTool
-from langchain_mcp_adapters.client import (
-    MultiServerMCPClient,
-    create_session,
-)
-from langchain_mcp_adapters.tools import (
-    convert_mcp_tool_to_langchain_tool,
-    load_mcp_tools,
-)
-from pydantic import BaseModel
+import httpx
+from httpx_sse import aconnect_sse
+from langchain_core.tools import BaseTool
+from pydantic import BaseModel, HttpUrl
 
 from chatter.config import settings
 from chatter.utils.logging import get_logger
@@ -30,133 +23,232 @@ class MCPServiceError(Exception):
 
 
 @dataclass
-class MCPServer:
-    """MCP server configuration."""
+class OAuthConfig:
+    """OAuth configuration for remote servers."""
+    
+    client_id: str
+    client_secret: str
+    token_url: str
+    scope: Optional[str] = None
+    refresh_token: Optional[str] = None
+    access_token: Optional[str] = None
+
+
+@dataclass
+class RemoteMCPServer:
+    """Remote MCP server configuration for HTTP/SSE endpoints."""
 
     name: str
-    command: str
-    args: list[str]
-    env: dict[str, str] | None = None
+    base_url: HttpUrl
+    transport_type: str  # "http" or "sse"
+    oauth_config: Optional[OAuthConfig] = None
+    headers: Optional[dict[str, str]] = None
+    timeout: int = 30
+    enabled: bool = True
 
 
 class MCPToolService:
-    """Service for MCP tool calling integration."""
+    """Service for remote MCP tool calling integration via HTTP and SSE."""
 
     def __init__(self) -> None:
         """Initialize MCP tool service."""
         self.enabled = settings.mcp_enabled
-        self.servers: dict[str, MCPServer] = {}
-        self.clients: dict[str, MultiServerMCPClient] = {}
-        self.tools_cache: dict[str, list[BaseTool]] = {}
+        self.servers: dict[str, RemoteMCPServer] = {}
+        self.clients: dict[str, httpx.AsyncClient] = {}
+        self.tools_cache: dict[str, list[dict[str, Any]]] = {}
+        self._oauth_tokens: dict[str, dict[str, Any]] = {}
 
-        if self.enabled:
-            self._initialize_servers()
-
-    def _initialize_servers(self) -> None:
-        """Initialize MCP servers from configuration."""
-        # Default MCP servers based on configuration
-        default_servers = {
-            "filesystem": MCPServer(
-                name="filesystem",
-                command="npx",
-                args=[
-                    "-y",
-                    "@modelcontextprotocol/server-filesystem",
-                    "/tmp",
-                ],
-                env=None,
-            ),
-            "browser": MCPServer(
-                name="browser",
-                command="npx",
-                args=[
-                    "-y",
-                    "@modelcontextprotocol/server-brave-search",
-                ],
-                env={"BRAVE_API_KEY": "your_brave_api_key"},
-            ),
-            "calculator": MCPServer(
-                name="calculator",
-                command="python",
-                args=["-m", "mcp_math_server"],
-                env=None,
-            ),
-        }
-
-        # Initialize configured servers
-        for server_name in settings.mcp_servers:
-            if server_name in default_servers:
-                self.servers[server_name] = default_servers[server_name]
-                logger.info("MCP server configured", server=server_name)
-
-    async def start_server(self, server_name: str) -> bool:
-        """Start an MCP server."""
-        if not self.enabled or server_name not in self.servers:
+    async def add_remote_server(
+        self, 
+        server_config: RemoteMCPServer
+    ) -> bool:
+        """Add a remote MCP server configuration."""
+        if not self.enabled:
             return False
 
-        server_config = self.servers[server_name]
-
         try:
-            # Create session for the server
-            session = await create_session(
-                command=server_config.command,
-                args=server_config.args,
-                env=server_config.env,
+            # Create HTTP client with appropriate configuration
+            headers = server_config.headers or {}
+            if server_config.oauth_config and server_config.oauth_config.access_token:
+                headers["Authorization"] = f"Bearer {server_config.oauth_config.access_token}"
+
+            client = httpx.AsyncClient(
+                base_url=str(server_config.base_url),
+                headers=headers,
+                timeout=server_config.timeout,
             )
 
-            # Load tools from the session
-            tools = await load_mcp_tools(session)
+            self.servers[server_config.name] = server_config
+            self.clients[server_config.name] = client
 
-            # Convert to LangChain tools
-            langchain_tools = []
-            for tool in tools:
-                lc_tool = convert_mcp_tool_to_langchain_tool(tool)
-                langchain_tools.append(lc_tool)
-
-            self.tools_cache[server_name] = langchain_tools
+            # Initialize OAuth if configured
+            if server_config.oauth_config and not server_config.oauth_config.access_token:
+                await self._authenticate_oauth(server_config.name)
 
             logger.info(
-                "MCP server started",
-                server=server_name,
-                tools_count=len(langchain_tools),
+                "Remote MCP server added",
+                server=server_config.name,
+                transport=server_config.transport_type,
+                url=str(server_config.base_url),
             )
             return True
 
         except Exception as e:
             logger.error(
-                "Failed to start MCP server",
-                server=server_name,
+                "Failed to add remote MCP server",
+                server=server_config.name,
                 error=str(e),
             )
             return False
 
-    async def stop_server(self, server_name: str) -> bool:
-        """Stop an MCP server."""
-        if server_name not in self.clients:
-            return False
-
+    async def remove_server(self, server_name: str) -> bool:
+        """Remove a remote MCP server."""
         try:
-            # Clean up
             if server_name in self.clients:
+                await self.clients[server_name].aclose()
                 del self.clients[server_name]
+
+            if server_name in self.servers:
+                del self.servers[server_name]
+
             if server_name in self.tools_cache:
                 del self.tools_cache[server_name]
 
-            logger.info("MCP server stopped", server=server_name)
+            if server_name in self._oauth_tokens:
+                del self._oauth_tokens[server_name]
+
+            logger.info("Remote MCP server removed", server=server_name)
             return True
 
         except Exception as e:
             logger.error(
-                "Failed to stop MCP server",
+                "Failed to remove remote MCP server",
                 server=server_name,
                 error=str(e),
             )
             return False
 
+    async def _authenticate_oauth(self, server_name: str) -> bool:
+        """Authenticate with OAuth for a server."""
+        server = self.servers.get(server_name)
+        if not server or not server.oauth_config:
+            return False
+
+        oauth_config = server.oauth_config
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                # Prepare OAuth token request
+                token_data = {
+                    "grant_type": "client_credentials",
+                    "client_id": oauth_config.client_id,
+                    "client_secret": oauth_config.client_secret,
+                }
+                
+                if oauth_config.scope:
+                    token_data["scope"] = oauth_config.scope
+
+                # Request token
+                response = await client.post(
+                    oauth_config.token_url,
+                    data=token_data,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                )
+                response.raise_for_status()
+
+                token_info = response.json()
+                access_token = token_info.get("access_token")
+                
+                if not access_token:
+                    raise MCPServiceError("No access token in OAuth response")
+
+                # Update server client with new token
+                oauth_config.access_token = access_token
+                if server_name in self.clients:
+                    self.clients[server_name].headers["Authorization"] = f"Bearer {access_token}"
+
+                # Store token info for refresh
+                self._oauth_tokens[server_name] = {
+                    "access_token": access_token,
+                    "expires_in": token_info.get("expires_in"),
+                    "refresh_token": token_info.get("refresh_token"),
+                }
+
+                logger.info("OAuth authentication successful", server=server_name)
+                return True
+
+        except Exception as e:
+            logger.error(
+                "OAuth authentication failed",
+                server=server_name,
+                error=str(e),
+            )
+            return False
+
+    async def discover_tools(self, server_name: str) -> list[dict[str, Any]]:
+        """Discover tools from a remote MCP server."""
+        if not self.enabled or server_name not in self.servers:
+            return []
+
+        server = self.servers[server_name]
+        client = self.clients.get(server_name)
+        
+        if not client:
+            return []
+
+        try:
+            if server.transport_type == "http":
+                response = await client.get("/tools")
+                response.raise_for_status()
+                tools_data = response.json()
+                
+            elif server.transport_type == "sse":
+                tools_data = await self._discover_tools_sse(server_name)
+                
+            else:
+                raise MCPServiceError(f"Unsupported transport type: {server.transport_type}")
+
+            # Normalize tools data
+            tools = tools_data.get("tools", []) if isinstance(tools_data, dict) else tools_data
+            self.tools_cache[server_name] = tools
+
+            logger.info(
+                "Tools discovered from remote server",
+                server=server_name,
+                count=len(tools),
+            )
+            return tools
+
+        except Exception as e:
+            logger.error(
+                "Failed to discover tools from remote server",
+                server=server_name,
+                error=str(e),
+            )
+            return []
+
+    async def _discover_tools_sse(self, server_name: str) -> list[dict[str, Any]]:
+        """Discover tools using SSE connection."""
+        server = self.servers[server_name]
+        client = self.clients[server_name]
+        
+        tools = []
+        sse_url = f"{server.base_url}/tools/stream"
+        
+        async with aconnect_sse(client, "GET", sse_url) as event_source:
+            async for sse in event_source.aiter_sse():
+                if sse.event == "tool":
+                    tool_data = sse.json()
+                    tools.append(tool_data)
+                elif sse.event == "end":
+                    break
+                    
+        return tools
+
     async def get_tools(
         self, server_names: list[str] | None = None
-    ) -> list[BaseTool]:
-        """Get tools from specified MCP servers."""
+    ) -> list[dict[str, Any]]:
+        """Get tools from specified remote MCP servers."""
         if not self.enabled:
             return []
 
@@ -167,26 +259,26 @@ class MCPToolService:
 
         for server_name in server_names:
             if server_name not in self.tools_cache:
-                # Try to start the server
-                await self.start_server(server_name)
+                # Discover tools from the server
+                await self.discover_tools(server_name)
 
             if server_name in self.tools_cache:
                 tools = self.tools_cache[server_name]
                 all_tools.extend(tools)
                 logger.debug(
-                    "Retrieved tools from server",
+                    "Retrieved tools from remote server",
                     server=server_name,
                     count=len(tools),
                 )
 
         return all_tools
 
-    async def get_tool_by_name(self, tool_name: str) -> BaseTool | None:
+    async def get_tool_by_name(self, tool_name: str) -> dict[str, Any] | None:
         """Get a specific tool by name."""
         all_tools = await self.get_tools()
 
         for tool in all_tools:
-            if tool.name == tool_name:
+            if tool.get("name") == tool_name:
                 return tool
 
         return None
@@ -199,7 +291,7 @@ class MCPToolService:
         user_id: str | None = None,
         conversation_id: str | None = None,
     ) -> dict[str, Any]:
-        """Call a specific MCP tool with usage tracking.
+        """Call a specific remote MCP tool with usage tracking.
 
         Args:
             tool_name: Name of the tool to call
@@ -212,27 +304,42 @@ class MCPToolService:
             Tool result with success/error information
         """
         start_time = time.time()
+        
+        # Find the tool and its server
         tool = await self.get_tool_by_name(tool_name)
-
         if not tool:
-            raise MCPServiceError(
-                f"Tool not found: {tool_name}"
-            ) from None
+            raise MCPServiceError(f"Tool not found: {tool_name}")
 
         # Find which server provides this tool
         found_server = None
-        for server_name_check, tools in self.tools_cache.items():
-            if any(t.name == tool_name for t in tools):
-                found_server = server_name_check
+        for srv_name, tools in self.tools_cache.items():
+            if any(t.get("name") == tool_name for t in tools):
+                found_server = srv_name
                 break
 
         if not found_server:
-            raise MCPServiceError(
-                f"Server not found for tool: {tool_name}"
-            ) from None
+            raise MCPServiceError(f"Server not found for tool: {tool_name}")
+
+        server = self.servers[found_server]
+        client = self.clients[found_server]
 
         try:
-            result = await tool.arun(arguments)
+            # Make HTTP call to tool endpoint
+            if server.transport_type == "http":
+                response = await client.post(
+                    f"/tools/{tool_name}/call",
+                    json={"arguments": arguments},
+                )
+                response.raise_for_status()
+                result_data = response.json()
+                
+            elif server.transport_type == "sse":
+                result_data = await self._call_tool_sse(
+                    found_server, tool_name, arguments
+                )
+            else:
+                raise MCPServiceError(f"Unsupported transport type: {server.transport_type}")
+
             response_time_ms = (time.time() - start_time) * 1000
 
             # Track usage (async, don't block)
@@ -241,7 +348,7 @@ class MCPToolService:
                     found_server,
                     tool_name,
                     arguments,
-                    result,
+                    result_data,
                     response_time_ms,
                     True,
                     None,
@@ -252,17 +359,18 @@ class MCPToolService:
 
             return {
                 "success": True,
-                "result": result,
+                "result": result_data,
                 "tool": tool_name,
                 "server": found_server,
                 "response_time_ms": response_time_ms,
             }
+
         except Exception as e:
             response_time_ms = (time.time() - start_time) * 1000
             error_msg = str(e)
 
             logger.error(
-                "Tool call failed",
+                "Remote tool call failed",
                 tool=tool_name,
                 server=found_server,
                 error=error_msg,
@@ -290,6 +398,38 @@ class MCPToolService:
                 "server": found_server,
                 "response_time_ms": response_time_ms,
             }
+
+    async def _call_tool_sse(
+        self,
+        server_name: str,
+        tool_name: str,
+        arguments: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Call a tool using SSE connection."""
+        server = self.servers[server_name]
+        client = self.clients[server_name]
+        
+        sse_url = f"{server.base_url}/tools/{tool_name}/call"
+        
+        result = None
+        async with aconnect_sse(
+            client, 
+            "POST", 
+            sse_url,
+            json={"arguments": arguments}
+        ) as event_source:
+            async for sse in event_source.aiter_sse():
+                if sse.event == "result":
+                    result = sse.json()
+                    break
+                elif sse.event == "error":
+                    error_data = sse.json()
+                    raise MCPServiceError(error_data.get("message", "Tool call failed"))
+                    
+        if result is None:
+            raise MCPServiceError("No result received from SSE tool call")
+            
+        return result
 
     async def _track_tool_usage(
         self,
@@ -375,19 +515,21 @@ class MCPToolService:
         )
 
     async def get_available_servers(self) -> list[dict[str, Any]]:
-        """Get list of available MCP servers."""
+        """Get list of available remote MCP servers."""
         servers_info = []
 
         for server_name, server_config in self.servers.items():
-            is_running = server_name in self.tools_cache
+            has_tools = server_name in self.tools_cache
             tools_count = len(self.tools_cache.get(server_name, []))
 
             servers_info.append(
                 {
                     "name": server_name,
-                    "command": server_config.command,
-                    "args": server_config.args,
-                    "running": is_running,
+                    "base_url": str(server_config.base_url),
+                    "transport_type": server_config.transport_type,
+                    "enabled": server_config.enabled,
+                    "has_oauth": server_config.oauth_config is not None,
+                    "tools_discovered": has_tools,
                     "tools_count": tools_count,
                 }
             )
@@ -395,115 +537,119 @@ class MCPToolService:
         return servers_info
 
     async def health_check(self) -> dict[str, Any]:
-        """Perform health check on MCP service."""
+        """Perform health check on remote MCP servers."""
         if not self.enabled:
             return {"enabled": False, "status": "disabled"}
 
         server_status = {}
         total_tools = 0
+        healthy_servers = 0
 
-        for server_name in self.servers:
-            is_running = server_name in self.tools_cache
-            tools_count = len(self.tools_cache.get(server_name, []))
+        for server_name, server_config in self.servers.items():
+            try:
+                client = self.clients.get(server_name)
+                if client and server_config.enabled:
+                    # Check server health
+                    response = await client.get("/health", timeout=5)
+                    is_healthy = response.status_code == 200
+                    
+                    tools_count = len(self.tools_cache.get(server_name, []))
+                    
+                    server_status[server_name] = {
+                        "healthy": is_healthy,
+                        "tools_count": tools_count,
+                        "transport": server_config.transport_type,
+                        "enabled": server_config.enabled,
+                    }
+                    
+                    if is_healthy:
+                        healthy_servers += 1
+                        total_tools += tools_count
+                        
+                else:
+                    server_status[server_name] = {
+                        "healthy": False,
+                        "tools_count": 0,
+                        "transport": server_config.transport_type,
+                        "enabled": server_config.enabled,
+                    }
+                    
+            except Exception as e:
+                server_status[server_name] = {
+                    "healthy": False,
+                    "error": str(e),
+                    "tools_count": 0,
+                    "transport": server_config.transport_type,
+                    "enabled": server_config.enabled,
+                }
 
-            server_status[server_name] = {
-                "running": is_running,
-                "tools_count": tools_count,
-            }
-            total_tools += tools_count
+        overall_status = "healthy" if healthy_servers > 0 else "unhealthy"
+        if total_tools == 0:
+            overall_status = "no_tools"
 
         return {
             "enabled": True,
-            "status": "healthy" if total_tools > 0 else "no_tools",
+            "status": overall_status,
             "servers": server_status,
             "total_tools": total_tools,
+            "healthy_servers": healthy_servers,
+            "total_servers": len(self.servers),
         }
 
-    async def restart_all_servers(self) -> bool:
-        """Restart all MCP servers."""
-        success = True
+    async def enable_server(self, server_name: str) -> bool:
+        """Enable a remote MCP server."""
+        if server_name in self.servers:
+            self.servers[server_name].enabled = True
+            logger.info("Remote MCP server enabled", server=server_name)
+            return True
+        return False
 
-        # Stop all servers
-        for server_name in list(self.tools_cache.keys()):
-            if not await self.stop_server(server_name):
-                success = False
+    async def disable_server(self, server_name: str) -> bool:
+        """Disable a remote MCP server."""
+        if server_name in self.servers:
+            self.servers[server_name].enabled = False
+            # Clear tools cache for disabled server
+            if server_name in self.tools_cache:
+                del self.tools_cache[server_name]
+            logger.info("Remote MCP server disabled", server=server_name)
+            return True
+        return False
 
-        # Start all configured servers
-        for server_name in self.servers:
-            if not await self.start_server(server_name):
-                success = False
-
-        return success
-
-
-# Built-in tools that don't require MCP servers
-class BuiltInTools:
-    """Built-in tools for common operations."""
-
-    @staticmethod
-    def get_current_time() -> str:
-        """Get the current time."""
-        from datetime import datetime
-
-        return datetime.now().isoformat()
-
-    @staticmethod
-    def calculate(expression: str) -> float | str:
-        """Calculate a mathematical expression safely."""
+    async def refresh_server_tools(self, server_name: str) -> bool:
+        """Refresh tools for a specific server."""
+        if server_name not in self.servers:
+            return False
+            
         try:
-            # Safe evaluation of mathematical expressions
-            import ast
-            import operator
-
-            ops = {
-                ast.Add: operator.add,
-                ast.Sub: operator.sub,
-                ast.Mult: operator.mul,
-                ast.Div: operator.truediv,
-                ast.Pow: operator.pow,
-                ast.USub: operator.neg,
-            }
-
-            def eval_expr(node):
-                """Safely evaluate an AST node."""
-                if isinstance(node, ast.Num):
-                    return node.n
-                elif isinstance(node, ast.BinOp):
-                    return ops[type(node.op)](
-                        eval_expr(node.left), eval_expr(node.right)
-                    )
-                elif isinstance(node, ast.UnaryOp):
-                    return ops[type(node.op)](eval_expr(node.operand))
-                else:
-                    raise TypeError(node) from None
-
-            return eval_expr(ast.parse(expression, mode="eval").body)
+            # Clear existing cache
+            if server_name in self.tools_cache:
+                del self.tools_cache[server_name]
+                
+            # Re-discover tools
+            tools = await self.discover_tools(server_name)
+            return len(tools) > 0
+            
         except Exception as e:
-            return f"Error: {str(e)}"
+            logger.error(
+                "Failed to refresh server tools",
+                server=server_name,
+                error=str(e),
+            )
+            return False
 
-    @staticmethod
-    def create_builtin_tools() -> list[BaseTool]:
-        """Create built-in tools."""
-        tools = []
-
-        # Time tool
-        time_tool = StructuredTool.from_function(
-            func=BuiltInTools.get_current_time,
-            name="get_current_time",
-            description="Get the current date and time in ISO format",
-        )
-        tools.append(time_tool)
-
-        # Calculator tool
-        calc_tool = StructuredTool.from_function(
-            func=BuiltInTools.calculate,
-            name="calculate",
-            description="Calculate a mathematical expression (supports +, -, *, /, **)",
-        )
-        tools.append(calc_tool)
-
-        return tools
-
+    async def cleanup(self) -> None:
+        """Clean up all connections and resources."""
+        for client in self.clients.values():
+            try:
+                await client.aclose()
+            except Exception as e:
+                logger.warning("Error closing HTTP client", error=str(e))
+                
+        self.clients.clear()
+        self.tools_cache.clear()
+        self._oauth_tokens.clear()
+        
+        logger.info("MCP service cleanup completed")
 
 # Global MCP service instance
 mcp_service = MCPToolService()

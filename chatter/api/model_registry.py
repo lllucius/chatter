@@ -11,6 +11,8 @@ from chatter.models.user import User
 from chatter.schemas.model_registry import (
     DefaultProvider,
     EmbeddingSpaceCreate,
+    EmbeddingSpaceDeleteResponse,
+    EmbeddingSpaceDefaultResponse,
     EmbeddingSpaceList,
     EmbeddingSpaceUpdate,
     EmbeddingSpaceWithModel,
@@ -18,8 +20,12 @@ from chatter.schemas.model_registry import (
     ModelDefList,
     ModelDefUpdate,
     ModelDefWithProvider,
+    ModelDeleteResponse,
+    ModelDefaultResponse,
     Provider,
     ProviderCreate,
+    ProviderDeleteResponse,
+    ProviderDefaultResponse,
     ProviderList,
     ProviderUpdate,
 )
@@ -127,12 +133,12 @@ async def update_provider(
     return provider
 
 
-@router.delete("/providers/{provider_id}")
+@router.delete("/providers/{provider_id}", response_model=ProviderDeleteResponse)
 async def delete_provider(
     provider_id: str,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
-):
+) -> ProviderDeleteResponse:
     """Delete a provider and all its dependent models and embedding spaces."""
     service = ModelRegistryService(session)
     try:
@@ -150,7 +156,7 @@ async def delete_provider(
             user_id=current_user.id
         )
 
-        return {"message": "Provider and its dependent models/embedding spaces deleted successfully"}
+        return ProviderDeleteResponse(message="Provider and its dependent models/embedding spaces deleted successfully")
     except IntegrityError as e:
         await session.rollback()
         raise HTTPException(
@@ -159,13 +165,13 @@ async def delete_provider(
         ) from e
 
 
-@router.post("/providers/{provider_id}/set-default")
+@router.post("/providers/{provider_id}/set-default", response_model=ProviderDefaultResponse)
 async def set_default_provider(
     provider_id: str,
     default_data: DefaultProvider,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
-):
+) -> ProviderDefaultResponse:
     """Set a provider as default for a model type."""
     service = ModelRegistryService(session)
     success = await service.set_default_provider(provider_id, default_data.model_type)
@@ -183,7 +189,7 @@ async def set_default_provider(
         user_id=current_user.id
     )
 
-    return {"message": "Default provider set successfully"}
+    return ProviderDefaultResponse(message="Default provider set successfully")
 
 
 # Model endpoints
@@ -293,12 +299,12 @@ async def update_model(
     return model
 
 
-@router.delete("/models/{model_id}")
+@router.delete("/models/{model_id}", response_model=ModelDeleteResponse)
 async def delete_model(
     model_id: str,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
-):
+) -> ModelDeleteResponse:
     """Delete a model definition and its dependent embedding spaces."""
     service = ModelRegistryService(session)
     try:
@@ -316,7 +322,7 @@ async def delete_model(
             user_id=current_user.id
         )
 
-        return {"message": "Model and its dependent embedding spaces deleted successfully"}
+        return ModelDeleteResponse(message="Model and its dependent embedding spaces deleted successfully")
     except IntegrityError as e:
         await session.rollback()
         raise HTTPException(
@@ -325,12 +331,12 @@ async def delete_model(
         ) from e
 
 
-@router.post("/models/{model_id}/set-default")
+@router.post("/models/{model_id}/set-default", response_model=ModelDefaultResponse)
 async def set_default_model(
     model_id: str,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
-):
+) -> ModelDefaultResponse:
     """Set a model as default for its type."""
     service = ModelRegistryService(session)
     success = await service.set_default_model(model_id)
@@ -347,7 +353,7 @@ async def set_default_model(
         user_id=current_user.id
     )
 
-    return {"message": "Default model set successfully"}
+    return ModelDefaultResponse(message="Default model set successfully")
 
 
 # Embedding space endpoints
@@ -480,12 +486,12 @@ async def update_embedding_space(
     return space
 
 
-@router.delete("/embedding-spaces/{space_id}")
+@router.delete("/embedding-spaces/{space_id}", response_model=EmbeddingSpaceDeleteResponse)
 async def delete_embedding_space(
     space_id: str,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
-):
+) -> EmbeddingSpaceDeleteResponse:
     """Delete an embedding space (does not drop the table)."""
     service = ModelRegistryService(session)
     deleted = await service.delete_embedding_space(space_id)
@@ -502,15 +508,15 @@ async def delete_embedding_space(
         user_id=current_user.id
     )
 
-    return {"message": "Embedding space deleted successfully"}
+    return EmbeddingSpaceDeleteResponse(message="Embedding space deleted successfully")
 
 
-@router.post("/embedding-spaces/{space_id}/set-default")
+@router.post("/embedding-spaces/{space_id}/set-default", response_model=EmbeddingSpaceDefaultResponse)
 async def set_default_embedding_space(
     space_id: str,
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
-):
+) -> EmbeddingSpaceDefaultResponse:
     """Set an embedding space as default."""
     service = ModelRegistryService(session)
     success = await service.set_default_embedding_space(space_id)
@@ -527,7 +533,7 @@ async def set_default_embedding_space(
         user_id=current_user.id
     )
 
-    return {"message": "Default embedding space set successfully"}
+    return EmbeddingSpaceDefaultResponse(message="Default embedding space set successfully")
 
 
 # Default lookup endpoints

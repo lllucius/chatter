@@ -212,6 +212,12 @@ class DocumentDeleteRequest(DeleteRequestBase):
     pass
 
 
+class DocumentDeleteResponse(BaseModel):
+    """Response schema for document deletion."""
+    
+    message: str = Field(..., description="Deletion result message")
+
+
 class DocumentStatsRequest(GetRequestBase):
     """Schema for document stats request."""
 

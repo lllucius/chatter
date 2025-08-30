@@ -30,6 +30,7 @@ from chatter.schemas.chat import (
     ConversationWithMessages,
     McpStatusResponse,
     MessageCreate,
+    MessageDeleteResponse,
     MessageResponse,
     PerformanceStatsResponse,
     WorkflowTemplatesResponse,
@@ -279,19 +280,19 @@ async def add_message_to_conversation(
         ) from None
 
 
-@router.delete("/conversations/{conversation_id}/messages/{message_id}")
+@router.delete("/conversations/{conversation_id}/messages/{message_id}", response_model=MessageDeleteResponse)
 async def delete_message(
     conversation_id: str,
     message_id: str,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
-) -> dict:
+) -> MessageDeleteResponse:
     """Delete a message from conversation."""
     try:
         await chat_service.delete_message(
             conversation_id, message_id, current_user.id
         )
-        return {"message": "Message deleted successfully"}
+        return MessageDeleteResponse(message="Message deleted successfully")
     except ConversationNotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",

@@ -8,6 +8,7 @@ from chatter.schemas.common import *  # noqa: F403
 from chatter.schemas.document import *  # noqa: F403
 from chatter.schemas.events import *  # noqa: F403
 from chatter.schemas.health import *  # noqa: F403
+from chatter.schemas.model_registry import *  # noqa: F403
 from chatter.schemas.profile import *  # noqa: F403
 from chatter.schemas.prompt import *  # noqa: F403
 from chatter.schemas.toolserver import *  # noqa: F403
@@ -59,6 +60,7 @@ __all__ = [
     "AvailableToolsRequest",
     "McpStatusRequest",
     "ConversationDeleteResponse",
+    "MessageDeleteResponse",
     "AvailableToolResponse",
     "AvailableToolsResponse",
     "McpStatusResponse",
@@ -78,6 +80,7 @@ __all__ = [
     "DocumentStatsResponse",
     "DocumentGetRequest",
     "DocumentDeleteRequest",
+    "DocumentDeleteResponse",
     "DocumentStatsRequest",
     "DocumentUploadRequest",
     "DocumentChunksResponse",
@@ -174,4 +177,31 @@ __all__ = [
     "ToolServerEvent",
     "DocumentEvent",
     "SystemEvent",
+    # Model Registry schemas
+    "ProviderBase",
+    "ProviderCreate",
+    "ProviderUpdate",
+    "Provider",
+    "ModelDefBase",
+    "ModelDefCreate",
+    "ModelDefUpdate",
+    "ModelDef",
+    "ModelDefWithProvider",
+    "EmbeddingSpaceBase",
+    "EmbeddingSpaceCreate",
+    "EmbeddingSpaceUpdate",
+    "EmbeddingSpace",
+    "EmbeddingSpaceWithModel",
+    "ProviderList",
+    "ModelDefList",
+    "EmbeddingSpaceList",
+    "DefaultProvider",
+    "DefaultModel",
+    "DefaultEmbeddingSpace",
+    "ProviderDeleteResponse",
+    "ProviderDefaultResponse",
+    "ModelDeleteResponse",
+    "ModelDefaultResponse",
+    "EmbeddingSpaceDeleteResponse",
+    "EmbeddingSpaceDefaultResponse",
 ]

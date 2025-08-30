@@ -48,7 +48,11 @@ export function useApi<T>(
       const errorMessage = err.message || 'An error occurred';
       setError(errorMessage);
       onErrorRef.current?.(err);
-      console.error('API call failed:', err);
+      // Log error for debugging in development
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error('API call failed:', err);
+      }
     } finally {
       setLoading(false);
     }
@@ -110,7 +114,7 @@ export function useApiList<T>(
         api.data[index] = updater(api.data[index]);
       }
     }
-  }, []);
+  }, [api.data]);
 
   return {
     ...api,

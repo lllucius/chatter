@@ -44,7 +44,7 @@ class ConditionalWorkflowConfig:
                 # Handle range conditions
                 if "min" in condition_value and "max" in condition_value:
                     if (context_value is not None and
-                        condition_value["min"] <= context_value <= condition_value["max"]):
+                            condition_value["min"] <= context_value <= condition_value["max"]):
                         return condition_name
                 # Handle list membership
                 elif "in" in condition_value:

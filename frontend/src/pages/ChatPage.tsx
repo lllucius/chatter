@@ -115,7 +115,10 @@ const ChatPage: React.FC = () => {
       }
     } catch (err: any) {
       setError('Failed to load chat data');
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
     }
   };
 
@@ -153,7 +156,10 @@ const ChatPage: React.FC = () => {
       return response.data;
     } catch (err: any) {
       setError('Failed to start new conversation');
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
       return null;
     }
   }, [selectedProfile, selectedPrompt, prompts, enableRetrieval]);
@@ -184,7 +190,10 @@ const ChatPage: React.FC = () => {
       setTimeout(() => scrollToBottom(), 100);
     } catch (err: any) {
       setError('Failed to load conversation');
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
     }
   }, []);
 
@@ -271,6 +280,7 @@ const ChatPage: React.FC = () => {
       const decoder = new TextDecoder();
       let buffer = '';
 
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -339,7 +349,7 @@ const ChatPage: React.FC = () => {
             } else if (chunk.event === 'done' || chunk.type === 'end') {
               return;
             }
-          } catch (parseError) {
+          } catch {
             // Not JSON or partial line; ignore until buffer completes
             // console.warn('Failed to parse streaming chunk:', parseError, payload);
           }

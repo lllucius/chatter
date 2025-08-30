@@ -1,9 +1,11 @@
 """API versioning strategy and management."""
 
 import re
+from typing import Any, Awaitable, Callable
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.routing import APIRoute
+from starlette.responses import Response
 
 from chatter.config import settings
 from chatter.schemas.utilities import (
@@ -20,7 +22,7 @@ logger = get_logger(__name__)
 class APIVersionManager:
     """Manages API versioning strategy."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the API version manager."""
         self.versions: dict[APIVersion, VersionInfo] = {}
         self.endpoints: dict[str, EndpointVersioning] = {}
@@ -242,7 +244,7 @@ def extract_version_from_request(request: Request) -> APIVersion:
     return version_manager.default_version
 
 
-async def version_middleware(request: Request, call_next):
+async def version_middleware(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
     """Middleware to handle API versioning.
 
     Args:
@@ -318,7 +320,7 @@ def create_versioned_app() -> FastAPI:
 def version_route(
     versions: list[APIVersion],
     deprecated_in: APIVersion | None = None,
-):
+) -> Callable[[Callable], Callable]:
     """Decorator to mark routes with version information.
 
     Args:
@@ -328,7 +330,7 @@ def version_route(
     Returns:
         Route decorator
     """
-    def decorator(func):
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         # Add version metadata to function
         func._api_versions = versions
         func._deprecated_in = deprecated_in
@@ -345,7 +347,7 @@ def version_route(
 class VersionedRouter:
     """Router that supports versioning."""
 
-    def __init__(self, prefix: str = ""):
+    def __init__(self, prefix: str = "") -> None:
         """Initialize versioned router.
 
         Args:

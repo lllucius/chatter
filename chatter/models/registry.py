@@ -1,5 +1,7 @@
 """Registry models for LLM providers, models, and embedding spaces."""
 
+from __future__ import annotations
+
 from enum import Enum
 
 from sqlalchemy import (
@@ -48,7 +50,7 @@ class ReductionStrategy(str, Enum):
 class Provider(Base):
     """AI provider registry."""
 
-    __tablename__ = "providers"
+    __tablename__ = "providers"  # type: ignore[assignment]
 
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     provider_type: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -67,14 +69,14 @@ class Provider(Base):
     # Relationships
     models = relationship("ModelDef", back_populates="provider", cascade="all, delete-orphan")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Provider(name='{self.name}', type='{self.provider_type}')>"
 
 
 class ModelDef(Base):
     """AI model definition registry."""
 
-    __tablename__ = "model_defs"
+    __tablename__ = "model_defs"  # type: ignore[assignment]
 
     provider_id: Mapped[str] = mapped_column(String(26), ForeignKey("providers.id"), nullable=False)
 
@@ -111,14 +113,14 @@ class ModelDef(Base):
         UniqueConstraint('provider_id', 'name', name='uq_provider_model_name'),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ModelDef(name='{self.name}', type='{self.model_type}', dimensions={self.dimensions})>"
 
 
 class EmbeddingSpace(Base):
     """Embedding space definition with dimensional reduction support."""
 
-    __tablename__ = "embedding_spaces"
+    __tablename__ = "embedding_spaces"  # type: ignore[assignment]
 
     model_id: Mapped[str] = mapped_column(String(26), ForeignKey("model_defs.id"), nullable=False)
 
@@ -150,5 +152,5 @@ class EmbeddingSpace(Base):
     # Relationships
     model = relationship("ModelDef", back_populates="embedding_spaces")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<EmbeddingSpace(name='{self.name}', base_dims={self.base_dimensions}, effective_dims={self.effective_dimensions})>"

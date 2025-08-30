@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -184,6 +185,7 @@ const AdministrationPage: React.FC = () => {
       setLastJobStates(newStates);
       setJobs(newJobs);
     } catch (error: any) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load jobs:', error);
       setError('Failed to load jobs');
     } finally {
@@ -358,12 +360,12 @@ const AdministrationPage: React.FC = () => {
       showSnackbar('User settings updated successfully!');
       setUserSettingsOpen(false);
       setEditingUser(null);
-    } catch (error: any) {
+    } catch {
       showSnackbar('Failed to update user settings');
     }
   };
 
-  const handleBackupDownload = async (backupId: string) => {
+  const handleBackupDownload = async () => {
     try {
       setLoading(true);
       showSnackbar('Backup download functionality will be available soon');
@@ -564,7 +566,7 @@ const AdministrationPage: React.FC = () => {
     }
   };
 
-  const handleEditAction = async (type: string, id: string) => {
+  const handleEditAction = async (type: string) => {
     try {
       setLoading(true);
       setError('');

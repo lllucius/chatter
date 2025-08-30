@@ -1,4 +1,4 @@
-import { useMemo, startTransition, useTransition } from 'react';
+import { useMemo, useTransition } from 'react';
 
 /**
  * Hook for managing concurrent updates with React 19's improved startTransition
@@ -31,7 +31,7 @@ export function useConcurrentData<T>(
 
   const promise = useMemo(() => {
     return fetcher();
-  }, deps);
+  }, [fetcher, ...deps]);
 
   // Return promise for Suspense integration
   return { promise, isPending, startConcurrentUpdate };
@@ -47,5 +47,5 @@ export function useConcurrentMemo<T>(
   return useMemo(() => {
     // In React 19, this computation can be interrupted and resumed
     return factory();
-  }, deps);
+  }, [factory, ...deps]);
 }

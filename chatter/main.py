@@ -319,8 +319,8 @@ def create_app() -> FastAPI:
     # Add rate limiting middleware
     from chatter.utils.rate_limit import RateLimitMiddleware
     app.add_middleware(RateLimitMiddleware,
-                      requests_per_minute=100,
-                      requests_per_hour=2000)
+                       requests_per_minute=100,
+                       requests_per_hour=2000)
 
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
@@ -500,10 +500,10 @@ def create_app() -> FastAPI:
         async def serve_react_app(full_path: str):
             # Don't intercept API routes, docs, or health checks
             if (full_path.startswith("api/") or
-                full_path.startswith("health") or
-                full_path.startswith("docs") or
-                full_path.startswith("redoc") or
-                full_path.startswith("openapi.json")):
+                    full_path.startswith("health") or
+                    full_path.startswith("docs") or
+                    full_path.startswith("redoc") or
+                    full_path.startswith("openapi.json")):
                 return {"error": "Not found"}
 
             from fastapi.responses import FileResponse

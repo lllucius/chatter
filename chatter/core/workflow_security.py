@@ -9,7 +9,9 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-logger = logging.getLogger(__name__)
+from chatter.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class PermissionLevel(Enum):
@@ -46,7 +48,7 @@ class ToolPermission:
         self.rate_limit = rate_limit
         self.expiry = expiry
         self.usage_count = 0
-        self.last_used = None
+        self.last_used: datetime | None = None
 
     def is_valid(self) -> bool:
         """Check if permission is still valid (not expired)."""
@@ -241,7 +243,7 @@ class AuditLogEntry:
 class WorkflowSecurityManager:
     """Manages security for workflow execution."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize workflow security manager."""
         self.user_permissions: dict[str, UserPermissions] = {}
         self.audit_log: list[AuditLogEntry] = []
@@ -540,8 +542,8 @@ class WorkflowSecurityManager:
             }
 
         # Count events by type
-        event_counts = {}
-        user_counts = {}
+        event_counts: dict[str, int] = {}
+        user_counts: dict[str, int] = {}
 
         for entry in recent_entries:
             event_counts[entry.event_type] = event_counts.get(entry.event_type, 0) + 1

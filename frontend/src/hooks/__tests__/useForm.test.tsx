@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 
 // Simple mock useForm implementation for testing
-const useForm = (initialValues: any, options: any = {}) => {
+const useForm = (initialValues: any) => {
   return {
     values: initialValues,
     errors: {},

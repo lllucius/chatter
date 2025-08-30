@@ -43,7 +43,7 @@ dependencies = [
     "pgvector==0.4.1",
     "chromadb==1.0.20",
     "qdrant-client==1.12.1",
-    "pinecone-client==5.1.0",
+    "pinecone-client==5.0.1",
     
     # LangChain ecosystem
     "langchain==0.3.27",
@@ -199,6 +199,7 @@ module = [
     "mcp.*",
     "google.generativeai.*",
     "cohere.*",
+    "structlog.*",
 ]
 ignore_missing_imports = true
 

@@ -1,5 +1,7 @@
 """Profile model for LLM configuration management."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from enum import Enum
 from typing import Any

@@ -1,5 +1,7 @@
 """Conversation and message models."""
 
+from __future__ import annotations
+
 from enum import Enum
 from typing import Any, Optional
 
@@ -249,7 +251,7 @@ class Message(Base):
             name='check_content_not_empty'
         ),
         UniqueConstraint('conversation_id', 'sequence_number',
-                        name='uq_conversation_sequence'),
+                         name='uq_conversation_sequence'),
         Index('idx_conversation_sequence', 'conversation_id', 'sequence_number'),
         Index('idx_conversation_role', 'conversation_id', 'role'),
     )

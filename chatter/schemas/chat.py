@@ -297,6 +297,12 @@ class ConversationDeleteResponse(BaseModel):
     message: str = Field(..., description="Success message")
 
 
+class MessageDeleteResponse(BaseModel):
+    """Response schema for message deletion."""
+    
+    message: str = Field(..., description="Deletion result message")
+
+
 class AvailableToolResponse(BaseModel):
     """Schema for individual available tool."""
 

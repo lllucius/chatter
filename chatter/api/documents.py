@@ -22,6 +22,7 @@ from chatter.schemas.document import (
     DocumentChunksResponse,
     DocumentCreate,
     DocumentDeleteRequest,
+    DocumentDeleteResponse,
     DocumentListResponse,
     DocumentProcessingRequest,
     DocumentProcessingResponse,
@@ -295,13 +296,13 @@ async def update_document(
         ) from None
 
 
-@router.delete("/{document_id}")
+@router.delete("/{document_id}", response_model=DocumentDeleteResponse)
 async def delete_document(
     document_id: str,
     request: DocumentDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
-) -> dict:
+) -> DocumentDeleteResponse:
     """Delete document.
 
     Args:
@@ -325,7 +326,7 @@ async def delete_document(
                 resource_id=document_id,
             ) from None
 
-        return {"message": "Document deleted successfully"}
+        return DocumentDeleteResponse(message="Document deleted successfully")
 
     except ProblemException:
         raise

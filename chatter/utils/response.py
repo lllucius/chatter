@@ -48,12 +48,12 @@ def create_success_response(
     pagination: dict[str, Any] | None = None
 ) -> StandardResponse | PaginatedResponse:
     """Create a standardized success response.
-    
+
     Args:
         data: The response data
         message: Optional success message
         pagination: Optional pagination metadata
-        
+
     Returns:
         Standardized success response
     """
@@ -78,12 +78,12 @@ def create_error_response(
     data: Any = None
 ) -> StandardResponse:
     """Create a standardized error response.
-    
+
     Args:
         message: Primary error message
         errors: List of detailed error messages
         data: Optional error data
-        
+
     Returns:
         Standardized error response
     """
@@ -97,11 +97,11 @@ def create_error_response(
 
 def wrap_response(response_data: Any, message: str | None = None) -> StandardResponse:
     """Wrap existing response data in standard envelope.
-    
+
     Args:
         response_data: Existing response data to wrap
         message: Optional message
-        
+
     Returns:
         Wrapped response in standard format
     """

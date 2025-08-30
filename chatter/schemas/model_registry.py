@@ -210,35 +210,35 @@ class DefaultEmbeddingSpace(BaseModel):
 # Response schemas
 class ProviderDeleteResponse(BaseModel):
     """Response schema for provider deletion."""
-    
+
     message: str = Field(..., description="Deletion result message")
 
 
 class ProviderDefaultResponse(BaseModel):
     """Response schema for setting default provider."""
-    
+
     message: str = Field(..., description="Operation result message")
 
 
 class ModelDeleteResponse(BaseModel):
     """Response schema for model deletion."""
-    
+
     message: str = Field(..., description="Deletion result message")
 
 
 class ModelDefaultResponse(BaseModel):
     """Response schema for setting default model."""
-    
+
     message: str = Field(..., description="Operation result message")
 
 
 class EmbeddingSpaceDeleteResponse(BaseModel):
     """Response schema for embedding space deletion."""
-    
+
     message: str = Field(..., description="Deletion result message")
 
 
 class EmbeddingSpaceDefaultResponse(BaseModel):
     """Response schema for setting default embedding space."""
-    
+
     message: str = Field(..., description="Operation result message")

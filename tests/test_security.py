@@ -1,7 +1,9 @@
 """Security functionality tests."""
 
+from unittest.mock import patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from chatter.utils.config_validator import ConfigValidator
 from chatter.utils.security import generate_secure_secret
 from chatter.utils.validation import sanitize_input, validate_email
@@ -16,7 +18,7 @@ class TestSecurityUtilities:
         secret = generate_secure_secret()
         assert len(secret) >= 32
         assert secret.isalnum() or any(c in secret for c in "!@#$%^&*")
-        
+
         # Ensure multiple calls generate different secrets
         secret2 = generate_secure_secret()
         assert secret != secret2
@@ -25,12 +27,12 @@ class TestSecurityUtilities:
         """Test generated secrets meet strength requirements."""
         secret = generate_secure_secret(length=64)
         assert len(secret) == 64
-        
+
         # Check complexity requirements
         has_upper = any(c.isupper() for c in secret)
         has_lower = any(c.islower() for c in secret)
         has_digit = any(c.isdigit() for c in secret)
-        
+
         # At least 2 of 3 character types should be present
         complexity_score = sum([has_upper, has_lower, has_digit])
         assert complexity_score >= 2
@@ -53,7 +55,7 @@ class TestSecurityUtilities:
         # Valid emails
         assert validate_email("user@example.com") is True
         assert validate_email("test.user+tag@domain.co.uk") is True
-        
+
         # Invalid/malicious emails
         assert validate_email("user@") is False
         assert validate_email("@domain.com") is False
@@ -70,11 +72,12 @@ class TestAuthenticationSecurity:
     def test_password_verification_timing(self, mock_verify):
         """Test password verification has consistent timing."""
         import time
+
         from chatter.utils.security import verify_password
-        
+
         # Mock the actual verification to control timing
         mock_verify.return_value = False
-        
+
         # Time multiple password verifications
         times = []
         for _ in range(5):
@@ -82,7 +85,7 @@ class TestAuthenticationSecurity:
             verify_password("test_password", "hashed_password")
             end = time.time()
             times.append(end - start)
-        
+
         # Timing should be relatively consistent (preventing timing attacks)
         avg_time = sum(times) / len(times)
         for t in times:
@@ -90,19 +93,22 @@ class TestAuthenticationSecurity:
 
     def test_jwt_token_security(self):
         """Test JWT token generation and validation security."""
-        from chatter.utils.security import create_access_token, verify_token
-        
+        from chatter.utils.security import (
+            create_access_token,
+            verify_token,
+        )
+
         # Test token generation
         token = create_access_token({"sub": "user123"})
         assert token is not None
         assert isinstance(token, str)
         assert len(token) > 100  # JWT should be reasonably long
-        
+
         # Test token validation
         payload = verify_token(token)
         assert payload is not None
         assert payload.get("sub") == "user123"
-        
+
         # Test invalid token
         invalid_payload = verify_token("invalid.token.here")
         assert invalid_payload is None
@@ -111,11 +117,11 @@ class TestAuthenticationSecurity:
         """Test session security measures."""
         # Test session ID generation
         from chatter.utils.security import generate_session_id
-        
+
         session_id = generate_session_id()
         assert len(session_id) >= 32
         assert session_id.replace('-', '').isalnum()
-        
+
         # Ensure uniqueness
         session_id2 = generate_session_id()
         assert session_id != session_id2
@@ -128,7 +134,7 @@ class TestConfigurationSecurity:
     def test_weak_secret_detection(self):
         """Test detection of weak secrets."""
         validator = ConfigValidator()
-        
+
         # Weak secrets should be rejected
         weak_secrets = [
             "secret",
@@ -137,7 +143,7 @@ class TestConfigurationSecurity:
             "your-secret-key",
             "development_secret"
         ]
-        
+
         for secret in weak_secrets:
             with pytest.raises(ValueError, match="weak|insecure|default"):
                 validator.validate_secret_key(secret)
@@ -145,7 +151,7 @@ class TestConfigurationSecurity:
     def test_default_credential_detection(self):
         """Test detection of default credentials."""
         validator = ConfigValidator()
-        
+
         # Default database credentials should be rejected
         default_configs = [
             {"DB_USER": "postgres", "DB_PASSWORD": "password"},
@@ -153,7 +159,7 @@ class TestConfigurationSecurity:
             {"DB_USER": "root", "DB_PASSWORD": ""},
             {"DB_USER": "user", "DB_PASSWORD": "123456"},
         ]
-        
+
         for config in default_configs:
             with pytest.raises(ValueError, match="default|insecure"):
                 validator.validate_database_config(config)
@@ -161,11 +167,11 @@ class TestConfigurationSecurity:
     def test_secure_config_acceptance(self):
         """Test that secure configurations are accepted."""
         validator = ConfigValidator()
-        
+
         # Strong secrets should be accepted
         strong_secret = generate_secure_secret(64)
         validator.validate_secret_key(strong_secret)  # Should not raise
-        
+
         # Secure database config should be accepted
         secure_config = {
             "DB_USER": "chatter_prod_user_" + generate_secure_secret(8),
@@ -181,7 +187,7 @@ class TestErrorHandlingSecurity:
     def test_error_response_sanitization(self):
         """Test that error responses don't leak sensitive data."""
         from chatter.utils.problem import create_problem_detail
-        
+
         # Create error with potentially sensitive information
         try:
             raise ValueError("Database connection failed: password=secret123 host=internal.db")
@@ -191,7 +197,7 @@ class TestErrorHandlingSecurity:
                 title="Internal Server Error",
                 detail=str(e)
             )
-            
+
             # Sensitive information should be removed
             detail = problem.get("detail", "")
             assert "password=" not in detail
@@ -219,7 +225,7 @@ class TestSecurityIntegration:
         }
         response = await test_client.post("/api/v1/auth/register", json=weak_password_data)
         assert response.status_code == 400  # Should reject weak password
-        
+
         # Test registration with strong password
         strong_password_data = {
             "email": "test@example.com",
@@ -233,12 +239,12 @@ class TestSecurityIntegration:
         """Test rate limiting prevents brute force attacks."""
         # Attempt multiple failed logins rapidly
         login_data = {"email": "test@example.com", "password": "wrong_password"}
-        
+
         responses = []
         for _ in range(10):
             response = await test_client.post("/api/v1/auth/login", json=login_data)
             responses.append(response.status_code)
-        
+
         # Should eventually get rate limited (429)
         assert 429 in responses or all(r == 401 for r in responses)
 
@@ -247,7 +253,7 @@ class TestSecurityIntegration:
         # Test that CORS headers are properly configured
         response = await test_client.options("/api/v1/auth/login")
         headers = response.headers
-        
+
         # Check for security headers
         if "access-control-allow-origin" in headers:
             origin = headers["access-control-allow-origin"]

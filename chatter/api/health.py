@@ -83,7 +83,7 @@ async def liveness_check() -> HealthCheckResponse:
 @router.get("/metrics", response_model=MetricsResponse)
 async def get_metrics() -> MetricsResponse:
     """Get application metrics and monitoring data.
-    
+
     Returns:
         Application metrics including performance and health data
     """
@@ -113,10 +113,10 @@ async def get_metrics() -> MetricsResponse:
 @router.get("/trace/{correlation_id}", response_model=CorrelationTraceResponse)
 async def get_correlation_trace(correlation_id: str) -> CorrelationTraceResponse:
     """Get trace of all requests for a correlation ID.
-    
+
     Args:
         correlation_id: The correlation ID to trace
-        
+
     Returns:
         List of requests associated with the correlation ID
     """

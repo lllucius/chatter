@@ -3,13 +3,12 @@
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
 
 
 class ProcessError(Exception):
     """Exception raised when a subprocess fails."""
-    
-    def __init__(self, command: List[str], returncode: int, stdout: str, stderr: str):
+
+    def __init__(self, command: list[str], returncode: int, stdout: str, stderr: str):
         self.command = command
         self.returncode = returncode
         self.stdout = stdout
@@ -18,16 +17,16 @@ class ProcessError(Exception):
 
 
 def run_command(
-    cmd: List[str], 
+    cmd: list[str],
     description: str,
-    cwd: Optional[Path] = None,
+    cwd: Path | None = None,
     capture_output: bool = True,
     check: bool = True,
-    timeout: Optional[int] = None
-) -> Tuple[bool, str, str]:
+    timeout: int | None = None
+) -> tuple[bool, str, str]:
     """
     Run a command and return success status with output.
-    
+
     Args:
         cmd: Command to run as a list of strings
         description: Human-readable description for logging
@@ -35,10 +34,10 @@ def run_command(
         capture_output: Whether to capture stdout/stderr
         check: Whether to raise exception on non-zero exit
         timeout: Timeout in seconds
-        
+
     Returns:
         Tuple of (success, stdout, stderr)
-        
+
     Raises:
         ProcessError: If check=True and command fails
     """
@@ -46,7 +45,7 @@ def run_command(
     print(f"   Command: {' '.join(cmd)}")
     if cwd:
         print(f"   Working directory: {cwd}")
-    
+
     try:
         result = subprocess.run(
             cmd,
@@ -55,9 +54,9 @@ def run_command(
             cwd=str(cwd) if cwd else None,
             timeout=timeout
         )
-        
+
         success = result.returncode == 0
-        
+
         if success:
             print(f"✅ {description} completed successfully")
         else:
@@ -67,18 +66,18 @@ def run_command(
                     print(f"   stdout: {result.stdout}")
                 if result.stderr:
                     print(f"   stderr: {result.stderr}")
-                    
+
         if check and not success:
             raise ProcessError(cmd, result.returncode, result.stdout, result.stderr)
-            
+
         return success, result.stdout, result.stderr
-        
-    except subprocess.TimeoutExpired as e:
+
+    except subprocess.TimeoutExpired:
         print(f"❌ {description} timed out after {timeout} seconds")
         if check:
             raise ProcessError(cmd, -1, "", f"Timeout after {timeout} seconds")
         return False, "", f"Timeout after {timeout} seconds"
-    
+
     except FileNotFoundError:
         print(f"❌ {description} failed: Command not found: {cmd[0]}")
         if check:
@@ -99,7 +98,7 @@ def check_command_available(command: str) -> bool:
         return False
 
 
-def ensure_command_available(command: str, install_hint: Optional[str] = None) -> None:
+def ensure_command_available(command: str, install_hint: str | None = None) -> None:
     """Ensure a command is available, raising an error with install hint if not."""
     if not check_command_available(command):
         error_msg = f"Required command '{command}' not found in PATH"

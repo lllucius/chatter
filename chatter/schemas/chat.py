@@ -140,7 +140,7 @@ WorkflowType = Literal["plain", "rag", "tools", "full"]
 
 class WorkflowTemplateInfo(BaseModel):
     """Schema for workflow template information."""
-    
+
     name: str = Field(..., description="Template name")
     workflow_type: str = Field(..., description="Workflow type")
     description: str = Field(..., description="Template description")
@@ -151,14 +151,14 @@ class WorkflowTemplateInfo(BaseModel):
 
 class WorkflowTemplatesResponse(BaseModel):
     """Schema for workflow templates response."""
-    
+
     templates: dict[str, WorkflowTemplateInfo] = Field(..., description="Available templates")
     total_count: int = Field(..., description="Total number of templates")
 
 
 class PerformanceStatsResponse(BaseModel):
     """Schema for performance statistics response."""
-    
+
     total_executions: int = Field(..., description="Total number of executions")
     avg_execution_time_ms: int = Field(..., description="Average execution time in milliseconds")
     min_execution_time_ms: int = Field(..., description="Minimum execution time in milliseconds")
@@ -299,7 +299,7 @@ class ConversationDeleteResponse(BaseModel):
 
 class MessageDeleteResponse(BaseModel):
     """Response schema for message deletion."""
-    
+
     message: str = Field(..., description="Deletion result message")
 
 

@@ -328,7 +328,7 @@ def create_problem_detail(
 
 class ProblemDetailResponse(JSONResponse):
     """RFC 9457 compliant JSON response for problem details."""
-    
+
     def __init__(
         self,
         problem_detail: ProblemDetail,
@@ -337,7 +337,7 @@ class ProblemDetailResponse(JSONResponse):
         **kwargs: Any,
     ) -> None:
         """Initialize problem detail response.
-        
+
         Args:
             problem_detail: Problem detail object
             status_code: HTTP status code (defaults to problem detail status)
@@ -348,7 +348,7 @@ class ProblemDetailResponse(JSONResponse):
             "Content-Type": "application/problem+json",
             **(headers or {})
         }
-        
+
         super().__init__(
             content=problem_detail.model_dump(exclude_none=True),
             status_code=status_code or problem_detail.status,

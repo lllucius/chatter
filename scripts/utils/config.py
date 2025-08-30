@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 @dataclass
@@ -24,7 +24,7 @@ class PythonSDKConfig(SDKConfig):
     project_name: str = ""
     package_company: str = ""
     use_asyncio: bool = True
-    
+
     def __post_init__(self):
         if not self.project_name:
             self.project_name = self.package_name.replace("_", "-")
@@ -41,7 +41,7 @@ class TypeScriptSDKConfig(SDKConfig):
     use_single_request_parameter: bool = True
     supports_es6: bool = True
     with_separate_models_and_api: bool = False
-    
+
     def __post_init__(self):
         if not self.npm_name:
             self.npm_name = self.package_name.replace("_", "-")
@@ -83,7 +83,7 @@ def get_default_typescript_config(project_root: Path) -> TypeScriptSDKConfig:
     )
 
 
-def get_openapi_generator_config(config: Any) -> Dict[str, Any]:
+def get_openapi_generator_config(config: Any) -> dict[str, Any]:
     """Convert SDK config to OpenAPI Generator configuration format."""
     if isinstance(config, PythonSDKConfig):
         return {
@@ -98,7 +98,7 @@ def get_openapi_generator_config(config: Any) -> Dict[str, Any]:
             "library": "asyncio" if config.use_asyncio else "urllib3",
             "useAsyncio": config.use_asyncio,
         }
-    
+
     elif isinstance(config, TypeScriptSDKConfig):
         return {
             "basePath": config.base_path,
@@ -114,6 +114,6 @@ def get_openapi_generator_config(config: Any) -> Dict[str, Any]:
             "enumNameSuffix": "",
             "enumPropertyNaming": "original",
         }
-    
+
     else:
         raise ValueError(f"Unsupported config type: {type(config)}")

@@ -1,11 +1,13 @@
 """Database Model tests."""
 
-import pytest
 import asyncio
-from datetime import datetime, timedelta
-from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime
+
+import pytest
 from sqlalchemy.exc import IntegrityError
-from chatter.models.conversation import User, Conversation, Message
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from chatter.models.conversation import Conversation, Message, User
 from chatter.models.profile import Profile
 
 
@@ -21,11 +23,11 @@ class TestUserModel:
             username="testuser",
             password_hash="hashed_password_123"
         )
-        
+
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         assert user.id is not None
         assert user.email == "test@example.com"
         assert user.username == "testuser"
@@ -43,7 +45,7 @@ class TestUserModel:
         )
         test_session.add(user1)
         await test_session.commit()
-        
+
         # Try to create second user with same email
         user2 = User(
             email="unique@example.com",  # Same email
@@ -51,7 +53,7 @@ class TestUserModel:
             password_hash="hash2"
         )
         test_session.add(user2)
-        
+
         with pytest.raises(IntegrityError):
             await test_session.commit()
 
@@ -65,7 +67,7 @@ class TestUserModel:
         )
         test_session.add(user1)
         await test_session.commit()
-        
+
         # Try to create second user with same username
         user2 = User(
             email="user2@example.com",
@@ -73,27 +75,30 @@ class TestUserModel:
             password_hash="hash2"
         )
         test_session.add(user2)
-        
+
         with pytest.raises(IntegrityError):
             await test_session.commit()
 
     async def test_password_hashing_integration(self, test_session: AsyncSession):
         """Test password hashing integration."""
-        from chatter.utils.security import hash_password, verify_password
-        
+        from chatter.utils.security import (
+            hash_password,
+            verify_password,
+        )
+
         plain_password = "MySecurePassword123!"
         hashed_password = hash_password(plain_password)
-        
+
         user = User(
             email="password@example.com",
             username="passworduser",
             password_hash=hashed_password
         )
-        
+
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Verify password can be checked
         assert verify_password(plain_password, user.password_hash)
         assert not verify_password("wrong_password", user.password_hash)
@@ -105,16 +110,15 @@ class TestUserModel:
             username="deleteuser",
             password_hash="hash"
         )
-        
+
         test_session.add(user)
         await test_session.commit()
-        user_id = user.id
-        
+
         # Soft delete
         user.is_active = False
         user.deleted_at = datetime.utcnow()
         await test_session.commit()
-        
+
         # User should still exist in database
         await test_session.refresh(user)
         assert user.is_active is False
@@ -131,7 +135,7 @@ class TestUserModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Create conversations for the user
         conv1 = Conversation(
             title="Test Conversation 1",
@@ -143,10 +147,10 @@ class TestUserModel:
             user_id=user.id,
             model="gpt-4"
         )
-        
+
         test_session.add_all([conv1, conv2])
         await test_session.commit()
-        
+
         # Test relationship access
         await test_session.refresh(user)
         conversations = await user.get_conversations(test_session)
@@ -159,23 +163,23 @@ class TestUserModel:
             username="timestampuser",
             password_hash="hash"
         )
-        
+
         creation_time = datetime.utcnow()
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Created timestamp should be set
         assert user.created_at is not None
         assert user.created_at >= creation_time
-        
+
         # Update user
         original_created = user.created_at
         await asyncio.sleep(0.01)  # Small delay
         user.email = "updated@example.com"
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Created timestamp should not change
         assert user.created_at == original_created
 
@@ -195,7 +199,7 @@ class TestConversationModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Create conversation
         conversation = Conversation(
             title="Test Conversation",
@@ -203,11 +207,11 @@ class TestConversationModel:
             model="gpt-3.5-turbo",
             system_prompt="You are a helpful assistant."
         )
-        
+
         test_session.add(conversation)
         await test_session.commit()
         await test_session.refresh(conversation)
-        
+
         assert conversation.id is not None
         assert conversation.title == "Test Conversation"
         assert conversation.user_id == user.id
@@ -226,7 +230,7 @@ class TestConversationModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Create multiple conversations
         conversations = []
         for i in range(3):
@@ -237,13 +241,13 @@ class TestConversationModel:
             )
             conversations.append(conv)
             test_session.add(conv)
-        
+
         await test_session.commit()
-        
+
         # Test relationship access
         user_conversations = await user.get_conversations(test_session)
         assert len(user_conversations) == 3
-        
+
         # Test conversation belongs to user
         for conv in conversations:
             await test_session.refresh(conv)
@@ -260,7 +264,7 @@ class TestConversationModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         conversation = Conversation(
             title="Message Test Conversation",
             user_id=user.id,
@@ -269,7 +273,7 @@ class TestConversationModel:
         test_session.add(conversation)
         await test_session.commit()
         await test_session.refresh(conversation)
-        
+
         # Create messages
         messages = [
             Message(
@@ -288,10 +292,10 @@ class TestConversationModel:
                 content="Can you help me with Python?"
             )
         ]
-        
+
         test_session.add_all(messages)
         await test_session.commit()
-        
+
         # Test message retrieval
         conv_messages = await conversation.get_messages(test_session)
         assert len(conv_messages) == 3
@@ -310,7 +314,7 @@ class TestConversationModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Create conversation with metadata
         metadata = {
             "temperature": 0.7,
@@ -319,18 +323,18 @@ class TestConversationModel:
             "tags": ["programming", "help"],
             "custom_field": "custom_value"
         }
-        
+
         conversation = Conversation(
             title="Metadata Test",
             user_id=user.id,
             model="gpt-4",
             metadata=metadata
         )
-        
+
         test_session.add(conversation)
         await test_session.commit()
         await test_session.refresh(conversation)
-        
+
         # Test metadata retrieval
         assert conversation.metadata["temperature"] == 0.7
         assert conversation.metadata["max_tokens"] == 1000
@@ -348,7 +352,7 @@ class TestConversationModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Test different model configurations
         models_config = [
             {
@@ -368,7 +372,7 @@ class TestConversationModel:
                 }
             }
         ]
-        
+
         conversations = []
         for model_data in models_config:
             conv = Conversation(
@@ -379,9 +383,9 @@ class TestConversationModel:
             )
             conversations.append(conv)
             test_session.add(conv)
-        
+
         await test_session.commit()
-        
+
         # Verify configurations
         for i, conv in enumerate(conversations):
             await test_session.refresh(conv)
@@ -405,7 +409,7 @@ class TestProfileModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Create profile
         profile = Profile(
             user_id=user.id,
@@ -414,11 +418,11 @@ class TestProfileModel:
             timezone="UTC",
             language="en"
         )
-        
+
         test_session.add(profile)
         await test_session.commit()
         await test_session.refresh(profile)
-        
+
         assert profile.user_id == user.id
         assert profile.display_name == "John Doe"
         assert profile.bio == "Software developer and AI enthusiast"
@@ -436,7 +440,7 @@ class TestProfileModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Create profile with preferences
         preferences = {
             "theme": "dark",
@@ -455,17 +459,17 @@ class TestProfileModel:
                 "analytics": True
             }
         }
-        
+
         profile = Profile(
             user_id=user.id,
             display_name="Settings User",
             preferences=preferences
         )
-        
+
         test_session.add(profile)
         await test_session.commit()
         await test_session.refresh(profile)
-        
+
         # Test preference retrieval
         assert profile.preferences["theme"] == "dark"
         assert profile.preferences["notifications"]["email"] is True
@@ -483,7 +487,7 @@ class TestProfileModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         profile = Profile(
             user_id=user.id,
             display_name="Original Name",
@@ -493,16 +497,16 @@ class TestProfileModel:
         test_session.add(profile)
         await test_session.commit()
         original_created = profile.created_at
-        
+
         # Update profile
         await asyncio.sleep(0.01)  # Small delay
         profile.display_name = "Updated Name"
         profile.bio = "Updated bio with more details"
         profile.timezone = "America/New_York"
-        
+
         await test_session.commit()
         await test_session.refresh(profile)
-        
+
         # Verify updates
         assert profile.display_name == "Updated Name"
         assert profile.bio == "Updated bio with more details"
@@ -521,17 +525,17 @@ class TestProfileModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Create minimal profile (test defaults)
         profile = Profile(
             user_id=user.id,
             display_name="Minimal User"
         )
-        
+
         test_session.add(profile)
         await test_session.commit()
         await test_session.refresh(profile)
-        
+
         # Test default values
         assert profile.display_name == "Minimal User"
         assert profile.bio is None or profile.bio == ""
@@ -550,7 +554,7 @@ class TestProfileModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # Create profile
         profile = Profile(
             user_id=user.id,
@@ -559,12 +563,12 @@ class TestProfileModel:
         test_session.add(profile)
         await test_session.commit()
         await test_session.refresh(profile)
-        
+
         # Test relationship access
         profile_user = await profile.get_user(test_session)
         assert profile_user.id == user.id
         assert profile_user.email == "relationship@example.com"
-        
+
         # Test reverse relationship
         user_profile = await user.get_profile(test_session)
         assert user_profile.id == profile.id
@@ -586,7 +590,7 @@ class TestMessageModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         conversation = Conversation(
             title="Message Test",
             user_id=user.id,
@@ -595,18 +599,18 @@ class TestMessageModel:
         test_session.add(conversation)
         await test_session.commit()
         await test_session.refresh(conversation)
-        
+
         # Create message
         message = Message(
             conversation_id=conversation.id,
             role="user",
             content="Hello, this is a test message."
         )
-        
+
         test_session.add(message)
         await test_session.commit()
         await test_session.refresh(message)
-        
+
         assert message.id is not None
         assert message.conversation_id == conversation.id
         assert message.role == "user"
@@ -624,7 +628,7 @@ class TestMessageModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         conversation = Conversation(
             title="Ordering Test",
             user_id=user.id,
@@ -633,7 +637,7 @@ class TestMessageModel:
         test_session.add(conversation)
         await test_session.commit()
         await test_session.refresh(conversation)
-        
+
         # Create messages in specific order
         messages_data = [
             ("user", "First message"),
@@ -641,7 +645,7 @@ class TestMessageModel:
             ("user", "Second message"),
             ("assistant", "Second response")
         ]
-        
+
         for role, content in messages_data:
             message = Message(
                 conversation_id=conversation.id,
@@ -651,7 +655,7 @@ class TestMessageModel:
             test_session.add(message)
             await test_session.commit()
             await asyncio.sleep(0.001)  # Ensure different timestamps
-        
+
         # Retrieve messages and verify order
         messages = await conversation.get_messages(test_session, order_by="created_at")
         assert len(messages) == 4
@@ -671,7 +675,7 @@ class TestMessageModel:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         conversation = Conversation(
             title="Metadata Test",
             user_id=user.id,
@@ -680,7 +684,7 @@ class TestMessageModel:
         test_session.add(conversation)
         await test_session.commit()
         await test_session.refresh(conversation)
-        
+
         # Create message with metadata
         metadata = {
             "token_count": 25,
@@ -689,18 +693,18 @@ class TestMessageModel:
             "temperature": 0.7,
             "finish_reason": "stop"
         }
-        
+
         message = Message(
             conversation_id=conversation.id,
             role="assistant",
             content="This is a response with metadata.",
             metadata=metadata
         )
-        
+
         test_session.add(message)
         await test_session.commit()
         await test_session.refresh(message)
-        
+
         # Verify metadata
         assert message.metadata["token_count"] == 25
         assert message.metadata["processing_time"] == 1.5
@@ -723,7 +727,7 @@ class TestModelIntegration:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         # 2. Create user profile
         profile = Profile(
             user_id=user.id,
@@ -735,7 +739,7 @@ class TestModelIntegration:
         )
         test_session.add(profile)
         await test_session.commit()
-        
+
         # 3. Create conversation
         conversation = Conversation(
             title="Complete Workflow Test",
@@ -747,7 +751,7 @@ class TestModelIntegration:
         test_session.add(conversation)
         await test_session.commit()
         await test_session.refresh(conversation)
-        
+
         # 4. Create conversation messages
         messages_data = [
             ("user", "Hello, can you help me?"),
@@ -755,7 +759,7 @@ class TestModelIntegration:
             ("user", "What's the weather like?"),
             ("assistant", "I don't have access to real-time weather data, but I can help you find weather information.")
         ]
-        
+
         for role, content in messages_data:
             message = Message(
                 conversation_id=conversation.id,
@@ -764,19 +768,19 @@ class TestModelIntegration:
                 metadata={"timestamp": datetime.utcnow().isoformat()}
             )
             test_session.add(message)
-        
+
         await test_session.commit()
-        
+
         # 5. Verify complete workflow
         # Check user has conversation
         user_conversations = await user.get_conversations(test_session)
         assert len(user_conversations) == 1
         assert user_conversations[0].title == "Complete Workflow Test"
-        
+
         # Check conversation has messages
         conv_messages = await conversation.get_messages(test_session)
         assert len(conv_messages) == 4
-        
+
         # Check user has profile
         user_profile = await user.get_profile(test_session)
         assert user_profile.display_name == "Workflow User"
@@ -809,7 +813,7 @@ class TestModelIntegration:
         test_session.add(user)
         await test_session.commit()
         await test_session.refresh(user)
-        
+
         conversation = Conversation(
             title="Cascade Test",
             user_id=user.id,
@@ -818,7 +822,7 @@ class TestModelIntegration:
         test_session.add(conversation)
         await test_session.commit()
         await test_session.refresh(conversation)
-        
+
         # Add messages
         for i in range(3):
             message = Message(
@@ -827,13 +831,13 @@ class TestModelIntegration:
                 content=f"Message {i+1}"
             )
             test_session.add(message)
-        
+
         await test_session.commit()
-        
+
         # Verify setup
         messages = await conversation.get_messages(test_session)
         assert len(messages) == 3
-        
+
         # Test soft delete (if implemented)
         # This would depend on the actual cascade configuration
         # For now, we'll just verify the relationships exist

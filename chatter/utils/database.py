@@ -153,27 +153,27 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 async def _create_default_registry_data(session: AsyncSession) -> None:
     """Create default provider, models, and embedding spaces for the registry."""
     from sqlalchemy import select
-    
+
     from chatter.models.registry import (
-        Provider,
-        ModelDef,
-        EmbeddingSpace,
-        ProviderType,
-        ModelType,
-        ReductionStrategy,
         DistanceMetric,
+        EmbeddingSpace,
+        ModelDef,
+        ModelType,
+        Provider,
+        ProviderType,
+        ReductionStrategy,
     )
-    
+
     # Check if any providers already exist
     result = await session.execute(select(Provider).limit(1))
     existing_provider = result.scalar_one_or_none()
-    
+
     if existing_provider is not None:
         logger.info("Registry data already exists, skipping default registry initialization")
         return
-    
+
     logger.info("Creating default registry data (providers, models, embedding spaces)")
-    
+
     # Create default OpenAI provider
     openai_provider = Provider(
         name="openai",
@@ -192,9 +192,9 @@ async def _create_default_registry_data(session: AsyncSession) -> None:
     session.add(openai_provider)
     await session.commit()
     await session.refresh(openai_provider)
-    
+
     logger.info("Created default OpenAI provider", provider_id=openai_provider.id)
-    
+
     # Create default LLM model (GPT-4)
     gpt4_model = ModelDef(
         provider_id=openai_provider.id,
@@ -216,7 +216,7 @@ async def _create_default_registry_data(session: AsyncSession) -> None:
         is_default=True,
     )
     session.add(gpt4_model)
-    
+
     # Create default embedding model (text-embedding-3-large)
     embedding_model = ModelDef(
         provider_id=openai_provider.id,
@@ -239,13 +239,13 @@ async def _create_default_registry_data(session: AsyncSession) -> None:
     await session.commit()
     await session.refresh(gpt4_model)
     await session.refresh(embedding_model)
-    
+
     logger.info(
-        "Created default models", 
-        gpt4_id=gpt4_model.id, 
+        "Created default models",
+        gpt4_id=gpt4_model.id,
         embedding_id=embedding_model.id
     )
-    
+
     # Create default embedding space
     default_embedding_space = EmbeddingSpace(
         model_id=embedding_model.id,
@@ -269,9 +269,9 @@ async def _create_default_registry_data(session: AsyncSession) -> None:
     session.add(default_embedding_space)
     await session.commit()
     await session.refresh(default_embedding_space)
-    
+
     logger.info(
-        "Created default embedding space", 
+        "Created default embedding space",
         space_id=default_embedding_space.id,
         table_name=default_embedding_space.table_name
     )
@@ -304,10 +304,10 @@ async def initialize_default_data() -> None:
         # Create admin user with secure random password
         import secrets
         import string
-        
+
         # Generate a secure random password
         admin_password = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$%^&*") for _ in range(16))
-        
+
         admin_user = User(
             email="admin@admin.net",
             username="admin",

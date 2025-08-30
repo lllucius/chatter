@@ -15,7 +15,7 @@ correlation_id_var: ContextVar[str | None] = ContextVar(
 
 def generate_correlation_id() -> str:
     """Generate a new correlation ID.
-    
+
     Returns:
         A new UUID4 string to use as correlation ID
     """
@@ -24,7 +24,7 @@ def generate_correlation_id() -> str:
 
 def get_correlation_id() -> str | None:
     """Get the current correlation ID from context.
-    
+
     Returns:
         Current correlation ID or None if not set
     """
@@ -33,7 +33,7 @@ def get_correlation_id() -> str | None:
 
 def set_correlation_id(correlation_id: str) -> None:
     """Set the correlation ID in context.
-    
+
     Args:
         correlation_id: The correlation ID to set
     """
@@ -45,11 +45,11 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> Response:
         """Add correlation ID to request and response.
-        
+
         Args:
             request: The incoming request
             call_next: The next middleware in the chain
-            
+
         Returns:
             Response with correlation ID header
         """

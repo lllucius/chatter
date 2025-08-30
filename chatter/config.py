@@ -76,7 +76,7 @@ class Settings(BaseSettings):
 
     # Security
     trusted_hosts: str | list[str] = Field(
-        default=["localhost", "127.0.0.1"], 
+        default=["localhost", "127.0.0.1"],
         description="Trusted hosts"
     )
     force_https: bool = Field(
@@ -482,23 +482,23 @@ class Settings(BaseSettings):
     @property
     def trusted_hosts_for_env(self) -> list[str]:
         """Get trusted hosts configuration for current environment.
-        
+
         In development/testing: More permissive to include common development patterns
         In production: Use the configured trusted_hosts as-is for security
         """
         base_hosts = self.trusted_hosts if isinstance(self.trusted_hosts, list) else [self.trusted_hosts]
-        
+
         if self.is_development or self.is_testing:
             # Add common development patterns if not already present
             dev_patterns = [
                 "localhost",
-                "127.0.0.1", 
+                "127.0.0.1",
                 "0.0.0.0",
                 f"localhost:{self.port}",
                 f"127.0.0.1:{self.port}",
                 f"0.0.0.0:{self.port}"
             ]
-            
+
             # Combine and deduplicate
             all_hosts = list(set(base_hosts + dev_patterns))
             return all_hosts
@@ -514,7 +514,7 @@ settings = Settings()
 @lru_cache
 def get_settings() -> Settings:
     """Get cached settings instance.
-    
+
     DEPRECATED: Use 'from chatter.config import settings' instead.
     This function is kept for backward compatibility.
     """

@@ -47,11 +47,11 @@ def make_embedding_model(name: str, dim: int):
     """
     Dynamically creates and registers a SQLAlchemy model for an embedding table.
     Each model gets its own table with the correct vector dimension.
-    
+
     Args:
         name: Name of the embedding model (from _to_name())
         dim: Vector dimension for this model
-        
+
     Returns:
         SQLAlchemy model class for the embedding table
     """
@@ -83,7 +83,7 @@ def ensure_table_and_index(
     """
     Create the table and ANN index if they don't exist.
     Also runs ANALYZE after creating the index.
-    
+
     Args:
         engine: SQLAlchemy engine
         model_class: The SQLAlchemy model class
@@ -141,7 +141,7 @@ def get_embedding_model(
     """
     Get or create the embedding model for the given LLM.
     Ensures ANN index exists if engine is provided.
-    
+
     Args:
         model_name: Name of the embedding model
         dim: Vector dimension
@@ -149,9 +149,9 @@ def get_embedding_model(
         metric: Distance metric
         index_type: Index type
         lists: IVFFlat lists parameter
-        m: HNSW m parameter  
+        m: HNSW m parameter
         ef_construction: HNSW ef_construction parameter
-        
+
     Returns:
         SQLAlchemy model class for the embedding table
     """
@@ -178,10 +178,10 @@ def get_embedding_model(
 def get_model_dimensions(provider_name: str) -> int:
     """
     Get the default vector dimension for a given provider.
-    
+
     Args:
         provider_name: Name of the embedding provider
-        
+
     Returns:
         Vector dimension for the provider
     """
@@ -200,7 +200,7 @@ def get_model_dimensions(provider_name: str) -> int:
 def list_embedding_models() -> dict[str, type]:
     """
     List all registered embedding models.
-    
+
     Returns:
         Dictionary mapping model names to SQLAlchemy classes
     """

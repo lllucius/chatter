@@ -1,18 +1,17 @@
 """Input validation tests."""
 
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from chatter.core.workflow_validation import (
-    WorkflowValidator,
-    InputSanitizer,
     ValidationRule,
-    ValidationResult
+    WorkflowValidator,
 )
 from chatter.utils.validation import (
+    sanitize_input,
     validate_email,
     validate_password,
-    sanitize_input,
-    validate_username
+    validate_username,
 )
 
 
@@ -30,7 +29,7 @@ class TestInputValidation:
             "firstname.lastname@company.com",
             "user123@test-domain.com"
         ]
-        
+
         for email in valid_emails:
             assert validate_email(email), f"Should accept valid email: {email}"
 
@@ -46,7 +45,7 @@ class TestInputValidation:
             "a" * 255 + "@example.com",  # Too long
             ""
         ]
-        
+
         for email in invalid_emails:
             assert not validate_email(email), f"Should reject invalid email: {email}"
 
@@ -60,13 +59,13 @@ class TestInputValidation:
             "Super$trong9Pass",
             "Ungu3ss@ble123!"
         ]
-        
+
         for password in strong_passwords:
             result = validate_password(password)
             assert result["valid"], f"Should accept strong password: {password}"
             assert result["score"] >= 3
 
-        # Weak passwords  
+        # Weak passwords
         weak_passwords = [
             "password",
             "123456",
@@ -76,7 +75,7 @@ class TestInputValidation:
             "12345678",
             "Password1"  # Common pattern
         ]
-        
+
         for password in weak_passwords:
             result = validate_password(password)
             assert not result["valid"], f"Should reject weak password: {password}"
@@ -93,7 +92,7 @@ class TestInputValidation:
             "a" * 3,  # Minimum length
             "a" * 30  # Maximum length
         ]
-        
+
         for username in valid_usernames:
             assert validate_username(username), f"Should accept valid username: {username}"
 
@@ -112,7 +111,7 @@ class TestInputValidation:
             "root",  # Reserved
             "test"  # Reserved
         ]
-        
+
         for username in invalid_usernames:
             assert not validate_username(username), f"Should reject invalid username: {username}"
 
@@ -127,7 +126,7 @@ class TestInputValidation:
             "<svg onload=alert('xss')>",
             "</script><script>alert('xss')</script>"
         ]
-        
+
         for xss_input in xss_inputs:
             sanitized = sanitize_input(xss_input)
             assert "<script>" not in sanitized
@@ -144,7 +143,7 @@ class TestInputValidation:
             "'; INSERT INTO users VALUES ('hacker'); --",
             "' UNION SELECT * FROM passwords --"
         ]
-        
+
         for sql_input in sql_inputs:
             sanitized = sanitize_input(sql_input)
             assert "DROP TABLE" not in sanitized.upper()
@@ -158,7 +157,7 @@ class TestInputValidation:
             "....//....//....//etc/passwd",
             "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd"
         ]
-        
+
         for path_input in path_inputs:
             sanitized = sanitize_input(path_input)
             assert "../" not in sanitized
@@ -168,12 +167,12 @@ class TestInputValidation:
     def test_content_length_validation(self):
         """Test content length validation."""
         validator = WorkflowValidator()
-        
+
         # Test message length limits
         short_message = "Hello"
         normal_message = "This is a normal length message for testing."
         long_message = "x" * 10000  # Very long message
-        
+
         assert validator.validate_message_length(short_message)
         assert validator.validate_message_length(normal_message)
         assert not validator.validate_message_length(long_message)
@@ -181,14 +180,14 @@ class TestInputValidation:
     def test_file_upload_validation(self):
         """Test file upload validation."""
         validator = WorkflowValidator()
-        
+
         # Valid file types
         valid_files = [
             {"filename": "document.pdf", "size": 1024000, "type": "application/pdf"},
             {"filename": "image.jpg", "size": 512000, "type": "image/jpeg"},
             {"filename": "text.txt", "size": 1000, "type": "text/plain"}
         ]
-        
+
         for file_data in valid_files:
             result = validator.validate_file_upload(file_data)
             assert result.valid, f"Should accept valid file: {file_data['filename']}"
@@ -200,7 +199,7 @@ class TestInputValidation:
             {"filename": "no_extension", "size": 1000, "type": "application/octet-stream"},
             {"filename": "suspicious.php", "size": 1000, "type": "text/plain"}
         ]
-        
+
         for file_data in invalid_files:
             result = validator.validate_file_upload(file_data)
             assert not result.valid, f"Should reject invalid file: {file_data['filename']}"
@@ -224,7 +223,7 @@ class TestWorkflowValidation:
             "max_tokens": 1000,
             "temperature": 0.7
         }
-        
+
         result = self.validator.validate_conversation_input(valid_data)
         assert result.valid
         assert len(result.errors) == 0
@@ -237,7 +236,7 @@ class TestWorkflowValidation:
             "max_tokens": -1,  # Invalid
             "temperature": 2.5  # Out of range
         }
-        
+
         result = self.validator.validate_conversation_input(invalid_data)
         assert not result.valid
         assert len(result.errors) > 0
@@ -250,7 +249,7 @@ class TestWorkflowValidation:
             "role": "user",
             "conversation_id": "conv-123"
         }
-        
+
         result = self.validator.validate_message_input(valid_message)
         assert result.valid
 
@@ -261,7 +260,7 @@ class TestWorkflowValidation:
             {"content": "Hello", "role": "user", "conversation_id": ""},  # Empty conv ID
             {"content": "x" * 100000, "role": "user", "conversation_id": "conv-123"}  # Too long
         ]
-        
+
         for invalid_message in invalid_messages:
             result = self.validator.validate_message_input(invalid_message)
             assert not result.valid
@@ -278,7 +277,7 @@ class TestWorkflowValidation:
             "stop": ["</end>"],
             "stream": True
         }
-        
+
         result = self.validator.validate_workflow_parameters(valid_params)
         assert result.valid
 
@@ -292,7 +291,7 @@ class TestWorkflowValidation:
             "stop": ["x" * 1000],  # Stop sequence too long
             "stream": "yes"  # Wrong type
         }
-        
+
         result = self.validator.validate_workflow_parameters(invalid_params)
         assert not result.valid
         assert len(result.errors) > 0
@@ -305,7 +304,7 @@ class TestWorkflowValidation:
             "sk-live-1234567890abcdef1234567890abcdef12345678",
             "sk-ant-api03-abcdef1234567890abcdef1234567890abcdef"
         ]
-        
+
         for key in valid_keys:
             assert self.validator.validate_api_key_format(key)
 
@@ -317,7 +316,7 @@ class TestWorkflowValidation:
             "sk-proj-short",
             "not-an-api-key"
         ]
-        
+
         for key in invalid_keys:
             assert not self.validator.validate_api_key_format(key)
 
@@ -329,7 +328,7 @@ class TestWorkflowValidation:
             {"requests_per_minute": 10, "tokens_per_minute": 1000},
             {"requests_per_minute": 100, "tokens_per_minute": 50000}
         ]
-        
+
         for limit in valid_limits:
             result = self.validator.validate_rate_limits(limit)
             assert result.valid
@@ -341,7 +340,7 @@ class TestWorkflowValidation:
             {"requests_per_minute": -1, "tokens_per_minute": 1000},  # Negative
             {"requests_per_minute": 10000, "tokens_per_minute": 1000000}  # Too high
         ]
-        
+
         for limit in invalid_limits:
             result = self.validator.validate_rate_limits(limit)
             assert not result.valid
@@ -358,7 +357,7 @@ class TestValidationRules:
             validator=lambda x: "@" in x and "." in x,
             error_message="Invalid email format"
         )
-        
+
         assert rule.name == "email_format"
         assert rule.validate("test@example.com")
         assert not rule.validate("invalid-email")
@@ -372,18 +371,18 @@ class TestValidationRules:
             ValidationRule("max_length", lambda x: len(x) <= 50, "Must be at most 50 characters"),
             ValidationRule("alphanumeric", lambda x: x.isalnum(), "Must be alphanumeric")
         ]
-        
+
         validator = WorkflowValidator()
-        
+
         # Valid input
         result = validator.apply_rules("test123", rules)
         assert result.valid
-        
+
         # Invalid input (fails multiple rules)
         result = validator.apply_rules("", rules)
         assert not result.valid
         assert "Cannot be empty" in result.errors[0]
-        
+
         result = validator.apply_rules("ab", rules)
         assert not result.valid
         assert "Must be at least 3 characters" in result.errors[0]
@@ -398,13 +397,13 @@ class TestValidationRules:
             if not any(c.isdigit() for c in password):
                 return False
             return True
-        
+
         rule = ValidationRule(
             name="password_strength",
             validator=password_strength_rule,
             error_message="Password must be at least 8 characters with uppercase and digit"
         )
-        
+
         assert rule.validate("StrongPass123")
         assert not rule.validate("weak")
         assert not rule.validate("nostrongcase")
@@ -413,19 +412,19 @@ class TestValidationRules:
     def test_custom_validation_context(self):
         """Test validation with custom context."""
         validator = WorkflowValidator()
-        
+
         # Context-aware validation (e.g., user permissions)
         context = {
             "user_role": "admin",
             "feature_flags": ["advanced_features"],
             "subscription_tier": "premium"
         }
-        
+
         # Admin can use advanced models
         model_data = {"model": "gpt-4", "advanced_params": True}
         result = validator.validate_with_context(model_data, context)
         assert result.valid
-        
+
         # Regular user cannot
         context["user_role"] = "user"
         context["subscription_tier"] = "free"
@@ -445,10 +444,10 @@ class TestValidationIntegration:
             "model": "invalid-model",
             "max_tokens": -1
         }
-        
+
         response = await test_client.post("/api/v1/conversations", json=invalid_data)
         assert response.status_code == 400
-        
+
         data = response.json()
         assert "validation" in data["title"].lower() or "field_errors" in data
 
@@ -459,7 +458,7 @@ class TestValidationIntegration:
             "content": "",  # Empty content
             "conversation_id": "invalid-id"
         }
-        
+
         response = await test_client.post("/api/v1/chat", json=invalid_message)
         assert response.status_code == 400
 
@@ -468,7 +467,7 @@ class TestValidationIntegration:
         # This would test actual file upload validation
         # For now, we'll test the validation logic
         validator = WorkflowValidator()
-        
+
         # Simulate malicious file upload
         malicious_file = {
             "filename": "virus.exe",
@@ -476,7 +475,7 @@ class TestValidationIntegration:
             "type": "application/x-executable",
             "content": b"malicious content"
         }
-        
+
         result = validator.validate_file_upload(malicious_file)
         assert not result.valid
         assert "executable" in result.errors[0].lower() or "not allowed" in result.errors[0].lower()
@@ -486,7 +485,7 @@ class TestValidationIntegration:
         # Test rapid requests to trigger validation
         # This would normally be handled by middleware
         validator = WorkflowValidator()
-        
+
         # Simulate rate limit check
         rate_limit_data = {
             "user_id": "user-123",
@@ -494,7 +493,7 @@ class TestValidationIntegration:
             "tokens_in_window": 50000,
             "window_start": "2024-01-01T00:00:00Z"
         }
-        
+
         result = validator.validate_rate_limit_status(rate_limit_data)
         # Would depend on configured limits
         assert isinstance(result.valid, bool)
@@ -517,17 +516,17 @@ class TestValidationIntegration:
                 "stream": True
             }
         }
-        
+
         validator = WorkflowValidator()
-        
+
         # Validate conversation
         conv_result = validator.validate_conversation_input(workflow_data["conversation"])
         assert conv_result.valid
-        
+
         # Validate message
         msg_result = validator.validate_message_input(workflow_data["message"])
         assert msg_result.valid
-        
+
         # Validate parameters
         param_result = validator.validate_workflow_parameters(workflow_data["parameters"])
         assert param_result.valid

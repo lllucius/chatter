@@ -5,7 +5,6 @@ import json
 from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Any
 
 from chatter.api.auth import get_current_user
 from chatter.core.chat import (
@@ -33,8 +32,8 @@ from chatter.schemas.chat import (
     MessageDeleteResponse,
     MessageResponse,
     PerformanceStatsResponse,
-    WorkflowTemplatesResponse,
     WorkflowTemplateInfo,
+    WorkflowTemplatesResponse,
 )
 from chatter.services.llm import LLMService
 from chatter.utils.database import get_session
@@ -436,15 +435,17 @@ async def get_workflow_templates(
 ) -> WorkflowTemplatesResponse:
     """Get available workflow templates."""
     try:
-        from chatter.core.workflow_templates import WorkflowTemplateManager
-        
+        from chatter.core.workflow_templates import (
+            WorkflowTemplateManager,
+        )
+
         templates_data = WorkflowTemplateManager.get_template_info()
-        
+
         # Convert to structured response
         templates = {}
         for name, template_info in templates_data.items():
             templates[name] = WorkflowTemplateInfo(**template_info)
-        
+
         return WorkflowTemplatesResponse(
             templates=templates,
             total_count=len(templates)
@@ -467,7 +468,7 @@ async def chat_with_template(
         conversation, assistant_message = await chat_service.chat_with_template(
             current_user.id, chat_request, template_name
         )
-        
+
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),

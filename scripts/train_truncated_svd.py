@@ -21,10 +21,10 @@ logger = get_logger(__name__)
 
 def load_training_corpus(corpus_path: str) -> list[str]:
     """Load training corpus from a text file.
-    
+
     Args:
         corpus_path: Path to corpus file (one text per line)
-        
+
     Returns:
         List of text strings
     """
@@ -47,14 +47,14 @@ def train_truncated_svd(
     output_path: str = None,
 ) -> str:
     """Train a TruncatedSVD model for dimensional reduction.
-    
+
     Args:
         texts: List of training texts
         provider: Embedding provider name
         target_dim: Target dimension after reduction
         sample_size: Maximum number of texts to use (None for all)
         output_path: Output path for the trained model
-        
+
     Returns:
         Path to the saved model
     """

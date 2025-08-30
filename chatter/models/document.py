@@ -303,7 +303,7 @@ class DocumentChunk(Base):
 
     def add_embedding_model(self, model_name: str, set_as_primary: bool = False) -> None:
         """Add an embedding model to the list of applied models.
-        
+
         Args:
             model_name: Name of the embedding model
             set_as_primary: Whether to set this as the primary model
@@ -319,7 +319,7 @@ class DocumentChunk(Base):
 
     def remove_embedding_model(self, model_name: str) -> None:
         """Remove an embedding model from the list.
-        
+
         Args:
             model_name: Name of the embedding model to remove
         """

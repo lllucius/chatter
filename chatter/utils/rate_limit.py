@@ -17,7 +17,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, requests_per_minute: int = 60,
                  requests_per_hour: int = 1000):
         """Initialize rate limiter.
-        
+
         Args:
             app: FastAPI application
             requests_per_minute: Requests allowed per minute
@@ -33,10 +33,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     def _get_client_identifier(self, request: Request) -> str:
         """Get unique client identifier.
-        
+
         Args:
             request: The incoming request
-            
+
         Returns:
             Client identifier (IP or user ID)
         """
@@ -57,7 +57,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     def _clean_old_requests(self, client_id: str, window_seconds: int) -> None:
         """Remove old requests outside the time window.
-        
+
         Args:
             client_id: Client identifier
             window_seconds: Time window in seconds
@@ -74,10 +74,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     def _check_rate_limit(self, client_id: str) -> tuple[bool, dict[str, str]]:
         """Check if client is within rate limits.
-        
+
         Args:
             client_id: Client identifier
-            
+
         Returns:
             Tuple of (allowed, headers_dict)
         """
@@ -136,14 +136,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> Response:
         """Apply rate limiting with headers.
-        
+
         Args:
             request: The incoming request
             call_next: The next middleware in the chain
-            
+
         Returns:
             Response with rate limiting headers
-            
+
         Raises:
             HTTPException: If rate limit exceeded
         """

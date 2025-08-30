@@ -214,7 +214,7 @@ class DocumentDeleteRequest(DeleteRequestBase):
 
 class DocumentDeleteResponse(BaseModel):
     """Response schema for document deletion."""
-    
+
     message: str = Field(..., description="Deletion result message")
 
 

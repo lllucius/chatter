@@ -58,7 +58,6 @@ class DocumentProcessingService:
         """
         self.session = session
         self.embedding_service = EmbeddingService()
-        a = 1
         self.vector_store_service = DynamicVectorStoreService(session)
         self.storage_path = Path(settings.document_storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)

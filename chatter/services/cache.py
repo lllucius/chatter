@@ -46,10 +46,10 @@ class CacheService:
 
     async def get(self, key: str) -> Any:
         """Get value from cache.
-        
+
         Args:
             key: Cache key
-            
+
         Returns:
             Cached value or None if not found/cache unavailable
         """
@@ -72,12 +72,12 @@ class CacheService:
         expire: timedelta | None = None
     ) -> bool:
         """Set value in cache.
-        
+
         Args:
             key: Cache key
             value: Value to cache
             expire: Expiration time
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -97,10 +97,10 @@ class CacheService:
 
     async def delete(self, key: str) -> bool:
         """Delete value from cache.
-        
+
         Args:
             key: Cache key
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -116,7 +116,7 @@ class CacheService:
 
     async def clear(self) -> bool:
         """Clear all cached values.
-        
+
         Returns:
             True if successful, False otherwise
         """
@@ -133,7 +133,7 @@ class CacheService:
 
     def is_connected(self) -> bool:
         """Check if cache is connected.
-        
+
         Returns:
             True if connected, False otherwise
         """
@@ -146,7 +146,7 @@ cache_service = CacheService()
 
 async def get_cache_service() -> CacheService:
     """Get cache service instance (dependency injection).
-    
+
     Returns:
         Cache service instance
     """

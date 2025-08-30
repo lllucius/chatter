@@ -1,26 +1,27 @@
 """TypeScript SDK generation."""
 
-import json
 from pathlib import Path
-from typing import Any, Dict, List
 
 from scripts.sdk.base import SDKGenerator
-from scripts.utils.config import TypeScriptSDKConfig, get_openapi_generator_config
+from scripts.utils.config import (
+    TypeScriptSDKConfig,
+    get_openapi_generator_config,
+)
 from scripts.utils.files import save_json, save_text, verify_files_exist
 from scripts.utils.subprocess import ensure_command_available
 
 
 class TypeScriptSDKGenerator(SDKGenerator):
     """Generator for TypeScript SDK using OpenAPI Generator."""
-    
+
     def __init__(self, config: TypeScriptSDKConfig):
         super().__init__(config)
         self.config: TypeScriptSDKConfig = config
-    
+
     def generate(self) -> bool:
         """Generate TypeScript SDK using OpenAPI Generator."""
         print("📦 Generating TypeScript SDK...")
-        
+
         # Check dependencies
         try:
             ensure_command_available(
@@ -31,10 +32,10 @@ class TypeScriptSDKGenerator(SDKGenerator):
             print(f"❌ {e}")
             print("⚠️  OpenAPI generator not available, creating mock SDK for testing")
             return self._create_mock_typescript_sdk()
-        
+
         # Prepare output directory
         self.prepare_output_directory()
-        
+
         # Generate OpenAPI spec
         try:
             spec = self.generate_openapi_spec()
@@ -44,59 +45,59 @@ class TypeScriptSDKGenerator(SDKGenerator):
             from scripts.sdk.base import MockOpenAPISpec
             spec = MockOpenAPISpec.get_mock_spec()
             print("⚠️  Using mock OpenAPI spec for testing")
-        
+
         # Update config with spec version
         if "info" in spec and "version" in spec["info"]:
             self.config.package_version = spec["info"]["version"]
-        
+
         # Save temporary files
         spec_path = self.save_temp_openapi_spec(spec)
         generator_config = get_openapi_generator_config(self.config)
         config_path = self.save_generator_config(generator_config)
-        
+
         # Generate SDK
         success = self.run_generator_command(
             "typescript-axios",
             spec_path,
             config_path
         )
-        
+
         if not success:
             return False
-        
+
         # Create additional files
         self._create_package_json()
         self._create_index_file()
         self._create_readme()
-        
+
         print("✅ TypeScript SDK generated successfully!")
         print(f"📁 SDK location: {self.config.output_dir}")
-        
+
         return True
-    
+
     def validate(self) -> bool:
         """Validate the generated TypeScript SDK."""
         print("🔍 Validating TypeScript SDK...")
-        
+
         expected_files = self.get_expected_files()
         missing_files = verify_files_exist(
-            self.config.output_dir, 
+            self.config.output_dir,
             expected_files,
             "TypeScript SDK files"
         )
-        
+
         if missing_files:
             print(f"❌ Validation failed: {len(missing_files)} missing files")
             return False
-        
+
         # Additional validation: check if TypeScript files are syntactically valid
         if not self._validate_typescript_syntax():
             return False
-        
+
         print("✅ TypeScript SDK validation passed")
         return True
-    
-    def get_expected_files(self) -> List[str]:
+
+    def get_expected_files(self) -> list[str]:
         """Get list of expected files after generation."""
         base_files = [
             "index.ts",
@@ -105,14 +106,14 @@ class TypeScriptSDKGenerator(SDKGenerator):
             "configuration.ts",
             "base.ts",
         ]
-        
+
         # Check for either single files or separate directories
         # The exact structure depends on the generator configuration
         api_files = ["api.ts"]  # or "api/" directory
         model_files = []  # "models.ts" might be generated or not
-        
+
         return base_files + api_files + model_files
-    
+
     def _create_package_json(self) -> None:
         """Create package.json file for the SDK."""
         package_json_content = {
@@ -143,9 +144,9 @@ class TypeScriptSDKGenerator(SDKGenerator):
                 "@types/node": "^16.18.126"
             }
         }
-        
+
         save_json(package_json_content, self.config.output_dir / "package.json")
-    
+
     def _create_index_file(self) -> None:
         """Create main index.ts file that exports everything."""
         index_content = '''/**
@@ -160,25 +161,25 @@ export * from './api';
 export { Configuration } from './configuration';
 export { BaseAPI } from './base';
 '''
-        
+
         # Check what files were actually generated and adjust exports
         api_ts_path = self.config.output_dir / "api.ts"
         api_dir_path = self.config.output_dir / "api"
         models_ts_path = self.config.output_dir / "models.ts"
         models_dir_path = self.config.output_dir / "models"
-        
+
         if api_ts_path.exists():
             index_content += "export * from './api';\n"
         elif api_dir_path.exists():
             index_content += "export * from './api';\n"
-        
+
         if models_ts_path.exists():
             index_content += "export * from './models';\n"
         elif models_dir_path.exists():
             index_content += "export * from './models';\n"
-        
+
         save_text(index_content, self.config.output_dir / "index.ts")
-    
+
     def _create_readme(self) -> None:
         """Create README file for the SDK."""
         readme_content = f"""# Chatter TypeScript SDK
@@ -260,18 +261,21 @@ python scripts/generate_all.py
 
 The SDK is generated as part of the development workflow and should not be manually edited. All changes should be made to the backend API and OpenAPI specification, then the SDK should be regenerated.
 """
-        
+
         save_text(readme_content, self.config.output_dir / "README.md")
-    
+
     def _validate_typescript_syntax(self) -> bool:
         """Validate TypeScript syntax using tsc if available."""
         try:
-            from scripts.utils.subprocess import check_command_available, run_command
-            
+            from scripts.utils.subprocess import (
+                check_command_available,
+                run_command,
+            )
+
             if not check_command_available("tsc"):
                 print("⚠️  TypeScript compiler not available, skipping syntax validation")
                 return True
-            
+
             # Run TypeScript compiler in dry-run mode
             success, _, stderr = run_command(
                 ["tsc", "--noEmit", "--skipLibCheck", "index.ts"],
@@ -279,24 +283,24 @@ The SDK is generated as part of the development workflow and should not be manua
                 cwd=self.config.output_dir,
                 check=False
             )
-            
+
             if not success:
                 print(f"❌ TypeScript syntax validation failed: {stderr}")
                 return False
-            
+
             return True
-            
+
         except Exception as e:
             print(f"⚠️  Could not validate TypeScript syntax: {e}")
             return True  # Don't fail generation due to validation issues
-    
+
     def _create_mock_typescript_sdk(self) -> bool:
         """Create a minimal mock TypeScript SDK for testing."""
         print("📝 Creating mock TypeScript SDK files...")
-        
+
         # Prepare output directory
         self.prepare_output_directory()
-        
+
         # Create minimal TypeScript files
         self._create_mock_api_file()
         self._create_mock_base_file()
@@ -304,12 +308,12 @@ The SDK is generated as part of the development workflow and should not be manua
         self._create_package_json()
         self._create_index_file()
         self._create_readme()
-        
+
         print("✅ Mock TypeScript SDK created successfully!")
         print(f"📁 SDK location: {self.config.output_dir}")
-        
+
         return True
-    
+
     def _create_mock_api_file(self) -> None:
         """Create a mock API file."""
         api_content = '''/**
@@ -343,9 +347,9 @@ export class HealthApi extends BaseAPI {
 export * from './base';
 export * from './configuration';
 '''
-        
+
         save_text(api_content, self.config.output_dir / "api.ts")
-    
+
     def _create_mock_base_file(self) -> None:
         """Create a mock base API file."""
         base_content = '''/**
@@ -372,10 +376,10 @@ export class BaseAPI {
         // Add auth interceptor if access token is available
         if (this.configuration.accessToken) {
             instance.interceptors.request.use((config) => {
-                const token = typeof this.configuration.accessToken === 'function' 
-                    ? this.configuration.accessToken() 
+                const token = typeof this.configuration.accessToken === 'function'
+                    ? this.configuration.accessToken()
                     : this.configuration.accessToken;
-                
+
                 if (token) {
                     config.headers.Authorization = `Bearer ${token}`;
                 }
@@ -394,9 +398,9 @@ export class BaseAPI {
     }
 }
 '''
-        
+
         save_text(base_content, self.config.output_dir / "base.ts")
-    
+
     def _create_mock_configuration_file(self) -> None:
         """Create a mock configuration file."""
         config_content = '''/**
@@ -424,22 +428,22 @@ export class Configuration {
     }
 }
 '''
-        
+
         save_text(config_content, self.config.output_dir / "configuration.ts")
 
 
 def main():
     """Main function to generate TypeScript SDK."""
     from scripts.utils.config import get_default_typescript_config
-    
+
     # Get project root
     project_root = Path(__file__).parent.parent.parent
     config = get_default_typescript_config(project_root)
-    
+
     # Generate SDK
     generator = TypeScriptSDKGenerator(config)
     success = generator.generate_with_cleanup()
-    
+
     if success:
         # Validate generated SDK
         if generator.validate():
@@ -449,13 +453,13 @@ def main():
     else:
         print("\n❌ TypeScript SDK generation failed!")
         return 1
-    
+
     print("\n📋 Next steps:")
     print("1. Review the generated SDK code")
     print("2. Update frontend imports to use the generated SDK")
     print("3. Test the frontend with the new SDK")
     print("4. Build the frontend to verify TypeScript compilation")
-    
+
     return 0
 
 

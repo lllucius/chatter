@@ -5,7 +5,7 @@ workflows for common scenarios like customer support, code assistance, and resea
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from chatter.core.exceptions import WorkflowConfigurationError
 
@@ -16,9 +16,9 @@ class WorkflowTemplate:
     name: str
     workflow_type: str
     description: str
-    default_params: Dict[str, Any]
-    required_tools: Optional[List[str]] = None
-    required_retrievers: Optional[List[str]] = None
+    default_params: dict[str, Any]
+    required_tools: list[str] | None = None
+    required_retrievers: list[str] | None = None
 
 
 # Built-in workflow templates
@@ -36,7 +36,7 @@ WORKFLOW_TEMPLATES = {
         required_tools=["search_kb", "create_ticket", "escalate"],
         required_retrievers=["support_docs"]
     ),
-    
+
     "code_assistant": WorkflowTemplate(
         name="code_assistant",
         workflow_type="tools",
@@ -49,7 +49,7 @@ WORKFLOW_TEMPLATES = {
         },
         required_tools=["execute_code", "search_docs", "generate_tests"]
     ),
-    
+
     "research_assistant": WorkflowTemplate(
         name="research_assistant",
         workflow_type="rag",
@@ -62,7 +62,7 @@ WORKFLOW_TEMPLATES = {
         },
         required_retrievers=["research_docs"]
     ),
-    
+
     "general_chat": WorkflowTemplate(
         name="general_chat",
         workflow_type="plain",
@@ -73,7 +73,7 @@ WORKFLOW_TEMPLATES = {
             "system_message": "You are a helpful, harmless, and honest AI assistant. Engage in natural conversation while being informative and supportive."
         }
     ),
-    
+
     "document_qa": WorkflowTemplate(
         name="document_qa",
         workflow_type="rag",
@@ -86,7 +86,7 @@ WORKFLOW_TEMPLATES = {
         },
         required_retrievers=["document_store"]
     ),
-    
+
     "data_analyst": WorkflowTemplate(
         name="data_analyst",
         workflow_type="tools",
@@ -104,17 +104,17 @@ WORKFLOW_TEMPLATES = {
 
 class WorkflowTemplateManager:
     """Manages workflow templates and template-based workflow creation."""
-    
+
     @classmethod
     def get_template(cls, template_name: str) -> WorkflowTemplate:
         """Get a workflow template by name.
-        
+
         Args:
             template_name: Name of the template to retrieve
-            
+
         Returns:
             WorkflowTemplate: The requested template
-            
+
         Raises:
             WorkflowConfigurationError: If template is not found
         """
@@ -124,20 +124,20 @@ class WorkflowTemplateManager:
                 f"Template '{template_name}' not found. Available templates: {available}"
             )
         return WORKFLOW_TEMPLATES[template_name]
-    
+
     @classmethod
-    def list_templates(cls) -> List[str]:
+    def list_templates(cls) -> list[str]:
         """List available template names.
-        
+
         Returns:
             List of template names
         """
         return list(WORKFLOW_TEMPLATES.keys())
-    
+
     @classmethod
-    def get_template_info(cls) -> Dict[str, Dict[str, Any]]:
+    def get_template_info(cls) -> dict[str, dict[str, Any]]:
         """Get information about all available templates.
-        
+
         Returns:
             Dictionary mapping template names to their information
         """
@@ -152,19 +152,19 @@ class WorkflowTemplateManager:
             }
             for name, template in WORKFLOW_TEMPLATES.items()
         }
-    
+
     @classmethod
     async def create_workflow_from_template(
-        cls, 
-        template_name: str, 
+        cls,
+        template_name: str,
         llm_service: Any,
         provider_name: str,
-        overrides: Optional[Dict[str, Any]] = None,
+        overrides: dict[str, Any] | None = None,
         retriever: Any = None,
-        tools: Optional[List[Any]] = None
+        tools: list[Any] | None = None
     ):
         """Create a workflow from a template.
-        
+
         Args:
             template_name: Name of the template to use
             llm_service: LLM service instance
@@ -172,83 +172,83 @@ class WorkflowTemplateManager:
             overrides: Parameter overrides for the template
             retriever: Retriever instance (if required by template)
             tools: List of tools (if required by template)
-            
+
         Returns:
             Configured workflow instance
-            
+
         Raises:
             WorkflowConfigurationError: If template requirements are not met
         """
         template = cls.get_template(template_name)
         params = template.default_params.copy()
-        
+
         # Apply overrides
         if overrides:
             params.update(overrides)
-        
+
         # Validate requirements
         if template.required_tools and not tools:
             raise WorkflowConfigurationError(
                 f"Template '{template_name}' requires tools: {template.required_tools}"
             )
-        
+
         if template.required_retrievers and not retriever:
             raise WorkflowConfigurationError(
                 f"Template '{template_name}' requires retrievers: {template.required_retrievers}"
             )
-        
+
         # Create workflow with template parameters
         workflow_kwargs = {
             "provider_name": provider_name,
             "workflow_type": template.workflow_type,
             **params
         }
-        
+
         # Add retriever and tools if provided
         if retriever:
             workflow_kwargs["retriever"] = retriever
         if tools:
             workflow_kwargs["tools"] = tools
-        
+
         return await llm_service.create_langgraph_workflow(**workflow_kwargs)
-    
+
     @classmethod
     def validate_template_requirements(
         cls,
         template_name: str,
-        available_tools: Optional[List[str]] = None,
-        available_retrievers: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        available_tools: list[str] | None = None,
+        available_retrievers: list[str] | None = None
+    ) -> dict[str, Any]:
         """Validate if template requirements can be satisfied.
-        
+
         Args:
             template_name: Name of the template to validate
             available_tools: List of available tool names
             available_retrievers: List of available retriever names
-            
+
         Returns:
             Dictionary with validation results
         """
         template = cls.get_template(template_name)
-        
+
         result = {
             "valid": True,
             "missing_tools": [],
             "missing_retrievers": [],
             "requirements_met": True
         }
-        
+
         # Check tool requirements
         if template.required_tools:
             available_tools = available_tools or []
             missing_tools = [
-                tool for tool in template.required_tools 
+                tool for tool in template.required_tools
                 if tool not in available_tools
             ]
             if missing_tools:
                 result["missing_tools"] = missing_tools
                 result["requirements_met"] = False
-        
+
         # Check retriever requirements
         if template.required_retrievers:
             available_retrievers = available_retrievers or []
@@ -259,6 +259,6 @@ class WorkflowTemplateManager:
             if missing_retrievers:
                 result["missing_retrievers"] = missing_retrievers
                 result["requirements_met"] = False
-        
+
         result["valid"] = result["requirements_met"]
         return result

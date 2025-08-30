@@ -104,7 +104,7 @@ def demonstrate_basic_functionality():
 
     mock_engine = MockEngine()
 
-    for provider, expected_dim in providers:
+    for provider, _expected_dim in providers:
         actual_dim = get_model_dimensions(provider)
         model_class = get_embedding_model(provider, actual_dim, mock_engine)
 
@@ -233,7 +233,7 @@ def demonstrate_index_configurations():
 
         # Simulate index creation
         mock_engine = type('MockEngine', (), {})()
-        model_class = get_embedding_model(provider, get_model_dimensions(provider), mock_engine, **config)
+        get_embedding_model(provider, get_model_dimensions(provider), mock_engine, **config)
         print()
 
 
@@ -323,10 +323,10 @@ async def demonstrate_async_workflow():
 def main():
     """Run all demonstrations."""
     # Basic functionality
-    models = demonstrate_basic_functionality()
+    demonstrate_basic_functionality()
 
     # Storage workflow
-    stored = demonstrate_storage_workflow()
+    demonstrate_storage_workflow()
 
     # Search concepts
     demonstrate_similarity_search()

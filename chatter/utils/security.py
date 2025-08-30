@@ -338,15 +338,15 @@ def validate_password_strength(password: str) -> dict[str, Any]:
 
 def generate_secure_secret(length: int = 32) -> str:
     """Generate a cryptographically secure secret.
-    
+
     Args:
         length: Length of the secret to generate
-        
+
     Returns:
         Secure random string
     """
     import secrets
     import string
-    
+
     alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
     return "".join(secrets.choice(alphabet) for _ in range(length))

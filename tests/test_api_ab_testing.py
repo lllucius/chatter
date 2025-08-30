@@ -1,9 +1,7 @@
 """A/B Testing API tests."""
 
+
 import pytest
-from unittest.mock import patch, AsyncMock
-import json
-from datetime import datetime, timedelta
 
 
 @pytest.mark.unit
@@ -19,7 +17,7 @@ class TestABTestingAPI:
             "username": "abtestuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "abtestuser@example.com",
             "password": "SecurePass123!"
@@ -27,7 +25,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create A/B test
         test_data = {
             "name": "Model Comparison Test",
@@ -47,10 +45,10 @@ class TestABTestingAPI:
             "success_metric": "user_satisfaction",
             "duration_days": 7
         }
-        
+
         response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         assert response.status_code == 201
-        
+
         data = response.json()
         assert data["name"] == "Model Comparison Test"
         assert data["description"] == "Compare GPT-3.5 vs GPT-4 performance"
@@ -67,7 +65,7 @@ class TestABTestingAPI:
             "username": "listabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "listabuser@example.com",
             "password": "SecurePass123!"
@@ -75,7 +73,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create multiple A/B tests
         test_names = ["Test A", "Test B", "Test C"]
         for name in test_names:
@@ -90,11 +88,11 @@ class TestABTestingAPI:
                 "duration_days": 7
             }
             await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
-        
+
         # List A/B tests
         response = await test_client.get("/api/v1/ab-tests", headers=headers)
         assert response.status_code == 200
-        
+
         data = response.json()
         assert len(data) >= 3
         test_names_response = [test["name"] for test in data]
@@ -110,7 +108,7 @@ class TestABTestingAPI:
             "username": "getabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "getabuser@example.com",
             "password": "SecurePass123!"
@@ -118,7 +116,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create A/B test
         test_data = {
             "name": "Specific Test",
@@ -132,11 +130,11 @@ class TestABTestingAPI:
         }
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         test_id = create_response.json()["id"]
-        
+
         # Get A/B test
         response = await test_client.get(f"/api/v1/ab-tests/{test_id}", headers=headers)
         assert response.status_code == 200
-        
+
         data = response.json()
         assert data["id"] == test_id
         assert data["name"] == "Specific Test"
@@ -150,7 +148,7 @@ class TestABTestingAPI:
             "username": "startabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "startabuser@example.com",
             "password": "SecurePass123!"
@@ -158,7 +156,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create A/B test
         test_data = {
             "name": "Start Test",
@@ -172,13 +170,13 @@ class TestABTestingAPI:
         }
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         test_id = create_response.json()["id"]
-        
+
         # Start A/B test
         response = await test_client.post(f"/api/v1/ab-tests/{test_id}/start", headers=headers)
-        
+
         # Should either succeed or return 404 if endpoint not implemented
         assert response.status_code in [200, 404, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert data["status"] == "running"
@@ -193,7 +191,7 @@ class TestABTestingAPI:
             "username": "pauseabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "pauseabuser@example.com",
             "password": "SecurePass123!"
@@ -201,7 +199,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create and start A/B test
         test_data = {
             "name": "Pause Test",
@@ -215,16 +213,16 @@ class TestABTestingAPI:
         }
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         test_id = create_response.json()["id"]
-        
+
         # Start the test first (if endpoint exists)
         await test_client.post(f"/api/v1/ab-tests/{test_id}/start", headers=headers)
-        
+
         # Pause A/B test
         response = await test_client.post(f"/api/v1/ab-tests/{test_id}/pause", headers=headers)
-        
+
         # Should either succeed or return 404 if endpoint not implemented
         assert response.status_code in [200, 404, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert data["status"] == "paused"
@@ -238,7 +236,7 @@ class TestABTestingAPI:
             "username": "completeabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "completeabuser@example.com",
             "password": "SecurePass123!"
@@ -246,7 +244,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create A/B test
         test_data = {
             "name": "Complete Test",
@@ -260,13 +258,13 @@ class TestABTestingAPI:
         }
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         test_id = create_response.json()["id"]
-        
+
         # Complete A/B test
         response = await test_client.post(f"/api/v1/ab-tests/{test_id}/complete", headers=headers)
-        
+
         # Should either succeed or return 404 if endpoint not implemented
         assert response.status_code in [200, 404, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert data["status"] == "completed"
@@ -281,7 +279,7 @@ class TestABTestingAPI:
             "username": "resultsabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "resultsabuser@example.com",
             "password": "SecurePass123!"
@@ -289,7 +287,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create A/B test
         test_data = {
             "name": "Results Test",
@@ -303,13 +301,13 @@ class TestABTestingAPI:
         }
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         test_id = create_response.json()["id"]
-        
+
         # Get A/B test results
         response = await test_client.get(f"/api/v1/ab-tests/{test_id}/results", headers=headers)
-        
+
         # Should either succeed or return 404 if endpoint not implemented
         assert response.status_code in [200, 404, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "variants" in data or "results" in data
@@ -324,7 +322,7 @@ class TestABTestingAPI:
             "username": "metricsabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "metricsabuser@example.com",
             "password": "SecurePass123!"
@@ -332,7 +330,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create A/B test
         test_data = {
             "name": "Metrics Test",
@@ -346,13 +344,13 @@ class TestABTestingAPI:
         }
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         test_id = create_response.json()["id"]
-        
+
         # Get A/B test metrics
         response = await test_client.get(f"/api/v1/ab-tests/{test_id}/metrics", headers=headers)
-        
+
         # Should either succeed or return 404 if endpoint not implemented
         assert response.status_code in [200, 404, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "metrics" in data or "performance" in data
@@ -366,7 +364,7 @@ class TestABTestingAPI:
             "username": "perfabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "perfabuser@example.com",
             "password": "SecurePass123!"
@@ -374,7 +372,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create A/B test
         test_data = {
             "name": "Performance Test",
@@ -388,13 +386,13 @@ class TestABTestingAPI:
         }
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         test_id = create_response.json()["id"]
-        
+
         # Get A/B test performance
         response = await test_client.get(f"/api/v1/ab-tests/{test_id}/performance", headers=headers)
-        
+
         # Should either succeed or return 404 if endpoint not implemented
         assert response.status_code in [200, 404, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "performance" in data or "response_times" in data
@@ -408,7 +406,7 @@ class TestABTestingAPI:
             "username": "updateabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "updateabuser@example.com",
             "password": "SecurePass123!"
@@ -416,7 +414,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create A/B test
         test_data = {
             "name": "Update Test",
@@ -430,19 +428,19 @@ class TestABTestingAPI:
         }
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         test_id = create_response.json()["id"]
-        
+
         # Update A/B test
         update_data = {
             "name": "Updated Test Name",
             "description": "Updated description",
             "duration_days": 14
         }
-        
+
         response = await test_client.put(f"/api/v1/ab-tests/{test_id}", json=update_data, headers=headers)
-        
+
         # Should either succeed or return 404 if endpoint not implemented
         assert response.status_code in [200, 404, 405, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert data["name"] == "Updated Test Name"
@@ -458,7 +456,7 @@ class TestABTestingAPI:
             "username": "deleteabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "deleteabuser@example.com",
             "password": "SecurePass123!"
@@ -466,7 +464,7 @@ class TestABTestingAPI:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create A/B test
         test_data = {
             "name": "Delete Test",
@@ -480,13 +478,13 @@ class TestABTestingAPI:
         }
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         test_id = create_response.json()["id"]
-        
+
         # Delete A/B test
         response = await test_client.delete(f"/api/v1/ab-tests/{test_id}", headers=headers)
-        
+
         # Should either succeed or return 404 if endpoint not implemented
         assert response.status_code in [200, 204, 404, 405, 501]
-        
+
         if response.status_code in [200, 204]:
             # Verify deletion by trying to get the test
             get_response = await test_client.get(f"/api/v1/ab-tests/{test_id}", headers=headers)
@@ -506,7 +504,7 @@ class TestABTestValidation:
             "username": "validabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "validabuser@example.com",
             "password": "SecurePass123!"
@@ -514,16 +512,16 @@ class TestABTestValidation:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Test missing required fields
         invalid_test_data = {
             "name": "",  # Empty name
             # Missing description, variants, etc.
         }
-        
+
         response = await test_client.post("/api/v1/ab-tests", json=invalid_test_data, headers=headers)
         assert response.status_code == 400
-        
+
         # Test invalid variant weights
         invalid_weights_data = {
             "name": "Invalid Weights Test",
@@ -535,10 +533,10 @@ class TestABTestValidation:
             "success_metric": "user_satisfaction",
             "duration_days": 7
         }
-        
+
         response = await test_client.post("/api/v1/ab-tests", json=invalid_weights_data, headers=headers)
         assert response.status_code == 400
-        
+
         # Test invalid duration
         invalid_duration_data = {
             "name": "Invalid Duration Test",
@@ -550,7 +548,7 @@ class TestABTestValidation:
             "success_metric": "user_satisfaction",
             "duration_days": -1  # Negative duration
         }
-        
+
         response = await test_client.post("/api/v1/ab-tests", json=invalid_duration_data, headers=headers)
         assert response.status_code == 400
 
@@ -558,50 +556,50 @@ class TestABTestValidation:
         """Test variant allocation logic."""
         # This would test the logic for allocating users to variants
         # Since we don't have the actual implementation, we'll test the concept
-        
+
         # Mock variant allocation function
         def allocate_variant(user_id: str, test_id: str, variants: list) -> str:
             """Mock variant allocation based on user ID hash."""
             import hashlib
-            
+
             # Use consistent hashing to allocate users
             hash_input = f"{user_id}-{test_id}".encode()
             hash_value = int(hashlib.md5(hash_input).hexdigest(), 16)
-            
+
             # Calculate weights
             total_weight = sum(v["weight"] for v in variants)
             normalized_hash = hash_value % total_weight
-            
+
             cumulative_weight = 0
             for variant in variants:
                 cumulative_weight += variant["weight"]
                 if normalized_hash < cumulative_weight:
                     return variant["name"]
-            
+
             return variants[0]["name"]  # Fallback
-        
+
         # Test allocation
         variants = [
             {"name": "control", "weight": 50},
             {"name": "treatment", "weight": 50}
         ]
-        
+
         # Test multiple users get consistent allocation
         user1_variant = allocate_variant("user1", "test1", variants)
         user1_variant_again = allocate_variant("user1", "test1", variants)
         assert user1_variant == user1_variant_again  # Should be consistent
-        
+
         # Test distribution
         allocations = {}
         for i in range(1000):
             variant = allocate_variant(f"user{i}", "test1", variants)
             allocations[variant] = allocations.get(variant, 0) + 1
-        
+
         # Should be roughly 50/50 split
         control_count = allocations.get("control", 0)
         treatment_count = allocations.get("treatment", 0)
         total = control_count + treatment_count
-        
+
         assert abs(control_count / total - 0.5) < 0.1  # Within 10% of expected
         assert abs(treatment_count / total - 0.5) < 0.1
 
@@ -619,7 +617,7 @@ class TestABTestingIntegration:
             "username": "lifecycleabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "lifecycleabuser@example.com",
             "password": "SecurePass123!"
@@ -627,7 +625,7 @@ class TestABTestingIntegration:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # 1. Create A/B test
         test_data = {
             "name": "Lifecycle Test",
@@ -642,25 +640,25 @@ class TestABTestingIntegration:
         create_response = await test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
         assert create_response.status_code == 201
         test_id = create_response.json()["id"]
-        
+
         # 2. Start the test (if endpoint exists)
         start_response = await test_client.post(f"/api/v1/ab-tests/{test_id}/start", headers=headers)
         if start_response.status_code == 200:
             assert start_response.json()["status"] == "running"
-        
+
         # 3. Get test status
         status_response = await test_client.get(f"/api/v1/ab-tests/{test_id}", headers=headers)
         assert status_response.status_code == 200
-        
+
         # 4. Get metrics (if endpoint exists)
         metrics_response = await test_client.get(f"/api/v1/ab-tests/{test_id}/metrics", headers=headers)
         assert metrics_response.status_code in [200, 404, 501]
-        
+
         # 5. Complete the test (if endpoint exists)
         complete_response = await test_client.post(f"/api/v1/ab-tests/{test_id}/complete", headers=headers)
         if complete_response.status_code == 200:
             assert complete_response.json()["status"] == "completed"
-        
+
         # 6. Get final results (if endpoint exists)
         results_response = await test_client.get(f"/api/v1/ab-tests/{test_id}/results", headers=headers)
         assert results_response.status_code in [200, 404, 501]
@@ -669,19 +667,19 @@ class TestABTestingIntegration:
         """Test A/B test with statistical analysis."""
         # This would test the statistical analysis components
         # Mock statistical significance calculation
-        
+
         def calculate_statistical_significance(control_data, treatment_data):
             """Mock statistical significance calculation."""
             # This would normally use proper statistical tests
             # For testing, we'll use a simple mock
-            
+
             control_mean = sum(control_data) / len(control_data) if control_data else 0
             treatment_mean = sum(treatment_data) / len(treatment_data) if treatment_data else 0
-            
+
             # Mock p-value calculation
             diff = abs(treatment_mean - control_mean)
             p_value = max(0.001, 0.1 - diff)  # Mock calculation
-            
+
             return {
                 "control_mean": control_mean,
                 "treatment_mean": treatment_mean,
@@ -689,13 +687,13 @@ class TestABTestingIntegration:
                 "p_value": p_value,
                 "significant": p_value < 0.05
             }
-        
+
         # Test statistical analysis
         control_satisfaction = [4.2, 4.1, 4.3, 4.0, 4.2, 4.1]  # Mock data
         treatment_satisfaction = [4.5, 4.6, 4.4, 4.7, 4.5, 4.6]  # Mock data
-        
+
         result = calculate_statistical_significance(control_satisfaction, treatment_satisfaction)
-        
+
         assert "control_mean" in result
         assert "treatment_mean" in result
         assert "p_value" in result
@@ -705,7 +703,7 @@ class TestABTestingIntegration:
     async def test_concurrent_ab_tests(self, test_client):
         """Test running multiple concurrent A/B tests."""
         import asyncio
-        
+
         # Setup user and auth
         registration_data = {
             "email": "concurrentabuser@example.com",
@@ -713,7 +711,7 @@ class TestABTestingIntegration:
             "username": "concurrentabuser"
         }
         await test_client.post("/api/v1/auth/register", json=registration_data)
-        
+
         login_data = {
             "email": "concurrentabuser@example.com",
             "password": "SecurePass123!"
@@ -721,7 +719,7 @@ class TestABTestingIntegration:
         login_response = await test_client.post("/api/v1/auth/login", json=login_data)
         token = login_response.json()["access_token"]
         headers = {"Authorization": f"Bearer {token}"}
-        
+
         # Create multiple A/B tests concurrently
         test_tasks = []
         for i in range(3):
@@ -737,18 +735,18 @@ class TestABTestingIntegration:
             }
             task = test_client.post("/api/v1/ab-tests", json=test_data, headers=headers)
             test_tasks.append(task)
-        
+
         # Execute concurrently
         responses = await asyncio.gather(*test_tasks)
-        
+
         # All should succeed
         for response in responses:
             assert response.status_code == 201
-        
+
         # Verify all tests were created
         list_response = await test_client.get("/api/v1/ab-tests", headers=headers)
         assert list_response.status_code == 200
-        
+
         tests = list_response.json()
         concurrent_tests = [t for t in tests if "Concurrent Test" in t["name"]]
         assert len(concurrent_tests) >= 3

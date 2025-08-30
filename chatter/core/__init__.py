@@ -23,7 +23,7 @@ except ImportError:
 
 __all__ = [
     "agent_manager",
-    "orchestrator", 
+    "orchestrator",
     "workflow_manager",
     "vector_store_manager"
 ]

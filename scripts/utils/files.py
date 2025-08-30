@@ -3,7 +3,7 @@
 import json
 import shutil
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 def ensure_directory(path: Path, clean: bool = False) -> None:
@@ -11,12 +11,12 @@ def ensure_directory(path: Path, clean: bool = False) -> None:
     if clean and path.exists():
         print(f"🧹 Cleaning directory: {path}")
         shutil.rmtree(path)
-    
+
     path.mkdir(parents=True, exist_ok=True)
     print(f"📁 Directory ready: {path}")
 
 
-def save_json(data: Dict[str, Any], path: Path, indent: int = 2) -> None:
+def save_json(data: dict[str, Any], path: Path, indent: int = 2) -> None:
     """Save data as JSON to a file."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
@@ -32,7 +32,7 @@ def save_text(content: str, path: Path) -> None:
     print(f"💾 Saved file: {path}")
 
 
-def clean_temp_files(paths: List[Path]) -> None:
+def clean_temp_files(paths: list[Path]) -> None:
     """Clean up temporary files."""
     for path in paths:
         if path.exists():
@@ -41,34 +41,34 @@ def clean_temp_files(paths: List[Path]) -> None:
 
 
 def verify_files_exist(
-    base_dir: Path, 
-    expected_files: List[str], 
+    base_dir: Path,
+    expected_files: list[str],
     file_type: str = "files"
-) -> List[str]:
+) -> list[str]:
     """
     Verify that expected files exist and return a list of missing files.
-    
+
     Args:
         base_dir: Base directory to check files in
         expected_files: List of relative file paths to check
         file_type: Description of the file type for logging
-        
+
     Returns:
         List of missing file paths
     """
     missing_files = []
-    
+
     print(f"🔍 Verifying {file_type} in {base_dir}:")
-    
+
     for file_path in expected_files:
         full_path = base_dir / file_path
-        
+
         if full_path.exists():
             if full_path.is_file():
                 if file_path.endswith('.py') or file_path.endswith('.ts'):
                     # Count lines for code files
                     try:
-                        with open(full_path, 'r', encoding='utf-8') as f:
+                        with open(full_path, encoding='utf-8') as f:
                             lines = len(f.readlines())
                         print(f"   ✅ {file_path} ({lines} lines)")
                     except Exception:
@@ -87,11 +87,11 @@ def verify_files_exist(
         else:
             print(f"   ❌ Missing: {file_path}")
             missing_files.append(file_path)
-    
+
     return missing_files
 
 
-def get_generated_files_info(sdk_dir: Path) -> Dict[str, Any]:
+def get_generated_files_info(sdk_dir: Path) -> dict[str, Any]:
     """Get information about generated SDK files."""
     info = {
         "total_files": 0,
@@ -99,29 +99,29 @@ def get_generated_files_info(sdk_dir: Path) -> Dict[str, Any]:
         "file_types": {},
         "largest_files": []
     }
-    
+
     if not sdk_dir.exists():
         return info
-    
+
     files = list(sdk_dir.rglob("*"))
     files = [f for f in files if f.is_file()]
-    
+
     info["total_files"] = len(files)
-    
+
     for file_path in files:
         try:
             size = file_path.stat().st_size
             info["total_size"] += size
-            
+
             suffix = file_path.suffix or "no_extension"
             info["file_types"][suffix] = info["file_types"].get(suffix, 0) + 1
-            
+
             info["largest_files"].append((str(file_path.relative_to(sdk_dir)), size))
         except Exception:
             continue
-    
+
     # Sort largest files by size (descending)
     info["largest_files"].sort(key=lambda x: x[1], reverse=True)
     info["largest_files"] = info["largest_files"][:10]  # Top 10
-    
+
     return info

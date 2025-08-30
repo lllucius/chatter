@@ -1,7 +1,7 @@
 """LangGraph workflows for advanced conversation logic."""
 
 from collections.abc import Sequence
-from typing import Annotated, Any, Literal, TypedDict, Optional
+from typing import Annotated, Any, Literal, TypedDict
 from uuid import uuid4
 
 from langchain_core.language_models import BaseChatModel
@@ -105,10 +105,10 @@ class LangGraphWorkflowManager:
         tools: list[Any] | None = None,
         enable_memory: bool = False,
         memory_window: int = 20,
-        user_id: Optional[str] = None,
-        conversation_id: Optional[str] = None,
-        provider_name: Optional[str] = None,
-        model_name: Optional[str] = None,
+        user_id: str | None = None,
+        conversation_id: str | None = None,
+        provider_name: str | None = None,
+        model_name: str | None = None,
     ) -> Pregel:
         """Create a unified conversation workflow.
 
@@ -316,7 +316,7 @@ class LangGraphWorkflowManager:
                             method=None,
                             parameters=tool_args
                         )
-                        
+
                         if not authorized:
                             tool_messages.append(
                                 ToolMessage(
@@ -342,7 +342,7 @@ class LangGraphWorkflowManager:
                             tool_call_id=tool_id or "",
                         )
                     )
-                    
+
                     # Update metrics
                     if METRICS_ENABLED and workflow_metrics_id:
                         workflow_metrics_collector.update_workflow_metrics(
@@ -359,7 +359,7 @@ class LangGraphWorkflowManager:
                             content=f"Error: {error_msg}", tool_call_id=tool_id or ""
                         )
                     )
-                    
+
                     # Update metrics with error
                     if METRICS_ENABLED and workflow_metrics_id:
                         workflow_metrics_collector.update_workflow_metrics(

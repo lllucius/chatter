@@ -17,15 +17,15 @@ from ulid import ULID
 def generate_ulid() -> str:
     """
     Generate a ULID (Universally Unique Lexicographically Sortable Identifier).
-    
+
     ULIDs are 26 character strings that are:
     - Lexicographically sortable
-    - Canonically encoded as a 26 character string 
+    - Canonically encoded as a 26 character string
     - Uses Crockford's base32 for better efficiency and readability
     - Case insensitive
     - No special characters (URL safe)
     - Monotonically increasing when generated on the same machine
-    
+
     Returns:
         str: A 26-character ULID string
     """

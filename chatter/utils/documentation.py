@@ -13,7 +13,7 @@ class APIDocumentationEnhancer:
 
     def __init__(self, app: FastAPI):
         """Initialize the documentation enhancer.
-        
+
         Args:
             app: FastAPI application instance
         """
@@ -30,7 +30,7 @@ class APIDocumentationEnhancer:
         description: str | None = None
     ) -> None:
         """Add examples for an endpoint.
-        
+
         Args:
             path: Endpoint path
             method: HTTP method
@@ -49,7 +49,7 @@ class APIDocumentationEnhancer:
 
     def enhance_openapi_schema(self) -> dict[str, Any]:
         """Generate enhanced OpenAPI schema with examples.
-        
+
         Returns:
             Enhanced OpenAPI schema
         """
@@ -388,10 +388,10 @@ class APIDocumentationEnhancer:
 
 def setup_enhanced_docs(app: FastAPI) -> APIDocumentationEnhancer:
     """Setup enhanced documentation for the application.
-    
+
     Args:
         app: FastAPI application
-        
+
     Returns:
         Documentation enhancer instance
     """

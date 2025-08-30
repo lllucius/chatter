@@ -222,7 +222,7 @@ class StorageStatsResponse(BaseModel):
 
 class BulkDeleteResponse(BaseModel):
     """Response schema for bulk delete operations."""
-    
+
     total_requested: int = Field(..., description="Total number of items requested for deletion")
     successful_deletions: int = Field(..., description="Number of successful deletions")
     failed_deletions: int = Field(..., description="Number of failed deletions")

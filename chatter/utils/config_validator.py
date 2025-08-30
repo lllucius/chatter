@@ -24,7 +24,7 @@ class ConfigurationValidator:
 
     def validate_all(self) -> None:
         """Validate all configuration settings.
-        
+
         Raises:
             ConfigurationError: If critical configuration errors are found
         """
@@ -255,7 +255,7 @@ class ConfigurationValidator:
 
 def validate_startup_configuration() -> None:
     """Validate configuration at application startup.
-    
+
     Raises:
         ConfigurationError: If critical configuration errors are found
     """

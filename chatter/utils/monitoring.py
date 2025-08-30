@@ -40,7 +40,7 @@ class MetricsCollector:
 
     def __init__(self, max_history: int = 10000):
         """Initialize metrics collector.
-        
+
         Args:
             max_history: Maximum number of requests to keep in memory
         """
@@ -51,7 +51,7 @@ class MetricsCollector:
 
     def record_request(self, metrics: RequestMetrics) -> None:
         """Record a request's metrics.
-        
+
         Args:
             metrics: Request metrics to record
         """
@@ -102,10 +102,10 @@ class MetricsCollector:
 
     def get_overall_stats(self, window_minutes: int = 60) -> dict[str, Any]:
         """Get overall system statistics.
-        
+
         Args:
             window_minutes: Time window for statistics in minutes
-            
+
         Returns:
             Dictionary of overall statistics
         """
@@ -136,10 +136,10 @@ class MetricsCollector:
 
     def get_endpoint_stats(self, endpoint: str | None = None) -> dict[str, Any]:
         """Get statistics for endpoints.
-        
+
         Args:
             endpoint: Specific endpoint to get stats for (e.g., "GET:/api/v1/chat")
-            
+
         Returns:
             Dictionary of endpoint statistics
         """
@@ -172,10 +172,10 @@ class MetricsCollector:
 
     def get_correlation_trace(self, correlation_id: str) -> list[dict[str, Any]]:
         """Get trace of all requests for a correlation ID.
-        
+
         Args:
             correlation_id: Correlation ID to trace
-            
+
         Returns:
             List of request details for the correlation ID
         """
@@ -195,7 +195,7 @@ class MetricsCollector:
 
     def get_health_metrics(self) -> dict[str, Any]:
         """Get health-related metrics for monitoring.
-        
+
         Returns:
             Dictionary of health metrics
         """
@@ -231,7 +231,7 @@ def record_request_metrics(
     rate_limited: bool = False
 ) -> None:
     """Record metrics for a request.
-    
+
     Args:
         method: HTTP method
         path: Request path

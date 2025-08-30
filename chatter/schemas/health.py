@@ -46,7 +46,7 @@ class LivenessCheckResponse(BaseModel):
 
 class MetricsResponse(BaseModel):
     """Schema for application metrics response."""
-    
+
     timestamp: str = Field(..., description="Metrics collection timestamp")
     service: str = Field(..., description="Service name")
     version: str = Field(..., description="Service version")
@@ -58,7 +58,7 @@ class MetricsResponse(BaseModel):
 
 class CorrelationTraceResponse(BaseModel):
     """Schema for correlation trace response."""
-    
+
     correlation_id: str = Field(..., description="Correlation ID")
     trace_length: int = Field(..., description="Number of requests in trace")
     requests: list[dict[str, Any]] = Field(..., description="List of requests in trace")

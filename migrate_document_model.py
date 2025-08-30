@@ -53,7 +53,7 @@ def update_document_model():
 
     new_embedding_metadata = """    # Embedding metadata - tracks which models have been applied
     embedding_models: Mapped[list[str] | None] = mapped_column(
-        "embedding_models", JSON, nullable=True, 
+        "embedding_models", JSON, nullable=True,
         comment="List of embedding model names that have been applied to this chunk"
     )
     primary_embedding_model: Mapped[str | None] = mapped_column(
@@ -79,7 +79,7 @@ def update_document_model():
     def has_embedding(self) -> bool:
         \"\"\"Check if chunk has any embeddings (legacy or dynamic).\"\"\"
         return (
-            self.embedding is not None 
+            self.embedding is not None
             or (self.embedding_models and len(self.embedding_models) > 0)
         )
 
@@ -90,29 +90,29 @@ def update_document_model():
 
     def add_embedding_model(self, model_name: str, set_as_primary: bool = False) -> None:
         \"\"\"Add an embedding model to the list of applied models.
-        
+
         Args:
             model_name: Name of the embedding model
             set_as_primary: Whether to set this as the primary model
         \"\"\"
         if not self.embedding_models:
             self.embedding_models = []
-        
+
         if model_name not in self.embedding_models:
             self.embedding_models.append(model_name)
-        
+
         if set_as_primary or not self.primary_embedding_model:
             self.primary_embedding_model = model_name
 
     def remove_embedding_model(self, model_name: str) -> None:
         \"\"\"Remove an embedding model from the list.
-        
+
         Args:
             model_name: Name of the embedding model to remove
         \"\"\"
         if self.embedding_models and model_name in self.embedding_models:
             self.embedding_models.remove(model_name)
-            
+
             # Update primary if it was the removed model
             if self.primary_embedding_model == model_name:
                 self.primary_embedding_model = (

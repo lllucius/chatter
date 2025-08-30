@@ -61,7 +61,7 @@ class DimensionalReductionEmbeddings(Embeddings):
         normalize: bool = True,
     ):
         """Initialize dimensional reduction wrapper.
-        
+
         Args:
             base_embeddings: Base embedding provider
             target_dim: Target dimension after reduction
@@ -212,7 +212,7 @@ class EmbeddingService:
 
     def _initialize_providers(self) -> None:
         """Initialize available embedding providers.
-        
+
         Note: This is kept for backward compatibility but providers are now loaded dynamically.
         """
         logger.info("Embedding providers will be loaded dynamically from model registry")
@@ -346,7 +346,7 @@ class EmbeddingService:
 
     async def get_all_provider_info(self) -> dict[str, dict[str, Any]]:
         """Get information for all available providers.
-        
+
         Returns:
             Dictionary mapping provider names to their info
         """

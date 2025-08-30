@@ -62,7 +62,7 @@ class ModelRegistryService:
         query = select(Provider)
 
         if params.active_only:
-            query = query.where(Provider.is_active == True)
+            query = query.where(Provider.is_active)
 
         # Order by default first, then by display name
         query = query.order_by(Provider.is_default.desc(), Provider.display_name)
@@ -146,7 +146,7 @@ class ModelRegistryService:
         """Set a provider as default for a model type."""
         # First, unset current default
         await self.session.execute(
-            update(Provider).where(Provider.is_default == True).values(is_default=False)
+            update(Provider).where(Provider.is_default).values(is_default=False)
         )
 
         # Set new default
@@ -175,7 +175,7 @@ class ModelRegistryService:
             query = query.where(ModelDef.model_type == model_type)
 
         if params.active_only:
-            query = query.where(ModelDef.is_active == True)
+            query = query.where(ModelDef.is_active)
 
         # Order by default first, then by display name
         query = query.order_by(ModelDef.is_default.desc(), ModelDef.display_name)
@@ -256,7 +256,7 @@ class ModelRegistryService:
         # First, unset current default for this model type
         await self.session.execute(
             update(ModelDef)
-            .where(ModelDef.model_type == model.model_type, ModelDef.is_default == True)
+            .where(ModelDef.model_type == model.model_type, ModelDef.is_default)
             .values(is_default=False)
         )
 
@@ -284,7 +284,7 @@ class ModelRegistryService:
             query = query.where(EmbeddingSpace.model_id == model_id)
 
         if params.active_only:
-            query = query.where(EmbeddingSpace.is_active == True)
+            query = query.where(EmbeddingSpace.is_active)
 
         # Order by default first, then by display name
         query = query.order_by(EmbeddingSpace.is_default.desc(), EmbeddingSpace.display_name)
@@ -421,7 +421,7 @@ class ModelRegistryService:
         # First, unset current default
         await self.session.execute(
             update(EmbeddingSpace)
-            .where(EmbeddingSpace.is_default == True)
+            .where(EmbeddingSpace.is_default)
             .values(is_default=False)
         )
 
@@ -439,7 +439,7 @@ class ModelRegistryService:
         """Get the default provider for a model type."""
         result = await self.session.execute(
             select(Provider)
-            .where(Provider.is_default == True, Provider.is_active == True)
+            .where(Provider.is_default, Provider.is_active)
         )
         return result.scalar_one_or_none()
 
@@ -450,8 +450,8 @@ class ModelRegistryService:
             .options(selectinload(ModelDef.provider))
             .where(
                 ModelDef.model_type == model_type,
-                ModelDef.is_default == True,
-                ModelDef.is_active == True
+                ModelDef.is_default,
+                ModelDef.is_active
             )
         )
         return result.scalar_one_or_none()
@@ -464,8 +464,8 @@ class ModelRegistryService:
                 selectinload(EmbeddingSpace.model).selectinload(ModelDef.provider)
             )
             .where(
-                EmbeddingSpace.is_default == True,
-                EmbeddingSpace.is_active == True
+                EmbeddingSpace.is_default,
+                EmbeddingSpace.is_active
             )
         )
         return result.scalar_one_or_none()

@@ -101,7 +101,7 @@ dependencies = [
     "apscheduler==3.11.0",
     
     # MCP and tools
-    "mcp==1.1.0",
+    "mcp==1.13.0",
     "httpx-sse==0.4.1",
 ]
 

@@ -163,11 +163,25 @@ class ChatService:
         self, conversation_id: str, user_id: str, content: str, role: str = "user"
     ) -> Message:
         """Append a message to the conversation."""
-        conv = await self.get_conversation(conversation_id, user_id, include_messages=True)
+        from sqlalchemy import text
+        
+        conv = await self.get_conversation(conversation_id, user_id)
         if not conv:
             raise ConversationNotFoundError()
 
-        seq = 1 + max((m.sequence_number for m in conv.messages), default=0)
+        # Use database-level sequence number generation to avoid race conditions
+        # This query atomically gets the next sequence number for the conversation
+        result = await self.session.execute(
+            text("""
+                SELECT COALESCE(MAX(sequence_number), 0) + 1 as next_seq
+                FROM messages
+                WHERE conversation_id = :conversation_id
+                FOR UPDATE
+            """),
+            {"conversation_id": conv.id}
+        )
+        seq = result.scalar()
+
         msg = Message(
             conversation_id=conv.id,
             role=role,

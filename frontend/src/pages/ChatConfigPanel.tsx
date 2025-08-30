@@ -79,13 +79,19 @@ const ChatConfigPanel: React.FC<Props> = ({
   onSelectConversation,
 }) => {
   const { collapsed, setCollapsed } = useRightSidebar();
-  const [expandedPanel, setExpandedPanel] = useState<string>('conversations');
+  const [expandedPanel, setExpandedPanel] = useState<string>(() => {
+    const saved = localStorage.getItem('chatter_expandedPanel');
+    return saved ? saved : 'conversations';
+  });
   const [conversations, setConversations] = useState<ConversationResponse[]>([]);
   const [loadingConversations, setLoadingConversations] = useState(false);
 
   const handlePanelChange =
-    (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) =>
-      setExpandedPanel(isExpanded ? panel : '');
+    (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
+      const newPanel = isExpanded ? panel : '';
+      setExpandedPanel(newPanel);
+      localStorage.setItem('chatter_expandedPanel', newPanel);
+    };
 
   const loadConversations = useCallback(async () => {
     setLoadingConversations(true);
@@ -115,7 +121,8 @@ const ChatConfigPanel: React.FC<Props> = ({
           <IconButton
             onClick={() => {
               setCollapsed(false);
-              setExpandedPanel('conversations');
+              const savedPanel = localStorage.getItem('chatter_expandedPanel') || 'conversations';
+              setExpandedPanel(savedPanel);
             }}
             sx={{ borderRadius: 1 }}
           >
@@ -127,6 +134,7 @@ const ChatConfigPanel: React.FC<Props> = ({
             onClick={() => {
               setCollapsed(false);
               setExpandedPanel('profile');
+              localStorage.setItem('chatter_expandedPanel', 'profile');
             }}
             sx={{ borderRadius: 1 }}
           >
@@ -138,6 +146,7 @@ const ChatConfigPanel: React.FC<Props> = ({
             onClick={() => {
               setCollapsed(false);
               setExpandedPanel('prompts');
+              localStorage.setItem('chatter_expandedPanel', 'prompts');
             }}
             sx={{ borderRadius: 1 }}
           >
@@ -149,6 +158,7 @@ const ChatConfigPanel: React.FC<Props> = ({
             onClick={() => {
               setCollapsed(false);
               setExpandedPanel('knowledge');
+              localStorage.setItem('chatter_expandedPanel', 'knowledge');
             }}
             sx={{ borderRadius: 1 }}
           >

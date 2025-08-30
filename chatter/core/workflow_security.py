@@ -9,7 +9,9 @@ from enum import Enum
 from typing import Any
 from uuid import uuid4
 
-logger = logging.getLogger(__name__)
+from chatter.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class PermissionLevel(Enum):

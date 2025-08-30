@@ -50,7 +50,7 @@ class ReductionStrategy(str, Enum):
 class Provider(Base):
     """AI provider registry."""
 
-    __tablename__ = "providers"
+    __tablename__ = "providers"  # type: ignore[assignment]
 
     name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
     provider_type: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -76,7 +76,7 @@ class Provider(Base):
 class ModelDef(Base):
     """AI model definition registry."""
 
-    __tablename__ = "model_defs"
+    __tablename__ = "model_defs"  # type: ignore[assignment]
 
     provider_id: Mapped[str] = mapped_column(String(26), ForeignKey("providers.id"), nullable=False)
 
@@ -120,7 +120,7 @@ class ModelDef(Base):
 class EmbeddingSpace(Base):
     """Embedding space definition with dimensional reduction support."""
 
-    __tablename__ = "embedding_spaces"
+    __tablename__ = "embedding_spaces"  # type: ignore[assignment]
 
     model_id: Mapped[str] = mapped_column(String(26), ForeignKey("model_defs.id"), nullable=False)
 

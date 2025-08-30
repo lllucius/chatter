@@ -1,7 +1,7 @@
 """API versioning strategy and management."""
 
 import re
-from typing import Callable
+from typing import Any, Awaitable, Callable
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.routing import APIRoute
@@ -244,7 +244,7 @@ def extract_version_from_request(request: Request) -> APIVersion:
     return version_manager.default_version
 
 
-async def version_middleware(request: Request, call_next: Callable) -> Response:
+async def version_middleware(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
     """Middleware to handle API versioning.
 
     Args:
@@ -320,7 +320,7 @@ def create_versioned_app() -> FastAPI:
 def version_route(
     versions: list[APIVersion],
     deprecated_in: APIVersion | None = None,
-):
+) -> Callable[[Callable], Callable]:
     """Decorator to mark routes with version information.
 
     Args:
@@ -330,7 +330,7 @@ def version_route(
     Returns:
         Route decorator
     """
-    def decorator(func: Callable) -> Callable:
+    def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         # Add version metadata to function
         func._api_versions = versions
         func._deprecated_in = deprecated_in

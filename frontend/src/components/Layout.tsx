@@ -39,6 +39,7 @@ import {
   DarkMode as DarkModeIcon,
   AdminPanelSettings as AdminIcon,
   Storage as ModelsIcon,
+  Build as ToolsIcon,
   ExpandLess,
   ExpandMore,
 } from '@mui/icons-material';
@@ -91,6 +92,7 @@ const navSections: NavSection[] = [
     items: [
       { label: 'Models', path: '/models', icon: <ModelsIcon /> },
       { label: 'Agents', path: '/agents', icon: <AgentIcon /> },
+      { label: 'Tools', path: '/tools', icon: <ToolsIcon /> },
     ]
   },
   {

@@ -33,7 +33,8 @@ async def get_agent_manager() -> AgentManager:
     Returns:
         AgentManager instance
     """
-    return AgentManager()
+    from chatter.core.agents import agent_manager
+    return agent_manager
 
 
 @router.post("/", response_model=AgentResponse, status_code=status.HTTP_201_CREATED)

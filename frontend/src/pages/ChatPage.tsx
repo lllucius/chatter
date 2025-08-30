@@ -25,23 +25,30 @@ import {
   Tune as TuneIcon,
   Stream as StreamIcon,
   Speed as SpeedIcon,
+  History as HistoryIcon,
+  Download as DownloadIcon,
+  Clear as ClearIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from '../sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import ChatConfigPanel from './ChatConfigPanel';
+import ConversationHistory from '../components/ConversationHistory';
+import ChatExport from '../components/ChatExport';
+import EnhancedMessage, { ChatMessage } from '../components/EnhancedMessage';
 
-interface ChatMessage {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: Date;
+interface ExtendedChatMessage extends ChatMessage {
+  metadata?: {
+    model?: string;
+    tokens?: number;
+    processingTime?: number;
+  };
 }
 
 const ChatPage: React.FC = () => {
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<ExtendedChatMessage[]>([]);
   const [profiles, setProfiles] = useState<ProfileResponse[]>([]);
   const [prompts, setPrompts] = useState<PromptResponse[]>([]);
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
@@ -52,6 +59,10 @@ const ChatPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // New state for advanced features
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   // Input focus ref (works for textarea in multiline mode)
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
@@ -176,8 +187,8 @@ const ChatPage: React.FC = () => {
         conversationId: conversation.id
       });
       
-      // Convert messages to ChatMessage format
-      const chatMessages: ChatMessage[] = response.data.map(msg => ({
+      // Convert messages to ExtendedChatMessage format
+      const chatMessages: ExtendedChatMessage[] = response.data.map(msg => ({
         id: msg.id,
         role: msg.role as 'user' | 'assistant' | 'system',
         content: msg.content,
@@ -267,7 +278,7 @@ const ChatPage: React.FC = () => {
     try {
       // Create a placeholder assistant message for streaming content
       const messageId = `stream-${Date.now()}`;
-      const assistantMessage: ChatMessage = {
+      const assistantMessage: ExtendedChatMessage = {
         id: messageId,
         role: 'assistant',
         content: '',
@@ -336,7 +347,7 @@ const ChatPage: React.FC = () => {
               if (typeof usage.total_tokens === 'number') parts.push(`Tokens: ${usage.total_tokens}`);
               if (typeof usage.response_time_ms === 'number') parts.push(`Response time: ${usage.response_time_ms}ms`);
               if (parts.length) {
-                const tokenMessage: ChatMessage = {
+                const tokenMessage: ExtendedChatMessage = {
                   id: `token-${chunk.message_id || messageId}`,
                   role: 'system',
                   content: `📊 ${parts.join(' | ')}`,
@@ -376,7 +387,7 @@ const ChatPage: React.FC = () => {
         conversationId = conv?.id;
       }
 
-      const userMessage: ChatMessage = {
+      const userMessage: ExtendedChatMessage = {
         id: Date.now().toString(),
         role: 'user',
         content: text,
@@ -487,6 +498,104 @@ const ChatPage: React.FC = () => {
     }
   };
 
+  // Enhanced message handlers
+  const handleEditMessage = useCallback((messageId: string, newContent: string) => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId 
+        ? { ...msg, content: newContent, edited: true, editedAt: new Date() }
+        : msg
+    ));
+  }, []);
+
+  const handleRegenerateMessage = useCallback(async (messageId: string) => {
+    const messageIndex = messages.findIndex(msg => msg.id === messageId);
+    if (messageIndex === -1) return;
+
+    // Find the last user message before this assistant message
+    let userMessageContent = '';
+    for (let i = messageIndex - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        userMessageContent = messages[i].content;
+        break;
+      }
+    }
+
+    if (!userMessageContent) return;
+
+    // Remove the message to be regenerated and all messages after it
+    setMessages(prev => prev.slice(0, messageIndex));
+
+    // Regenerate the response
+    try {
+      setLoading(true);
+      const sendRequest: ChatRequest = {
+        message: userMessageContent,
+        conversation_id: currentConversation?.id,
+        stream: streamingEnabled,
+        profile_id: selectedProfile,
+        temperature,
+        max_tokens: maxTokens,
+        enable_retrieval: enableRetrieval,
+        document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+        system_prompt_override: selectedPrompt ? prompts.find(p => p.id === selectedPrompt)?.content : undefined,
+      };
+
+      if (streamingEnabled) {
+        const assistantMessageId = Date.now().toString();
+        const assistantMessage: ExtendedChatMessage = {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        await handleStreamingResponse(sendRequest, assistantMessageId);
+      } else {
+        const response = await chatterSDK.chat.chatApiV1ChatPost({ chatRequest: sendRequest });
+        const assistantMessage: ExtendedChatMessage = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: response.data.content,
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      }
+    } catch (err: any) {
+      setError('Failed to regenerate message');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [messages, currentConversation, selectedProfile, streamingEnabled, temperature, maxTokens, enableRetrieval, selectedDocuments, selectedPrompt, prompts]);
+
+  const handleDeleteMessage = useCallback((messageId: string) => {
+    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+  }, []);
+
+  const handleRateMessage = useCallback((messageId: string, rating: number) => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId 
+        ? { ...msg, rating }
+        : msg
+    ));
+  }, []);
+
+  const handleSelectConversation = useCallback((conversation: ConversationResponse) => {
+    setCurrentConversation(conversation);
+    // In a real implementation, you would load the conversation messages here
+    // For now, we'll just clear the current messages
+    setMessages([]);
+    setError('');
+  }, []);
+
+  const handleClearConversation = useCallback(() => {
+    if (window.confirm('Are you sure you want to clear this conversation?')) {
+      setMessages([]);
+      setCurrentConversation(null);
+      setError('');
+    }
+  }, []);
+
   return (
     <Box
       sx={{
@@ -521,6 +630,33 @@ const ChatPage: React.FC = () => {
               <Divider orientation="vertical" flexItem />
               <Button variant="outlined" size="small" onClick={startNewConversation} startIcon={<RefreshIcon />}>
                 New Chat
+              </Button>
+              <Button 
+                variant="outlined" 
+                size="small" 
+                onClick={() => setHistoryDialogOpen(true)} 
+                startIcon={<HistoryIcon />}
+              >
+                History
+              </Button>
+              <Button 
+                variant="outlined" 
+                size="small" 
+                onClick={() => setExportDialogOpen(true)} 
+                startIcon={<DownloadIcon />}
+                disabled={messages.length === 0}
+              >
+                Export
+              </Button>
+              <Button 
+                variant="outlined" 
+                size="small" 
+                onClick={handleClearConversation} 
+                startIcon={<ClearIcon />}
+                disabled={messages.length === 0}
+                color="warning"
+              >
+                Clear
               </Button>
               {currentConversation && (
                 <Chip
@@ -585,39 +721,17 @@ const ChatPage: React.FC = () => {
               </Box>
             ) : (
               messages.map((msg) => (
-                <Box
+                <EnhancedMessage
                   key={msg.id}
-                  sx={{
-                    display: 'flex',
-                    mb: 2,
-                    alignItems: 'flex-start',
-                    ...(msg.role === 'user' && {
-                      flexDirection: 'row-reverse',
-                    }),
-                  }}
-                >
-                  <Avatar sx={{ bgcolor: getMessageColor(msg.role), ...(msg.role === 'user' ? { ml: 1 } : { mr: 1 }) }}>
-                    {getMessageAvatar(msg.role)}
-                  </Avatar>
-                  <Paper
-                    sx={{
-                      p: 2,
-                      maxWidth: '70%',
-                      bgcolor:
-                        msg.role === 'user'
-                          ? 'primary.light'
-                          : (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'),
-                      color: msg.role === 'user' ? 'primary.contrastText' : 'text.primary',
-                    }}
-                  >
-                    <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                      {msg.content}
-                    </Typography>
-                    <Typography variant="caption" sx={{ display: 'block', mt: 1, opacity: 0.7 }}>
-                      {format(msg.timestamp, 'HH:mm:ss')}
-                    </Typography>
-                  </Paper>
-                </Box>
+                  message={msg}
+                  onEdit={handleEditMessage}
+                  onRegenerate={handleRegenerateMessage}
+                  onDelete={handleDeleteMessage}
+                  onRate={handleRateMessage}
+                  canEdit={msg.role === 'user'}
+                  canRegenerate={msg.role === 'assistant'}
+                  canDelete={true}
+                />
               ))
             )}
             {loading && (
@@ -661,6 +775,22 @@ const ChatPage: React.FC = () => {
           </IconButton>
         </Box>
       </Paper>
+
+      {/* Conversation History Dialog */}
+      <ConversationHistory
+        open={historyDialogOpen}
+        onClose={() => setHistoryDialogOpen(false)}
+        onSelectConversation={handleSelectConversation}
+        currentConversationId={currentConversation?.id}
+      />
+
+      {/* Chat Export Dialog */}
+      <ChatExport
+        open={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        messages={messages}
+        conversationTitle={currentConversation?.title || 'Untitled Conversation'}
+      />
     </Box>
   );
 };

@@ -351,22 +351,126 @@ class DataManager:
 
         return stats
 
-    # Thin wrappers to support current API bulk-delete endpoints
+    # Bulk delete operations using core services
 
     async def bulk_delete_documents(self, document_ids: list[str], user_id: str) -> dict[str, Any]:
-        """Simulate bulk document delete."""
-        # TODO: replace with actual delete logic
-        return {"success_count": len(document_ids), "error_count": 0, "errors": []}
+        """Bulk delete documents using DocumentService."""
+        from sqlalchemy.ext.asyncio import AsyncSession
+        from chatter.utils.database import get_async_session_factory
+        from chatter.core.documents import DocumentService
+        
+        success_count = 0
+        error_count = 0
+        errors = []
+        
+        async_session_factory = get_async_session_factory()
+        async with async_session_factory() as session:
+            document_service = DocumentService(session)
+            
+            for document_id in document_ids:
+                try:
+                    success = await document_service.delete_document(document_id, user_id)
+                    if success:
+                        success_count += 1
+                    else:
+                        error_count += 1
+                        errors.append(f"Document {document_id} not found or not owned by user")
+                except Exception as e:
+                    error_count += 1
+                    errors.append(f"Document {document_id}: {str(e)}")
+                    logger.error(
+                        "Failed to delete document in bulk operation",
+                        document_id=document_id,
+                        user_id=user_id,
+                        error=str(e)
+                    )
+        
+        logger.info(
+            "Bulk document deletion completed",
+            user_id=user_id,
+            success_count=success_count,
+            error_count=error_count
+        )
+        
+        return {"success_count": success_count, "error_count": error_count, "errors": errors}
 
     async def bulk_delete_conversations(self, conversation_ids: list[str], user_id: str) -> dict[str, Any]:
-        """Simulate bulk conversation delete."""
-        # TODO: replace with actual delete logic
-        return {"success_count": len(conversation_ids), "error_count": 0, "errors": []}
+        """Bulk delete conversations using ChatService."""
+        from sqlalchemy.ext.asyncio import AsyncSession
+        from chatter.utils.database import get_async_session_factory
+        from chatter.core.chat import ChatService
+        
+        success_count = 0
+        error_count = 0
+        errors = []
+        
+        async_session_factory = get_async_session_factory()
+        async with async_session_factory() as session:
+            chat_service = ChatService(session)
+            
+            for conversation_id in conversation_ids:
+                try:
+                    await chat_service.delete_conversation(conversation_id, user_id)
+                    success_count += 1
+                except Exception as e:
+                    error_count += 1
+                    errors.append(f"Conversation {conversation_id}: {str(e)}")
+                    logger.error(
+                        "Failed to delete conversation in bulk operation",
+                        conversation_id=conversation_id,
+                        user_id=user_id,
+                        error=str(e)
+                    )
+        
+        logger.info(
+            "Bulk conversation deletion completed",
+            user_id=user_id,
+            success_count=success_count,
+            error_count=error_count
+        )
+        
+        return {"success_count": success_count, "error_count": error_count, "errors": errors}
 
     async def bulk_delete_prompts(self, prompt_ids: list[str], user_id: str) -> dict[str, Any]:
-        """Simulate bulk prompt delete."""
-        # TODO: replace with actual delete logic
-        return {"success_count": len(prompt_ids), "error_count": 0, "errors": []}
+        """Bulk delete prompts using PromptService."""
+        from sqlalchemy.ext.asyncio import AsyncSession
+        from chatter.utils.database import get_async_session_factory
+        from chatter.core.prompts import PromptService
+        
+        success_count = 0
+        error_count = 0
+        errors = []
+        
+        async_session_factory = get_async_session_factory()
+        async with async_session_factory() as session:
+            prompt_service = PromptService(session)
+            
+            for prompt_id in prompt_ids:
+                try:
+                    success = await prompt_service.delete_prompt(prompt_id, user_id)
+                    if success:
+                        success_count += 1
+                    else:
+                        error_count += 1
+                        errors.append(f"Prompt {prompt_id} not found or not owned by user")
+                except Exception as e:
+                    error_count += 1
+                    errors.append(f"Prompt {prompt_id}: {str(e)}")
+                    logger.error(
+                        "Failed to delete prompt in bulk operation",
+                        prompt_id=prompt_id,
+                        user_id=user_id,
+                        error=str(e)
+                    )
+        
+        logger.info(
+            "Bulk prompt deletion completed",
+            user_id=user_id,
+            success_count=success_count,
+            error_count=error_count
+        )
+        
+        return {"success_count": success_count, "error_count": error_count, "errors": errors}
 
 
 # Global data manager instance shared across API and job handlers

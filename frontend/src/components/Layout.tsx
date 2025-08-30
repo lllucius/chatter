@@ -141,7 +141,7 @@ const LayoutFrame: React.FC = () => {
 
   useEffect(() => {
     if (!location.pathname.startsWith('/chat')) {
-      setRightOpen(false);
+      // Only clear the panel content when leaving chat, but preserve open state
       clearPanelContent();
     }
     (document.activeElement as HTMLElement | null)?.blur?.();

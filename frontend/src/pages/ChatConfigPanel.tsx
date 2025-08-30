@@ -13,7 +13,6 @@ import {
   FormControlLabel,
   Switch,
   Chip,
-  Button,
   Tooltip,
   IconButton,
   List,
@@ -27,8 +26,6 @@ import {
   TextSnippet as PromptIcon,
   AccountBox as ProfileIcon,
   Description as DocumentIcon,
-  Speed as SpeedIcon,
-  Refresh as RefreshIcon,
   Chat as ConversationIcon,
 } from '@mui/icons-material';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse } from '../sdk';
@@ -40,7 +37,6 @@ interface Props {
   prompts: PromptResponse[];
   documents: DocumentResponse[];
   currentConversation: ConversationResponse | null;
-  messagesCount: number;
 
   selectedProfile: string;
   setSelectedProfile: (id: string) => void;
@@ -51,9 +47,6 @@ interface Props {
   selectedDocuments: string[];
   setSelectedDocuments: (ids: string[]) => void;
 
-  streamingEnabled: boolean;
-  setStreamingEnabled: (v: boolean) => void;
-
   temperature: number;
   setTemperature: (v: number) => void;
 
@@ -63,7 +56,6 @@ interface Props {
   enableRetrieval: boolean;
   setEnableRetrieval: (v: boolean) => void;
 
-  startNewConversation: () => void;
   onSelectConversation: (conversation: ConversationResponse) => void;
 }
 
@@ -72,22 +64,18 @@ const ChatConfigPanel: React.FC<Props> = ({
   prompts,
   documents,
   currentConversation,
-  messagesCount,
   selectedProfile,
   setSelectedProfile,
   selectedPrompt,
   setSelectedPrompt,
   selectedDocuments,
   setSelectedDocuments,
-  streamingEnabled,
-  setStreamingEnabled,
   temperature,
   setTemperature,
   maxTokens,
   setMaxTokens,
   enableRetrieval,
   setEnableRetrieval,
-  startNewConversation,
   onSelectConversation,
 }) => {
   const { collapsed, setCollapsed } = useRightSidebar();
@@ -167,29 +155,13 @@ const ChatConfigPanel: React.FC<Props> = ({
             <DocumentIcon />
           </IconButton>
         </Tooltip>
-        <Tooltip title="Advanced Settings" placement="left">
-          <IconButton
-            onClick={() => {
-              setCollapsed(false);
-              setExpandedPanel('advanced');
-            }}
-            sx={{ borderRadius: 1 }}
-          >
-            <SpeedIcon />
-          </IconButton>
-        </Tooltip>
+
       </Box>
     );
   }
 
   return (
     <Box>
-      {/* Optional current chat info */}
-      {currentConversation && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          {currentConversation.title} ({messagesCount} messages)
-        </Typography>
-      )}
 
       {/* Conversations */}
       <Accordion expanded={expandedPanel === 'conversations'} onChange={handlePanelChange('conversations')}>
@@ -362,28 +334,7 @@ const ChatConfigPanel: React.FC<Props> = ({
         </AccordionDetails>
       </Accordion>
 
-      {/* Advanced */}
-      <Accordion expanded={expandedPanel === 'advanced'} onChange={handlePanelChange('advanced')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <SpeedIcon sx={{ mr: 1 }} />
-          <Typography>Advanced Settings</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <FormControlLabel
-            control={<Switch checked={streamingEnabled} onChange={(e) => setStreamingEnabled(e.target.checked)} />}
-            label="Streaming Responses"
-            sx={{ mb: 2 }}
-          />
 
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {streamingEnabled ? 'Responses will be streamed in real-time' : 'Responses will be delivered all at once'}
-          </Typography>
-
-          <Button variant="outlined" fullWidth onClick={startNewConversation} startIcon={<RefreshIcon />}>
-            Apply Settings & New Chat
-          </Button>
-        </AccordionDetails>
-      </Accordion>
     </Box>
   );
 };

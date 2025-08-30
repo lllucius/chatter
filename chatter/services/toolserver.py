@@ -925,34 +925,6 @@ class ToolServerService:
             server.consecutive_failures += 1
             server.updated_at = datetime.now(UTC)
 
-            logger.error(
-                "Failed to connect to remote server",
-                server_id=server.id,
-                server_name=server.name,
-                error=str(e),
-            )
-            return False
-                            "server_name": server.name,
-                            "error": "Failed to start server",
-                            "consecutive_failures": server.consecutive_failures,
-                        }
-                    )
-                except Exception as e:
-                    logger.warning("Failed to trigger tool server error event", error=str(e))
-
-                # Disable if too many failures
-                if server.consecutive_failures >= server.max_failures:
-                    server.status = ServerStatus.DISABLED
-
-            server.updated_at = datetime.now(UTC)
-            return success
-
-        except Exception as e:
-            server.status = ServerStatus.ERROR
-            server.last_startup_error = str(e)
-            server.consecutive_failures += 1
-            server.updated_at = datetime.now(UTC)
-
             # Trigger tool server error event
             try:
                 from chatter.services.sse_events import (
@@ -971,12 +943,14 @@ class ToolServerService:
             except Exception as event_e:
                 logger.warning("Failed to trigger tool server error event", error=str(event_e))
 
+            # Disable if too many failures
             if server.consecutive_failures >= server.max_failures:
                 server.status = ServerStatus.DISABLED
 
             logger.error(
-                "Failed to start server",
+                "Failed to connect to remote server",
                 server_id=server.id,
+                server_name=server.name,
                 error=str(e),
             )
             return False
@@ -1080,15 +1054,6 @@ class ToolServerService:
                 "Failed to discover remote server tools",
                 server_id=server.id,
                 server_name=server.name,
-                error=str(e),
-            )
-                    tool.is_available = False
-                    tool.updated_at = datetime.now(UTC)
-
-        except Exception as e:
-            logger.error(
-                "Failed to discover server tools",
-                server_id=server.id,
                 error=str(e),
             )
 

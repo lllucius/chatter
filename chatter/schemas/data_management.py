@@ -218,3 +218,12 @@ class StorageStatsResponse(BaseModel):
 
     # Last updated
     last_updated: datetime = Field(..., description="Statistics last updated timestamp")
+
+
+class BulkDeleteResponse(BaseModel):
+    """Response schema for bulk delete operations."""
+    
+    total_requested: int = Field(..., description="Total number of items requested for deletion")
+    successful_deletions: int = Field(..., description="Number of successful deletions")
+    failed_deletions: int = Field(..., description="Number of failed deletions")
+    errors: list[str] = Field(..., description="List of error messages for failed deletions")

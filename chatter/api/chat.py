@@ -31,6 +31,9 @@ from chatter.schemas.chat import (
     McpStatusResponse,
     MessageCreate,
     MessageResponse,
+    PerformanceStatsResponse,
+    WorkflowTemplatesResponse,
+    WorkflowTemplateInfo,
 )
 from chatter.services.llm import LLMService
 from chatter.utils.database import get_session
@@ -426,19 +429,25 @@ async def get_available_tools(
         ) from None
 
 
-@router.get("/templates")
+@router.get("/templates", response_model=WorkflowTemplatesResponse)
 async def get_workflow_templates(
     current_user: User = Depends(get_current_user),
-) -> dict[str, Any]:
+) -> WorkflowTemplatesResponse:
     """Get available workflow templates."""
     try:
         from chatter.core.workflow_templates import WorkflowTemplateManager
         
-        templates = WorkflowTemplateManager.get_template_info()
-        return {
-            "templates": templates,
-            "total_count": len(templates)
-        }
+        templates_data = WorkflowTemplateManager.get_template_info()
+        
+        # Convert to structured response
+        templates = {}
+        for name, template_info in templates_data.items():
+            templates[name] = WorkflowTemplateInfo(**template_info)
+        
+        return WorkflowTemplatesResponse(
+            templates=templates,
+            total_count=len(templates)
+        )
     except Exception as e:
         raise InternalServerProblem(
             detail=f"Failed to get workflow templates: {str(e)}"
@@ -469,18 +478,18 @@ async def chat_with_template(
         raise BadRequestProblem(detail=str(e)) from None
 
 
-@router.get("/performance/stats")
+@router.get("/performance/stats", response_model=PerformanceStatsResponse)
 async def get_performance_stats(
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
-) -> dict[str, Any]:
+) -> PerformanceStatsResponse:
     """Get workflow performance statistics."""
     try:
         stats = chat_service.get_performance_stats()
-        return {
-            "performance_stats": stats,
-            "timestamp": __import__('time').time()
-        }
+        return PerformanceStatsResponse(
+            **stats,
+            timestamp=__import__('time').time()
+        )
     except Exception as e:
         raise InternalServerProblem(
             detail=f"Failed to get performance stats: {str(e)}"

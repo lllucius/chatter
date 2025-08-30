@@ -1072,6 +1072,8 @@ const ModelManagementPage: React.FC = () => {
             required
             value={providerForm.name}
             onChange={(e) => setProviderForm({ ...providerForm, name: e.target.value })}
+            disabled={!!editingProvider}
+            helperText={editingProvider ? "Name cannot be changed after creation" : ""}
           />
           <TextField
             select
@@ -1080,6 +1082,8 @@ const ModelManagementPage: React.FC = () => {
             margin="normal"
             value={providerForm.provider_type}
             onChange={(e) => setProviderForm({ ...providerForm, provider_type: e.target.value as any })}
+            disabled={!!editingProvider}
+            helperText={editingProvider ? "Provider type cannot be changed after creation" : ""}
           >
             {providerOptions.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
@@ -1148,6 +1152,8 @@ const ModelManagementPage: React.FC = () => {
             required
             value={modelForm.provider_id}
             onChange={(e) => setModelForm({ ...modelForm, provider_id: e.target.value })}
+            disabled={!!editingModel}
+            helperText={editingModel ? "Provider cannot be changed after creation" : ""}
           >
             {providers.map((p) => (
               <MenuItem key={p.id} value={p.id}>
@@ -1162,6 +1168,8 @@ const ModelManagementPage: React.FC = () => {
             required
             value={modelForm.name}
             onChange={(e) => setModelForm({ ...modelForm, name: e.target.value })}
+            disabled={!!editingModel}
+            helperText={editingModel ? "Name cannot be changed after creation" : ""}
           />
           <TextField
             select
@@ -1177,6 +1185,8 @@ const ModelManagementPage: React.FC = () => {
                 dimensions: model_type === 'embedding' ? (f.dimensions ?? 1536) : undefined,
               }));
             }}
+            disabled={!!editingModel}
+            helperText={editingModel ? "Model type cannot be changed after creation" : ""}
           >
             <MenuItem value="embedding">Embedding</MenuItem>
             <MenuItem value="llm">LLM</MenuItem>
@@ -1255,6 +1265,8 @@ const ModelManagementPage: React.FC = () => {
             required
             value={spaceForm.model_id}
             onChange={(e) => setSpaceForm({ ...spaceForm, model_id: e.target.value })}
+            disabled={!!editingSpace}
+            helperText={editingSpace ? "Model cannot be changed after creation" : ""}
           >
             {embeddingModels.map((m) => (
               <MenuItem key={m.id} value={m.id}>
@@ -1269,6 +1281,8 @@ const ModelManagementPage: React.FC = () => {
             required
             value={spaceForm.name}
             onChange={(e) => setSpaceForm({ ...spaceForm, name: e.target.value })}
+            disabled={!!editingSpace}
+            helperText={editingSpace ? "Name cannot be changed after creation" : ""}
           />
           <TextField
             fullWidth
@@ -1285,6 +1299,8 @@ const ModelManagementPage: React.FC = () => {
             required
             value={spaceForm.table_name}
             onChange={(e) => setSpaceForm({ ...spaceForm, table_name: e.target.value })}
+            disabled={!!editingSpace}
+            helperText={editingSpace ? "Table name cannot be changed after creation" : ""}
           />
           <Grid container spacing={2} sx={{ mt: 0 }}>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -1296,6 +1312,8 @@ const ModelManagementPage: React.FC = () => {
                 required
                 value={spaceForm.base_dimensions}
                 onChange={(e) => setSpaceForm({ ...spaceForm, base_dimensions: parseInt(e.target.value) || 0 })}
+                disabled={!!editingSpace}
+                helperText={editingSpace ? "Base dimensions cannot be changed after creation" : ""}
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 3 }}>

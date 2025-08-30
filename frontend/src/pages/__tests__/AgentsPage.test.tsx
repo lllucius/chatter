@@ -27,7 +27,7 @@ const mockAgents = [
     id: '1',
     name: 'Customer Support Agent',
     description: 'Handles customer inquiries',
-    agent_type: 'chat',
+    agent_type: 'conversational',
     status: 'active',
     config: {},
     created_at: '2024-01-01T10:00:00Z',
@@ -59,7 +59,7 @@ describe('AgentsPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText('AI Agents')).toBeInTheDocument();
+      expect(screen.getByText('AI Agents Management')).toBeInTheDocument();
     });
   });
 

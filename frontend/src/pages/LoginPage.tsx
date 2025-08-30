@@ -31,7 +31,16 @@ const LoginPage: React.FC = () => {
         await chatterSDK.login(values.username, values.password);
         navigate('/dashboard');
       } catch (err: any) {
-        form.setFieldError('password', err.message || 'Login failed');
+        const errorMessage = err.message || 'Login failed';
+        
+        // Check if error is related to username (user not found, invalid username format, etc.)
+        if (errorMessage.toLowerCase().includes('user') || 
+            errorMessage.toLowerCase().includes('username') ||
+            errorMessage.toLowerCase().includes('not found')) {
+          form.setFieldError('username', errorMessage);
+        } else {
+          form.setFieldError('password', errorMessage);
+        }
         throw err; // Re-throw to stop form submission
       }
     },

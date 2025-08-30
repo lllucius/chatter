@@ -25,6 +25,17 @@ import {
   Menu,
   MenuItem,
   Paper,
+  Select,
+  FormControl,
+  InputLabel,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Tooltip,
 } from '@mui/material';
 import {
   Build as ToolsIcon,
@@ -37,6 +48,11 @@ import {
   Stop as StopIcon,
   Refresh as RefreshIcon,
   PowerSettingsNew as ToggleIcon,
+  Security as SecurityIcon,
+  ExpandMore as ExpandMoreIcon,
+  Cloud as CloudIcon,
+  Http as HttpIcon,
+  Sync as SseIcon,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
 
@@ -53,8 +69,8 @@ function TabPanel(props: TabPanelProps) {
     <div
       role="tabpanel"
       hidden={value !== index}
-      id={`tools-tabpanel-${index}`}
-      aria-labelledby={`tools-tab-${index}`}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
@@ -62,77 +78,93 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
+interface RemoteServer {
+  id: string;
+  name: string;
+  display_name: string;
+  description?: string;
+  base_url: string;
+  transport_type: 'http' | 'sse';
+  status: 'enabled' | 'disabled' | 'error' | 'starting' | 'stopping';
+  oauth_config?: {
+    client_id: string;
+    client_secret: string;
+    token_url: string;
+    scope?: string;
+  };
+  headers?: Record<string, string>;
+  timeout: number;
+  auto_start: boolean;
+  tools_count?: number;
+  last_health_check?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Tool {
+  id: string;
+  name: string;
+  display_name: string;
+  description?: string;
+  server_name: string;
+  status: 'enabled' | 'disabled' | 'unavailable' | 'error';
+  is_available: boolean;
+  total_calls: number;
+  total_errors: number;
+  avg_response_time_ms?: number;
+  last_called?: string;
+}
+
+interface PermissionData {
+  user_id: string;
+  tool_id?: string;
+  server_id?: string;
+  access_level: 'none' | 'read' | 'execute' | 'admin';
+  rate_limit_per_hour?: number;
+  rate_limit_per_day?: number;
+  expires_at?: string;
+}
+
 const ToolsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'server' | 'tool'>('server');
+  const [dialogType, setDialogType] = useState<'server' | 'tool' | 'permission'>('server');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
-  
-  // Action menu state
+
+  // Menu state
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
   const [actionItem, setActionItem] = useState<any>(null);
   const [actionType, setActionType] = useState<'server' | 'tool'>('server');
 
   // Data state
-  const [toolServers, setToolServers] = useState([
-    {
-      id: 'file-ops',
-      name: 'File Operations Server',
-      display_name: 'File Operations Server',
-      status: 'ENABLED',
-      url: 'http://localhost:3000',
-      toolsCount: 8,
-      is_builtin: false,
-    },
-    {
-      id: 'web-search',
-      name: 'Web Search Server',
-      display_name: 'Web Search Server',
-      status: 'DISABLED',
-      url: 'http://localhost:3001',
-      toolsCount: 4,
-      is_builtin: true,
-    }
-  ]);
+  const [remoteServers, setRemoteServers] = useState<RemoteServer[]>([]);
+  const [tools, setTools] = useState<Tool[]>([]);
+  const [permissions, setPermissions] = useState<any[]>([]);
 
-  const [tools, setTools] = useState([
-    {
-      id: 'file-read',
-      name: 'file_read',
-      display_name: 'Read File',
-      description: 'Read the contents of a file',
-      server_id: 'file-ops',
-      server_name: 'File Operations Server',
-      enabled: true,
-    },
-    {
-      id: 'file-write',
-      name: 'file_write',
-      display_name: 'Write File',
-      description: 'Write contents to a file',
-      server_id: 'file-ops',
-      server_name: 'File Operations Server',
-      enabled: true,
-    },
-    {
-      id: 'web-search',
-      name: 'web_search',
-      display_name: 'Web Search',
-      description: 'Search the web for information',
-      server_id: 'web-search',
-      server_name: 'Web Search Server',
-      enabled: false,
-    },
-  ]);
+  // Form state for remote servers
+  const [serverFormData, setServerFormData] = useState({
+    name: '',
+    display_name: '',
+    description: '',
+    base_url: '',
+    transport_type: 'http' as 'http' | 'sse',
+    oauth_enabled: false,
+    oauth_client_id: '',
+    oauth_client_secret: '',
+    oauth_token_url: '',
+    oauth_scope: '',
+    headers: '{}',
+    timeout: 30,
+    auto_start: true,
+  });
 
-  const [formData, setFormData] = useState({
-    serverName: '',
-    serverDisplayName: '',
-    serverCommand: '',
-    serverDescription: '',
+  // Form state for permissions
+  const [permissionFormData, setPermissionFormData] = useState<PermissionData>({
+    user_id: '',
+    access_level: 'execute',
   });
 
   const showSnackbar = (message: string) => {
@@ -144,394 +176,616 @@ const ToolsPage: React.FC = () => {
     setActiveTab(newValue);
   };
 
-  const openDialog = (type: 'server' | 'tool') => {
+  const openDialog = (type: 'server' | 'tool' | 'permission') => {
     setDialogType(type);
     setDialogOpen(true);
-    setError('');
-    setFormData({
-      serverName: '',
-      serverDisplayName: '',
-      serverCommand: '',
-      serverDescription: '',
-    });
-  };
-
-  const handleFormChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleFormSubmit = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      if (dialogType === 'server') {
-        await chatterSDK.toolServers.createToolServerApiV1ToolserversServersPost({
-          toolServerCreate: {
-            name: formData.serverName,
-            display_name: formData.serverDisplayName || formData.serverName,
-            command: formData.serverCommand,
-            description: formData.serverDescription,
-          }
-        });
-        showSnackbar('Tool server created successfully!');
-        // TODO: Refresh server list from API
-      }
-      
-      setDialogOpen(false);
-    } catch (error: any) {
-      console.error('Error submitting form:', error);
-      setError(error.response?.data?.detail || error.message || 'An error occurred. Please try again.');
-    } finally {
-      setLoading(false);
+    if (type === 'server') {
+      setServerFormData({
+        name: '',
+        display_name: '',
+        description: '',
+        base_url: '',
+        transport_type: 'http',
+        oauth_enabled: false,
+        oauth_client_id: '',
+        oauth_client_secret: '',
+        oauth_token_url: '',
+        oauth_scope: '',
+        headers: '{}',
+        timeout: 30,
+        auto_start: true,
+      });
     }
   };
 
-  const openActionMenu = (e: React.MouseEvent<HTMLElement>, item: any, type: 'server' | 'tool') => {
-    setActionAnchorEl(e.currentTarget);
+  const closeDialog = () => {
+    setDialogOpen(false);
+    setError('');
+  };
+
+  const handleActionClick = (event: React.MouseEvent<HTMLElement>, item: any, type: 'server' | 'tool') => {
+    setActionAnchorEl(event.currentTarget);
     setActionItem(item);
     setActionType(type);
   };
 
-  const closeActionMenu = () => {
+  const handleActionClose = () => {
     setActionAnchorEl(null);
     setActionItem(null);
   };
 
-  const handleServerToggle = async (serverId: string, enable: boolean) => {
+  // Load data
+  const loadRemoteServers = useCallback(async () => {
     try {
       setLoading(true);
+      const response = await chatterSDK.getToolServers();
+      setRemoteServers(response.data || []);
+    } catch (err) {
+      console.error('Failed to load remote servers:', err);
+      setError('Failed to load remote servers');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadTools = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await chatterSDK.getAllTools();
+      setTools(response.data || []);
+    } catch (err) {
+      console.error('Failed to load tools:', err);
+      setError('Failed to load tools');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadPermissions = useCallback(async () => {
+    try {
+      setLoading(true);
+      // This would need to be implemented in the SDK
+      // const response = await chatterSDK.getUserPermissions(currentUserId);
+      // setPermissions(response.data || []);
+      setPermissions([]); // Placeholder
+    } catch (err) {
+      console.error('Failed to load permissions:', err);
+      setError('Failed to load permissions');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadRemoteServers();
+    loadTools();
+    loadPermissions();
+  }, [loadRemoteServers, loadTools, loadPermissions]);
+
+  // Server operations
+  const createRemoteServer = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const serverData = {
+        name: serverFormData.name,
+        display_name: serverFormData.display_name,
+        description: serverFormData.description,
+        base_url: serverFormData.base_url,
+        transport_type: serverFormData.transport_type,
+        oauth_config: serverFormData.oauth_enabled ? {
+          client_id: serverFormData.oauth_client_id,
+          client_secret: serverFormData.oauth_client_secret,
+          token_url: serverFormData.oauth_token_url,
+          scope: serverFormData.oauth_scope || undefined,
+        } : undefined,
+        headers: serverFormData.headers ? JSON.parse(serverFormData.headers) : undefined,
+        timeout: serverFormData.timeout,
+        auto_start: serverFormData.auto_start,
+      };
+
+      await chatterSDK.createToolServer(serverData);
+      showSnackbar('Remote server created successfully');
+      closeDialog();
+      loadRemoteServers();
+    } catch (err) {
+      console.error('Failed to create remote server:', err);
+      setError('Failed to create remote server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleServer = async (serverId: string, enable: boolean) => {
+    try {
       if (enable) {
-        await chatterSDK.toolServers.enableToolServerApiV1ToolserversServersServerIdEnablePost({
-          serverId
-        });
-        showSnackbar('Server enabled successfully');
+        await chatterSDK.enableToolServer(serverId);
       } else {
-        await chatterSDK.toolServers.disableToolServerApiV1ToolserversServersServerIdDisablePost({
-          serverId
-        });
-        showSnackbar('Server disabled successfully');
+        await chatterSDK.disableToolServer(serverId);
       }
-      // TODO: Refresh server list from API
-      closeActionMenu();
-    } catch (error: any) {
-      console.error('Error toggling server:', error);
-      setError('Failed to toggle server status');
-    } finally {
-      setLoading(false);
+      showSnackbar(`Server ${enable ? 'enabled' : 'disabled'} successfully`);
+      loadRemoteServers();
+    } catch (err) {
+      console.error(`Failed to ${enable ? 'enable' : 'disable'} server:`, err);
+      showSnackbar(`Failed to ${enable ? 'enable' : 'disable'} server`);
     }
+    handleActionClose();
   };
 
-  const handleToolToggle = async (toolId: string, enable: boolean) => {
+  const refreshServerTools = async (serverId: string) => {
     try {
-      setLoading(true);
+      // This would need to be implemented in the SDK
+      // await chatterSDK.refreshServerTools(serverId);
+      showSnackbar('Server tools refreshed successfully');
+      loadTools();
+    } catch (err) {
+      console.error('Failed to refresh server tools:', err);
+      showSnackbar('Failed to refresh server tools');
+    }
+    handleActionClose();
+  };
+
+  const deleteServer = async (serverId: string) => {
+    try {
+      await chatterSDK.deleteToolServer(serverId);
+      showSnackbar('Server deleted successfully');
+      loadRemoteServers();
+      loadTools();
+    } catch (err) {
+      console.error('Failed to delete server:', err);
+      showSnackbar('Failed to delete server');
+    }
+    handleActionClose();
+  };
+
+  const toggleTool = async (toolId: string, enable: boolean) => {
+    try {
       if (enable) {
-        await chatterSDK.toolServers.enableToolApiV1ToolserversToolsToolIdEnablePost({
-          toolId
-        });
-        showSnackbar('Tool enabled successfully');
+        await chatterSDK.enableTool(toolId);
       } else {
-        await chatterSDK.toolServers.disableToolApiV1ToolserversToolsToolIdDisablePost({
-          toolId
-        });
-        showSnackbar('Tool disabled successfully');
+        await chatterSDK.disableTool(toolId);
       }
-      // TODO: Refresh tools list from API
-      closeActionMenu();
-    } catch (error: any) {
-      console.error('Error toggling tool:', error);
-      setError('Failed to toggle tool status');
-    } finally {
-      setLoading(false);
+      showSnackbar(`Tool ${enable ? 'enabled' : 'disabled'} successfully`);
+      loadTools();
+    } catch (err) {
+      console.error(`Failed to ${enable ? 'enable' : 'disable'} tool:`, err);
+      showSnackbar(`Failed to ${enable ? 'enable' : 'disable'} tool`);
     }
+    handleActionClose();
   };
 
-  const handleServerStart = async (serverId: string) => {
-    try {
-      setLoading(true);
-      await chatterSDK.toolServers.startToolServerApiV1ToolserversServersServerIdStartPost({
-        serverId
-      });
-      showSnackbar('Server started successfully');
-      // TODO: Refresh server list from API
-      closeActionMenu();
-    } catch (error: any) {
-      console.error('Error starting server:', error);
-      setError('Failed to start server');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const renderServerDialog = () => (
+    <Dialog open={dialogOpen && dialogType === 'server'} onClose={closeDialog} maxWidth="md" fullWidth>
+      <DialogTitle>Add Remote MCP Server</DialogTitle>
+      <DialogContent>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Server Name"
+              value={serverFormData.name}
+              onChange={(e) => setServerFormData({ ...serverFormData, name: e.target.value })}
+              required
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Display Name"
+              value={serverFormData.display_name}
+              onChange={(e) => setServerFormData({ ...serverFormData, display_name: e.target.value })}
+              required
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="Description"
+              value={serverFormData.description}
+              onChange={(e) => setServerFormData({ ...serverFormData, description: e.target.value })}
+              multiline
+              rows={2}
+            />
+          </Grid>
+          <Grid item xs={12} md={8}>
+            <TextField
+              fullWidth
+              label="Base URL"
+              value={serverFormData.base_url}
+              onChange={(e) => setServerFormData({ ...serverFormData, base_url: e.target.value })}
+              placeholder="https://api.example.com"
+              required
+            />
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <FormControl fullWidth>
+              <InputLabel>Transport Type</InputLabel>
+              <Select
+                value={serverFormData.transport_type}
+                onChange={(e) => setServerFormData({ ...serverFormData, transport_type: e.target.value as 'http' | 'sse' })}
+                label="Transport Type"
+              >
+                <MenuItem value="http">HTTP</MenuItem>
+                <MenuItem value="sse">Server-Sent Events</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          
+          <Grid item xs={12}>
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <SecurityIcon sx={{ mr: 1 }} />
+                <Typography>OAuth Configuration</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={serverFormData.oauth_enabled}
+                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_enabled: e.target.checked })}
+                        />
+                      }
+                      label="Enable OAuth Authentication"
+                    />
+                  </Grid>
+                  {serverFormData.oauth_enabled && (
+                    <>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Client ID"
+                          value={serverFormData.oauth_client_id}
+                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_client_id: e.target.value })}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Client Secret"
+                          type="password"
+                          value={serverFormData.oauth_client_secret}
+                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_client_secret: e.target.value })}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={8}>
+                        <TextField
+                          fullWidth
+                          label="Token URL"
+                          value={serverFormData.oauth_token_url}
+                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_token_url: e.target.value })}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={4}>
+                        <TextField
+                          fullWidth
+                          label="Scope (optional)"
+                          value={serverFormData.oauth_scope}
+                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_scope: e.target.value })}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                </Grid>
+              </AccordionDetails>
+            </Accordion>
+          </Grid>
 
-  const handleServerStop = async (serverId: string) => {
-    try {
-      setLoading(true);
-      await chatterSDK.toolServers.stopToolServerApiV1ToolserversServersServerIdStopPost({
-        serverId
-      });
-      showSnackbar('Server stopped successfully');
-      // TODO: Refresh server list from API
-      closeActionMenu();
-    } catch (error: any) {
-      console.error('Error stopping server:', error);
-      setError('Failed to stop server');
-    } finally {
-      setLoading(false);
-    }
-  };
+          <Grid item xs={12}>
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                <SettingsIcon sx={{ mr: 1 }} />
+                <Typography>Advanced Settings</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Timeout (seconds)"
+                      type="number"
+                      value={serverFormData.timeout}
+                      onChange={(e) => setServerFormData({ ...serverFormData, timeout: parseInt(e.target.value) || 30 })}
+                      inputProps={{ min: 5, max: 300 }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={serverFormData.auto_start}
+                          onChange={(e) => setServerFormData({ ...serverFormData, auto_start: e.target.checked })}
+                        />
+                      }
+                      label="Auto-connect on startup"
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Custom Headers (JSON)"
+                      value={serverFormData.headers}
+                      onChange={(e) => setServerFormData({ ...serverFormData, headers: e.target.value })}
+                      placeholder='{"Authorization": "Bearer token", "X-Custom": "value"}'
+                      multiline
+                      rows={3}
+                    />
+                  </Grid>
+                </Grid>
+              </AccordionDetails>
+            </Accordion>
+          </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeDialog}>Cancel</Button>
+        <Button 
+          onClick={createRemoteServer} 
+          variant="contained" 
+          disabled={loading || !serverFormData.name || !serverFormData.base_url}
+        >
+          {loading ? <CircularProgress size={20} /> : 'Create Server'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 
-  const handleDeleteServer = async (serverId: string) => {
-    const server = toolServers.find(s => s.id === serverId);
-    const toolCount = server?.toolsCount || 0;
-    
-    const confirmMessage = toolCount > 0 
-      ? `Are you sure you want to delete this server? This will also remove all ${toolCount} associated tools.`
-      : 'Are you sure you want to delete this server?';
-      
-    if (window.confirm(confirmMessage)) {
-      try {
-        setLoading(true);
-        setError('');
-        await chatterSDK.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
-          serverId
-        });
-        showSnackbar('Tool server deleted successfully!');
-        // TODO: Refresh server list from API
-        closeActionMenu();
-      } catch (error: any) {
-        console.error('Error deleting server:', error);
-        setError(error.response?.data?.detail || error.message || 'Failed to delete server');
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  const getServerStatusColor = (status: string) => {
-    switch (status) {
-      case 'ENABLED':
-        return 'success';
-      case 'DISABLED':
-        return 'default';
-      case 'ERROR':
-        return 'error';
-      default:
-        return 'default';
-    }
-  };
-
-  return (
+  const renderRemoteServers = () => (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Tools Management
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={() => {
-              // TODO: Refresh data from API
-              showSnackbar('Data refreshed');
-            }}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-        </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">Remote MCP Servers</Typography>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => openDialog('server')}
+        >
+          Add Remote Server
+        </Button>
       </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
+      {loading && <CircularProgress />}
+      
+      {remoteServers.length === 0 && !loading ? (
+        <Alert severity="info">
+          No remote servers configured. Add your first remote MCP server to get started.
         </Alert>
-      )}
-
-      <Paper sx={{ width: '100%' }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={activeTab} onChange={handleTabChange} aria-label="tools management tabs">
-            <Tab
-              icon={<ServersIcon />}
-              iconPosition="start"
-              label="Servers"
-              id="tools-tab-0"
-              aria-controls="tools-tabpanel-0"
-            />
-            <Tab
-              icon={<ToolsIcon />}
-              iconPosition="start"
-              label="Tools"
-              id="tools-tab-1"
-              aria-controls="tools-tabpanel-1"
-            />
-          </Tabs>
-        </Box>
-
-        <TabPanel value={activeTab} index={0}>
-          <Box sx={{ mb: 2 }}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => openDialog('server')}
-            >
-              Add Server
-            </Button>
-          </Box>
-          <List>
-            {toolServers.map((server) => (
-              <ListItem key={server.id}>
-                <ListItemText
-                  primary={server.display_name || server.name}
-                  secondary={`Status: ${server.status} | Tools: ${server.toolsCount}${server.is_builtin ? ' | Built-in' : ''}`}
-                />
-                <Chip 
-                  label={server.status} 
-                  color={getServerStatusColor(server.status) as any}
-                  size="small" 
-                  sx={{ mr: 1 }} 
-                />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" onClick={(e) => openActionMenu(e, server, 'server')}>
-                    <MoreVertIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
-        </TabPanel>
-
-        <TabPanel value={activeTab} index={1}>
-          <List>
-            {tools.map((tool) => (
-              <ListItem key={tool.id}>
-                <ListItemText
-                  primary={tool.display_name || tool.name}
-                  secondary={`${tool.description} | Server: ${tool.server_name}`}
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={tool.enabled}
-                      onChange={(e) => handleToolToggle(tool.id, e.target.checked)}
-                      disabled={loading}
+      ) : (
+        <Grid container spacing={2}>
+          {remoteServers.map((server) => (
+            <Grid item xs={12} md={6} lg={4} key={server.id}>
+              <Card>
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <Typography variant="h6" component="div">
+                      {server.display_name}
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      onClick={(e) => handleActionClick(e, server, 'server')}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                  </Box>
+                  
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    {server.description || 'No description'}
+                  </Typography>
+                  
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    {server.transport_type === 'http' ? <HttpIcon /> : <SseIcon />}
+                    <Typography variant="body2">{server.base_url}</Typography>
+                  </Box>
+                  
+                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                    <Chip 
+                      label={server.status} 
+                      color={server.status === 'enabled' ? 'success' : server.status === 'error' ? 'error' : 'default'}
+                      size="small"
                     />
-                  }
-                  label={tool.enabled ? 'Enabled' : 'Disabled'}
-                  sx={{ mr: 1 }}
-                />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" onClick={(e) => openActionMenu(e, tool, 'tool')}>
-                    <MoreVertIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
-        </TabPanel>
-      </Paper>
+                    <Chip 
+                      label={server.transport_type.toUpperCase()} 
+                      variant="outlined"
+                      size="small"
+                    />
+                    {server.oauth_config && (
+                      <Chip 
+                        label="OAuth" 
+                        color="primary"
+                        variant="outlined"
+                        size="small"
+                      />
+                    )}
+                    {server.tools_count !== undefined && (
+                      <Chip 
+                        label={`${server.tools_count} tools`} 
+                        variant="outlined"
+                        size="small"
+                      />
+                    )}
+                  </Box>
+                </CardContent>
+                <CardActions>
+                  <Button size="small" color="primary">
+                    View Details
+                  </Button>
+                  <Button 
+                    size="small" 
+                    color={server.status === 'enabled' ? 'warning' : 'success'}
+                    onClick={() => toggleServer(server.id, server.status !== 'enabled')}
+                  >
+                    {server.status === 'enabled' ? 'Disable' : 'Enable'}
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
+    </Box>
+  );
 
-      {/* Add Server Dialog */}
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {dialogType === 'server' && 'Add Tool Server'}
-        </DialogTitle>
-        <DialogContent>
-          {dialogType === 'server' && (
-            <Box sx={{ mt: 2 }}>
-              <TextField
-                fullWidth
-                label="Server Name"
-                margin="normal"
-                placeholder="my-tool-server"
-                helperText="Unique name for the server"
-                value={formData.serverName}
-                onChange={(e) => handleFormChange('serverName', e.target.value)}
+  const renderTools = () => (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">Available Tools</Typography>
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={loadTools}
+        >
+          Refresh
+        </Button>
+      </Box>
+
+      {loading && <CircularProgress />}
+      
+      {tools.length === 0 && !loading ? (
+        <Alert severity="info">
+          No tools available. Add remote servers to discover tools.
+        </Alert>
+      ) : (
+        <List>
+          {tools.map((tool) => (
+            <ListItem key={tool.id} divider>
+              <CloudIcon sx={{ mr: 2, color: 'primary.main' }} />
+              <ListItemText
+                primary={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography variant="subtitle1">{tool.display_name}</Typography>
+                    <Chip 
+                      label={tool.status} 
+                      color={tool.status === 'enabled' ? 'success' : tool.status === 'error' ? 'error' : 'default'}
+                      size="small"
+                    />
+                    {!tool.is_available && (
+                      <Chip label="Unavailable" color="warning" size="small" />
+                    )}
+                  </Box>
+                }
+                secondary={
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">
+                      {tool.description || 'No description'}
+                    </Typography>
+                    <Typography variant="caption" display="block">
+                      Server: {tool.server_name} • Calls: {tool.total_calls} • Errors: {tool.total_errors}
+                      {tool.avg_response_time_ms && ` • Avg: ${tool.avg_response_time_ms.toFixed(0)}ms`}
+                    </Typography>
+                  </Box>
+                }
               />
-              <TextField
-                fullWidth
-                label="Display Name"
-                margin="normal"
-                placeholder="My Tool Server"
-                value={formData.serverDisplayName}
-                onChange={(e) => handleFormChange('serverDisplayName', e.target.value)}
-              />
-              <TextField
-                fullWidth
-                label="Command"
-                margin="normal"
-                placeholder="node server.js"
-                helperText="Command to start the server"
-                value={formData.serverCommand}
-                onChange={(e) => handleFormChange('serverCommand', e.target.value)}
-              />
-              <TextField
-                fullWidth
-                label="Description"
-                margin="normal"
-                multiline
-                rows={3}
-                placeholder="Description of the server's capabilities"
-                value={formData.serverDescription}
-                onChange={(e) => handleFormChange('serverDescription', e.target.value)}
-              />
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-          <Button 
-            onClick={handleFormSubmit} 
-            variant="contained" 
-            disabled={loading || !formData.serverName || !formData.serverCommand}
-          >
-            {loading ? <CircularProgress size={20} /> : 'Add'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+              <ListItemSecondaryAction>
+                <IconButton
+                  edge="end"
+                  onClick={(e) => handleActionClick(e, tool, 'tool')}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              </ListItemSecondaryAction>
+            </ListItem>
+          ))}
+        </List>
+      )}
+    </Box>
+  );
+
+  const renderPermissions = () => (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+        <Typography variant="h6">Access Permissions</Typography>
+        <Button
+          variant="contained"
+          startIcon={<SecurityIcon />}
+          onClick={() => openDialog('permission')}
+        >
+          Grant Permission
+        </Button>
+      </Box>
+
+      <Alert severity="info" sx={{ mb: 2 }}>
+        Tool access control allows you to grant specific permissions to users for tools and servers.
+        This feature requires role-based access control to be configured.
+      </Alert>
+
+      {/* This would show the actual permissions list */}
+      <Typography variant="body2" color="text.secondary">
+        Permission management interface coming soon...
+      </Typography>
+    </Box>
+  );
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <Typography variant="h4" gutterBottom>
+        Tool Server Management
+      </Typography>
+      
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs value={activeTab} onChange={handleTabChange}>
+          <Tab 
+            label="Remote Servers" 
+            icon={<ServersIcon />} 
+            iconPosition="start"
+          />
+          <Tab 
+            label="Available Tools" 
+            icon={<ToolsIcon />} 
+            iconPosition="start"
+          />
+          <Tab 
+            label="Access Control" 
+            icon={<SecurityIcon />} 
+            iconPosition="start"
+          />
+        </Tabs>
+      </Box>
+
+      <TabPanel value={activeTab} index={0}>
+        {renderRemoteServers()}
+      </TabPanel>
+
+      <TabPanel value={activeTab} index={1}>
+        {renderTools()}
+      </TabPanel>
+
+      <TabPanel value={activeTab} index={2}>
+        {renderPermissions()}
+      </TabPanel>
+
+      {/* Dialogs */}
+      {renderServerDialog()}
 
       {/* Action Menu */}
       <Menu
         anchorEl={actionAnchorEl}
         open={Boolean(actionAnchorEl)}
-        onClose={closeActionMenu}
+        onClose={handleActionClose}
       >
         {actionType === 'server' && actionItem && (
           [
-            <MenuItem key="toggle" onClick={() => handleServerToggle(actionItem.id, actionItem.status !== 'ENABLED')}>
+            <MenuItem key="toggle" onClick={() => toggleServer(actionItem.id, actionItem.status !== 'enabled')}>
               <ToggleIcon sx={{ mr: 1 }} />
-              {actionItem.status === 'ENABLED' ? 'Disable' : 'Enable'} Server
+              {actionItem.status === 'enabled' ? 'Disable' : 'Enable'}
             </MenuItem>,
-            <MenuItem key="start" onClick={() => handleServerStart(actionItem.id)}>
-              <StartIcon sx={{ mr: 1 }} />
-              Start Server
+            <MenuItem key="refresh" onClick={() => refreshServerTools(actionItem.id)}>
+              <RefreshIcon sx={{ mr: 1 }} />
+              Refresh Tools
             </MenuItem>,
-            <MenuItem key="stop" onClick={() => handleServerStop(actionItem.id)}>
-              <StopIcon sx={{ mr: 1 }} />
-              Stop Server
-            </MenuItem>,
-            <MenuItem key="settings" onClick={closeActionMenu}>
-              <SettingsIcon sx={{ mr: 1 }} />
-              Settings
-            </MenuItem>,
-            !actionItem.is_builtin && (
-              <MenuItem key="delete" onClick={() => handleDeleteServer(actionItem.id)} sx={{ color: 'error.main' }}>
-                <DeleteIcon sx={{ mr: 1 }} />
-                Delete Server
-              </MenuItem>
-            )
-          ].filter(Boolean)
-        )}
-        {actionType === 'tool' && actionItem && (
-          [
-            <MenuItem key="toggle" onClick={() => handleToolToggle(actionItem.id, !actionItem.enabled)}>
-              <ToggleIcon sx={{ mr: 1 }} />
-              {actionItem.enabled ? 'Disable' : 'Enable'} Tool
-            </MenuItem>,
-            <MenuItem key="settings" onClick={closeActionMenu}>
-              <SettingsIcon sx={{ mr: 1 }} />
-              Settings
+            <MenuItem key="delete" onClick={() => deleteServer(actionItem.id)}>
+              <DeleteIcon sx={{ mr: 1 }} />
+              Delete
             </MenuItem>
           ]
+        )}
+        {actionType === 'tool' && actionItem && (
+          <MenuItem onClick={() => toggleTool(actionItem.id, actionItem.status !== 'enabled')}>
+            <ToggleIcon sx={{ mr: 1 }} />
+            {actionItem.status === 'enabled' ? 'Disable' : 'Enable'}
+          </MenuItem>
         )}
       </Menu>
 

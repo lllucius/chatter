@@ -215,22 +215,18 @@ const ChatPage: React.FC = () => {
         prompts={prompts}
         documents={documents}
         currentConversation={currentConversation}
-        messagesCount={messages.length}
         selectedProfile={selectedProfile}
         setSelectedProfile={setSelectedProfile}
         selectedPrompt={selectedPrompt}
         setSelectedPrompt={setSelectedPrompt}
         selectedDocuments={selectedDocuments}
         setSelectedDocuments={setSelectedDocuments}
-        streamingEnabled={streamingEnabled}
-        setStreamingEnabled={setStreamingEnabled}
         temperature={temperature}
         setTemperature={setTemperature}
         maxTokens={maxTokens}
         setMaxTokens={setMaxTokens}
         enableRetrieval={enableRetrieval}
         setEnableRetrieval={setEnableRetrieval}
-        startNewConversation={startNewConversation}
         onSelectConversation={onSelectConversation}
       />
     );
@@ -245,15 +241,12 @@ const ChatPage: React.FC = () => {
     prompts,
     documents,
     currentConversation,
-    messages.length,
     selectedProfile,
     selectedPrompt,
     selectedDocuments,
-    streamingEnabled,
     temperature,
     maxTokens,
     enableRetrieval,
-    startNewConversation,
     onSelectConversation,
   ]);
 

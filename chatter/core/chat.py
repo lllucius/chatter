@@ -173,13 +173,13 @@ class ChatService:
             raise ConversationNotFoundError()
 
         # Use database-level sequence number generation to avoid race conditions
-        # This query atomically gets the next sequence number for the conversation
+        # This query gets the next sequence number for the conversation
+        # Note: The unique constraint on (conversation_id, sequence_number) handles race conditions
         result = await self.session.execute(
             text("""
                 SELECT COALESCE(MAX(sequence_number), 0) + 1 as next_seq
                 FROM messages
                 WHERE conversation_id = :conversation_id
-                FOR UPDATE
             """),
             {"conversation_id": conv.id}
         )

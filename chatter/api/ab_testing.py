@@ -35,7 +35,8 @@ async def get_ab_test_manager() -> ABTestManager:
     Returns:
         ABTestManager instance
     """
-    return ABTestManager()
+    from chatter.services.ab_testing import ab_test_manager
+    return ab_test_manager
 
 
 @router.post("/", response_model=ABTestResponse, status_code=status.HTTP_201_CREATED)

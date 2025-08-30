@@ -31,7 +31,8 @@ async def get_plugin_manager() -> PluginManager:
     Returns:
         PluginManager instance
     """
-    return PluginManager()
+    from chatter.services.plugins import plugin_manager
+    return plugin_manager
 
 
 @router.post("/install", response_model=PluginResponse, status_code=status.HTTP_201_CREATED)

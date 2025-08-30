@@ -85,13 +85,18 @@ class LLMService:
                     return None
 
                 config = model_def.default_config or {}
-                return ChatOpenAI(
-                    api_key=api_key,
-                    base_url=provider.base_url,
-                    model=model_def.model_name,
-                    temperature=config.get('temperature', 0.7),
-                    max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
-                )
+                # Only create provider if we have an API key or if it's not required
+                if api_key or not provider.api_key_required:
+                    return ChatOpenAI(
+                        api_key=api_key,
+                        base_url=provider.base_url,
+                        model=model_def.model_name,
+                        temperature=config.get('temperature', 0.7),
+                        max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
+                    )
+                else:
+                    logger.warning(f"Cannot create OpenAI provider {provider.name}: API key required but not provided")
+                    return None
 
             elif provider.provider_type == ProviderType.ANTHROPIC:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
@@ -100,12 +105,17 @@ class LLMService:
                     return None
 
                 config = model_def.default_config or {}
-                return ChatAnthropic(
-                    api_key=api_key,
-                    model=model_def.model_name,
-                    temperature=config.get('temperature', 0.7),
-                    max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
-                )
+                # Only create provider if we have an API key or if it's not required
+                if api_key or not provider.api_key_required:
+                    return ChatAnthropic(
+                        api_key=api_key,
+                        model=model_def.model_name,
+                        temperature=config.get('temperature', 0.7),
+                        max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
+                    )
+                else:
+                    logger.warning(f"Cannot create Anthropic provider {provider.name}: API key required but not provided")
+                    return None
 
             else:
                 logger.warning(f"Unsupported provider type: {provider.provider_type}")
@@ -252,32 +262,40 @@ class LLMService:
                 if provider.api_key_required and not api_key:
                     raise LLMProviderError(f"No API key found for provider {provider.name}")
 
-                return ChatOpenAI(
-                    api_key=api_key,
-                    base_url=provider.base_url,
-                    model=model_def.model_name,
-                    temperature=profile.temperature,
-                    max_tokens=profile.max_tokens,
-                    top_p=profile.top_p,
-                    presence_penalty=profile.presence_penalty,
-                    frequency_penalty=profile.frequency_penalty,
-                    seed=profile.seed,
-                    stop=profile.stop_sequences,
-                    logit_bias=profile.logit_bias,
-                )
+                # Only create provider if we have an API key or if it's not required
+                if api_key or not provider.api_key_required:
+                    return ChatOpenAI(
+                        api_key=api_key,
+                        base_url=provider.base_url,
+                        model=model_def.model_name,
+                        temperature=profile.temperature,
+                        max_tokens=profile.max_tokens,
+                        top_p=profile.top_p,
+                        presence_penalty=profile.presence_penalty,
+                        frequency_penalty=profile.frequency_penalty,
+                        seed=profile.seed,
+                        stop=profile.stop_sequences,
+                        logit_bias=profile.logit_bias,
+                    )
+                else:
+                    raise LLMProviderError(f"Cannot create OpenAI provider {provider.name}: API key required but not provided")
             elif provider.provider_type == ProviderType.ANTHROPIC:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
                 if provider.api_key_required and not api_key:
                     raise LLMProviderError(f"No API key found for provider {provider.name}")
 
-                return ChatAnthropic(
-                    api_key=api_key,
-                    model=model_def.model_name,
-                    temperature=profile.temperature,
-                    max_tokens=profile.max_tokens,
-                    top_p=profile.top_p,
-                    stop_sequences=profile.stop_sequences,
-                )
+                # Only create provider if we have an API key or if it's not required
+                if api_key or not provider.api_key_required:
+                    return ChatAnthropic(
+                        api_key=api_key,
+                        model=model_def.model_name,
+                        temperature=profile.temperature,
+                        max_tokens=profile.max_tokens,
+                        top_p=profile.top_p,
+                        stop_sequences=profile.stop_sequences,
+                    )
+                else:
+                    raise LLMProviderError(f"Cannot create Anthropic provider {provider.name}: API key required but not provided")
             else:
                 raise LLMProviderError(f"Unsupported provider type: {provider.provider_type}")
 

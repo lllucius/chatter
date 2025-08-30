@@ -27,11 +27,11 @@ class PaginatedRequest(BaseModel):
     """Base class for paginated requests."""
 
     pagination: PaginationRequest = Field(
-        default_factory=PaginationRequest,
+        default=PaginationRequest(),
         description="Pagination parameters",
     )
     sorting: SortingRequest = Field(
-        default_factory=SortingRequest, description="Sorting parameters"
+        default=SortingRequest(), description="Sorting parameters"
     )
 
 

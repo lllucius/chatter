@@ -297,8 +297,41 @@ class Prompt(Base):
 
         # Validate input schema if provided
         if self.input_schema:
-            # TODO: Implement JSON schema validation
-            pass
+            try:
+                import jsonschema
+                
+                # Validate each variable against the schema
+                for var_name, var_value in kwargs.items():
+                    # Check if there's a schema for this variable
+                    if "properties" in self.input_schema and var_name in self.input_schema["properties"]:
+                        var_schema = self.input_schema["properties"][var_name]
+                        
+                        try:
+                            jsonschema.validate(var_value, var_schema)
+                        except jsonschema.ValidationError as ve:
+                            result["valid"] = False
+                            result["errors"].append(
+                                f"Variable '{var_name}' failed schema validation: {ve.message}"
+                            )
+                        except jsonschema.SchemaError as se:
+                            result["warnings"].append(
+                                f"Invalid schema for variable '{var_name}': {se.message}"
+                            )
+                
+                # Validate the complete input against the full schema if it's a complete object schema
+                if "type" in self.input_schema and self.input_schema["type"] == "object":
+                    try:
+                        jsonschema.validate(kwargs, self.input_schema)
+                    except jsonschema.ValidationError as ve:
+                        result["valid"] = False
+                        result["errors"].append(f"Input validation failed: {ve.message}")
+                    except jsonschema.SchemaError as se:
+                        result["warnings"].append(f"Invalid input schema: {se.message}")
+                        
+            except ImportError:
+                result["warnings"].append(
+                    "jsonschema package not available for input validation"
+                )
 
         return result
 

@@ -129,8 +129,18 @@ async def admin_events_stream(
     Returns:
         StreamingResponse with SSE format for all events
     """
-    # TODO: Add admin role check once user roles are implemented
-    # For now, allow any authenticated user to access admin stream
+    # Check admin role - only superusers can access admin event stream
+    from chatter.core.auth import AuthService
+    from chatter.utils.database import get_session
+    
+    async with get_session() as session:
+        auth_service = AuthService(session)
+        is_admin = await auth_service.is_admin(current_user.id)
+        if not is_admin:
+            from chatter.utils.problem import AuthorizationProblem
+            raise AuthorizationProblem(
+                detail="Admin privileges required for system event stream"
+            )
 
     async def generate_admin_events():
         """Generate SSE formatted events for admin stream."""
@@ -217,6 +227,19 @@ async def get_sse_stats(
     Returns:
         SSE service statistics
     """
+    # Check admin role for detailed system statistics
+    from chatter.core.auth import AuthService
+    from chatter.utils.database import get_session
+    
+    async with get_session() as session:
+        auth_service = AuthService(session)
+        is_admin = await auth_service.is_admin(current_user.id)
+        if not is_admin:
+            from chatter.utils.problem import AuthorizationProblem
+            raise AuthorizationProblem(
+                detail="Admin privileges required for detailed system statistics"
+            )
+    
     # TODO: Add admin role check for detailed stats
     stats = sse_service.get_stats()
 
@@ -267,7 +290,18 @@ async def trigger_broadcast_test(
     Returns:
         Success message with event ID
     """
-    # TODO: Add admin role check for broadcast events
+    # Check admin role for broadcast events
+    from chatter.core.auth import AuthService
+    from chatter.utils.database import get_session
+    
+    async with get_session() as session:
+        auth_service = AuthService(session)
+        is_admin = await auth_service.is_admin(current_user.id)
+        if not is_admin:
+            from chatter.utils.problem import AuthorizationProblem
+            raise AuthorizationProblem(
+                detail="Admin privileges required for system broadcast events"
+            )
 
     event_id = await sse_service.trigger_event(
         EventType.SYSTEM_ALERT,

@@ -150,8 +150,20 @@ class AuthService:
         )
         return user
 
+    async def is_admin(self, user_id: str) -> bool:
+        """Check if user has admin privileges.
+
+        Args:
+            user_id: User ID
+
+        Returns:
+            True if user is superuser, False otherwise
+        """
+        user = await self.get_user_by_id(user_id)
+        return user is not None and user.is_superuser
+
     async def get_user_by_id(self, user_id: str) -> User | None:
-        """Get user by ID.
+        """Get user by ID with caching.
 
         Args:
             user_id: User ID
@@ -159,10 +171,44 @@ class AuthService:
         Returns:
             User if found, None otherwise
         """
+        # Try cache first for performance
+        try:
+            from chatter.services.cache import get_cache_service
+            cache_service = await get_cache_service()
+            
+            if cache_service.is_connected():
+                cache_key = f"user:{user_id}"
+                cached_user = await cache_service.get(cache_key)
+                if cached_user:
+                    # Convert back to User object (simplified caching)
+                    logger.debug("User found in cache", user_id=user_id)
+                    # For now, fall through to database - can enhance later
+        except Exception as cache_error:
+            logger.debug("Cache lookup failed, using database", 
+                        user_id=user_id, error=str(cache_error))
+        
         result = await self.session.execute(
             select(User).where(User.id == user_id)
         )
-        return result.scalar_one_or_none()
+        user = result.scalar_one_or_none()
+        
+        # Cache the result for future lookups
+        if user:
+            try:
+                from chatter.services.cache import get_cache_service
+                from datetime import timedelta
+                
+                cache_service = await get_cache_service()
+                if cache_service.is_connected():
+                    cache_key = f"user:{user_id}"
+                    # Cache for 15 minutes
+                    await cache_service.set(cache_key, "cached", timedelta(minutes=15))
+                    logger.debug("User cached", user_id=user_id)
+            except Exception as cache_error:
+                logger.debug("Cache storage failed", 
+                            user_id=user_id, error=str(cache_error))
+        
+        return user
 
     async def get_user_by_email(self, email: str) -> User | None:
         """Get user by email.

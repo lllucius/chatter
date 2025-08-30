@@ -336,6 +336,76 @@ export class ChatterSDK {
       }
     }
   };
+
+  /**
+   * Tool Server convenience methods
+   */
+
+  // Get all tool servers
+  async getToolServers() {
+    return await this.toolServers.listToolServersApiV1ToolserversServersGet({});
+  }
+
+  // Get all tools from all servers
+  async getAllTools() {
+    return await this.toolServers.listAllToolsApiV1ToolserversToolsAllGet({});
+  }
+
+  // Create a new tool server
+  async createToolServer(serverData: any) {
+    return await this.toolServers.createToolServerApiV1ToolserversServersPost({
+      toolServerCreate: serverData
+    });
+  }
+
+  // Enable a tool server
+  async enableToolServer(serverId: string) {
+    return await this.toolServers.enableToolServerApiV1ToolserversServersServerIdEnablePost({
+      serverId
+    });
+  }
+
+  // Disable a tool server
+  async disableToolServer(serverId: string) {
+    return await this.toolServers.disableToolServerApiV1ToolserversServersServerIdDisablePost({
+      serverId
+    });
+  }
+
+  // Delete a tool server
+  async deleteToolServer(serverId: string) {
+    return await this.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
+      serverId
+    });
+  }
+
+  // Enable a tool
+  async enableTool(toolId: string) {
+    return await this.toolServers.enableToolApiV1ToolserversToolsToolIdEnablePost({
+      toolId
+    });
+  }
+
+  // Disable a tool
+  async disableTool(toolId: string) {
+    return await this.toolServers.disableToolApiV1ToolserversToolsToolIdDisablePost({
+      toolId
+    });
+  }
+
+  // Refresh server tools (get latest tools from server)
+  async refreshServerTools(serverId: string) {
+    return await this.toolServers.getServerToolsApiV1ToolserversServersServerIdToolsGet({
+      serverId
+    });
+  }
+
+  // Get user permissions (placeholder implementation until endpoint is available)
+  async getUserPermissions(userId: string) {
+    // TODO: Implement when permission endpoints are available in the generated SDK
+    // For now, return empty array to avoid breaking the UI
+    return { data: [] };
+  }
 }
 
 // Create and export a singleton instance

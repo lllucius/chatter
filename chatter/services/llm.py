@@ -77,45 +77,30 @@ class LLMService:
     async def _create_provider_instance(self, provider, model_def) -> BaseChatModel | None:
         """Create a provider instance based on registry data."""
         try:
-            if provider.provider_type == ProviderType.OPENAI:
-                # Get API key from environment - registry doesn't store sensitive data
-                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
-                if provider.api_key_required and not api_key:
-                    logger.warning(f"No API key found for provider {provider.name}")
-                    return None
+            # Get API key from environment - registry doesn't store sensitive data
+            api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+            if provider.api_key_required and not api_key:
+                logger.warning(f"No API key found for provider {provider.name}")
+                return None
 
-                config = model_def.default_config or {}
-                # Only create provider if we have an API key or if it's not required
-                if api_key or not provider.api_key_required:
-                    return ChatOpenAI(
-                        api_key=api_key,
-                        base_url=provider.base_url,
-                        model=model_def.model_name,
-                        temperature=config.get('temperature', 0.7),
-                        max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
-                    )
-                else:
-                    logger.warning(f"Cannot create OpenAI provider {provider.name}: API key required but not provided")
-                    return None
+            config = model_def.default_config or {}
+
+            if provider.provider_type == ProviderType.OPENAI:
+                return ChatOpenAI(
+                    api_key=api_key or "dummy",
+                    base_url=provider.base_url,
+                    model=model_def.model_name,
+                    temperature=config.get('temperature', 0.7),
+                    max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
+                )
 
             elif provider.provider_type == ProviderType.ANTHROPIC:
-                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
-                if provider.api_key_required and not api_key:
-                    logger.warning(f"No API key found for provider {provider.name}")
-                    return None
-
-                config = model_def.default_config or {}
-                # Only create provider if we have an API key or if it's not required
-                if api_key or not provider.api_key_required:
-                    return ChatAnthropic(
-                        api_key=api_key,
-                        model=model_def.model_name,
-                        temperature=config.get('temperature', 0.7),
-                        max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
-                    )
-                else:
-                    logger.warning(f"Cannot create Anthropic provider {provider.name}: API key required but not provided")
-                    return None
+                return ChatAnthropic(
+                    api_key=api_key or "dummy",
+                    model=model_def.model_name,
+                    temperature=config.get('temperature', 0.7),
+                    max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
+                )
 
             else:
                 logger.warning(f"Unsupported provider type: {provider.provider_type}")

@@ -1,4 +1,4 @@
-import { useState, useCallback, ChangeEvent } from 'react';
+import { useState, useCallback, useMemo, ChangeEvent } from 'react';
 
 interface UseFormOptions<T> {
   initialValues: T;
@@ -44,14 +44,12 @@ export function useForm<T extends Record<string, any>>(
       [name]: newValue,
     }));
 
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: undefined,
-      }));
-    }
-  }, [errors]);
+    // Clear error when user starts typing - clear any error for this field
+    setErrors(prev => ({
+      ...prev,
+      [name]: undefined,
+    }));
+  }, []);
 
   const handleBlur = useCallback((name: keyof T) => () => {
     setTouched(prev => ({
@@ -59,14 +57,20 @@ export function useForm<T extends Record<string, any>>(
       [name]: true,
     }));
 
-    // Run validation on blur
+    // Only run validation on blur if the field has content or form was previously submitted
     if (validate) {
-      const validationErrors = validate(values);
-      if (validationErrors[name]) {
-        setErrors(prev => ({
-          ...prev,
-          [name]: validationErrors[name],
-        }));
+      const fieldValue = values[name];
+      const hasContent = fieldValue && String(fieldValue).trim().length > 0;
+      
+      // Only validate on blur if field has content - avoid showing errors for empty fields during navigation
+      if (hasContent) {
+        const validationErrors = validate(values);
+        if (validationErrors[name]) {
+          setErrors(prev => ({
+            ...prev,
+            [name]: validationErrors[name],
+          }));
+        }
       }
     }
   }, [values, validate]);
@@ -130,7 +134,33 @@ export function useForm<T extends Record<string, any>>(
     }
   }, [values, validate, onSubmit]);
 
-  const isValid = Object.keys(errors).length === 0;
+  // Calculate isValid - form is valid if no validation errors exist for filled fields
+  // Don't penalize empty fields unless the form has been submitted
+  const isValid = useMemo(() => {
+    if (!validate) return true;
+    
+    // Run validation to get current errors
+    const validationErrors = validate(values);
+    
+    // Form is valid if there are no validation errors for fields that have content
+    // or if all fields are empty (user hasn't started filling the form)
+    const hasAnyContent = Object.values(values).some(value => 
+      value && String(value).trim().length > 0
+    );
+    
+    if (!hasAnyContent) {
+      return true; // Empty form is considered valid for button enabling
+    }
+    
+    // Check if there are any validation errors for non-empty fields
+    const hasErrors = Object.keys(validationErrors).some(key => {
+      const fieldValue = values[key as keyof T];
+      const hasContent = fieldValue && String(fieldValue).trim().length > 0;
+      return hasContent && validationErrors[key as keyof T];
+    });
+    
+    return !hasErrors;
+  }, [values, validate]);
 
   return {
     values,

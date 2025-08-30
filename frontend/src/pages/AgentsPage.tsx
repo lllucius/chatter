@@ -150,7 +150,7 @@ const AgentsPage: React.FC = () => {
     try {
       await chatterSDK.agents.deleteAgentApiV1AgentsAgentIdDelete({ agentId });
       setAgents(prev => prev.filter(a => a.id !== agentId));
-    } catch (err: any) {
+    } catch {
       setError('Failed to delete agent');
     }
   };

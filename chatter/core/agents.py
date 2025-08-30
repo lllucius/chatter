@@ -182,15 +182,15 @@ class BaseAgent(ABC):
 
         # Update average confidence
         total_confidence = (
-            metrics["average_confidence"] * (metrics["total_interactions"] - 1) +
-            interaction.confidence_score
+            metrics["average_confidence"] * (metrics["total_interactions"] - 1)
+            + interaction.confidence_score
         )
         metrics["average_confidence"] = total_confidence / metrics["total_interactions"]
 
         # Update average response time
         total_response_time = (
-            metrics["average_response_time"] * (metrics["total_interactions"] - 1) +
-            interaction.response_time
+            metrics["average_response_time"] * (metrics["total_interactions"] - 1)
+            + interaction.response_time
         )
         metrics["average_response_time"] = total_response_time / metrics["total_interactions"]
 

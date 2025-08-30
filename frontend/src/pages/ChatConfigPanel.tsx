@@ -103,7 +103,10 @@ const ChatConfigPanel: React.FC<Props> = ({
       });
       setConversations(response.data.conversations || []);
     } catch (error) {
-      console.error('Failed to load conversations:', error);
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error('Failed to load conversations:', error);
+      }
       setConversations([]);
     } finally {
       setLoadingConversations(false);

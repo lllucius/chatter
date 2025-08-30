@@ -115,7 +115,10 @@ const ChatPage: React.FC = () => {
       }
     } catch (err: any) {
       setError('Failed to load chat data');
-      console.error(err);
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      }
     }
   };
 

@@ -2,6 +2,7 @@
 
 import uuid
 from contextvars import ContextVar
+from typing import Callable
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -43,7 +44,7 @@ def set_correlation_id(correlation_id: str) -> None:
 class CorrelationIdMiddleware(BaseHTTPMiddleware):
     """Middleware to add correlation IDs to requests and responses."""
 
-    async def dispatch(self, request: Request, call_next) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Add correlation ID to request and response.
 
         Args:

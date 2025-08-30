@@ -1,5 +1,7 @@
 """Registry models for LLM providers, models, and embedding spaces."""
 
+from __future__ import annotations
+
 from enum import Enum
 
 from sqlalchemy import (
@@ -67,7 +69,7 @@ class Provider(Base):
     # Relationships
     models = relationship("ModelDef", back_populates="provider", cascade="all, delete-orphan")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Provider(name='{self.name}', type='{self.provider_type}')>"
 
 
@@ -111,7 +113,7 @@ class ModelDef(Base):
         UniqueConstraint('provider_id', 'name', name='uq_provider_model_name'),
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<ModelDef(name='{self.name}', type='{self.model_type}', dimensions={self.dimensions})>"
 
 
@@ -150,5 +152,5 @@ class EmbeddingSpace(Base):
     # Relationships
     model = relationship("ModelDef", back_populates="embedding_spaces")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<EmbeddingSpace(name='{self.name}', base_dims={self.base_dimensions}, effective_dims={self.effective_dimensions})>"

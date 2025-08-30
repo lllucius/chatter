@@ -540,8 +540,8 @@ class WorkflowSecurityManager:
             }
 
         # Count events by type
-        event_counts = {}
-        user_counts = {}
+        event_counts: dict[str, int] = {}
+        user_counts: dict[str, int] = {}
 
         for entry in recent_entries:
             event_counts[entry.event_type] = event_counts.get(entry.event_type, 0) + 1

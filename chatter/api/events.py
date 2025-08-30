@@ -65,7 +65,7 @@ async def events_stream(
             async for event in connection.get_events():
                 # Skip keepalive events for the client unless explicitly requested
                 if (event.type == EventType.SYSTEM_STATUS and
-                    event.data.get("keepalive", False)):
+                        event.data.get("keepalive", False)):
                     yield ": keepalive\n\n"  # SSE comment format for keepalive
                     continue
 
@@ -159,7 +159,7 @@ async def admin_events_stream(
             async for event in connection.get_events():
                 # Skip keepalive events for admin stream too
                 if (event.type == EventType.SYSTEM_STATUS and
-                    event.data.get("keepalive", False)):
+                        event.data.get("keepalive", False)):
                     yield ": admin-keepalive\n\n"
                     continue
 

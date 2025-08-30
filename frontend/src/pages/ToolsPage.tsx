@@ -244,10 +244,8 @@ const ToolsPage: React.FC = () => {
   const loadPermissions = useCallback(async () => {
     try {
       setLoading(true);
-      // This would need to be implemented in the SDK
-      // const response = await chatterSDK.getUserPermissions(currentUserId);
-      // setPermissions(response.data || []);
-      setPermissions([]); // Placeholder
+      const response = await chatterSDK.getUserPermissions('current-user'); // Using placeholder for now
+      setPermissions(response.data || []);
     } catch (err) {
       console.error('Failed to load permissions:', err);
       setError('Failed to load permissions');
@@ -315,8 +313,7 @@ const ToolsPage: React.FC = () => {
 
   const refreshServerTools = async (serverId: string) => {
     try {
-      // This would need to be implemented in the SDK
-      // await chatterSDK.refreshServerTools(serverId);
+      await chatterSDK.refreshServerTools(serverId);
       showSnackbar('Server tools refreshed successfully');
       loadTools();
     } catch (err) {
@@ -534,6 +531,104 @@ const ToolsPage: React.FC = () => {
     </Dialog>
   );
 
+  const renderPermissionDialog = () => (
+    <Dialog open={dialogOpen && dialogType === 'permission'} onClose={closeDialog} maxWidth="sm" fullWidth>
+      <DialogTitle>Grant Tool Permission</DialogTitle>
+      <DialogContent>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="User ID"
+              value={permissionFormData.user_id}
+              onChange={(e) => setPermissionFormData({ ...permissionFormData, user_id: e.target.value })}
+              placeholder="Enter user ID or email"
+              required
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>Access Level</InputLabel>
+              <Select
+                value={permissionFormData.access_level}
+                onChange={(e) => setPermissionFormData({ 
+                  ...permissionFormData, 
+                  access_level: e.target.value as 'none' | 'read' | 'execute' | 'admin'
+                })}
+                label="Access Level"
+              >
+                <MenuItem value="none">None</MenuItem>
+                <MenuItem value="read">Read Only</MenuItem>
+                <MenuItem value="execute">Execute</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Tool ID (optional)"
+              value={permissionFormData.tool_id || ''}
+              onChange={(e) => setPermissionFormData({ ...permissionFormData, tool_id: e.target.value })}
+              placeholder="Specific tool ID"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Server ID (optional)"
+              value={permissionFormData.server_id || ''}
+              onChange={(e) => setPermissionFormData({ ...permissionFormData, server_id: e.target.value })}
+              placeholder="Specific server ID"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Rate Limit (per hour)"
+              type="number"
+              value={permissionFormData.rate_limit_per_hour || ''}
+              onChange={(e) => setPermissionFormData({ 
+                ...permissionFormData, 
+                rate_limit_per_hour: parseInt(e.target.value) || undefined 
+              })}
+              placeholder="Optional rate limit"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Rate Limit (per day)"
+              type="number"
+              value={permissionFormData.rate_limit_per_day || ''}
+              onChange={(e) => setPermissionFormData({ 
+                ...permissionFormData, 
+                rate_limit_per_day: parseInt(e.target.value) || undefined 
+              })}
+              placeholder="Optional rate limit"
+            />
+          </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeDialog}>Cancel</Button>
+        <Button 
+          onClick={() => {
+            // TODO: Implement when permission endpoints are available
+            showSnackbar('Permission grant feature will be available when backend endpoints are integrated');
+            closeDialog();
+          }} 
+          variant="contained" 
+          disabled={loading || !permissionFormData.user_id}
+        >
+          {loading ? <CircularProgress size={20} /> : 'Grant Permission'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   const renderRemoteServers = () => (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -711,10 +806,59 @@ const ToolsPage: React.FC = () => {
         This feature requires role-based access control to be configured.
       </Alert>
 
-      {/* This would show the actual permissions list */}
-      <Typography variant="body2" color="text.secondary">
-        Permission management interface coming soon...
-      </Typography>
+      {loading && <CircularProgress />}
+
+      {permissions.length === 0 && !loading ? (
+        <Alert severity="info">
+          No permissions configured yet. Grant permissions to users to control access to tools and servers.
+        </Alert>
+      ) : (
+        <Box>
+          <Typography variant="h6" gutterBottom>
+            Current Permissions
+          </Typography>
+          <List>
+            {permissions.map((permission: any, index: number) => (
+              <ListItem key={index} divider>
+                <SecurityIcon sx={{ mr: 2, color: 'primary.main' }} />
+                <ListItemText
+                  primary={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Typography variant="subtitle1">
+                        {permission.user_id || 'User'}
+                      </Typography>
+                      <Chip 
+                        label={permission.access_level || 'execute'} 
+                        color="primary"
+                        size="small"
+                      />
+                    </Box>
+                  }
+                  secondary={
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        {permission.tool_id ? `Tool: ${permission.tool_id}` : 
+                         permission.server_id ? `Server: ${permission.server_id}` : 
+                         'Global access'}
+                      </Typography>
+                      {permission.rate_limit_per_hour && (
+                        <Typography variant="caption" display="block">
+                          Rate limit: {permission.rate_limit_per_hour}/hour
+                        </Typography>
+                      )}
+                    </Box>
+                  }
+                />
+                <ListItemSecondaryAction>
+                  <IconButton edge="end" color="error">
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      )}
     </Box>
   );
 
@@ -758,6 +902,7 @@ const ToolsPage: React.FC = () => {
 
       {/* Dialogs */}
       {renderServerDialog()}
+      {renderPermissionDialog()}
 
       {/* Action Menu */}
       <Menu

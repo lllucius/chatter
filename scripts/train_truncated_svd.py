@@ -7,9 +7,6 @@ import sys
 from pathlib import Path
 
 import joblib
-import sys
-from pathlib import Path
-
 import numpy as np
 from sklearn.decomposition import TruncatedSVD
 

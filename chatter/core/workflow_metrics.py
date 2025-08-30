@@ -1,7 +1,6 @@
 """Workflow metrics and monitoring system for LangGraph workflows."""
 
 # Simple logger fallback
-import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any

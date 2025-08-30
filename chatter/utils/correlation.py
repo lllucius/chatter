@@ -1,8 +1,8 @@
 """Request correlation ID utilities for tracing requests across services."""
 
 import uuid
+from collections.abc import Awaitable, Callable
 from contextvars import ContextVar
-from typing import Awaitable, Callable
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request

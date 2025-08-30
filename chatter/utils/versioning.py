@@ -1,7 +1,8 @@
 """API versioning strategy and management."""
 
 import re
-from typing import Any, Awaitable, Callable
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.routing import APIRoute

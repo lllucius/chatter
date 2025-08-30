@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import (
     JSON,
@@ -145,20 +145,20 @@ class Document(Base):
     )
 
     # Relationships
-    owner: Mapped["User"] = relationship(
+    owner: Mapped[User] = relationship(
         "User", back_populates="documents"
     )
-    chunks: Mapped[list["DocumentChunk"]] = relationship(
+    chunks: Mapped[list[DocumentChunk]] = relationship(
         "DocumentChunk",
         back_populates="document",
         cascade="all, delete-orphan",
     )
-    parent_document: Mapped[Optional["Document"]] = relationship(
+    parent_document: Mapped[Document | None] = relationship(
         "Document",
         remote_side="Document.id",
         back_populates="child_documents",
     )
-    child_documents: Mapped[list["Document"]] = relationship(
+    child_documents: Mapped[list[Document]] = relationship(
         "Document", back_populates="parent_document"
     )
 
@@ -285,7 +285,7 @@ class DocumentChunk(Base):
     )
 
     # Relationships
-    document: Mapped["Document"] = relationship(
+    document: Mapped[Document] = relationship(
         "Document", back_populates="chunks"
     )
 

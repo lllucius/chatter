@@ -38,7 +38,7 @@ const ChatExport: React.FC<ChatExportProps> = ({
   messages,
   conversationTitle = 'Untitled Conversation',
 }) => {
-  const [format, setFormat] = useState<ExportFormat>('markdown');
+  const [exportFormat, setExportFormat] = useState<ExportFormat>('markdown');
   const [includeMetadata, setIncludeMetadata] = useState(true);
   const [includeTimestamps, setIncludeTimestamps] = useState(true);
   const [includeSystemMessages, setIncludeSystemMessages] = useState(false);
@@ -221,7 +221,7 @@ const ChatExport: React.FC<ChatExportProps> = ({
       let mimeType: string;
       let extension: string;
 
-      switch (format) {
+      switch (exportFormat) {
         case 'json':
           content = formatAsJSON();
           mimeType = 'application/json';
@@ -287,8 +287,8 @@ const ChatExport: React.FC<ChatExportProps> = ({
           <FormControl component="fieldset">
             <FormLabel component="legend">Export Format</FormLabel>
             <RadioGroup
-              value={format}
-              onChange={(e) => setFormat(e.target.value as ExportFormat)}
+              value={exportFormat}
+              onChange={(e) => setExportFormat(e.target.value as ExportFormat)}
             >
               <FormControlLabel
                 value="markdown"

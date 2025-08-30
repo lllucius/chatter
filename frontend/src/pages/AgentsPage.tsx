@@ -70,11 +70,12 @@ const AgentsPage: React.FC = () => {
 
   const agentTypes = [
     'conversational',
+    'task_oriented',
     'analytical',
     'creative',
-    'technical',
     'research',
-    'assistant',
+    'support',
+    'specialist',
   ];
 
   const loadAgents = useCallback(async () => {

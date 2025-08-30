@@ -22,6 +22,7 @@ const HealthPage = lazy(() => import('./pages/HealthPage'));
 const AgentsPage = lazy(() => import('./pages/AgentsPage'));
 const AdministrationPage = lazy(() => import('./pages/AdministrationPage'));
 const ModelManagementPage = lazy(() => import('./pages/ModelManagementPage'));
+const ToolsPage = lazy(() => import('./pages/ToolsPage'));
 
 // Create theme context
 export const ThemeContext = React.createContext<{
@@ -147,6 +148,11 @@ function App() {
                   <Route path="agents" element={
                     <SuspenseWrapper loadingMessage="Loading agents...">
                       <AgentsPage />
+                    </SuspenseWrapper>
+                  } />
+                  <Route path="tools" element={
+                    <SuspenseWrapper loadingMessage="Loading tools...">
+                      <ToolsPage />
                     </SuspenseWrapper>
                   } />
                   <Route path="health" element={

@@ -54,9 +54,9 @@ import { useSSE } from '../services/sse-context';
 const AdministrationPage: React.FC = () => {
   const { isConnected, on } = useSSE();
   
-  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users' | 'tools'>('backups');
+  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users'>('backups');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'user' | 'tool' | 'backup' | 'plugin' | 'job'>('user');
+  const [dialogType, setDialogType] = useState<'user' | 'backup' | 'plugin' | 'job'>('user');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -65,7 +65,6 @@ const AdministrationPage: React.FC = () => {
   // More options menu state
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
   const [actionUser, setActionUser] = useState<any>(null);
-  const [actionToolServer, setActionToolServer] = useState<any>(null);
   
   // User settings dialog state
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
@@ -99,24 +98,6 @@ const AdministrationPage: React.FC = () => {
     }
   ]);
 
-  // Mock tool server data - in real app this would come from API
-  const [toolServers] = useState([
-    {
-      id: 'file-ops',
-      name: 'File Operations Server',
-      url: 'http://localhost:3000',
-      status: 'Connected',
-      toolsCount: 8
-    },
-    {
-      id: 'web-search',
-      name: 'Web Search Server',
-      url: 'http://localhost:3001',
-      status: 'Disconnected',
-      toolsCount: 4
-    }
-  ]);
-  
   const [notifications, setNotifications] = useState<Array<{
     id: string;
     title: string;
@@ -132,8 +113,6 @@ const AdministrationPage: React.FC = () => {
     email: '',
     password: '',
     role: 'user',
-    serverName: '',
-    serverUrl: '',
     description: '',
     backupName: '',
     includeUserData: true,
@@ -337,15 +316,9 @@ const AdministrationPage: React.FC = () => {
     setActionUser(user);
   };
 
-  const openToolServerActionsMenu = (e: React.MouseEvent<HTMLElement>, toolServer: any) => {
-    setActionAnchorEl(e.currentTarget);
-    setActionToolServer(toolServer);
-  };
-
   const closeActionsMenu = () => {
     setActionAnchorEl(null);
     setActionUser(null);
-    setActionToolServer(null);
   };
 
   const handleUserSettings = (user: any) => {
@@ -393,7 +366,7 @@ const AdministrationPage: React.FC = () => {
     }
   };
 
-  const openDialog = (type: 'user' | 'tool' | 'backup' | 'plugin' | 'job') => {
+  const openDialog = (type: 'user' | 'backup' | 'plugin' | 'job') => {
     setDialogType(type);
     setDialogOpen(true);
     setError('');
@@ -402,8 +375,6 @@ const AdministrationPage: React.FC = () => {
       email: '',
       password: '',
       role: 'user',
-      serverName: '',
-      serverUrl: '',
       description: '',
       backupName: '',
       includeUserData: true,
@@ -438,17 +409,6 @@ const AdministrationPage: React.FC = () => {
             }
           });
           showSnackbar('User created successfully!');
-          break;
-        case 'tool':
-          await chatterSDK.toolServers.createToolServerApiV1ToolserversServersPost({
-            toolServerCreate: {
-              name: formData.serverName,
-              display_name: formData.serverName,
-              command: formData.serverUrl,
-              description: formData.description,
-            }
-          });
-          showSnackbar('Tool server created successfully!');
           break;
         case 'backup':
           await chatterSDK.dataManagement.createBackupApiV1DataBackupPost({
@@ -534,12 +494,6 @@ const AdministrationPage: React.FC = () => {
           case 'user':
             showSnackbar('User deletion functionality requires implementation of admin user management API');
             break;
-          case 'tool server':
-            await chatterSDK.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
-              serverId: id
-            });
-            showSnackbar('Tool server deleted successfully!');
-            break;
           case 'backup':
             showSnackbar('Backup deletion is not yet supported by the API');
             break;
@@ -573,9 +527,6 @@ const AdministrationPage: React.FC = () => {
       switch (type) {
         case 'user':
           showSnackbar('User editing functionality requires implementation of admin user management API');
-          break;
-        case 'tool server':
-          showSnackbar('Tool server editing functionality would open edit dialog with current data');
           break;
         case 'backup':
           showSnackbar('Backup editing functionality would be implemented with backup management API');
@@ -667,7 +618,6 @@ const AdministrationPage: React.FC = () => {
         <Tab value="jobs" icon={<JobIcon />} iconPosition="start" label="Background Jobs" />
         <Tab value="plugins" icon={<PluginIcon />} iconPosition="start" label="Plugins" />
         <Tab value="users" icon={<UsersIcon />} iconPosition="start" label="User Management" />
-        <Tab value="tools" icon={<ToolsIcon />} iconPosition="start" label="Tool Servers" />
       </Tabs>
 
       {/* Backups Tab */}
@@ -919,46 +869,9 @@ const AdministrationPage: React.FC = () => {
         </Box>
       )}
 
-      {/* Tools Tab */}
-      {activeTab === 'tools' && (
-        <Box>
-          <Box sx={{ mb: 2 }}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => openDialog('tool')}
-            >
-              Add Tool Server
-            </Button>
-          </Box>
-          <List>
-            {toolServers.map((server) => (
-              <ListItem key={server.id}>
-                <ListItemText
-                  primary={server.name}
-                  secondary={`URL: ${server.url} | Status: ${server.status} | Tools: ${server.toolsCount}`}
-                />
-                <Chip 
-                  label={server.status} 
-                  color={server.status === 'Connected' ? 'success' : 'error'} 
-                  size="small" 
-                  sx={{ mr: 1 }} 
-                />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" onClick={(e) => openToolServerActionsMenu(e, server)}>
-                    <MoreVertIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      )}
-
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>
           {dialogType === 'user' && 'Add New User'}
-          {dialogType === 'tool' && 'Add Tool Server'}
           {dialogType === 'backup' && 'Create Backup'}
           {dialogType === 'plugin' && 'Install Plugin'}
           {dialogType === 'job' && 'Create New Job'}
@@ -1004,36 +917,6 @@ const AdministrationPage: React.FC = () => {
                 <option value="user">User</option>
                 <option value="admin">Administrator</option>
               </TextField>
-            </Box>
-          )}
-          {dialogType === 'tool' && (
-            <Box sx={{ mt: 2 }}>
-              <TextField
-                fullWidth
-                label="Server Name"
-                margin="normal"
-                placeholder="My Tool Server"
-                value={formData.serverName}
-                onChange={(e) => handleFormChange('serverName', e.target.value)}
-              />
-              <TextField
-                fullWidth
-                label="Server URL"
-                margin="normal"
-                placeholder="http://localhost:3000"
-                value={formData.serverUrl}
-                onChange={(e) => handleFormChange('serverUrl', e.target.value)}
-              />
-              <TextField
-                fullWidth
-                label="Description"
-                margin="normal"
-                multiline
-                rows={3}
-                placeholder="Description of the tool server capabilities"
-                value={formData.description}
-                onChange={(e) => handleFormChange('description', e.target.value)}
-              />
             </Box>
           )}
           {dialogType === 'backup' && (
@@ -1198,32 +1081,6 @@ const AdministrationPage: React.FC = () => {
         </MenuItem>
         <MenuItem onClick={() => {
           if (actionUser) handleDeleteAction('user', actionUser.id);
-          closeActionsMenu();
-        }}>
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" />
-          </ListItemIcon>
-          Delete
-        </MenuItem>
-      </Menu>
-
-      {/* Tool Server Actions Menu */}
-      <Menu
-        anchorEl={actionAnchorEl}
-        open={Boolean(actionAnchorEl) && Boolean(actionToolServer)}
-        onClose={closeActionsMenu}
-      >
-        <MenuItem onClick={() => {
-          if (actionToolServer) handleEditAction('tool server', actionToolServer.id);
-          closeActionsMenu();
-        }}>
-          <ListItemIcon>
-            <EditIcon fontSize="small" />
-          </ListItemIcon>
-          Edit
-        </MenuItem>
-        <MenuItem onClick={() => {
-          if (actionToolServer) handleDeleteAction('tool server', actionToolServer.id);
           closeActionsMenu();
         }}>
           <ListItemIcon>

@@ -6,10 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
 from chatter.schemas.health import (
+    CorrelationTraceResponse,
     HealthCheckResponse,
+    MetricsResponse,
     ReadinessCheckResponse,
 )
 from chatter.utils.database import get_session, health_check
+from chatter.utils.problem import InternalServerProblem
 
 router = APIRouter()
 
@@ -77,8 +80,8 @@ async def liveness_check() -> HealthCheckResponse:
     )
 
 
-@router.get("/metrics")
-async def get_metrics():
+@router.get("/metrics", response_model=MetricsResponse)
+async def get_metrics() -> MetricsResponse:
     """Get application metrics and monitoring data.
     
     Returns:
@@ -91,28 +94,24 @@ async def get_metrics():
         health_metrics = metrics_collector.get_health_metrics()
         endpoint_stats = metrics_collector.get_endpoint_stats()
 
-        return {
-            "timestamp": "2024-01-01T12:00:00Z",  # Would use actual timestamp
-            "service": "chatter",
-            "version": settings.app_version,
-            "environment": settings.environment,
-            "health": health_metrics,
-            "performance": overall_stats,
-            "endpoints": endpoint_stats
-        }
+        return MetricsResponse(
+            timestamp="2024-01-01T12:00:00Z",  # Would use actual timestamp
+            service="chatter",
+            version=settings.app_version,
+            environment=settings.environment,
+            health=health_metrics,
+            performance=overall_stats,
+            endpoints=endpoint_stats
+        )
     except Exception as e:
-        # Fallback metrics if monitoring fails
-        return {
-            "timestamp": "2024-01-01T12:00:00Z",
-            "service": "chatter",
-            "version": settings.app_version,
-            "environment": settings.environment,
-            "error": f"Metrics collection failed: {str(e)}"
-        }
+        # No fallback metrics - raise proper problem instead
+        raise InternalServerProblem(
+            detail=f"Metrics collection failed: {str(e)}"
+        ) from e
 
 
-@router.get("/trace/{correlation_id}")
-async def get_correlation_trace(correlation_id: str):
+@router.get("/trace/{correlation_id}", response_model=CorrelationTraceResponse)
+async def get_correlation_trace(correlation_id: str) -> CorrelationTraceResponse:
     """Get trace of all requests for a correlation ID.
     
     Args:
@@ -126,13 +125,13 @@ async def get_correlation_trace(correlation_id: str):
 
         trace = metrics_collector.get_correlation_trace(correlation_id)
 
-        return {
-            "correlation_id": correlation_id,
-            "trace_length": len(trace),
-            "requests": trace
-        }
+        return CorrelationTraceResponse(
+            correlation_id=correlation_id,
+            trace_length=len(trace),
+            requests=trace
+        )
     except Exception as e:
-        return {
-            "correlation_id": correlation_id,
-            "error": f"Failed to get trace: {str(e)}"
-        }
+        # No fallback response - raise proper problem instead
+        raise InternalServerProblem(
+            detail=f"Failed to get trace: {str(e)}"
+        ) from e

@@ -46,7 +46,7 @@ class ToolPermission:
         self.rate_limit = rate_limit
         self.expiry = expiry
         self.usage_count = 0
-        self.last_used = None
+        self.last_used: datetime | None = None
 
     def is_valid(self) -> bool:
         """Check if permission is still valid (not expired)."""
@@ -241,7 +241,7 @@ class AuditLogEntry:
 class WorkflowSecurityManager:
     """Manages security for workflow execution."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize workflow security manager."""
         self.user_permissions: dict[str, UserPermissions] = {}
         self.audit_log: list[AuditLogEntry] = []

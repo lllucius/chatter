@@ -1,5 +1,7 @@
 """Analytics models for usage statistics and performance metrics."""
 
+from __future__ import annotations
+
 from datetime import date
 
 from sqlalchemy import JSON, Date, Float, ForeignKey, Integer, String

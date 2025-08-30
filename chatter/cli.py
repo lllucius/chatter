@@ -956,7 +956,7 @@ def generate_sdk(
     sys.path.insert(0, str(project_root))
 
     try:
-        from scripts.generate_sdk import generate_python_sdk
+        from scripts.sdk.python_sdk import main as generate_python_sdk
 
         console.print(f"🐍 Generating {language} SDK...")
 
@@ -1835,7 +1835,7 @@ def show_document(
             table.add_row("File Type", response.get("file_type", "N/A"))
             table.add_row(
                 "File Size",
-                f"{response.get('file_size', 0) / (1024*1024):.1f}MB",
+                f"{response.get('file_size', 0) / (1024 * 1024):.1f}MB",
             )
             table.add_row("Status", response.get("status", "N/A"))
             table.add_row("Chunks", str(response.get("chunk_count", 0)))

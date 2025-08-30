@@ -1,4 +1,4 @@
-import { useMemo, startTransition, useTransition } from 'react';
+import { useMemo, useTransition } from 'react';
 
 /**
  * Hook for managing concurrent updates with React 19's improved startTransition

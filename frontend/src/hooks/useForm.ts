@@ -119,7 +119,11 @@ export function useForm<T extends Record<string, any>>(
       try {
         await onSubmit(values);
       } catch (error) {
-        console.error('Form submission error:', error);
+        // Log error for debugging in development
+        if (process.env.NODE_ENV === 'development') {
+          // eslint-disable-next-line no-console
+          console.error('Form submission error:', error);
+        }
       } finally {
         setIsSubmitting(false);
       }

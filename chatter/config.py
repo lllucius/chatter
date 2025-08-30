@@ -232,11 +232,6 @@ class Settings(BaseSettings):
     # =============================================================================
     # REDIS SETTINGS
     # =============================================================================
-
-    redis_url: str | None = Field(default=None, description="Redis URL")
-    test_redis_url: str = Field(
-        default="redis://localhost:6379/1", description="Test Redis URL"
-    )
     redis_max_connections: int = Field(
         default=20, description="Redis max connections"
     )
@@ -404,7 +399,7 @@ class Settings(BaseSettings):
     )
 
     @model_validator(mode='after')
-    def validate_configuration(self):
+    def validate_configuration(self) -> 'Settings':
         """Validate configuration for security and production readiness."""
         # Validate database URL is provided
         if not self.database_url:
@@ -429,7 +424,7 @@ class Settings(BaseSettings):
 
     @field_validator('database_url')
     @classmethod
-    def validate_database_url(cls, v):
+    def validate_database_url(cls, v: str) -> str:
         """Validate database URL format."""
         if not v:
             raise ValueError("Database URL is required")
@@ -519,4 +514,3 @@ def get_settings() -> Settings:
     This function is kept for backward compatibility.
     """
     return settings
-

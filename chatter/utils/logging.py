@@ -10,7 +10,7 @@ from structlog.stdlib import LoggerFactory
 from chatter.config import settings
 
 
-def correlation_id_processor(logger, method_name, event_dict):
+def correlation_id_processor(logger: Any, method_name: str, event_dict: dict[str, Any]) -> dict[str, Any]:
     """Add correlation ID to log events."""
     try:
         from chatter.utils.correlation import get_correlation_id

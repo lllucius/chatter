@@ -25,7 +25,7 @@ class PythonSDKConfig(SDKConfig):
     package_company: str = ""
     use_asyncio: bool = True
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.project_name:
             self.project_name = self.package_name.replace("_", "-")
 
@@ -42,7 +42,7 @@ class TypeScriptSDKConfig(SDKConfig):
     supports_es6: bool = True
     with_separate_models_and_api: bool = False
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if not self.npm_name:
             self.npm_name = self.package_name.replace("_", "-")
         if not self.npm_repository:

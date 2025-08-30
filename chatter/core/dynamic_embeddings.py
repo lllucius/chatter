@@ -125,7 +125,7 @@ def ensure_table_and_index(
     logger.info(
         "Created embedding table and index",
         table=table_name,
-        index_type=index_type,
+        index_type="hnsw",
         metric=metric
     )
 

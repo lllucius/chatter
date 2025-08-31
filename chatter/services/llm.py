@@ -28,28 +28,13 @@ if TYPE_CHECKING:
 logger = get_logger(__name__)
 
 
-def _get_builtin_tools():
-    """Lazy import of BuiltInTools to avoid circular imports."""
-    from chatter.services.mcp import BuiltInTools
-    return BuiltInTools.create_builtin_tools()
-
-
-def _get_orchestrator():
-    """Lazy import of orchestrator to avoid circular imports."""
-    from chatter.core.langchain import orchestrator
-    return orchestrator
-
-
-def _get_mcp_service():
-    """Lazy import of MCP service to avoid circular imports."""
-    from chatter.services.mcp import mcp_service
-    return mcp_service
-
-
-def _get_model_registry():
-    """Lazy import of model registry to avoid circular imports."""
-    from chatter.core.model_registry import ModelRegistryService
-    return ModelRegistryService
+# Import dependency injection functions
+from chatter.core.dependencies import (
+    get_builtin_tools,
+    get_mcp_service, 
+    get_model_registry,
+    get_orchestrator,
+)
 
 
 class LLMProviderError(Exception):
@@ -128,7 +113,7 @@ class LLMService:
 
         # Load from registry
         session = await self._get_session()
-        registry = _get_model_registry()(session)
+        registry = get_model_registry()(session)
 
         # Get provider by name
         provider = await registry.get_provider_by_name(provider_name)
@@ -174,7 +159,7 @@ class LLMService:
             LLMProviderError: If no providers available
         """
         session = await self._get_session()
-        registry = _get_model_registry()(session)
+        registry = get_model_registry()(session)
 
         # Get default provider for LLM
         provider = await registry.get_default_provider(ModelType.LLM)
@@ -206,7 +191,7 @@ class LLMService:
         """
         # Get the provider configuration from registry
         session = await self._get_session()
-        registry = _get_model_registry()(session)
+        registry = get_model_registry()(session)
 
         provider = await registry.get_provider_by_name(profile.llm_provider)
         if not provider:
@@ -466,7 +451,7 @@ class LLMService:
             List of provider names
         """
         session = await self._get_session()
-        registry = _get_model_registry()(session)
+        registry = get_model_registry()(session)
 
         providers, _ = await registry.list_providers()
         active_providers = [p.name for p in providers if p.is_active]
@@ -483,7 +468,7 @@ class LLMService:
             Provider information
         """
         session = await self._get_session()
-        registry = _get_model_registry()(session)
+        registry = get_model_registry()(session)
 
         provider = await registry.get_provider_by_name(provider_name)
         if not provider:
@@ -520,7 +505,7 @@ class LLMService:
     ) -> Any:
         """Create a conversation chain using LangChain orchestrator."""
         provider = await self.get_provider(provider_name)
-        return _get_orchestrator().create_chat_chain(
+        return get_orchestrator().create_chat_chain(
             llm=provider,
             system_message=system_message,
             include_history=include_history,
@@ -534,7 +519,7 @@ class LLMService:
     ) -> Any:
         """Create a RAG chain using LangChain orchestrator."""
         provider = await self.get_provider(provider_name)
-        return _get_orchestrator().create_rag_chain(
+        return get_orchestrator().create_rag_chain(
             llm=provider,
             retriever=retriever,
             system_message=system_message,
@@ -553,8 +538,8 @@ class LLMService:
 
         # Get MCP tools if none provided
         if tools is None:
-            tools = await _get_mcp_service().get_tools()
-            tools.extend(_get_builtin_tools())
+            tools = await get_mcp_service().get_tools()
+            tools.extend(get_builtin_tools())
 
         if tools:
             # Bind tools to the provider
@@ -627,8 +612,8 @@ class LLMService:
 
         # Get default tools if needed
         if workflow_type in ("tools", "full") and not tools:
-            tools = await _get_mcp_service().get_tools()
-            tools.extend(_get_builtin_tools())
+            tools = await get_mcp_service().get_tools()
+            tools.extend(get_builtin_tools())
 
         # Note: do NOT hard-require a retriever; the workflow handles missing retriever gracefully.
         mode = (

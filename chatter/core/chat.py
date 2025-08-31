@@ -9,7 +9,8 @@ from typing import Any
 from langchain_core.messages import AIMessage, BaseMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.langgraph import ConversationState, workflow_manager
+from chatter.core.dependencies import get_workflow_manager
+from chatter.core.langgraph import ConversationState
 from chatter.core.workflow_performance import (
     lazy_tool_loader,
     performance_monitor,
@@ -425,7 +426,7 @@ class ChatService:
             }
 
             # Run workflow
-            result = await workflow_manager.run_workflow(
+            result = await get_workflow_manager().run_workflow(
                 workflow=workflow, initial_state=initial_state, thread_id=conversation.id
             )
 
@@ -576,7 +577,7 @@ class ChatService:
             }
 
             # Run the graph
-            result = await workflow_manager.run_workflow(
+            result = await get_workflow_manager().run_workflow(
                 workflow=workflow, initial_state=initial_state, thread_id=conversation.id
             )
 
@@ -680,7 +681,7 @@ class ChatService:
         try:
             workflow_start_time = __import__('time').time()
 
-            async for event in workflow_manager.stream_workflow(
+            async for event in get_workflow_manager().stream_workflow(
                 workflow=workflow, initial_state=initial_state, thread_id=conversation.id
             ):
                 # Extract node information for better debugging

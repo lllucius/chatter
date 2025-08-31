@@ -973,8 +973,6 @@ const ToolsPage: React.FC = () => {
   const renderRemoteServers = () => (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Remote MCP Servers</Typography>
-        
         {/* Filter field */}
         <TextField
           fullWidth
@@ -1127,8 +1125,6 @@ const ToolsPage: React.FC = () => {
   const renderTools = () => (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Available Tools</Typography>
-        
         {/* Filter field */}
         <TextField
           fullWidth

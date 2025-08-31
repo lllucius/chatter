@@ -20,10 +20,28 @@ from chatter.utils.security import (
 )
 from chatter.utils.validation import (
     sanitize_input,
-    validate_email,
-    validate_password,
-    validate_username,
+    input_validator,
 )
+from chatter.utils.security import validate_password_strength
+
+
+# Simple replacements for removed backward compatibility functions
+def validate_email(email):
+    try:
+        input_validator.validate_and_sanitize(email, "email")
+        return True
+    except:
+        return False
+
+def validate_username(username):
+    try:
+        input_validator.validate_and_sanitize(username, "username")
+        return True
+    except:
+        return False
+
+def validate_password(password):
+    return validate_password_strength(password)
 
 
 @pytest.mark.unit

@@ -409,11 +409,58 @@ export class ChatterSDK {
     });
   }
 
-  // Get user permissions (placeholder implementation until endpoint is available)
+  /**
+   * RBAC Permission Management Methods
+   */
+
+  // Get user permissions
   async getUserPermissions(userId: string) {
-    // TODO: Implement when permission endpoints are available in the generated SDK
-    // For now, return empty array to avoid breaking the UI
-    return { data: [] };
+    return await this.toolServers.getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet({
+      userId
+    });
+  }
+
+  // Grant tool permission
+  async grantToolPermission(permissionData: any) {
+    return await this.toolServers.grantToolPermissionApiV1ToolserversPermissionsPost({
+      toolPermissionCreate: permissionData
+    });
+  }
+
+  // Update tool permission
+  async updateToolPermission(permissionId: string, updateData: any) {
+    return await this.toolServers.updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut({
+      permissionId,
+      toolPermissionUpdate: updateData
+    });
+  }
+
+  // Revoke tool permission
+  async revokeToolPermission(permissionId: string) {
+    return await this.toolServers.revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete({
+      permissionId
+    });
+  }
+
+  // Create role access rule
+  async createRoleAccessRule(ruleData: any) {
+    return await this.toolServers.createRoleAccessRuleApiV1ToolserversRoleAccessPost({
+      roleToolAccessCreate: ruleData
+    });
+  }
+
+  // Get role access rules
+  async getRoleAccessRules(role?: string) {
+    return await this.toolServers.getRoleAccessRulesApiV1ToolserversRoleAccessGet({
+      role
+    });
+  }
+
+  // Check tool access
+  async checkToolAccess(checkData: any) {
+    return await this.toolServers.checkToolAccessApiV1ToolserversAccessCheckPost({
+      userToolAccessCheck: checkData
+    });
   }
 }
 

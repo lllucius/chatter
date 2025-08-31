@@ -136,10 +136,19 @@ interface PermissionData {
   expires_at?: string;
 }
 
+interface RoleAccessData {
+  role: 'guest' | 'user' | 'power_user' | 'admin' | 'super_admin';
+  tool_pattern?: string;
+  server_pattern?: string;
+  access_level: 'none' | 'read' | 'execute' | 'admin';
+  default_rate_limit_per_hour?: number;
+  default_rate_limit_per_day?: number;
+}
+
 const ToolsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'server' | 'tool' | 'permission' | 'edit-server'>('server');
+  const [dialogType, setDialogType] = useState<'server' | 'tool' | 'permission' | 'role-access' | 'edit-server'>('server');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -155,6 +164,8 @@ const ToolsPage: React.FC = () => {
   const [remoteServers, setRemoteServers] = useState<RemoteServer[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
   const [permissions, setPermissions] = useState<any[]>([]);
+  const [roleAccessRules, setRoleAccessRules] = useState<any[]>([]);
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   // Pagination state
   const [toolsPage, setToolsPage] = useState(0);
@@ -190,6 +201,12 @@ const ToolsPage: React.FC = () => {
   // Form state for permissions
   const [permissionFormData, setPermissionFormData] = useState<PermissionData>({
     user_id: '',
+    access_level: 'execute',
+  });
+
+  // Form state for role access rules
+  const [roleAccessFormData, setRoleAccessFormData] = useState<RoleAccessData>({
+    role: 'user',
     access_level: 'execute',
   });
 
@@ -330,7 +347,7 @@ const ToolsPage: React.FC = () => {
     setActiveTab(newValue);
   };
 
-  const openDialog = (type: 'server' | 'tool' | 'permission' | 'edit-server', item?: any) => {
+  const openDialog = (type: 'server' | 'tool' | 'permission' | 'role-access' | 'edit-server', item?: any) => {
     setDialogType(type);
     setDialogOpen(true);
     if (type === 'server') {
@@ -366,6 +383,16 @@ const ToolsPage: React.FC = () => {
         headers: item.headers ? JSON.stringify(item.headers) : '{}',
         timeout: item.timeout || 30,
         auto_start: item.auto_start !== undefined ? item.auto_start : true,
+      });
+    } else if (type === 'permission') {
+      setPermissionFormData({
+        user_id: '',
+        access_level: 'execute',
+      });
+    } else if (type === 'role-access') {
+      setRoleAccessFormData({
+        role: 'user',
+        access_level: 'execute',
       });
     }
   };
@@ -423,7 +450,12 @@ const ToolsPage: React.FC = () => {
   const loadPermissions = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await chatterSDK.getUserPermissions('current-user'); // Using placeholder for now
+      // Get current user first
+      const userResponse = await chatterSDK.getCurrentUser();
+      setCurrentUser(userResponse);
+      
+      // Load user permissions  
+      const response = await chatterSDK.getUserPermissions(userResponse.id);
       setPermissions(response.data || []);
       setError('');
     } catch (err) {
@@ -436,11 +468,28 @@ const ToolsPage: React.FC = () => {
     }
   }, []);
 
+  const loadRoleAccessRules = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await chatterSDK.getRoleAccessRules();
+      setRoleAccessRules(response.data || []);
+      setError('');
+    } catch (err) {
+      console.error('Failed to load role access rules:', err);
+      const errorMessage = 'Failed to load role access rules';
+      setError(errorMessage);
+      showSnackbar(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadRemoteServers();
     loadTools();
     loadPermissions();
-  }, [loadRemoteServers, loadTools, loadPermissions]);
+    loadRoleAccessRules();
+  }, [loadRemoteServers, loadTools, loadPermissions, loadRoleAccessRules]);
 
   // Server operations
   const createRemoteServer = async () => {
@@ -569,6 +618,57 @@ const ToolsPage: React.FC = () => {
       showSnackbar(`Failed to ${enable ? 'enable' : 'disable'} tool`);
     }
     handleActionClose();
+  };
+
+  // Permission management functions
+  const grantPermission = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      await chatterSDK.grantToolPermission(permissionFormData);
+      showSnackbar('Permission granted successfully');
+      closeDialog();
+      loadPermissions();
+    } catch (err) {
+      console.error('Failed to grant permission:', err);
+      const errorMessage = 'Failed to grant permission';
+      setError(errorMessage);
+      showSnackbar(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const revokePermission = async (permissionId: string) => {
+    try {
+      await chatterSDK.revokeToolPermission(permissionId);
+      showSnackbar('Permission revoked successfully');
+      loadPermissions();
+    } catch (err) {
+      console.error('Failed to revoke permission:', err);
+      showSnackbar('Failed to revoke permission');
+    }
+  };
+
+  // Role access management functions
+  const createRoleAccessRule = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      await chatterSDK.createRoleAccessRule(roleAccessFormData);
+      showSnackbar('Role access rule created successfully');
+      closeDialog();
+      loadRoleAccessRules();
+    } catch (err) {
+      console.error('Failed to create role access rule:', err);
+      const errorMessage = 'Failed to create role access rule';
+      setError(errorMessage);
+      showSnackbar(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Pagination handlers
@@ -872,6 +972,111 @@ const ToolsPage: React.FC = () => {
     </Dialog>
   );
 
+  const renderRoleAccessDialog = () => (
+    <Dialog open={dialogOpen && dialogType === 'role-access'} onClose={closeDialog} maxWidth="sm" fullWidth>
+      <DialogTitle>Create Role Access Rule</DialogTitle>
+      <DialogContent>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>User Role</InputLabel>
+              <Select
+                value={roleAccessFormData.role}
+                onChange={(e) => setRoleAccessFormData({ 
+                  ...roleAccessFormData, 
+                  role: e.target.value as any
+                })}
+                label="User Role"
+              >
+                <MenuItem value="guest">Guest</MenuItem>
+                <MenuItem value="user">User</MenuItem>
+                <MenuItem value="power_user">Power User</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+                <MenuItem value="super_admin">Super Admin</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>Access Level</InputLabel>
+              <Select
+                value={roleAccessFormData.access_level}
+                onChange={(e) => setRoleAccessFormData({ 
+                  ...roleAccessFormData, 
+                  access_level: e.target.value as any
+                })}
+                label="Access Level"
+              >
+                <MenuItem value="none">None</MenuItem>
+                <MenuItem value="read">Read Only</MenuItem>
+                <MenuItem value="execute">Execute</MenuItem>
+                <MenuItem value="admin">Admin</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Tool Pattern (optional)"
+              value={roleAccessFormData.tool_pattern || ''}
+              onChange={(e) => setRoleAccessFormData({ ...roleAccessFormData, tool_pattern: e.target.value })}
+              placeholder="e.g., data_* or calculator"
+              helperText="Wildcard patterns supported (*, ?)"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Server Pattern (optional)"
+              value={roleAccessFormData.server_pattern || ''}
+              onChange={(e) => setRoleAccessFormData({ ...roleAccessFormData, server_pattern: e.target.value })}
+              placeholder="e.g., internal_* or analytics"
+              helperText="Wildcard patterns supported (*, ?)"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Default Rate Limit (per hour)"
+              type="number"
+              value={roleAccessFormData.default_rate_limit_per_hour || ''}
+              onChange={(e) => setRoleAccessFormData({ 
+                ...roleAccessFormData, 
+                default_rate_limit_per_hour: parseInt(e.target.value) || undefined 
+              })}
+              placeholder="Optional rate limit"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Default Rate Limit (per day)"
+              type="number"
+              value={roleAccessFormData.default_rate_limit_per_day || ''}
+              onChange={(e) => setRoleAccessFormData({ 
+                ...roleAccessFormData, 
+                default_rate_limit_per_day: parseInt(e.target.value) || undefined 
+              })}
+              placeholder="Optional rate limit"
+            />
+          </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeDialog}>Cancel</Button>
+        <Button 
+          onClick={createRoleAccessRule}
+          variant="contained" 
+          disabled={loading}
+        >
+          {loading ? <CircularProgress size={20} /> : 'Create Rule'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   const renderPermissionDialog = () => (
     <Dialog open={dialogOpen && dialogType === 'permission'} onClose={closeDialog} maxWidth="sm" fullWidth>
       <DialogTitle>Grant Tool Permission</DialogTitle>
@@ -956,11 +1161,7 @@ const ToolsPage: React.FC = () => {
       <DialogActions>
         <Button onClick={closeDialog}>Cancel</Button>
         <Button 
-          onClick={() => {
-            // TODO: Implement when permission endpoints are available
-            showSnackbar('Permission grant feature will be available when backend endpoints are integrated');
-            closeDialog();
-          }} 
+          onClick={grantPermission}
           variant="contained" 
           disabled={loading || !permissionFormData.user_id}
         >
@@ -1274,67 +1475,170 @@ const ToolsPage: React.FC = () => {
   const renderPermissions = () => (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>Access Permissions</Typography>
+        <Typography variant="h6" sx={{ mb: 2 }}>Access Control Management</Typography>
         
         <Alert severity="info" sx={{ mb: 2 }}>
-          Tool access control allows you to grant specific permissions to users for tools and servers.
-          This feature requires role-based access control to be configured.
+          Manage user permissions and role-based access rules for tools and servers.
+          Individual permissions override role-based rules.
         </Alert>
       </Box>
 
       {loading && <CircularProgress />}
 
-      {permissions.length === 0 && !loading ? (
-        <Alert severity="info">
-          No permissions configured yet. Grant permissions to users to control access to tools and servers.
-        </Alert>
-      ) : (
-        <Box>
-          <Typography variant="h6" gutterBottom>
-            Current Permissions
-          </Typography>
-          <List>
-            {permissions.map((permission: any, index: number) => (
-              <ListItem key={index} divider>
-                <SecurityIcon sx={{ mr: 2, color: 'primary.main' }} />
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="subtitle1">
-                        {permission.user_id || 'User'}
-                      </Typography>
-                      <Chip 
-                        label={permission.access_level || 'execute'} 
-                        color="primary"
-                        size="small"
-                      />
-                    </Box>
-                  }
-                  secondary={
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        {permission.tool_id ? `Tool: ${permission.tool_id}` : 
-                         permission.server_id ? `Server: ${permission.server_id}` : 
-                         'Global access'}
-                      </Typography>
-                      {permission.rate_limit_per_hour && (
-                        <Typography variant="caption" display="block">
-                          Rate limit: {permission.rate_limit_per_hour}/hour
+      {/* Individual Permissions Section */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+              <SecurityIcon sx={{ mr: 1 }} />
+              Individual User Permissions
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => openDialog('permission')}
+              size="small"
+            >
+              Grant Permission
+            </Button>
+          </Box>
+
+          {permissions.length === 0 ? (
+            <Alert severity="info">
+              No individual permissions configured. Click "Grant Permission" to assign specific access to users.
+            </Alert>
+          ) : (
+            <List>
+              {permissions.map((permission: any, index: number) => (
+                <ListItem key={permission.id || index} divider>
+                  <SecurityIcon sx={{ mr: 2, color: 'primary.main' }} />
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="subtitle1">
+                          User: {permission.user_id}
                         </Typography>
-                      )}
-                    </Box>
-                  }
-                />
-                <ListItemSecondaryAction>
-                  <IconButton edge="end" color="error">
-                    <DeleteIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      )}
+                        <Chip 
+                          label={permission.access_level} 
+                          color="primary"
+                          size="small"
+                        />
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        <Typography variant="body2" color="text.secondary">
+                          {permission.tool_id ? `Tool: ${permission.tool_id}` : 
+                           permission.server_id ? `Server: ${permission.server_id}` : 
+                           'Global access'}
+                        </Typography>
+                        {permission.rate_limit_per_hour && (
+                          <Typography variant="caption" display="block">
+                            Rate limit: {permission.rate_limit_per_hour}/hour
+                          </Typography>
+                        )}
+                        {permission.expires_at && (
+                          <Typography variant="caption" display="block">
+                            Expires: {new Date(permission.expires_at).toLocaleDateString()}
+                          </Typography>
+                        )}
+                        <Typography variant="caption" display="block" color="text.secondary">
+                          Granted: {new Date(permission.granted_at).toLocaleDateString()}
+                          {permission.usage_count > 0 && ` • Used: ${permission.usage_count} times`}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton 
+                      edge="end" 
+                      color="error"
+                      onClick={() => revokePermission(permission.id)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Role-Based Access Rules Section */}
+      <Card>
+        <CardContent>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center' }}>
+              <SettingsIcon sx={{ mr: 1 }} />
+              Role-Based Access Rules
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => openDialog('role-access')}
+              size="small"
+            >
+              Create Rule
+            </Button>
+          </Box>
+
+          {roleAccessRules.length === 0 ? (
+            <Alert severity="info">
+              No role-based access rules configured. Click "Create Rule" to set default access by user role.
+            </Alert>
+          ) : (
+            <List>
+              {roleAccessRules.map((rule: any, index: number) => (
+                <ListItem key={rule.id || index} divider>
+                  <SettingsIcon sx={{ mr: 2, color: 'secondary.main' }} />
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Typography variant="subtitle1">
+                          Role: {rule.role.replace('_', ' ').toUpperCase()}
+                        </Typography>
+                        <Chip 
+                          label={rule.access_level} 
+                          color="secondary"
+                          size="small"
+                        />
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
+                        {rule.tool_pattern && (
+                          <Typography variant="body2" color="text.secondary">
+                            Tool Pattern: {rule.tool_pattern}
+                          </Typography>
+                        )}
+                        {rule.server_pattern && (
+                          <Typography variant="body2" color="text.secondary">
+                            Server Pattern: {rule.server_pattern}
+                          </Typography>
+                        )}
+                        {rule.default_rate_limit_per_hour && (
+                          <Typography variant="caption" display="block">
+                            Default Rate Limit: {rule.default_rate_limit_per_hour}/hour
+                          </Typography>
+                        )}
+                        <Typography variant="caption" display="block" color="text.secondary">
+                          Created: {new Date(rule.created_at).toLocaleDateString()}
+                        </Typography>
+                      </Box>
+                    }
+                  />
+                  <ListItemSecondaryAction>
+                    <IconButton edge="end" color="error">
+                      <DeleteIcon />
+                    </IconButton>
+                  </ListItemSecondaryAction>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </CardContent>
+      </Card>
     </Box>
   );
 
@@ -1355,6 +1659,7 @@ const ToolsPage: React.FC = () => {
                 loadTools();
               } else {
                 loadPermissions();
+                loadRoleAccessRules();
               }
             }}
             disabled={loading}
@@ -1371,13 +1676,22 @@ const ToolsPage: React.FC = () => {
             </Button>
           )}
           {activeTab === 2 && (
-            <Button
-              variant="contained"
-              startIcon={<SecurityIcon />}
-              onClick={() => openDialog('permission')}
-            >
-              Grant Permissions
-            </Button>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="contained"
+                startIcon={<SecurityIcon />}
+                onClick={() => openDialog('permission')}
+              >
+                Grant Permission
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<SettingsIcon />}
+                onClick={() => openDialog('role-access')}
+              >
+                Create Role Rule
+              </Button>
+            </Box>
           )}
         </Box>
       </Box>
@@ -1417,6 +1731,7 @@ const ToolsPage: React.FC = () => {
       {/* Dialogs */}
       {renderServerDialog()}
       {renderPermissionDialog()}
+      {renderRoleAccessDialog()}
 
       {/* Action Menu */}
       <Menu

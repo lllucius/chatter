@@ -7,7 +7,8 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.tool_server_update_env_type_0 import ToolServerUpdateEnvType0
+    from ..models.o_auth_config_schema import OAuthConfigSchema
+    from ..models.tool_server_update_headers_type_0 import ToolServerUpdateHeadersType0
 
 
 T = TypeVar("T", bound="ToolServerUpdate")
@@ -15,31 +16,34 @@ T = TypeVar("T", bound="ToolServerUpdate")
 
 @_attrs_define
 class ToolServerUpdate:
-    """Schema for updating a tool server.
+    """Schema for updating a remote tool server.
 
     Attributes:
         display_name (Union[None, Unset, str]):
         description (Union[None, Unset, str]):
-        command (Union[None, Unset, str]):
-        args (Union[None, Unset, list[str]]):
-        env (Union['ToolServerUpdateEnvType0', None, Unset]):
+        base_url (Union[None, Unset, str]):
+        transport_type (Union[None, Unset, str]):
+        oauth_config (Union['OAuthConfigSchema', None, Unset]):
+        headers (Union['ToolServerUpdateHeadersType0', None, Unset]):
+        timeout (Union[None, Unset, int]):
         auto_start (Union[None, Unset, bool]):
-        auto_update (Union[None, Unset, bool]):
         max_failures (Union[None, Unset, int]):
     """
 
     display_name: Union[None, Unset, str] = UNSET
     description: Union[None, Unset, str] = UNSET
-    command: Union[None, Unset, str] = UNSET
-    args: Union[None, Unset, list[str]] = UNSET
-    env: Union["ToolServerUpdateEnvType0", None, Unset] = UNSET
+    base_url: Union[None, Unset, str] = UNSET
+    transport_type: Union[None, Unset, str] = UNSET
+    oauth_config: Union["OAuthConfigSchema", None, Unset] = UNSET
+    headers: Union["ToolServerUpdateHeadersType0", None, Unset] = UNSET
+    timeout: Union[None, Unset, int] = UNSET
     auto_start: Union[None, Unset, bool] = UNSET
-    auto_update: Union[None, Unset, bool] = UNSET
     max_failures: Union[None, Unset, int] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.tool_server_update_env_type_0 import ToolServerUpdateEnvType0
+        from ..models.o_auth_config_schema import OAuthConfigSchema
+        from ..models.tool_server_update_headers_type_0 import ToolServerUpdateHeadersType0
 
         display_name: Union[None, Unset, str]
         if isinstance(self.display_name, Unset):
@@ -53,40 +57,45 @@ class ToolServerUpdate:
         else:
             description = self.description
 
-        command: Union[None, Unset, str]
-        if isinstance(self.command, Unset):
-            command = UNSET
+        base_url: Union[None, Unset, str]
+        if isinstance(self.base_url, Unset):
+            base_url = UNSET
         else:
-            command = self.command
+            base_url = self.base_url
 
-        args: Union[None, Unset, list[str]]
-        if isinstance(self.args, Unset):
-            args = UNSET
-        elif isinstance(self.args, list):
-            args = self.args
-
+        transport_type: Union[None, Unset, str]
+        if isinstance(self.transport_type, Unset):
+            transport_type = UNSET
         else:
-            args = self.args
+            transport_type = self.transport_type
 
-        env: Union[None, Unset, dict[str, Any]]
-        if isinstance(self.env, Unset):
-            env = UNSET
-        elif isinstance(self.env, ToolServerUpdateEnvType0):
-            env = self.env.to_dict()
+        oauth_config: Union[None, Unset, dict[str, Any]]
+        if isinstance(self.oauth_config, Unset):
+            oauth_config = UNSET
+        elif isinstance(self.oauth_config, OAuthConfigSchema):
+            oauth_config = self.oauth_config.to_dict()
         else:
-            env = self.env
+            oauth_config = self.oauth_config
+
+        headers: Union[None, Unset, dict[str, Any]]
+        if isinstance(self.headers, Unset):
+            headers = UNSET
+        elif isinstance(self.headers, ToolServerUpdateHeadersType0):
+            headers = self.headers.to_dict()
+        else:
+            headers = self.headers
+
+        timeout: Union[None, Unset, int]
+        if isinstance(self.timeout, Unset):
+            timeout = UNSET
+        else:
+            timeout = self.timeout
 
         auto_start: Union[None, Unset, bool]
         if isinstance(self.auto_start, Unset):
             auto_start = UNSET
         else:
             auto_start = self.auto_start
-
-        auto_update: Union[None, Unset, bool]
-        if isinstance(self.auto_update, Unset):
-            auto_update = UNSET
-        else:
-            auto_update = self.auto_update
 
         max_failures: Union[None, Unset, int]
         if isinstance(self.max_failures, Unset):
@@ -101,16 +110,18 @@ class ToolServerUpdate:
             field_dict["display_name"] = display_name
         if description is not UNSET:
             field_dict["description"] = description
-        if command is not UNSET:
-            field_dict["command"] = command
-        if args is not UNSET:
-            field_dict["args"] = args
-        if env is not UNSET:
-            field_dict["env"] = env
+        if base_url is not UNSET:
+            field_dict["base_url"] = base_url
+        if transport_type is not UNSET:
+            field_dict["transport_type"] = transport_type
+        if oauth_config is not UNSET:
+            field_dict["oauth_config"] = oauth_config
+        if headers is not UNSET:
+            field_dict["headers"] = headers
+        if timeout is not UNSET:
+            field_dict["timeout"] = timeout
         if auto_start is not UNSET:
             field_dict["auto_start"] = auto_start
-        if auto_update is not UNSET:
-            field_dict["auto_update"] = auto_update
         if max_failures is not UNSET:
             field_dict["max_failures"] = max_failures
 
@@ -118,7 +129,8 @@ class ToolServerUpdate:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.tool_server_update_env_type_0 import ToolServerUpdateEnvType0
+        from ..models.o_auth_config_schema import OAuthConfigSchema
+        from ..models.tool_server_update_headers_type_0 import ToolServerUpdateHeadersType0
 
         d = dict(src_dict)
 
@@ -140,33 +152,25 @@ class ToolServerUpdate:
 
         description = _parse_description(d.pop("description", UNSET))
 
-        def _parse_command(data: object) -> Union[None, Unset, str]:
+        def _parse_base_url(data: object) -> Union[None, Unset, str]:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
             return cast(Union[None, Unset, str], data)
 
-        command = _parse_command(d.pop("command", UNSET))
+        base_url = _parse_base_url(d.pop("base_url", UNSET))
 
-        def _parse_args(data: object) -> Union[None, Unset, list[str]]:
+        def _parse_transport_type(data: object) -> Union[None, Unset, str]:
             if data is None:
                 return data
             if isinstance(data, Unset):
                 return data
-            try:
-                if not isinstance(data, list):
-                    raise TypeError()
-                args_type_0 = cast(list[str], data)
+            return cast(Union[None, Unset, str], data)
 
-                return args_type_0
-            except:  # noqa: E722
-                pass
-            return cast(Union[None, Unset, list[str]], data)
+        transport_type = _parse_transport_type(d.pop("transport_type", UNSET))
 
-        args = _parse_args(d.pop("args", UNSET))
-
-        def _parse_env(data: object) -> Union["ToolServerUpdateEnvType0", None, Unset]:
+        def _parse_oauth_config(data: object) -> Union["OAuthConfigSchema", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -174,14 +178,40 @@ class ToolServerUpdate:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                env_type_0 = ToolServerUpdateEnvType0.from_dict(data)
+                oauth_config_type_0 = OAuthConfigSchema.from_dict(data)
 
-                return env_type_0
+                return oauth_config_type_0
             except:  # noqa: E722
                 pass
-            return cast(Union["ToolServerUpdateEnvType0", None, Unset], data)
+            return cast(Union["OAuthConfigSchema", None, Unset], data)
 
-        env = _parse_env(d.pop("env", UNSET))
+        oauth_config = _parse_oauth_config(d.pop("oauth_config", UNSET))
+
+        def _parse_headers(data: object) -> Union["ToolServerUpdateHeadersType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                headers_type_0 = ToolServerUpdateHeadersType0.from_dict(data)
+
+                return headers_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["ToolServerUpdateHeadersType0", None, Unset], data)
+
+        headers = _parse_headers(d.pop("headers", UNSET))
+
+        def _parse_timeout(data: object) -> Union[None, Unset, int]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, int], data)
+
+        timeout = _parse_timeout(d.pop("timeout", UNSET))
 
         def _parse_auto_start(data: object) -> Union[None, Unset, bool]:
             if data is None:
@@ -191,15 +221,6 @@ class ToolServerUpdate:
             return cast(Union[None, Unset, bool], data)
 
         auto_start = _parse_auto_start(d.pop("auto_start", UNSET))
-
-        def _parse_auto_update(data: object) -> Union[None, Unset, bool]:
-            if data is None:
-                return data
-            if isinstance(data, Unset):
-                return data
-            return cast(Union[None, Unset, bool], data)
-
-        auto_update = _parse_auto_update(d.pop("auto_update", UNSET))
 
         def _parse_max_failures(data: object) -> Union[None, Unset, int]:
             if data is None:
@@ -213,11 +234,12 @@ class ToolServerUpdate:
         tool_server_update = cls(
             display_name=display_name,
             description=description,
-            command=command,
-            args=args,
-            env=env,
+            base_url=base_url,
+            transport_type=transport_type,
+            oauth_config=oauth_config,
+            headers=headers,
+            timeout=timeout,
             auto_start=auto_start,
-            auto_update=auto_update,
             max_failures=max_failures,
         )
 

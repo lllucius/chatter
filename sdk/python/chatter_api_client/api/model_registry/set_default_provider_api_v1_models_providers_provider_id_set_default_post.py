@@ -7,6 +7,7 @@ from ... import errors
 from ...client import AuthenticatedClient, Client
 from ...models.default_provider import DefaultProvider
 from ...models.http_validation_error import HTTPValidationError
+from ...models.provider_default_response import ProviderDefaultResponse
 from ...types import Response
 
 
@@ -32,9 +33,10 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Optional[Union[HTTPValidationError, ProviderDefaultResponse]]:
     if response.status_code == 200:
-        response_200 = response.json()
+        response_200 = ProviderDefaultResponse.from_dict(response.json())
+
         return response_200
 
     if response.status_code == 422:
@@ -50,7 +52,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Union[HTTPValidationError, ProviderDefaultResponse]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -64,7 +66,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: DefaultProvider,
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Union[HTTPValidationError, ProviderDefaultResponse]]:
     """Set Default Provider
 
      Set a provider as default for a model type.
@@ -78,7 +80,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Union[HTTPValidationError, ProviderDefaultResponse]]
     """
 
     kwargs = _get_kwargs(
@@ -98,7 +100,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: DefaultProvider,
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Optional[Union[HTTPValidationError, ProviderDefaultResponse]]:
     """Set Default Provider
 
      Set a provider as default for a model type.
@@ -112,7 +114,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Union[HTTPValidationError, ProviderDefaultResponse]
     """
 
     return sync_detailed(
@@ -127,7 +129,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: DefaultProvider,
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Union[HTTPValidationError, ProviderDefaultResponse]]:
     """Set Default Provider
 
      Set a provider as default for a model type.
@@ -141,7 +143,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Union[HTTPValidationError, ProviderDefaultResponse]]
     """
 
     kwargs = _get_kwargs(
@@ -159,7 +161,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: DefaultProvider,
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Optional[Union[HTTPValidationError, ProviderDefaultResponse]]:
     """Set Default Provider
 
      Set a provider as default for a model type.
@@ -173,7 +175,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Union[HTTPValidationError, ProviderDefaultResponse]
     """
 
     return (

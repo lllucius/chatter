@@ -186,7 +186,7 @@ const { status, data } = await apiInstance.createProviderApiV1ModelsProvidersPos
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete**
-> any deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete()
+> EmbeddingSpaceDeleteResponse deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete()
 
 Delete an embedding space (does not drop the table).
 
@@ -217,7 +217,7 @@ const { status, data } = await apiInstance.deleteEmbeddingSpaceApiV1ModelsEmbedd
 
 ### Return type
 
-**any**
+**EmbeddingSpaceDeleteResponse**
 
 ### Authorization
 
@@ -238,7 +238,7 @@ const { status, data } = await apiInstance.deleteEmbeddingSpaceApiV1ModelsEmbedd
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **deleteModelApiV1ModelsModelsModelIdDelete**
-> any deleteModelApiV1ModelsModelsModelIdDelete()
+> ModelDeleteResponse deleteModelApiV1ModelsModelsModelIdDelete()
 
 Delete a model definition and its dependent embedding spaces.
 
@@ -269,7 +269,7 @@ const { status, data } = await apiInstance.deleteModelApiV1ModelsModelsModelIdDe
 
 ### Return type
 
-**any**
+**ModelDeleteResponse**
 
 ### Authorization
 
@@ -290,7 +290,7 @@ const { status, data } = await apiInstance.deleteModelApiV1ModelsModelsModelIdDe
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **deleteProviderApiV1ModelsProvidersProviderIdDelete**
-> any deleteProviderApiV1ModelsProvidersProviderIdDelete()
+> ProviderDeleteResponse deleteProviderApiV1ModelsProvidersProviderIdDelete()
 
 Delete a provider and all its dependent models and embedding spaces.
 
@@ -321,7 +321,7 @@ const { status, data } = await apiInstance.deleteProviderApiV1ModelsProvidersPro
 
 ### Return type
 
-**any**
+**ProviderDeleteResponse**
 
 ### Authorization
 
@@ -829,7 +829,7 @@ const { status, data } = await apiInstance.listProvidersApiV1ModelsProvidersGet(
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost**
-> any setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost()
+> EmbeddingSpaceDefaultResponse setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost()
 
 Set an embedding space as default.
 
@@ -860,7 +860,7 @@ const { status, data } = await apiInstance.setDefaultEmbeddingSpaceApiV1ModelsEm
 
 ### Return type
 
-**any**
+**EmbeddingSpaceDefaultResponse**
 
 ### Authorization
 
@@ -881,7 +881,7 @@ const { status, data } = await apiInstance.setDefaultEmbeddingSpaceApiV1ModelsEm
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost**
-> any setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost()
+> ModelDefaultResponse setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost()
 
 Set a model as default for its type.
 
@@ -912,7 +912,7 @@ const { status, data } = await apiInstance.setDefaultModelApiV1ModelsModelsModel
 
 ### Return type
 
-**any**
+**ModelDefaultResponse**
 
 ### Authorization
 
@@ -933,7 +933,7 @@ const { status, data } = await apiInstance.setDefaultModelApiV1ModelsModelsModel
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost**
-> any setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(defaultProvider)
+> ProviderDefaultResponse setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(defaultProvider)
 
 Set a provider as default for a model type.
 
@@ -968,7 +968,7 @@ const { status, data } = await apiInstance.setDefaultProviderApiV1ModelsProvider
 
 ### Return type
 
-**any**
+**ProviderDefaultResponse**
 
 ### Authorization
 

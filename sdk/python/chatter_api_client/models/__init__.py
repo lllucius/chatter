@@ -51,15 +51,7 @@ from .backup_response_metadata import BackupResponseMetadata
 from .backup_type import BackupType
 from .body_list_agents_api_v1_agents_get import BodyListAgentsApiV1AgentsGet
 from .body_upload_document_api_v1_documents_upload_post import BodyUploadDocumentApiV1DocumentsUploadPost
-from .bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post_response_bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post import (
-    BulkDeleteConversationsApiV1DataBulkDeleteConversationsPostResponseBulkDeleteConversationsApiV1DataBulkDeleteConversationsPost,
-)
-from .bulk_delete_documents_api_v1_data_bulk_delete_documents_post_response_bulk_delete_documents_api_v1_data_bulk_delete_documents_post import (
-    BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost,
-)
-from .bulk_delete_prompts_api_v1_data_bulk_delete_prompts_post_response_bulk_delete_prompts_api_v1_data_bulk_delete_prompts_post import (
-    BulkDeletePromptsApiV1DataBulkDeletePromptsPostResponseBulkDeletePromptsApiV1DataBulkDeletePromptsPost,
-)
+from .bulk_delete_response import BulkDeleteResponse
 from .bulk_operation_result import BulkOperationResult
 from .bulk_operation_result_results_item import BulkOperationResultResultsItem
 from .bulk_tool_server_operation import BulkToolServerOperation
@@ -81,16 +73,12 @@ from .conversation_stats_response_popular_providers import ConversationStatsResp
 from .conversation_status import ConversationStatus
 from .conversation_update import ConversationUpdate
 from .conversation_with_messages import ConversationWithMessages
+from .correlation_trace_response import CorrelationTraceResponse
+from .correlation_trace_response_requests_item import CorrelationTraceResponseRequestsItem
 from .dashboard_response import DashboardResponse
 from .dashboard_response_custom_metrics_item import DashboardResponseCustomMetricsItem
 from .data_format import DataFormat
 from .default_provider import DefaultProvider
-from .delete_document_api_v1_documents_document_id_delete_response_delete_document_api_v1_documents_document_id_delete import (
-    DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete,
-)
-from .delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete_response_delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete import (
-    DeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteResponseDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete,
-)
 from .distance_metric import DistanceMetric
 from .document_analytics_response import DocumentAnalyticsResponse
 from .document_analytics_response_documents_by_access_level import DocumentAnalyticsResponseDocumentsByAccessLevel
@@ -102,6 +90,7 @@ from .document_analytics_response_storage_by_type import DocumentAnalyticsRespon
 from .document_chunk_response import DocumentChunkResponse
 from .document_chunk_response_extra_metadata_type_0 import DocumentChunkResponseExtraMetadataType0
 from .document_chunks_response import DocumentChunksResponse
+from .document_delete_response import DocumentDeleteResponse
 from .document_list_response import DocumentListResponse
 from .document_processing_request import DocumentProcessingRequest
 from .document_processing_response import DocumentProcessingResponse
@@ -121,6 +110,8 @@ from .document_update import DocumentUpdate
 from .document_update_extra_metadata_type_0 import DocumentUpdateExtraMetadataType0
 from .embedding_space_create import EmbeddingSpaceCreate
 from .embedding_space_create_index_config import EmbeddingSpaceCreateIndexConfig
+from .embedding_space_default_response import EmbeddingSpaceDefaultResponse
+from .embedding_space_delete_response import EmbeddingSpaceDeleteResponse
 from .embedding_space_list import EmbeddingSpaceList
 from .embedding_space_update import EmbeddingSpaceUpdate
 from .embedding_space_update_index_config_type_0 import EmbeddingSpaceUpdateIndexConfigType0
@@ -133,17 +124,11 @@ from .export_scope import ExportScope
 from .get_ab_test_performance_api_v1_ab_tests_test_id_performance_get_response_get_ab_test_performance_api_v1_ab_tests_test_id_performance_get import (
     GetAbTestPerformanceApiV1AbTestsTestIdPerformanceGetResponseGetAbTestPerformanceApiV1AbTestsTestIdPerformanceGet,
 )
-from .get_performance_stats_api_v1_chat_performance_stats_get_response_get_performance_stats_api_v1_chat_performance_stats_get import (
-    GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet,
-)
 from .get_tool_server_analytics_api_v1_analytics_toolservers_get_response_get_tool_server_analytics_api_v1_analytics_toolservers_get import (
     GetToolServerAnalyticsApiV1AnalyticsToolserversGetResponseGetToolServerAnalyticsApiV1AnalyticsToolserversGet,
 )
 from .get_user_analytics_api_v1_analytics_users_user_id_get_response_get_user_analytics_api_v1_analytics_users_user_id_get import (
     GetUserAnalyticsApiV1AnalyticsUsersUserIdGetResponseGetUserAnalyticsApiV1AnalyticsUsersUserIdGet,
-)
-from .get_workflow_templates_api_v1_chat_templates_get_response_get_workflow_templates_api_v1_chat_templates_get import (
-    GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet,
 )
 from .health_check_response import HealthCheckResponse
 from .http_validation_error import HTTPValidationError
@@ -162,9 +147,14 @@ from .logout_response import LogoutResponse
 from .mcp_status_response import McpStatusResponse
 from .mcp_status_response_servers_item import McpStatusResponseServersItem
 from .message_create import MessageCreate
+from .message_delete_response import MessageDeleteResponse
 from .message_response import MessageResponse
 from .message_role import MessageRole
 from .metric_type import MetricType
+from .metrics_response import MetricsResponse
+from .metrics_response_endpoints import MetricsResponseEndpoints
+from .metrics_response_health import MetricsResponseHealth
+from .metrics_response_performance import MetricsResponsePerformance
 from .model_def_create import ModelDefCreate
 from .model_def_create_default_config import ModelDefCreateDefaultConfig
 from .model_def_list import ModelDefList
@@ -172,7 +162,10 @@ from .model_def_update import ModelDefUpdate
 from .model_def_update_default_config_type_0 import ModelDefUpdateDefaultConfigType0
 from .model_def_with_provider import ModelDefWithProvider
 from .model_def_with_provider_default_config import ModelDefWithProviderDefaultConfig
+from .model_default_response import ModelDefaultResponse
+from .model_delete_response import ModelDeleteResponse
 from .model_type import ModelType
+from .o_auth_config_schema import OAuthConfigSchema
 from .pagination_request import PaginationRequest
 from .password_change import PasswordChange
 from .password_change_response import PasswordChangeResponse
@@ -188,6 +181,11 @@ from .performance_metrics_response_performance_by_provider import PerformanceMet
 from .performance_metrics_response_performance_by_provider_additional_property import (
     PerformanceMetricsResponsePerformanceByProviderAdditionalProperty,
 )
+from .performance_stats_response import PerformanceStatsResponse
+from .performance_stats_response_cache_stats import PerformanceStatsResponseCacheStats
+from .performance_stats_response_error_counts import PerformanceStatsResponseErrorCounts
+from .performance_stats_response_tool_stats import PerformanceStatsResponseToolStats
+from .performance_stats_response_workflow_types import PerformanceStatsResponseWorkflowTypes
 from .plugin_action_response import PluginActionResponse
 from .plugin_delete_response import PluginDeleteResponse
 from .plugin_install_request import PluginInstallRequest
@@ -259,6 +257,8 @@ from .provider import Provider
 from .provider_create import ProviderCreate
 from .provider_create_default_config import ProviderCreateDefaultConfig
 from .provider_default_config import ProviderDefaultConfig
+from .provider_default_response import ProviderDefaultResponse
+from .provider_delete_response import ProviderDeleteResponse
 from .provider_list import ProviderList
 from .provider_type import ProviderType
 from .provider_update import ProviderUpdate
@@ -266,9 +266,17 @@ from .provider_update_default_config_type_0 import ProviderUpdateDefaultConfigTy
 from .readiness_check_response import ReadinessCheckResponse
 from .readiness_check_response_checks import ReadinessCheckResponseChecks
 from .reduction_strategy import ReductionStrategy
+from .refresh_server_tools_api_v1_toolservers_servers_server_id_refresh_tools_post_response_refresh_server_tools_api_v1_toolservers_servers_server_id_refresh_tools_post import (
+    RefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostResponseRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost,
+)
 from .restore_request import RestoreRequest
 from .restore_request_restore_options import RestoreRequestRestoreOptions
 from .restore_response import RestoreResponse
+from .revoke_tool_permission_api_v1_toolservers_permissions_permission_id_delete_response_revoke_tool_permission_api_v1_toolservers_permissions_permission_id_delete import (
+    RevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteResponseRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete,
+)
+from .role_tool_access_create import RoleToolAccessCreate
+from .role_tool_access_response import RoleToolAccessResponse
 from .server_status import ServerStatus
 from .server_tool_response import ServerToolResponse
 from .server_tool_response_args_schema_type_0 import ServerToolResponseArgsSchemaType0
@@ -292,17 +300,22 @@ from .test_variant_configuration import TestVariantConfiguration
 from .token_refresh import TokenRefresh
 from .token_refresh_response import TokenRefreshResponse
 from .token_response import TokenResponse
+from .tool_access_level import ToolAccessLevel
+from .tool_access_result import ToolAccessResult
 from .tool_operation_response import ToolOperationResponse
+from .tool_permission_create import ToolPermissionCreate
+from .tool_permission_response import ToolPermissionResponse
+from .tool_permission_update import ToolPermissionUpdate
 from .tool_server_create import ToolServerCreate
-from .tool_server_create_env_type_0 import ToolServerCreateEnvType0
+from .tool_server_create_headers_type_0 import ToolServerCreateHeadersType0
 from .tool_server_delete_response import ToolServerDeleteResponse
 from .tool_server_health_check import ToolServerHealthCheck
 from .tool_server_metrics import ToolServerMetrics
 from .tool_server_operation_response import ToolServerOperationResponse
 from .tool_server_response import ToolServerResponse
-from .tool_server_response_env_type_0 import ToolServerResponseEnvType0
+from .tool_server_response_headers_type_0 import ToolServerResponseHeadersType0
 from .tool_server_update import ToolServerUpdate
-from .tool_server_update_env_type_0 import ToolServerUpdateEnvType0
+from .tool_server_update_headers_type_0 import ToolServerUpdateHeadersType0
 from .tool_status import ToolStatus
 from .usage_metrics_response import UsageMetricsResponse
 from .usage_metrics_response_cost_by_model import UsageMetricsResponseCostByModel
@@ -315,9 +328,15 @@ from .usage_metrics_response_tokens_by_provider import UsageMetricsResponseToken
 from .user_create import UserCreate
 from .user_login import UserLogin
 from .user_response import UserResponse
+from .user_role import UserRole
+from .user_tool_access_check import UserToolAccessCheck
 from .user_update import UserUpdate
 from .validation_error import ValidationError
 from .variant_allocation import VariantAllocation
+from .workflow_template_info import WorkflowTemplateInfo
+from .workflow_template_info_default_params import WorkflowTemplateInfoDefaultParams
+from .workflow_templates_response import WorkflowTemplatesResponse
+from .workflow_templates_response_templates import WorkflowTemplatesResponseTemplates
 
 __all__ = (
     "ABTestActionResponse",
@@ -369,9 +388,7 @@ __all__ = (
     "BackupType",
     "BodyListAgentsApiV1AgentsGet",
     "BodyUploadDocumentApiV1DocumentsUploadPost",
-    "BulkDeleteConversationsApiV1DataBulkDeleteConversationsPostResponseBulkDeleteConversationsApiV1DataBulkDeleteConversationsPost",
-    "BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost",
-    "BulkDeletePromptsApiV1DataBulkDeletePromptsPostResponseBulkDeletePromptsApiV1DataBulkDeletePromptsPost",
+    "BulkDeleteResponse",
     "BulkOperationResult",
     "BulkOperationResultResultsItem",
     "BulkToolServerOperation",
@@ -393,12 +410,12 @@ __all__ = (
     "ConversationStatus",
     "ConversationUpdate",
     "ConversationWithMessages",
+    "CorrelationTraceResponse",
+    "CorrelationTraceResponseRequestsItem",
     "DashboardResponse",
     "DashboardResponseCustomMetricsItem",
     "DataFormat",
     "DefaultProvider",
-    "DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete",
-    "DeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteResponseDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete",
     "DistanceMetric",
     "DocumentAnalyticsResponse",
     "DocumentAnalyticsResponseDocumentsByAccessLevel",
@@ -410,6 +427,7 @@ __all__ = (
     "DocumentChunkResponse",
     "DocumentChunkResponseExtraMetadataType0",
     "DocumentChunksResponse",
+    "DocumentDeleteResponse",
     "DocumentListResponse",
     "DocumentProcessingRequest",
     "DocumentProcessingResponse",
@@ -429,6 +447,8 @@ __all__ = (
     "DocumentUpdateExtraMetadataType0",
     "EmbeddingSpaceCreate",
     "EmbeddingSpaceCreateIndexConfig",
+    "EmbeddingSpaceDefaultResponse",
+    "EmbeddingSpaceDeleteResponse",
     "EmbeddingSpaceList",
     "EmbeddingSpaceUpdate",
     "EmbeddingSpaceUpdateIndexConfigType0",
@@ -439,10 +459,8 @@ __all__ = (
     "ExportDataResponse",
     "ExportScope",
     "GetAbTestPerformanceApiV1AbTestsTestIdPerformanceGetResponseGetAbTestPerformanceApiV1AbTestsTestIdPerformanceGet",
-    "GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet",
     "GetToolServerAnalyticsApiV1AnalyticsToolserversGetResponseGetToolServerAnalyticsApiV1AnalyticsToolserversGet",
     "GetUserAnalyticsApiV1AnalyticsUsersUserIdGetResponseGetUserAnalyticsApiV1AnalyticsUsersUserIdGet",
-    "GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet",
     "HealthCheckResponse",
     "HTTPValidationError",
     "JobActionResponse",
@@ -458,9 +476,15 @@ __all__ = (
     "McpStatusResponse",
     "McpStatusResponseServersItem",
     "MessageCreate",
+    "MessageDeleteResponse",
     "MessageResponse",
     "MessageRole",
+    "MetricsResponse",
+    "MetricsResponseEndpoints",
+    "MetricsResponseHealth",
+    "MetricsResponsePerformance",
     "MetricType",
+    "ModelDefaultResponse",
     "ModelDefCreate",
     "ModelDefCreateDefaultConfig",
     "ModelDefList",
@@ -468,7 +492,9 @@ __all__ = (
     "ModelDefUpdateDefaultConfigType0",
     "ModelDefWithProvider",
     "ModelDefWithProviderDefaultConfig",
+    "ModelDeleteResponse",
     "ModelType",
+    "OAuthConfigSchema",
     "PaginationRequest",
     "PasswordChange",
     "PasswordChangeResponse",
@@ -480,6 +506,11 @@ __all__ = (
     "PerformanceMetricsResponsePerformanceByModelAdditionalProperty",
     "PerformanceMetricsResponsePerformanceByProvider",
     "PerformanceMetricsResponsePerformanceByProviderAdditionalProperty",
+    "PerformanceStatsResponse",
+    "PerformanceStatsResponseCacheStats",
+    "PerformanceStatsResponseErrorCounts",
+    "PerformanceStatsResponseToolStats",
+    "PerformanceStatsResponseWorkflowTypes",
     "PluginActionResponse",
     "PluginDeleteResponse",
     "PluginInstallRequest",
@@ -551,6 +582,8 @@ __all__ = (
     "ProviderCreate",
     "ProviderCreateDefaultConfig",
     "ProviderDefaultConfig",
+    "ProviderDefaultResponse",
+    "ProviderDeleteResponse",
     "ProviderList",
     "ProviderType",
     "ProviderUpdate",
@@ -558,9 +591,13 @@ __all__ = (
     "ReadinessCheckResponse",
     "ReadinessCheckResponseChecks",
     "ReductionStrategy",
+    "RefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostResponseRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost",
     "RestoreRequest",
     "RestoreRequestRestoreOptions",
     "RestoreResponse",
+    "RevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteResponseRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete",
+    "RoleToolAccessCreate",
+    "RoleToolAccessResponse",
     "ServerStatus",
     "ServerToolResponse",
     "ServerToolResponseArgsSchemaType0",
@@ -582,17 +619,22 @@ __all__ = (
     "TokenRefresh",
     "TokenRefreshResponse",
     "TokenResponse",
+    "ToolAccessLevel",
+    "ToolAccessResult",
     "ToolOperationResponse",
+    "ToolPermissionCreate",
+    "ToolPermissionResponse",
+    "ToolPermissionUpdate",
     "ToolServerCreate",
-    "ToolServerCreateEnvType0",
+    "ToolServerCreateHeadersType0",
     "ToolServerDeleteResponse",
     "ToolServerHealthCheck",
     "ToolServerMetrics",
     "ToolServerOperationResponse",
     "ToolServerResponse",
-    "ToolServerResponseEnvType0",
+    "ToolServerResponseHeadersType0",
     "ToolServerUpdate",
-    "ToolServerUpdateEnvType0",
+    "ToolServerUpdateHeadersType0",
     "ToolStatus",
     "UsageMetricsResponse",
     "UsageMetricsResponseCostByModel",
@@ -605,7 +647,13 @@ __all__ = (
     "UserCreate",
     "UserLogin",
     "UserResponse",
+    "UserRole",
+    "UserToolAccessCheck",
     "UserUpdate",
     "ValidationError",
     "VariantAllocation",
+    "WorkflowTemplateInfo",
+    "WorkflowTemplateInfoDefaultParams",
+    "WorkflowTemplatesResponse",
+    "WorkflowTemplatesResponseTemplates",
 )

@@ -4,30 +4,44 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar(
-    "T", bound="GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet"
-)
+T = TypeVar("T", bound="DocumentDeleteResponse")
 
 
 @_attrs_define
-class GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet:
-    """ """
+class DocumentDeleteResponse:
+    """Response schema for document deletion.
 
+    Attributes:
+        message (str): Deletion result message
+    """
+
+    message: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        message = self.message
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "message": message,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        get_performance_stats_api_v1_chat_performance_stats_get_response_get_performance_stats_api_v1_chat_performance_stats_get = cls()
+        message = d.pop("message")
 
-        get_performance_stats_api_v1_chat_performance_stats_get_response_get_performance_stats_api_v1_chat_performance_stats_get.additional_properties = d
-        return get_performance_stats_api_v1_chat_performance_stats_get_response_get_performance_stats_api_v1_chat_performance_stats_get
+        document_delete_response = cls(
+            message=message,
+        )
+
+        document_delete_response.additional_properties = d
+        return document_delete_response
 
     @property
     def additional_keys(self) -> list[str]:

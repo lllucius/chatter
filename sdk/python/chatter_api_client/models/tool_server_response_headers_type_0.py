@@ -4,11 +4,11 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="ToolServerUpdateEnvType0")
+T = TypeVar("T", bound="ToolServerResponseHeadersType0")
 
 
 @_attrs_define
-class ToolServerUpdateEnvType0:
+class ToolServerResponseHeadersType0:
     """ """
 
     additional_properties: dict[str, str] = _attrs_field(init=False, factory=dict)
@@ -22,10 +22,10 @@ class ToolServerUpdateEnvType0:
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        tool_server_update_env_type_0 = cls()
+        tool_server_response_headers_type_0 = cls()
 
-        tool_server_update_env_type_0.additional_properties = d
-        return tool_server_update_env_type_0
+        tool_server_response_headers_type_0.additional_properties = d
+        return tool_server_response_headers_type_0
 
     @property
     def additional_keys(self) -> list[str]:

@@ -17,7 +17,7 @@ All URIs are relative to *http://localhost:8000*
 |[**uploadDocumentApiV1DocumentsUploadPost**](#uploaddocumentapiv1documentsuploadpost) | **POST** /api/v1/documents/upload | Upload Document|
 
 # **deleteDocumentApiV1DocumentsDocumentIdDelete**
-> { [key: string]: any; } deleteDocumentApiV1DocumentsDocumentIdDelete()
+> DocumentDeleteResponse deleteDocumentApiV1DocumentsDocumentIdDelete()
 
 Delete document.  Args:     document_id: Document ID     request: Delete request parameters     current_user: Current authenticated user     document_service: Document service  Returns:     Success message
 
@@ -48,7 +48,7 @@ const { status, data } = await apiInstance.deleteDocumentApiV1DocumentsDocumentI
 
 ### Return type
 
-**{ [key: string]: any; }**
+**DocumentDeleteResponse**
 
 ### Authorization
 

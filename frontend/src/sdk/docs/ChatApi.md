@@ -290,7 +290,7 @@ const { status, data } = await apiInstance.deleteConversationApiV1ChatConversati
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete**
-> { [key: string]: any; } deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete()
+> MessageDeleteResponse deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete()
 
 Delete a message from conversation.
 
@@ -324,7 +324,7 @@ const { status, data } = await apiInstance.deleteMessageApiV1ChatConversationsCo
 
 ### Return type
 
-**{ [key: string]: any; }**
+**MessageDeleteResponse**
 
 ### Authorization
 
@@ -540,7 +540,7 @@ This endpoint does not have any parameters.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getPerformanceStatsApiV1ChatPerformanceStatsGet**
-> { [key: string]: any; } getPerformanceStatsApiV1ChatPerformanceStatsGet()
+> PerformanceStatsResponse getPerformanceStatsApiV1ChatPerformanceStatsGet()
 
 Get workflow performance statistics.
 
@@ -564,7 +564,7 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-**{ [key: string]: any; }**
+**PerformanceStatsResponse**
 
 ### Authorization
 
@@ -584,7 +584,7 @@ This endpoint does not have any parameters.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getWorkflowTemplatesApiV1ChatTemplatesGet**
-> { [key: string]: any; } getWorkflowTemplatesApiV1ChatTemplatesGet()
+> WorkflowTemplatesResponse getWorkflowTemplatesApiV1ChatTemplatesGet()
 
 Get available workflow templates.
 
@@ -608,7 +608,7 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-**{ [key: string]: any; }**
+**WorkflowTemplatesResponse**
 
 ### Authorization
 

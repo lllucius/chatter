@@ -5,9 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.get_workflow_templates_api_v1_chat_templates_get_response_get_workflow_templates_api_v1_chat_templates_get import (
-    GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet,
-)
+from ...models.workflow_templates_response import WorkflowTemplatesResponse
 from ...types import Response
 
 
@@ -22,13 +20,9 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet]:
+) -> Optional[WorkflowTemplatesResponse]:
     if response.status_code == 200:
-        response_200 = (
-            GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet.from_dict(
-                response.json()
-            )
-        )
+        response_200 = WorkflowTemplatesResponse.from_dict(response.json())
 
         return response_200
 
@@ -40,7 +34,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet]:
+) -> Response[WorkflowTemplatesResponse]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -52,7 +46,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet]:
+) -> Response[WorkflowTemplatesResponse]:
     """Get Workflow Templates
 
      Get available workflow templates.
@@ -62,7 +56,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet]
+        Response[WorkflowTemplatesResponse]
     """
 
     kwargs = _get_kwargs()
@@ -77,7 +71,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-) -> Optional[GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet]:
+) -> Optional[WorkflowTemplatesResponse]:
     """Get Workflow Templates
 
      Get available workflow templates.
@@ -87,7 +81,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet
+        WorkflowTemplatesResponse
     """
 
     return sync_detailed(
@@ -98,7 +92,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet]:
+) -> Response[WorkflowTemplatesResponse]:
     """Get Workflow Templates
 
      Get available workflow templates.
@@ -108,7 +102,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet]
+        Response[WorkflowTemplatesResponse]
     """
 
     kwargs = _get_kwargs()
@@ -121,7 +115,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-) -> Optional[GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet]:
+) -> Optional[WorkflowTemplatesResponse]:
     """Get Workflow Templates
 
      Get available workflow templates.
@@ -131,7 +125,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet
+        WorkflowTemplatesResponse
     """
 
     return (

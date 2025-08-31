@@ -5,9 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.delete_document_api_v1_documents_document_id_delete_response_delete_document_api_v1_documents_document_id_delete import (
-    DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete,
-)
+from ...models.document_delete_response import DocumentDeleteResponse
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
@@ -25,18 +23,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[
-    Union[
-        DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete,
-        HTTPValidationError,
-    ]
-]:
+) -> Optional[Union[DocumentDeleteResponse, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = (
-            DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete.from_dict(
-                response.json()
-            )
-        )
+        response_200 = DocumentDeleteResponse.from_dict(response.json())
 
         return response_200
 
@@ -53,12 +42,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[
-    Union[
-        DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete,
-        HTTPValidationError,
-    ]
-]:
+) -> Response[Union[DocumentDeleteResponse, HTTPValidationError]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -71,12 +55,7 @@ def sync_detailed(
     document_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[
-    Union[
-        DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete,
-        HTTPValidationError,
-    ]
-]:
+) -> Response[Union[DocumentDeleteResponse, HTTPValidationError]]:
     """Delete Document
 
      Delete document.
@@ -98,7 +77,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete, HTTPValidationError]]
+        Response[Union[DocumentDeleteResponse, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
@@ -116,12 +95,7 @@ def sync(
     document_id: str,
     *,
     client: AuthenticatedClient,
-) -> Optional[
-    Union[
-        DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete,
-        HTTPValidationError,
-    ]
-]:
+) -> Optional[Union[DocumentDeleteResponse, HTTPValidationError]]:
     """Delete Document
 
      Delete document.
@@ -143,7 +117,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete, HTTPValidationError]
+        Union[DocumentDeleteResponse, HTTPValidationError]
     """
 
     return sync_detailed(
@@ -156,12 +130,7 @@ async def asyncio_detailed(
     document_id: str,
     *,
     client: AuthenticatedClient,
-) -> Response[
-    Union[
-        DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete,
-        HTTPValidationError,
-    ]
-]:
+) -> Response[Union[DocumentDeleteResponse, HTTPValidationError]]:
     """Delete Document
 
      Delete document.
@@ -183,7 +152,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete, HTTPValidationError]]
+        Response[Union[DocumentDeleteResponse, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
@@ -199,12 +168,7 @@ async def asyncio(
     document_id: str,
     *,
     client: AuthenticatedClient,
-) -> Optional[
-    Union[
-        DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete,
-        HTTPValidationError,
-    ]
-]:
+) -> Optional[Union[DocumentDeleteResponse, HTTPValidationError]]:
     """Delete Document
 
      Delete document.
@@ -226,7 +190,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete, HTTPValidationError]
+        Union[DocumentDeleteResponse, HTTPValidationError]
     """
 
     return (

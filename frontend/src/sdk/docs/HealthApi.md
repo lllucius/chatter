@@ -11,9 +11,9 @@ All URIs are relative to *http://localhost:8000*
 |[**readinessCheckReadyzGet**](#readinesscheckreadyzget) | **GET** /readyz | Readiness Check|
 
 # **getCorrelationTraceTraceCorrelationIdGet**
-> any getCorrelationTraceTraceCorrelationIdGet()
+> CorrelationTraceResponse getCorrelationTraceTraceCorrelationIdGet()
 
-Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace      Returns:     List of requests associated with the correlation ID
+Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace  Returns:     List of requests associated with the correlation ID
 
 ### Example
 
@@ -42,7 +42,7 @@ const { status, data } = await apiInstance.getCorrelationTraceTraceCorrelationId
 
 ### Return type
 
-**any**
+**CorrelationTraceResponse**
 
 ### Authorization
 
@@ -63,7 +63,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getMetricsMetricsGet**
-> any getMetricsMetricsGet()
+> MetricsResponse getMetricsMetricsGet()
 
 Get application metrics and monitoring data.  Returns:     Application metrics including performance and health data
 
@@ -87,7 +87,7 @@ This endpoint does not have any parameters.
 
 ### Return type
 
-**any**
+**MetricsResponse**
 
 ### Authorization
 

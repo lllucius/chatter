@@ -5,9 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.get_performance_stats_api_v1_chat_performance_stats_get_response_get_performance_stats_api_v1_chat_performance_stats_get import (
-    GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet,
-)
+from ...models.performance_stats_response import PerformanceStatsResponse
 from ...types import Response
 
 
@@ -22,11 +20,9 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet]:
+) -> Optional[PerformanceStatsResponse]:
     if response.status_code == 200:
-        response_200 = GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet.from_dict(
-            response.json()
-        )
+        response_200 = PerformanceStatsResponse.from_dict(response.json())
 
         return response_200
 
@@ -38,7 +34,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet]:
+) -> Response[PerformanceStatsResponse]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -50,7 +46,7 @@ def _build_response(
 def sync_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet]:
+) -> Response[PerformanceStatsResponse]:
     """Get Performance Stats
 
      Get workflow performance statistics.
@@ -60,7 +56,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet]
+        Response[PerformanceStatsResponse]
     """
 
     kwargs = _get_kwargs()
@@ -75,7 +71,7 @@ def sync_detailed(
 def sync(
     *,
     client: AuthenticatedClient,
-) -> Optional[GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet]:
+) -> Optional[PerformanceStatsResponse]:
     """Get Performance Stats
 
      Get workflow performance statistics.
@@ -85,7 +81,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet
+        PerformanceStatsResponse
     """
 
     return sync_detailed(
@@ -96,7 +92,7 @@ def sync(
 async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
-) -> Response[GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet]:
+) -> Response[PerformanceStatsResponse]:
     """Get Performance Stats
 
      Get workflow performance statistics.
@@ -106,7 +102,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet]
+        Response[PerformanceStatsResponse]
     """
 
     kwargs = _get_kwargs()
@@ -119,7 +115,7 @@ async def asyncio_detailed(
 async def asyncio(
     *,
     client: AuthenticatedClient,
-) -> Optional[GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet]:
+) -> Optional[PerformanceStatsResponse]:
     """Get Performance Stats
 
      Get workflow performance statistics.
@@ -129,7 +125,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        GetPerformanceStatsApiV1ChatPerformanceStatsGetResponseGetPerformanceStatsApiV1ChatPerformanceStatsGet
+        PerformanceStatsResponse
     """
 
     return (

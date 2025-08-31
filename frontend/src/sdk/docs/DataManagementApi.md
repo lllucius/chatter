@@ -14,7 +14,7 @@ All URIs are relative to *http://localhost:8000*
 |[**restoreFromBackupApiV1DataRestorePost**](#restorefrombackupapiv1datarestorepost) | **POST** /api/v1/data/restore | Restore From Backup|
 
 # **bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost**
-> { [key: string]: any; } bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestBody)
+> BulkDeleteResponse bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestBody)
 
 Bulk delete conversations.
 
@@ -45,7 +45,7 @@ const { status, data } = await apiInstance.bulkDeleteConversationsApiV1DataBulkD
 
 ### Return type
 
-**{ [key: string]: any; }**
+**BulkDeleteResponse**
 
 ### Authorization
 
@@ -66,7 +66,7 @@ const { status, data } = await apiInstance.bulkDeleteConversationsApiV1DataBulkD
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost**
-> { [key: string]: any; } bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestBody)
+> BulkDeleteResponse bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestBody)
 
 Bulk delete documents.
 
@@ -97,7 +97,7 @@ const { status, data } = await apiInstance.bulkDeleteDocumentsApiV1DataBulkDelet
 
 ### Return type
 
-**{ [key: string]: any; }**
+**BulkDeleteResponse**
 
 ### Authorization
 
@@ -118,7 +118,7 @@ const { status, data } = await apiInstance.bulkDeleteDocumentsApiV1DataBulkDelet
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **bulkDeletePromptsApiV1DataBulkDeletePromptsPost**
-> { [key: string]: any; } bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestBody)
+> BulkDeleteResponse bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestBody)
 
 Bulk delete prompts.
 
@@ -149,7 +149,7 @@ const { status, data } = await apiInstance.bulkDeletePromptsApiV1DataBulkDeleteP
 
 ### Return type
 
-**{ [key: string]: any; }**
+**BulkDeleteResponse**
 
 ### Authorization
 

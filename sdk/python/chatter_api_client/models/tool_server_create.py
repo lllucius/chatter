@@ -7,7 +7,8 @@ from attrs import field as _attrs_field
 from ..types import UNSET, Unset
 
 if TYPE_CHECKING:
-    from ..models.tool_server_create_env_type_0 import ToolServerCreateEnvType0
+    from ..models.o_auth_config_schema import OAuthConfigSchema
+    from ..models.tool_server_create_headers_type_0 import ToolServerCreateHeadersType0
 
 
 T = TypeVar("T", bound="ToolServerCreate")
@@ -20,34 +21,37 @@ class ToolServerCreate:
     Attributes:
         name (str): Server name
         display_name (str): Display name
-        command (str): Command to start server
+        base_url (str): Base URL for the remote server
         description (Union[None, Unset, str]): Server description
-        args (Union[Unset, list[str]]): Command arguments
-        env (Union['ToolServerCreateEnvType0', None, Unset]): Environment variables
-        auto_start (Union[Unset, bool]): Auto-start server on system startup Default: True.
-        auto_update (Union[Unset, bool]): Auto-update server capabilities Default: True.
+        transport_type (Union[Unset, str]): Transport type: http or sse Default: 'http'.
+        oauth_config (Union['OAuthConfigSchema', None, Unset]): OAuth configuration if required
+        headers (Union['ToolServerCreateHeadersType0', None, Unset]): Additional HTTP headers
+        timeout (Union[Unset, int]): Request timeout in seconds Default: 30.
+        auto_start (Union[Unset, bool]): Auto-connect to server on system startup Default: True.
         max_failures (Union[Unset, int]): Maximum consecutive failures before disabling Default: 3.
     """
 
     name: str
     display_name: str
-    command: str
+    base_url: str
     description: Union[None, Unset, str] = UNSET
-    args: Union[Unset, list[str]] = UNSET
-    env: Union["ToolServerCreateEnvType0", None, Unset] = UNSET
+    transport_type: Union[Unset, str] = "http"
+    oauth_config: Union["OAuthConfigSchema", None, Unset] = UNSET
+    headers: Union["ToolServerCreateHeadersType0", None, Unset] = UNSET
+    timeout: Union[Unset, int] = 30
     auto_start: Union[Unset, bool] = True
-    auto_update: Union[Unset, bool] = True
     max_failures: Union[Unset, int] = 3
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        from ..models.tool_server_create_env_type_0 import ToolServerCreateEnvType0
+        from ..models.o_auth_config_schema import OAuthConfigSchema
+        from ..models.tool_server_create_headers_type_0 import ToolServerCreateHeadersType0
 
         name = self.name
 
         display_name = self.display_name
 
-        command = self.command
+        base_url = self.base_url
 
         description: Union[None, Unset, str]
         if isinstance(self.description, Unset):
@@ -55,21 +59,27 @@ class ToolServerCreate:
         else:
             description = self.description
 
-        args: Union[Unset, list[str]] = UNSET
-        if not isinstance(self.args, Unset):
-            args = self.args
+        transport_type = self.transport_type
 
-        env: Union[None, Unset, dict[str, Any]]
-        if isinstance(self.env, Unset):
-            env = UNSET
-        elif isinstance(self.env, ToolServerCreateEnvType0):
-            env = self.env.to_dict()
+        oauth_config: Union[None, Unset, dict[str, Any]]
+        if isinstance(self.oauth_config, Unset):
+            oauth_config = UNSET
+        elif isinstance(self.oauth_config, OAuthConfigSchema):
+            oauth_config = self.oauth_config.to_dict()
         else:
-            env = self.env
+            oauth_config = self.oauth_config
+
+        headers: Union[None, Unset, dict[str, Any]]
+        if isinstance(self.headers, Unset):
+            headers = UNSET
+        elif isinstance(self.headers, ToolServerCreateHeadersType0):
+            headers = self.headers.to_dict()
+        else:
+            headers = self.headers
+
+        timeout = self.timeout
 
         auto_start = self.auto_start
-
-        auto_update = self.auto_update
 
         max_failures = self.max_failures
 
@@ -79,19 +89,21 @@ class ToolServerCreate:
             {
                 "name": name,
                 "display_name": display_name,
-                "command": command,
+                "base_url": base_url,
             }
         )
         if description is not UNSET:
             field_dict["description"] = description
-        if args is not UNSET:
-            field_dict["args"] = args
-        if env is not UNSET:
-            field_dict["env"] = env
+        if transport_type is not UNSET:
+            field_dict["transport_type"] = transport_type
+        if oauth_config is not UNSET:
+            field_dict["oauth_config"] = oauth_config
+        if headers is not UNSET:
+            field_dict["headers"] = headers
+        if timeout is not UNSET:
+            field_dict["timeout"] = timeout
         if auto_start is not UNSET:
             field_dict["auto_start"] = auto_start
-        if auto_update is not UNSET:
-            field_dict["auto_update"] = auto_update
         if max_failures is not UNSET:
             field_dict["max_failures"] = max_failures
 
@@ -99,14 +111,15 @@ class ToolServerCreate:
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
-        from ..models.tool_server_create_env_type_0 import ToolServerCreateEnvType0
+        from ..models.o_auth_config_schema import OAuthConfigSchema
+        from ..models.tool_server_create_headers_type_0 import ToolServerCreateHeadersType0
 
         d = dict(src_dict)
         name = d.pop("name")
 
         display_name = d.pop("display_name")
 
-        command = d.pop("command")
+        base_url = d.pop("base_url")
 
         def _parse_description(data: object) -> Union[None, Unset, str]:
             if data is None:
@@ -117,9 +130,9 @@ class ToolServerCreate:
 
         description = _parse_description(d.pop("description", UNSET))
 
-        args = cast(list[str], d.pop("args", UNSET))
+        transport_type = d.pop("transport_type", UNSET)
 
-        def _parse_env(data: object) -> Union["ToolServerCreateEnvType0", None, Unset]:
+        def _parse_oauth_config(data: object) -> Union["OAuthConfigSchema", None, Unset]:
             if data is None:
                 return data
             if isinstance(data, Unset):
@@ -127,30 +140,48 @@ class ToolServerCreate:
             try:
                 if not isinstance(data, dict):
                     raise TypeError()
-                env_type_0 = ToolServerCreateEnvType0.from_dict(data)
+                oauth_config_type_0 = OAuthConfigSchema.from_dict(data)
 
-                return env_type_0
+                return oauth_config_type_0
             except:  # noqa: E722
                 pass
-            return cast(Union["ToolServerCreateEnvType0", None, Unset], data)
+            return cast(Union["OAuthConfigSchema", None, Unset], data)
 
-        env = _parse_env(d.pop("env", UNSET))
+        oauth_config = _parse_oauth_config(d.pop("oauth_config", UNSET))
+
+        def _parse_headers(data: object) -> Union["ToolServerCreateHeadersType0", None, Unset]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            try:
+                if not isinstance(data, dict):
+                    raise TypeError()
+                headers_type_0 = ToolServerCreateHeadersType0.from_dict(data)
+
+                return headers_type_0
+            except:  # noqa: E722
+                pass
+            return cast(Union["ToolServerCreateHeadersType0", None, Unset], data)
+
+        headers = _parse_headers(d.pop("headers", UNSET))
+
+        timeout = d.pop("timeout", UNSET)
 
         auto_start = d.pop("auto_start", UNSET)
-
-        auto_update = d.pop("auto_update", UNSET)
 
         max_failures = d.pop("max_failures", UNSET)
 
         tool_server_create = cls(
             name=name,
             display_name=display_name,
-            command=command,
+            base_url=base_url,
             description=description,
-            args=args,
-            env=env,
+            transport_type=transport_type,
+            oauth_config=oauth_config,
+            headers=headers,
+            timeout=timeout,
             auto_start=auto_start,
-            auto_update=auto_update,
             max_failures=max_failures,
         )
 

@@ -82,7 +82,7 @@ def sync_detailed(
 
     Args:
         server_id (str):
-        body (ToolServerUpdate): Schema for updating a tool server.
+        body (ToolServerUpdate): Schema for updating a remote tool server.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -125,7 +125,7 @@ def sync(
 
     Args:
         server_id (str):
-        body (ToolServerUpdate): Schema for updating a tool server.
+        body (ToolServerUpdate): Schema for updating a remote tool server.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -163,7 +163,7 @@ async def asyncio_detailed(
 
     Args:
         server_id (str):
-        body (ToolServerUpdate): Schema for updating a tool server.
+        body (ToolServerUpdate): Schema for updating a remote tool server.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
@@ -204,7 +204,7 @@ async def asyncio(
 
     Args:
         server_id (str):
-        body (ToolServerUpdate): Schema for updating a tool server.
+        body (ToolServerUpdate): Schema for updating a remote tool server.
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.

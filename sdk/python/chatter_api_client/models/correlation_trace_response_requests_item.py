@@ -4,14 +4,11 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar(
-    "T",
-    bound="BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost",
-)
+T = TypeVar("T", bound="CorrelationTraceResponseRequestsItem")
 
 
 @_attrs_define
-class BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost:
+class CorrelationTraceResponseRequestsItem:
     """ """
 
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
@@ -25,10 +22,10 @@ class BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocum
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        bulk_delete_documents_api_v1_data_bulk_delete_documents_post_response_bulk_delete_documents_api_v1_data_bulk_delete_documents_post = cls()
+        correlation_trace_response_requests_item = cls()
 
-        bulk_delete_documents_api_v1_data_bulk_delete_documents_post_response_bulk_delete_documents_api_v1_data_bulk_delete_documents_post.additional_properties = d
-        return bulk_delete_documents_api_v1_data_bulk_delete_documents_post_response_bulk_delete_documents_api_v1_data_bulk_delete_documents_post
+        correlation_trace_response_requests_item.additional_properties = d
+        return correlation_trace_response_requests_item
 
     @property
     def additional_keys(self) -> list[str]:

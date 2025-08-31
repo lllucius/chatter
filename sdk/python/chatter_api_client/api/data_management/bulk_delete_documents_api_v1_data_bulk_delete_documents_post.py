@@ -5,9 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.bulk_delete_documents_api_v1_data_bulk_delete_documents_post_response_bulk_delete_documents_api_v1_data_bulk_delete_documents_post import (
-    BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost,
-)
+from ...models.bulk_delete_response import BulkDeleteResponse
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
@@ -33,16 +31,9 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[
-    Union[
-        BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost,
-        HTTPValidationError,
-    ]
-]:
+) -> Optional[Union[BulkDeleteResponse, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost.from_dict(
-            response.json()
-        )
+        response_200 = BulkDeleteResponse.from_dict(response.json())
 
         return response_200
 
@@ -59,12 +50,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[
-    Union[
-        BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost,
-        HTTPValidationError,
-    ]
-]:
+) -> Response[Union[BulkDeleteResponse, HTTPValidationError]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -77,12 +63,7 @@ def sync_detailed(
     *,
     client: AuthenticatedClient,
     body: list[str],
-) -> Response[
-    Union[
-        BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost,
-        HTTPValidationError,
-    ]
-]:
+) -> Response[Union[BulkDeleteResponse, HTTPValidationError]]:
     """Bulk Delete Documents
 
      Bulk delete documents.
@@ -95,7 +76,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost, HTTPValidationError]]
+        Response[Union[BulkDeleteResponse, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
@@ -113,12 +94,7 @@ def sync(
     *,
     client: AuthenticatedClient,
     body: list[str],
-) -> Optional[
-    Union[
-        BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost,
-        HTTPValidationError,
-    ]
-]:
+) -> Optional[Union[BulkDeleteResponse, HTTPValidationError]]:
     """Bulk Delete Documents
 
      Bulk delete documents.
@@ -131,7 +107,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost, HTTPValidationError]
+        Union[BulkDeleteResponse, HTTPValidationError]
     """
 
     return sync_detailed(
@@ -144,12 +120,7 @@ async def asyncio_detailed(
     *,
     client: AuthenticatedClient,
     body: list[str],
-) -> Response[
-    Union[
-        BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost,
-        HTTPValidationError,
-    ]
-]:
+) -> Response[Union[BulkDeleteResponse, HTTPValidationError]]:
     """Bulk Delete Documents
 
      Bulk delete documents.
@@ -162,7 +133,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost, HTTPValidationError]]
+        Response[Union[BulkDeleteResponse, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
@@ -178,12 +149,7 @@ async def asyncio(
     *,
     client: AuthenticatedClient,
     body: list[str],
-) -> Optional[
-    Union[
-        BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost,
-        HTTPValidationError,
-    ]
-]:
+) -> Optional[Union[BulkDeleteResponse, HTTPValidationError]]:
     """Bulk Delete Documents
 
      Bulk delete documents.
@@ -196,7 +162,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostResponseBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost, HTTPValidationError]
+        Union[BulkDeleteResponse, HTTPValidationError]
     """
 
     return (

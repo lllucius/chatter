@@ -4,16 +4,14 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar(
-    "T", bound="DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete"
-)
+T = TypeVar("T", bound="PerformanceStatsResponseErrorCounts")
 
 
 @_attrs_define
-class DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1DocumentsDocumentIdDelete:
-    """ """
+class PerformanceStatsResponseErrorCounts:
+    """Error count by type"""
 
-    additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
+    additional_properties: dict[str, int] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
         field_dict: dict[str, Any] = {}
@@ -24,19 +22,19 @@ class DeleteDocumentApiV1DocumentsDocumentIdDeleteResponseDeleteDocumentApiV1Doc
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        delete_document_api_v1_documents_document_id_delete_response_delete_document_api_v1_documents_document_id_delete = cls()
+        performance_stats_response_error_counts = cls()
 
-        delete_document_api_v1_documents_document_id_delete_response_delete_document_api_v1_documents_document_id_delete.additional_properties = d
-        return delete_document_api_v1_documents_document_id_delete_response_delete_document_api_v1_documents_document_id_delete
+        performance_stats_response_error_counts.additional_properties = d
+        return performance_stats_response_error_counts
 
     @property
     def additional_keys(self) -> list[str]:
         return list(self.additional_properties.keys())
 
-    def __getitem__(self, key: str) -> Any:
+    def __getitem__(self, key: str) -> int:
         return self.additional_properties[key]
 
-    def __setitem__(self, key: str, value: Any) -> None:
+    def __setitem__(self, key: str, value: int) -> None:
         self.additional_properties[key] = value
 
     def __delitem__(self, key: str) -> None:

@@ -166,15 +166,16 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/MetricsResponse'
   /trace/{correlation_id}:
     get:
       tags:
       - Health
       summary: Get Correlation Trace
       description: "Get trace of all requests for a correlation ID.\n\nArgs:\n   \
-        \ correlation_id: The correlation ID to trace\n    \nReturns:\n    List of\
-        \ requests associated with the correlation ID"
+        \ correlation_id: The correlation ID to trace\n\nReturns:\n    List of requests\
+        \ associated with the correlation ID"
       operationId: get_correlation_trace_trace__correlation_id__get
       parameters:
       - name: correlation_id
@@ -188,7 +189,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/CorrelationTraceResponse'
         '422':
           description: Validation Error
           content:
@@ -825,10 +827,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
-                title: Response Delete Message Api V1 Chat Conversations  Conversation
-                  Id  Messages  Message Id  Delete
+                $ref: '#/components/schemas/MessageDeleteResponse'
         '422':
           description: Validation Error
           content:
@@ -1113,9 +1112,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-                title: Response Get Workflow Templates Api V1 Chat Templates Get
+                $ref: '#/components/schemas/WorkflowTemplatesResponse'
       security:
       - HTTPBearer: []
   /api/v1/chat/template/{template_name}:
@@ -1166,10 +1163,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-                title: Response Get Performance Stats Api V1 Chat Performance Stats
-                  Get
+                $ref: '#/components/schemas/PerformanceStatsResponse'
       security:
       - HTTPBearer: []
   /api/v1/chat/mcp/status:
@@ -1425,9 +1419,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                additionalProperties: true
-                title: Response Delete Document Api V1 Documents  Document Id  Delete
+                $ref: '#/components/schemas/DocumentDeleteResponse'
         '422':
           description: Validation Error
           content:
@@ -3395,6 +3387,271 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/toolservers/permissions:
+    post:
+      tags:
+      - Tool Servers
+      summary: Grant Tool Permission
+      description: "Grant tool permission to a user.\n\nArgs:\n    permission_data:\
+        \ Permission data\n    current_user: Current authenticated user\n    access_service:\
+        \ Tool access service\n\nReturns:\n    Created permission"
+      operationId: grant_tool_permission_api_v1_toolservers_permissions_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToolPermissionCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolPermissionResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+  /api/v1/toolservers/permissions/{permission_id}:
+    put:
+      tags:
+      - Tool Servers
+      summary: Update Tool Permission
+      description: "Update tool permission.\n\nArgs:\n    permission_id: Permission\
+        \ ID\n    update_data: Update data\n    current_user: Current authenticated\
+        \ user\n    access_service: Tool access service\n\nReturns:\n    Updated permission"
+      operationId: update_tool_permission_api_v1_toolservers_permissions__permission_id__put
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: permission_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Permission Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToolPermissionUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolPermissionResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Tool Servers
+      summary: Revoke Tool Permission
+      description: "Revoke tool permission.\n\nArgs:\n    permission_id: Permission\
+        \ ID\n    current_user: Current authenticated user\n    access_service: Tool\
+        \ access service\n\nReturns:\n    Success message"
+      operationId: revoke_tool_permission_api_v1_toolservers_permissions__permission_id__delete
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: permission_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Permission Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Revoke Tool Permission Api V1 Toolservers Permissions  Permission
+                  Id  Delete
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/toolservers/users/{user_id}/permissions:
+    get:
+      tags:
+      - Tool Servers
+      summary: Get User Permissions
+      description: "Get all permissions for a user.\n\nArgs:\n    user_id: User ID\n\
+        \    current_user: Current authenticated user\n    access_service: Tool access\
+        \ service\n\nReturns:\n    List of user permissions"
+      operationId: get_user_permissions_api_v1_toolservers_users__user_id__permissions_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: user_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: User Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ToolPermissionResponse'
+                title: Response Get User Permissions Api V1 Toolservers Users  User
+                  Id  Permissions Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/toolservers/role-access:
+    post:
+      tags:
+      - Tool Servers
+      summary: Create Role Access Rule
+      description: "Create role-based access rule.\n\nArgs:\n    rule_data: Rule data\n\
+        \    current_user: Current authenticated user\n    access_service: Tool access\
+        \ service\n\nReturns:\n    Created rule"
+      operationId: create_role_access_rule_api_v1_toolservers_role_access_post
+      security:
+      - HTTPBearer: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RoleToolAccessCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleToolAccessResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Tool Servers
+      summary: Get Role Access Rules
+      description: "Get role-based access rules.\n\nArgs:\n    role: Optional role\
+        \ filter\n    current_user: Current authenticated user\n    access_service:\
+        \ Tool access service\n\nReturns:\n    List of access rules"
+      operationId: get_role_access_rules_api_v1_toolservers_role_access_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: role
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Role
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RoleToolAccessResponse'
+                title: Response Get Role Access Rules Api V1 Toolservers Role Access
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/toolservers/access-check:
+    post:
+      tags:
+      - Tool Servers
+      summary: Check Tool Access
+      description: "Check if user has access to a tool.\n\nArgs:\n    check_data:\
+        \ Access check data\n    current_user: Current authenticated user\n    access_service:\
+        \ Tool access service\n\nReturns:\n    Access check result"
+      operationId: check_tool_access_api_v1_toolservers_access_check_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserToolAccessCheck'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ToolAccessResult'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+  /api/v1/toolservers/servers/{server_id}/refresh-tools:
+    post:
+      tags:
+      - Tool Servers
+      summary: Refresh Server Tools
+      description: "Refresh tools for a remote server.\n\nArgs:\n    server_id: Server\
+        \ ID\n    current_user: Current authenticated user\n    service: Tool server\
+        \ service\n\nReturns:\n    Refresh result"
+      operationId: refresh_server_tools_api_v1_toolservers_servers__server_id__refresh_tools_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: server_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Server Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Refresh Server Tools Api V1 Toolservers Servers  Server
+                  Id  Refresh Tools Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/agents/:
     post:
       tags:
@@ -4674,10 +4931,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-                title: Response Bulk Delete Documents Api V1 Data Bulk Delete Documents
-                  Post
+                $ref: '#/components/schemas/BulkDeleteResponse'
         '422':
           description: Validation Error
           content:
@@ -4708,10 +4962,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-                title: Response Bulk Delete Conversations Api V1 Data Bulk Delete
-                  Conversations Post
+                $ref: '#/components/schemas/BulkDeleteResponse'
         '422':
           description: Validation Error
           content:
@@ -4742,10 +4993,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                type: object
-                title: Response Bulk Delete Prompts Api V1 Data Bulk Delete Prompts
-                  Post
+                $ref: '#/components/schemas/BulkDeleteResponse'
         '422':
           description: Validation Error
           content:
@@ -4917,7 +5165,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/ProviderDeleteResponse'
         '422':
           description: Validation Error
           content:
@@ -4951,7 +5200,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/ProviderDefaultResponse'
         '422':
           description: Validation Error
           content:
@@ -5136,7 +5386,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/ModelDeleteResponse'
         '422':
           description: Validation Error
           content:
@@ -5164,7 +5415,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/ModelDefaultResponse'
         '422':
           description: Validation Error
           content:
@@ -5342,7 +5594,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/EmbeddingSpaceDeleteResponse'
         '422':
           description: Validation Error
           content:
@@ -5370,7 +5623,8 @@ paths:
           description: Successful Response
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/EmbeddingSpaceDefaultResponse'
         '422':
           description: Validation Error
           content:
@@ -6841,8 +7095,14 @@ components:
       properties:
         pagination:
           $ref: '#/components/schemas/PaginationRequest'
+          default:
+            limit: 50
+            offset: 0
         sorting:
           $ref: '#/components/schemas/SortingRequest'
+          default:
+            sort_by: created_at
+            sort_order: desc
         tags:
           anyOf:
           - items:
@@ -6883,6 +7143,34 @@ components:
       required:
       - file
       title: Body_upload_document_api_v1_documents_upload_post
+    BulkDeleteResponse:
+      properties:
+        total_requested:
+          type: integer
+          title: Total Requested
+          description: Total number of items requested for deletion
+        successful_deletions:
+          type: integer
+          title: Successful Deletions
+          description: Number of successful deletions
+        failed_deletions:
+          type: integer
+          title: Failed Deletions
+          description: Number of failed deletions
+        errors:
+          items:
+            type: string
+          type: array
+          title: Errors
+          description: List of error messages for failed deletions
+      type: object
+      required:
+      - total_requested
+      - successful_deletions
+      - failed_deletions
+      - errors
+      title: BulkDeleteResponse
+      description: Response schema for bulk delete operations.
     BulkOperationResult:
       properties:
         total_requested:
@@ -7430,6 +7718,30 @@ components:
       - updated_at
       title: ConversationWithMessages
       description: Schema for conversation with messages.
+    CorrelationTraceResponse:
+      properties:
+        correlation_id:
+          type: string
+          title: Correlation Id
+          description: Correlation ID
+        trace_length:
+          type: integer
+          title: Trace Length
+          description: Number of requests in trace
+        requests:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Requests
+          description: List of requests in trace
+      type: object
+      required:
+      - correlation_id
+      - trace_length
+      - requests
+      title: CorrelationTraceResponse
+      description: Schema for correlation trace response.
     DashboardResponse:
       properties:
         conversation_stats:
@@ -7721,6 +8033,17 @@ components:
       - offset
       title: DocumentChunksResponse
       description: Schema for document chunks response with pagination.
+    DocumentDeleteResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Deletion result message
+      type: object
+      required:
+      - message
+      title: DocumentDeleteResponse
+      description: Response schema for document deletion.
     DocumentListResponse:
       properties:
         documents:
@@ -8269,6 +8592,28 @@ components:
       - model_id
       title: EmbeddingSpaceCreate
       description: Schema for creating an embedding space.
+    EmbeddingSpaceDefaultResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Operation result message
+      type: object
+      required:
+      - message
+      title: EmbeddingSpaceDefaultResponse
+      description: Response schema for setting default embedding space.
+    EmbeddingSpaceDeleteResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Deletion result message
+      type: object
+      required:
+      - message
+      title: EmbeddingSpaceDeleteResponse
+      description: Response schema for embedding space deletion.
     EmbeddingSpaceList:
       properties:
         spaces:
@@ -8910,6 +9255,17 @@ components:
       - content
       title: MessageCreate
       description: Schema for creating a message.
+    MessageDeleteResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Deletion result message
+      type: object
+      required:
+      - message
+      title: MessageDeleteResponse
+      description: Response schema for message deletion.
     MessageResponse:
       properties:
         role:
@@ -9010,6 +9366,50 @@ components:
       - custom
       title: MetricType
       description: Types of metrics to track.
+    MetricsResponse:
+      properties:
+        timestamp:
+          type: string
+          title: Timestamp
+          description: Metrics collection timestamp
+        service:
+          type: string
+          title: Service
+          description: Service name
+        version:
+          type: string
+          title: Version
+          description: Service version
+        environment:
+          type: string
+          title: Environment
+          description: Environment
+        health:
+          additionalProperties: true
+          type: object
+          title: Health
+          description: Health metrics
+        performance:
+          additionalProperties: true
+          type: object
+          title: Performance
+          description: Performance statistics
+        endpoints:
+          additionalProperties: true
+          type: object
+          title: Endpoints
+          description: Endpoint statistics
+      type: object
+      required:
+      - timestamp
+      - service
+      - version
+      - environment
+      - health
+      - performance
+      - endpoints
+      title: MetricsResponse
+      description: Schema for application metrics response.
     ModelDefCreate:
       properties:
         name:
@@ -9288,6 +9688,28 @@ components:
       - provider
       title: ModelDefWithProvider
       description: Model definition with provider information.
+    ModelDefaultResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Operation result message
+      type: object
+      required:
+      - message
+      title: ModelDefaultResponse
+      description: Response schema for setting default model.
+    ModelDeleteResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Deletion result message
+      type: object
+      required:
+      - message
+      title: ModelDeleteResponse
+      description: Response schema for model deletion.
     ModelType:
       type: string
       enum:
@@ -9295,6 +9717,36 @@ components:
       - embedding
       title: ModelType
       description: Types of AI models.
+    OAuthConfigSchema:
+      properties:
+        client_id:
+          type: string
+          title: Client Id
+          description: OAuth client ID
+        client_secret:
+          type: string
+          title: Client Secret
+          description: OAuth client secret
+        token_url:
+          type: string
+          maxLength: 2083
+          minLength: 1
+          format: uri
+          title: Token Url
+          description: OAuth token endpoint URL
+        scope:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Scope
+          description: OAuth scope
+      type: object
+      required:
+      - client_id
+      - client_secret
+      - token_url
+      title: OAuthConfigSchema
+      description: OAuth configuration for remote servers.
     PaginationRequest:
       properties:
         limit:
@@ -9450,6 +9902,63 @@ components:
       - embedding_generation_time_ms
       title: PerformanceMetricsResponse
       description: Schema for performance metrics response.
+    PerformanceStatsResponse:
+      properties:
+        total_executions:
+          type: integer
+          title: Total Executions
+          description: Total number of executions
+        avg_execution_time_ms:
+          type: integer
+          title: Avg Execution Time Ms
+          description: Average execution time in milliseconds
+        min_execution_time_ms:
+          type: integer
+          title: Min Execution Time Ms
+          description: Minimum execution time in milliseconds
+        max_execution_time_ms:
+          type: integer
+          title: Max Execution Time Ms
+          description: Maximum execution time in milliseconds
+        workflow_types:
+          additionalProperties:
+            type: integer
+          type: object
+          title: Workflow Types
+          description: Execution count by workflow type
+        error_counts:
+          additionalProperties:
+            type: integer
+          type: object
+          title: Error Counts
+          description: Error count by type
+        cache_stats:
+          additionalProperties: true
+          type: object
+          title: Cache Stats
+          description: Cache statistics
+        tool_stats:
+          additionalProperties: true
+          type: object
+          title: Tool Stats
+          description: Tool usage statistics
+        timestamp:
+          type: number
+          title: Timestamp
+          description: Statistics timestamp
+      type: object
+      required:
+      - total_executions
+      - avg_execution_time_ms
+      - min_execution_time_ms
+      - max_execution_time_ms
+      - workflow_types
+      - error_counts
+      - cache_stats
+      - tool_stats
+      - timestamp
+      title: PerformanceStatsResponse
+      description: Schema for performance statistics response.
     PluginActionResponse:
       properties:
         success:
@@ -11441,6 +11950,28 @@ components:
       - display_name
       title: ProviderCreate
       description: Schema for creating a provider.
+    ProviderDefaultResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Operation result message
+      type: object
+      required:
+      - message
+      title: ProviderDefaultResponse
+      description: Response schema for setting default provider.
+    ProviderDeleteResponse:
+      properties:
+        message:
+          type: string
+          title: Message
+          description: Deletion result message
+      type: object
+      required:
+      - message
+      title: ProviderDeleteResponse
+      description: Response schema for provider deletion.
     ProviderList:
       properties:
         providers:
@@ -11634,6 +12165,126 @@ components:
       - started_at
       title: RestoreResponse
       description: Response schema for restore operation.
+    RoleToolAccessCreate:
+      properties:
+        role:
+          $ref: '#/components/schemas/UserRole'
+          description: User role
+        tool_pattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tool Pattern
+          description: Tool name pattern
+        server_pattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Server Pattern
+          description: Server name pattern
+        access_level:
+          $ref: '#/components/schemas/ToolAccessLevel'
+          description: Access level
+        default_rate_limit_per_hour:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Default Rate Limit Per Hour
+        default_rate_limit_per_day:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Default Rate Limit Per Day
+        allowed_hours:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Hours
+        allowed_days:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Days
+      type: object
+      required:
+      - role
+      - access_level
+      title: RoleToolAccessCreate
+      description: Schema for creating role-based tool access.
+    RoleToolAccessResponse:
+      properties:
+        role:
+          $ref: '#/components/schemas/UserRole'
+          description: User role
+        tool_pattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tool Pattern
+          description: Tool name pattern
+        server_pattern:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Server Pattern
+          description: Server name pattern
+        access_level:
+          $ref: '#/components/schemas/ToolAccessLevel'
+          description: Access level
+        default_rate_limit_per_hour:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Default Rate Limit Per Hour
+        default_rate_limit_per_day:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Default Rate Limit Per Day
+        allowed_hours:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Hours
+        allowed_days:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Days
+        id:
+          type: string
+          title: Id
+          description: Access rule ID
+        created_by:
+          type: string
+          title: Created By
+          description: Creator user ID
+        created_at:
+          type: string
+          format: date-time
+          title: Created At
+          description: Creation timestamp
+      type: object
+      required:
+      - role
+      - access_level
+      - id
+      - created_by
+      - created_at
+      title: RoleToolAccessResponse
+      description: Schema for role-based tool access response.
     SSEStatsResponse:
       properties:
         total_connections:
@@ -12125,6 +12776,55 @@ components:
       - user
       title: TokenResponse
       description: Schema for authentication token response.
+    ToolAccessLevel:
+      type: string
+      enum:
+      - none
+      - read
+      - execute
+      - admin
+      title: ToolAccessLevel
+      description: Access levels for tools.
+    ToolAccessResult:
+      properties:
+        allowed:
+          type: boolean
+          title: Allowed
+          description: Whether access is allowed
+        access_level:
+          $ref: '#/components/schemas/ToolAccessLevel'
+          description: Access level
+        rate_limit_remaining_hour:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Rate Limit Remaining Hour
+          description: Remaining hourly calls
+        rate_limit_remaining_day:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Rate Limit Remaining Day
+          description: Remaining daily calls
+        restriction_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Restriction Reason
+          description: Reason if restricted
+        expires_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expires At
+          description: Permission expiry
+      type: object
+      required:
+      - allowed
+      - access_level
+      title: ToolAccessResult
+      description: Schema for tool access check result.
     ToolOperationResponse:
       properties:
         success:
@@ -12141,6 +12841,203 @@ components:
       - message
       title: ToolOperationResponse
       description: Schema for tool operation response.
+    ToolPermissionCreate:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+          description: User ID
+        tool_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tool Id
+          description: Specific tool ID
+        server_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Server Id
+          description: Server ID (for all tools)
+        access_level:
+          $ref: '#/components/schemas/ToolAccessLevel'
+          description: Access level
+        rate_limit_per_hour:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Rate Limit Per Hour
+          description: Hourly rate limit
+        rate_limit_per_day:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Rate Limit Per Day
+          description: Daily rate limit
+        allowed_hours:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Hours
+          description: Allowed hours (0-23)
+        allowed_days:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Days
+          description: Allowed weekdays (0-6)
+        expires_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expires At
+          description: Permission expiry
+      type: object
+      required:
+      - user_id
+      - access_level
+      title: ToolPermissionCreate
+      description: Schema for creating tool permissions.
+    ToolPermissionResponse:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+          description: User ID
+        tool_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tool Id
+          description: Specific tool ID
+        server_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Server Id
+          description: Server ID (for all tools)
+        access_level:
+          $ref: '#/components/schemas/ToolAccessLevel'
+          description: Access level
+        rate_limit_per_hour:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Rate Limit Per Hour
+          description: Hourly rate limit
+        rate_limit_per_day:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Rate Limit Per Day
+          description: Daily rate limit
+        allowed_hours:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Hours
+          description: Allowed hours (0-23)
+        allowed_days:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Days
+          description: Allowed weekdays (0-6)
+        expires_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expires At
+          description: Permission expiry
+        id:
+          type: string
+          title: Id
+          description: Permission ID
+        granted_by:
+          type: string
+          title: Granted By
+          description: Granter user ID
+        granted_at:
+          type: string
+          format: date-time
+          title: Granted At
+          description: Grant timestamp
+        usage_count:
+          type: integer
+          title: Usage Count
+          description: Usage count
+        last_used:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Last Used
+          description: Last used timestamp
+      type: object
+      required:
+      - user_id
+      - access_level
+      - id
+      - granted_by
+      - granted_at
+      - usage_count
+      title: ToolPermissionResponse
+      description: Schema for tool permission response.
+    ToolPermissionUpdate:
+      properties:
+        access_level:
+          anyOf:
+          - $ref: '#/components/schemas/ToolAccessLevel'
+          - type: 'null'
+        rate_limit_per_hour:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Rate Limit Per Hour
+        rate_limit_per_day:
+          anyOf:
+          - type: integer
+            minimum: 0.0
+          - type: 'null'
+          title: Rate Limit Per Day
+        allowed_hours:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Hours
+        allowed_days:
+          anyOf:
+          - items:
+              type: integer
+            type: array
+          - type: 'null'
+          title: Allowed Days
+        expires_at:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Expires At
+      type: object
+      title: ToolPermissionUpdate
+      description: Schema for updating tool permissions.
     ToolServerCreate:
       properties:
         name:
@@ -12161,35 +13058,43 @@ components:
           - type: 'null'
           title: Description
           description: Server description
-        command:
+        base_url:
           type: string
-          maxLength: 500
+          maxLength: 2083
           minLength: 1
-          title: Command
-          description: Command to start server
-        args:
-          items:
-            type: string
-          type: array
-          title: Args
-          description: Command arguments
-        env:
+          format: uri
+          title: Base Url
+          description: Base URL for the remote server
+        transport_type:
+          type: string
+          pattern: ^(http|sse)$
+          title: Transport Type
+          description: 'Transport type: http or sse'
+          default: http
+        oauth_config:
+          anyOf:
+          - $ref: '#/components/schemas/OAuthConfigSchema'
+          - type: 'null'
+          description: OAuth configuration if required
+        headers:
           anyOf:
           - additionalProperties:
               type: string
             type: object
           - type: 'null'
-          title: Env
-          description: Environment variables
+          title: Headers
+          description: Additional HTTP headers
+        timeout:
+          type: integer
+          maximum: 300.0
+          minimum: 5.0
+          title: Timeout
+          description: Request timeout in seconds
+          default: 30
         auto_start:
           type: boolean
           title: Auto Start
-          description: Auto-start server on system startup
-          default: true
-        auto_update:
-          type: boolean
-          title: Auto Update
-          description: Auto-update server capabilities
+          description: Auto-connect to server on system startup
           default: true
         max_failures:
           type: integer
@@ -12202,7 +13107,7 @@ components:
       required:
       - name
       - display_name
-      - command
+      - base_url
       title: ToolServerCreate
       description: Schema for creating a tool server.
     ToolServerDeleteResponse:
@@ -12367,35 +13272,43 @@ components:
           - type: 'null'
           title: Description
           description: Server description
-        command:
+        base_url:
           type: string
-          maxLength: 500
+          maxLength: 2083
           minLength: 1
-          title: Command
-          description: Command to start server
-        args:
-          items:
-            type: string
-          type: array
-          title: Args
-          description: Command arguments
-        env:
+          format: uri
+          title: Base Url
+          description: Base URL for the remote server
+        transport_type:
+          type: string
+          pattern: ^(http|sse)$
+          title: Transport Type
+          description: 'Transport type: http or sse'
+          default: http
+        oauth_config:
+          anyOf:
+          - $ref: '#/components/schemas/OAuthConfigSchema'
+          - type: 'null'
+          description: OAuth configuration if required
+        headers:
           anyOf:
           - additionalProperties:
               type: string
             type: object
           - type: 'null'
-          title: Env
-          description: Environment variables
+          title: Headers
+          description: Additional HTTP headers
+        timeout:
+          type: integer
+          maximum: 300.0
+          minimum: 5.0
+          title: Timeout
+          description: Request timeout in seconds
+          default: 30
         auto_start:
           type: boolean
           title: Auto Start
-          description: Auto-start server on system startup
-          default: true
-        auto_update:
-          type: boolean
-          title: Auto Update
-          description: Auto-update server capabilities
+          description: Auto-connect to server on system startup
           default: true
         max_failures:
           type: integer
@@ -12465,7 +13378,7 @@ components:
       required:
       - name
       - display_name
-      - command
+      - base_url
       - id
       - status
       - is_builtin
@@ -12488,37 +13401,43 @@ components:
           - type: string
           - type: 'null'
           title: Description
-        command:
+        base_url:
           anyOf:
           - type: string
-            maxLength: 500
+            maxLength: 2083
             minLength: 1
+            format: uri
           - type: 'null'
-          title: Command
-        args:
+          title: Base Url
+        transport_type:
           anyOf:
-          - items:
-              type: string
-            type: array
+          - type: string
+            pattern: ^(http|sse)$
           - type: 'null'
-          title: Args
-        env:
+          title: Transport Type
+        oauth_config:
+          anyOf:
+          - $ref: '#/components/schemas/OAuthConfigSchema'
+          - type: 'null'
+        headers:
           anyOf:
           - additionalProperties:
               type: string
             type: object
           - type: 'null'
-          title: Env
+          title: Headers
+        timeout:
+          anyOf:
+          - type: integer
+            maximum: 300.0
+            minimum: 5.0
+          - type: 'null'
+          title: Timeout
         auto_start:
           anyOf:
           - type: boolean
           - type: 'null'
           title: Auto Start
-        auto_update:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Auto Update
         max_failures:
           anyOf:
           - type: integer
@@ -12528,7 +13447,7 @@ components:
           title: Max Failures
       type: object
       title: ToolServerUpdate
-      description: Schema for updating a tool server.
+      description: Schema for updating a remote tool server.
     ToolStatus:
       type: string
       enum:
@@ -12784,6 +13703,38 @@ components:
       - updated_at
       title: UserResponse
       description: Schema for user response.
+    UserRole:
+      type: string
+      enum:
+      - guest
+      - user
+      - power_user
+      - admin
+      - super_admin
+      title: UserRole
+      description: User roles for tool access.
+    UserToolAccessCheck:
+      properties:
+        user_id:
+          type: string
+          title: User Id
+          description: User ID
+        tool_name:
+          type: string
+          title: Tool Name
+          description: Tool name
+        server_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Server Name
+          description: Server name
+      type: object
+      required:
+      - user_id
+      - tool_name
+      title: UserToolAccessCheck
+      description: Schema for checking user tool access.
     UserUpdate:
       properties:
         full_name:
@@ -12852,6 +13803,65 @@ components:
       - user_attribute
       title: VariantAllocation
       description: Variant allocation strategies.
+    WorkflowTemplateInfo:
+      properties:
+        name:
+          type: string
+          title: Name
+          description: Template name
+        workflow_type:
+          type: string
+          title: Workflow Type
+          description: Workflow type
+        description:
+          type: string
+          title: Description
+          description: Template description
+        required_tools:
+          items:
+            type: string
+          type: array
+          title: Required Tools
+          description: Required tools
+        required_retrievers:
+          items:
+            type: string
+          type: array
+          title: Required Retrievers
+          description: Required retrievers
+        default_params:
+          additionalProperties: true
+          type: object
+          title: Default Params
+          description: Default parameters
+      type: object
+      required:
+      - name
+      - workflow_type
+      - description
+      - required_tools
+      - required_retrievers
+      - default_params
+      title: WorkflowTemplateInfo
+      description: Schema for workflow template information.
+    WorkflowTemplatesResponse:
+      properties:
+        templates:
+          additionalProperties:
+            $ref: '#/components/schemas/WorkflowTemplateInfo'
+          type: object
+          title: Templates
+          description: Available templates
+        total_count:
+          type: integer
+          title: Total Count
+          description: Total number of templates
+      type: object
+      required:
+      - templates
+      - total_count
+      title: WorkflowTemplatesResponse
+      description: Schema for workflow templates response.
   securitySchemes:
     HTTPBearer:
       type: http

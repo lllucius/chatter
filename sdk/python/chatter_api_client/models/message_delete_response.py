@@ -4,31 +4,44 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar(
-    "T",
-    bound="BulkDeleteConversationsApiV1DataBulkDeleteConversationsPostResponseBulkDeleteConversationsApiV1DataBulkDeleteConversationsPost",
-)
+T = TypeVar("T", bound="MessageDeleteResponse")
 
 
 @_attrs_define
-class BulkDeleteConversationsApiV1DataBulkDeleteConversationsPostResponseBulkDeleteConversationsApiV1DataBulkDeleteConversationsPost:
-    """ """
+class MessageDeleteResponse:
+    """Response schema for message deletion.
 
+    Attributes:
+        message (str): Deletion result message
+    """
+
+    message: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        message = self.message
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "message": message,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post_response_bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post = cls()
+        message = d.pop("message")
 
-        bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post_response_bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post.additional_properties = d
-        return bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post_response_bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post
+        message_delete_response = cls(
+            message=message,
+        )
+
+        message_delete_response.additional_properties = d
+        return message_delete_response
 
     @property
     def additional_keys(self) -> list[str]:

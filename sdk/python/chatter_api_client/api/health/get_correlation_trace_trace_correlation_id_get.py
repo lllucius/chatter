@@ -5,6 +5,7 @@ import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
+from ...models.correlation_trace_response import CorrelationTraceResponse
 from ...models.http_validation_error import HTTPValidationError
 from ...types import Response
 
@@ -22,9 +23,10 @@ def _get_kwargs(
 
 def _parse_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Optional[Union[CorrelationTraceResponse, HTTPValidationError]]:
     if response.status_code == 200:
-        response_200 = response.json()
+        response_200 = CorrelationTraceResponse.from_dict(response.json())
+
         return response_200
 
     if response.status_code == 422:
@@ -40,7 +42,7 @@ def _parse_response(
 
 def _build_response(
     *, client: Union[AuthenticatedClient, Client], response: httpx.Response
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Union[CorrelationTraceResponse, HTTPValidationError]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -53,7 +55,7 @@ def sync_detailed(
     correlation_id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Union[CorrelationTraceResponse, HTTPValidationError]]:
     """Get Correlation Trace
 
      Get trace of all requests for a correlation ID.
@@ -72,7 +74,7 @@ def sync_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Union[CorrelationTraceResponse, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
@@ -90,7 +92,7 @@ def sync(
     correlation_id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Optional[Union[CorrelationTraceResponse, HTTPValidationError]]:
     """Get Correlation Trace
 
      Get trace of all requests for a correlation ID.
@@ -109,7 +111,7 @@ def sync(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Union[CorrelationTraceResponse, HTTPValidationError]
     """
 
     return sync_detailed(
@@ -122,7 +124,7 @@ async def asyncio_detailed(
     correlation_id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Response[Union[Any, HTTPValidationError]]:
+) -> Response[Union[CorrelationTraceResponse, HTTPValidationError]]:
     """Get Correlation Trace
 
      Get trace of all requests for a correlation ID.
@@ -141,7 +143,7 @@ async def asyncio_detailed(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Union[Any, HTTPValidationError]]
+        Response[Union[CorrelationTraceResponse, HTTPValidationError]]
     """
 
     kwargs = _get_kwargs(
@@ -157,7 +159,7 @@ async def asyncio(
     correlation_id: str,
     *,
     client: Union[AuthenticatedClient, Client],
-) -> Optional[Union[Any, HTTPValidationError]]:
+) -> Optional[Union[CorrelationTraceResponse, HTTPValidationError]]:
     """Get Correlation Trace
 
      Get trace of all requests for a correlation ID.
@@ -176,7 +178,7 @@ async def asyncio(
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Union[Any, HTTPValidationError]
+        Union[CorrelationTraceResponse, HTTPValidationError]
     """
 
     return (

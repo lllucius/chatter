@@ -4,15 +4,12 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar(
-    "T",
-    bound="DeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteResponseDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete",
-)
+T = TypeVar("T", bound="PerformanceStatsResponseToolStats")
 
 
 @_attrs_define
-class DeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteResponseDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete:
-    """ """
+class PerformanceStatsResponseToolStats:
+    """Tool usage statistics"""
 
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -25,10 +22,10 @@ class DeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRe
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete_response_delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete = cls()
+        performance_stats_response_tool_stats = cls()
 
-        delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete_response_delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete.additional_properties = d
-        return delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete_response_delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete
+        performance_stats_response_tool_stats.additional_properties = d
+        return performance_stats_response_tool_stats
 
     @property
     def additional_keys(self) -> list[str]:

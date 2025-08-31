@@ -1509,6 +1509,37 @@ export interface BodyListAgentsApiV1AgentsGet {
     'tags'?: Array<string> | null;
 }
 /**
+ * Response schema for bulk delete operations.
+ * @export
+ * @interface BulkDeleteResponse
+ */
+export interface BulkDeleteResponse {
+    /**
+     * Total number of items requested for deletion
+     * @type {number}
+     * @memberof BulkDeleteResponse
+     */
+    'total_requested': number;
+    /**
+     * Number of successful deletions
+     * @type {number}
+     * @memberof BulkDeleteResponse
+     */
+    'successful_deletions': number;
+    /**
+     * Number of failed deletions
+     * @type {number}
+     * @memberof BulkDeleteResponse
+     */
+    'failed_deletions': number;
+    /**
+     * List of error messages for failed deletions
+     * @type {Array<string>}
+     * @memberof BulkDeleteResponse
+     */
+    'errors': Array<string>;
+}
+/**
  * Schema for bulk operation results.
  * @export
  * @interface BulkOperationResult
@@ -2134,6 +2165,31 @@ export interface ConversationWithMessages {
 
 
 /**
+ * Schema for correlation trace response.
+ * @export
+ * @interface CorrelationTraceResponse
+ */
+export interface CorrelationTraceResponse {
+    /**
+     * Correlation ID
+     * @type {string}
+     * @memberof CorrelationTraceResponse
+     */
+    'correlation_id': string;
+    /**
+     * Number of requests in trace
+     * @type {number}
+     * @memberof CorrelationTraceResponse
+     */
+    'trace_length': number;
+    /**
+     * List of requests in trace
+     * @type {Array<{ [key: string]: any; } | null>}
+     * @memberof CorrelationTraceResponse
+     */
+    'requests': Array<{ [key: string]: any; } | null>;
+}
+/**
  * Schema for analytics dashboard response.
  * @export
  * @interface DashboardResponse
@@ -2465,6 +2521,19 @@ export interface DocumentChunksResponse {
      * @memberof DocumentChunksResponse
      */
     'offset': number;
+}
+/**
+ * Response schema for document deletion.
+ * @export
+ * @interface DocumentDeleteResponse
+ */
+export interface DocumentDeleteResponse {
+    /**
+     * Deletion result message
+     * @type {string}
+     * @memberof DocumentDeleteResponse
+     */
+    'message': string;
 }
 /**
  * Schema for document list response.
@@ -3075,6 +3144,32 @@ export interface EmbeddingSpaceCreate {
 }
 
 
+/**
+ * Response schema for setting default embedding space.
+ * @export
+ * @interface EmbeddingSpaceDefaultResponse
+ */
+export interface EmbeddingSpaceDefaultResponse {
+    /**
+     * Operation result message
+     * @type {string}
+     * @memberof EmbeddingSpaceDefaultResponse
+     */
+    'message': string;
+}
+/**
+ * Response schema for embedding space deletion.
+ * @export
+ * @interface EmbeddingSpaceDeleteResponse
+ */
+export interface EmbeddingSpaceDeleteResponse {
+    /**
+     * Deletion result message
+     * @type {string}
+     * @memberof EmbeddingSpaceDeleteResponse
+     */
+    'message': string;
+}
 /**
  * List of embedding spaces with pagination.
  * @export
@@ -3839,6 +3934,19 @@ export interface MessageCreate {
 
 
 /**
+ * Response schema for message deletion.
+ * @export
+ * @interface MessageDeleteResponse
+ */
+export interface MessageDeleteResponse {
+    /**
+     * Deletion result message
+     * @type {string}
+     * @memberof MessageDeleteResponse
+     */
+    'message': string;
+}
+/**
  * Schema for message response.
  * @export
  * @interface MessageResponse
@@ -3961,6 +4069,55 @@ export const MetricType = {
 export type MetricType = typeof MetricType[keyof typeof MetricType];
 
 
+/**
+ * Schema for application metrics response.
+ * @export
+ * @interface MetricsResponse
+ */
+export interface MetricsResponse {
+    /**
+     * Metrics collection timestamp
+     * @type {string}
+     * @memberof MetricsResponse
+     */
+    'timestamp': string;
+    /**
+     * Service name
+     * @type {string}
+     * @memberof MetricsResponse
+     */
+    'service': string;
+    /**
+     * Service version
+     * @type {string}
+     * @memberof MetricsResponse
+     */
+    'version': string;
+    /**
+     * Environment
+     * @type {string}
+     * @memberof MetricsResponse
+     */
+    'environment': string;
+    /**
+     * Health metrics
+     * @type {{ [key: string]: any; }}
+     * @memberof MetricsResponse
+     */
+    'health': { [key: string]: any; };
+    /**
+     * Performance statistics
+     * @type {{ [key: string]: any; }}
+     * @memberof MetricsResponse
+     */
+    'performance': { [key: string]: any; };
+    /**
+     * Endpoint statistics
+     * @type {{ [key: string]: any; }}
+     * @memberof MetricsResponse
+     */
+    'endpoints': { [key: string]: any; };
+}
 /**
  * Schema for creating a model definition.
  * @export
@@ -4294,6 +4451,32 @@ export interface ModelDefWithProvider {
 
 
 /**
+ * Response schema for setting default model.
+ * @export
+ * @interface ModelDefaultResponse
+ */
+export interface ModelDefaultResponse {
+    /**
+     * Operation result message
+     * @type {string}
+     * @memberof ModelDefaultResponse
+     */
+    'message': string;
+}
+/**
+ * Response schema for model deletion.
+ * @export
+ * @interface ModelDeleteResponse
+ */
+export interface ModelDeleteResponse {
+    /**
+     * Deletion result message
+     * @type {string}
+     * @memberof ModelDeleteResponse
+     */
+    'message': string;
+}
+/**
  * Types of AI models.
  * @export
  * @enum {string}
@@ -4307,6 +4490,37 @@ export const ModelType = {
 export type ModelType = typeof ModelType[keyof typeof ModelType];
 
 
+/**
+ * OAuth configuration for remote servers.
+ * @export
+ * @interface OAuthConfigSchema
+ */
+export interface OAuthConfigSchema {
+    /**
+     * OAuth client ID
+     * @type {string}
+     * @memberof OAuthConfigSchema
+     */
+    'client_id': string;
+    /**
+     * OAuth client secret
+     * @type {string}
+     * @memberof OAuthConfigSchema
+     */
+    'client_secret': string;
+    /**
+     * OAuth token endpoint URL
+     * @type {string}
+     * @memberof OAuthConfigSchema
+     */
+    'token_url': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof OAuthConfigSchema
+     */
+    'scope'?: string | null;
+}
 /**
  * Common pagination request schema.
  * @export
@@ -4474,6 +4688,67 @@ export interface PerformanceMetricsResponse {
      * @memberof PerformanceMetricsResponse
      */
     'embedding_generation_time_ms': number;
+}
+/**
+ * Schema for performance statistics response.
+ * @export
+ * @interface PerformanceStatsResponse
+ */
+export interface PerformanceStatsResponse {
+    /**
+     * Total number of executions
+     * @type {number}
+     * @memberof PerformanceStatsResponse
+     */
+    'total_executions': number;
+    /**
+     * Average execution time in milliseconds
+     * @type {number}
+     * @memberof PerformanceStatsResponse
+     */
+    'avg_execution_time_ms': number;
+    /**
+     * Minimum execution time in milliseconds
+     * @type {number}
+     * @memberof PerformanceStatsResponse
+     */
+    'min_execution_time_ms': number;
+    /**
+     * Maximum execution time in milliseconds
+     * @type {number}
+     * @memberof PerformanceStatsResponse
+     */
+    'max_execution_time_ms': number;
+    /**
+     * Execution count by workflow type
+     * @type {{ [key: string]: number; }}
+     * @memberof PerformanceStatsResponse
+     */
+    'workflow_types': { [key: string]: number; };
+    /**
+     * Error count by type
+     * @type {{ [key: string]: number; }}
+     * @memberof PerformanceStatsResponse
+     */
+    'error_counts': { [key: string]: number; };
+    /**
+     * Cache statistics
+     * @type {{ [key: string]: any; }}
+     * @memberof PerformanceStatsResponse
+     */
+    'cache_stats': { [key: string]: any; };
+    /**
+     * Tool usage statistics
+     * @type {{ [key: string]: any; }}
+     * @memberof PerformanceStatsResponse
+     */
+    'tool_stats': { [key: string]: any; };
+    /**
+     * Statistics timestamp
+     * @type {number}
+     * @memberof PerformanceStatsResponse
+     */
+    'timestamp': number;
 }
 /**
  * Response schema for plugin actions.
@@ -6487,6 +6762,32 @@ export interface ProviderCreate {
 
 
 /**
+ * Response schema for setting default provider.
+ * @export
+ * @interface ProviderDefaultResponse
+ */
+export interface ProviderDefaultResponse {
+    /**
+     * Operation result message
+     * @type {string}
+     * @memberof ProviderDefaultResponse
+     */
+    'message': string;
+}
+/**
+ * Response schema for provider deletion.
+ * @export
+ * @interface ProviderDeleteResponse
+ */
+export interface ProviderDeleteResponse {
+    /**
+     * Deletion result message
+     * @type {string}
+     * @memberof ProviderDeleteResponse
+     */
+    'message': string;
+}
+/**
  * List of providers with pagination.
  * @export
  * @interface ProviderList
@@ -6721,6 +7022,138 @@ export interface RestoreResponse {
      */
     'error_message'?: string | null;
 }
+/**
+ * Schema for creating role-based tool access.
+ * @export
+ * @interface RoleToolAccessCreate
+ */
+export interface RoleToolAccessCreate {
+    /**
+     * User role
+     * @type {UserRole}
+     * @memberof RoleToolAccessCreate
+     */
+    'role': UserRole;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoleToolAccessCreate
+     */
+    'tool_pattern'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoleToolAccessCreate
+     */
+    'server_pattern'?: string | null;
+    /**
+     * Access level
+     * @type {ToolAccessLevel}
+     * @memberof RoleToolAccessCreate
+     */
+    'access_level': ToolAccessLevel;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoleToolAccessCreate
+     */
+    'default_rate_limit_per_hour'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoleToolAccessCreate
+     */
+    'default_rate_limit_per_day'?: number | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof RoleToolAccessCreate
+     */
+    'allowed_hours'?: Array<number> | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof RoleToolAccessCreate
+     */
+    'allowed_days'?: Array<number> | null;
+}
+
+
+/**
+ * Schema for role-based tool access response.
+ * @export
+ * @interface RoleToolAccessResponse
+ */
+export interface RoleToolAccessResponse {
+    /**
+     * User role
+     * @type {UserRole}
+     * @memberof RoleToolAccessResponse
+     */
+    'role': UserRole;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoleToolAccessResponse
+     */
+    'tool_pattern'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof RoleToolAccessResponse
+     */
+    'server_pattern'?: string | null;
+    /**
+     * Access level
+     * @type {ToolAccessLevel}
+     * @memberof RoleToolAccessResponse
+     */
+    'access_level': ToolAccessLevel;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoleToolAccessResponse
+     */
+    'default_rate_limit_per_hour'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof RoleToolAccessResponse
+     */
+    'default_rate_limit_per_day'?: number | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof RoleToolAccessResponse
+     */
+    'allowed_hours'?: Array<number> | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof RoleToolAccessResponse
+     */
+    'allowed_days'?: Array<number> | null;
+    /**
+     * Access rule ID
+     * @type {string}
+     * @memberof RoleToolAccessResponse
+     */
+    'id': string;
+    /**
+     * Creator user ID
+     * @type {string}
+     * @memberof RoleToolAccessResponse
+     */
+    'created_by': string;
+    /**
+     * Creation timestamp
+     * @type {string}
+     * @memberof RoleToolAccessResponse
+     */
+    'created_at': string;
+}
+
+
 /**
  * Response schema for SSE service statistics.
  * @export
@@ -7299,6 +7732,67 @@ export interface TokenResponse {
     'user': UserResponse;
 }
 /**
+ * Access levels for tools.
+ * @export
+ * @enum {string}
+ */
+
+export const ToolAccessLevel = {
+    none: 'none',
+    read: 'read',
+    execute: 'execute',
+    admin: 'admin'
+} as const;
+
+export type ToolAccessLevel = typeof ToolAccessLevel[keyof typeof ToolAccessLevel];
+
+
+/**
+ * Schema for tool access check result.
+ * @export
+ * @interface ToolAccessResult
+ */
+export interface ToolAccessResult {
+    /**
+     * Whether access is allowed
+     * @type {boolean}
+     * @memberof ToolAccessResult
+     */
+    'allowed': boolean;
+    /**
+     * Access level
+     * @type {ToolAccessLevel}
+     * @memberof ToolAccessResult
+     */
+    'access_level': ToolAccessLevel;
+    /**
+     * 
+     * @type {number}
+     * @memberof ToolAccessResult
+     */
+    'rate_limit_remaining_hour'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ToolAccessResult
+     */
+    'rate_limit_remaining_day'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolAccessResult
+     */
+    'restriction_reason'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolAccessResult
+     */
+    'expires_at'?: string | null;
+}
+
+
+/**
  * Schema for tool operation response.
  * @export
  * @interface ToolOperationResponse
@@ -7317,6 +7811,207 @@ export interface ToolOperationResponse {
      */
     'message': string;
 }
+/**
+ * Schema for creating tool permissions.
+ * @export
+ * @interface ToolPermissionCreate
+ */
+export interface ToolPermissionCreate {
+    /**
+     * User ID
+     * @type {string}
+     * @memberof ToolPermissionCreate
+     */
+    'user_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolPermissionCreate
+     */
+    'tool_id'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolPermissionCreate
+     */
+    'server_id'?: string | null;
+    /**
+     * Access level
+     * @type {ToolAccessLevel}
+     * @memberof ToolPermissionCreate
+     */
+    'access_level': ToolAccessLevel;
+    /**
+     * 
+     * @type {number}
+     * @memberof ToolPermissionCreate
+     */
+    'rate_limit_per_hour'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ToolPermissionCreate
+     */
+    'rate_limit_per_day'?: number | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ToolPermissionCreate
+     */
+    'allowed_hours'?: Array<number> | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ToolPermissionCreate
+     */
+    'allowed_days'?: Array<number> | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolPermissionCreate
+     */
+    'expires_at'?: string | null;
+}
+
+
+/**
+ * Schema for tool permission response.
+ * @export
+ * @interface ToolPermissionResponse
+ */
+export interface ToolPermissionResponse {
+    /**
+     * User ID
+     * @type {string}
+     * @memberof ToolPermissionResponse
+     */
+    'user_id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolPermissionResponse
+     */
+    'tool_id'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolPermissionResponse
+     */
+    'server_id'?: string | null;
+    /**
+     * Access level
+     * @type {ToolAccessLevel}
+     * @memberof ToolPermissionResponse
+     */
+    'access_level': ToolAccessLevel;
+    /**
+     * 
+     * @type {number}
+     * @memberof ToolPermissionResponse
+     */
+    'rate_limit_per_hour'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ToolPermissionResponse
+     */
+    'rate_limit_per_day'?: number | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ToolPermissionResponse
+     */
+    'allowed_hours'?: Array<number> | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ToolPermissionResponse
+     */
+    'allowed_days'?: Array<number> | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolPermissionResponse
+     */
+    'expires_at'?: string | null;
+    /**
+     * Permission ID
+     * @type {string}
+     * @memberof ToolPermissionResponse
+     */
+    'id': string;
+    /**
+     * Granter user ID
+     * @type {string}
+     * @memberof ToolPermissionResponse
+     */
+    'granted_by': string;
+    /**
+     * Grant timestamp
+     * @type {string}
+     * @memberof ToolPermissionResponse
+     */
+    'granted_at': string;
+    /**
+     * Usage count
+     * @type {number}
+     * @memberof ToolPermissionResponse
+     */
+    'usage_count': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolPermissionResponse
+     */
+    'last_used'?: string | null;
+}
+
+
+/**
+ * Schema for updating tool permissions.
+ * @export
+ * @interface ToolPermissionUpdate
+ */
+export interface ToolPermissionUpdate {
+    /**
+     * 
+     * @type {ToolAccessLevel}
+     * @memberof ToolPermissionUpdate
+     */
+    'access_level'?: ToolAccessLevel | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ToolPermissionUpdate
+     */
+    'rate_limit_per_hour'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ToolPermissionUpdate
+     */
+    'rate_limit_per_day'?: number | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ToolPermissionUpdate
+     */
+    'allowed_hours'?: Array<number> | null;
+    /**
+     * 
+     * @type {Array<number>}
+     * @memberof ToolPermissionUpdate
+     */
+    'allowed_days'?: Array<number> | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolPermissionUpdate
+     */
+    'expires_at'?: string | null;
+}
+
+
 /**
  * Schema for creating a tool server.
  * @export
@@ -7342,35 +8037,41 @@ export interface ToolServerCreate {
      */
     'description'?: string | null;
     /**
-     * Command to start server
+     * Base URL for the remote server
      * @type {string}
      * @memberof ToolServerCreate
      */
-    'command': string;
+    'base_url': string;
     /**
-     * Command arguments
-     * @type {Array<string>}
+     * Transport type: http or sse
+     * @type {string}
      * @memberof ToolServerCreate
      */
-    'args'?: Array<string>;
+    'transport_type'?: string;
+    /**
+     * 
+     * @type {OAuthConfigSchema}
+     * @memberof ToolServerCreate
+     */
+    'oauth_config'?: OAuthConfigSchema | null;
     /**
      * 
      * @type {{ [key: string]: string; }}
      * @memberof ToolServerCreate
      */
-    'env'?: { [key: string]: string; } | null;
+    'headers'?: { [key: string]: string; } | null;
     /**
-     * Auto-start server on system startup
+     * Request timeout in seconds
+     * @type {number}
+     * @memberof ToolServerCreate
+     */
+    'timeout'?: number;
+    /**
+     * Auto-connect to server on system startup
      * @type {boolean}
      * @memberof ToolServerCreate
      */
     'auto_start'?: boolean;
-    /**
-     * Auto-update server capabilities
-     * @type {boolean}
-     * @memberof ToolServerCreate
-     */
-    'auto_update'?: boolean;
     /**
      * Maximum consecutive failures before disabling
      * @type {number}
@@ -7567,35 +8268,41 @@ export interface ToolServerResponse {
      */
     'description'?: string | null;
     /**
-     * Command to start server
+     * Base URL for the remote server
      * @type {string}
      * @memberof ToolServerResponse
      */
-    'command': string;
+    'base_url': string;
     /**
-     * Command arguments
-     * @type {Array<string>}
+     * Transport type: http or sse
+     * @type {string}
      * @memberof ToolServerResponse
      */
-    'args'?: Array<string>;
+    'transport_type'?: string;
+    /**
+     * 
+     * @type {OAuthConfigSchema}
+     * @memberof ToolServerResponse
+     */
+    'oauth_config'?: OAuthConfigSchema | null;
     /**
      * 
      * @type {{ [key: string]: string; }}
      * @memberof ToolServerResponse
      */
-    'env'?: { [key: string]: string; } | null;
+    'headers'?: { [key: string]: string; } | null;
     /**
-     * Auto-start server on system startup
+     * Request timeout in seconds
+     * @type {number}
+     * @memberof ToolServerResponse
+     */
+    'timeout'?: number;
+    /**
+     * Auto-connect to server on system startup
      * @type {boolean}
      * @memberof ToolServerResponse
      */
     'auto_start'?: boolean;
-    /**
-     * Auto-update server capabilities
-     * @type {boolean}
-     * @memberof ToolServerResponse
-     */
-    'auto_update'?: boolean;
     /**
      * Maximum consecutive failures before disabling
      * @type {number}
@@ -7672,7 +8379,7 @@ export interface ToolServerResponse {
 
 
 /**
- * Schema for updating a tool server.
+ * Schema for updating a remote tool server.
  * @export
  * @interface ToolServerUpdate
  */
@@ -7694,31 +8401,37 @@ export interface ToolServerUpdate {
      * @type {string}
      * @memberof ToolServerUpdate
      */
-    'command'?: string | null;
+    'base_url'?: string | null;
     /**
      * 
-     * @type {Array<string>}
+     * @type {string}
      * @memberof ToolServerUpdate
      */
-    'args'?: Array<string> | null;
+    'transport_type'?: string | null;
+    /**
+     * 
+     * @type {OAuthConfigSchema}
+     * @memberof ToolServerUpdate
+     */
+    'oauth_config'?: OAuthConfigSchema | null;
     /**
      * 
      * @type {{ [key: string]: string; }}
      * @memberof ToolServerUpdate
      */
-    'env'?: { [key: string]: string; } | null;
+    'headers'?: { [key: string]: string; } | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ToolServerUpdate
+     */
+    'timeout'?: number | null;
     /**
      * 
      * @type {boolean}
      * @memberof ToolServerUpdate
      */
     'auto_start'?: boolean | null;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof ToolServerUpdate
-     */
-    'auto_update'?: boolean | null;
     /**
      * 
      * @type {number}
@@ -7987,6 +8700,48 @@ export interface UserResponse {
     'last_login_at'?: string | null;
 }
 /**
+ * User roles for tool access.
+ * @export
+ * @enum {string}
+ */
+
+export const UserRole = {
+    guest: 'guest',
+    user: 'user',
+    power_user: 'power_user',
+    admin: 'admin',
+    super_admin: 'super_admin'
+} as const;
+
+export type UserRole = typeof UserRole[keyof typeof UserRole];
+
+
+/**
+ * Schema for checking user tool access.
+ * @export
+ * @interface UserToolAccessCheck
+ */
+export interface UserToolAccessCheck {
+    /**
+     * User ID
+     * @type {string}
+     * @memberof UserToolAccessCheck
+     */
+    'user_id': string;
+    /**
+     * Tool name
+     * @type {string}
+     * @memberof UserToolAccessCheck
+     */
+    'tool_name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserToolAccessCheck
+     */
+    'server_name'?: string | null;
+}
+/**
  * Schema for user profile updates.
  * @export
  * @interface UserUpdate
@@ -8071,6 +8826,68 @@ export const VariantAllocation = {
 export type VariantAllocation = typeof VariantAllocation[keyof typeof VariantAllocation];
 
 
+/**
+ * Schema for workflow template information.
+ * @export
+ * @interface WorkflowTemplateInfo
+ */
+export interface WorkflowTemplateInfo {
+    /**
+     * Template name
+     * @type {string}
+     * @memberof WorkflowTemplateInfo
+     */
+    'name': string;
+    /**
+     * Workflow type
+     * @type {string}
+     * @memberof WorkflowTemplateInfo
+     */
+    'workflow_type': string;
+    /**
+     * Template description
+     * @type {string}
+     * @memberof WorkflowTemplateInfo
+     */
+    'description': string;
+    /**
+     * Required tools
+     * @type {Array<string>}
+     * @memberof WorkflowTemplateInfo
+     */
+    'required_tools': Array<string>;
+    /**
+     * Required retrievers
+     * @type {Array<string>}
+     * @memberof WorkflowTemplateInfo
+     */
+    'required_retrievers': Array<string>;
+    /**
+     * Default parameters
+     * @type {{ [key: string]: any; }}
+     * @memberof WorkflowTemplateInfo
+     */
+    'default_params': { [key: string]: any; };
+}
+/**
+ * Schema for workflow templates response.
+ * @export
+ * @interface WorkflowTemplatesResponse
+ */
+export interface WorkflowTemplatesResponse {
+    /**
+     * Available templates
+     * @type {{ [key: string]: WorkflowTemplateInfo; }}
+     * @memberof WorkflowTemplatesResponse
+     */
+    'templates': { [key: string]: WorkflowTemplateInfo; };
+    /**
+     * Total number of templates
+     * @type {number}
+     * @memberof WorkflowTemplatesResponse
+     */
+    'total_count': number;
+}
 
 /**
  * ABTestingApi - axios parameter creator
@@ -13156,7 +13973,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(conversationId: string, messageId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(conversationId: string, messageId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MessageDeleteResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(conversationId, messageId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ChatApi.deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete']?.[localVarOperationServerIndex]?.url;
@@ -13218,7 +14035,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PerformanceStatsResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getPerformanceStatsApiV1ChatPerformanceStatsGet(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ChatApi.getPerformanceStatsApiV1ChatPerformanceStatsGet']?.[localVarOperationServerIndex]?.url;
@@ -13230,7 +14047,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkflowTemplatesResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkflowTemplatesApiV1ChatTemplatesGet(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ChatApi.getWorkflowTemplatesApiV1ChatTemplatesGet']?.[localVarOperationServerIndex]?.url;
@@ -13335,7 +14152,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(requestParameters: ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(requestParameters: ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<MessageDeleteResponse> {
             return localVarFp.deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(requestParameters.conversationId, requestParameters.messageId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -13382,7 +14199,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig): AxiosPromise<PerformanceStatsResponse> {
             return localVarFp.getPerformanceStatsApiV1ChatPerformanceStatsGet(options).then((request) => request(axios, basePath));
         },
         /**
@@ -13391,7 +14208,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): AxiosPromise<WorkflowTemplatesResponse> {
             return localVarFp.getWorkflowTemplatesApiV1ChatTemplatesGet(options).then((request) => request(axios, basePath));
         },
         /**
@@ -13481,7 +14298,7 @@ export interface ChatApiInterface {
      * @throws {RequiredError}
      * @memberof ChatApiInterface
      */
-    deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(requestParameters: ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(requestParameters: ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<MessageDeleteResponse>;
 
     /**
      * Get list of available MCP tools.
@@ -13528,7 +14345,7 @@ export interface ChatApiInterface {
      * @throws {RequiredError}
      * @memberof ChatApiInterface
      */
-    getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    getPerformanceStatsApiV1ChatPerformanceStatsGet(options?: RawAxiosRequestConfig): AxiosPromise<PerformanceStatsResponse>;
 
     /**
      * Get available workflow templates.
@@ -13537,7 +14354,7 @@ export interface ChatApiInterface {
      * @throws {RequiredError}
      * @memberof ChatApiInterface
      */
-    getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): AxiosPromise<WorkflowTemplatesResponse>;
 
     /**
      * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
@@ -14279,7 +15096,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestBody: Array<string | null>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestBody: Array<string | null>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BulkDeleteResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DataManagementApi.bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost']?.[localVarOperationServerIndex]?.url;
@@ -14292,7 +15109,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestBody: Array<string | null>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestBody: Array<string | null>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BulkDeleteResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DataManagementApi.bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost']?.[localVarOperationServerIndex]?.url;
@@ -14305,7 +15122,7 @@ export const DataManagementApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestBody: Array<string | null>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestBody: Array<string | null>, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<BulkDeleteResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestBody, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DataManagementApi.bulkDeletePromptsApiV1DataBulkDeletePromptsPost']?.[localVarOperationServerIndex]?.url;
@@ -14393,7 +15210,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestParameters: DataManagementApiBulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestParameters: DataManagementApiBulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<BulkDeleteResponse> {
             return localVarFp.bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestParameters.requestBody, options).then((request) => request(axios, basePath));
         },
         /**
@@ -14403,7 +15220,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestParameters: DataManagementApiBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestParameters: DataManagementApiBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<BulkDeleteResponse> {
             return localVarFp.bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestParameters.requestBody, options).then((request) => request(axios, basePath));
         },
         /**
@@ -14413,7 +15230,7 @@ export const DataManagementApiFactory = function (configuration?: Configuration,
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestParameters: DataManagementApiBulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestParameters: DataManagementApiBulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<BulkDeleteResponse> {
             return localVarFp.bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestParameters.requestBody, options).then((request) => request(axios, basePath));
         },
         /**
@@ -14482,7 +15299,7 @@ export interface DataManagementApiInterface {
      * @throws {RequiredError}
      * @memberof DataManagementApiInterface
      */
-    bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestParameters: DataManagementApiBulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(requestParameters: DataManagementApiBulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<BulkDeleteResponse>;
 
     /**
      * Bulk delete documents.
@@ -14492,7 +15309,7 @@ export interface DataManagementApiInterface {
      * @throws {RequiredError}
      * @memberof DataManagementApiInterface
      */
-    bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestParameters: DataManagementApiBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(requestParameters: DataManagementApiBulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<BulkDeleteResponse>;
 
     /**
      * Bulk delete prompts.
@@ -14502,7 +15319,7 @@ export interface DataManagementApiInterface {
      * @throws {RequiredError}
      * @memberof DataManagementApiInterface
      */
-    bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestParameters: DataManagementApiBulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    bulkDeletePromptsApiV1DataBulkDeletePromptsPost(requestParameters: DataManagementApiBulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<BulkDeleteResponse>;
 
     /**
      * Create a data backup.
@@ -15510,7 +16327,7 @@ export const DocumentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteDocumentApiV1DocumentsDocumentIdDelete(documentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+        async deleteDocumentApiV1DocumentsDocumentIdDelete(documentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<DocumentDeleteResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteDocumentApiV1DocumentsDocumentIdDelete(documentId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['DocumentsApi.deleteDocumentApiV1DocumentsDocumentIdDelete']?.[localVarOperationServerIndex]?.url;
@@ -15679,7 +16496,7 @@ export const DocumentsApiFactory = function (configuration?: Configuration, base
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteDocumentApiV1DocumentsDocumentIdDelete(requestParameters: DocumentsApiDeleteDocumentApiV1DocumentsDocumentIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+        deleteDocumentApiV1DocumentsDocumentIdDelete(requestParameters: DocumentsApiDeleteDocumentApiV1DocumentsDocumentIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<DocumentDeleteResponse> {
             return localVarFp.deleteDocumentApiV1DocumentsDocumentIdDelete(requestParameters.documentId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -15798,7 +16615,7 @@ export interface DocumentsApiInterface {
      * @throws {RequiredError}
      * @memberof DocumentsApiInterface
      */
-    deleteDocumentApiV1DocumentsDocumentIdDelete(requestParameters: DocumentsApiDeleteDocumentApiV1DocumentsDocumentIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    deleteDocumentApiV1DocumentsDocumentIdDelete(requestParameters: DocumentsApiDeleteDocumentApiV1DocumentsDocumentIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<DocumentDeleteResponse>;
 
     /**
      * Download original document file.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     File download response
@@ -16730,7 +17547,7 @@ export class EventsApi extends BaseAPI implements EventsApiInterface {
 export const HealthApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace      Returns:     List of requests associated with the correlation ID
+         * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace  Returns:     List of requests associated with the correlation ID
          * @summary Get Correlation Trace
          * @param {string} correlationId 
          * @param {*} [options] Override http request option.
@@ -16894,13 +17711,13 @@ export const HealthApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = HealthApiAxiosParamCreator(configuration)
     return {
         /**
-         * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace      Returns:     List of requests associated with the correlation ID
+         * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace  Returns:     List of requests associated with the correlation ID
          * @summary Get Correlation Trace
          * @param {string} correlationId 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getCorrelationTraceTraceCorrelationIdGet(correlationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async getCorrelationTraceTraceCorrelationIdGet(correlationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CorrelationTraceResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getCorrelationTraceTraceCorrelationIdGet(correlationId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['HealthApi.getCorrelationTraceTraceCorrelationIdGet']?.[localVarOperationServerIndex]?.url;
@@ -16912,7 +17729,7 @@ export const HealthApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getMetricsMetricsGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async getMetricsMetricsGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MetricsResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getMetricsMetricsGet(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['HealthApi.getMetricsMetricsGet']?.[localVarOperationServerIndex]?.url;
@@ -16965,13 +17782,13 @@ export const HealthApiFactory = function (configuration?: Configuration, basePat
     const localVarFp = HealthApiFp(configuration)
     return {
         /**
-         * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace      Returns:     List of requests associated with the correlation ID
+         * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace  Returns:     List of requests associated with the correlation ID
          * @summary Get Correlation Trace
          * @param {HealthApiGetCorrelationTraceTraceCorrelationIdGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getCorrelationTraceTraceCorrelationIdGet(requestParameters: HealthApiGetCorrelationTraceTraceCorrelationIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        getCorrelationTraceTraceCorrelationIdGet(requestParameters: HealthApiGetCorrelationTraceTraceCorrelationIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<CorrelationTraceResponse> {
             return localVarFp.getCorrelationTraceTraceCorrelationIdGet(requestParameters.correlationId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -16980,7 +17797,7 @@ export const HealthApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getMetricsMetricsGet(options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        getMetricsMetricsGet(options?: RawAxiosRequestConfig): AxiosPromise<MetricsResponse> {
             return localVarFp.getMetricsMetricsGet(options).then((request) => request(axios, basePath));
         },
         /**
@@ -17020,14 +17837,14 @@ export const HealthApiFactory = function (configuration?: Configuration, basePat
  */
 export interface HealthApiInterface {
     /**
-     * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace      Returns:     List of requests associated with the correlation ID
+     * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace  Returns:     List of requests associated with the correlation ID
      * @summary Get Correlation Trace
      * @param {HealthApiGetCorrelationTraceTraceCorrelationIdGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof HealthApiInterface
      */
-    getCorrelationTraceTraceCorrelationIdGet(requestParameters: HealthApiGetCorrelationTraceTraceCorrelationIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
+    getCorrelationTraceTraceCorrelationIdGet(requestParameters: HealthApiGetCorrelationTraceTraceCorrelationIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<CorrelationTraceResponse>;
 
     /**
      * Get application metrics and monitoring data.  Returns:     Application metrics including performance and health data
@@ -17036,7 +17853,7 @@ export interface HealthApiInterface {
      * @throws {RequiredError}
      * @memberof HealthApiInterface
      */
-    getMetricsMetricsGet(options?: RawAxiosRequestConfig): AxiosPromise<any>;
+    getMetricsMetricsGet(options?: RawAxiosRequestConfig): AxiosPromise<MetricsResponse>;
 
     /**
      * Basic health check endpoint.  Returns:     Health status
@@ -17089,7 +17906,7 @@ export interface HealthApiGetCorrelationTraceTraceCorrelationIdGetRequest {
  */
 export class HealthApi extends BaseAPI implements HealthApiInterface {
     /**
-     * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace      Returns:     List of requests associated with the correlation ID
+     * Get trace of all requests for a correlation ID.  Args:     correlation_id: The correlation ID to trace  Returns:     List of requests associated with the correlation ID
      * @summary Get Correlation Trace
      * @param {HealthApiGetCorrelationTraceTraceCorrelationIdGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -18620,7 +19437,7 @@ export const ModelRegistryApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete(spaceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete(spaceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmbeddingSpaceDeleteResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete(spaceId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ModelRegistryApi.deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete']?.[localVarOperationServerIndex]?.url;
@@ -18633,7 +19450,7 @@ export const ModelRegistryApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteModelApiV1ModelsModelsModelIdDelete(modelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async deleteModelApiV1ModelsModelsModelIdDelete(modelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ModelDeleteResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteModelApiV1ModelsModelsModelIdDelete(modelId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ModelRegistryApi.deleteModelApiV1ModelsModelsModelIdDelete']?.[localVarOperationServerIndex]?.url;
@@ -18646,7 +19463,7 @@ export const ModelRegistryApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteProviderApiV1ModelsProvidersProviderIdDelete(providerId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async deleteProviderApiV1ModelsProvidersProviderIdDelete(providerId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProviderDeleteResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.deleteProviderApiV1ModelsProvidersProviderIdDelete(providerId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ModelRegistryApi.deleteProviderApiV1ModelsProvidersProviderIdDelete']?.[localVarOperationServerIndex]?.url;
@@ -18784,7 +19601,7 @@ export const ModelRegistryApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost(spaceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost(spaceId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<EmbeddingSpaceDefaultResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost(spaceId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ModelRegistryApi.setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost']?.[localVarOperationServerIndex]?.url;
@@ -18797,7 +19614,7 @@ export const ModelRegistryApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost(modelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost(modelId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ModelDefaultResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost(modelId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ModelRegistryApi.setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost']?.[localVarOperationServerIndex]?.url;
@@ -18811,7 +19628,7 @@ export const ModelRegistryApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(providerId: string, defaultProvider: DefaultProvider, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<any>> {
+        async setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(providerId: string, defaultProvider: DefaultProvider, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProviderDefaultResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(providerId, defaultProvider, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ModelRegistryApi.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost']?.[localVarOperationServerIndex]?.url;
@@ -18906,7 +19723,7 @@ export const ModelRegistryApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete(requestParameters: ModelRegistryApiDeleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete(requestParameters: ModelRegistryApiDeleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<EmbeddingSpaceDeleteResponse> {
             return localVarFp.deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete(requestParameters.spaceId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -18916,7 +19733,7 @@ export const ModelRegistryApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteModelApiV1ModelsModelsModelIdDelete(requestParameters: ModelRegistryApiDeleteModelApiV1ModelsModelsModelIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        deleteModelApiV1ModelsModelsModelIdDelete(requestParameters: ModelRegistryApiDeleteModelApiV1ModelsModelsModelIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<ModelDeleteResponse> {
             return localVarFp.deleteModelApiV1ModelsModelsModelIdDelete(requestParameters.modelId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -18926,7 +19743,7 @@ export const ModelRegistryApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteProviderApiV1ModelsProvidersProviderIdDelete(requestParameters: ModelRegistryApiDeleteProviderApiV1ModelsProvidersProviderIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        deleteProviderApiV1ModelsProvidersProviderIdDelete(requestParameters: ModelRegistryApiDeleteProviderApiV1ModelsProvidersProviderIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<ProviderDeleteResponse> {
             return localVarFp.deleteProviderApiV1ModelsProvidersProviderIdDelete(requestParameters.providerId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -19025,7 +19842,7 @@ export const ModelRegistryApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<EmbeddingSpaceDefaultResponse> {
             return localVarFp.setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost(requestParameters.spaceId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -19035,7 +19852,7 @@ export const ModelRegistryApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultModelApiV1ModelsModelsModelIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultModelApiV1ModelsModelsModelIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ModelDefaultResponse> {
             return localVarFp.setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost(requestParameters.modelId, options).then((request) => request(axios, basePath));
         },
         /**
@@ -19045,7 +19862,7 @@ export const ModelRegistryApiFactory = function (configuration?: Configuration, 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<any> {
+        setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ProviderDefaultResponse> {
             return localVarFp.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(requestParameters.providerId, requestParameters.defaultProvider, options).then((request) => request(axios, basePath));
         },
         /**
@@ -19125,7 +19942,7 @@ export interface ModelRegistryApiInterface {
      * @throws {RequiredError}
      * @memberof ModelRegistryApiInterface
      */
-    deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete(requestParameters: ModelRegistryApiDeleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
+    deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete(requestParameters: ModelRegistryApiDeleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<EmbeddingSpaceDeleteResponse>;
 
     /**
      * Delete a model definition and its dependent embedding spaces.
@@ -19135,7 +19952,7 @@ export interface ModelRegistryApiInterface {
      * @throws {RequiredError}
      * @memberof ModelRegistryApiInterface
      */
-    deleteModelApiV1ModelsModelsModelIdDelete(requestParameters: ModelRegistryApiDeleteModelApiV1ModelsModelsModelIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
+    deleteModelApiV1ModelsModelsModelIdDelete(requestParameters: ModelRegistryApiDeleteModelApiV1ModelsModelsModelIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<ModelDeleteResponse>;
 
     /**
      * Delete a provider and all its dependent models and embedding spaces.
@@ -19145,7 +19962,7 @@ export interface ModelRegistryApiInterface {
      * @throws {RequiredError}
      * @memberof ModelRegistryApiInterface
      */
-    deleteProviderApiV1ModelsProvidersProviderIdDelete(requestParameters: ModelRegistryApiDeleteProviderApiV1ModelsProvidersProviderIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
+    deleteProviderApiV1ModelsProvidersProviderIdDelete(requestParameters: ModelRegistryApiDeleteProviderApiV1ModelsProvidersProviderIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<ProviderDeleteResponse>;
 
     /**
      * Get the default embedding space.
@@ -19244,7 +20061,7 @@ export interface ModelRegistryApiInterface {
      * @throws {RequiredError}
      * @memberof ModelRegistryApiInterface
      */
-    setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
+    setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<EmbeddingSpaceDefaultResponse>;
 
     /**
      * Set a model as default for its type.
@@ -19254,7 +20071,7 @@ export interface ModelRegistryApiInterface {
      * @throws {RequiredError}
      * @memberof ModelRegistryApiInterface
      */
-    setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultModelApiV1ModelsModelsModelIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
+    setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultModelApiV1ModelsModelsModelIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ModelDefaultResponse>;
 
     /**
      * Set a provider as default for a model type.
@@ -19264,7 +20081,7 @@ export interface ModelRegistryApiInterface {
      * @throws {RequiredError}
      * @memberof ModelRegistryApiInterface
      */
-    setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<any>;
+    setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(requestParameters: ModelRegistryApiSetDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ProviderDefaultResponse>;
 
     /**
      * Update an embedding space.
@@ -22733,6 +23550,86 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Check if user has access to a tool.  Args:     check_data: Access check data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Access check result
+         * @summary Check Tool Access
+         * @param {UserToolAccessCheck} userToolAccessCheck 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        checkToolAccessApiV1ToolserversAccessCheckPost: async (userToolAccessCheck: UserToolAccessCheck, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userToolAccessCheck' is not null or undefined
+            assertParamExists('checkToolAccessApiV1ToolserversAccessCheckPost', 'userToolAccessCheck', userToolAccessCheck)
+            const localVarPath = `/api/v1/toolservers/access-check`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(userToolAccessCheck, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Create role-based access rule.  Args:     rule_data: Rule data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created rule
+         * @summary Create Role Access Rule
+         * @param {RoleToolAccessCreate} roleToolAccessCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRoleAccessRuleApiV1ToolserversRoleAccessPost: async (roleToolAccessCreate: RoleToolAccessCreate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'roleToolAccessCreate' is not null or undefined
+            assertParamExists('createRoleAccessRuleApiV1ToolserversRoleAccessPost', 'roleToolAccessCreate', roleToolAccessCreate)
+            const localVarPath = `/api/v1/toolservers/role-access`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(roleToolAccessCreate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Create a new tool server.  Args:     server_data: Server creation data     current_user: Current authenticated user     service: Tool server service  Returns:     Created server response
          * @summary Create Tool Server
          * @param {ToolServerCreate} toolServerCreate 
@@ -22963,6 +23860,45 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Get role-based access rules.  Args:     role: Optional role filter     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of access rules
+         * @summary Get Role Access Rules
+         * @param {string | null} [role] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRoleAccessRulesApiV1ToolserversRoleAccessGet: async (role?: string | null, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/toolservers/role-access`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (role !== undefined) {
+                localVarQueryParameter['role'] = role;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Get analytics for a specific server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Server metrics
          * @summary Get Server Metrics
          * @param {string} serverId 
@@ -23087,6 +24023,84 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Get all permissions for a user.  Args:     user_id: User ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of user permissions
+         * @summary Get User Permissions
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet: async (userId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'userId' is not null or undefined
+            assertParamExists('getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet', 'userId', userId)
+            const localVarPath = `/api/v1/toolservers/users/{user_id}/permissions`
+                .replace(`{${"user_id"}}`, encodeURIComponent(String(userId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Grant tool permission to a user.  Args:     permission_data: Permission data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created permission
+         * @summary Grant Tool Permission
+         * @param {ToolPermissionCreate} toolPermissionCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        grantToolPermissionApiV1ToolserversPermissionsPost: async (toolPermissionCreate: ToolPermissionCreate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'toolPermissionCreate' is not null or undefined
+            assertParamExists('grantToolPermissionApiV1ToolserversPermissionsPost', 'toolPermissionCreate', toolPermissionCreate)
+            const localVarPath = `/api/v1/toolservers/permissions`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(toolPermissionCreate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * List all tools across all servers.  Args:     current_user: Current authenticated user     tool_server_service: Tool server service  Returns:     List of all available tools across all servers
          * @summary List All Tools
          * @param {*} [options] Override http request option.
@@ -23165,6 +24179,44 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Refresh tools for a remote server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Refresh result
+         * @summary Refresh Server Tools
+         * @param {string} serverId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost: async (serverId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'serverId' is not null or undefined
+            assertParamExists('refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost', 'serverId', serverId)
+            const localVarPath = `/api/v1/toolservers/servers/{server_id}/refresh-tools`
+                .replace(`{${"server_id"}}`, encodeURIComponent(String(serverId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Restart a tool server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Operation result
          * @summary Restart Tool Server
          * @param {string} serverId 
@@ -23184,6 +24236,44 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             }
 
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Revoke tool permission.  Args:     permission_id: Permission ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     Success message
+         * @summary Revoke Tool Permission
+         * @param {string} permissionId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete: async (permissionId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'permissionId' is not null or undefined
+            assertParamExists('revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete', 'permissionId', permissionId)
+            const localVarPath = `/api/v1/toolservers/permissions/{permission_id}`
+                .replace(`{${"permission_id"}}`, encodeURIComponent(String(permissionId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -23317,6 +24407,50 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
+         * Update tool permission.  Args:     permission_id: Permission ID     update_data: Update data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Updated permission
+         * @summary Update Tool Permission
+         * @param {string} permissionId 
+         * @param {ToolPermissionUpdate} toolPermissionUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut: async (permissionId: string, toolPermissionUpdate: ToolPermissionUpdate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'permissionId' is not null or undefined
+            assertParamExists('updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut', 'permissionId', permissionId)
+            // verify required parameter 'toolPermissionUpdate' is not null or undefined
+            assertParamExists('updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut', 'toolPermissionUpdate', toolPermissionUpdate)
+            const localVarPath = `/api/v1/toolservers/permissions/{permission_id}`
+                .replace(`{${"permission_id"}}`, encodeURIComponent(String(permissionId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication HTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(toolPermissionUpdate, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Update a tool server.  Args:     server_id: Server ID     update_data: Update data     current_user: Current authenticated user     service: Tool server service  Returns:     Updated server response
          * @summary Update Tool Server
          * @param {string} serverId 
@@ -23394,6 +24528,32 @@ export const ToolServersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.checkServerHealthApiV1ToolserversServersServerIdHealthGet(serverId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ToolServersApi.checkServerHealthApiV1ToolserversServersServerIdHealthGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Check if user has access to a tool.  Args:     check_data: Access check data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Access check result
+         * @summary Check Tool Access
+         * @param {UserToolAccessCheck} userToolAccessCheck 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async checkToolAccessApiV1ToolserversAccessCheckPost(userToolAccessCheck: UserToolAccessCheck, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ToolAccessResult>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.checkToolAccessApiV1ToolserversAccessCheckPost(userToolAccessCheck, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ToolServersApi.checkToolAccessApiV1ToolserversAccessCheckPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Create role-based access rule.  Args:     rule_data: Rule data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created rule
+         * @summary Create Role Access Rule
+         * @param {RoleToolAccessCreate} roleToolAccessCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createRoleAccessRuleApiV1ToolserversRoleAccessPost(roleToolAccessCreate: RoleToolAccessCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RoleToolAccessResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createRoleAccessRuleApiV1ToolserversRoleAccessPost(roleToolAccessCreate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ToolServersApi.createRoleAccessRuleApiV1ToolserversRoleAccessPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -23475,6 +24635,19 @@ export const ToolServersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Get role-based access rules.  Args:     role: Optional role filter     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of access rules
+         * @summary Get Role Access Rules
+         * @param {string | null} [role] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRoleAccessRulesApiV1ToolserversRoleAccessGet(role?: string | null, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoleToolAccessResponse>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRoleAccessRulesApiV1ToolserversRoleAccessGet(role, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ToolServersApi.getRoleAccessRulesApiV1ToolserversRoleAccessGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Get analytics for a specific server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Server metrics
          * @summary Get Server Metrics
          * @param {string} serverId 
@@ -23516,6 +24689,32 @@ export const ToolServersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Get all permissions for a user.  Args:     user_id: User ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of user permissions
+         * @summary Get User Permissions
+         * @param {string} userId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet(userId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ToolPermissionResponse>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet(userId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ToolServersApi.getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Grant tool permission to a user.  Args:     permission_data: Permission data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created permission
+         * @summary Grant Tool Permission
+         * @param {ToolPermissionCreate} toolPermissionCreate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async grantToolPermissionApiV1ToolserversPermissionsPost(toolPermissionCreate: ToolPermissionCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ToolPermissionResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.grantToolPermissionApiV1ToolserversPermissionsPost(toolPermissionCreate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ToolServersApi.grantToolPermissionApiV1ToolserversPermissionsPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * List all tools across all servers.  Args:     current_user: Current authenticated user     tool_server_service: Tool server service  Returns:     List of all available tools across all servers
          * @summary List All Tools
          * @param {*} [options] Override http request option.
@@ -23542,6 +24741,19 @@ export const ToolServersApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Refresh tools for a remote server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Refresh result
+         * @summary Refresh Server Tools
+         * @param {string} serverId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost(serverId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost(serverId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ToolServersApi.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Restart a tool server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Operation result
          * @summary Restart Tool Server
          * @param {string} serverId 
@@ -23552,6 +24764,19 @@ export const ToolServersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.restartToolServerApiV1ToolserversServersServerIdRestartPost(serverId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ToolServersApi.restartToolServerApiV1ToolserversServersServerIdRestartPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Revoke tool permission.  Args:     permission_id: Permission ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     Success message
+         * @summary Revoke Tool Permission
+         * @param {string} permissionId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete(permissionId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete(permissionId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ToolServersApi.revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -23591,6 +24816,20 @@ export const ToolServersApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.testServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPost(serverId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ToolServersApi.testServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPost']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Update tool permission.  Args:     permission_id: Permission ID     update_data: Update data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Updated permission
+         * @summary Update Tool Permission
+         * @param {string} permissionId 
+         * @param {ToolPermissionUpdate} toolPermissionUpdate 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut(permissionId: string, toolPermissionUpdate: ToolPermissionUpdate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ToolPermissionResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut(permissionId, toolPermissionUpdate, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ToolServersApi.updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -23636,6 +24875,26 @@ export const ToolServersApiFactory = function (configuration?: Configuration, ba
          */
         checkServerHealthApiV1ToolserversServersServerIdHealthGet(requestParameters: ToolServersApiCheckServerHealthApiV1ToolserversServersServerIdHealthGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolServerHealthCheck> {
             return localVarFp.checkServerHealthApiV1ToolserversServersServerIdHealthGet(requestParameters.serverId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Check if user has access to a tool.  Args:     check_data: Access check data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Access check result
+         * @summary Check Tool Access
+         * @param {ToolServersApiCheckToolAccessApiV1ToolserversAccessCheckPostRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        checkToolAccessApiV1ToolserversAccessCheckPost(requestParameters: ToolServersApiCheckToolAccessApiV1ToolserversAccessCheckPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolAccessResult> {
+            return localVarFp.checkToolAccessApiV1ToolserversAccessCheckPost(requestParameters.userToolAccessCheck, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Create role-based access rule.  Args:     rule_data: Rule data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created rule
+         * @summary Create Role Access Rule
+         * @param {ToolServersApiCreateRoleAccessRuleApiV1ToolserversRoleAccessPostRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRoleAccessRuleApiV1ToolserversRoleAccessPost(requestParameters: ToolServersApiCreateRoleAccessRuleApiV1ToolserversRoleAccessPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<RoleToolAccessResponse> {
+            return localVarFp.createRoleAccessRuleApiV1ToolserversRoleAccessPost(requestParameters.roleToolAccessCreate, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new tool server.  Args:     server_data: Server creation data     current_user: Current authenticated user     service: Tool server service  Returns:     Created server response
@@ -23698,6 +24957,16 @@ export const ToolServersApiFactory = function (configuration?: Configuration, ba
             return localVarFp.enableToolServerApiV1ToolserversServersServerIdEnablePost(requestParameters.serverId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Get role-based access rules.  Args:     role: Optional role filter     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of access rules
+         * @summary Get Role Access Rules
+         * @param {ToolServersApiGetRoleAccessRulesApiV1ToolserversRoleAccessGetRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRoleAccessRulesApiV1ToolserversRoleAccessGet(requestParameters: ToolServersApiGetRoleAccessRulesApiV1ToolserversRoleAccessGetRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<Array<RoleToolAccessResponse>> {
+            return localVarFp.getRoleAccessRulesApiV1ToolserversRoleAccessGet(requestParameters.role, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Get analytics for a specific server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Server metrics
          * @summary Get Server Metrics
          * @param {ToolServersApiGetServerMetricsApiV1ToolserversServersServerIdMetricsGetRequest} requestParameters Request parameters.
@@ -23728,6 +24997,26 @@ export const ToolServersApiFactory = function (configuration?: Configuration, ba
             return localVarFp.getToolServerApiV1ToolserversServersServerIdGet(requestParameters.serverId, options).then((request) => request(axios, basePath));
         },
         /**
+         * Get all permissions for a user.  Args:     user_id: User ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of user permissions
+         * @summary Get User Permissions
+         * @param {ToolServersApiGetUserPermissionsApiV1ToolserversUsersUserIdPermissionsGetRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet(requestParameters: ToolServersApiGetUserPermissionsApiV1ToolserversUsersUserIdPermissionsGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<Array<ToolPermissionResponse>> {
+            return localVarFp.getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet(requestParameters.userId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Grant tool permission to a user.  Args:     permission_data: Permission data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created permission
+         * @summary Grant Tool Permission
+         * @param {ToolServersApiGrantToolPermissionApiV1ToolserversPermissionsPostRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        grantToolPermissionApiV1ToolserversPermissionsPost(requestParameters: ToolServersApiGrantToolPermissionApiV1ToolserversPermissionsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolPermissionResponse> {
+            return localVarFp.grantToolPermissionApiV1ToolserversPermissionsPost(requestParameters.toolPermissionCreate, options).then((request) => request(axios, basePath));
+        },
+        /**
          * List all tools across all servers.  Args:     current_user: Current authenticated user     tool_server_service: Tool server service  Returns:     List of all available tools across all servers
          * @summary List All Tools
          * @param {*} [options] Override http request option.
@@ -23747,6 +25036,16 @@ export const ToolServersApiFactory = function (configuration?: Configuration, ba
             return localVarFp.listToolServersApiV1ToolserversServersGet(requestParameters.status, requestParameters.includeBuiltin, options).then((request) => request(axios, basePath));
         },
         /**
+         * Refresh tools for a remote server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Refresh result
+         * @summary Refresh Server Tools
+         * @param {ToolServersApiRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost(requestParameters: ToolServersApiRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+            return localVarFp.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost(requestParameters.serverId, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Restart a tool server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Operation result
          * @summary Restart Tool Server
          * @param {ToolServersApiRestartToolServerApiV1ToolserversServersServerIdRestartPostRequest} requestParameters Request parameters.
@@ -23755,6 +25054,16 @@ export const ToolServersApiFactory = function (configuration?: Configuration, ba
          */
         restartToolServerApiV1ToolserversServersServerIdRestartPost(requestParameters: ToolServersApiRestartToolServerApiV1ToolserversServersServerIdRestartPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolServerOperationResponse> {
             return localVarFp.restartToolServerApiV1ToolserversServersServerIdRestartPost(requestParameters.serverId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Revoke tool permission.  Args:     permission_id: Permission ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     Success message
+         * @summary Revoke Tool Permission
+         * @param {ToolServersApiRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete(requestParameters: ToolServersApiRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+            return localVarFp.revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete(requestParameters.permissionId, options).then((request) => request(axios, basePath));
         },
         /**
          * Start a tool server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Operation result
@@ -23785,6 +25094,16 @@ export const ToolServersApiFactory = function (configuration?: Configuration, ba
          */
         testServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPost(requestParameters: ToolServersApiTestServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
             return localVarFp.testServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPost(requestParameters.serverId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Update tool permission.  Args:     permission_id: Permission ID     update_data: Update data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Updated permission
+         * @summary Update Tool Permission
+         * @param {ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPutRequest} requestParameters Request parameters.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut(requestParameters: ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolPermissionResponse> {
+            return localVarFp.updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut(requestParameters.permissionId, requestParameters.toolPermissionUpdate, options).then((request) => request(axios, basePath));
         },
         /**
          * Update a tool server.  Args:     server_id: Server ID     update_data: Update data     current_user: Current authenticated user     service: Tool server service  Returns:     Updated server response
@@ -23824,6 +25143,26 @@ export interface ToolServersApiInterface {
      * @memberof ToolServersApiInterface
      */
     checkServerHealthApiV1ToolserversServersServerIdHealthGet(requestParameters: ToolServersApiCheckServerHealthApiV1ToolserversServersServerIdHealthGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolServerHealthCheck>;
+
+    /**
+     * Check if user has access to a tool.  Args:     check_data: Access check data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Access check result
+     * @summary Check Tool Access
+     * @param {ToolServersApiCheckToolAccessApiV1ToolserversAccessCheckPostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApiInterface
+     */
+    checkToolAccessApiV1ToolserversAccessCheckPost(requestParameters: ToolServersApiCheckToolAccessApiV1ToolserversAccessCheckPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolAccessResult>;
+
+    /**
+     * Create role-based access rule.  Args:     rule_data: Rule data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created rule
+     * @summary Create Role Access Rule
+     * @param {ToolServersApiCreateRoleAccessRuleApiV1ToolserversRoleAccessPostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApiInterface
+     */
+    createRoleAccessRuleApiV1ToolserversRoleAccessPost(requestParameters: ToolServersApiCreateRoleAccessRuleApiV1ToolserversRoleAccessPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<RoleToolAccessResponse>;
 
     /**
      * Create a new tool server.  Args:     server_data: Server creation data     current_user: Current authenticated user     service: Tool server service  Returns:     Created server response
@@ -23886,6 +25225,16 @@ export interface ToolServersApiInterface {
     enableToolServerApiV1ToolserversServersServerIdEnablePost(requestParameters: ToolServersApiEnableToolServerApiV1ToolserversServersServerIdEnablePostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolServerOperationResponse>;
 
     /**
+     * Get role-based access rules.  Args:     role: Optional role filter     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of access rules
+     * @summary Get Role Access Rules
+     * @param {ToolServersApiGetRoleAccessRulesApiV1ToolserversRoleAccessGetRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApiInterface
+     */
+    getRoleAccessRulesApiV1ToolserversRoleAccessGet(requestParameters?: ToolServersApiGetRoleAccessRulesApiV1ToolserversRoleAccessGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<Array<RoleToolAccessResponse>>;
+
+    /**
      * Get analytics for a specific server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Server metrics
      * @summary Get Server Metrics
      * @param {ToolServersApiGetServerMetricsApiV1ToolserversServersServerIdMetricsGetRequest} requestParameters Request parameters.
@@ -23916,6 +25265,26 @@ export interface ToolServersApiInterface {
     getToolServerApiV1ToolserversServersServerIdGet(requestParameters: ToolServersApiGetToolServerApiV1ToolserversServersServerIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolServerResponse>;
 
     /**
+     * Get all permissions for a user.  Args:     user_id: User ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of user permissions
+     * @summary Get User Permissions
+     * @param {ToolServersApiGetUserPermissionsApiV1ToolserversUsersUserIdPermissionsGetRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApiInterface
+     */
+    getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet(requestParameters: ToolServersApiGetUserPermissionsApiV1ToolserversUsersUserIdPermissionsGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<Array<ToolPermissionResponse>>;
+
+    /**
+     * Grant tool permission to a user.  Args:     permission_data: Permission data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created permission
+     * @summary Grant Tool Permission
+     * @param {ToolServersApiGrantToolPermissionApiV1ToolserversPermissionsPostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApiInterface
+     */
+    grantToolPermissionApiV1ToolserversPermissionsPost(requestParameters: ToolServersApiGrantToolPermissionApiV1ToolserversPermissionsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolPermissionResponse>;
+
+    /**
      * List all tools across all servers.  Args:     current_user: Current authenticated user     tool_server_service: Tool server service  Returns:     List of all available tools across all servers
      * @summary List All Tools
      * @param {*} [options] Override http request option.
@@ -23935,6 +25304,16 @@ export interface ToolServersApiInterface {
     listToolServersApiV1ToolserversServersGet(requestParameters?: ToolServersApiListToolServersApiV1ToolserversServersGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<Array<ToolServerResponse>>;
 
     /**
+     * Refresh tools for a remote server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Refresh result
+     * @summary Refresh Server Tools
+     * @param {ToolServersApiRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApiInterface
+     */
+    refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost(requestParameters: ToolServersApiRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+
+    /**
      * Restart a tool server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Operation result
      * @summary Restart Tool Server
      * @param {ToolServersApiRestartToolServerApiV1ToolserversServersServerIdRestartPostRequest} requestParameters Request parameters.
@@ -23943,6 +25322,16 @@ export interface ToolServersApiInterface {
      * @memberof ToolServersApiInterface
      */
     restartToolServerApiV1ToolserversServersServerIdRestartPost(requestParameters: ToolServersApiRestartToolServerApiV1ToolserversServersServerIdRestartPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolServerOperationResponse>;
+
+    /**
+     * Revoke tool permission.  Args:     permission_id: Permission ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     Success message
+     * @summary Revoke Tool Permission
+     * @param {ToolServersApiRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApiInterface
+     */
+    revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete(requestParameters: ToolServersApiRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
 
     /**
      * Start a tool server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Operation result
@@ -23973,6 +25362,16 @@ export interface ToolServersApiInterface {
      * @memberof ToolServersApiInterface
      */
     testServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPost(requestParameters: ToolServersApiTestServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+
+    /**
+     * Update tool permission.  Args:     permission_id: Permission ID     update_data: Update data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Updated permission
+     * @summary Update Tool Permission
+     * @param {ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPutRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApiInterface
+     */
+    updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut(requestParameters: ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<ToolPermissionResponse>;
 
     /**
      * Update a tool server.  Args:     server_id: Server ID     update_data: Update data     current_user: Current authenticated user     service: Tool server service  Returns:     Updated server response
@@ -24012,6 +25411,34 @@ export interface ToolServersApiCheckServerHealthApiV1ToolserversServersServerIdH
      * @memberof ToolServersApiCheckServerHealthApiV1ToolserversServersServerIdHealthGet
      */
     readonly serverId: string
+}
+
+/**
+ * Request parameters for checkToolAccessApiV1ToolserversAccessCheckPost operation in ToolServersApi.
+ * @export
+ * @interface ToolServersApiCheckToolAccessApiV1ToolserversAccessCheckPostRequest
+ */
+export interface ToolServersApiCheckToolAccessApiV1ToolserversAccessCheckPostRequest {
+    /**
+     * 
+     * @type {UserToolAccessCheck}
+     * @memberof ToolServersApiCheckToolAccessApiV1ToolserversAccessCheckPost
+     */
+    readonly userToolAccessCheck: UserToolAccessCheck
+}
+
+/**
+ * Request parameters for createRoleAccessRuleApiV1ToolserversRoleAccessPost operation in ToolServersApi.
+ * @export
+ * @interface ToolServersApiCreateRoleAccessRuleApiV1ToolserversRoleAccessPostRequest
+ */
+export interface ToolServersApiCreateRoleAccessRuleApiV1ToolserversRoleAccessPostRequest {
+    /**
+     * 
+     * @type {RoleToolAccessCreate}
+     * @memberof ToolServersApiCreateRoleAccessRuleApiV1ToolserversRoleAccessPost
+     */
+    readonly roleToolAccessCreate: RoleToolAccessCreate
 }
 
 /**
@@ -24099,6 +25526,20 @@ export interface ToolServersApiEnableToolServerApiV1ToolserversServersServerIdEn
 }
 
 /**
+ * Request parameters for getRoleAccessRulesApiV1ToolserversRoleAccessGet operation in ToolServersApi.
+ * @export
+ * @interface ToolServersApiGetRoleAccessRulesApiV1ToolserversRoleAccessGetRequest
+ */
+export interface ToolServersApiGetRoleAccessRulesApiV1ToolserversRoleAccessGetRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolServersApiGetRoleAccessRulesApiV1ToolserversRoleAccessGet
+     */
+    readonly role?: string | null
+}
+
+/**
  * Request parameters for getServerMetricsApiV1ToolserversServersServerIdMetricsGet operation in ToolServersApi.
  * @export
  * @interface ToolServersApiGetServerMetricsApiV1ToolserversServersServerIdMetricsGetRequest
@@ -24155,6 +25596,34 @@ export interface ToolServersApiGetToolServerApiV1ToolserversServersServerIdGetRe
 }
 
 /**
+ * Request parameters for getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet operation in ToolServersApi.
+ * @export
+ * @interface ToolServersApiGetUserPermissionsApiV1ToolserversUsersUserIdPermissionsGetRequest
+ */
+export interface ToolServersApiGetUserPermissionsApiV1ToolserversUsersUserIdPermissionsGetRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolServersApiGetUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet
+     */
+    readonly userId: string
+}
+
+/**
+ * Request parameters for grantToolPermissionApiV1ToolserversPermissionsPost operation in ToolServersApi.
+ * @export
+ * @interface ToolServersApiGrantToolPermissionApiV1ToolserversPermissionsPostRequest
+ */
+export interface ToolServersApiGrantToolPermissionApiV1ToolserversPermissionsPostRequest {
+    /**
+     * 
+     * @type {ToolPermissionCreate}
+     * @memberof ToolServersApiGrantToolPermissionApiV1ToolserversPermissionsPost
+     */
+    readonly toolPermissionCreate: ToolPermissionCreate
+}
+
+/**
  * Request parameters for listToolServersApiV1ToolserversServersGet operation in ToolServersApi.
  * @export
  * @interface ToolServersApiListToolServersApiV1ToolserversServersGetRequest
@@ -24176,6 +25645,20 @@ export interface ToolServersApiListToolServersApiV1ToolserversServersGetRequest 
 }
 
 /**
+ * Request parameters for refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost operation in ToolServersApi.
+ * @export
+ * @interface ToolServersApiRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostRequest
+ */
+export interface ToolServersApiRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolServersApiRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost
+     */
+    readonly serverId: string
+}
+
+/**
  * Request parameters for restartToolServerApiV1ToolserversServersServerIdRestartPost operation in ToolServersApi.
  * @export
  * @interface ToolServersApiRestartToolServerApiV1ToolserversServersServerIdRestartPostRequest
@@ -24187,6 +25670,20 @@ export interface ToolServersApiRestartToolServerApiV1ToolserversServersServerIdR
      * @memberof ToolServersApiRestartToolServerApiV1ToolserversServersServerIdRestartPost
      */
     readonly serverId: string
+}
+
+/**
+ * Request parameters for revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete operation in ToolServersApi.
+ * @export
+ * @interface ToolServersApiRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteRequest
+ */
+export interface ToolServersApiRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolServersApiRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete
+     */
+    readonly permissionId: string
 }
 
 /**
@@ -24229,6 +25726,27 @@ export interface ToolServersApiTestServerConnectivityApiV1ToolserversServersServ
      * @memberof ToolServersApiTestServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPost
      */
     readonly serverId: string
+}
+
+/**
+ * Request parameters for updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut operation in ToolServersApi.
+ * @export
+ * @interface ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPutRequest
+ */
+export interface ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPutRequest {
+    /**
+     * 
+     * @type {string}
+     * @memberof ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPut
+     */
+    readonly permissionId: string
+
+    /**
+     * 
+     * @type {ToolPermissionUpdate}
+     * @memberof ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPut
+     */
+    readonly toolPermissionUpdate: ToolPermissionUpdate
 }
 
 /**
@@ -24281,6 +25799,30 @@ export class ToolServersApi extends BaseAPI implements ToolServersApiInterface {
      */
     public checkServerHealthApiV1ToolserversServersServerIdHealthGet(requestParameters: ToolServersApiCheckServerHealthApiV1ToolserversServersServerIdHealthGetRequest, options?: RawAxiosRequestConfig) {
         return ToolServersApiFp(this.configuration).checkServerHealthApiV1ToolserversServersServerIdHealthGet(requestParameters.serverId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Check if user has access to a tool.  Args:     check_data: Access check data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Access check result
+     * @summary Check Tool Access
+     * @param {ToolServersApiCheckToolAccessApiV1ToolserversAccessCheckPostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApi
+     */
+    public checkToolAccessApiV1ToolserversAccessCheckPost(requestParameters: ToolServersApiCheckToolAccessApiV1ToolserversAccessCheckPostRequest, options?: RawAxiosRequestConfig) {
+        return ToolServersApiFp(this.configuration).checkToolAccessApiV1ToolserversAccessCheckPost(requestParameters.userToolAccessCheck, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Create role-based access rule.  Args:     rule_data: Rule data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created rule
+     * @summary Create Role Access Rule
+     * @param {ToolServersApiCreateRoleAccessRuleApiV1ToolserversRoleAccessPostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApi
+     */
+    public createRoleAccessRuleApiV1ToolserversRoleAccessPost(requestParameters: ToolServersApiCreateRoleAccessRuleApiV1ToolserversRoleAccessPostRequest, options?: RawAxiosRequestConfig) {
+        return ToolServersApiFp(this.configuration).createRoleAccessRuleApiV1ToolserversRoleAccessPost(requestParameters.roleToolAccessCreate, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -24356,6 +25898,18 @@ export class ToolServersApi extends BaseAPI implements ToolServersApiInterface {
     }
 
     /**
+     * Get role-based access rules.  Args:     role: Optional role filter     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of access rules
+     * @summary Get Role Access Rules
+     * @param {ToolServersApiGetRoleAccessRulesApiV1ToolserversRoleAccessGetRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApi
+     */
+    public getRoleAccessRulesApiV1ToolserversRoleAccessGet(requestParameters: ToolServersApiGetRoleAccessRulesApiV1ToolserversRoleAccessGetRequest = {}, options?: RawAxiosRequestConfig) {
+        return ToolServersApiFp(this.configuration).getRoleAccessRulesApiV1ToolserversRoleAccessGet(requestParameters.role, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Get analytics for a specific server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Server metrics
      * @summary Get Server Metrics
      * @param {ToolServersApiGetServerMetricsApiV1ToolserversServersServerIdMetricsGetRequest} requestParameters Request parameters.
@@ -24392,6 +25946,30 @@ export class ToolServersApi extends BaseAPI implements ToolServersApiInterface {
     }
 
     /**
+     * Get all permissions for a user.  Args:     user_id: User ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of user permissions
+     * @summary Get User Permissions
+     * @param {ToolServersApiGetUserPermissionsApiV1ToolserversUsersUserIdPermissionsGetRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApi
+     */
+    public getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet(requestParameters: ToolServersApiGetUserPermissionsApiV1ToolserversUsersUserIdPermissionsGetRequest, options?: RawAxiosRequestConfig) {
+        return ToolServersApiFp(this.configuration).getUserPermissionsApiV1ToolserversUsersUserIdPermissionsGet(requestParameters.userId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Grant tool permission to a user.  Args:     permission_data: Permission data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Created permission
+     * @summary Grant Tool Permission
+     * @param {ToolServersApiGrantToolPermissionApiV1ToolserversPermissionsPostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApi
+     */
+    public grantToolPermissionApiV1ToolserversPermissionsPost(requestParameters: ToolServersApiGrantToolPermissionApiV1ToolserversPermissionsPostRequest, options?: RawAxiosRequestConfig) {
+        return ToolServersApiFp(this.configuration).grantToolPermissionApiV1ToolserversPermissionsPost(requestParameters.toolPermissionCreate, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * List all tools across all servers.  Args:     current_user: Current authenticated user     tool_server_service: Tool server service  Returns:     List of all available tools across all servers
      * @summary List All Tools
      * @param {*} [options] Override http request option.
@@ -24415,6 +25993,18 @@ export class ToolServersApi extends BaseAPI implements ToolServersApiInterface {
     }
 
     /**
+     * Refresh tools for a remote server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Refresh result
+     * @summary Refresh Server Tools
+     * @param {ToolServersApiRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApi
+     */
+    public refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost(requestParameters: ToolServersApiRefreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPostRequest, options?: RawAxiosRequestConfig) {
+        return ToolServersApiFp(this.configuration).refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost(requestParameters.serverId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Restart a tool server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Operation result
      * @summary Restart Tool Server
      * @param {ToolServersApiRestartToolServerApiV1ToolserversServersServerIdRestartPostRequest} requestParameters Request parameters.
@@ -24424,6 +26014,18 @@ export class ToolServersApi extends BaseAPI implements ToolServersApiInterface {
      */
     public restartToolServerApiV1ToolserversServersServerIdRestartPost(requestParameters: ToolServersApiRestartToolServerApiV1ToolserversServersServerIdRestartPostRequest, options?: RawAxiosRequestConfig) {
         return ToolServersApiFp(this.configuration).restartToolServerApiV1ToolserversServersServerIdRestartPost(requestParameters.serverId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Revoke tool permission.  Args:     permission_id: Permission ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     Success message
+     * @summary Revoke Tool Permission
+     * @param {ToolServersApiRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApi
+     */
+    public revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete(requestParameters: ToolServersApiRevokeToolPermissionApiV1ToolserversPermissionsPermissionIdDeleteRequest, options?: RawAxiosRequestConfig) {
+        return ToolServersApiFp(this.configuration).revokeToolPermissionApiV1ToolserversPermissionsPermissionIdDelete(requestParameters.permissionId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -24460,6 +26062,18 @@ export class ToolServersApi extends BaseAPI implements ToolServersApiInterface {
      */
     public testServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPost(requestParameters: ToolServersApiTestServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPostRequest, options?: RawAxiosRequestConfig) {
         return ToolServersApiFp(this.configuration).testServerConnectivityApiV1ToolserversServersServerIdTestConnectivityPost(requestParameters.serverId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Update tool permission.  Args:     permission_id: Permission ID     update_data: Update data     current_user: Current authenticated user     access_service: Tool access service  Returns:     Updated permission
+     * @summary Update Tool Permission
+     * @param {ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPutRequest} requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ToolServersApi
+     */
+    public updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut(requestParameters: ToolServersApiUpdateToolPermissionApiV1ToolserversPermissionsPermissionIdPutRequest, options?: RawAxiosRequestConfig) {
+        return ToolServersApiFp(this.configuration).updateToolPermissionApiV1ToolserversPermissionsPermissionIdPut(requestParameters.permissionId, requestParameters.toolPermissionUpdate, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

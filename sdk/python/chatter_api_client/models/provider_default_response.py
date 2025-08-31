@@ -4,32 +4,44 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet")
+T = TypeVar("T", bound="ProviderDefaultResponse")
 
 
 @_attrs_define
-class GetWorkflowTemplatesApiV1ChatTemplatesGetResponseGetWorkflowTemplatesApiV1ChatTemplatesGet:
-    """ """
+class ProviderDefaultResponse:
+    """Response schema for setting default provider.
 
+    Attributes:
+        message (str): Operation result message
+    """
+
+    message: str
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
+        message = self.message
+
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
+        field_dict.update(
+            {
+                "message": message,
+            }
+        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        get_workflow_templates_api_v1_chat_templates_get_response_get_workflow_templates_api_v1_chat_templates_get = (
-            cls()
+        message = d.pop("message")
+
+        provider_default_response = cls(
+            message=message,
         )
 
-        get_workflow_templates_api_v1_chat_templates_get_response_get_workflow_templates_api_v1_chat_templates_get.additional_properties = d
-        return (
-            get_workflow_templates_api_v1_chat_templates_get_response_get_workflow_templates_api_v1_chat_templates_get
-        )
+        provider_default_response.additional_properties = d
+        return provider_default_response
 
     @property
     def additional_keys(self) -> list[str]:

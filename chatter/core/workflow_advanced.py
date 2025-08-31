@@ -307,9 +307,7 @@ class AdvancedWorkflowManager:
         )
 
         logger.info(
-            "Registered conditional workflow configuration",
-            config_name=config_name,
-            conditions=list(conditions.keys())
+            f"Registered conditional workflow configuration '{config_name}' with conditions: {list(conditions.keys())}"
         )
 
     async def create_workflow_from_template(

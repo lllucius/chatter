@@ -45,9 +45,7 @@ class ChatterError(ProblemException):
         self.details = details or {}
         self.cause = cause
         self.error_id = str(uuid.uuid4())
-
-        # Log error details
-        self._log_error(message)
+        self.status_code = status_code  # Store status_code before calling super
 
         # Build problem details
         extra_fields = {
@@ -70,6 +68,9 @@ class ChatterError(ProblemException):
             type_suffix=self._get_type_suffix(),
             **extra_fields
         )
+
+        # Log error details after initialization
+        self._log_error(message)
 
     def _get_error_title(self) -> str:
         """Get the error title for RFC 9457 response."""

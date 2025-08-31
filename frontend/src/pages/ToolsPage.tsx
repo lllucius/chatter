@@ -229,11 +229,11 @@ const ToolsPage: React.FC = () => {
     if (!serversFilter) return servers;
     const filter = serversFilter.toLowerCase();
     return servers.filter(server =>
-      server.display_name.toLowerCase().includes(filter) ||
-      server.name.toLowerCase().includes(filter) ||
-      server.base_url.toLowerCase().includes(filter) ||
-      server.transport_type.toLowerCase().includes(filter) ||
-      server.status.toLowerCase().includes(filter) ||
+      (server.display_name && server.display_name.toLowerCase().includes(filter)) ||
+      (server.name && server.name.toLowerCase().includes(filter)) ||
+      (server.base_url && server.base_url.toLowerCase().includes(filter)) ||
+      (server.transport_type && server.transport_type.toLowerCase().includes(filter)) ||
+      (server.status && server.status.toLowerCase().includes(filter)) ||
       (server.description && server.description.toLowerCase().includes(filter))
     );
   };

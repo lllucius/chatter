@@ -151,6 +151,13 @@ export class ChatterSDK {
   }
 
   /**
+   * Get current authentication token
+   */
+  getToken(): string | null {
+    return this.token;
+  }
+
+  /**
    * Update all API instances with current configuration
    */
   private updateApiInstances() {

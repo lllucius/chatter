@@ -70,7 +70,7 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
         ...style,
       }}
       trackProps={{
-        renderer: ({ elementRef, style: trackStyle, ...restProps }) => {
+        renderer: ({ elementRef, style: trackStyle, ...restProps }: any) => {
           const { className, ...validProps } = restProps;
           return (
             <div
@@ -88,7 +88,7 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
         },
       }}
       thumbProps={{
-        renderer: ({ elementRef, style: thumbStyle, ...restProps }) => {
+        renderer: ({ elementRef, style: thumbStyle, ...restProps }: any) => {
           const { className, ...validProps } = restProps;
           return (
             <div
@@ -115,8 +115,7 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
           );
         },
       }}
-      // Track click behavior
-      trackClickBehavior="jump"
+      trackClickBehavior={'jump' as any}
       {...props}
     >
       {children}

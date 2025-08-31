@@ -22,6 +22,12 @@ except ImportError:
     data_manager = None
 
 try:
+    from .enhanced_streaming import EnhancedStreamingService, enhanced_streaming_service
+except ImportError:
+    EnhancedStreamingService = None
+    enhanced_streaming_service = None
+
+try:
     from .job_queue import job_queue
 except ImportError:
     job_queue = None
@@ -55,6 +61,8 @@ __all__ = [
     "ab_test_manager",
     "ConversationService",
     "data_manager",
+    "enhanced_streaming_service",
+    "EnhancedStreamingService",
     "job_queue",
     "mcp_service",
     "MessageService", 

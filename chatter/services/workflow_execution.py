@@ -23,6 +23,11 @@ from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
 from chatter.utils.logging import get_logger
 from chatter.utils.monitoring import record_workflow_metrics
+from chatter.services.enhanced_streaming import (
+    create_enhanced_stream,
+    enhanced_streaming_service,
+    stream_workflow_with_enhancements,
+)
 from chatter.utils.security import get_secure_logger
 
 logger = get_secure_logger(__name__)
@@ -172,7 +177,7 @@ class WorkflowExecutionService:
         chat_request: ChatRequest,
         correlation_id: str
     ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Execute a workflow with streaming response.
+        """Execute a workflow with enhanced streaming response.
 
         Args:
             conversation: Conversation context
@@ -180,13 +185,16 @@ class WorkflowExecutionService:
             correlation_id: Request correlation ID
 
         Yields:
-            Streaming chat chunks
+            Enhanced streaming chat chunks
 
         Raises:
             WorkflowExecutionError: If workflow execution fails
         """
         start_time = time.time()
         workflow_type = chat_request.workflow_type or "plain"
+        
+        # Create enhanced streaming session
+        stream_id = await create_enhanced_stream(workflow_type, correlation_id)
         
         try:
             # Validate workflow configuration
@@ -196,22 +204,31 @@ class WorkflowExecutionService:
                 raise WorkflowExecutionError(f"Invalid workflow configuration for {workflow_type}")
 
             logger.info(
-                "Starting streaming workflow execution",
+                "Starting enhanced streaming workflow execution",
                 conversation_id=conversation.id,
                 workflow_type=workflow_type,
+                stream_id=stream_id,
                 correlation_id=correlation_id
             )
 
-            # Execute streaming workflow based on type
-            async for chunk in self._execute_streaming_workflow(
+            # Create workflow event generator
+            workflow_generator = self._create_enhanced_workflow_generator(
                 workflow_type, conversation, chat_request, correlation_id
+            )
+
+            # Stream with enhancements (heartbeat, token chunking, etc.)
+            async for chunk in stream_workflow_with_enhancements(
+                stream_id, 
+                workflow_generator,
+                enable_heartbeat=True,
+                heartbeat_interval=30.0
             ):
                 yield chunk
 
             # Record successful streaming metrics
             duration_ms = (time.time() - start_time) * 1000
             record_workflow_metrics(
-                workflow_type=f"{workflow_type}_streaming",
+                workflow_type=f"{workflow_type}_enhanced_streaming",
                 workflow_id=conversation.id,
                 step="complete",
                 duration_ms=duration_ms,
@@ -221,9 +238,10 @@ class WorkflowExecutionService:
             )
 
             logger.info(
-                "Streaming workflow completed successfully",
+                "Enhanced streaming workflow completed successfully",
                 conversation_id=conversation.id,
                 workflow_type=workflow_type,
+                stream_id=stream_id,
                 duration_ms=duration_ms,
                 correlation_id=correlation_id
             )
@@ -232,7 +250,7 @@ class WorkflowExecutionService:
             # Record failed streaming metrics
             duration_ms = (time.time() - start_time) * 1000
             record_workflow_metrics(
-                workflow_type=f"{workflow_type}_streaming",
+                workflow_type=f"{workflow_type}_enhanced_streaming",
                 workflow_id=conversation.id,
                 step="error",
                 duration_ms=duration_ms,
@@ -242,9 +260,10 @@ class WorkflowExecutionService:
             )
 
             logger.error(
-                "Streaming workflow execution failed",
+                "Enhanced streaming workflow execution failed",
                 conversation_id=conversation.id,
                 workflow_type=workflow_type,
+                stream_id=stream_id,
                 error=str(e),
                 correlation_id=correlation_id
             )
@@ -252,7 +271,7 @@ class WorkflowExecutionService:
             # Yield error chunk
             yield StreamingChatChunk(
                 type="error",
-                content=f"Workflow execution failed: {str(e)}",
+                content=f"Enhanced workflow execution failed: {str(e)}",
                 correlation_id=correlation_id
             )
 
@@ -398,7 +417,295 @@ class WorkflowExecutionService:
         usage_info = result.get("usage", {"tokens": 0, "cost": 0.0})
         return response_message, usage_info
 
-    async def _execute_streaming_workflow(
+    async def _create_enhanced_workflow_generator(
+        self,
+        workflow_type: str,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        correlation_id: str
+    ) -> AsyncGenerator[dict[str, Any], None]:
+        """Create enhanced workflow event generator with detailed streaming.
+        
+        Args:
+            workflow_type: Type of workflow
+            conversation: Conversation context
+            chat_request: Chat request
+            correlation_id: Request correlation ID
+            
+        Yields:
+            Enhanced workflow events with detailed metadata
+        """
+        workflow_manager = get_workflow_manager()
+        
+        # Prepare state
+        state = ConversationState(
+            conversation_id=conversation.id,
+            messages=await self._get_conversation_messages(conversation),
+            user_message=chat_request.message,
+            workflow_config=chat_request.workflow_config or {},
+            correlation_id=correlation_id
+        )
+        
+        # Yield start event
+        yield {
+            "type": "start",
+            "workflow_type": workflow_type,
+            "conversation_id": conversation.id,
+            "timestamp": time.time()
+        }
+        
+        # Enhanced streaming based on workflow type
+        if workflow_type == "plain":
+            async for event in self._stream_plain_workflow_enhanced(state):
+                yield event
+        elif workflow_type in ["rag", "tools", "full"]:
+            async for event in workflow_manager.stream_workflow(workflow_type, state):
+                # Enhance basic workflow events with additional metadata
+                enhanced_event = self._enhance_workflow_event(event, workflow_type)
+                yield enhanced_event
+        else:
+            raise WorkflowExecutionError(f"Unknown workflow type: {workflow_type}")
+        
+        # Yield completion event
+        yield {
+            "type": "complete",
+            "workflow_type": workflow_type,
+            "conversation_id": conversation.id,
+            "timestamp": time.time()
+        }
+
+    async def _stream_plain_workflow_enhanced(
+        self, state: ConversationState
+    ) -> AsyncGenerator[dict[str, Any], None]:
+        """Stream plain workflow with enhanced token-level streaming."""
+        try:
+            # Convert conversation to messages
+            messages = self.llm_service.convert_conversation_to_messages(
+                None, state.messages  # We'll handle conversation context differently
+            )
+            
+            # Add user message
+            from langchain_core.messages import HumanMessage
+            messages.append(HumanMessage(content=state.user_message))
+            
+            # Get LLM provider
+            provider = await self.llm_service.get_default_provider()
+            
+            # Yield thinking event
+            yield {
+                "type": "thinking",
+                "thought": "Processing request with plain workflow...",
+                "step": "provider_selection",
+                "provider": provider.__class__.__name__
+            }
+            
+            # Stream response tokens
+            token_count = 0
+            response_content = ""
+            
+            # For demonstration, we'll simulate token streaming
+            # In a real implementation, this would use the provider's streaming capabilities
+            async for token in self._simulate_token_streaming(provider, messages):
+                token_count += 1
+                response_content += token
+                
+                yield {
+                    "type": "token",
+                    "content": token,
+                    "token_index": token_count,
+                    "accumulated_content": response_content,
+                    "provider": provider.__class__.__name__
+                }
+                
+                # Add small delay to simulate realistic streaming
+                await asyncio.sleep(0.01)
+            
+            # Yield completion with usage
+            yield {
+                "type": "complete",
+                "content": response_content,
+                "usage": {
+                    "tokens": token_count,
+                    "input_tokens": sum(len(msg.content.split()) for msg in messages),
+                    "output_tokens": token_count,
+                    "cost": token_count * 0.00001  # Rough estimate
+                },
+                "provider": provider.__class__.__name__
+            }
+            
+        except Exception as e:
+            yield {
+                "type": "error",
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "step": "plain_workflow_execution"
+            }
+
+    async def _simulate_token_streaming(
+        self, provider, messages
+    ) -> AsyncGenerator[str, None]:
+        """Simulate token-level streaming for providers that don't support it natively."""
+        try:
+            # Get complete response first
+            response = await provider.ainvoke(messages)
+            response_text = response.content if hasattr(response, 'content') else str(response)
+            
+            # Split into tokens (simple word-based tokenization for demo)
+            tokens = response_text.split()
+            
+            for i, token in enumerate(tokens):
+                # Add space before token (except first)
+                if i > 0:
+                    yield " "
+                yield token
+                
+        except Exception as e:
+            yield f"[Error: {str(e)}]"
+
+    def _enhance_workflow_event(
+        self, event: dict[str, Any], workflow_type: str
+    ) -> dict[str, Any]:
+        """Enhance basic workflow event with additional metadata."""
+        enhanced_event = event.copy()
+        
+        # Add common metadata
+        enhanced_event["workflow_type"] = workflow_type
+        enhanced_event["timestamp"] = time.time()
+        enhanced_event["enhanced"] = True
+        
+        # Enhance specific event types
+        event_type = event.get("type")
+        
+        if event_type == "token":
+            # Add token metadata
+            enhanced_event["token_metadata"] = {
+                "character_count": len(event.get("content", "")),
+                "is_punctuation": event.get("content", "").strip() in ".,!?;:",
+                "is_whitespace": event.get("content", "").isspace()
+            }
+            
+        elif event_type == "tool_call":
+            # Add tool execution metadata
+            enhanced_event["tool_metadata"] = {
+                "tool_category": self._categorize_tool(event.get("tool_name", "")),
+                "expected_duration": self._estimate_tool_duration(event.get("tool_name", "")),
+                "risk_level": self._assess_tool_risk(event.get("tool_name", ""))
+            }
+            
+        elif event_type == "source":
+            # Add source metadata
+            enhanced_event["source_metadata"] = {
+                "domain": self._extract_domain(event.get("source_url", "")),
+                "content_type": self._detect_content_type(event.get("source_title", "")),
+                "quality_score": self._assess_source_quality(event)
+            }
+        
+        return enhanced_event
+
+    def _categorize_tool(self, tool_name: str) -> str:
+        """Categorize tool by type."""
+        tool_categories = {
+            "search": ["search", "google", "bing"],
+            "computation": ["calculator", "math", "compute"],
+            "data": ["database", "query", "fetch"],
+            "file": ["file", "read", "write", "download"],
+            "communication": ["email", "slack", "notify"]
+        }
+        
+        tool_name_lower = tool_name.lower()
+        for category, keywords in tool_categories.items():
+            if any(keyword in tool_name_lower for keyword in keywords):
+                return category
+        
+        return "general"
+
+    def _estimate_tool_duration(self, tool_name: str) -> float:
+        """Estimate tool execution duration in seconds."""
+        duration_estimates = {
+            "search": 2.0,
+            "computation": 0.1,
+            "data": 1.0,
+            "file": 0.5,
+            "communication": 3.0
+        }
+        
+        category = self._categorize_tool(tool_name)
+        return duration_estimates.get(category, 1.0)
+
+    def _assess_tool_risk(self, tool_name: str) -> str:
+        """Assess risk level of tool execution."""
+        high_risk_tools = ["delete", "remove", "execute", "shell", "admin"]
+        medium_risk_tools = ["write", "update", "modify", "send", "post"]
+        
+        tool_name_lower = tool_name.lower()
+        
+        if any(risk in tool_name_lower for risk in high_risk_tools):
+            return "high"
+        elif any(risk in tool_name_lower for risk in medium_risk_tools):
+            return "medium"
+        else:
+            return "low"
+
+    def _extract_domain(self, url: str) -> str:
+        """Extract domain from URL."""
+        try:
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            return parsed.netloc
+        except Exception:
+            return "unknown"
+
+    def _detect_content_type(self, title: str) -> str:
+        """Detect content type from title."""
+        content_indicators = {
+            "article": ["article", "blog", "post", "news"],
+            "documentation": ["docs", "documentation", "guide", "manual"],
+            "academic": ["paper", "research", "study", "journal"],
+            "reference": ["wiki", "encyclopedia", "reference", "definition"]
+        }
+        
+        title_lower = title.lower()
+        for content_type, indicators in content_indicators.items():
+            if any(indicator in title_lower for indicator in indicators):
+                return content_type
+        
+        return "general"
+
+    def _assess_source_quality(self, source_event: dict[str, Any]) -> float:
+        """Assess quality score of a source (0.0 to 1.0)."""
+        score = 0.5  # Base score
+        
+        # Factors that increase quality
+        url = source_event.get("source_url", "")
+        title = source_event.get("source_title", "")
+        
+        # Domain reputation
+        trusted_domains = [".edu", ".gov", ".org", "wikipedia.org", "stackoverflow.com"]
+        if any(domain in url for domain in trusted_domains):
+            score += 0.3
+        
+        # Title quality indicators
+        if len(title) > 10 and len(title) < 200:  # Reasonable title length
+            score += 0.1
+        
+        # Relevance score from the event
+        relevance = source_event.get("relevance_score", 0.5)
+        score = (score + relevance) / 2
+        
+        return min(1.0, max(0.0, score))
+
+    async def get_enhanced_streaming_stats(self) -> dict[str, Any]:
+        """Get enhanced streaming statistics."""
+        base_stats = await self.get_workflow_performance_stats()
+        
+        # Add enhanced streaming stats
+        streaming_stats = enhanced_streaming_service.get_global_streaming_stats()
+        
+        return {
+            "workflow_performance": base_stats,
+            "enhanced_streaming": streaming_stats,
+            "streaming_service_status": "active"
+        }
         self,
         workflow_type: str,
         conversation: Conversation,

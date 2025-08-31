@@ -1,8 +1,9 @@
 """
 Chatter - Advanced AI Chatbot Backend API Platform
 
-A comprehensive Python-based backend API platform for building advanced AI chatbots,
-implemented with FastAPI, LangChain, LangGraph, Postgres, PGVector, and SQLAlchemy.
+A comprehensive Python-based backend API platform for building
+advanced AI chatbots, implemented with FastAPI, LangChain,
+LangGraph, Postgres, PGVector, and SQLAlchemy.
 """
 
 __version__ = "0.1.0"

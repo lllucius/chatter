@@ -524,10 +524,10 @@ def validate_user_input(data: dict[str, Any]) -> dict[str, Any]:
 
 def sanitize_input(text: str) -> str:
     """Backward compatibility function for sanitizing input.
-    
+
     Args:
         text: Text to sanitize
-        
+
     Returns:
         Sanitized text
     """

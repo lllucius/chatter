@@ -6,18 +6,18 @@ This provides a minimal working backend that serves the core API endpoints
 needed by the frontend without requiring full dependencies.
 """
 
-import json
 import uuid
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
-import traceback
+from datetime import datetime
 
 try:
-    from fastapi import FastAPI, HTTPException, Depends, status
-    from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-    from fastapi.middleware.cors import CORSMiddleware
-    from pydantic import BaseModel
     import uvicorn
+    from fastapi import Depends, FastAPI, HTTPException, status
+    from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.security import (
+        HTTPAuthorizationCredentials,
+        HTTPBearer,
+    )
+    from pydantic import BaseModel
 except ImportError:
     print("FastAPI not available. This mock requires: pip install fastapi uvicorn")
     exit(1)
@@ -39,7 +39,7 @@ security = HTTPBearer()
 mock_users = {
     "admin": {
         "id": "1",
-        "username": "admin", 
+        "username": "admin",
         "email": "admin@chatter.com",
         "full_name": "Administrator",
         "password": "admin",  # In real app, this would be hashed
@@ -65,7 +65,7 @@ class UserResponse(BaseModel):
     id: str
     username: str
     email: str
-    full_name: Optional[str] = None
+    full_name: str | None = None
     role: str = "user"
     is_active: bool = True
     created_at: str
@@ -106,18 +106,18 @@ async def login(user_login: UserLogin):
     """Login endpoint"""
     username = user_login.username
     password = user_login.password
-    
+
     if username not in mock_users:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     user = mock_users[username]
     if user["password"] != password:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     # Generate token
     token = str(uuid.uuid4())
     mock_tokens[token] = user
-    
+
     return LoginResponse(
         access_token=token,
         user=UserResponse(**user),
@@ -187,7 +187,7 @@ async def api_health():
         "timestamp": datetime.now().isoformat(),
         "services": {
             "database": "connected",
-            "cache": "connected", 
+            "cache": "connected",
             "llm": "available"
         }
     }
@@ -197,5 +197,5 @@ if __name__ == "__main__":
     print("📍 Available at: http://localhost:8000")
     print("📖 API docs at: http://localhost:8000/docs")
     print("🔑 Default login: admin/admin")
-    
+
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

@@ -9,9 +9,9 @@ to demonstrate that the frontend functionality is working.
 import json
 import uuid
 from datetime import datetime
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
-import threading
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from urllib.parse import urlparse
+
 
 class ChatterMockHandler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -19,14 +19,14 @@ class ChatterMockHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_cors_headers()
         self.end_headers()
-    
+
     def send_cors_headers(self):
         """Send CORS headers"""
         self.send_header('Access-Control-Allow-Origin', 'http://localhost:3000')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
         self.send_header('Access-Control-Allow-Credentials', 'true')
-    
+
     def send_json_response(self, data, status=200):
         """Send JSON response with CORS headers"""
         self.send_response(status)
@@ -34,11 +34,11 @@ class ChatterMockHandler(BaseHTTPRequestHandler):
         self.send_cors_headers()
         self.end_headers()
         self.wfile.write(json.dumps(data).encode())
-    
+
     def do_GET(self):
         """Handle GET requests"""
         path = urlparse(self.path).path
-        
+
         if path == '/health':
             self.send_json_response({
                 "status": "healthy",
@@ -51,7 +51,7 @@ class ChatterMockHandler(BaseHTTPRequestHandler):
                 "timestamp": datetime.now().isoformat(),
                 "services": {
                     "database": "mock",
-                    "cache": "mock", 
+                    "cache": "mock",
                     "llm": "mock"
                 }
             })
@@ -96,7 +96,7 @@ class ChatterMockHandler(BaseHTTPRequestHandler):
             if not auth_header or not auth_header.startswith('Bearer '):
                 self.send_json_response({"detail": "Not authenticated"}, 401)
                 return
-            
+
             self.send_json_response({
                 "id": "1",
                 "username": "admin",
@@ -108,11 +108,11 @@ class ChatterMockHandler(BaseHTTPRequestHandler):
             })
         else:
             self.send_json_response({"detail": "Not found"}, 404)
-    
+
     def do_POST(self):
         """Handle POST requests"""
         path = urlparse(self.path).path
-        
+
         if path == '/api/v1/auth/login':
             # Read request body
             content_length = int(self.headers.get('Content-Length', 0))
@@ -122,7 +122,7 @@ class ChatterMockHandler(BaseHTTPRequestHandler):
                     data = json.loads(body.decode())
                     username = data.get('username')
                     password = data.get('password')
-                    
+
                     # Simple auth check
                     if username == 'admin' and password == 'admin':
                         token = str(uuid.uuid4())
@@ -147,11 +147,11 @@ class ChatterMockHandler(BaseHTTPRequestHandler):
                 except json.JSONDecodeError:
                     self.send_json_response({"detail": "Invalid JSON"}, 400)
                     return
-            
+
             self.send_json_response({"detail": "Missing request body"}, 400)
         else:
             self.send_json_response({"detail": "Not found"}, 404)
-    
+
     def log_message(self, format, *args):
         """Override to reduce log noise"""
         print(f"[{datetime.now().strftime('%H:%M:%S')}] {format % args}")
@@ -160,13 +160,13 @@ def run_server():
     """Run the mock server"""
     server_address = ('', 8000)
     httpd = HTTPServer(server_address, ChatterMockHandler)
-    
+
     print("🚀 Chatter Mock Backend starting...")
     print("📍 Available at: http://localhost:8000")
     print("🔑 Login with: admin/admin")
     print("🔄 CORS enabled for http://localhost:3000")
     print("📡 Press Ctrl+C to stop")
-    
+
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

@@ -31,7 +31,7 @@ logger = get_logger(__name__)
 # Import dependency injection functions
 from chatter.core.dependencies import (
     get_builtin_tools,
-    get_mcp_service, 
+    get_mcp_service,
     get_model_registry,
     get_orchestrator,
 )

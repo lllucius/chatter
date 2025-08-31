@@ -132,7 +132,7 @@ async def admin_events_stream(
     # Check admin role - only superusers can access admin event stream
     from chatter.core.auth import AuthService
     from chatter.utils.database import get_session
-    
+
     async with get_session() as session:
         auth_service = AuthService(session)
         is_admin = await auth_service.is_admin(current_user.id)
@@ -230,7 +230,7 @@ async def get_sse_stats(
     # Check admin role for detailed system statistics
     from chatter.core.auth import AuthService
     from chatter.utils.database import get_session
-    
+
     async with get_session() as session:
         auth_service = AuthService(session)
         is_admin = await auth_service.is_admin(current_user.id)
@@ -239,8 +239,8 @@ async def get_sse_stats(
             raise AuthorizationProblem(
                 detail="Admin privileges required for detailed system statistics"
             )
-    
-    
+
+
     stats = sse_service.get_stats()
 
     # For non-admin users, only show basic stats
@@ -293,7 +293,7 @@ async def trigger_broadcast_test(
     # Check admin role for broadcast events
     from chatter.core.auth import AuthService
     from chatter.utils.database import get_session
-    
+
     async with get_session() as session:
         auth_service = AuthService(session)
         is_admin = await auth_service.is_admin(current_user.id)

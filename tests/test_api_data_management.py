@@ -37,10 +37,10 @@ class TestDataManagementAPI:
         }
 
         response = await test_client.post("/api/v1/data-management/export", json=export_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 202, 422, 501]
-        
+
         if response.status_code in [200, 202]:
             data = response.json()
             assert "export_id" in data or "data" in data
@@ -74,7 +74,7 @@ class TestDataManagementAPI:
         }
 
         response = await test_client.post("/api/v1/data-management/import", json=import_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 202, 422, 501]
 
@@ -103,7 +103,7 @@ class TestDataManagementAPI:
         }
 
         response = await test_client.post("/api/v1/data-management/delete-all", json=deletion_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 202, 422, 501]
 
@@ -133,7 +133,7 @@ class TestDataManagementAPI:
         }
 
         response = await test_client.post("/api/v1/data-management/backup", json=backup_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 202, 422, 501]
 
@@ -157,10 +157,10 @@ class TestDataManagementAPI:
 
         # List backups
         response = await test_client.get("/api/v1/data-management/backups", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "backups" in data or isinstance(data, list)
@@ -191,7 +191,7 @@ class TestDataManagementAPI:
         }
 
         response = await test_client.post("/api/v1/data-management/restore", json=restore_data, headers=headers)
-        
+
         # Should return 404 for non-existent backup or 501 if not implemented
         assert response.status_code in [404, 422, 501]
 
@@ -215,10 +215,10 @@ class TestDataManagementAPI:
 
         # Get usage stats
         response = await test_client.get("/api/v1/data-management/usage", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "storage_used" in data or "usage" in data
@@ -232,13 +232,13 @@ class TestDataManagementAPI:
             "/api/v1/data-management/backups",
             "/api/v1/data-management/usage"
         ]
-        
+
         for endpoint in endpoints:
             if endpoint in ["/api/v1/data-management/export", "/api/v1/data-management/import", "/api/v1/data-management/backup"]:
                 response = await test_client.post(endpoint, json={})
             else:
                 response = await test_client.get(endpoint)
-            
+
             # Should require authentication
             assert response.status_code in [401, 403]
 
@@ -262,7 +262,7 @@ class TestDataManagementAPI:
 
         # Request GDPR data export (right to portability)
         response = await test_client.get("/api/v1/data-management/gdpr-export", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 202, 501]
 
@@ -286,6 +286,6 @@ class TestDataManagementAPI:
 
         # Get retention policy info
         response = await test_client.get("/api/v1/data-management/retention-policy", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]

@@ -5,7 +5,10 @@ from unittest.mock import patch
 import pytest
 
 from chatter.utils.config_validator import ConfigurationValidator
-from chatter.utils.security import generate_secure_secret, sanitize_input
+from chatter.utils.security import (
+    generate_secure_secret,
+    sanitize_input,
+)
 
 
 @pytest.mark.unit

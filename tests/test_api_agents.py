@@ -43,10 +43,10 @@ class TestAgentsAPI:
         }
 
         response = await test_client.post("/api/v1/agents", json=agent_data, headers=headers)
-        
+
         # Should succeed or return 501 if not fully implemented
         assert response.status_code in [201, 422, 501]
-        
+
         if response.status_code == 201:
             data = response.json()
             assert data["name"] == "Test Agent"
@@ -62,7 +62,7 @@ class TestAgentsAPI:
         }
 
         response = await test_client.post("/api/v1/agents", json=agent_data)
-        
+
         # Should require authentication
         assert response.status_code in [401, 403]
 
@@ -86,10 +86,10 @@ class TestAgentsAPI:
 
         # List agents
         response = await test_client.get("/api/v1/agents", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "agents" in data or isinstance(data, list)
@@ -114,7 +114,7 @@ class TestAgentsAPI:
 
         # Try to get an agent (will likely return 404)
         response = await test_client.get("/api/v1/agents/nonexistent", headers=headers)
-        
+
         # Should return 404 for non-existent agent or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -144,7 +144,7 @@ class TestAgentsAPI:
         }
 
         response = await test_client.put("/api/v1/agents/nonexistent", json=update_data, headers=headers)
-        
+
         # Should return 404 for non-existent or 501/405 if not implemented
         assert response.status_code in [404, 405, 501]
 
@@ -168,7 +168,7 @@ class TestAgentsAPI:
 
         # Try to delete an agent
         response = await test_client.delete("/api/v1/agents/nonexistent", headers=headers)
-        
+
         # Should return 404 for non-existent or 501/405 if not implemented
         assert response.status_code in [404, 405, 501]
 
@@ -197,11 +197,11 @@ class TestAgentsAPI:
         }
 
         response = await test_client.post(
-            "/api/v1/agents/nonexistent/interact", 
-            json=interaction_data, 
+            "/api/v1/agents/nonexistent/interact",
+            json=interaction_data,
             headers=headers
         )
-        
+
         # Should return 404 for non-existent agent or 501 if not implemented
         assert response.status_code in [404, 422, 501]
 
@@ -225,7 +225,7 @@ class TestAgentsAPI:
 
         # Get agent stats
         response = await test_client.get("/api/v1/agents/nonexistent/stats", headers=headers)
-        
+
         # Should return 404 for non-existent agent or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -253,7 +253,7 @@ class TestAgentsAPI:
         }
 
         response = await test_client.post("/api/v1/agents", json=invalid_data, headers=headers)
-        
+
         # Should fail validation
         assert response.status_code in [400, 422]
 
@@ -277,10 +277,10 @@ class TestAgentsAPI:
 
         # Search agents with query parameters
         response = await test_client.get("/api/v1/agents?search=test&type=conversational", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "agents" in data or isinstance(data, list)

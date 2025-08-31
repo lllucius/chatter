@@ -1,4 +1,4 @@
-"""Security enhancements for workflow execution including tool permissions and audit logging."""
+"""Security for workflow execution including tool permissions and audit logging."""
 
 import json
 

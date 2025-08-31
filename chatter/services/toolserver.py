@@ -1,4 +1,4 @@
-"""Enhanced tool server service with database persistence and CRUD operations."""
+"""Tool server service with database persistence and CRUD operations."""
 
 import asyncio
 from datetime import UTC, datetime
@@ -36,7 +36,7 @@ class ToolServerServiceError(Exception):
 
 
 class ToolServerService:
-    """Enhanced service for managing tool servers with database persistence."""
+    """Service for managing tool servers with database persistence."""
 
     def __init__(self, session: AsyncSession):
         """Initialize tool server service.
@@ -738,17 +738,16 @@ class ToolServerService:
         # Calculate uptime percentage based on recent health checks and startup time
         uptime_percentage = None
         if server.last_startup_success and server.last_health_check:
-            from datetime import timedelta
-            
+
             # Simple uptime calculation: if health check is recent and server started successfully
             now = datetime.now(UTC)
             startup_time = server.last_startup_success
             last_check = server.last_health_check
-            
+
             # If last health check was within 5 minutes and no consecutive failures
             health_check_age = (now - last_check).total_seconds()
             running_time = (now - startup_time).total_seconds()
-            
+
             if health_check_age < 300:  # 5 minutes
                 if server.consecutive_failures == 0:
                     uptime_percentage = 100.0

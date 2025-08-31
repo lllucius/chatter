@@ -1,6 +1,7 @@
 """Document management API tests."""
 
 from unittest.mock import patch
+
 import pytest
 
 
@@ -36,20 +37,20 @@ class TestDocumentsAPI:
                 "type": "pdf",
                 "status": "processing"
             }
-            
+
             files = {"file": ("test.pdf", b"fake pdf content", "application/pdf")}
             data = {"title": "Test Document", "type": "pdf"}
-            
+
             response = await test_client.post(
-                "/api/v1/documents", 
-                files=files, 
-                data=data, 
+                "/api/v1/documents",
+                files=files,
+                data=data,
                 headers=headers
             )
-            
+
             # Should return 201 or 422 if endpoint not fully implemented
             assert response.status_code in [201, 422, 501]
-            
+
             if response.status_code == 201:
                 response_data = response.json()
                 assert "id" in response_data
@@ -59,9 +60,9 @@ class TestDocumentsAPI:
         """Test document upload without authentication."""
         files = {"file": ("test.pdf", b"fake pdf content", "application/pdf")}
         data = {"title": "Test Document", "type": "pdf"}
-        
+
         response = await test_client.post("/api/v1/documents", files=files, data=data)
-        
+
         # Should require authentication
         assert response.status_code in [401, 403]
 
@@ -85,10 +86,10 @@ class TestDocumentsAPI:
 
         # List documents
         response = await test_client.get("/api/v1/documents", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "documents" in data or isinstance(data, list)
@@ -113,7 +114,7 @@ class TestDocumentsAPI:
 
         # Try to get a document (will likely return 404)
         response = await test_client.get("/api/v1/documents/nonexistent", headers=headers)
-        
+
         # Should return 404 for non-existent document or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -137,7 +138,7 @@ class TestDocumentsAPI:
 
         # Try to delete a document
         response = await test_client.delete("/api/v1/documents/nonexistent", headers=headers)
-        
+
         # Should return 404 for non-existent or 501/405 if not implemented
         assert response.status_code in [404, 405, 501]
 
@@ -164,16 +165,16 @@ class TestDocumentsAPI:
             "query": "test document",
             "limit": 10
         }
-        
+
         response = await test_client.post(
-            "/api/v1/documents/search", 
-            json=search_data, 
+            "/api/v1/documents/search",
+            json=search_data,
             headers=headers
         )
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 422, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "results" in data or isinstance(data, list)
@@ -199,7 +200,7 @@ class TestDocumentsAPI:
         # Try uploading without file
         data = {"title": "Test Document", "type": "pdf"}
         response = await test_client.post("/api/v1/documents", data=data, headers=headers)
-        
+
         # Should fail validation
         assert response.status_code in [400, 422]
 
@@ -223,10 +224,10 @@ class TestDocumentsAPI:
 
         # Get document stats
         response = await test_client.get("/api/v1/documents/stats", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "total_documents" in data or "count" in data
@@ -251,6 +252,6 @@ class TestDocumentsAPI:
 
         # Check processing status for non-existent document
         response = await test_client.get("/api/v1/documents/nonexistent/status", headers=headers)
-        
+
         # Should return 404 for non-existent or 501 if not implemented
         assert response.status_code in [404, 501]

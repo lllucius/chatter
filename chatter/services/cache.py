@@ -22,7 +22,7 @@ class CacheService:
         self._connected = False
         self._enabled = settings.cache_enabled
         self._connection_attempts = 0
-        
+
         if not self._enabled:
             logger.info("Cache service disabled by configuration")
 
@@ -31,12 +31,12 @@ class CacheService:
         if not self._enabled:
             logger.debug("Skipping Redis connection - caching disabled")
             return
-            
+
         if self._connection_attempts >= settings.redis_connect_retries:
             logger.warning(f"Max Redis connection attempts ({settings.redis_connect_retries}) reached, disabling cache")
             self._enabled = False
             return
-            
+
         try:
             self.redis = redis.from_url(
                 settings.redis_url,
@@ -57,7 +57,7 @@ class CacheService:
                 f"Failed to connect to Redis (attempt {self._connection_attempts}/{settings.redis_connect_retries}): {e}"
             )
             self._connected = False
-            
+
             # If max retries reached, disable caching
             if self._connection_attempts >= settings.redis_connect_retries:
                 self._enabled = False
@@ -147,7 +147,7 @@ class CacheService:
             return True
         except Exception as e:
             logger.warning(f"Cache delete error for key {key}: {e}")
-            # Try to reconnect on next operation  
+            # Try to reconnect on next operation
             if "Connection" in str(e) or "timeout" in str(e).lower():
                 self._connected = False
             return False
@@ -179,18 +179,18 @@ class CacheService:
             True if connected, False otherwise
         """
         return self._enabled and self._connected
-        
+
     def is_enabled(self) -> bool:
         """Check if cache is enabled.
-        
+
         Returns:
             True if enabled, False otherwise
         """
         return self._enabled
-        
+
     async def health_check(self) -> dict[str, Any]:
         """Perform health check on cache service.
-        
+
         Returns:
             Health status information
         """
@@ -200,7 +200,7 @@ class CacheService:
             "connection_attempts": self._connection_attempts,
             "status": "healthy" if self.is_connected() else "unhealthy"
         }
-        
+
         if self._enabled and self.redis:
             try:
                 # Test with a simple ping
@@ -213,21 +213,21 @@ class CacheService:
                 status["status"] = "unhealthy"
         else:
             status["ping_success"] = False
-            
+
         return status
-        
+
     async def ensure_connection(self) -> bool:
         """Ensure Redis connection is established if enabled.
-        
+
         Returns:
             True if connected or caching disabled, False otherwise
         """
         if not self._enabled:
             return True
-            
+
         if not self._connected:
             await self.connect()
-            
+
         return self.is_connected()
 
 

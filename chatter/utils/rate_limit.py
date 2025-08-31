@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
-    """Enhanced rate limiting middleware with X-RateLimit headers."""
+    """Rate limiting middleware with X-RateLimit headers."""
 
     def __init__(self, app, requests_per_minute: int = 60,
                  requests_per_hour: int = 1000):

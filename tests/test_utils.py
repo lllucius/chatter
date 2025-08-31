@@ -15,14 +15,14 @@ from chatter.utils.security import (
     create_access_token,
     generate_secure_secret,
     hash_password,
+    validate_password_strength,
     verify_password,
     verify_token,
 )
 from chatter.utils.validation import (
-    sanitize_input,
     input_validator,
+    sanitize_input,
 )
-from chatter.utils.security import validate_password_strength
 
 
 # Simple replacements for removed backward compatibility functions

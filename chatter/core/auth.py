@@ -175,7 +175,7 @@ class AuthService:
         try:
             from chatter.services.cache import get_cache_service
             cache_service = await get_cache_service()
-            
+
             if cache_service.is_connected():
                 cache_key = f"user:{user_id}"
                 cached_user = await cache_service.get(cache_key)
@@ -184,20 +184,21 @@ class AuthService:
                     logger.debug("User found in cache", user_id=user_id)
                     # For now, fall through to database - can enhance later
         except Exception as cache_error:
-            logger.debug("Cache lookup failed, using database", 
+            logger.debug("Cache lookup failed, using database",
                         user_id=user_id, error=str(cache_error))
-        
+
         result = await self.session.execute(
             select(User).where(User.id == user_id)
         )
         user = result.scalar_one_or_none()
-        
+
         # Cache the result for future lookups
         if user:
             try:
-                from chatter.services.cache import get_cache_service
                 from datetime import timedelta
-                
+
+                from chatter.services.cache import get_cache_service
+
                 cache_service = await get_cache_service()
                 if cache_service.is_connected():
                     cache_key = f"user:{user_id}"
@@ -205,9 +206,9 @@ class AuthService:
                     await cache_service.set(cache_key, "cached", timedelta(minutes=15))
                     logger.debug("User cached", user_id=user_id)
             except Exception as cache_error:
-                logger.debug("Cache storage failed", 
+                logger.debug("Cache storage failed",
                             user_id=user_id, error=str(cache_error))
-        
+
         return user
 
     async def get_user_by_email(self, email: str) -> User | None:

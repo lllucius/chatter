@@ -2,21 +2,19 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from chatter.core.exceptions import (
-    ConflictError,
     NotFoundError,
     ValidationError,
 )
 from chatter.models.conversation import (
     Conversation,
     ConversationStatus,
-    Message,
 )
 from chatter.schemas.chat import (
     ConversationCreate as ConversationCreateSchema,
@@ -29,7 +27,6 @@ from chatter.utils.database_optimization import (
     get_conversation_optimized,
     get_user_conversations_optimized,
 )
-from chatter.utils.logging import get_logger
 from chatter.utils.security import get_secure_logger
 
 logger = get_secure_logger(__name__)
@@ -321,9 +318,9 @@ class ConversationService:
             total_messages = len(conversation.messages)
             user_messages = sum(1 for msg in conversation.messages if msg.role == "user")
             assistant_messages = sum(1 for msg in conversation.messages if msg.role == "assistant")
-            
+
             total_tokens = sum(
-                (msg.input_tokens or 0) + (msg.output_tokens or 0) 
+                (msg.input_tokens or 0) + (msg.output_tokens or 0)
                 for msg in conversation.messages
             )
 

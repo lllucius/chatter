@@ -1,4 +1,4 @@
-"""Refactored ChatService - orchestrates conversation, message, and workflow services."""
+"""ChatService - orchestrates conversation, message, and workflow services."""
 
 from __future__ import annotations
 
@@ -7,7 +7,11 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.models.conversation import Conversation, Message, MessageRole
+from chatter.models.conversation import (
+    Conversation,
+    Message,
+    MessageRole,
+)
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.schemas.chat import (
     ConversationCreate as ConversationCreateSchema,
@@ -20,7 +24,6 @@ from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
 from chatter.services.workflow_execution import WorkflowExecutionService
 from chatter.utils.correlation import get_correlation_id
-from chatter.utils.logging import get_logger
 from chatter.utils.monitoring import record_request_metrics
 from chatter.utils.security import get_secure_logger
 
@@ -31,13 +34,13 @@ logger = get_secure_logger(__name__)
 from chatter.core.exceptions import ChatServiceError
 
 
-class RefactoredChatService:
+class ChatService:
     """
-    Refactored ChatService that orchestrates specialized services.
-    
+    ChatService that orchestrates specialized services.
+
     This is a much smaller, focused service that delegates to:
     - ConversationService: CRUD operations for conversations
-    - MessageService: CRUD operations for messages  
+    - MessageService: CRUD operations for messages
     - WorkflowExecutionService: Workflow execution and streaming
     - LLMService: LLM provider interactions
     """
@@ -46,14 +49,14 @@ class RefactoredChatService:
         """Initialize chat service with dependencies."""
         self.session = session
         self.llm_service = llm_service
-        
+
         # Initialize specialized services
         self.conversation_service = ConversationService(session)
         self.message_service = MessageService(session)
         self.workflow_service = WorkflowExecutionService(llm_service, self.message_service)
 
     # Conversation management - delegate to ConversationService
-    
+
     async def create_conversation(
         self, user_id: str, conversation_data: ConversationCreateSchema
     ) -> Conversation:
@@ -66,12 +69,15 @@ class RefactoredChatService:
         """List conversations for a user with pagination."""
         # Get conversations
         conversations = await self.conversation_service.list_conversations(user_id, limit, offset)
-        
+
         # Get total count - for now, we'll implement a simple approach
         # TODO: Add optimized count method to ConversationService
         from sqlalchemy import func, select
-        from chatter.models.conversation import Conversation as ConversationModel
-        
+
+        from chatter.models.conversation import (
+            Conversation as ConversationModel,
+        )
+
         total_q = select(func.count()).select_from(
             select(ConversationModel.id)
             .where(ConversationModel.user_id == user_id)
@@ -79,7 +85,7 @@ class RefactoredChatService:
         )
         total_result = await self.session.execute(total_q)
         total = int(total_result.scalar() or 0)
-        
+
         return list(conversations), total
 
     async def get_conversation(
@@ -251,7 +257,7 @@ class RefactoredChatService:
         """Process a chat request with streaming response.
 
         Args:
-            user_id: User ID  
+            user_id: User ID
             chat_request: Chat request
 
         Yields:
@@ -340,7 +346,7 @@ class RefactoredChatService:
                 error=str(e),
                 correlation_id=correlation_id
             )
-            
+
             # Yield error chunk
             yield StreamingChatChunk(
                 type="error",
@@ -357,7 +363,7 @@ class RefactoredChatService:
         # Combine stats from different services
         conv_stats = await self.conversation_service.get_conversation_stats(conversation_id, user_id)
         message_stats = await self.message_service.get_message_statistics(conversation_id, user_id)
-        
+
         return {
             "conversation": conv_stats,
             "messages": message_stats,
@@ -372,11 +378,11 @@ class RefactoredChatService:
     def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics."""
         return {
-            "service_name": "RefactoredChatService",
+            "service_name": "ChatService",
             "architecture": "microservice_based",
             "services": {
                 "conversation_service": "active",
-                "message_service": "active", 
+                "message_service": "active",
                 "workflow_service": "active",
                 "llm_service": "active"
             }
@@ -416,24 +422,24 @@ class RefactoredChatService:
             total_messages = conv_stats.get("total_messages", 1)
             avg_tokens = message_stats.get("avg_tokens_per_message", 0)
             total_cost = message_stats.get("total_cost", 0.0)
-            
+
             # Higher score for fewer messages with reasonable token usage and lower cost
             efficiency = 100.0
-            
+
             # Penalize excessive messages
             if total_messages > 20:
                 efficiency -= (total_messages - 20) * 2
-                
-            # Penalize excessive token usage  
+
+            # Penalize excessive token usage
             if avg_tokens > 1000:
                 efficiency -= (avg_tokens - 1000) / 100
-                
+
             # Penalize high cost
             if total_cost > 1.0:
                 efficiency -= total_cost * 10
-                
+
             return max(0.0, min(100.0, efficiency))
-            
+
         except Exception:
             return 50.0  # Default score
 
@@ -467,7 +473,7 @@ class RefactoredChatService:
         from chatter.schemas.chat import ChatRequest
         workflow_config = chat_request.workflow_config or {}
         workflow_config["template_name"] = template_name
-        
+
         new_request = ChatRequest(
             message=chat_request.message,
             conversation_id=chat_request.conversation_id,

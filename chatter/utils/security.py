@@ -65,17 +65,17 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def hash_api_key(api_key: str, salt: str | None = None) -> str:
     """Hash an API key for secure storage.
-    
+
     Args:
         api_key: The API key to hash
         salt: Optional salt (uses default if not provided)
-        
+
     Returns:
         Hashed API key
     """
     if salt is None:
         salt = settings.secret_key[:16]  # Use first 16 chars of secret key as salt
-    
+
     # Use SHA-256 with salt for API key hashing
     combined = f"{salt}{api_key}{salt}"
     return hashlib.sha256(combined.encode()).hexdigest()
@@ -83,12 +83,12 @@ def hash_api_key(api_key: str, salt: str | None = None) -> str:
 
 def verify_api_key(plain_key: str, hashed_key: str, salt: str | None = None) -> bool:
     """Verify an API key against its hash.
-    
+
     Args:
         plain_key: Plain text API key
         hashed_key: Hashed API key to verify against
         salt: Optional salt (uses default if not provided)
-        
+
     Returns:
         True if API key matches, False otherwise
     """
@@ -102,39 +102,39 @@ def verify_api_key(plain_key: str, hashed_key: str, salt: str | None = None) -> 
 
 def generate_api_key_hash(length: int = 32) -> tuple[str, str]:
     """Generate a new API key and its hash.
-    
+
     Args:
         length: Length of the API key to generate
-        
+
     Returns:
         Tuple of (plain_api_key, hashed_api_key)
     """
     import secrets
     import string
-    
+
     # Generate secure random API key
     alphabet = string.ascii_letters + string.digits + "-_"
     api_key = ''.join(secrets.choice(alphabet) for _ in range(length))
-    
+
     # Hash it for storage
     hashed_key = hash_api_key(api_key)
-    
+
     return api_key, hashed_key
 
 
 def sanitize_log_data(data: Any, max_depth: int = 5) -> Any:
     """Sanitize sensitive data from logs.
-    
+
     Args:
         data: Data to sanitize (dict, list, string, etc.)
         max_depth: Maximum recursion depth to prevent infinite loops
-        
+
     Returns:
         Sanitized data with sensitive information masked
     """
     if max_depth <= 0:
         return "[MAX_DEPTH_REACHED]"
-    
+
     if isinstance(data, dict):
         sanitized = {}
         for key, value in data.items():
@@ -144,38 +144,38 @@ def sanitize_log_data(data: Any, max_depth: int = 5) -> Any:
             else:
                 sanitized[key] = sanitize_log_data(value, max_depth - 1)
         return sanitized
-    
+
     elif isinstance(data, list):
         return [sanitize_log_data(item, max_depth - 1) for item in data]
-    
+
     elif isinstance(data, str):
         return sanitize_string(data)
-    
+
     elif hasattr(data, '__dict__'):
         # Handle objects with attributes
         try:
             return sanitize_log_data(data.__dict__, max_depth - 1)
         except Exception:
             return str(type(data).__name__)
-    
+
     else:
         return data
 
 
 def sanitize_string(text: str) -> str:
     """Sanitize sensitive data from a string.
-    
+
     Args:
         text: String to sanitize
-        
+
     Returns:
         String with sensitive data masked
     """
     if not isinstance(text, str):
         return text
-    
+
     sanitized = text
-    
+
     # Apply all sensitive patterns
     for pattern_name, pattern in SENSITIVE_PATTERNS.items():
         def replace_match(match):
@@ -192,58 +192,58 @@ def sanitize_string(text: str) -> str:
                     return f"{match.group(1)}=[MASKED]"
                 else:
                     return "[MASKED]"
-        
+
         sanitized = pattern.sub(replace_match, sanitized)
-    
+
     return sanitized
 
 
 def mask_sensitive_value(value: str, show_chars: int = 4) -> str:
     """Mask a sensitive value showing only first/last characters.
-    
+
     Args:
         value: Value to mask
         show_chars: Number of characters to show at start/end
-        
+
     Returns:
         Masked value
     """
     if not value or len(value) <= show_chars * 2:
         return "[MASKED]"
-    
+
     return f"{value[:show_chars]}{'*' * (len(value) - show_chars * 2)}{value[-show_chars:]}"
 
 
 def sanitize_url(url: str) -> str:
     """Sanitize sensitive information from URLs.
-    
+
     Args:
         url: URL to sanitize
-        
+
     Returns:
         URL with sensitive information masked
     """
     if not url:
         return url
-    
+
     # Remove credentials from URLs
     # postgres://user:password@host:port/db -> postgres://[MASKED]@host:port/db
     url_pattern = re.compile(r'([\w+]+://)([^:]+):([^@]+)@(.+)')
     match = url_pattern.match(url)
-    
+
     if match:
         protocol, user, password, rest = match.groups()
         return f"{protocol}[MASKED]@{rest}"
-    
+
     return url
 
 
 def is_sensitive_key(key: str) -> bool:
     """Check if a key name indicates sensitive data.
-    
+
     Args:
         key: Key name to check
-        
+
     Returns:
         True if key appears to contain sensitive data
     """
@@ -252,10 +252,10 @@ def is_sensitive_key(key: str) -> bool:
 
 def create_secure_log_context(**kwargs) -> dict[str, Any]:
     """Create a sanitized context for logging.
-    
+
     Args:
         **kwargs: Key-value pairs to include in log context
-        
+
     Returns:
         Sanitized context dictionary
     """
@@ -264,44 +264,44 @@ def create_secure_log_context(**kwargs) -> dict[str, Any]:
 
 class SecureLogger:
     """Logger wrapper that automatically sanitizes sensitive data."""
-    
+
     def __init__(self, logger_instance):
         """Initialize with a logger instance."""
         self.logger = logger_instance
-    
+
     def _sanitize_message(self, message: str, *args, **kwargs) -> tuple[str, tuple, dict]:
         """Sanitize log message and arguments."""
         # Sanitize the message
         sanitized_message = sanitize_string(str(message))
-        
+
         # Sanitize positional arguments
         sanitized_args = tuple(sanitize_log_data(arg) for arg in args)
-        
+
         # Sanitize keyword arguments
         sanitized_kwargs = sanitize_log_data(kwargs)
-        
+
         return sanitized_message, sanitized_args, sanitized_kwargs
-    
+
     def debug(self, message: str, *args, **kwargs):
         """Log debug message with sanitization."""
         msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
         self.logger.debug(msg, *args, **kwargs)
-    
+
     def info(self, message: str, *args, **kwargs):
         """Log info message with sanitization."""
         msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
         self.logger.info(msg, *args, **kwargs)
-    
+
     def warning(self, message: str, *args, **kwargs):
         """Log warning message with sanitization."""
         msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
         self.logger.warning(msg, *args, **kwargs)
-    
+
     def error(self, message: str, *args, **kwargs):
         """Log error message with sanitization."""
         msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
         self.logger.error(msg, *args, **kwargs)
-    
+
     def critical(self, message: str, *args, **kwargs):
         """Log critical message with sanitization."""
         msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
@@ -310,10 +310,10 @@ class SecureLogger:
 
 def get_secure_logger(name: str):
     """Get a secure logger that sanitizes sensitive data.
-    
+
     Args:
         name: Logger name
-        
+
     Returns:
         SecureLogger instance
     """

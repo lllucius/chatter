@@ -27,10 +27,10 @@ class TestJobsAPI:
 
         # List jobs
         response = await test_client.get("/api/v1/jobs", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "jobs" in data or isinstance(data, list)
@@ -65,10 +65,10 @@ class TestJobsAPI:
         }
 
         response = await test_client.post("/api/v1/jobs", json=job_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [201, 422, 501]
-        
+
         if response.status_code == 201:
             data = response.json()
             assert "id" in data
@@ -94,7 +94,7 @@ class TestJobsAPI:
 
         # Try to get a job (will likely return 404)
         response = await test_client.get("/api/v1/jobs/nonexistent", headers=headers)
-        
+
         # Should return 404 for non-existent job or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -118,7 +118,7 @@ class TestJobsAPI:
 
         # Try to cancel a job
         response = await test_client.post("/api/v1/jobs/nonexistent/cancel", headers=headers)
-        
+
         # Should return 404 for non-existent or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -142,7 +142,7 @@ class TestJobsAPI:
 
         # Get job status
         response = await test_client.get("/api/v1/jobs/nonexistent/status", headers=headers)
-        
+
         # Should return 404 for non-existent or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -166,7 +166,7 @@ class TestJobsAPI:
 
         # Get job results
         response = await test_client.get("/api/v1/jobs/nonexistent/results", headers=headers)
-        
+
         # Should return 404 for non-existent or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -178,10 +178,10 @@ class TestJobsAPI:
             "/api/v1/jobs/test/status",
             "/api/v1/jobs/test/results"
         ]
-        
+
         for endpoint in endpoints:
             response = await test_client.get(endpoint)
-            
+
             # Should require authentication
             assert response.status_code in [401, 403]
 
@@ -209,7 +209,7 @@ class TestJobsAPI:
         }
 
         response = await test_client.post("/api/v1/jobs", json=invalid_data, headers=headers)
-        
+
         # Should fail validation
         assert response.status_code in [400, 422]
 
@@ -233,7 +233,7 @@ class TestJobsAPI:
 
         # Try to retry a job
         response = await test_client.post("/api/v1/jobs/nonexistent/retry", headers=headers)
-        
+
         # Should return 404 for non-existent or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -257,6 +257,6 @@ class TestJobsAPI:
 
         # Get job logs
         response = await test_client.get("/api/v1/jobs/nonexistent/logs", headers=headers)
-        
+
         # Should return 404 for non-existent or 501 if not implemented
         assert response.status_code in [404, 501]

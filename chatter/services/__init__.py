@@ -7,12 +7,12 @@ except ImportError:
     ab_test_manager = None
 
 try:
-    from .chat_refactored import RefactoredChatService
+    from .chat import ChatService
 except ImportError:
-    RefactoredChatService = None
+    ChatService = None
 
 try:
-    from .conversation import ConversationService  
+    from .conversation import ConversationService
 except ImportError:
     ConversationService = None
 
@@ -22,10 +22,13 @@ except ImportError:
     data_manager = None
 
 try:
-    from .enhanced_streaming import EnhancedStreamingService, enhanced_streaming_service
+    from .streaming import (
+        StreamingService,
+        streaming_service,
+    )
 except ImportError:
-    EnhancedStreamingService = None
-    enhanced_streaming_service = None
+    StreamingService = None
+    streaming_service = None
 
 try:
     from .job_queue import job_queue
@@ -61,13 +64,13 @@ __all__ = [
     "ab_test_manager",
     "ConversationService",
     "data_manager",
-    "enhanced_streaming_service",
-    "EnhancedStreamingService",
+    "streaming_service",
+    "StreamingService",
     "job_queue",
     "mcp_service",
-    "MessageService", 
+    "MessageService",
     "plugin_manager",
-    "RefactoredChatService",
+    "ChatService",
     "sse_service",
     "WorkflowExecutionService",
 ]

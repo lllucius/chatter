@@ -1007,7 +1007,7 @@ async def refresh_server_tools(
         server = await service.get_server(server_id)
         if not server:
             raise NotFoundProblem(
-                detail="Server not found", 
+                detail="Server not found",
                 resource_type="tool_server",
                 resource_id=server_id
             )
@@ -1015,12 +1015,13 @@ async def refresh_server_tools(
         # Refresh tools from remote server
         from chatter.services.mcp import mcp_service
         success = await mcp_service.refresh_server_tools(server.name)
-        
+
         if success:
             # Update database with new tools
-            from chatter.models.toolserver import ToolServer
             from sqlalchemy import select
-            
+
+            from chatter.models.toolserver import ToolServer
+
             # This would be better in the service, but for now:
             result = await service.session.execute(
                 select(ToolServer).where(ToolServer.id == server_id)

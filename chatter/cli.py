@@ -868,9 +868,11 @@ def health_check() -> None:
         # Check Vector Store connection (try common configurations)
         vector_store_status = "❌ Vector Store: Not configured"
         try:
-            from chatter.services.dynamic_vector_store import DynamicVectorStoreService
+            from chatter.services.dynamic_vector_store import (
+                DynamicVectorStoreService,
+            )
             from chatter.utils.database import get_session
-            
+
             async with get_session() as session:
                 vector_service = DynamicVectorStoreService(session)
                 # Simple connectivity test - check if service initializes
@@ -878,7 +880,7 @@ def health_check() -> None:
                     vector_store_status = "✅ Vector Store: Service available"
         except Exception as e:
             vector_store_status = f"⚠️ Vector Store: {e}"
-        
+
         console.print(vector_store_status)
 
         # Check LLM provider connectivity
@@ -886,7 +888,7 @@ def health_check() -> None:
         try:
             from chatter.services.llm import LLMService
             from chatter.utils.database import get_session
-            
+
             async with get_session() as session:
                 llm_service = LLMService(session)
                 # Check if any API keys are configured
@@ -896,7 +898,7 @@ def health_check() -> None:
                     llm_status = "⚠️ LLM Service: No providers configured"
         except Exception as e:
             llm_status = f"⚠️ LLM Service: {e}"
-        
+
         console.print(llm_status)
 
         # Check External services
@@ -912,7 +914,7 @@ def health_check() -> None:
                     external_status = "⚠️ External Services: Limited connectivity"
         except Exception:
             external_status = "⚠️ External Services: No internet connectivity"
-        
+
         console.print(external_status)
 
     asyncio.run(_check())

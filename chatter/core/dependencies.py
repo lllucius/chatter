@@ -2,8 +2,7 @@
 
 from __future__ import annotations
 
-import asyncio
-from typing import Any, TypeVar, get_type_hints
+from typing import Any, TypeVar
 
 from chatter.utils.logging import get_logger
 
@@ -24,7 +23,7 @@ class DependencyContainer:
 
     def register_singleton(self, service_type: type[T], instance: T) -> None:
         """Register a singleton instance.
-        
+
         Args:
             service_type: The service type/interface
             instance: The singleton instance
@@ -35,9 +34,9 @@ class DependencyContainer:
 
     def register_factory(self, service_type: type[T], factory: callable[[], T]) -> None:
         """Register a factory function for creating service instances.
-        
+
         Args:
-            service_type: The service type/interface  
+            service_type: The service type/interface
             factory: Factory function that creates instances
         """
         key = self._get_service_key(service_type)
@@ -46,7 +45,7 @@ class DependencyContainer:
 
     def register_lazy_loader(self, service_name: str, loader: callable) -> None:
         """Register a lazy loader function to avoid circular imports.
-        
+
         Args:
             service_name: Name of the service
             loader: Lazy loader function
@@ -56,46 +55,46 @@ class DependencyContainer:
 
     def get(self, service_type: type[T]) -> T:
         """Get a service instance.
-        
+
         Args:
             service_type: The service type to retrieve
-            
+
         Returns:
             Service instance
-            
+
         Raises:
             ValueError: If service is not registered
         """
         key = self._get_service_key(service_type)
-        
+
         # Check singletons first
         if key in self._singletons:
             return self._singletons[key]
-            
+
         # Check factories
         if key in self._factories:
             instance = self._factories[key]()
             # Cache as singleton for future requests
             self._singletons[key] = instance
             return instance
-            
+
         raise ValueError(f"Service not registered: {key}")
 
     def get_lazy(self, service_name: str) -> Any:
         """Get a service instance using lazy loading.
-        
+
         Args:
             service_name: Name of the service
-            
+
         Returns:
             Service instance
-            
+
         Raises:
             ValueError: If lazy loader is not registered
         """
         if service_name not in self._lazy_loaders:
             raise ValueError(f"Lazy loader not registered: {service_name}")
-            
+
         # Cache the result after first load
         if service_name not in self._services:
             try:
@@ -104,7 +103,7 @@ class DependencyContainer:
             except Exception as e:
                 logger.error(f"Failed to lazy load service {service_name}: {e}")
                 raise
-                
+
         return self._services[service_name]
 
     def clear(self) -> None:
@@ -127,28 +126,28 @@ container = DependencyContainer()
 
 def register_lazy_loaders() -> None:
     """Register all lazy loaders to avoid circular imports."""
-    
+
     # Register lazy loaders for commonly problematic circular imports
     container.register_lazy_loader(
         "builtin_tools",
         lambda: _lazy_import_builtin_tools()
     )
-    
+
     container.register_lazy_loader(
-        "orchestrator", 
+        "orchestrator",
         lambda: _lazy_import_orchestrator()
     )
-    
+
     container.register_lazy_loader(
         "mcp_service",
         lambda: _lazy_import_mcp_service()
     )
-    
+
     container.register_lazy_loader(
         "model_registry",
         lambda: _lazy_import_model_registry()
     )
-    
+
     container.register_lazy_loader(
         "workflow_manager",
         lambda: _lazy_import_workflow_manager()

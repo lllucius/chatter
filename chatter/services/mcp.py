@@ -4,7 +4,7 @@ import asyncio
 import time
 from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from langchain_core.tools import BaseTool, StructuredTool
 from langchain_mcp_adapters.client import MultiServerMCPClient
@@ -26,13 +26,13 @@ class MCPServiceError(Exception):
 @dataclass
 class OAuthConfig:
     """OAuth configuration for remote servers."""
-    
+
     client_id: str
     client_secret: str
     token_url: str
-    scope: Optional[str] = None
-    refresh_token: Optional[str] = None
-    access_token: Optional[str] = None
+    scope: str | None = None
+    refresh_token: str | None = None
+    access_token: str | None = None
 
 
 @dataclass
@@ -42,8 +42,8 @@ class RemoteMCPServer:
     name: str
     base_url: HttpUrl
     transport_type: str  # "http" or "sse" or "stdio" or "websocket"
-    oauth_config: Optional[OAuthConfig] = None
-    headers: Optional[dict[str, str]] = None
+    oauth_config: OAuthConfig | None = None
+    headers: dict[str, str] | None = None
     timeout: int = 30
     enabled: bool = True
 
@@ -57,7 +57,7 @@ class MCPToolService:
         self.servers: dict[str, RemoteMCPServer] = {}
         self.connections: dict[str, Connection] = {}
         self.tools_cache: dict[str, list[BaseTool]] = {}
-        self._client: Optional[MultiServerMCPClient] = None
+        self._client: MultiServerMCPClient | None = None
 
     def _get_client(self) -> MultiServerMCPClient:
         """Get or create the MCP client."""
@@ -74,28 +74,28 @@ class MCPToolService:
         base_connection = {
             "transport": "streamable_http" if server.transport_type == "http" else server.transport_type,
         }
-        
+
         if server.transport_type in ["http", "sse"]:
             base_connection["url"] = str(server.base_url)
             if server.headers:
                 base_connection["headers"] = server.headers
             if server.timeout:
                 base_connection["timeout"] = server.timeout
-                
+
         elif server.transport_type == "stdio":
             # For stdio, we need command and args
             # This is a simplified example - in practice you'd need more configuration
             raise MCPServiceError("stdio transport requires command and args configuration")
-            
+
         elif server.transport_type == "websocket":
             base_connection["url"] = str(server.base_url)
             if server.headers:
                 base_connection["headers"] = server.headers
-                
+
         return base_connection
 
     async def add_remote_server(
-        self, 
+        self,
         server_config: RemoteMCPServer
     ) -> bool:
         """Add a remote MCP server configuration."""
@@ -105,10 +105,10 @@ class MCPToolService:
         try:
             # Convert server config to connection
             connection = self._convert_server_to_connection(server_config)
-            
+
             self.servers[server_config.name] = server_config
             self.connections[server_config.name] = connection
-            
+
             # Update client with new connections
             self._update_client()
 
@@ -168,7 +168,7 @@ class MCPToolService:
         try:
             client = self._get_client()
             tools = await client.get_tools(server_name=server_name)
-            
+
             # Cache the tools
             self.tools_cache[server_name] = tools
 
@@ -196,7 +196,7 @@ class MCPToolService:
 
         try:
             client = self._get_client()
-            
+
             if server_names is None:
                 # Get all tools from all servers
                 tools = await client.get_tools()
@@ -239,7 +239,7 @@ class MCPToolService:
         conversation_id: str | None = None,
     ) -> dict[str, Any]:
         """Call a specific MCP tool.
-        
+
         Args:
             tool_name: Name of the tool to call
             arguments: Tool arguments
@@ -251,7 +251,7 @@ class MCPToolService:
             Tool result with success/error information
         """
         start_time = time.time()
-        
+
         try:
             # Find the tool
             tool = await self.get_tool_by_name(tool_name)
@@ -260,7 +260,7 @@ class MCPToolService:
 
             # Call the tool
             result = await tool.ainvoke(arguments)
-            
+
             response_time_ms = (time.time() - start_time) * 1000
 
             # Track usage (async, don't block)
@@ -429,14 +429,14 @@ class MCPToolService:
                     tools = await self.discover_tools(server_name)
                     tools_count = len(tools)
                     is_healthy = tools_count >= 0  # Consider healthy if we can connect
-                    
+
                     server_status[server_name] = {
                         "healthy": is_healthy,
                         "tools_count": tools_count,
                         "transport": server_config.transport_type,
                         "enabled": server_config.enabled,
                     }
-                    
+
                     if is_healthy:
                         healthy_servers += 1
                         total_tools += tools_count
@@ -447,7 +447,7 @@ class MCPToolService:
                         "transport": server_config.transport_type,
                         "enabled": server_config.enabled,
                     }
-                    
+
             except Exception as e:
                 server_status[server_name] = {
                     "healthy": False,
@@ -493,16 +493,16 @@ class MCPToolService:
         """Refresh tools for a specific server."""
         if server_name not in self.servers:
             return False
-            
+
         try:
             # Clear existing cache
             if server_name in self.tools_cache:
                 del self.tools_cache[server_name]
-                
+
             # Re-discover tools
             tools = await self.discover_tools(server_name)
             return len(tools) >= 0
-            
+
         except Exception as e:
             logger.error(
                 "Failed to refresh server tools",
@@ -517,13 +517,13 @@ class MCPToolService:
         self.tools_cache.clear()
         self.connections.clear()
         self._client = None
-        
+
         logger.info("MCP service cleanup completed")
 
 
 class BuiltInTools:
     """Built-in tools for basic functionality."""
-    
+
     @classmethod
     def create_builtin_tools(cls) -> list[BaseTool]:
         """Create a list of built-in LangChain tools."""
@@ -539,7 +539,7 @@ class BuiltInTools:
                 description="Get the current date and time"
             ),
         ]
-    
+
     @staticmethod
     def calculate(expression: str) -> str:
         """Calculate a mathematical expression."""
@@ -548,12 +548,12 @@ class BuiltInTools:
             allowed_chars = set('0123456789+-*/().')
             if not all(c in allowed_chars or c.isspace() for c in expression):
                 return "Error: Invalid characters in expression"
-            
+
             result = eval(expression)
             return str(result)
         except Exception as e:
             return f"Error: {str(e)}"
-    
+
     @staticmethod
     def get_current_time() -> str:
         """Get the current date and time."""

@@ -27,10 +27,10 @@ class TestEventsAPI:
 
         # Get events
         response = await test_client.get("/api/v1/events", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "events" in data or isinstance(data, list)
@@ -61,9 +61,9 @@ class TestEventsAPI:
             "start_date": "2024-01-01",
             "end_date": "2024-12-31"
         }
-        
+
         response = await test_client.get("/api/v1/events", params=params, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 422, 501]
 
@@ -99,10 +99,10 @@ class TestEventsAPI:
         }
 
         response = await test_client.post("/api/v1/events", json=event_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [201, 422, 501]
-        
+
         if response.status_code == 201:
             data = response.json()
             assert "id" in data
@@ -128,7 +128,7 @@ class TestEventsAPI:
 
         # Try to get an event (will likely return 404)
         response = await test_client.get("/api/v1/events/nonexistent", headers=headers)
-        
+
         # Should return 404 for non-existent event or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -152,7 +152,7 @@ class TestEventsAPI:
 
         # Try to connect to event stream
         response = await test_client.get("/api/v1/events/stream", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         # SSE endpoints typically return 200 with text/event-stream content type
         assert response.status_code in [200, 501]
@@ -177,7 +177,7 @@ class TestEventsAPI:
 
         # List webhooks
         response = await test_client.get("/api/v1/events/webhooks", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
 
@@ -208,7 +208,7 @@ class TestEventsAPI:
         }
 
         response = await test_client.post("/api/v1/events/webhooks", json=webhook_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [201, 422, 501]
 
@@ -220,10 +220,10 @@ class TestEventsAPI:
             "/api/v1/events/stream",
             "/api/v1/events/webhooks"
         ]
-        
+
         for endpoint in endpoints:
             response = await test_client.get(endpoint)
-            
+
             # Should require authentication
             assert response.status_code in [401, 403]
 
@@ -251,7 +251,7 @@ class TestEventsAPI:
         }
 
         response = await test_client.post("/api/v1/events", json=invalid_data, headers=headers)
-        
+
         # Should fail validation
         assert response.status_code in [400, 422]
 
@@ -280,8 +280,8 @@ class TestEventsAPI:
             "start_date": "2024-01-01",
             "end_date": "2024-01-31"
         }
-        
+
         response = await test_client.get("/api/v1/events/aggregation", params=params, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 422, 501]

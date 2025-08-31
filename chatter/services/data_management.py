@@ -355,18 +355,17 @@ class DataManager:
 
     async def bulk_delete_documents(self, document_ids: list[str], user_id: str) -> dict[str, Any]:
         """Bulk delete documents using DocumentService."""
-        from sqlalchemy.ext.asyncio import AsyncSession
-        from chatter.utils.database import get_async_session_factory
         from chatter.core.documents import DocumentService
-        
+        from chatter.utils.database import get_async_session_factory
+
         success_count = 0
         error_count = 0
         errors = []
-        
+
         async_session_factory = get_async_session_factory()
         async with async_session_factory() as session:
             document_service = DocumentService(session)
-            
+
             for document_id in document_ids:
                 try:
                     success = await document_service.delete_document(document_id, user_id)
@@ -384,32 +383,33 @@ class DataManager:
                         user_id=user_id,
                         error=str(e)
                     )
-        
+
         logger.info(
             "Bulk document deletion completed",
             user_id=user_id,
             success_count=success_count,
             error_count=error_count
         )
-        
+
         return {"success_count": success_count, "error_count": error_count, "errors": errors}
 
     async def bulk_delete_conversations(self, conversation_ids: list[str], user_id: str) -> dict[str, Any]:
-        """Bulk delete conversations using RefactoredChatService."""
-        from sqlalchemy.ext.asyncio import AsyncSession
-        from chatter.utils.database import get_async_session_factory
-        from chatter.services.chat_refactored import RefactoredChatService
+        """Bulk delete conversations using ChatService."""
+        from chatter.services.chat import (
+            ChatService,
+        )
         from chatter.services.llm import LLMService
-        
+        from chatter.utils.database import get_async_session_factory
+
         success_count = 0
         error_count = 0
         errors = []
-        
+
         async_session_factory = get_async_session_factory()
         async with async_session_factory() as session:
             llm_service = LLMService()
-            chat_service = RefactoredChatService(session, llm_service)
-            
+            chat_service = ChatService(session, llm_service)
+
             for conversation_id in conversation_ids:
                 try:
                     await chat_service.delete_conversation(conversation_id, user_id)
@@ -423,30 +423,29 @@ class DataManager:
                         user_id=user_id,
                         error=str(e)
                     )
-        
+
         logger.info(
             "Bulk conversation deletion completed",
             user_id=user_id,
             success_count=success_count,
             error_count=error_count
         )
-        
+
         return {"success_count": success_count, "error_count": error_count, "errors": errors}
 
     async def bulk_delete_prompts(self, prompt_ids: list[str], user_id: str) -> dict[str, Any]:
         """Bulk delete prompts using PromptService."""
-        from sqlalchemy.ext.asyncio import AsyncSession
-        from chatter.utils.database import get_async_session_factory
         from chatter.core.prompts import PromptService
-        
+        from chatter.utils.database import get_async_session_factory
+
         success_count = 0
         error_count = 0
         errors = []
-        
+
         async_session_factory = get_async_session_factory()
         async with async_session_factory() as session:
             prompt_service = PromptService(session)
-            
+
             for prompt_id in prompt_ids:
                 try:
                     success = await prompt_service.delete_prompt(prompt_id, user_id)
@@ -464,14 +463,14 @@ class DataManager:
                         user_id=user_id,
                         error=str(e)
                     )
-        
+
         logger.info(
             "Bulk prompt deletion completed",
             user_id=user_id,
             success_count=success_count,
             error_count=error_count
         )
-        
+
         return {"success_count": success_count, "error_count": error_count, "errors": errors}
 
 

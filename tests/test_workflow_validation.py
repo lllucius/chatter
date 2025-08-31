@@ -7,11 +7,11 @@ from chatter.core.workflow_validation import (
     ValidationRule,
     WorkflowValidator,
 )
-from chatter.utils.validation import (
-    sanitize_input,
-    input_validator,
-)
 from chatter.utils.security import validate_password_strength
+from chatter.utils.validation import (
+    input_validator,
+    sanitize_input,
+)
 
 
 # Simple replacements for removed backward compatibility functions

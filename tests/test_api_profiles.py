@@ -27,10 +27,10 @@ class TestProfilesAPI:
 
         # Get user profile
         response = await test_client.get("/api/v1/profiles/me", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "email" in data or "username" in data or "profile" in data
@@ -67,10 +67,10 @@ class TestProfilesAPI:
         }
 
         response = await test_client.put("/api/v1/profiles/me", json=profile_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 422, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert data["display_name"] == "Updated User"
@@ -95,7 +95,7 @@ class TestProfilesAPI:
 
         # Try to get another user's profile
         response = await test_client.get("/api/v1/profiles/other_user_id", headers=headers)
-        
+
         # Should return 404 for non-existent user or 501 if not implemented
         assert response.status_code in [404, 403, 501]
 
@@ -119,9 +119,9 @@ class TestProfilesAPI:
 
         # Upload profile picture
         files = {"file": ("profile.jpg", b"fake image content", "image/jpeg")}
-        
+
         response = await test_client.post("/api/v1/profiles/me/picture", files=files, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 422, 501]
 
@@ -145,7 +145,7 @@ class TestProfilesAPI:
 
         # Delete profile picture
         response = await test_client.delete("/api/v1/profiles/me/picture", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 204, 404, 501]
 
@@ -169,10 +169,10 @@ class TestProfilesAPI:
 
         # Get preferences
         response = await test_client.get("/api/v1/profiles/me/preferences", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "preferences" in data or isinstance(data, dict)
@@ -211,7 +211,7 @@ class TestProfilesAPI:
         }
 
         response = await test_client.put("/api/v1/profiles/me/preferences", json=preferences, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 422, 501]
 
@@ -235,10 +235,10 @@ class TestProfilesAPI:
 
         # Get activity
         response = await test_client.get("/api/v1/profiles/me/activity", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "activities" in data or isinstance(data, list)
@@ -273,7 +273,7 @@ class TestProfilesAPI:
         }
 
         response = await test_client.put("/api/v1/profiles/me/privacy", json=privacy_settings, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 422, 501]
 
@@ -285,10 +285,10 @@ class TestProfilesAPI:
             "/api/v1/profiles/me/activity",
             "/api/v1/profiles/me/privacy"
         ]
-        
+
         for endpoint in endpoints:
             response = await test_client.get(endpoint)
-            
+
             # Should require authentication
             assert response.status_code in [401, 403]
 
@@ -317,7 +317,7 @@ class TestProfilesAPI:
         }
 
         response = await test_client.put("/api/v1/profiles/me", json=invalid_data, headers=headers)
-        
+
         # Should fail validation
         assert response.status_code in [400, 422]
 
@@ -346,6 +346,6 @@ class TestProfilesAPI:
         }
 
         response = await test_client.delete("/api/v1/profiles/me", json=delete_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 204, 422, 501]

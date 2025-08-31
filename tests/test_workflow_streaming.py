@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from chatter.services.chat_refactored import RefactoredChatService
+from chatter.services.chat import ChatService
 from chatter.services.sse_events import SSEEventService
 
 
@@ -87,7 +87,7 @@ class TestWorkflowStreaming:
     @pytest.fixture
     def mock_chat_service(self):
         """Mock chat service for testing."""
-        service = AsyncMock(spec=RefactoredChatService)
+        service = AsyncMock(spec=ChatService)
         service.stream_response.return_value = self._mock_stream_generator()
         return service
 

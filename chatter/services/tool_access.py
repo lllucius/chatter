@@ -4,7 +4,7 @@ import re
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.models.toolserver import (
@@ -50,7 +50,7 @@ class ToolAccessService:
     # Permission management methods
 
     async def grant_tool_permission(
-        self, 
+        self,
         permission_data: ToolPermissionCreate,
         granted_by: str,
     ) -> ToolPermissionResponse:
@@ -72,11 +72,11 @@ class ToolAccessService:
 
         # Check if permission already exists
         existing = await self._get_existing_permission(
-            permission_data.user_id, 
-            permission_data.tool_id, 
+            permission_data.user_id,
+            permission_data.tool_id,
             permission_data.server_id
         )
-        
+
         if existing:
             raise ToolAccessServiceError("Permission already exists")
 
@@ -277,7 +277,7 @@ class ToolAccessService:
 
         # Get tool and server information
         tool, server = await self._get_tool_and_server(tool_name, server_name)
-        
+
         # Check explicit permissions first
         permission = await self._get_user_tool_permission(user_id, tool, server)
         if permission:
@@ -311,7 +311,7 @@ class ToolAccessService:
         """
         # Get tool and server information
         tool, server = await self._get_tool_and_server(tool_name, server_name)
-        
+
         # Update usage for explicit permissions
         permission = await self._get_user_tool_permission(user_id, tool, server)
         if permission:
@@ -325,16 +325,16 @@ class ToolAccessService:
     # Helper methods
 
     async def _get_existing_permission(
-        self, 
-        user_id: str, 
-        tool_id: str | None, 
+        self,
+        user_id: str,
+        tool_id: str | None,
         server_id: str | None
     ) -> ToolPermission | None:
         """Get existing permission."""
         query = select(ToolPermission).where(
             ToolPermission.user_id == user_id
         )
-        
+
         if tool_id:
             query = query.where(ToolPermission.tool_id == tool_id)
         elif server_id:
@@ -388,7 +388,7 @@ class ToolAccessService:
                 select(ServerTool).where(ServerTool.name == tool_name)
             )
             tool = result.scalar_one_or_none()
-            
+
             if tool:
                 result = await self.session.execute(
                     select(ToolServer).where(ToolServer.id == tool.server_id)
@@ -398,9 +398,9 @@ class ToolAccessService:
         return tool, server
 
     async def _get_user_tool_permission(
-        self, 
-        user_id: str, 
-        tool: ServerTool | None, 
+        self,
+        user_id: str,
+        tool: ServerTool | None,
         server: ToolServer | None
     ) -> ToolPermission | None:
         """Get user permission for specific tool or server."""
@@ -453,7 +453,7 @@ class ToolAccessService:
         """Check if name matches pattern."""
         if not pattern:
             return False
-        
+
         # Simple wildcard pattern matching
         pattern = pattern.replace('*', '.*')
         return bool(re.match(f"^{pattern}$", name))
@@ -540,7 +540,7 @@ class ToolAccessService:
     ) -> dict[str, Any]:
         """Check rate limits for permission."""
         now = datetime.now(UTC)
-        
+
         # Default to no limits
         result = {
             "allowed": True,

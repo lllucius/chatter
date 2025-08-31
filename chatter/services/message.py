@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
-from sqlalchemy import and_, select, desc
+from sqlalchemy import and_, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.exceptions import (
+    AuthorizationError,
     NotFoundError,
     ValidationError,
-    AuthorizationError,
 )
 from chatter.models.conversation import Message, MessageRole
-from chatter.utils.logging import get_logger
 from chatter.utils.security import get_secure_logger
 
 logger = get_secure_logger(__name__)
@@ -51,7 +51,9 @@ class MessageService:
         """
         try:
             # First verify user has access to conversation
-            from chatter.services.conversation import ConversationService
+            from chatter.services.conversation import (
+                ConversationService,
+            )
             conv_service = ConversationService(self.session)
             await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
 
@@ -130,7 +132,9 @@ class MessageService:
         """
         try:
             # Verify user has access to conversation
-            from chatter.services.conversation import ConversationService
+            from chatter.services.conversation import (
+                ConversationService,
+            )
             conv_service = ConversationService(self.session)
             conversation = await conv_service.get_conversation(
                 conversation_id, user_id, include_messages=False
@@ -195,7 +199,9 @@ class MessageService:
         """
         try:
             # Verify user has access to conversation
-            from chatter.services.conversation import ConversationService
+            from chatter.services.conversation import (
+                ConversationService,
+            )
             conv_service = ConversationService(self.session)
             await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
 
@@ -262,7 +268,9 @@ class MessageService:
         """
         try:
             # Verify user has access to conversation
-            from chatter.services.conversation import ConversationService
+            from chatter.services.conversation import (
+                ConversationService,
+            )
             conv_service = ConversationService(self.session)
             await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
 
@@ -326,7 +334,9 @@ class MessageService:
         """
         try:
             # Verify user has access to conversation
-            from chatter.services.conversation import ConversationService
+            from chatter.services.conversation import (
+                ConversationService,
+            )
             conv_service = ConversationService(self.session)
             await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
 
@@ -383,7 +393,9 @@ class MessageService:
         """
         try:
             # Verify user has access to conversation
-            from chatter.services.conversation import ConversationService
+            from chatter.services.conversation import (
+                ConversationService,
+            )
             conv_service = ConversationService(self.session)
             await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
 
@@ -468,7 +480,9 @@ class MessageService:
         """
         try:
             # Verify user has access to conversation
-            from chatter.services.conversation import ConversationService
+            from chatter.services.conversation import (
+                ConversationService,
+            )
             conv_service = ConversationService(self.session)
             await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
 

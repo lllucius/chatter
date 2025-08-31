@@ -1,6 +1,5 @@
 """Configuration management for Chatter application."""
 
-from functools import lru_cache
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict

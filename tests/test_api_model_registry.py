@@ -27,10 +27,10 @@ class TestModelRegistryAPI:
 
         # List models
         response = await test_client.get("/api/v1/models", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "models" in data or isinstance(data, list)
@@ -69,10 +69,10 @@ class TestModelRegistryAPI:
         }
 
         response = await test_client.post("/api/v1/models", json=model_data, headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [201, 422, 501]
-        
+
         if response.status_code == 201:
             data = response.json()
             assert data["name"] == "custom-gpt-model"
@@ -98,7 +98,7 @@ class TestModelRegistryAPI:
 
         # Try to get a model (will likely return 404)
         response = await test_client.get("/api/v1/models/nonexistent", headers=headers)
-        
+
         # Should return 404 for non-existent model or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -130,7 +130,7 @@ class TestModelRegistryAPI:
         }
 
         response = await test_client.put("/api/v1/models/nonexistent", json=update_data, headers=headers)
-        
+
         # Should return 404 for non-existent or 501/405 if not implemented
         assert response.status_code in [404, 405, 501]
 
@@ -154,7 +154,7 @@ class TestModelRegistryAPI:
 
         # Try to delete a model
         response = await test_client.delete("/api/v1/models/nonexistent", headers=headers)
-        
+
         # Should return 404 for non-existent or 501/405 if not implemented
         assert response.status_code in [404, 405, 501]
 
@@ -178,7 +178,7 @@ class TestModelRegistryAPI:
 
         # Test model connection
         response = await test_client.post("/api/v1/models/nonexistent/test", headers=headers)
-        
+
         # Should return 404 for non-existent model or 501 if not implemented
         assert response.status_code in [404, 422, 501]
 
@@ -202,7 +202,7 @@ class TestModelRegistryAPI:
 
         # Get model usage stats
         response = await test_client.get("/api/v1/models/nonexistent/stats", headers=headers)
-        
+
         # Should return 404 for non-existent model or 501 if not implemented
         assert response.status_code in [404, 501]
 
@@ -226,10 +226,10 @@ class TestModelRegistryAPI:
 
         # List providers
         response = await test_client.get("/api/v1/models/providers", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "providers" in data or isinstance(data, list)
@@ -254,7 +254,7 @@ class TestModelRegistryAPI:
 
         # List model templates
         response = await test_client.get("/api/v1/models/templates", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
 
@@ -266,13 +266,13 @@ class TestModelRegistryAPI:
             "/api/v1/models/providers",
             "/api/v1/models/templates"
         ]
-        
+
         for endpoint in endpoints:
             if endpoint == "/api/v1/models":
                 # Test both GET and POST
                 response = await test_client.get(endpoint)
                 assert response.status_code in [401, 403]
-                
+
                 response = await test_client.post(endpoint, json={})
                 assert response.status_code in [401, 403]
             else:
@@ -303,7 +303,7 @@ class TestModelRegistryAPI:
         }
 
         response = await test_client.post("/api/v1/models", json=invalid_data, headers=headers)
-        
+
         # Should fail validation
         assert response.status_code in [400, 422]
 
@@ -327,6 +327,6 @@ class TestModelRegistryAPI:
 
         # Search models with query parameters
         response = await test_client.get("/api/v1/models?search=gpt&provider=openai&type=chat", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]

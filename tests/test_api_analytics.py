@@ -1,6 +1,5 @@
 """Analytics API tests."""
 
-from datetime import UTC, datetime
 import pytest
 
 
@@ -28,10 +27,10 @@ class TestAnalyticsAPI:
 
         # Get conversation stats with default parameters
         response = await test_client.get("/api/v1/analytics/conversations", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "total_conversations" in data or "count" in data or "stats" in data
@@ -56,13 +55,13 @@ class TestAnalyticsAPI:
 
         # Test different periods
         periods = ["1h", "24h", "7d", "30d", "90d"]
-        
+
         for period in periods:
             response = await test_client.get(
-                f"/api/v1/analytics/conversations?period={period}", 
+                f"/api/v1/analytics/conversations?period={period}",
                 headers=headers
             )
-            
+
             # Should succeed or return 501 if not implemented
             assert response.status_code in [200, 422, 501]
 
@@ -87,12 +86,12 @@ class TestAnalyticsAPI:
         # Test with custom date range
         start_date = "2024-01-01T00:00:00Z"
         end_date = "2024-01-31T23:59:59Z"
-        
+
         response = await test_client.get(
-            f"/api/v1/analytics/conversations?start_date={start_date}&end_date={end_date}", 
+            f"/api/v1/analytics/conversations?start_date={start_date}&end_date={end_date}",
             headers=headers
         )
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 422, 501]
 
@@ -116,10 +115,10 @@ class TestAnalyticsAPI:
 
         # Get usage metrics
         response = await test_client.get("/api/v1/analytics/usage", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "total_requests" in data or "usage" in data or "metrics" in data
@@ -144,10 +143,10 @@ class TestAnalyticsAPI:
 
         # Get performance metrics
         response = await test_client.get("/api/v1/analytics/performance", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "response_time" in data or "performance" in data or "metrics" in data
@@ -172,10 +171,10 @@ class TestAnalyticsAPI:
 
         # Get system analytics
         response = await test_client.get("/api/v1/analytics/system", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "system" in data or "analytics" in data or "stats" in data
@@ -200,10 +199,10 @@ class TestAnalyticsAPI:
 
         # Get dashboard data
         response = await test_client.get("/api/v1/analytics/dashboard", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "dashboard" in data or "widgets" in data or "summary" in data
@@ -228,10 +227,10 @@ class TestAnalyticsAPI:
 
         # Get document analytics
         response = await test_client.get("/api/v1/analytics/documents", headers=headers)
-        
+
         # Should succeed or return 501 if not implemented
         assert response.status_code in [200, 501]
-        
+
         if response.status_code == 200:
             data = response.json()
             assert "documents" in data or "analytics" in data or "stats" in data
@@ -240,16 +239,16 @@ class TestAnalyticsAPI:
         """Test analytics endpoints require authentication."""
         endpoints = [
             "/api/v1/analytics/conversations",
-            "/api/v1/analytics/usage", 
+            "/api/v1/analytics/usage",
             "/api/v1/analytics/performance",
             "/api/v1/analytics/system",
             "/api/v1/analytics/dashboard",
             "/api/v1/analytics/documents"
         ]
-        
+
         for endpoint in endpoints:
             response = await test_client.get(endpoint)
-            
+
             # Should require authentication
             assert response.status_code in [401, 403]
 
@@ -273,10 +272,10 @@ class TestAnalyticsAPI:
 
         # Test with invalid date format
         response = await test_client.get(
-            "/api/v1/analytics/conversations?start_date=invalid-date", 
+            "/api/v1/analytics/conversations?start_date=invalid-date",
             headers=headers
         )
-        
+
         # Should return validation error
         assert response.status_code in [400, 422, 501]
 
@@ -300,9 +299,9 @@ class TestAnalyticsAPI:
 
         # Test with invalid period
         response = await test_client.get(
-            "/api/v1/analytics/conversations?period=invalid", 
+            "/api/v1/analytics/conversations?period=invalid",
             headers=headers
         )
-        
+
         # Should return validation error or succeed with default
         assert response.status_code in [200, 400, 422, 501]

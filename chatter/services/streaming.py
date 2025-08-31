@@ -492,7 +492,7 @@ class StreamingService:
 streaming_service = StreamingService()
 
 
-async def create__stream(
+async def create_stream(
     workflow_type: str,
     correlation_id: str | None = None
 ) -> str:

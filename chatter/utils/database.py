@@ -86,10 +86,6 @@ def get_session_maker() -> async_sessionmaker[AsyncSession]:
     return _session_maker
 
 
-# Alias for compatibility
-get_session_factory = get_session_maker
-
-
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """Get an async database session.
 

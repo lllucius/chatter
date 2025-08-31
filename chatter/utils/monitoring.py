@@ -445,9 +445,6 @@ class AdvancedMetricsCollector:
 # Global metrics collector instances
 metrics_collector = AdvancedMetricsCollector()
 
-# For backward compatibility
-MetricsCollector = AdvancedMetricsCollector
-
 
 def record_request_metrics(
     method: str,

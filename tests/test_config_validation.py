@@ -5,16 +5,16 @@ from unittest.mock import patch
 
 import pytest
 
-from chatter.utils.config_validator import ConfigValidator
+from chatter.utils.config_validator import ConfigurationValidator
 
 
 @pytest.mark.unit
-class TestConfigValidator:
+class TestConfigurationValidator:
     """Test configuration validation functionality."""
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.validator = ConfigValidator()
+        self.validator = ConfigurationValidator()
 
     def test_weak_secret_key_detection(self):
         """Test detection of weak secret keys."""
@@ -166,7 +166,7 @@ class TestConfigValidator:
         """Test environment-specific validation rules."""
         # Production environment should have stricter rules
         with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
-            validator = ConfigValidator()
+            validator = ConfigurationValidator()
 
             # Even moderately secure keys should be rejected in production
             with pytest.raises(ValueError):
@@ -174,7 +174,7 @@ class TestConfigValidator:
 
         # Development environment should be more lenient
         with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
-            validator = ConfigValidator()
+            validator = ConfigurationValidator()
 
             # Should accept development keys in dev environment
             validator.validate_secret_key("development_secret_key_123")
@@ -183,7 +183,7 @@ class TestConfigValidator:
         """Test SSL/TLS configuration validation."""
         # Test that production requires SSL/TLS
         with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
-            validator = ConfigValidator()
+            validator = ConfigurationValidator()
 
             insecure_configs = [
                 {"DATABASE_URL": "postgresql://user:pass@host:5432/db"},
@@ -243,7 +243,7 @@ class TestConfigurationPatterns:
 
     def test_sensitive_data_detection(self):
         """Test detection of sensitive data in configuration."""
-        validator = ConfigValidator()
+        validator = ConfigurationValidator()
 
         sensitive_patterns = [
             "password=secret123",
@@ -259,7 +259,7 @@ class TestConfigurationPatterns:
 
     def test_placeholder_detection(self):
         """Test detection of placeholder values."""
-        validator = ConfigValidator()
+        validator = ConfigurationValidator()
 
         placeholders = [
             "your_api_key_here",
@@ -276,7 +276,7 @@ class TestConfigurationPatterns:
 
     def test_real_values_not_detected_as_placeholders(self):
         """Test that real values are not detected as placeholders."""
-        validator = ConfigValidator()
+        validator = ConfigurationValidator()
 
         real_values = [
             "sk-proj-real1234567890abcdef1234567890abcdef",
@@ -295,7 +295,7 @@ class TestConfigValidationIntegration:
 
     def test_full_configuration_validation(self):
         """Test complete configuration validation workflow."""
-        validator = ConfigValidator()
+        validator = ConfigurationValidator()
 
         # Test a complete production-like configuration
         production_config = {
@@ -315,7 +315,7 @@ class TestConfigValidationIntegration:
 
     def test_development_configuration_validation(self):
         """Test development configuration validation."""
-        validator = ConfigValidator()
+        validator = ConfigurationValidator()
 
         # Development config should be more lenient
         dev_config = {
@@ -332,7 +332,7 @@ class TestConfigValidationIntegration:
 
     def test_invalid_configuration_reporting(self):
         """Test that invalid configurations are properly reported."""
-        validator = ConfigValidator()
+        validator = ConfigurationValidator()
 
         # Configuration with multiple issues
         invalid_config = {

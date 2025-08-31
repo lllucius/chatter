@@ -780,13 +780,13 @@ job_queue = AdvancedJobQueue(max_workers=settings.background_worker_concurrency)
 # Register some default job handlers
 async def document_processing_job(document_id: str, file_content: bytes) -> dict[str, Any]:
     """Document processing job handler for background processing."""
-    from chatter.utils.database import get_session_factory
+    from chatter.utils.database import get_session_maker
 
     logger.info(f"Starting background processing for document {document_id}")
 
     try:
         # Get a database session for background processing
-        async_session = get_session_factory()
+        async_session = get_session_maker()
         async with async_session() as session:
             from chatter.services.document_processing import (
                 DocumentProcessingService,

@@ -351,11 +351,12 @@ class TaskOrientedAgent(BaseAgent):
         tools_used = []
 
         try:
-            # Create workflow for task execution
-            workflow = workflow_manager.create_tool_calling_workflow(
+            # Create workflow for task execution using unified API
+            workflow = workflow_manager.create_workflow(
                 llm=self.llm,
-                tools=list(self.tools.values()),
+                mode="tools",
                 system_message=self.profile.system_prompt,
+                tools=list(self.tools.values()),
             )
 
             # Create conversation state

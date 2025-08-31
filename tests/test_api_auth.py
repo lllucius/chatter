@@ -249,7 +249,7 @@ class TestPasswordSecurity:
 
     def test_password_strength_requirements(self):
         """Test password strength requirements."""
-        from chatter.utils.validation import validate_password
+        from chatter.utils.security import validate_password_strength as validate_password
 
         # Test minimum requirements
         weak_passwords = [

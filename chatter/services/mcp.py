@@ -357,10 +357,10 @@ class MCPToolService:
         try:
             from chatter.schemas.toolserver import ToolUsageCreate
             from chatter.services.toolserver import ToolServerService
-            from chatter.utils.database import get_session_factory
+            from chatter.utils.database import get_session_maker
 
             # Get database session
-            async_session = get_session_factory()
+            async_session = get_session_maker()
             async with async_session() as session:
                 tool_server_service = ToolServerService(session)
 

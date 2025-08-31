@@ -148,7 +148,7 @@ interface RoleAccessData {
 const ToolsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'server' | 'tool' | 'permission' | 'role-access' | 'edit-server'>('server');
+  const [dialogType, setDialogType] = useState<'server' | 'tool' | 'permission' | 'role-access' | 'access-check' | 'edit-server'>('server');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -209,6 +209,15 @@ const ToolsPage: React.FC = () => {
     role: 'user',
     access_level: 'execute',
   });
+
+  // Form state for access check
+  const [accessCheckFormData, setAccessCheckFormData] = useState({
+    user_id: '',
+    tool_name: '',
+    server_name: '',
+  });
+
+  const [accessCheckResult, setAccessCheckResult] = useState<any>(null);
 
   const showSnackbar = (message: string) => {
     setSnackbarMessage(message);
@@ -394,6 +403,13 @@ const ToolsPage: React.FC = () => {
         role: 'user',
         access_level: 'execute',
       });
+    } else if (type === 'access-check') {
+      setAccessCheckFormData({
+        user_id: '',
+        tool_name: '',
+        server_name: '',
+      });
+      setAccessCheckResult(null);
     }
   };
 
@@ -664,6 +680,25 @@ const ToolsPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to create role access rule:', err);
       const errorMessage = 'Failed to create role access rule';
+      setError(errorMessage);
+      showSnackbar(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Access check function
+  const checkAccess = async () => {
+    try {
+      setLoading(true);
+      setError('');
+
+      const result = await chatterSDK.checkToolAccess(accessCheckFormData);
+      setAccessCheckResult(result.data);
+      showSnackbar('Access check completed');
+    } catch (err) {
+      console.error('Failed to check access:', err);
+      const errorMessage = 'Failed to check access';
       setError(errorMessage);
       showSnackbar(errorMessage);
     } finally {
@@ -1077,6 +1112,115 @@ const ToolsPage: React.FC = () => {
     </Dialog>
   );
 
+  const renderAccessCheckDialog = () => (
+    <Dialog open={dialogOpen && dialogType === 'access-check'} onClose={closeDialog} maxWidth="sm" fullWidth>
+      <DialogTitle>Check Tool Access</DialogTitle>
+      <DialogContent>
+        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid item xs={12}>
+            <TextField
+              fullWidth
+              label="User ID"
+              value={accessCheckFormData.user_id}
+              onChange={(e) => setAccessCheckFormData({ ...accessCheckFormData, user_id: e.target.value })}
+              placeholder="Enter user ID to check"
+              required
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <FormControl fullWidth>
+              <InputLabel>Tool</InputLabel>
+              <Select
+                value={accessCheckFormData.tool_name}
+                onChange={(e) => setAccessCheckFormData({ ...accessCheckFormData, tool_name: e.target.value })}
+                label="Tool"
+              >
+                <MenuItem value="">
+                  <em>Select a tool</em>
+                </MenuItem>
+                {tools.map((tool) => (
+                  <MenuItem key={tool.id} value={tool.name}>
+                    {tool.display_name || tool.name} ({tool.server_name})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <FormControl fullWidth>
+              <InputLabel>Server (optional)</InputLabel>
+              <Select
+                value={accessCheckFormData.server_name}
+                onChange={(e) => setAccessCheckFormData({ ...accessCheckFormData, server_name: e.target.value })}
+                label="Server (optional)"
+              >
+                <MenuItem value="">
+                  <em>Auto-detect from tool</em>
+                </MenuItem>
+                {remoteServers.map((server) => (
+                  <MenuItem key={server.id} value={server.name}>
+                    {server.display_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+
+        {accessCheckResult && (
+          <Box sx={{ mt: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Access Check Result
+            </Typography>
+            <Alert 
+              severity={accessCheckResult.allowed ? 'success' : 'error'}
+              sx={{ mb: 2 }}
+            >
+              <Typography variant="subtitle1">
+                Access {accessCheckResult.allowed ? 'Granted' : 'Denied'}
+              </Typography>
+              <Typography variant="body2">
+                Access Level: {accessCheckResult.access_level}
+              </Typography>
+              {accessCheckResult.rate_limit_remaining_hour !== null && (
+                <Typography variant="body2">
+                  Rate Limit Remaining (Hour): {accessCheckResult.rate_limit_remaining_hour}
+                </Typography>
+              )}
+              {accessCheckResult.rate_limit_remaining_day !== null && (
+                <Typography variant="body2">
+                  Rate Limit Remaining (Day): {accessCheckResult.rate_limit_remaining_day}
+                </Typography>
+              )}
+              {accessCheckResult.restriction_reason && (
+                <Typography variant="body2">
+                  Reason: {accessCheckResult.restriction_reason}
+                </Typography>
+              )}
+              {accessCheckResult.expires_at && (
+                <Typography variant="body2">
+                  Expires: {new Date(accessCheckResult.expires_at).toLocaleString()}
+                </Typography>
+              )}
+            </Alert>
+          </Box>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={closeDialog}>Close</Button>
+        <Button 
+          onClick={checkAccess}
+          variant="contained" 
+          disabled={loading || !accessCheckFormData.user_id || !accessCheckFormData.tool_name}
+        >
+          {loading ? <CircularProgress size={20} /> : 'Check Access'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+
   const renderPermissionDialog = () => (
     <Dialog open={dialogOpen && dialogType === 'permission'} onClose={closeDialog} maxWidth="sm" fullWidth>
       <DialogTitle>Grant Tool Permission</DialogTitle>
@@ -1113,22 +1257,43 @@ const ToolsPage: React.FC = () => {
             </FormControl>
           </Grid>
           <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Tool ID (optional)"
-              value={permissionFormData.tool_id || ''}
-              onChange={(e) => setPermissionFormData({ ...permissionFormData, tool_id: e.target.value })}
-              placeholder="Specific tool ID"
-            />
+            <FormControl fullWidth>
+              <InputLabel>Tool (optional)</InputLabel>
+              <Select
+                value={permissionFormData.tool_id || ''}
+                onChange={(e) => setPermissionFormData({ ...permissionFormData, tool_id: e.target.value, server_id: '' })}
+                label="Tool (optional)"
+              >
+                <MenuItem value="">
+                  <em>None (select for tool-specific access)</em>
+                </MenuItem>
+                {tools.map((tool) => (
+                  <MenuItem key={tool.id} value={tool.id}>
+                    {tool.display_name || tool.name} ({tool.server_name})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Server ID (optional)"
-              value={permissionFormData.server_id || ''}
-              onChange={(e) => setPermissionFormData({ ...permissionFormData, server_id: e.target.value })}
-              placeholder="Specific server ID"
-            />
+            <FormControl fullWidth>
+              <InputLabel>Server (optional)</InputLabel>
+              <Select
+                value={permissionFormData.server_id || ''}
+                onChange={(e) => setPermissionFormData({ ...permissionFormData, server_id: e.target.value, tool_id: '' })}
+                label="Server (optional)"
+                disabled={!!permissionFormData.tool_id}
+              >
+                <MenuItem value="">
+                  <em>None (select for server-wide access)</em>
+                </MenuItem>
+                {remoteServers.map((server) => (
+                  <MenuItem key={server.id} value={server.id}>
+                    {server.display_name} ({server.base_url})
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
@@ -1154,6 +1319,21 @@ const ToolsPage: React.FC = () => {
                 rate_limit_per_day: parseInt(e.target.value) || undefined 
               })}
               placeholder="Optional rate limit"
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              fullWidth
+              label="Expires At (optional)"
+              type="datetime-local"
+              value={permissionFormData.expires_at || ''}
+              onChange={(e) => setPermissionFormData({ 
+                ...permissionFormData, 
+                expires_at: e.target.value 
+              })}
+              InputLabelProps={{
+                shrink: true,
+              }}
             />
           </Grid>
         </Grid>
@@ -1509,57 +1689,63 @@ const ToolsPage: React.FC = () => {
             </Alert>
           ) : (
             <List>
-              {permissions.map((permission: any, index: number) => (
-                <ListItem key={permission.id || index} divider>
-                  <SecurityIcon sx={{ mr: 2, color: 'primary.main' }} />
-                  <ListItemText
-                    primary={
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <Typography variant="subtitle1">
-                          User: {permission.user_id}
-                        </Typography>
-                        <Chip 
-                          label={permission.access_level} 
-                          color="primary"
-                          size="small"
-                        />
-                      </Box>
-                    }
-                    secondary={
-                      <Box>
-                        <Typography variant="body2" color="text.secondary">
-                          {permission.tool_id ? `Tool: ${permission.tool_id}` : 
-                           permission.server_id ? `Server: ${permission.server_id}` : 
-                           'Global access'}
-                        </Typography>
-                        {permission.rate_limit_per_hour && (
-                          <Typography variant="caption" display="block">
-                            Rate limit: {permission.rate_limit_per_hour}/hour
+              {permissions.map((permission: any, index: number) => {
+                // Find human readable names for tools and servers
+                const tool = permission.tool_id ? tools.find(t => t.id === permission.tool_id) : null;
+                const server = permission.server_id ? remoteServers.find(s => s.id === permission.server_id) : null;
+                
+                return (
+                  <ListItem key={permission.id || index} divider>
+                    <SecurityIcon sx={{ mr: 2, color: 'primary.main' }} />
+                    <ListItemText
+                      primary={
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <Typography variant="subtitle1">
+                            User: {permission.user_id}
                           </Typography>
-                        )}
-                        {permission.expires_at && (
-                          <Typography variant="caption" display="block">
-                            Expires: {new Date(permission.expires_at).toLocaleDateString()}
+                          <Chip 
+                            label={permission.access_level} 
+                            color="primary"
+                            size="small"
+                          />
+                        </Box>
+                      }
+                      secondary={
+                        <Box>
+                          <Typography variant="body2" color="text.secondary">
+                            {tool ? `Tool: ${tool.display_name || tool.name} (${tool.server_name})` : 
+                             server ? `Server: ${server.display_name} (${server.base_url})` : 
+                             'Global access'}
                           </Typography>
-                        )}
-                        <Typography variant="caption" display="block" color="text.secondary">
-                          Granted: {new Date(permission.granted_at).toLocaleDateString()}
-                          {permission.usage_count > 0 && ` • Used: ${permission.usage_count} times`}
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                  <ListItemSecondaryAction>
-                    <IconButton 
-                      edge="end" 
-                      color="error"
-                      onClick={() => revokePermission(permission.id)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              ))}
+                          {permission.rate_limit_per_hour && (
+                            <Typography variant="caption" display="block">
+                              Rate limit: {permission.rate_limit_per_hour}/hour
+                            </Typography>
+                          )}
+                          {permission.expires_at && (
+                            <Typography variant="caption" display="block">
+                              Expires: {new Date(permission.expires_at).toLocaleDateString()}
+                            </Typography>
+                          )}
+                          <Typography variant="caption" display="block" color="text.secondary">
+                            Granted: {new Date(permission.granted_at).toLocaleDateString()}
+                            {permission.usage_count > 0 && ` • Used: ${permission.usage_count} times`}
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    <ListItemSecondaryAction>
+                      <IconButton 
+                        edge="end" 
+                        color="error"
+                        onClick={() => revokePermission(permission.id)}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                );
+              })}
             </List>
           )}
         </CardContent>
@@ -1691,6 +1877,14 @@ const ToolsPage: React.FC = () => {
               >
                 Create Role Rule
               </Button>
+              <Button
+                variant="outlined"
+                color="info"
+                startIcon={<SecurityIcon />}
+                onClick={() => openDialog('access-check')}
+              >
+                Check Access
+              </Button>
             </Box>
           )}
         </Box>
@@ -1732,6 +1926,7 @@ const ToolsPage: React.FC = () => {
       {renderServerDialog()}
       {renderPermissionDialog()}
       {renderRoleAccessDialog()}
+      {renderAccessCheckDialog()}
 
       {/* Action Menu */}
       <Menu

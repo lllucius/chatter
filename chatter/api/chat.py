@@ -7,11 +7,7 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.core.chat import (
-    ChatError,
-    ChatService,
-    ConversationNotFoundError,
-)
+from chatter.core.exceptions import NotFoundError, ChatServiceError
 from chatter.services.chat_refactored import RefactoredChatService
 from chatter.models.conversation import ConversationStatus
 from chatter.models.user import User
@@ -106,7 +102,7 @@ async def create_conversation(
             current_user.id, conversation_data
         )
         return ConversationResponse.model_validate(conversation)
-    except ChatError as e:
+    except ChatServiceError as e:
         raise BadRequestProblem(detail=str(e)) from e
 
 
@@ -197,7 +193,7 @@ async def update_conversation(
             conversation_id, current_user.id, update_data
         )
         return ConversationResponse.model_validate(conversation)
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -222,7 +218,7 @@ async def delete_conversation(
         return ConversationDeleteResponse(
             message="Conversation deleted successfully"
         )
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -250,7 +246,7 @@ async def get_conversation_messages(
             conversation_id, current_user.id
         )
         return [MessageResponse.model_validate(m) for m in messages]
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -273,7 +269,7 @@ async def add_message_to_conversation(
             conversation_id, current_user.id, message.content
         )
         return MessageResponse.model_validate(created_message)
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -293,7 +289,7 @@ async def delete_message(
             conversation_id, message_id, current_user.id
         )
         return MessageDeleteResponse(message="Message deleted successfully")
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -349,7 +345,7 @@ async def chat(
                             current_user.id, chat_request, workflow_type=workflow_type
                         ):
                             yield f"data: {json.dumps(chunk)}\n\n"
-            except (ConversationNotFoundError, ChatError) as e:
+            except (NotFoundError, ChatServiceError) as e:
                 error_chunk = {"type": "error", "error": str(e)}
                 yield f"data: {json.dumps(error_chunk)}\n\n"
             finally:
@@ -381,7 +377,7 @@ async def chat(
             message=MessageResponse.model_validate(assistant_message),
             conversation=ConversationResponse.model_validate(conversation),
         )
-    except (ConversationNotFoundError, ChatError) as e:
+    except (NotFoundError, ChatServiceError) as e:
         raise BadRequestProblem(detail=str(e)) from None
 
 

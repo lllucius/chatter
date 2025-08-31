@@ -27,9 +27,8 @@ from chatter.utils.security import get_secure_logger
 logger = get_secure_logger(__name__)
 
 
-class ChatServiceError(Exception):
-    """Chat service error."""
-    pass
+# Use standardized ChatServiceError from core.exceptions
+from chatter.core.exceptions import ChatServiceError
 
 
 class RefactoredChatService:

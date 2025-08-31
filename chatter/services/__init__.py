@@ -7,6 +7,16 @@ except ImportError:
     ab_test_manager = None
 
 try:
+    from .chat_refactored import RefactoredChatService
+except ImportError:
+    RefactoredChatService = None
+
+try:
+    from .conversation import ConversationService  
+except ImportError:
+    ConversationService = None
+
+try:
     from .data_management import data_manager
 except ImportError:
     data_manager = None
@@ -22,6 +32,11 @@ except ImportError:
     mcp_service = None
 
 try:
+    from .message import MessageService
+except ImportError:
+    MessageService = None
+
+try:
     from .plugins import plugin_manager
 except ImportError:
     plugin_manager = None
@@ -31,11 +46,20 @@ try:
 except ImportError:
     sse_service = None
 
+try:
+    from .workflow_execution import WorkflowExecutionService
+except ImportError:
+    WorkflowExecutionService = None
+
 __all__ = [
     "ab_test_manager",
+    "ConversationService",
     "data_manager",
     "job_queue",
     "mcp_service",
+    "MessageService", 
     "plugin_manager",
+    "RefactoredChatService",
     "sse_service",
+    "WorkflowExecutionService",
 ]

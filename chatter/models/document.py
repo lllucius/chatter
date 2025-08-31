@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
     JSON,
@@ -19,6 +19,9 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
+
+if TYPE_CHECKING:
+    from chatter.models.user import User
 
 
 class DocumentStatus(str, Enum):
@@ -145,7 +148,7 @@ class Document(Base):
     )
 
     # Relationships
-    owner: Mapped[User] = relationship(
+    owner: Mapped["User"] = relationship(
         "User", back_populates="documents"
     )
     chunks: Mapped[list[DocumentChunk]] = relationship(

@@ -1,6 +1,8 @@
 """Rate limiting middleware with proper headers."""
 
 import time
+from collections.abc import Awaitable, Callable
+from typing import Any
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -14,8 +16,8 @@ logger = get_logger(__name__)
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Rate limiting middleware with X-RateLimit headers."""
 
-    def __init__(self, app, requests_per_minute: int = 60,
-                 requests_per_hour: int = 1000):
+    def __init__(self, app: Any, requests_per_minute: int = 60,
+                 requests_per_hour: int = 1000) -> None:
         """Initialize rate limiter.
 
         Args:
@@ -48,9 +50,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             return hashlib.sha256(auth_header.encode()).hexdigest()[:16]
 
         # Fall back to client IP
-        client_ip = request.client.host if request.client else "unknown"
+        client_ip: str = request.client.host if request.client else "unknown"
         forwarded_for = request.headers.get("x-forwarded-for")
         if forwarded_for:
+            # forwarded_for is guaranteed to be str here due to the if check
             client_ip = forwarded_for.split(",")[0].strip()
 
         return client_ip
@@ -134,7 +137,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         return allowed, headers
 
-    async def dispatch(self, request: Request, call_next) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
         """Apply rate limiting with headers.
 
         Args:

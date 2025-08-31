@@ -263,7 +263,7 @@ class AdvancedMetricsCollector:
         # Filter metrics to time window
         recent_requests = [r for r in self.requests if r.timestamp > cutoff_time]
         recent_db_ops = [d for d in self.database_ops if d.timestamp > cutoff_time]
-        recent_llm_ops = [l for l in self.llm_ops if l.timestamp > cutoff_time]
+        recent_llm_ops = [llm_op for llm_op in self.llm_ops if llm_op.timestamp > cutoff_time]
         recent_workflows = [w for w in self.workflow_ops if w.timestamp > cutoff_time]
 
         # Request analysis

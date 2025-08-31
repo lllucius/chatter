@@ -484,4 +484,3 @@ class Settings(BaseSettings):
 
 # Create module-level settings instance
 settings = Settings()
-

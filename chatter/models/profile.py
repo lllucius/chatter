@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import (
     JSON,
@@ -20,6 +20,10 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
+
+if TYPE_CHECKING:
+    from chatter.models.conversation import Conversation
+    from chatter.models.user import User
 
 
 class ProfileType(str, Enum):
@@ -167,10 +171,10 @@ class Profile(Base):
     )
 
     # Relationships
-    owner: Mapped[User] = relationship(
+    owner: Mapped["User"] = relationship(
         "User", back_populates="profiles", foreign_keys=[owner_id]
     )
-    conversations: Mapped[list[Conversation]] = relationship(
+    conversations: Mapped[list["Conversation"]] = relationship(
         "Conversation", back_populates="profile"
     )
 

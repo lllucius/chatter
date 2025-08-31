@@ -400,85 +400,6 @@ def verify_token(token: str) -> dict[str, Any] | None:
         return None
 
 
-def create_access_token(
-    data: dict[str, Any], expires_delta: timedelta | None = None
-) -> str:
-    """Create a JWT access token.
-
-    Args:
-        data: Data to encode in the token
-        expires_delta: Token expiration time delta
-
-    Returns:
-        Encoded JWT token string
-    """
-    to_encode = data.copy()
-
-    if expires_delta:
-        expire = datetime.now(UTC) + expires_delta
-    else:
-        expire = datetime.now(UTC) + timedelta(
-            minutes=settings.access_token_expire_minutes
-        )
-
-    to_encode.update({"exp": expire})
-
-    encoded_jwt = jwt.encode(
-        to_encode, settings.secret_key, algorithm=settings.algorithm
-    )
-
-    return encoded_jwt
-
-
-def create_refresh_token(
-    data: dict[str, Any], expires_delta: timedelta | None = None
-) -> str:
-    """Create a JWT refresh token.
-
-    Args:
-        data: Data to encode in the token
-        expires_delta: Token expiration time delta
-
-    Returns:
-        Encoded JWT token string
-    """
-    to_encode = data.copy()
-
-    if expires_delta:
-        expire = datetime.now(UTC) + expires_delta
-    else:
-        expire = datetime.now(UTC) + timedelta(
-            days=settings.refresh_token_expire_days
-        )
-
-    to_encode.update({"exp": expire, "type": "refresh"})
-
-    encoded_jwt = jwt.encode(
-        to_encode, settings.secret_key, algorithm=settings.algorithm
-    )
-
-    return encoded_jwt
-
-
-def verify_token(token: str) -> dict[str, Any] | None:
-    """Verify and decode a JWT token.
-
-    Args:
-        token: JWT token string to verify
-
-    Returns:
-        Decoded token payload if valid, None otherwise
-    """
-    try:
-        payload = jwt.decode(
-            token, settings.secret_key, algorithms=[settings.algorithm]
-        )
-        return payload
-    except JWTError as e:
-        logger.debug("Token verification failed", error=str(e))
-        return None
-
-
 def extract_user_id_from_token(token: str) -> str | None:
     """Extract user ID from JWT token.
 
@@ -565,33 +486,6 @@ def generate_api_key(length: int = 32) -> str:
 
     alphabet = string.ascii_letters + string.digits
     return "".join(secrets.choice(alphabet) for _ in range(length))
-
-
-def hash_api_key(api_key: str) -> str:
-    """Hash an API key using bcrypt.
-
-    Args:
-        api_key: Plain text API key
-
-    Returns:
-        Hashed API key string
-    """
-    return bcrypt.hashpw(api_key.encode(), bcrypt.gensalt()).decode()
-
-
-def verify_api_key(plain_api_key: str, hashed_api_key: str) -> bool:
-    """Verify an API key against its hash.
-
-    Args:
-        plain_api_key: Plain text API key to verify
-        hashed_api_key: Hashed API key to verify against
-
-    Returns:
-        True if API key matches, False otherwise
-    """
-    return bcrypt.checkpw(
-        plain_api_key.encode(), hashed_api_key.encode()
-    )
 
 
 def sanitize_input(input_string: str, max_length: int = 1000) -> str:

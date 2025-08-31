@@ -302,7 +302,7 @@ def create_versioned_app() -> FastAPI:
 
 def version_route(
     versions: list[APIVersion],
-) -> Callable[[Callable], Callable]:
+) -> Callable[[Callable[..., Any]], Callable[..., Any]]:
     """Decorator to mark routes with version information.
 
     Args:
@@ -313,7 +313,7 @@ def version_route(
     """
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         # Add version metadata to function
-        func._api_versions = versions
+        func._api_versions = versions  # type: ignore[attr-defined]
 
         # Register endpoint with version manager
         # This would be called during route registration
@@ -339,10 +339,10 @@ class VersionedRouter:
     def add_route(
         self,
         path: str,
-        endpoint,
+        endpoint: Callable[..., Any],
         methods: list[str],
         versions: list[APIVersion],
-        **kwargs
+        **kwargs: Any
     ) -> None:
         """Add a versioned route.
 
@@ -384,12 +384,12 @@ version_manager = APIVersionManager()
 
 # Example of how to use versioning decorators
 @version_route(versions=[APIVersion.V1, APIVersion.V2])
-async def get_health():
+async def get_health() -> dict[str, str]:
     """Health check endpoint available in all versions."""
     return {"status": "healthy"}
 
 
 @version_route(versions=[APIVersion.V2])
-async def get_agents():
+async def get_agents() -> dict[str, list[Any]]:
     """Agent management endpoint only in v2."""
     return {"agents": []}

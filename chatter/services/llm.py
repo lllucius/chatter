@@ -171,7 +171,7 @@ class LLMService:
     def _initialize_providers(self) -> None:
         """Initialize available LLM providers.
 
-        Note: This is kept for backward compatibility but providers are now loaded dynamically.
+        Note: Providers are now loaded dynamically from model registry.
         """
         logger.info("LLM providers will be loaded dynamically from model registry")
 

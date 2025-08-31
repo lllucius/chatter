@@ -157,7 +157,6 @@ class MCPToolService:
     async def _authenticate_oauth(self, server_name: str) -> bool:
         """OAuth authentication is handled by the underlying MCP client."""
         # Note: OAuth handling would need to be implemented in the connection configuration
-        # This is a placeholder for backward compatibility
         logger.warning("OAuth authentication not yet implemented with langchain-mcp-adapters")
         return False
 
@@ -187,14 +186,6 @@ class MCPToolService:
                 error=str(e),
             )
             return []
-
-    async def _discover_tools_sse(self, server_name: str) -> list[dict[str, Any]]:
-        """Discover tools using SSE connection."""
-        # This method is deprecated - langchain-mcp-adapters handles this internally
-        logger.warning("_discover_tools_sse is deprecated, use discover_tools instead")
-        tools = await self.discover_tools(server_name)
-        # Convert to old format for backward compatibility
-        return [{"name": tool.name, "description": tool.description} for tool in tools]
 
     async def get_tools(
         self, server_names: list[str] | None = None
@@ -328,18 +319,6 @@ class MCPToolService:
                 "server": server_name or "unknown",
                 "response_time_ms": response_time_ms,
             }
-
-    async def _call_tool_sse(
-        self,
-        server_name: str,
-        tool_name: str,
-        arguments: dict[str, Any],
-    ) -> dict[str, Any]:
-        """Call a tool using SSE connection."""
-        # This method is deprecated - langchain-mcp-adapters handles this internally
-        logger.warning("_call_tool_sse is deprecated, use call_tool instead")
-        result = await self.call_tool(tool_name, arguments, server_name)
-        return result.get("result", {})
 
     async def _track_tool_usage(
         self,

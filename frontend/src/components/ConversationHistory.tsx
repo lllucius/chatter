@@ -22,6 +22,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
+import CustomScrollbar from './CustomScrollbar';
 import {
   History as HistoryIcon,
   Message as MessageIcon,
@@ -174,16 +175,18 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
               <CircularProgress />
             </Box>
           ) : (
-            <List sx={{ maxHeight: 400, overflow: 'auto' }}>
-              {filteredConversations.length === 0 ? (
-                <ListItem>
-                  <ListItemText
-                    primary="No conversations found"
-                    secondary={searchTerm ? "Try adjusting your search terms" : "Start a new conversation to see it here"}
-                  />
-                </ListItem>
-              ) : (
-                filteredConversations.map((conversation) => (
+            <Box sx={{ maxHeight: 400 }}>
+              <CustomScrollbar>
+                <List>
+                  {filteredConversations.length === 0 ? (
+                    <ListItem>
+                      <ListItemText
+                        primary="No conversations found"
+                        secondary={searchTerm ? "Try adjusting your search terms" : "Start a new conversation to see it here"}
+                      />
+                    </ListItem>
+                  ) : (
+                    filteredConversations.map((conversation) => (
                   <ListItem
                     key={conversation.id}
                     button
@@ -240,7 +243,9 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
                   </ListItem>
                 ))
               )}
-            </List>
+                </List>
+              </CustomScrollbar>
+            </Box>
           )}
         </DialogContent>
         

@@ -115,6 +115,10 @@ class Settings(BaseSettings):
     # REDIS CACHE SETTINGS
     # =============================================================================
 
+    # Enable/disable Redis caching - if disabled, operations silently fail gracefully
+    cache_enabled: bool = Field(
+        default=True, description="Enable Redis caching (optional)"
+    )
     redis_url: str = Field(
         default="redis://localhost:6379/0",
         description="Redis URL for caching"
@@ -125,6 +129,14 @@ class Settings(BaseSettings):
     )
     cache_ttl: int = Field(
         default=3600, description="Default cache TTL in seconds"
+    )
+    # Connection timeout for Redis operations
+    redis_connect_timeout: int = Field(
+        default=5, description="Redis connection timeout in seconds"
+    )
+    # Retry attempts for Redis connection
+    redis_connect_retries: int = Field(
+        default=3, description="Redis connection retry attempts"
     )
     db_pool_recycle: int = Field(
         default=3600, description="Database pool recycle time"

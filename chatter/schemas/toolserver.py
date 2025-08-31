@@ -59,6 +59,9 @@ class ToolServerBase(BaseModel):
     auto_start: bool = Field(
         True, description="Auto-connect to server on system startup"
     )
+    auto_update: bool = Field(
+        True, description="Auto-update server capabilities"
+    )
     max_failures: int = Field(
         3,
         ge=1,
@@ -84,6 +87,7 @@ class ToolServerUpdate(BaseModel):
     headers: dict[str, str] | None = Field(None)
     timeout: int | None = Field(None, ge=5, le=300)
     auto_start: bool | None = Field(None)
+    auto_update: bool | None = Field(None)
     max_failures: int | None = Field(None, ge=1, le=10)
 
 

@@ -50,6 +50,7 @@ import {
 import { chatterSDK } from '../services/chatter-sdk';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
 import { useSSE } from '../services/sse-context';
+import CustomScrollbar from '../components/CustomScrollbar';
 
 const AdministrationPage: React.FC = () => {
   const { isConnected, on } = useSSE();
@@ -579,31 +580,35 @@ const AdministrationPage: React.FC = () => {
             <NotificationsIcon sx={{ mr: 1 }} />
             Recent Notifications ({notifications.length})
           </Typography>
-          <List sx={{ maxHeight: 200, overflow: 'auto' }}>
-            {notifications.map((notification) => (
-              <ListItem key={notification.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
-                <ListItemText
-                  primary={notification.title}
-                  secondary={`${notification.message} • ${new Date(notification.timestamp).toLocaleString()}`}
-                />
-                <Chip 
-                  label={notification.type} 
-                  color={notification.type === 'success' ? 'success' : 
-                         notification.type === 'error' ? 'error' : 
-                         notification.type === 'warning' ? 'warning' : 'info'} 
-                  size="small" 
-                  sx={{ mr: 1 }}
-                />
-                <IconButton 
-                  size="small" 
-                  onClick={() => removeNotification(notification.id)}
-                  title="Dismiss"
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </ListItem>
-            ))}
-          </List>
+          <Box sx={{ maxHeight: 200 }}>
+            <CustomScrollbar>
+              <List>
+                {notifications.map((notification) => (
+                  <ListItem key={notification.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
+                    <ListItemText
+                      primary={notification.title}
+                      secondary={`${notification.message} • ${new Date(notification.timestamp).toLocaleString()}`}
+                    />
+                    <Chip 
+                      label={notification.type} 
+                      color={notification.type === 'success' ? 'success' : 
+                             notification.type === 'error' ? 'error' : 
+                             notification.type === 'warning' ? 'warning' : 'info'} 
+                      size="small" 
+                      sx={{ mr: 1 }}
+                    />
+                    <IconButton 
+                      size="small" 
+                      onClick={() => removeNotification(notification.id)}
+                      title="Dismiss"
+                    >
+                      <CloseIcon fontSize="small" />
+                    </IconButton>
+                  </ListItem>
+                ))}
+              </List>
+            </CustomScrollbar>
+          </Box>
         </Box>
       )}
 

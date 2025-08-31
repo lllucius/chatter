@@ -42,6 +42,7 @@ import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { ConversationResponse, MessageResponse } from '../sdk';
 import { useApi } from '../hooks/useApi';
+import CustomScrollbar from '../components/CustomScrollbar';
 
 // Memoized conversation table row component
 const ConversationTableRow = memo(({ 
@@ -372,74 +373,72 @@ const ConversationsPage: React.FC = () => {
               <CircularProgress />
             </Box>
           ) : (
-            <Box sx={{
-              maxHeight: 400,
-              overflow: 'auto',
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-            }}>
-              {conversationMessages.map((message) => (
-                <Box
-                  key={message.id}
-                  sx={{
-                    display: 'flex',
-                    mb: 2,
-                    alignItems: 'flex-start',
-                    ...(message.role === 'user' && {
-                      flexDirection: 'row-reverse',
-                    }),
-                  }}
-                >
-                  <Avatar
-                    sx={{
-                      bgcolor: getMessageColor(message.role),
-                      ...(message.role === 'user' ? { ml: 1 } : { mr: 1 }),
-                    }}
-                  >
-                    {getMessageIcon(message.role)}
-                  </Avatar>
-                  <Paper
-                    sx={{
-                      p: 2,
-                      maxWidth: '70%',
-                      bgcolor: message.role === 'user'
-                        ? 'primary.light'
-                        : (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
-                      color: message.role === 'user'
-                        ? 'primary.contrastText'
-                        : 'text.primary',
-                    }}
-                  >
-                    <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
-                      {message.content}
-                    </Typography>
-                    <Typography
-                      variant="caption"
+            <Box sx={{ maxHeight: 400, p: 2 }}>
+              <CustomScrollbar>
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  {conversationMessages.map((message) => (
+                    <Box
+                      key={message.id}
                       sx={{
-                        display: 'block',
-                        mt: 1,
-                        opacity: 0.7,
+                        display: 'flex',
+                        mb: 2,
+                        alignItems: 'flex-start',
+                        ...(message.role === 'user' && {
+                          flexDirection: 'row-reverse',
+                        }),
                       }}
                     >
-                      {format(new Date(message.created_at), 'HH:mm:ss')}
+                      <Avatar
+                        sx={{
+                          bgcolor: getMessageColor(message.role),
+                          ...(message.role === 'user' ? { ml: 1 } : { mr: 1 }),
+                        }}
+                      >
+                        {getMessageIcon(message.role)}
+                      </Avatar>
+                      <Paper
+                        sx={{
+                          p: 2,
+                          maxWidth: '70%',
+                          bgcolor: message.role === 'user'
+                            ? 'primary.light'
+                            : (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
+                          color: message.role === 'user'
+                            ? 'primary.contrastText'
+                            : 'text.primary',
+                        }}
+                      >
+                        <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                          {message.content}
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: 'block',
+                            mt: 1,
+                            opacity: 0.7,
+                          }}
+                        >
+                          {format(new Date(message.created_at), 'HH:mm:ss')}
+                        </Typography>
+                        {message.total_tokens && (
+                          <Chip
+                            label={`${message.total_tokens} tokens`}
+                            size="small"
+                            variant="outlined"
+                            sx={{ mt: 1 }}
+                          />
+                        )}
+                      </Paper>
+                    </Box>
+                  ))}
+                  {conversationMessages.length === 0 && (
+                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+                      No messages in this conversation
                     </Typography>
-                    {message.total_tokens && (
-                      <Chip
-                        label={`${message.total_tokens} tokens`}
-                        size="small"
-                        variant="outlined"
-                        sx={{ mt: 1 }}
-                      />
-                    )}
-                  </Paper>
+                  )}
                 </Box>
-              ))}
-              {conversationMessages.length === 0 && (
-                <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
-                  No messages in this conversation
-                </Typography>
-              )}
+              </CustomScrollbar>
             </Box>
           )}
         </DialogContent>

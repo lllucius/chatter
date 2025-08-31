@@ -13,22 +13,22 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
     // Track styles
     trackVertical: {
       position: 'absolute' as const,
-      width: '8px',
+      width: '6px',
       right: '0px',
       bottom: '0px',
       top: '0px',
-      borderRadius: '4px',
+      borderRadius: '3px',
       backgroundColor: theme.palette.mode === 'dark' 
         ? 'rgba(255, 255, 255, 0.1)' 
         : 'rgba(0, 0, 0, 0.1)',
     },
     trackHorizontal: {
       position: 'absolute' as const,
-      height: '8px',
+      height: '6px',
       left: '0px',
       right: '0px',
       bottom: '0px',
-      borderRadius: '4px',
+      borderRadius: '3px',
       backgroundColor: theme.palette.mode === 'dark' 
         ? 'rgba(255, 255, 255, 0.1)' 
         : 'rgba(0, 0, 0, 0.1)',
@@ -37,9 +37,9 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
     thumbVertical: {
       position: 'relative' as const,
       display: 'block',
-      width: '6px',
+      width: '4px',
       minHeight: '20px',
-      borderRadius: '3px',
+      borderRadius: '2px',
       backgroundColor: theme.palette.mode === 'dark' 
         ? 'rgba(255, 255, 255, 0.4)' 
         : 'rgba(0, 0, 0, 0.4)',
@@ -50,9 +50,9 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
     thumbHorizontal: {
       position: 'relative' as const,
       display: 'block',
-      height: '6px',
+      height: '4px',
       minWidth: '20px',
-      borderRadius: '3px',
+      borderRadius: '2px',
       backgroundColor: theme.palette.mode === 'dark' 
         ? 'rgba(255, 255, 255, 0.4)' 
         : 'rgba(0, 0, 0, 0.4)',
@@ -115,11 +115,8 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
           );
         },
       }}
-      // Auto-hide configuration
+      // Track click behavior
       trackClickBehavior="jump"
-      autoHide
-      autoHideTimeout={1000}
-      autoHideDuration={200}
       {...props}
     >
       {children}

@@ -441,6 +441,10 @@ class AdvancedMetricsCollector:
         if not metrics.success:
             stats.error_count += 1
 
+    def _track_correlation(self, correlation_id: str, metrics: Any) -> None:
+        """Track metrics for a correlation ID."""
+        self.correlation_tracking[correlation_id].append(metrics)
+
 
 # Global metrics collector instances
 metrics_collector = AdvancedMetricsCollector()

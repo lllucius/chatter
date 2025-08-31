@@ -178,9 +178,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize built-in tool servers
     try:
         from chatter.services.toolserver import ToolServerService
-        from chatter.utils.database import get_session_factory
+        from chatter.utils.database import get_session_maker
 
-        async_session = get_session_factory()
+        async_session = get_session_maker()
         async with async_session() as session:
             service = ToolServerService(session)
             await service.initialize_builtin_servers()

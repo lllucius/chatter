@@ -28,7 +28,7 @@ import {
   InputLabel,
   Select,
 } from '@mui/material';
-import Grid from '@mui/material/GridLegacy';
+import Grid from '@mui/material/Grid';
 import {
   Backup as BackupIcon,
   Work as JobIcon,

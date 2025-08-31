@@ -12,6 +12,7 @@ from chatter.core.chat import (
     ChatService,
     ConversationNotFoundError,
 )
+from chatter.services.chat_refactored import RefactoredChatService
 from chatter.models.conversation import ConversationStatus
 from chatter.models.user import User
 from chatter.schemas.chat import (
@@ -50,17 +51,17 @@ router = APIRouter()
 
 async def get_chat_service(
     session: AsyncSession = Depends(get_session)
-) -> ChatService:
-    """Get chat service instance.
+) -> RefactoredChatService:
+    """Get refactored chat service instance.
 
     Args:
         session: Database session
 
     Returns:
-        ChatService instance
+        RefactoredChatService instance
     """
     llm_service = LLMService()
-    return ChatService(session, llm_service)
+    return RefactoredChatService(session, llm_service)
 
 
 def _map_workflow_type(workflow: str) -> str:
@@ -88,7 +89,7 @@ def _map_workflow_type(workflow: str) -> str:
 async def create_conversation(
     conversation_data: ConversationCreate,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationResponse:
     """Create a new conversation.
 
@@ -128,7 +129,7 @@ async def list_conversations(
     sort_by: str = Query("created_at", description="Sort field"),
     sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationSearchResponse:
     """List user's conversations.
 
@@ -156,7 +157,7 @@ async def get_conversation(
     conversation_id: str,
     request: ConversationGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationWithMessages:
     """Get conversation details with messages."""
     conversation = await chat_service.get_conversation(
@@ -188,7 +189,7 @@ async def update_conversation(
     conversation_id: str,
     update_data: ConversationUpdate,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationResponse:
     """Update conversation."""
     try:
@@ -211,7 +212,7 @@ async def delete_conversation(
     conversation_id: str,
     request: ConversationDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationDeleteResponse:
     """Delete conversation."""
     try:
@@ -241,7 +242,7 @@ async def delete_conversation(
 async def get_conversation_messages(
     conversation_id: str,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
     """Get conversation messages."""
     try:
@@ -264,7 +265,7 @@ async def add_message_to_conversation(
     conversation_id: str,
     message: MessageCreate,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> MessageResponse:
     """Add a new message to existing conversation."""
     try:
@@ -284,7 +285,7 @@ async def delete_message(
     conversation_id: str,
     message_id: str,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> MessageDeleteResponse:
     """Delete a message from conversation."""
     try:
@@ -315,7 +316,7 @@ async def delete_message(
 async def chat(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ):
     """Single chat endpoint supporting plain, rag, tools, and full workflows.
 
@@ -461,7 +462,7 @@ async def chat_with_template(
     template_name: str,
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ChatResponse:
     """Chat using a specific workflow template."""
     try:
@@ -483,7 +484,7 @@ async def chat_with_template(
 @router.get("/performance/stats", response_model=PerformanceStatsResponse)
 async def get_performance_stats(
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> PerformanceStatsResponse:
     """Get workflow performance statistics."""
     try:

@@ -48,6 +48,7 @@ import { chatterSDK } from '../services/chatter-sdk';
 import { DocumentResponse, DocumentSearchRequest } from '../sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
+import CustomScrollbar from '../components/CustomScrollbar';
 import {
   DocumentUploadedEvent,
   DocumentProcessingStartedEvent,
@@ -735,28 +736,30 @@ const DocumentsPage: React.FC = () => {
           )}
 
           {searchResults.length > 0 && (
-            <Paper sx={{ mt: 3, maxHeight: 400, overflow: 'auto' }}>
-              <List>
-                {searchResults.map((result, index) => (
-                  <ListItem key={index} divider>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                          <Typography variant="subtitle2" sx={{ mr: 1 }}>
-                            Score: {(result.score || 0).toFixed(3)}
+            <Paper sx={{ mt: 3, maxHeight: 400 }}>
+              <CustomScrollbar>
+                <List>
+                  {searchResults.map((result, index) => (
+                    <ListItem key={index} divider>
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="subtitle2" sx={{ mr: 1 }}>
+                              Score: {(result.score || 0).toFixed(3)}
+                            </Typography>
+                            <Chip label={result.source || 'Unknown'} size="small" />
+                          </Box>
+                        }
+                        secondary={
+                          <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                            {result.content || result.text || 'No content available'}
                           </Typography>
-                          <Chip label={result.source || 'Unknown'} size="small" />
-                        </Box>
-                      }
-                      secondary={
-                        <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                          {result.content || result.text || 'No content available'}
-                        </Typography>
-                      }
-                    />
-                  </ListItem>
-                ))}
-              </List>
+                        }
+                      />
+                    </ListItem>
+                  ))}
+                </List>
+              </CustomScrollbar>
             </Paper>
           )}
         </DialogContent>

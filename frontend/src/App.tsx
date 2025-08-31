@@ -8,6 +8,7 @@ import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import SuspenseWrapper from './components/SuspenseWrapper';
+import ThemedToastContainer from './components/ThemedToastContainer';
 import { SSEProvider } from './services/sse-context';
 
 // Lazy load pages for better performance
@@ -169,6 +170,7 @@ function App() {
               </Routes>
             </Router>
           </SSEProvider>
+          <ThemedToastContainer />
         </ThemeProvider>
       </ThemeContext.Provider>
     </ErrorBoundary>

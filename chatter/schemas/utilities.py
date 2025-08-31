@@ -52,7 +52,6 @@ class APIVersion(str, Enum):
 class VersionStatus(str, Enum):
     """API version status."""
     ACTIVE = "active"
-    DEPRECATED = "deprecated"
     SUNSET = "sunset"
 
 
@@ -60,7 +59,6 @@ class EndpointChange(str, Enum):
     """Types of endpoint changes between versions."""
     ADDED = "added"
     MODIFIED = "modified"
-    DEPRECATED = "deprecated"
     REMOVED = "removed"
 
 
@@ -74,7 +72,6 @@ class VersionInfo(BaseModel):
     documentation_url: str | None = None
     breaking_changes: list[str] = []
     new_features: list[str] = []
-    deprecated_features: list[str] = []
 
 
 class EndpointVersioning(BaseModel):
@@ -82,6 +79,5 @@ class EndpointVersioning(BaseModel):
     path: str
     method: str
     introduced_in: APIVersion
-    deprecated_in: APIVersion | None = None
     removed_in: APIVersion | None = None
     changes: dict[APIVersion, list[str]] = {}

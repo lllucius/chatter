@@ -67,7 +67,6 @@ class APIDocumentationEnhancer:
                 "status": version.status.value,
                 "release_date": version.release_date,
                 "documentation_url": version.documentation_url,
-                "deprecated_features": version.deprecated_features or [],
                 "breaking_changes": version.breaking_changes or [],
                 "new_features": version.new_features or []
             }

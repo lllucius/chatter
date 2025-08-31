@@ -65,10 +65,6 @@ class APIVersionManager:
                 "Advanced vector store filtering",
                 "PostgreSQL checkpointer for LangGraph",
             ],
-            deprecated_features=[
-                "Legacy chat endpoints (use /chat/conversations instead)",
-                "Old document upload format",
-            ],
         )
 
     def add_version(self, version_info: VersionInfo) -> None:
@@ -127,7 +123,6 @@ class APIVersionManager:
         path: str,
         method: str,
         introduced_in: APIVersion,
-        deprecated_in: APIVersion | None = None,
         removed_in: APIVersion | None = None,
     ) -> None:
         """Register an endpoint with versioning information.
@@ -136,7 +131,6 @@ class APIVersionManager:
             path: Endpoint path
             method: HTTP method
             introduced_in: Version where endpoint was introduced
-            deprecated_in: Version where endpoint was deprecated
             removed_in: Version where endpoint was removed
         """
         endpoint_key = f"{method.upper()}:{path}"
@@ -144,7 +138,7 @@ class APIVersionManager:
             path=path,
             method=method.upper(),
             introduced_in=introduced_in,
-            deprecated_in=deprecated_in,
+            deprecated_in=None,
             removed_in=removed_in,
         )
 
@@ -198,9 +192,6 @@ class APIVersionManager:
 
         if not self.is_endpoint_available(path, method, version):
             return "unavailable"
-
-        if endpoint.deprecated_in and endpoint.deprecated_in.value <= version.value:
-            return "deprecated"
 
         return "active"
 
@@ -281,21 +272,12 @@ async def version_middleware(request: Request, call_next: Callable[[Request], Aw
             detail=f"Endpoint not available in API version {version.value}"
         )
 
-    # Check if endpoint is deprecated
-    endpoint_status = version_manager.get_endpoint_status(clean_path, method, version)
-
     # Process request
     response = await call_next(request)
 
     # Add version headers to response
     response.headers["API-Version"] = version.value
     response.headers["API-Supported-Versions"] = ",".join([v.value for v in APIVersion])
-
-    # Add deprecation warning if needed
-    if endpoint_status == "deprecated":
-        response.headers["Deprecation"] = "true"
-        response.headers["Sunset"] = "2025-12-31"  # Example sunset date
-        response.headers["Link"] = f'<{settings.api_base_url}/docs/migration>; rel="successor-version"'
 
     return response
 
@@ -320,13 +302,11 @@ def create_versioned_app() -> FastAPI:
 
 def version_route(
     versions: list[APIVersion],
-    deprecated_in: APIVersion | None = None,
 ) -> Callable[[Callable], Callable]:
     """Decorator to mark routes with version information.
 
     Args:
         versions: List of supported versions
-        deprecated_in: Version where route was deprecated
 
     Returns:
         Route decorator
@@ -334,7 +314,6 @@ def version_route(
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         # Add version metadata to function
         func._api_versions = versions
-        func._deprecated_in = deprecated_in
 
         # Register endpoint with version manager
         # This would be called during route registration
@@ -414,9 +393,3 @@ async def get_health():
 async def get_agents():
     """Agent management endpoint only in v2."""
     return {"agents": []}
-
-
-@version_route(versions=[APIVersion.V1], deprecated_in=APIVersion.V2)
-async def legacy_chat():
-    """Legacy chat endpoint deprecated in v2."""
-    return {"message": "This endpoint is deprecated"}

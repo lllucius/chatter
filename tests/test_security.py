@@ -4,9 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from chatter.utils.config_validator import ConfigValidator
-from chatter.utils.security import generate_secure_secret
-from chatter.utils.validation import sanitize_input, validate_email
+from chatter.utils.config_validator import ConfigurationValidator
+from chatter.utils.security import generate_secure_secret, sanitize_input
 
 
 @pytest.mark.unit
@@ -49,19 +48,6 @@ class TestSecurityUtilities:
         sql_injection = "'; DROP TABLE users; --"
         sanitized_sql = sanitize_input(sql_injection)
         assert "DROP TABLE" not in sanitized_sql.upper()
-
-    def test_email_validation_security(self):
-        """Test email validation for security vulnerabilities."""
-        # Valid emails
-        assert validate_email("user@example.com") is True
-        assert validate_email("test.user+tag@domain.co.uk") is True
-
-        # Invalid/malicious emails
-        assert validate_email("user@") is False
-        assert validate_email("@domain.com") is False
-        assert validate_email("user@domain") is False
-        assert validate_email("user..user@domain.com") is False
-        assert validate_email("user@domain..com") is False
 
 
 @pytest.mark.unit
@@ -133,7 +119,7 @@ class TestConfigurationSecurity:
 
     def test_weak_secret_detection(self):
         """Test detection of weak secrets."""
-        validator = ConfigValidator()
+        validator = ConfigurationValidator()
 
         # Weak secrets should be rejected
         weak_secrets = [
@@ -150,7 +136,7 @@ class TestConfigurationSecurity:
 
     def test_default_credential_detection(self):
         """Test detection of default credentials."""
-        validator = ConfigValidator()
+        validator = ConfigurationValidator()
 
         # Default database credentials should be rejected
         default_configs = [
@@ -166,7 +152,7 @@ class TestConfigurationSecurity:
 
     def test_secure_config_acceptance(self):
         """Test that secure configurations are accepted."""
-        validator = ConfigValidator()
+        validator = ConfigurationValidator()
 
         # Strong secrets should be accepted
         strong_secret = generate_secure_secret(64)

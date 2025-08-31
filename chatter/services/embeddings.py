@@ -213,7 +213,7 @@ class EmbeddingService:
     def _initialize_providers(self) -> None:
         """Initialize available embedding providers.
 
-        Note: This is kept for backward compatibility but providers are now loaded dynamically.
+        Note: Providers are now loaded dynamically from model registry.
         """
         logger.info("Embedding providers will be loaded dynamically from model registry")
 

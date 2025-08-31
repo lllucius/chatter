@@ -33,14 +33,12 @@ Updated to use the unified workflow creation method internally while maintaining
 
 New method for creating streaming workflows with the same interface as the regular workflow creation method.
 
-## Backward Compatibility
+## Unified API
 
-All existing methods remain available and functional:
+The workflow API has been simplified to use a single unified method:
 
-- `create_basic_conversation_workflow()`
-- `create_rag_conversation_workflow()`
-- `create_tool_calling_workflow()`
-- Existing API endpoints (`/workflows/basic`, `/workflows/rag`, `/workflows/tools`)
+- `create_workflow(mode="plain"|"rag"|"tools"|"full")`
+- Existing API endpoints continue to work with the unified backend
 
 ## Usage Examples
 
@@ -96,9 +94,8 @@ streaming_workflow = await llm_service.create_langgraph_streaming_workflow(
 1. **Simplified API**: Single method for all workflow types
 2. **Automatic Detection**: No need to specify workflow type explicitly
 3. **Streaming Support**: Dedicated streaming workflow creation
-4. **Backward Compatibility**: Existing code continues to work
-5. **Reduced Code Duplication**: Unified implementation reduces maintenance overhead
+4. **Reduced Code Duplication**: Unified implementation reduces maintenance overhead
 
 ## Future Enhancements
 
-The unified API design makes it possible to create a single REST endpoint (e.g., `/workflows`) that could accept workflow configuration in the request body, eliminating the need for separate endpoints for each workflow type. This change would require updating the `ChatRequest` schema and is not included in this refactoring to maintain API backward compatibility.
+The unified API design makes it possible to create a single REST endpoint (e.g., `/workflows`) that could accept workflow configuration in the request body, eliminating the need for separate endpoints for each workflow type.

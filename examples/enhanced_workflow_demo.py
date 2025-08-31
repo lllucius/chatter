@@ -418,9 +418,9 @@ async def basic_feature_test():
     # Test metrics collector
     try:
         workflow_metrics_collector.get_workflow_stats()
-        print(f"✅ MetricsCollector: tracked workflow {workflow_id[:8]}..., tool_calls={final_metrics.tool_calls}")
+        print(f"✅ AdvancedMetricsCollector: tracked workflow {workflow_id[:8]}..., tool_calls={final_metrics.tool_calls}")
     except Exception as e:
-        print(f"❌ MetricsCollector failed: {e}")
+        print(f"❌ AdvancedMetricsCollector failed: {e}")
 
     # Test security
     try:

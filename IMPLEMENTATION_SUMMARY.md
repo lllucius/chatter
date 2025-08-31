@@ -176,10 +176,10 @@ if not rate_limit_validator.check_rate_limit(client_ip):
 async def get_conversations():
     return {"conversations": [...]}
 
-# Deprecation management
-@version_route(versions=[APIVersion.V1], deprecated_in=APIVersion.V2)
-async def legacy_endpoint():
-    return {"message": "This endpoint is deprecated"}
+# Simple versioning
+@version_route(versions=[APIVersion.V2])
+async def v2_only_endpoint():
+    return {"message": "Available in v2 only"}
 ```
 
 ### 8. **Webhook System** (`chatter/services/webhooks.py`)

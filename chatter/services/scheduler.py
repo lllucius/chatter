@@ -5,7 +5,7 @@ from datetime import UTC, datetime, timedelta
 
 from chatter.models.toolserver import ServerStatus
 from chatter.services.toolserver import ToolServerService
-from chatter.utils.database import get_session_factory
+from chatter.utils.database import get_session_maker
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -98,7 +98,7 @@ class ToolServerScheduler:
     async def _perform_health_checks(self):
         """Perform health checks on all servers."""
         try:
-            async_session = get_session_factory()
+            async_session = get_session_maker()
             async with async_session() as session:
                 service = ToolServerService(session)
 
@@ -152,7 +152,7 @@ class ToolServerScheduler:
     async def _perform_auto_updates(self):
         """Perform auto-updates for servers with auto_update enabled."""
         try:
-            async_session = get_session_factory()
+            async_session = get_session_maker()
             async with async_session() as session:
                 service = ToolServerService(session)
 
@@ -192,7 +192,7 @@ class ToolServerScheduler:
     async def _perform_cleanup(self):
         """Perform cleanup of old data."""
         try:
-            async_session = get_session_factory()
+            async_session = get_session_maker()
             async with async_session() as session:
                 from sqlalchemy import delete
 

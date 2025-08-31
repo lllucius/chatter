@@ -494,6 +494,39 @@ class ToolServerService:
             ServerToolResponse.model_validate(tool) for tool in tools
         ]
 
+    async def list_all_tools(self) -> list[dict]:
+        """List all tools across all servers.
+
+        Returns:
+            List of all available tools across all servers
+        """
+        result = await self.session.execute(
+            select(ServerTool).options(
+                selectinload(ServerTool.server)
+            )
+        )
+        tools = result.scalars().all()
+
+        return [
+            {
+                "id": tool.id,
+                "name": tool.name,
+                "description": tool.description,
+                "server_id": tool.server_id,
+                "server_name": tool.server.name if tool.server else None,
+                "status": tool.status.value if tool.status else None,
+                "enabled": tool.status == ToolStatus.ENABLED,
+                "total_calls": tool.total_calls,
+                "total_errors": tool.total_errors,
+                "avg_response_time_ms": tool.avg_response_time_ms,
+                "last_called": tool.last_called.isoformat() if tool.last_called else None,
+                "last_error": tool.last_error,
+                "created_at": tool.created_at.isoformat() if tool.created_at else None,
+                "updated_at": tool.updated_at.isoformat() if tool.updated_at else None,
+            }
+            for tool in tools
+        ]
+
     async def enable_tool(self, tool_id: str) -> bool:
         """Enable a specific tool.
 

@@ -53,10 +53,15 @@ class ToolServer(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Remote server configuration  
-    base_url: Mapped[str] = mapped_column(String(500), nullable=False)
+    base_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
     transport_type: Mapped[str] = mapped_column(
         String(20), nullable=False, default="http"  # "http" or "sse"
     )
+    
+    # Built-in server configuration (for local servers)
+    command: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    args: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+    env: Mapped[dict[str, str] | None] = mapped_column(JSON, nullable=True)
     
     # OAuth configuration
     oauth_client_id: Mapped[str | None] = mapped_column(String(200), nullable=True)

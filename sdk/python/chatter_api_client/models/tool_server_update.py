@@ -27,6 +27,7 @@ class ToolServerUpdate:
         headers (Union['ToolServerUpdateHeadersType0', None, Unset]):
         timeout (Union[None, Unset, int]):
         auto_start (Union[None, Unset, bool]):
+        auto_update (Union[None, Unset, bool]):
         max_failures (Union[None, Unset, int]):
     """
 
@@ -38,6 +39,7 @@ class ToolServerUpdate:
     headers: Union["ToolServerUpdateHeadersType0", None, Unset] = UNSET
     timeout: Union[None, Unset, int] = UNSET
     auto_start: Union[None, Unset, bool] = UNSET
+    auto_update: Union[None, Unset, bool] = UNSET
     max_failures: Union[None, Unset, int] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -97,6 +99,12 @@ class ToolServerUpdate:
         else:
             auto_start = self.auto_start
 
+        auto_update: Union[None, Unset, bool]
+        if isinstance(self.auto_update, Unset):
+            auto_update = UNSET
+        else:
+            auto_update = self.auto_update
+
         max_failures: Union[None, Unset, int]
         if isinstance(self.max_failures, Unset):
             max_failures = UNSET
@@ -122,6 +130,8 @@ class ToolServerUpdate:
             field_dict["timeout"] = timeout
         if auto_start is not UNSET:
             field_dict["auto_start"] = auto_start
+        if auto_update is not UNSET:
+            field_dict["auto_update"] = auto_update
         if max_failures is not UNSET:
             field_dict["max_failures"] = max_failures
 
@@ -222,6 +232,15 @@ class ToolServerUpdate:
 
         auto_start = _parse_auto_start(d.pop("auto_start", UNSET))
 
+        def _parse_auto_update(data: object) -> Union[None, Unset, bool]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, bool], data)
+
+        auto_update = _parse_auto_update(d.pop("auto_update", UNSET))
+
         def _parse_max_failures(data: object) -> Union[None, Unset, int]:
             if data is None:
                 return data
@@ -240,6 +259,7 @@ class ToolServerUpdate:
             headers=headers,
             timeout=timeout,
             auto_start=auto_start,
+            auto_update=auto_update,
             max_failures=max_failures,
         )
 

@@ -8037,13 +8037,13 @@ export interface ToolServerCreate {
      */
     'description'?: string | null;
     /**
-     * Base URL for the remote server
+     * 
      * @type {string}
      * @memberof ToolServerCreate
      */
-    'base_url': string;
+    'base_url'?: string | null;
     /**
-     * Transport type: http or sse
+     * Transport type: http, sse, or stdio
      * @type {string}
      * @memberof ToolServerCreate
      */
@@ -8072,6 +8072,12 @@ export interface ToolServerCreate {
      * @memberof ToolServerCreate
      */
     'auto_start'?: boolean;
+    /**
+     * Auto-update server capabilities
+     * @type {boolean}
+     * @memberof ToolServerCreate
+     */
+    'auto_update'?: boolean;
     /**
      * Maximum consecutive failures before disabling
      * @type {number}
@@ -8268,13 +8274,13 @@ export interface ToolServerResponse {
      */
     'description'?: string | null;
     /**
-     * Base URL for the remote server
+     * 
      * @type {string}
      * @memberof ToolServerResponse
      */
-    'base_url': string;
+    'base_url'?: string | null;
     /**
-     * Transport type: http or sse
+     * Transport type: http, sse, or stdio
      * @type {string}
      * @memberof ToolServerResponse
      */
@@ -8303,6 +8309,12 @@ export interface ToolServerResponse {
      * @memberof ToolServerResponse
      */
     'auto_start'?: boolean;
+    /**
+     * Auto-update server capabilities
+     * @type {boolean}
+     * @memberof ToolServerResponse
+     */
+    'auto_update'?: boolean;
     /**
      * Maximum consecutive failures before disabling
      * @type {number}
@@ -8432,6 +8444,12 @@ export interface ToolServerUpdate {
      * @memberof ToolServerUpdate
      */
     'auto_start'?: boolean | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof ToolServerUpdate
+     */
+    'auto_update'?: boolean | null;
     /**
      * 
      * @type {number}

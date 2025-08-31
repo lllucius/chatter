@@ -13059,17 +13059,19 @@ components:
           title: Description
           description: Server description
         base_url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
           title: Base Url
-          description: Base URL for the remote server
+          description: Base URL for the remote server (null for built-in servers)
         transport_type:
           type: string
-          pattern: ^(http|sse)$
+          pattern: ^(http|sse|stdio)$
           title: Transport Type
-          description: 'Transport type: http or sse'
+          description: 'Transport type: http, sse, or stdio'
           default: http
         oauth_config:
           anyOf:
@@ -13096,6 +13098,11 @@ components:
           title: Auto Start
           description: Auto-connect to server on system startup
           default: true
+        auto_update:
+          type: boolean
+          title: Auto Update
+          description: Auto-update server capabilities
+          default: true
         max_failures:
           type: integer
           maximum: 10.0
@@ -13107,7 +13114,6 @@ components:
       required:
       - name
       - display_name
-      - base_url
       title: ToolServerCreate
       description: Schema for creating a tool server.
     ToolServerDeleteResponse:
@@ -13273,17 +13279,19 @@ components:
           title: Description
           description: Server description
         base_url:
-          type: string
-          maxLength: 2083
-          minLength: 1
-          format: uri
+          anyOf:
+          - type: string
+            maxLength: 2083
+            minLength: 1
+            format: uri
+          - type: 'null'
           title: Base Url
-          description: Base URL for the remote server
+          description: Base URL for the remote server (null for built-in servers)
         transport_type:
           type: string
-          pattern: ^(http|sse)$
+          pattern: ^(http|sse|stdio)$
           title: Transport Type
-          description: 'Transport type: http or sse'
+          description: 'Transport type: http, sse, or stdio'
           default: http
         oauth_config:
           anyOf:
@@ -13309,6 +13317,11 @@ components:
           type: boolean
           title: Auto Start
           description: Auto-connect to server on system startup
+          default: true
+        auto_update:
+          type: boolean
+          title: Auto Update
+          description: Auto-update server capabilities
           default: true
         max_failures:
           type: integer
@@ -13378,7 +13391,6 @@ components:
       required:
       - name
       - display_name
-      - base_url
       - id
       - status
       - is_builtin
@@ -13412,7 +13424,7 @@ components:
         transport_type:
           anyOf:
           - type: string
-            pattern: ^(http|sse)$
+            pattern: ^(http|sse|stdio)$
           - type: 'null'
           title: Transport Type
         oauth_config:
@@ -13438,6 +13450,11 @@ components:
           - type: boolean
           - type: 'null'
           title: Auto Start
+        auto_update:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Auto Update
         max_failures:
           anyOf:
           - type: integer

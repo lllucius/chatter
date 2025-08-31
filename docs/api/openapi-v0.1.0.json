@@ -19670,18 +19670,25 @@
             "description": "Server description"
           },
           "base_url": {
-            "type": "string",
-            "maxLength": 2083,
-            "minLength": 1,
-            "format": "uri",
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Base Url",
-            "description": "Base URL for the remote server"
+            "description": "Base URL for the remote server (null for built-in servers)"
           },
           "transport_type": {
             "type": "string",
-            "pattern": "^(http|sse)$",
+            "pattern": "^(http|sse|stdio)$",
             "title": "Transport Type",
-            "description": "Transport type: http or sse",
+            "description": "Transport type: http, sse, or stdio",
             "default": "http"
           },
           "oauth_config": {
@@ -19724,6 +19731,12 @@
             "description": "Auto-connect to server on system startup",
             "default": true
           },
+          "auto_update": {
+            "type": "boolean",
+            "title": "Auto Update",
+            "description": "Auto-update server capabilities",
+            "default": true
+          },
           "max_failures": {
             "type": "integer",
             "maximum": 10.0,
@@ -19736,8 +19749,7 @@
         "type": "object",
         "required": [
           "name",
-          "display_name",
-          "base_url"
+          "display_name"
         ],
         "title": "ToolServerCreate",
         "description": "Schema for creating a tool server."
@@ -19967,18 +19979,25 @@
             "description": "Server description"
           },
           "base_url": {
-            "type": "string",
-            "maxLength": 2083,
-            "minLength": 1,
-            "format": "uri",
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Base Url",
-            "description": "Base URL for the remote server"
+            "description": "Base URL for the remote server (null for built-in servers)"
           },
           "transport_type": {
             "type": "string",
-            "pattern": "^(http|sse)$",
+            "pattern": "^(http|sse|stdio)$",
             "title": "Transport Type",
-            "description": "Transport type: http or sse",
+            "description": "Transport type: http, sse, or stdio",
             "default": "http"
           },
           "oauth_config": {
@@ -20019,6 +20038,12 @@
             "type": "boolean",
             "title": "Auto Start",
             "description": "Auto-connect to server on system startup",
+            "default": true
+          },
+          "auto_update": {
+            "type": "boolean",
+            "title": "Auto Update",
+            "description": "Auto-update server capabilities",
             "default": true
           },
           "max_failures": {
@@ -20123,7 +20148,6 @@
         "required": [
           "name",
           "display_name",
-          "base_url",
           "id",
           "status",
           "is_builtin",
@@ -20178,7 +20202,7 @@
             "anyOf": [
               {
                 "type": "string",
-                "pattern": "^(http|sse)$"
+                "pattern": "^(http|sse|stdio)$"
               },
               {
                 "type": "null"
@@ -20233,6 +20257,17 @@
               }
             ],
             "title": "Auto Start"
+          },
+          "auto_update": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auto Update"
           },
           "max_failures": {
             "anyOf": [

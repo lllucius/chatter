@@ -9,12 +9,13 @@ Name | Type | Description | Notes
 **name** | **string** | Server name | [default to undefined]
 **display_name** | **string** | Display name | [default to undefined]
 **description** | **string** |  | [optional] [default to undefined]
-**base_url** | **string** | Base URL for the remote server | [default to undefined]
-**transport_type** | **string** | Transport type: http or sse | [optional] [default to 'http']
+**base_url** | **string** |  | [optional] [default to undefined]
+**transport_type** | **string** | Transport type: http, sse, or stdio | [optional] [default to 'http']
 **oauth_config** | [**OAuthConfigSchema**](OAuthConfigSchema.md) |  | [optional] [default to undefined]
 **headers** | **{ [key: string]: string; }** |  | [optional] [default to undefined]
 **timeout** | **number** | Request timeout in seconds | [optional] [default to 30]
 **auto_start** | **boolean** | Auto-connect to server on system startup | [optional] [default to true]
+**auto_update** | **boolean** | Auto-update server capabilities | [optional] [default to true]
 **max_failures** | **number** | Maximum consecutive failures before disabling | [optional] [default to 3]
 **id** | **string** | Server ID | [default to undefined]
 **status** | [**ServerStatus**](ServerStatus.md) | Server status | [default to undefined]
@@ -43,6 +44,7 @@ const instance: ToolServerResponse = {
     headers,
     timeout,
     auto_start,
+    auto_update,
     max_failures,
     id,
     status,

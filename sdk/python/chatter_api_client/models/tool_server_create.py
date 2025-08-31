@@ -21,25 +21,27 @@ class ToolServerCreate:
     Attributes:
         name (str): Server name
         display_name (str): Display name
-        base_url (str): Base URL for the remote server
         description (Union[None, Unset, str]): Server description
-        transport_type (Union[Unset, str]): Transport type: http or sse Default: 'http'.
+        base_url (Union[None, Unset, str]): Base URL for the remote server (null for built-in servers)
+        transport_type (Union[Unset, str]): Transport type: http, sse, or stdio Default: 'http'.
         oauth_config (Union['OAuthConfigSchema', None, Unset]): OAuth configuration if required
         headers (Union['ToolServerCreateHeadersType0', None, Unset]): Additional HTTP headers
         timeout (Union[Unset, int]): Request timeout in seconds Default: 30.
         auto_start (Union[Unset, bool]): Auto-connect to server on system startup Default: True.
+        auto_update (Union[Unset, bool]): Auto-update server capabilities Default: True.
         max_failures (Union[Unset, int]): Maximum consecutive failures before disabling Default: 3.
     """
 
     name: str
     display_name: str
-    base_url: str
     description: Union[None, Unset, str] = UNSET
+    base_url: Union[None, Unset, str] = UNSET
     transport_type: Union[Unset, str] = "http"
     oauth_config: Union["OAuthConfigSchema", None, Unset] = UNSET
     headers: Union["ToolServerCreateHeadersType0", None, Unset] = UNSET
     timeout: Union[Unset, int] = 30
     auto_start: Union[Unset, bool] = True
+    auto_update: Union[Unset, bool] = True
     max_failures: Union[Unset, int] = 3
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -51,13 +53,17 @@ class ToolServerCreate:
 
         display_name = self.display_name
 
-        base_url = self.base_url
-
         description: Union[None, Unset, str]
         if isinstance(self.description, Unset):
             description = UNSET
         else:
             description = self.description
+
+        base_url: Union[None, Unset, str]
+        if isinstance(self.base_url, Unset):
+            base_url = UNSET
+        else:
+            base_url = self.base_url
 
         transport_type = self.transport_type
 
@@ -81,6 +87,8 @@ class ToolServerCreate:
 
         auto_start = self.auto_start
 
+        auto_update = self.auto_update
+
         max_failures = self.max_failures
 
         field_dict: dict[str, Any] = {}
@@ -89,11 +97,12 @@ class ToolServerCreate:
             {
                 "name": name,
                 "display_name": display_name,
-                "base_url": base_url,
             }
         )
         if description is not UNSET:
             field_dict["description"] = description
+        if base_url is not UNSET:
+            field_dict["base_url"] = base_url
         if transport_type is not UNSET:
             field_dict["transport_type"] = transport_type
         if oauth_config is not UNSET:
@@ -104,6 +113,8 @@ class ToolServerCreate:
             field_dict["timeout"] = timeout
         if auto_start is not UNSET:
             field_dict["auto_start"] = auto_start
+        if auto_update is not UNSET:
+            field_dict["auto_update"] = auto_update
         if max_failures is not UNSET:
             field_dict["max_failures"] = max_failures
 
@@ -119,8 +130,6 @@ class ToolServerCreate:
 
         display_name = d.pop("display_name")
 
-        base_url = d.pop("base_url")
-
         def _parse_description(data: object) -> Union[None, Unset, str]:
             if data is None:
                 return data
@@ -129,6 +138,15 @@ class ToolServerCreate:
             return cast(Union[None, Unset, str], data)
 
         description = _parse_description(d.pop("description", UNSET))
+
+        def _parse_base_url(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        base_url = _parse_base_url(d.pop("base_url", UNSET))
 
         transport_type = d.pop("transport_type", UNSET)
 
@@ -170,18 +188,21 @@ class ToolServerCreate:
 
         auto_start = d.pop("auto_start", UNSET)
 
+        auto_update = d.pop("auto_update", UNSET)
+
         max_failures = d.pop("max_failures", UNSET)
 
         tool_server_create = cls(
             name=name,
             display_name=display_name,
-            base_url=base_url,
             description=description,
+            base_url=base_url,
             transport_type=transport_type,
             oauth_config=oauth_config,
             headers=headers,
             timeout=timeout,
             auto_start=auto_start,
+            auto_update=auto_update,
             max_failures=max_failures,
         )
 

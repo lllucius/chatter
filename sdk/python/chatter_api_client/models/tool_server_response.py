@@ -25,7 +25,6 @@ class ToolServerResponse:
     Attributes:
         name (str): Server name
         display_name (str): Display name
-        base_url (str): Base URL for the remote server
         id (str): Server ID
         status (ServerStatus): Enumeration for server status.
         is_builtin (bool): Whether server is built-in
@@ -33,11 +32,13 @@ class ToolServerResponse:
         created_at (datetime.datetime): Creation timestamp
         updated_at (datetime.datetime): Last update timestamp
         description (Union[None, Unset, str]): Server description
-        transport_type (Union[Unset, str]): Transport type: http or sse Default: 'http'.
+        base_url (Union[None, Unset, str]): Base URL for the remote server (null for built-in servers)
+        transport_type (Union[Unset, str]): Transport type: http, sse, or stdio Default: 'http'.
         oauth_config (Union['OAuthConfigSchema', None, Unset]): OAuth configuration if required
         headers (Union['ToolServerResponseHeadersType0', None, Unset]): Additional HTTP headers
         timeout (Union[Unset, int]): Request timeout in seconds Default: 30.
         auto_start (Union[Unset, bool]): Auto-connect to server on system startup Default: True.
+        auto_update (Union[Unset, bool]): Auto-update server capabilities Default: True.
         max_failures (Union[Unset, int]): Maximum consecutive failures before disabling Default: 3.
         last_health_check (Union[None, Unset, datetime.datetime]): Last health check
         last_startup_success (Union[None, Unset, datetime.datetime]): Last successful startup
@@ -48,7 +49,6 @@ class ToolServerResponse:
 
     name: str
     display_name: str
-    base_url: str
     id: str
     status: ServerStatus
     is_builtin: bool
@@ -56,11 +56,13 @@ class ToolServerResponse:
     created_at: datetime.datetime
     updated_at: datetime.datetime
     description: Union[None, Unset, str] = UNSET
+    base_url: Union[None, Unset, str] = UNSET
     transport_type: Union[Unset, str] = "http"
     oauth_config: Union["OAuthConfigSchema", None, Unset] = UNSET
     headers: Union["ToolServerResponseHeadersType0", None, Unset] = UNSET
     timeout: Union[Unset, int] = 30
     auto_start: Union[Unset, bool] = True
+    auto_update: Union[Unset, bool] = True
     max_failures: Union[Unset, int] = 3
     last_health_check: Union[None, Unset, datetime.datetime] = UNSET
     last_startup_success: Union[None, Unset, datetime.datetime] = UNSET
@@ -76,8 +78,6 @@ class ToolServerResponse:
         name = self.name
 
         display_name = self.display_name
-
-        base_url = self.base_url
 
         id = self.id
 
@@ -96,6 +96,12 @@ class ToolServerResponse:
             description = UNSET
         else:
             description = self.description
+
+        base_url: Union[None, Unset, str]
+        if isinstance(self.base_url, Unset):
+            base_url = UNSET
+        else:
+            base_url = self.base_url
 
         transport_type = self.transport_type
 
@@ -118,6 +124,8 @@ class ToolServerResponse:
         timeout = self.timeout
 
         auto_start = self.auto_start
+
+        auto_update = self.auto_update
 
         max_failures = self.max_failures
 
@@ -162,7 +170,6 @@ class ToolServerResponse:
             {
                 "name": name,
                 "display_name": display_name,
-                "base_url": base_url,
                 "id": id,
                 "status": status,
                 "is_builtin": is_builtin,
@@ -173,6 +180,8 @@ class ToolServerResponse:
         )
         if description is not UNSET:
             field_dict["description"] = description
+        if base_url is not UNSET:
+            field_dict["base_url"] = base_url
         if transport_type is not UNSET:
             field_dict["transport_type"] = transport_type
         if oauth_config is not UNSET:
@@ -183,6 +192,8 @@ class ToolServerResponse:
             field_dict["timeout"] = timeout
         if auto_start is not UNSET:
             field_dict["auto_start"] = auto_start
+        if auto_update is not UNSET:
+            field_dict["auto_update"] = auto_update
         if max_failures is not UNSET:
             field_dict["max_failures"] = max_failures
         if last_health_check is not UNSET:
@@ -209,8 +220,6 @@ class ToolServerResponse:
 
         display_name = d.pop("display_name")
 
-        base_url = d.pop("base_url")
-
         id = d.pop("id")
 
         status = ServerStatus(d.pop("status"))
@@ -231,6 +240,15 @@ class ToolServerResponse:
             return cast(Union[None, Unset, str], data)
 
         description = _parse_description(d.pop("description", UNSET))
+
+        def _parse_base_url(data: object) -> Union[None, Unset, str]:
+            if data is None:
+                return data
+            if isinstance(data, Unset):
+                return data
+            return cast(Union[None, Unset, str], data)
+
+        base_url = _parse_base_url(d.pop("base_url", UNSET))
 
         transport_type = d.pop("transport_type", UNSET)
 
@@ -271,6 +289,8 @@ class ToolServerResponse:
         timeout = d.pop("timeout", UNSET)
 
         auto_start = d.pop("auto_start", UNSET)
+
+        auto_update = d.pop("auto_update", UNSET)
 
         max_failures = d.pop("max_failures", UNSET)
 
@@ -336,7 +356,6 @@ class ToolServerResponse:
         tool_server_response = cls(
             name=name,
             display_name=display_name,
-            base_url=base_url,
             id=id,
             status=status,
             is_builtin=is_builtin,
@@ -344,11 +363,13 @@ class ToolServerResponse:
             created_at=created_at,
             updated_at=updated_at,
             description=description,
+            base_url=base_url,
             transport_type=transport_type,
             oauth_config=oauth_config,
             headers=headers,
             timeout=timeout,
             auto_start=auto_start,
+            auto_update=auto_update,
             max_failures=max_failures,
             last_health_check=last_health_check,
             last_startup_success=last_startup_success,

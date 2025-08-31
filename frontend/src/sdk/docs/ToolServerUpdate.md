@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **headers** | **{ [key: string]: string; }** |  | [optional] [default to undefined]
 **timeout** | **number** |  | [optional] [default to undefined]
 **auto_start** | **boolean** |  | [optional] [default to undefined]
+**auto_update** | **boolean** |  | [optional] [default to undefined]
 **max_failures** | **number** |  | [optional] [default to undefined]
 
 ## Example
@@ -30,6 +31,7 @@ const instance: ToolServerUpdate = {
     headers,
     timeout,
     auto_start,
+    auto_update,
     max_failures,
 };
 ```

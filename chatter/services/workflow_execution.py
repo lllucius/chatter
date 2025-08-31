@@ -706,6 +706,8 @@ class WorkflowExecutionService:
             "enhanced_streaming": streaming_stats,
             "streaming_service_status": "active"
         }
+
+    async def execute_streaming_workflow(
         self,
         workflow_type: str,
         conversation: Conversation,

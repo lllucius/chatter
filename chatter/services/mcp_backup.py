@@ -155,22 +155,87 @@ class MCPToolService:
             return False
 
     async def _authenticate_oauth(self, server_name: str) -> bool:
-        """OAuth authentication is handled by the underlying MCP client."""
-        # Note: OAuth handling would need to be implemented in the connection configuration
-        # This is a placeholder for backward compatibility
-        logger.warning("OAuth authentication not yet implemented with langchain-mcp-adapters")
-        return False
+        """Authenticate with OAuth for a server."""
+        server = self.servers.get(server_name)
+        if not server or not server.oauth_config:
+            return False
 
-    async def discover_tools(self, server_name: str) -> list[BaseTool]:
+        oauth_config = server.oauth_config
+        
+        try:
+            async with httpx.AsyncClient() as client:
+                # Prepare OAuth token request
+                token_data = {
+                    "grant_type": "client_credentials",
+                    "client_id": oauth_config.client_id,
+                    "client_secret": oauth_config.client_secret,
+                }
+                
+                if oauth_config.scope:
+                    token_data["scope"] = oauth_config.scope
+
+                # Request token
+                response = await client.post(
+                    oauth_config.token_url,
+                    data=token_data,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"},
+                )
+                response.raise_for_status()
+
+                token_info = response.json()
+                access_token = token_info.get("access_token")
+                
+                if not access_token:
+                    raise MCPServiceError("No access token in OAuth response")
+
+                # Update server client with new token
+                oauth_config.access_token = access_token
+                if server_name in self.clients:
+                    self.clients[server_name].headers["Authorization"] = f"Bearer {access_token}"
+
+                # Store token info for refresh
+                self._oauth_tokens[server_name] = {
+                    "access_token": access_token,
+                    "expires_in": token_info.get("expires_in"),
+                    "refresh_token": token_info.get("refresh_token"),
+                }
+
+                logger.info("OAuth authentication successful", server=server_name)
+                return True
+
+        except Exception as e:
+            logger.error(
+                "OAuth authentication failed",
+                server=server_name,
+                error=str(e),
+            )
+            return False
+
+    async def discover_tools(self, server_name: str) -> list[dict[str, Any]]:
         """Discover tools from a remote MCP server."""
         if not self.enabled or server_name not in self.servers:
             return []
 
+        server = self.servers[server_name]
+        client = self.clients.get(server_name)
+        
+        if not client:
+            return []
+
         try:
-            client = self._get_client()
-            tools = await client.get_tools(server_name=server_name)
-            
-            # Cache the tools
+            if server.transport_type == "http":
+                response = await client.get("/tools")
+                response.raise_for_status()
+                tools_data = response.json()
+                
+            elif server.transport_type == "sse":
+                tools_data = await self._discover_tools_sse(server_name)
+                
+            else:
+                raise MCPServiceError(f"Unsupported transport type: {server.transport_type}")
+
+            # Normalize tools data
+            tools = tools_data.get("tools", []) if isinstance(tools_data, dict) else tools_data
             self.tools_cache[server_name] = tools
 
             logger.info(
@@ -190,51 +255,56 @@ class MCPToolService:
 
     async def _discover_tools_sse(self, server_name: str) -> list[dict[str, Any]]:
         """Discover tools using SSE connection."""
-        # This method is deprecated - langchain-mcp-adapters handles this internally
-        logger.warning("_discover_tools_sse is deprecated, use discover_tools instead")
-        tools = await self.discover_tools(server_name)
-        # Convert to old format for backward compatibility
-        return [{"name": tool.name, "description": tool.description} for tool in tools]
+        server = self.servers[server_name]
+        client = self.clients[server_name]
+        
+        tools = []
+        sse_url = f"{server.base_url}/tools/stream"
+        
+        async with aconnect_sse(client, "GET", sse_url) as event_source:
+            async for sse in event_source.aiter_sse():
+                if sse.event == "tool":
+                    tool_data = sse.json()
+                    tools.append(tool_data)
+                elif sse.event == "end":
+                    break
+                    
+        return tools
 
     async def get_tools(
         self, server_names: list[str] | None = None
-    ) -> list[BaseTool]:
+    ) -> list[dict[str, Any]]:
         """Get tools from specified remote MCP servers."""
         if not self.enabled:
             return []
 
-        try:
-            client = self._get_client()
-            
-            if server_names is None:
-                # Get all tools from all servers
-                tools = await client.get_tools()
-            else:
-                # Get tools from specific servers
-                all_tools = []
-                for server_name in server_names:
-                    if server_name in self.connections:
-                        server_tools = await client.get_tools(server_name=server_name)
-                        all_tools.extend(server_tools)
-                tools = all_tools
+        if server_names is None:
+            server_names = list(self.servers.keys())
 
-            # Update cache
-            for server_name in self.servers.keys():
-                if server_name not in self.tools_cache:
-                    self.tools_cache[server_name] = []
+        all_tools = []
 
-            return tools
+        for server_name in server_names:
+            if server_name not in self.tools_cache:
+                # Discover tools from the server
+                await self.discover_tools(server_name)
 
-        except Exception as e:
-            logger.error("Failed to get tools from MCP servers", error=str(e))
-            return []
+            if server_name in self.tools_cache:
+                tools = self.tools_cache[server_name]
+                all_tools.extend(tools)
+                logger.debug(
+                    "Retrieved tools from remote server",
+                    server=server_name,
+                    count=len(tools),
+                )
 
-    async def get_tool_by_name(self, tool_name: str) -> BaseTool | None:
+        return all_tools
+
+    async def get_tool_by_name(self, tool_name: str) -> dict[str, Any] | None:
         """Get a specific tool by name."""
         all_tools = await self.get_tools()
 
         for tool in all_tools:
-            if tool.name == tool_name:
+            if tool.get("name") == tool_name:
                 return tool
 
         return None
@@ -247,8 +317,8 @@ class MCPToolService:
         user_id: str | None = None,
         conversation_id: str | None = None,
     ) -> dict[str, Any]:
-        """Call a specific MCP tool.
-        
+        """Call a specific remote MCP tool with usage tracking.
+
         Args:
             tool_name: Name of the tool to call
             arguments: Tool arguments
@@ -261,24 +331,50 @@ class MCPToolService:
         """
         start_time = time.time()
         
-        try:
-            # Find the tool
-            tool = await self.get_tool_by_name(tool_name)
-            if not tool:
-                raise MCPServiceError(f"Tool not found: {tool_name}")
+        # Find the tool and its server
+        tool = await self.get_tool_by_name(tool_name)
+        if not tool:
+            raise MCPServiceError(f"Tool not found: {tool_name}")
 
-            # Call the tool
-            result = await tool.ainvoke(arguments)
-            
+        # Find which server provides this tool
+        found_server = None
+        for srv_name, tools in self.tools_cache.items():
+            if any(t.get("name") == tool_name for t in tools):
+                found_server = srv_name
+                break
+
+        if not found_server:
+            raise MCPServiceError(f"Server not found for tool: {tool_name}")
+
+        server = self.servers[found_server]
+        client = self.clients[found_server]
+
+        try:
+            # Make HTTP call to tool endpoint
+            if server.transport_type == "http":
+                response = await client.post(
+                    f"/tools/{tool_name}/call",
+                    json={"arguments": arguments},
+                )
+                response.raise_for_status()
+                result_data = response.json()
+                
+            elif server.transport_type == "sse":
+                result_data = await self._call_tool_sse(
+                    found_server, tool_name, arguments
+                )
+            else:
+                raise MCPServiceError(f"Unsupported transport type: {server.transport_type}")
+
             response_time_ms = (time.time() - start_time) * 1000
 
             # Track usage (async, don't block)
             asyncio.create_task(
                 self._track_tool_usage(
-                    server_name or "unknown",
+                    found_server,
                     tool_name,
                     arguments,
-                    result,
+                    result_data,
                     response_time_ms,
                     True,
                     None,
@@ -289,9 +385,9 @@ class MCPToolService:
 
             return {
                 "success": True,
-                "result": result,
+                "result": result_data,
                 "tool": tool_name,
-                "server": server_name or "unknown",
+                "server": found_server,
                 "response_time_ms": response_time_ms,
             }
 
@@ -300,16 +396,16 @@ class MCPToolService:
             error_msg = str(e)
 
             logger.error(
-                "MCP tool call failed",
+                "Remote tool call failed",
                 tool=tool_name,
-                server=server_name,
+                server=found_server,
                 error=error_msg,
             )
 
             # Track usage error (async, don't block)
             asyncio.create_task(
                 self._track_tool_usage(
-                    server_name or "unknown",
+                    found_server,
                     tool_name,
                     arguments,
                     None,
@@ -325,7 +421,7 @@ class MCPToolService:
                 "success": False,
                 "error": error_msg,
                 "tool": tool_name,
-                "server": server_name or "unknown",
+                "server": found_server,
                 "response_time_ms": response_time_ms,
             }
 
@@ -336,10 +432,30 @@ class MCPToolService:
         arguments: dict[str, Any],
     ) -> dict[str, Any]:
         """Call a tool using SSE connection."""
-        # This method is deprecated - langchain-mcp-adapters handles this internally
-        logger.warning("_call_tool_sse is deprecated, use call_tool instead")
-        result = await self.call_tool(tool_name, arguments, server_name)
-        return result.get("result", {})
+        server = self.servers[server_name]
+        client = self.clients[server_name]
+        
+        sse_url = f"{server.base_url}/tools/{tool_name}/call"
+        
+        result = None
+        async with aconnect_sse(
+            client, 
+            "POST", 
+            sse_url,
+            json={"arguments": arguments}
+        ) as event_source:
+            async for sse in event_source.aiter_sse():
+                if sse.event == "result":
+                    result = sse.json()
+                    break
+                elif sse.event == "error":
+                    error_data = sse.json()
+                    raise MCPServiceError(error_data.get("message", "Tool call failed"))
+                    
+        if result is None:
+            raise MCPServiceError("No result received from SSE tool call")
+            
+        return result
 
     async def _track_tool_usage(
         self,
@@ -353,7 +469,19 @@ class MCPToolService:
         user_id: str | None,
         conversation_id: str | None,
     ) -> None:
-        """Track tool usage in the database."""
+        """Track tool usage in the database.
+
+        Args:
+            server_name: Server name
+            tool_name: Tool name
+            arguments: Tool arguments
+            result: Tool result
+            response_time_ms: Response time in milliseconds
+            success: Whether the call was successful
+            error_message: Error message if failed
+            user_id: User ID
+            conversation_id: Conversation ID
+        """
         try:
             from chatter.schemas.toolserver import ToolUsageCreate
             from chatter.services.toolserver import ToolServerService
@@ -435,7 +563,7 @@ class MCPToolService:
         return servers_info
 
     async def health_check(self) -> dict[str, Any]:
-        """Perform health check on MCP servers."""
+        """Perform health check on remote MCP servers."""
         if not self.enabled:
             return {"enabled": False, "status": "disabled"}
 
@@ -445,11 +573,13 @@ class MCPToolService:
 
         for server_name, server_config in self.servers.items():
             try:
-                if server_config.enabled:
-                    # Try to get tools to check health
-                    tools = await self.discover_tools(server_name)
-                    tools_count = len(tools)
-                    is_healthy = tools_count >= 0  # Consider healthy if we can connect
+                client = self.clients.get(server_name)
+                if client and server_config.enabled:
+                    # Check server health
+                    response = await client.get("/health", timeout=5)
+                    is_healthy = response.status_code == 200
+                    
+                    tools_count = len(self.tools_cache.get(server_name, []))
                     
                     server_status[server_name] = {
                         "healthy": is_healthy,
@@ -461,6 +591,7 @@ class MCPToolService:
                     if is_healthy:
                         healthy_servers += 1
                         total_tools += tools_count
+                        
                 else:
                     server_status[server_name] = {
                         "healthy": False,
@@ -522,7 +653,7 @@ class MCPToolService:
                 
             # Re-discover tools
             tools = await self.discover_tools(server_name)
-            return len(tools) >= 0
+            return len(tools) > 0
             
         except Exception as e:
             logger.error(
@@ -534,12 +665,20 @@ class MCPToolService:
 
     async def cleanup(self) -> None:
         """Clean up all connections and resources."""
-        # The langchain-mcp-adapters client handles cleanup automatically
+        for client in self.clients.values():
+            try:
+                await client.aclose()
+            except Exception as e:
+                logger.warning("Error closing HTTP client", error=str(e))
+                
+        self.clients.clear()
         self.tools_cache.clear()
-        self.connections.clear()
-        self._client = None
+        self._oauth_tokens.clear()
         
         logger.info("MCP service cleanup completed")
+
+# Global MCP service instance
+mcp_service = MCPToolService()
 
 
 class BuiltInTools:
@@ -580,7 +719,3 @@ class BuiltInTools:
         """Get the current date and time."""
         import datetime
         return datetime.datetime.now().isoformat()
-
-
-# Global MCP service instance
-mcp_service = MCPToolService()

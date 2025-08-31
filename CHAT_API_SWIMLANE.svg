@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="1200" viewBox="0 0 1400 1200">
+  <defs>
+    <style>
+      .swimlane { fill: #f8f9fa; stroke: #dee2e6; stroke-width: 2; }
+      .swimlane-header { fill: #343a40; font-family: Arial, sans-serif; font-size: 14px; font-weight: bold; text-anchor: middle; }
+      .swimlane-text { fill: white; font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; }
+      .flow-arrow { stroke: #007bff; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+      .flow-arrow-return { stroke: #28a745; stroke-width: 2; fill: none; marker-end: url(#arrowhead-green); }
+      .flow-arrow-external { stroke: #fd7e14; stroke-width: 2; fill: none; marker-end: url(#arrowhead-orange); }
+      .process-box { fill: #e9ecef; stroke: #6c757d; stroke-width: 1; rx: 5; }
+      .process-text { fill: #495057; font-family: Arial, sans-serif; font-size: 10px; text-anchor: middle; }
+      .decision-diamond { fill: #fff3cd; stroke: #856404; stroke-width: 2; }
+      .decision-text { fill: #856404; font-family: Arial, sans-serif; font-size: 10px; text-anchor: middle; font-weight: bold; }
+      .external-box { fill: #d1ecf1; stroke: #0c5460; stroke-width: 1; rx: 5; }
+      .external-text { fill: #0c5460; font-family: Arial, sans-serif; font-size: 9px; text-anchor: middle; }
+      .title-text { fill: #212529; font-family: Arial, sans-serif; font-size: 18px; font-weight: bold; text-anchor: middle; }
+      .subtitle-text { fill: #6c757d; font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; }
+    </style>
+    
+    <!-- Arrow markers -->
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#007bff" />
+      </marker>
+      <marker id="arrowhead-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#28a745" />
+      </marker>
+      <marker id="arrowhead-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#fd7e14" />
+      </marker>
+    </defs>
+  </defs>
+
+  <!-- Title -->
+  <text x="700" y="30" class="title-text">Chatter Chat API Flow - Swimlane Diagram</text>
+  <text x="700" y="50" class="subtitle-text">Complete request flow from client to response with external service integration</text>
+
+  <!-- Swimlane columns -->
+  <rect x="50" y="80" width="240" height="1050" class="swimlane" />
+  <rect x="290" y="80" width="280" height="1050" class="swimlane" />
+  <rect x="570" y="80" width="280" height="1050" class="swimlane" />
+  <rect x="850" y="80" width="250" height="1050" class="swimlane" />
+  <rect x="1100" y="80" width="250" height="1050" class="swimlane" />
+
+  <!-- Swimlane headers -->
+  <rect x="50" y="80" width="240" height="40" fill="#343a40" />
+  <text x="170" y="105" class="swimlane-text">CLIENT</text>
+  
+  <rect x="290" y="80" width="280" height="40" fill="#343a40" />
+  <text x="430" y="105" class="swimlane-text">API LAYER</text>
+  
+  <rect x="570" y="80" width="280" height="40" fill="#343a40" />
+  <text x="710" y="105" class="swimlane-text">SERVICE LAYER</text>
+  
+  <rect x="850" y="80" width="250" height="40" fill="#343a40" />
+  <text x="975" y="105" class="swimlane-text">CORE LAYER</text>
+  
+  <rect x="1100" y="80" width="250" height="40" fill="#343a40" />
+  <text x="1225" y="105" class="swimlane-text">EXTERNAL SERVICES</text>
+
+  <!-- Process flows -->
+  
+  <!-- 1. Initial request -->
+  <rect x="70" y="140" width="200" height="30" class="process-box" />
+  <text x="170" y="160" class="process-text">POST /chat</text>
+  <line x1="270" y1="155" x2="310" y2="155" class="flow-arrow" />
+
+  <!-- 2. Authentication -->
+  <rect x="310" y="180" width="240" height="30" class="process-box" />
+  <text x="430" y="200" class="process-text">Authentication Middleware</text>
+  <line x1="430" y1="210" x2="430" y2="230" class="flow-arrow" />
+
+  <!-- 3. Rate limiting -->
+  <rect x="310" y="240" width="240" height="30" class="process-box" />
+  <text x="430" y="260" class="process-text">Rate Limit Check</text>
+  <line x1="430" y1="270" x2="430" y2="290" class="flow-arrow" />
+
+  <!-- 4. Validation -->
+  <rect x="310" y="300" width="240" height="30" class="process-box" />
+  <text x="430" y="320" class="process-text">Request Validation</text>
+  <line x1="550" y1="315" x2="590" y2="315" class="flow-arrow" />
+
+  <!-- 5. Service instantiation -->
+  <rect x="590" y="300" width="240" height="30" class="process-box" />
+  <text x="710" y="320" class="process-text">get_chat_service()</text>
+  <line x1="710" y1="330" x2="710" y2="350" class="flow-arrow" />
+
+  <!-- 6. Get conversation -->
+  <rect x="590" y="360" width="240" height="30" class="process-box" />
+  <text x="710" y="380" class="process-text">get_conversation()</text>
+  <line x1="830" y1="375" x2="870" y2="375" class="flow-arrow" />
+
+  <!-- 7. Database query -->
+  <rect x="870" y="360" width="210" height="30" class="process-box" />
+  <text x="975" y="380" class="process-text">Database Query</text>
+  <line x1="1080" y1="375" x2="1120" y2="375" class="flow-arrow-external" />
+
+  <!-- 8. PostgreSQL -->
+  <rect x="1120" y="360" width="200" height="30" class="external-box" />
+  <text x="1220" y="380" class="external-text">PostgreSQL</text>
+  <line x1="1120" y1="395" x2="1080" y2="395" class="flow-arrow-return" />
+  <line x1="870" y1="410" x2="830" y2="410" class="flow-arrow-return" />
+  <line x1="710" y1="425" x2="710" y2="445" class="flow-arrow" />
+
+  <!-- 9. Add user message -->
+  <rect x="590" y="455" width="240" height="30" class="process-box" />
+  <text x="710" y="475" class="process-text">add_message_to_conversation()</text>
+  <line x1="830" y1="470" x2="870" y2="470" class="flow-arrow" />
+
+  <!-- 10. Persist user message -->
+  <rect x="870" y="455" width="210" height="30" class="process-box" />
+  <text x="975" y="475" class="process-text">Persist User Message</text>
+  <line x1="1080" y1="470" x2="1120" y2="470" class="flow-arrow-external" />
+  <line x1="1120" y1="490" x2="1080" y2="490" class="flow-arrow-return" />
+  <line x1="870" y1="500" x2="830" y2="500" class="flow-arrow-return" />
+
+  <!-- 11. Streaming decision -->
+  <polygon points="650,530 750,530 770,550 750,570 650,570 630,550" class="decision-diamond" />
+  <text x="700" y="555" class="decision-text">Stream?</text>
+  
+  <!-- Streaming path (YES) -->
+  <line x1="630" y1="550" x2="600" y2="550" class="flow-arrow" />
+  <text x="580" y="545" class="decision-text">YES</text>
+  
+  <!-- 12. Streaming execution -->
+  <rect x="320" y="580" width="240" height="30" class="process-box" />
+  <text x="440" y="600" class="process-text">chat_streaming()</text>
+  <line x1="560" y1="595" x2="590" y2="595" class="flow-arrow" />
+
+  <rect x="590" y="580" width="240" height="30" class="process-box" />
+  <text x="710" y="600" class="process-text">resolve_provider() + LLM.generate()</text>
+  <line x1="830" y1="595" x2="1120" y2="595" class="flow-arrow-external" />
+
+  <!-- 13. External LLM -->
+  <rect x="1120" y="580" width="200" height="30" class="external-box" />
+  <text x="1220" y="600" class="external-text">OpenAI/Anthropic/etc</text>
+  <line x1="1120" y1="615" x2="560" y2="615" class="flow-arrow-return" />
+
+  <!-- 14. Streaming response -->
+  <rect x="320" y="630" width="240" height="30" class="process-box" />
+  <text x="440" y="650" class="process-text">StreamingResponse (SSE)</text>
+  <line x1="320" y1="645" x2="290" y2="645" class="flow-arrow-return" />
+
+  <rect x="70" y="630" width="200" height="30" class="process-box" />
+  <text x="170" y="650" class="process-text">text/event-stream</text>
+
+  <!-- Non-streaming path (NO) -->
+  <line x1="770" y1="550" x2="800" y2="550" class="flow-arrow" />
+  <text x="810" y="545" class="decision-text">NO</text>
+
+  <!-- 15. Workflow execution -->
+  <rect x="590" y="700" width="240" height="30" class="process-box" />
+  <text x="710" y="720" class="process-text">chat_with_workflow()</text>
+  <line x1="830" y1="715" x2="870" y2="715" class="flow-arrow" />
+
+  <!-- 16. Workflow validation -->
+  <rect x="870" y="700" width="210" height="30" class="process-box" />
+  <text x="975" y="720" class="process-text">WorkflowValidator</text>
+  <line x1="975" y1="730" x2="975" y2="750" class="flow-arrow" />
+
+  <!-- 17. Cache check -->
+  <rect x="870" y="760" width="210" height="30" class="process-box" />
+  <text x="975" y="780" class="process-text">workflow_cache.get()</text>
+  <line x1="975" y1="790" x2="975" y2="810" class="flow-arrow" />
+
+  <!-- 18. Create workflow -->
+  <rect x="870" y="820" width="210" height="30" class="process-box" />
+  <text x="975" y="840" class="process-text">create_langgraph_workflow()</text>
+  <line x1="1080" y1="835" x2="1120" y2="835" class="flow-arrow-external" />
+
+  <!-- 19. LangGraph -->
+  <rect x="1120" y="820" width="200" height="30" class="external-box" />
+  <text x="1220" y="840" class="external-text">LangGraph Engine</text>
+  <line x1="1120" y1="855" x2="1080" y2="855" class="flow-arrow-return" />
+
+  <!-- 20. Run workflow -->
+  <rect x="870" y="870" width="210" height="30" class="process-box" />
+  <text x="975" y="890" class="process-text">run_workflow()</text>
+  <line x1="1080" y1="885" x2="1120" y2="885" class="flow-arrow-external" />
+
+  <!-- 21. Vector store & tools -->
+  <rect x="1120" y="870" width="200" height="30" class="external-box" />
+  <text x="1220" y="885" class="external-text">Vector Store</text>
+  <text x="1220" y="895" class="external-text">+ MCP Tools</text>
+  <line x1="1120" y1="910" x2="1080" y2="910" class="flow-arrow-return" />
+  <line x1="870" y1="925" x2="830" y2="925" class="flow-arrow-return" />
+
+  <!-- 22. JSON response -->
+  <rect x="320" y="950" width="240" height="30" class="process-box" />
+  <text x="440" y="970" class="process-text">ChatResponse (JSON)</text>
+  <line x1="320" y1="965" x2="290" y2="965" class="flow-arrow-return" />
+
+  <rect x="70" y="950" width="200" height="30" class="process-box" />
+  <text x="170" y="970" class="process-text">application/json</text>
+
+  <!-- Legend -->
+  <g transform="translate(50, 1000)">
+    <text x="0" y="0" class="subtitle-text" style="font-weight: bold;">Legend:</text>
+    <line x1="0" y1="20" x2="30" y2="20" class="flow-arrow" />
+    <text x="35" y="25" class="process-text">Request Flow</text>
+    
+    <line x1="0" y1="40" x2="30" y2="40" class="flow-arrow-return" />
+    <text x="35" y="45" class="process-text">Response Flow</text>
+    
+    <line x1="0" y1="60" x2="30" y2="60" class="flow-arrow-external" />
+    <text x="35" y="65" class="process-text">External Service Call</text>
+    
+    <rect x="150" y="15" width="40" height="15" class="process-box" />
+    <text x="175" y="40" class="process-text">Process</text>
+    
+    <polygon points="200,15 220,15 230,22.5 220,30 200,30 190,22.5" class="decision-diamond" />
+    <text x="215" y="40" class="process-text">Decision</text>
+    
+    <rect x="250" y="15" width="50" height="15" class="external-box" />
+    <text x="280" y="40" class="process-text">External</text>
+  </g>
+
+</svg>

@@ -20,6 +20,7 @@ import {
   Collapse,
   ListSubheader,
 } from '@mui/material';
+import CustomScrollbar from './CustomScrollbar';
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
@@ -189,85 +190,87 @@ const LayoutFrame: React.FC = () => {
   };
 
   const renderNavigation = (isMobile: boolean = false) => (
-    <List sx={{ pt: 0 }}>
-      {navSections.map((section) => (
-        <React.Fragment key={section.title}>
-          {/* Section Header */}
-          {!sidebarCollapsed && (
-            <ListSubheader
-              component="div"
-              sx={{
-                py: 1,
-                px: 2.5,
-                fontSize: '0.75rem',
-                fontWeight: 600,
-                color: 'text.secondary',
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-                lineHeight: 1.5,
-                bgcolor: 'transparent',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'pointer',
-                '&:hover': {
-                  bgcolor: 'action.hover',
-                }
-              }}
-              onClick={() => handleSectionToggle(section.title)}
-            >
-              {section.title}
-              {section.items.length > 0 && (
-                expandedSections[section.title] ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />
-              )}
-            </ListSubheader>
-          )}
-          
-          {/* Section Items */}
-          <Collapse in={sidebarCollapsed || expandedSections[section.title]} timeout="auto" unmountOnExit>
-            {section.items.map((item) => (
-              <ListItem key={item.path} disablePadding>
-                <ListItemButton
-                  selected={location.pathname === item.path}
-                  onClick={() => {
-                    navigate(item.path);
-                    if (isMobile) {
-                      handleDrawerToggle();
-                    }
-                  }}
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: sidebarCollapsed ? 'center' : 'initial',
-                    px: sidebarCollapsed ? 2.5 : 3.5,
-                    ml: sidebarCollapsed ? 0 : 1,
-                    mr: sidebarCollapsed ? 0 : 1,
-                    borderRadius: sidebarCollapsed ? 0 : 1,
-                  }}
-                >
-                  <ListItemIcon
+    <CustomScrollbar style={{ height: 'calc(100vh - 64px)' }}>
+      <List sx={{ pt: 0 }}>
+        {navSections.map((section) => (
+          <React.Fragment key={section.title}>
+            {/* Section Header */}
+            {!sidebarCollapsed && (
+              <ListSubheader
+                component="div"
+                sx={{
+                  py: 1,
+                  px: 2.5,
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  color: 'text.secondary',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.1em',
+                  lineHeight: 1.5,
+                  bgcolor: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  '&:hover': {
+                    bgcolor: 'action.hover',
+                  }
+                }}
+                onClick={() => handleSectionToggle(section.title)}
+              >
+                {section.title}
+                {section.items.length > 0 && (
+                  expandedSections[section.title] ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />
+                )}
+              </ListSubheader>
+            )}
+            
+            {/* Section Items */}
+            <Collapse in={sidebarCollapsed || expandedSections[section.title]} timeout="auto" unmountOnExit>
+              {section.items.map((item) => (
+                <ListItem key={item.path} disablePadding>
+                  <ListItemButton
+                    selected={location.pathname === item.path}
+                    onClick={() => {
+                      navigate(item.path);
+                      if (isMobile) {
+                        handleDrawerToggle();
+                      }
+                    }}
                     sx={{
-                      minWidth: 0,
-                      mr: sidebarCollapsed ? 'auto' : 2,
-                      justifyContent: 'center',
+                      minHeight: 48,
+                      justifyContent: sidebarCollapsed ? 'center' : 'initial',
+                      px: sidebarCollapsed ? 2.5 : 3.5,
+                      ml: sidebarCollapsed ? 0 : 1,
+                      mr: sidebarCollapsed ? 0 : 1,
+                      borderRadius: sidebarCollapsed ? 0 : 1,
                     }}
                   >
-                    <Tooltip title={sidebarCollapsed ? item.label : ''} placement="right">
-                      {item.icon}
-                    </Tooltip>
-                  </ListItemIcon>
-                  {!sidebarCollapsed && <ListItemText primary={item.label} />}
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </Collapse>
-          
-          {/* Add divider between sections, except for the last one */}
-          {!sidebarCollapsed && navSections.indexOf(section) < navSections.length - 1 && (
-            <Divider sx={{ my: 1, mx: 2 }} />
-          )}
-        </React.Fragment>
-      ))}
-    </List>
+                    <ListItemIcon
+                      sx={{
+                        minWidth: 0,
+                        mr: sidebarCollapsed ? 'auto' : 2,
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Tooltip title={sidebarCollapsed ? item.label : ''} placement="right">
+                        {item.icon}
+                      </Tooltip>
+                    </ListItemIcon>
+                    {!sidebarCollapsed && <ListItemText primary={item.label} />}
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </Collapse>
+            
+            {/* Add divider between sections, except for the last one */}
+            {!sidebarCollapsed && navSections.indexOf(section) < navSections.length - 1 && (
+              <Divider sx={{ my: 1, mx: 2 }} />
+            )}
+          </React.Fragment>
+        ))}
+      </List>
+    </CustomScrollbar>
   );
 
   const drawer = (
@@ -352,13 +355,15 @@ const LayoutFrame: React.FC = () => {
           {rightCollapsed ? <ChevronLeftIcon /> : <ChevronRightIcon />}
         </IconButton>
       </Toolbar>
-      <Box sx={{ flexGrow: 1, overflow: 'auto', p: rightCollapsed ? 1 : 2 }}>
-        {panelContent ?? (
-          <Typography variant="body2" color="text.secondary">
-            No panel content
-          </Typography>
-        )}
-      </Box>
+      <CustomScrollbar style={{ flexGrow: 1 }}>
+        <Box sx={{ p: rightCollapsed ? 1 : 2 }}>
+          {panelContent ?? (
+            <Typography variant="body2" color="text.secondary">
+              No panel content
+            </Typography>
+          )}
+        </Box>
+      </CustomScrollbar>
     </div>
   );
 
@@ -408,7 +413,9 @@ const LayoutFrame: React.FC = () => {
                 </Box>
               </Toolbar>
               <Divider />
-              {renderNavigation(true)}
+              <CustomScrollbar style={{ height: 'calc(100vh - 128px)' }}>
+                {renderNavigation(true)}
+              </CustomScrollbar>
 
               {/* Profile Menu (mobile left) */}
               <Menu
@@ -467,7 +474,7 @@ const LayoutFrame: React.FC = () => {
           width: { sm: `calc(100% - ${currentDrawerWidth + effectiveRightWidth}px)` },
           minWidth: 0,
           minHeight: 0,
-          overflow: 'auto',
+          height: '100vh',
           display: 'flex',
           flexDirection: 'column',
           transition: (theme) =>
@@ -477,7 +484,9 @@ const LayoutFrame: React.FC = () => {
             }),
         }}
       >
-        <Outlet />
+        <CustomScrollbar>
+          <Outlet />
+        </CustomScrollbar>
       </Box>
 
       {/* RIGHT NAV */}

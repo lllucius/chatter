@@ -17,6 +17,7 @@ import {
   Switch,
   Avatar,
 } from '@mui/material';
+import CustomScrollbar from '../components/CustomScrollbar';
 import {
   Send as SendIcon,
   Person as PersonIcon,
@@ -693,13 +694,14 @@ const ChatPage: React.FC = () => {
             sx={{
               flex: 1,
               minHeight: 0,
-              overflowY: 'auto',
               p: 2,
               display: 'flex',
               flexDirection: 'column',
             }}
           >
-            {messages.length === 0 ? (
+            <CustomScrollbar style={{ flex: 1 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                {messages.length === 0 ? (
               <Box
                 sx={{
                   display: 'flex',
@@ -748,6 +750,8 @@ const ChatPage: React.FC = () => {
               </Box>
             )}
             <div ref={messagesEndRef} />
+              </Box>
+            </CustomScrollbar>
           </Box>
         </CardContent>
       </Card>

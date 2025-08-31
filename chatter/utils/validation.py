@@ -516,3 +516,15 @@ def validate_user_input(data: dict[str, Any]) -> dict[str, Any]:
         field_rules["api_key"] = "api_key"
 
     return input_validator.validate_dict(data, field_rules)
+
+
+def sanitize_input(text: str) -> str:
+    """Backward compatibility function for sanitizing input.
+    
+    Args:
+        text: Text to sanitize
+        
+    Returns:
+        Sanitized text
+    """
+    return input_validator._sanitize_value(text)

@@ -36,6 +36,14 @@ import {
   AccordionSummary,
   AccordionDetails,
   Tooltip,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TablePagination,
+  ListItemIcon,
 } from '@mui/material';
 import {
   Build as ToolsIcon,
@@ -143,6 +151,12 @@ const ToolsPage: React.FC = () => {
   const [remoteServers, setRemoteServers] = useState<RemoteServer[]>([]);
   const [tools, setTools] = useState<Tool[]>([]);
   const [permissions, setPermissions] = useState<any[]>([]);
+
+  // Pagination state
+  const [toolsPage, setToolsPage] = useState(0);
+  const [toolsRowsPerPage, setToolsRowsPerPage] = useState(10);
+  const [serversPage, setServersPage] = useState(0);
+  const [serversRowsPerPage, setServersRowsPerPage] = useState(10);
 
   // Form state for remote servers
   const [serverFormData, setServerFormData] = useState({
@@ -351,6 +365,36 @@ const ToolsPage: React.FC = () => {
     }
     handleActionClose();
   };
+
+  // Pagination handlers
+  const handleToolsPageChange = (event: unknown, newPage: number) => {
+    setToolsPage(newPage);
+  };
+
+  const handleToolsRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setToolsRowsPerPage(parseInt(event.target.value, 10));
+    setToolsPage(0);
+  };
+
+  const handleServersPageChange = (event: unknown, newPage: number) => {
+    setServersPage(newPage);
+  };
+
+  const handleServersRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setServersRowsPerPage(parseInt(event.target.value, 10));
+    setServersPage(0);
+  };
+
+  // Paginated data
+  const paginatedTools = tools.slice(
+    toolsPage * toolsRowsPerPage,
+    toolsPage * toolsRowsPerPage + toolsRowsPerPage
+  );
+
+  const paginatedServers = remoteServers.slice(
+    serversPage * serversRowsPerPage,
+    serversPage * serversRowsPerPage + serversRowsPerPage
+  );
 
   const renderServerDialog = () => (
     <Dialog open={dialogOpen && dialogType === 'server'} onClose={closeDialog} maxWidth="md" fullWidth>
@@ -631,7 +675,7 @@ const ToolsPage: React.FC = () => {
 
   const renderRemoteServers = () => (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h6">Remote MCP Servers</Typography>
         <Button
           variant="contained"
@@ -642,148 +686,221 @@ const ToolsPage: React.FC = () => {
         </Button>
       </Box>
 
-      {loading && <CircularProgress />}
-      
-      {remoteServers.length === 0 && !loading ? (
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress size={60} />
+        </Box>
+      ) : remoteServers.length === 0 ? (
         <Alert severity="info">
           No remote servers configured. Add your first remote MCP server to get started.
         </Alert>
       ) : (
-        <Grid container spacing={2}>
-          {remoteServers.map((server) => (
-            <Grid item xs={12} md={6} lg={4} key={server.id}>
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
-                    <Typography variant="h6" component="div">
-                      {server.display_name}
-                    </Typography>
-                    <IconButton
-                      size="small"
-                      onClick={(e) => handleActionClick(e, server, 'server')}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  </Box>
-                  
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    {server.description || 'No description'}
-                  </Typography>
-                  
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    {server.transport_type === 'http' ? <HttpIcon /> : <SseIcon />}
-                    <Typography variant="body2">{server.base_url}</Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                    <Chip 
-                      label={server.status} 
-                      color={server.status === 'enabled' ? 'success' : server.status === 'error' ? 'error' : 'default'}
-                      size="small"
-                    />
-                    <Chip 
-                      label={server.transport_type.toUpperCase()} 
-                      variant="outlined"
-                      size="small"
-                    />
-                    {server.oauth_config && (
+        <Card>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>URL</TableCell>
+                  <TableCell>Transport</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Tools</TableCell>
+                  <TableCell>Security</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedServers.map((server) => (
+                  <TableRow key={server.id} hover>
+                    <TableCell>
+                      <Box>
+                        <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                          {server.display_name}
+                        </Typography>
+                        {server.description && (
+                          <Typography variant="body2" color="text.secondary">
+                            {server.description}
+                          </Typography>
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {server.base_url}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
                       <Chip 
-                        label="OAuth" 
-                        color="primary"
+                        label={server.transport_type.toUpperCase()} 
                         variant="outlined"
                         size="small"
                       />
-                    )}
-                    {server.tools_count !== undefined && (
+                    </TableCell>
+                    <TableCell>
                       <Chip 
-                        label={`${server.tools_count} tools`} 
-                        variant="outlined"
+                        label={server.status} 
+                        color={server.status === 'enabled' ? 'success' : server.status === 'error' ? 'error' : 'default'}
                         size="small"
                       />
-                    )}
-                  </Box>
-                </CardContent>
-                <CardActions>
-                  <Button size="small" color="primary">
-                    View Details
-                  </Button>
-                  <Button 
-                    size="small" 
-                    color={server.status === 'enabled' ? 'warning' : 'success'}
-                    onClick={() => toggleServer(server.id, server.status !== 'enabled')}
-                  >
-                    {server.status === 'enabled' ? 'Disable' : 'Enable'}
-                  </Button>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {server.tools_count !== undefined ? `${server.tools_count} tools` : 'Unknown'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      {server.oauth_config && (
+                        <Chip 
+                          label="OAuth" 
+                          color="primary"
+                          variant="outlined"
+                          size="small"
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        onClick={(e) => handleActionClick(e, server, 'server')}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            component="div"
+            count={remoteServers.length}
+            page={serversPage}
+            onPageChange={handleServersPageChange}
+            rowsPerPage={serversRowsPerPage}
+            onRowsPerPageChange={handleServersRowsPerPageChange}
+            rowsPerPageOptions={[5, 10, 25]}
+          />
+        </Card>
       )}
     </Box>
   );
 
   const renderTools = () => (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Typography variant="h6">Available Tools</Typography>
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
           onClick={loadTools}
+          disabled={loading}
         >
           Refresh
         </Button>
       </Box>
 
-      {loading && <CircularProgress />}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       
-      {tools.length === 0 && !loading ? (
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress size={60} />
+        </Box>
+      ) : tools.length === 0 ? (
         <Alert severity="info">
           No tools available. Add remote servers to discover tools.
         </Alert>
       ) : (
-        <List>
-          {tools.map((tool) => (
-            <ListItem key={tool.id} divider>
-              <CloudIcon sx={{ mr: 2, color: 'primary.main' }} />
-              <ListItemText
-                primary={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="subtitle1">{tool.display_name}</Typography>
-                    <Chip 
-                      label={tool.status} 
-                      color={tool.status === 'enabled' ? 'success' : tool.status === 'error' ? 'error' : 'default'}
-                      size="small"
-                    />
-                    {!tool.is_available && (
-                      <Chip label="Unavailable" color="warning" size="small" />
-                    )}
-                  </Box>
-                }
-                secondary={
-                  <Box>
-                    <Typography variant="body2" color="text.secondary">
-                      {tool.description || 'No description'}
-                    </Typography>
-                    <Typography variant="caption" display="block">
-                      Server: {tool.server_name} • Calls: {tool.total_calls} • Errors: {tool.total_errors}
-                      {tool.avg_response_time_ms && ` • Avg: ${tool.avg_response_time_ms.toFixed(0)}ms`}
-                    </Typography>
-                  </Box>
-                }
-              />
-              <ListItemSecondaryAction>
-                <IconButton
-                  edge="end"
-                  onClick={(e) => handleActionClick(e, tool, 'tool')}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-              </ListItemSecondaryAction>
-            </ListItem>
-          ))}
-        </List>
+        <Card>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Server</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Usage</TableCell>
+                  <TableCell>Performance</TableCell>
+                  <TableCell align="center">Actions</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {paginatedTools.map((tool) => (
+                  <TableRow key={tool.id} hover>
+                    <TableCell>
+                      <Box>
+                        <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
+                          {tool.display_name || tool.name}
+                        </Typography>
+                        {tool.description && (
+                          <Typography variant="body2" color="text.secondary">
+                            {tool.description}
+                          </Typography>
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {tool.server_name}
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <Chip 
+                          label={tool.status} 
+                          color={tool.status === 'enabled' ? 'success' : tool.status === 'error' ? 'error' : 'default'}
+                          size="small"
+                        />
+                        {!tool.is_available && (
+                          <Chip label="Unavailable" color="warning" size="small" />
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Box>
+                        <Typography variant="body2">
+                          Calls: {tool.total_calls}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Errors: {tool.total_errors}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body2">
+                        {tool.avg_response_time_ms ? `${tool.avg_response_time_ms.toFixed(0)}ms` : 'N/A'}
+                      </Typography>
+                    </TableCell>
+                    <TableCell align="center">
+                      <IconButton
+                        onClick={(e) => handleActionClick(e, tool, 'tool')}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            component="div"
+            count={tools.length}
+            page={toolsPage}
+            onPageChange={handleToolsPageChange}
+            rowsPerPage={toolsRowsPerPage}
+            onRowsPerPageChange={handleToolsRowsPerPageChange}
+            rowsPerPageOptions={[5, 10, 25]}
+          />
+        </Card>
       )}
     </Box>
   );
@@ -863,10 +980,12 @@ const ToolsPage: React.FC = () => {
   );
 
   return (
-    <Box sx={{ width: '100%' }}>
-      <Typography variant="h4" gutterBottom>
-        Tool Server Management
-      </Typography>
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+          Tool Server Management
+        </Typography>
+      </Box>
       
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={activeTab} onChange={handleTabChange}>

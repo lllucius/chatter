@@ -395,10 +395,11 @@ class DataManager:
         return {"success_count": success_count, "error_count": error_count, "errors": errors}
 
     async def bulk_delete_conversations(self, conversation_ids: list[str], user_id: str) -> dict[str, Any]:
-        """Bulk delete conversations using ChatService."""
+        """Bulk delete conversations using RefactoredChatService."""
         from sqlalchemy.ext.asyncio import AsyncSession
         from chatter.utils.database import get_async_session_factory
-        from chatter.core.chat import ChatService
+        from chatter.services.chat_refactored import RefactoredChatService
+        from chatter.services.llm import LLMService
         
         success_count = 0
         error_count = 0
@@ -406,7 +407,8 @@ class DataManager:
         
         async_session_factory = get_async_session_factory()
         async with async_session_factory() as session:
-            chat_service = ChatService(session)
+            llm_service = LLMService()
+            chat_service = RefactoredChatService(session, llm_service)
             
             for conversation_id in conversation_ids:
                 try:

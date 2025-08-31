@@ -7,11 +7,8 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.core.chat import (
-    ChatError,
-    ChatService,
-    ConversationNotFoundError,
-)
+from chatter.core.exceptions import NotFoundError, ChatServiceError
+from chatter.services.chat_refactored import RefactoredChatService
 from chatter.models.conversation import ConversationStatus
 from chatter.models.user import User
 from chatter.schemas.chat import (
@@ -50,17 +47,17 @@ router = APIRouter()
 
 async def get_chat_service(
     session: AsyncSession = Depends(get_session)
-) -> ChatService:
-    """Get chat service instance.
+) -> RefactoredChatService:
+    """Get refactored chat service instance.
 
     Args:
         session: Database session
 
     Returns:
-        ChatService instance
+        RefactoredChatService instance
     """
     llm_service = LLMService()
-    return ChatService(session, llm_service)
+    return RefactoredChatService(session, llm_service)
 
 
 def _map_workflow_type(workflow: str) -> str:
@@ -88,7 +85,7 @@ def _map_workflow_type(workflow: str) -> str:
 async def create_conversation(
     conversation_data: ConversationCreate,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationResponse:
     """Create a new conversation.
 
@@ -105,7 +102,7 @@ async def create_conversation(
             current_user.id, conversation_data
         )
         return ConversationResponse.model_validate(conversation)
-    except ChatError as e:
+    except ChatServiceError as e:
         raise BadRequestProblem(detail=str(e)) from e
 
 
@@ -128,7 +125,7 @@ async def list_conversations(
     sort_by: str = Query("created_at", description="Sort field"),
     sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationSearchResponse:
     """List user's conversations.
 
@@ -156,7 +153,7 @@ async def get_conversation(
     conversation_id: str,
     request: ConversationGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationWithMessages:
     """Get conversation details with messages."""
     conversation = await chat_service.get_conversation(
@@ -188,7 +185,7 @@ async def update_conversation(
     conversation_id: str,
     update_data: ConversationUpdate,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationResponse:
     """Update conversation."""
     try:
@@ -196,7 +193,7 @@ async def update_conversation(
             conversation_id, current_user.id, update_data
         )
         return ConversationResponse.model_validate(conversation)
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -211,7 +208,7 @@ async def delete_conversation(
     conversation_id: str,
     request: ConversationDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ConversationDeleteResponse:
     """Delete conversation."""
     try:
@@ -221,7 +218,7 @@ async def delete_conversation(
         return ConversationDeleteResponse(
             message="Conversation deleted successfully"
         )
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -241,7 +238,7 @@ async def delete_conversation(
 async def get_conversation_messages(
     conversation_id: str,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> list[MessageResponse]:
     """Get conversation messages."""
     try:
@@ -249,7 +246,7 @@ async def get_conversation_messages(
             conversation_id, current_user.id
         )
         return [MessageResponse.model_validate(m) for m in messages]
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -264,7 +261,7 @@ async def add_message_to_conversation(
     conversation_id: str,
     message: MessageCreate,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> MessageResponse:
     """Add a new message to existing conversation."""
     try:
@@ -272,7 +269,7 @@ async def add_message_to_conversation(
             conversation_id, current_user.id, message.content
         )
         return MessageResponse.model_validate(created_message)
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -284,7 +281,7 @@ async def delete_message(
     conversation_id: str,
     message_id: str,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> MessageDeleteResponse:
     """Delete a message from conversation."""
     try:
@@ -292,7 +289,7 @@ async def delete_message(
             conversation_id, message_id, current_user.id
         )
         return MessageDeleteResponse(message="Message deleted successfully")
-    except ConversationNotFoundError:
+    except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
@@ -315,7 +312,7 @@ async def delete_message(
 async def chat(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ):
     """Single chat endpoint supporting plain, rag, tools, and full workflows.
 
@@ -348,7 +345,7 @@ async def chat(
                             current_user.id, chat_request, workflow_type=workflow_type
                         ):
                             yield f"data: {json.dumps(chunk)}\n\n"
-            except (ConversationNotFoundError, ChatError) as e:
+            except (NotFoundError, ChatServiceError) as e:
                 error_chunk = {"type": "error", "error": str(e)}
                 yield f"data: {json.dumps(error_chunk)}\n\n"
             finally:
@@ -380,7 +377,7 @@ async def chat(
             message=MessageResponse.model_validate(assistant_message),
             conversation=ConversationResponse.model_validate(conversation),
         )
-    except (ConversationNotFoundError, ChatError) as e:
+    except (NotFoundError, ChatServiceError) as e:
         raise BadRequestProblem(detail=str(e)) from None
 
 
@@ -461,7 +458,7 @@ async def chat_with_template(
     template_name: str,
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> ChatResponse:
     """Chat using a specific workflow template."""
     try:
@@ -483,7 +480,7 @@ async def chat_with_template(
 @router.get("/performance/stats", response_model=PerformanceStatsResponse)
 async def get_performance_stats(
     current_user: User = Depends(get_current_user),
-    chat_service: ChatService = Depends(get_chat_service),
+    chat_service: RefactoredChatService = Depends(get_chat_service),
 ) -> PerformanceStatsResponse:
     """Get workflow performance statistics."""
     try:

@@ -97,9 +97,8 @@ export class SSEEventManager {
     }
 
     try {
-      // Since EventSource doesn't support custom headers, we need to use a different approach
-      // Let's use a custom fetch-based EventSource implementation or modify our approach
-      const token = localStorage.getItem('chatter_token');
+      // Get token from chatterSDK instead of directly from localStorage
+      const token = chatterSDK.getToken();
       if (!token) {
         console.error('SSE: No authentication token found');
         return;

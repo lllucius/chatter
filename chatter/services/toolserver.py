@@ -1051,15 +1051,16 @@ class ToolServerService:
 
             # Update or create tools
             for tool_data in remote_tools:
-                tool_name = tool_data.get("name")
+                # Handle LangChain BaseTool objects instead of dicts
+                tool_name = tool_data.name if hasattr(tool_data, 'name') else None
                 if not tool_name:
                     continue
 
                 if tool_name in existing_tools:
                     # Update existing tool
                     tool = existing_tools[tool_name]
-                    tool.description = tool_data.get("description")
-                    tool.args_schema = tool_data.get("args_schema")
+                    tool.description = tool_data.description if hasattr(tool_data, 'description') else None
+                    tool.args_schema = getattr(tool_data, 'args_schema', None)
                     tool.is_available = True
                     tool.updated_at = datetime.now(UTC)
                 else:
@@ -1067,16 +1068,16 @@ class ToolServerService:
                     tool = ServerTool(
                         server_id=server.id,
                         name=tool_name,
-                        display_name=tool_data.get("display_name") or tool_name.replace("_", " ").title(),
-                        description=tool_data.get("description"),
-                        args_schema=tool_data.get("args_schema"),
+                        display_name=tool_name.replace("_", " ").title(),
+                        description=tool_data.description if hasattr(tool_data, 'description') else None,
+                        args_schema=getattr(tool_data, 'args_schema', None),
                         status=ToolStatus.ENABLED,
                         is_available=True,
                     )
                     self.session.add(tool)
 
             # Mark tools not found as unavailable
-            found_tool_names = {tool_data.get("name") for tool_data in remote_tools if tool_data.get("name")}
+            found_tool_names = {tool_data.name for tool_data in remote_tools if hasattr(tool_data, 'name') and tool_data.name}
             for tool_name, tool in existing_tools.items():
                 if tool_name not in found_tool_names:
                     tool.is_available = False

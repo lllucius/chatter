@@ -92,7 +92,7 @@ dependencies = [
     
     # Utilities
     "typer==0.14.0",
-    "rich==14.0.1",
+    "rich==14.1.0",
     "click==8.1.8",
     "pendulum==3.0.0",
     "orjson==3.10.12",

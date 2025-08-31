@@ -2,10 +2,12 @@
 
 import html
 import re
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 from fastapi import HTTPException, Request
 from pydantic import ValidationError
+from starlette.responses import Response
 
 from chatter.config import settings
 from chatter.schemas.utilities import ValidationRule
@@ -17,7 +19,7 @@ logger = get_logger(__name__)
 class InputValidator:
     """Input validation and sanitization engine."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the input validator."""
         self.rules: dict[str, ValidationRule] = {}
         self._setup_default_rules()
@@ -246,15 +248,15 @@ class InputValidator:
 class RateLimitValidator:
     """Rate limiting validation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize rate limit validator."""
         self.request_counts: dict[str, list[float]] = {}
 
     def check_rate_limit(
         self,
         identifier: str,
-        max_requests: int = None,
-        window_seconds: int = None
+        max_requests: int | None = None,
+        window_seconds: int | None = None
     ) -> bool:
         """Check if request is within rate limits.
 
@@ -294,7 +296,7 @@ class RateLimitValidator:
 class SecurityValidator:
     """Security-focused validation for potential threats."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize security validator."""
         self.sql_injection_patterns = [
             r"(\%27)|(\')|(\-\-)|(%23)|(#)",
@@ -389,7 +391,9 @@ rate_limit_validator = RateLimitValidator()
 security_validator = SecurityValidator()
 
 
-async def validate_request_middleware(request: Request, call_next):
+async def validate_request_middleware(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     """Middleware to validate incoming requests.
 
     Args:

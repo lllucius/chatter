@@ -12,17 +12,16 @@ class TestCoreVectorStore:
         from chatter.core.vector_store import VectorStore
 
         try:
-            # Test different vector store backends
-            backends = ["pgvector", "chromadb", "qdrant", "pinecone"]
-
-            for backend in backends:
-                try:
-                    store = VectorStore(backend=backend, session=test_session)
-                    assert store is not None
-                    assert store.backend == backend
-                except Exception:
-                    # Backend might not be available in test environment
-                    continue
+            # Test PGVector backend only
+            backend = "pgvector"
+            
+            try:
+                store = VectorStore(backend=backend, session=test_session)
+                assert store is not None
+                assert store.backend == backend
+            except Exception:
+                # Backend might not be available in test environment
+                pytest.skip(f"PGVector backend not available in test environment")
 
         except (ImportError, AttributeError, NotImplementedError):
             pytest.skip("Vector store initialization not implemented")

@@ -4,7 +4,6 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any
 
-from langchain_community.vectorstores import Chroma
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_postgres import PGVector
@@ -412,259 +411,6 @@ class PGVectorStore(AbstractVectorStore):
         return self._store.as_retriever(**kwargs)
 
 
-class ChromaVectorStore(AbstractVectorStore):
-    """ChromaDB implementation for development/testing."""
-
-    def __init__(
-        self,
-        embeddings: Embeddings,
-        collection_name: str = "documents",
-        persist_directory: str | None = None,
-        **kwargs,
-    ):
-        """Initialize Chroma store."""
-        self.embeddings = embeddings
-        self.collection_name = collection_name
-        self.persist_directory = persist_directory
-
-        self._store = None
-        self._initialize_store()
-
-    def _initialize_store(self) -> None:
-        """Initialize the Chroma store."""
-        try:
-            self._store = Chroma(
-                embedding_function=self.embeddings,
-                collection_name=self.collection_name,
-                persist_directory=self.persist_directory,
-            )
-            logger.info(
-                "Chroma store initialized",
-                collection=self.collection_name,
-            )
-        except Exception as e:
-            logger.error(
-                "Failed to initialize Chroma store", error=str(e)
-            )
-            raise VectorStoreError(
-                f"Chroma initialization failed: {str(e)}"
-            ) from e
-
-    async def add_documents(
-        self,
-        documents: list[Document],
-        embeddings: list[list[float]] | None = None,
-        ids: list[str] | None = None,
-        **kwargs,
-    ) -> list[str]:
-        """Add documents to Chroma."""
-        try:
-            return await asyncio.to_thread(
-                self._store.add_documents, documents, ids=ids
-            )
-        except Exception as e:
-            logger.error(
-                "Failed to add documents to Chroma", error=str(e)
-            )
-            raise VectorStoreError(
-                f"Add documents failed: {str(e)}"
-            ) from e
-
-    async def similarity_search(
-        self,
-        query: str,
-        k: int = 4,
-        filter: dict[str, Any] | None = None,
-        **kwargs,
-    ) -> list[Document]:
-        """Perform similarity search in Chroma."""
-        try:
-            return await asyncio.to_thread(
-                self._store.similarity_search,
-                query,
-                k=k,
-                filter=filter,
-                **kwargs,
-            )
-        except Exception as e:
-            logger.error("Similarity search failed", error=str(e))
-            raise VectorStoreError(
-                f"Similarity search failed: {str(e)}"
-            ) from e
-
-    async def similarity_search_with_score(
-        self,
-        query: str,
-        k: int = 4,
-        filter: dict[str, Any] | None = None,
-        **kwargs,
-    ) -> list[tuple[Document, float]]:
-        """Perform similarity search with scores in Chroma."""
-        try:
-            return await asyncio.to_thread(
-                self._store.similarity_search_with_score,
-                query,
-                k=k,
-                filter=filter,
-                **kwargs,
-            )
-        except Exception as e:
-            logger.error(
-                "Similarity search with score failed", error=str(e)
-            )
-            raise VectorStoreError(
-                f"Similarity search with score failed: {str(e)}"
-            ) from e
-
-    async def delete(self, ids: list[str]) -> bool:
-        """Delete documents by IDs."""
-        try:
-            self._store.delete(ids)
-            return True
-        except Exception as e:
-            logger.error("Delete documents failed", error=str(e))
-            raise VectorStoreError(f"Delete failed: {str(e)}") from e
-
-    async def update_documents(
-        self, ids: list[str], documents: list[Document]
-    ) -> bool:
-        """Update documents by IDs."""
-        try:
-            # Chroma doesn't have direct update, so delete and re-add
-            await self.delete(ids)
-            await self.add_documents(documents, ids=ids)
-            return True
-        except Exception as e:
-            logger.error("Update documents failed", error=str(e))
-            raise VectorStoreError(f"Update failed: {str(e)}") from e
-
-    async def advanced_search(
-        self,
-        query: str | None = None,
-        k: int = 4,
-        metadata_filter: dict[str, Any] | None = None,
-        semantic_filter: str | None = None,
-        date_range: tuple[str, str] | None = None,
-        content_type: str | None = None,
-        similarity_threshold: float = 0.0,
-        **kwargs: Any,
-    ) -> list[tuple[Document, float]]:
-        """Perform advanced search with multiple filter types."""
-        try:
-            # Build complex filter for Chroma
-            where_filter = {}
-
-            if metadata_filter:
-                where_filter.update(metadata_filter)
-
-            if date_range:
-                start_date, end_date = date_range
-                where_filter["created_at"] = {
-                    "$gte": start_date,
-                    "$lte": end_date
-                }
-
-            if content_type:
-                where_filter["content_type"] = content_type
-
-            # If no query provided, use metadata-only search
-            if not query:
-                query = "retrieving documents"  # dummy query for Chroma
-
-            docs_with_scores = await asyncio.to_thread(
-                self._store.similarity_search_with_score,
-                query,
-                k=k,
-                filter=where_filter,
-                **kwargs,
-            )
-
-            # Filter by similarity threshold
-            return [
-                (doc, score) for doc, score in docs_with_scores
-                if score >= similarity_threshold
-            ]
-
-        except Exception as e:
-            logger.error("Advanced search failed", error=str(e))
-            raise VectorStoreError(f"Advanced search failed: {str(e)}") from e
-
-    async def get_document_metadata(
-        self, doc_id: str
-    ) -> dict[str, Any] | None:
-        """Get metadata for a specific document."""
-        try:
-            results = await asyncio.to_thread(
-                self._store.similarity_search,
-                "",  # Empty query
-                k=1,
-                filter={"id": doc_id}
-            )
-
-            if results:
-                return results[0].metadata
-            return None
-
-        except Exception as e:
-            logger.error("Get document metadata failed", error=str(e))
-            return None
-
-    async def query_metadata(
-        self,
-        metadata_query: dict[str, Any],
-        limit: int = 100,
-    ) -> list[dict[str, Any]]:
-        """Query documents by metadata only."""
-        try:
-            results = await asyncio.to_thread(
-                self._store.similarity_search,
-                "",  # Empty query
-                k=limit,
-                filter=metadata_query
-            )
-
-            return [doc.metadata for doc in results]
-
-        except Exception as e:
-            logger.error("Query metadata failed", error=str(e))
-            raise VectorStoreError(f"Query metadata failed: {str(e)}") from e
-
-    async def get_similar_documents_by_metadata(
-        self,
-        reference_metadata: dict[str, Any],
-        k: int = 4,
-        exclude_ids: list[str] | None = None,
-    ) -> list[Document]:
-        """Find documents with similar metadata patterns."""
-        try:
-            # Build filter for similar metadata
-            where_filter = {}
-
-            for key, value in reference_metadata.items():
-                if key in ["content_type", "source", "category", "tags"]:
-                    where_filter[key] = value
-
-            if exclude_ids:
-                where_filter["id"] = {"$nin": exclude_ids}
-
-            results = await asyncio.to_thread(
-                self._store.similarity_search,
-                "",  # Empty query
-                k=k,
-                filter=where_filter
-            )
-
-            return results
-
-        except Exception as e:
-            logger.error("Get similar documents by metadata failed", error=str(e))
-            raise VectorStoreError(f"Similar metadata search failed: {str(e)}") from e
-
-    def as_retriever(self, **kwargs) -> Any:
-        """Get retriever interface."""
-        return self._store.as_retriever(**kwargs)
-
-
 class VectorStoreManager:
     """Manager for vector store operations."""
 
@@ -691,15 +437,9 @@ class VectorStoreManager:
                 collection_name=collection_name,
                 **kwargs,
             )
-        elif store_type.lower() == "chroma":
-            store = ChromaVectorStore(
-                embeddings=embeddings,
-                collection_name=collection_name,
-                **kwargs,
-            )
         else:
             raise VectorStoreError(
-                f"Unsupported vector store type: {store_type}"
+                f"Unsupported vector store type: {store_type}. Only 'pgvector' is supported."
             ) from None
 
         self._stores[store_key] = store
@@ -716,15 +456,8 @@ class VectorStoreManager:
         self, embeddings: Embeddings, **kwargs
     ) -> AbstractVectorStore:
         """Get the default vector store based on configuration."""
-        # Prefer PGVector for production, fallback to Chroma for development
-        try:
-            return self.create_store("pgvector", embeddings, **kwargs)
-        except Exception as e:
-            logger.warning(
-                "Failed to create PGVector store, falling back to Chroma",
-                error=str(e),
-            )
-            return self.create_store("chroma", embeddings, **kwargs)
+        # Use PGVector as the only supported vector store
+        return self.create_store("pgvector", embeddings, **kwargs)
 
 
 # Global vector store manager instance

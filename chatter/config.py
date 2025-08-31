@@ -158,37 +158,6 @@ class Settings(BaseSettings):
         default=3072, description="PGVector embedding dimension"
     )
 
-    # Pinecone settings
-    pinecone_api_key: str | None = Field(
-        default=None, description="Pinecone API key"
-    )
-    pinecone_environment: str | None = Field(
-        default=None, description="Pinecone environment"
-    )
-    pinecone_index_name: str = Field(
-        default="chatter-index", description="Pinecone index name"
-    )
-
-    # Qdrant settings
-    qdrant_url: str = Field(
-        default="http://localhost:6333", description="Qdrant URL"
-    )
-    qdrant_api_key: str | None = Field(
-        default=None, description="Qdrant API key"
-    )
-    qdrant_collection_name: str = Field(
-        default="chatter", description="Qdrant collection name"
-    )
-
-    # ChromaDB settings
-    chromadb_persist_directory: str = Field(
-        default="./data/chromadb",
-        description="ChromaDB persist directory",
-    )
-    chromadb_collection_name: str = Field(
-        default="chatter", description="ChromaDB collection name"
-    )
-
     # Embedding settings
     embedding_batch_size: int = Field(
         default=10, description="Embedding batch size"

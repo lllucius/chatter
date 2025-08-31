@@ -97,8 +97,8 @@ class ToolServerService:
             self.session.add(server)
             await self.session.flush()
 
-            # Auto-connect if requested
-            if server_data.auto_start:
+            # Auto-connect if requested (but not for built-in servers)
+            if server_data.auto_start and not server.is_builtin:
                 await self._connect_remote_server(server)
 
             await self.session.commit()
@@ -319,7 +319,16 @@ class ToolServerService:
                     f"Server not found: {server_id}"
                 ) from None
 
-            success = await self._connect_remote_server(server)
+            # Only connect remote servers, not built-in ones
+            if not server.is_builtin:
+                success = await self._connect_remote_server(server)
+            else:
+                # For built-in servers, just mark as enabled
+                server.status = ServerStatus.ENABLED
+                server.last_startup_success = datetime.now(UTC)
+                server.last_startup_error = None
+                server.consecutive_failures = 0
+                success = True
             await self.session.commit()
             await self.session.refresh(server)
 
@@ -414,8 +423,8 @@ class ToolServerService:
             server.status = ServerStatus.ENABLED
             server.updated_at = datetime.now(UTC)
 
-            # Auto-start if configured
-            if server.auto_start:
+            # Auto-start if configured (but only for remote servers)
+            if server.auto_start and not server.is_builtin:
                 await self._connect_remote_server(server)
 
             await self.session.commit()
@@ -1000,8 +1009,10 @@ class ToolServerService:
             server.status = ServerStatus.STOPPING
             server.updated_at = datetime.now(UTC)
 
-            # Stop the server
-            success = await self.mcp_service.stop_server(server.name)
+            # Stop the server (only disable remote servers in MCP service)
+            success = True
+            if not server.is_builtin:
+                success = await self.mcp_service.disable_server(server.name)
 
             server.status = ServerStatus.DISABLED
             server.updated_at = datetime.now(UTC)
@@ -1145,6 +1156,8 @@ class ToolServerService:
                         command=server_data["command"],
                         args=server_data["args"],
                         env=server_data["env"],
+                        base_url=None,  # Built-in servers don't have remote URLs
+                        transport_type="stdio",  # Built-in servers use stdio transport
                         is_builtin=True,
                         auto_start=True,
                         status=ServerStatus.DISABLED,

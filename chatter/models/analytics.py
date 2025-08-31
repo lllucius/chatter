@@ -2,12 +2,20 @@
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date as date_type
+from typing import TYPE_CHECKING
 
 from sqlalchemy import JSON, Date, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
+
+if TYPE_CHECKING:
+    from chatter.models.conversation import Conversation
+    from chatter.models.document import Document
+    from chatter.models.profile import Profile
+    from chatter.models.prompt import Prompt
+    from chatter.models.user import User
 
 
 class ConversationStats(Base):
@@ -26,7 +34,7 @@ class ConversationStats(Base):
     )
 
     # Time period
-    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    date: Mapped[date_type] = mapped_column(Date, nullable=False, index=True)
 
     # Message statistics
     total_messages: Mapped[int] = mapped_column(
@@ -119,8 +127,8 @@ class ConversationStats(Base):
     )
 
     # Relationships
-    conversation: Mapped[Conversation] = relationship("Conversation")
-    user: Mapped[User] = relationship("User")
+    conversation: Mapped["Conversation"] = relationship("Conversation")
+    user: Mapped["User"] = relationship("User")
 
     def __repr__(self) -> str:
         """String representation of conversation stats."""
@@ -143,7 +151,7 @@ class DocumentStats(Base):
     )
 
     # Time period
-    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    date: Mapped[date_type] = mapped_column(Date, nullable=False, index=True)
 
     # Access statistics
     view_count: Mapped[int] = mapped_column(
@@ -198,8 +206,8 @@ class DocumentStats(Base):
     )
 
     # Relationships
-    document: Mapped[Document] = relationship("Document")
-    user: Mapped[User] = relationship("User")
+    document: Mapped["Document"] = relationship("Document")
+    user: Mapped["User"] = relationship("User")
 
     def __repr__(self) -> str:
         """String representation of document stats."""
@@ -219,7 +227,7 @@ class PromptStats(Base):
     )
 
     # Time period
-    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    date: Mapped[date_type] = mapped_column(Date, nullable=False, index=True)
 
     # Usage statistics
     usage_count: Mapped[int] = mapped_column(
@@ -271,8 +279,8 @@ class PromptStats(Base):
     )
 
     # Relationships
-    prompt: Mapped[Prompt] = relationship("Prompt")
-    user: Mapped[User] = relationship("User")
+    prompt: Mapped["Prompt"] = relationship("Prompt")
+    user: Mapped["User"] = relationship("User")
 
     def __repr__(self) -> str:
         """String representation of prompt stats."""
@@ -295,7 +303,7 @@ class ProfileStats(Base):
     )
 
     # Time period
-    date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+    date: Mapped[date_type] = mapped_column(Date, nullable=False, index=True)
 
     # Usage statistics
     conversations_started: Mapped[int] = mapped_column(
@@ -347,8 +355,8 @@ class ProfileStats(Base):
     )
 
     # Relationships
-    profile: Mapped[Profile] = relationship("Profile")
-    user: Mapped[User] = relationship("User")
+    profile: Mapped["Profile"] = relationship("Profile")
+    user: Mapped["User"] = relationship("User")
 
     def __repr__(self) -> str:
         """String representation of profile stats."""

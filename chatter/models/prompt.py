@@ -3,7 +3,7 @@
 import hashlib
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import (
     JSON,
@@ -24,6 +24,9 @@ from sqlalchemy.orm import (
 )
 
 from chatter.models.base import Base, Keys
+
+if TYPE_CHECKING:
+    from chatter.models.user import User
 
 
 class PromptType(str, Enum):

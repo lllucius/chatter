@@ -271,11 +271,6 @@ class LLMService:
 
         except Exception as e:
             raise LLMProviderError(f"Failed to create provider from profile: {e}") from e
-            # For other providers, use base configuration with parameter updates
-            provider = base_provider
-            # Note: This is a simplified approach. In a production system,
-            # you'd need more sophisticated provider configuration
-            return provider
 
     def convert_conversation_to_messages(
         self, conversation: "Conversation", messages: list[Any]

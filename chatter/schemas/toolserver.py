@@ -36,13 +36,13 @@ class ToolServerBase(BaseModel):
     description: str | None = Field(
         None, description="Server description"
     )
-    base_url: HttpUrl = Field(
-        ..., description="Base URL for the remote server"
+    base_url: HttpUrl | None = Field(
+        None, description="Base URL for the remote server (null for built-in servers)"
     )
     transport_type: str = Field(
         "http",
-        pattern="^(http|sse)$",
-        description="Transport type: http or sse"
+        pattern="^(http|sse|stdio)$",
+        description="Transport type: http, sse, or stdio"
     )
     oauth_config: OAuthConfigSchema | None = Field(
         None, description="OAuth configuration if required"
@@ -82,7 +82,7 @@ class ToolServerUpdate(BaseModel):
     display_name: str | None = Field(None, min_length=1, max_length=200)
     description: str | None = Field(None)
     base_url: HttpUrl | None = Field(None)
-    transport_type: str | None = Field(None, pattern="^(http|sse)$")
+    transport_type: str | None = Field(None, pattern="^(http|sse|stdio)$")
     oauth_config: OAuthConfigSchema | None = Field(None)
     headers: dict[str, str] | None = Field(None)
     timeout: int | None = Field(None, ge=5, le=300)

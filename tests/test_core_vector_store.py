@@ -14,14 +14,14 @@ class TestCoreVectorStore:
         try:
             # Test PGVector backend only
             backend = "pgvector"
-            
+
             try:
                 store = VectorStore(backend=backend, session=test_session)
                 assert store is not None
                 assert store.backend == backend
             except Exception:
                 # Backend might not be available in test environment
-                pytest.skip(f"PGVector backend not available in test environment")
+                pytest.skip("PGVector backend not available in test environment")
 
         except (ImportError, AttributeError, NotImplementedError):
             pytest.skip("Vector store initialization not implemented")

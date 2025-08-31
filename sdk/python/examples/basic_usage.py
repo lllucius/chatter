@@ -1,8 +1,9 @@
 """Basic usage example for Chatter SDK."""
 
 import asyncio
+
 from chatter_sdk import ChatterClient
-from chatter_sdk.models import UserCreate, ChatRequest
+from chatter_sdk.models import ChatRequest, UserCreate
 
 
 async def main():

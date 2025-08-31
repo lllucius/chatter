@@ -171,10 +171,10 @@ class Profile(Base):
     )
 
     # Relationships
-    owner: Mapped["User"] = relationship(
+    owner: Mapped[User] = relationship(
         "User", back_populates="profiles", foreign_keys=[owner_id]
     )
-    conversations: Mapped[list["Conversation"]] = relationship(
+    conversations: Mapped[list[Conversation]] = relationship(
         "Conversation", back_populates="profile"
     )
 

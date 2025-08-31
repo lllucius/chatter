@@ -23,13 +23,13 @@ from chatter.models.conversation import (
     MessageRole,
 )
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
-from chatter.services.streaming import (
-    create_stream,
-    streaming_service,
-    stream_workflow,
-)
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
+from chatter.services.streaming import (
+    create_stream,
+    stream_workflow,
+    streaming_service,
+)
 from chatter.utils.monitoring import record_workflow_metrics
 from chatter.utils.security import get_secure_logger
 

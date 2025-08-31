@@ -127,8 +127,8 @@ class ConversationStats(Base):
     )
 
     # Relationships
-    conversation: Mapped["Conversation"] = relationship("Conversation")
-    user: Mapped["User"] = relationship("User")
+    conversation: Mapped[Conversation] = relationship("Conversation")
+    user: Mapped[User] = relationship("User")
 
     def __repr__(self) -> str:
         """String representation of conversation stats."""
@@ -206,8 +206,8 @@ class DocumentStats(Base):
     )
 
     # Relationships
-    document: Mapped["Document"] = relationship("Document")
-    user: Mapped["User"] = relationship("User")
+    document: Mapped[Document] = relationship("Document")
+    user: Mapped[User] = relationship("User")
 
     def __repr__(self) -> str:
         """String representation of document stats."""
@@ -279,8 +279,8 @@ class PromptStats(Base):
     )
 
     # Relationships
-    prompt: Mapped["Prompt"] = relationship("Prompt")
-    user: Mapped["User"] = relationship("User")
+    prompt: Mapped[Prompt] = relationship("Prompt")
+    user: Mapped[User] = relationship("User")
 
     def __repr__(self) -> str:
         """String representation of prompt stats."""
@@ -355,8 +355,8 @@ class ProfileStats(Base):
     )
 
     # Relationships
-    profile: Mapped["Profile"] = relationship("Profile")
-    user: Mapped["User"] = relationship("User")
+    profile: Mapped[Profile] = relationship("Profile")
+    user: Mapped[User] = relationship("User")
 
     def __repr__(self) -> str:
         """String representation of profile stats."""

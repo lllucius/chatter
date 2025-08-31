@@ -165,10 +165,10 @@ class Conversation(Base):
     )
 
     # Relationships
-    user: Mapped["User"] = relationship(
+    user: Mapped[User] = relationship(
         "User", back_populates="conversations"
     )
-    profile: Mapped["Profile | None"] = relationship(
+    profile: Mapped[Profile | None] = relationship(
         "Profile", back_populates="conversations"
     )
     messages: Mapped[list[Message]] = relationship(

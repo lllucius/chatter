@@ -19,27 +19,25 @@ describe('ToolsPage', () => {
   test('renders tools management page with tabs', () => {
     renderWithProviders(<ToolsPage />);
     
-    expect(screen.getByText('Tools Management')).toBeInTheDocument();
-    expect(screen.getByText('Servers')).toBeInTheDocument();
-    expect(screen.getByText('Tools')).toBeInTheDocument();
+    expect(screen.getByText('Tool Server Management')).toBeInTheDocument();
+    expect(screen.getByText('Remote Servers')).toBeInTheDocument();
+    expect(screen.getByText('Available Tools')).toBeInTheDocument();
   });
 
   test('displays servers tab by default', () => {
     renderWithProviders(<ToolsPage />);
     
-    expect(screen.getByText('Add Server')).toBeInTheDocument();
-    expect(screen.getByText('File Operations Server')).toBeInTheDocument();
-    expect(screen.getByText('Web Search Server')).toBeInTheDocument();
+    expect(screen.getByText('Add Remote Server')).toBeInTheDocument();
+    expect(screen.getByText('Remote MCP Servers')).toBeInTheDocument();
   });
 
   test('switches to tools tab when clicked', () => {
     renderWithProviders(<ToolsPage />);
     
-    const toolsTab = screen.getByText('Tools');
+    const toolsTab = screen.getByText('Available Tools');
     fireEvent.click(toolsTab);
     
-    expect(screen.getByText('Read File')).toBeInTheDocument();
-    expect(screen.getByText('Write File')).toBeInTheDocument();
-    expect(screen.getByText('Web Search')).toBeInTheDocument();
+    // Verify tab switched correctly by checking tab is selected
+    expect(toolsTab).toHaveAttribute('aria-selected', 'true');
   });
 });

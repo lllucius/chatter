@@ -26,6 +26,7 @@ import {
   UserCreate,
   ChatRequest,
   ModelRegistryApi,
+  ToolServerUpdate,
 } from '../sdk';
 
 type StoredAuth = {
@@ -376,6 +377,14 @@ export class ChatterSDK {
   async deleteToolServer(serverId: string) {
     return await this.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
       serverId
+    });
+  }
+
+  // Update a tool server
+  async updateToolServer(serverId: string, updateData: ToolServerUpdate) {
+    return await this.toolServers.updateToolServerApiV1ToolserversServersServerIdPut({
+      serverId,
+      toolServerUpdate: updateData
     });
   }
 

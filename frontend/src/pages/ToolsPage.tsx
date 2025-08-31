@@ -61,6 +61,7 @@ import {
   Cloud as CloudIcon,
   Http as HttpIcon,
   Sync as SseIcon,
+  Edit as EditIcon,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
 
@@ -136,11 +137,12 @@ interface PermissionData {
 const ToolsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'server' | 'tool' | 'permission'>('server');
+  const [dialogType, setDialogType] = useState<'server' | 'tool' | 'permission' | 'edit-server'>('server');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [editingServer, setEditingServer] = useState<RemoteServer | null>(null);
 
   // Menu state
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
@@ -190,7 +192,7 @@ const ToolsPage: React.FC = () => {
     setActiveTab(newValue);
   };
 
-  const openDialog = (type: 'server' | 'tool' | 'permission') => {
+  const openDialog = (type: 'server' | 'tool' | 'permission' | 'edit-server', item?: any) => {
     setDialogType(type);
     setDialogOpen(true);
     if (type === 'server') {
@@ -209,12 +211,31 @@ const ToolsPage: React.FC = () => {
         timeout: 30,
         auto_start: true,
       });
+      setEditingServer(null);
+    } else if (type === 'edit-server' && item) {
+      setEditingServer(item);
+      setServerFormData({
+        name: item.name || '',
+        display_name: item.display_name || '',
+        description: item.description || '',
+        base_url: item.base_url || '',
+        transport_type: item.transport_type || 'http',
+        oauth_enabled: Boolean(item.oauth_config),
+        oauth_client_id: item.oauth_config?.client_id || '',
+        oauth_client_secret: item.oauth_config?.client_secret || '',
+        oauth_token_url: item.oauth_config?.token_url || '',
+        oauth_scope: item.oauth_config?.scope || '',
+        headers: item.headers ? JSON.stringify(item.headers) : '{}',
+        timeout: item.timeout || 30,
+        auto_start: item.auto_start !== undefined ? item.auto_start : true,
+      });
     }
   };
 
   const closeDialog = () => {
     setDialogOpen(false);
     setError('');
+    setEditingServer(null);
   };
 
   const handleActionClick = (event: React.MouseEvent<HTMLElement>, item: any, type: 'server' | 'tool') => {
@@ -309,6 +330,31 @@ const ToolsPage: React.FC = () => {
     }
   };
 
+  const updateRemoteServer = async () => {
+    if (!editingServer) return;
+    
+    try {
+      setLoading(true);
+      setError('');
+
+      const updateData = {
+        display_name: serverFormData.display_name,
+        description: serverFormData.description,
+        auto_start: serverFormData.auto_start,
+      };
+
+      await chatterSDK.updateToolServer(editingServer.id, updateData);
+      showSnackbar('Server updated successfully');
+      closeDialog();
+      loadRemoteServers();
+    } catch (err) {
+      console.error('Failed to update server:', err);
+      setError('Failed to update server');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const toggleServer = async (serverId: string, enable: boolean) => {
     try {
       if (enable) {
@@ -397,30 +443,45 @@ const ToolsPage: React.FC = () => {
   );
 
   const renderServerDialog = () => (
-    <Dialog open={dialogOpen && dialogType === 'server'} onClose={closeDialog} maxWidth="md" fullWidth>
-      <DialogTitle>Add Remote MCP Server</DialogTitle>
+    <Dialog open={dialogOpen && (dialogType === 'server' || dialogType === 'edit-server')} onClose={closeDialog} maxWidth="md" fullWidth>
+      <DialogTitle>{dialogType === 'edit-server' ? 'Edit Server Configuration' : 'Add Remote MCP Server'}</DialogTitle>
       <DialogContent>
         {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         
         <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Server Name"
-              value={serverFormData.name}
-              onChange={(e) => setServerFormData({ ...serverFormData, name: e.target.value })}
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Display Name"
-              value={serverFormData.display_name}
-              onChange={(e) => setServerFormData({ ...serverFormData, display_name: e.target.value })}
-              required
-            />
-          </Grid>
+          {dialogType === 'server' && (
+            <>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Server Name"
+                  value={serverFormData.name}
+                  onChange={(e) => setServerFormData({ ...serverFormData, name: e.target.value })}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Display Name"
+                  value={serverFormData.display_name}
+                  onChange={(e) => setServerFormData({ ...serverFormData, display_name: e.target.value })}
+                  required
+                />
+              </Grid>
+            </>
+          )}
+          {dialogType === 'edit-server' && (
+            <Grid item xs={12}>
+              <TextField
+                fullWidth
+                label="Display Name"
+                value={serverFormData.display_name}
+                onChange={(e) => setServerFormData({ ...serverFormData, display_name: e.target.value })}
+                required
+              />
+            </Grid>
+          )}
           <Grid item xs={12}>
             <TextField
               fullWidth
@@ -431,131 +492,152 @@ const ToolsPage: React.FC = () => {
               rows={2}
             />
           </Grid>
-          <Grid item xs={12} md={8}>
-            <TextField
-              fullWidth
-              label="Base URL"
-              value={serverFormData.base_url}
-              onChange={(e) => setServerFormData({ ...serverFormData, base_url: e.target.value })}
-              placeholder="https://api.example.com"
-              required
-            />
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <FormControl fullWidth>
-              <InputLabel>Transport Type</InputLabel>
-              <Select
-                value={serverFormData.transport_type}
-                onChange={(e) => setServerFormData({ ...serverFormData, transport_type: e.target.value as 'http' | 'sse' })}
-                label="Transport Type"
-              >
-                <MenuItem value="http">HTTP</MenuItem>
-                <MenuItem value="sse">Server-Sent Events</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          
-          <Grid item xs={12}>
-            <Accordion>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <SecurityIcon sx={{ mr: 1 }} />
-                <Typography>OAuth Configuration</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Grid container spacing={2}>
-                  <Grid item xs={12}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={serverFormData.oauth_enabled}
-                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_enabled: e.target.checked })}
-                        />
-                      }
-                      label="Enable OAuth Authentication"
-                    />
-                  </Grid>
-                  {serverFormData.oauth_enabled && (
-                    <>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Client ID"
-                          value={serverFormData.oauth_client_id}
-                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_client_id: e.target.value })}
+          {dialogType === 'server' && (
+            <>
+              <Grid item xs={12} md={8}>
+                <TextField
+                  fullWidth
+                  label="Base URL"
+                  value={serverFormData.base_url}
+                  onChange={(e) => setServerFormData({ ...serverFormData, base_url: e.target.value })}
+                  placeholder="https://api.example.com"
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <FormControl fullWidth>
+                  <InputLabel>Transport Type</InputLabel>
+                  <Select
+                    value={serverFormData.transport_type}
+                    onChange={(e) => setServerFormData({ ...serverFormData, transport_type: e.target.value as 'http' | 'sse' })}
+                    label="Transport Type"
+                  >
+                    <MenuItem value="http">HTTP</MenuItem>
+                    <MenuItem value="sse">Server-Sent Events</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12}>
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <SecurityIcon sx={{ mr: 1 }} />
+                    <Typography>OAuth Configuration</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={serverFormData.oauth_enabled}
+                              onChange={(e) => setServerFormData({ ...serverFormData, oauth_enabled: e.target.checked })}
+                            />
+                          }
+                          label="Enable OAuth Authentication"
                         />
                       </Grid>
-                      <Grid item xs={12} md={6}>
-                        <TextField
-                          fullWidth
-                          label="Client Secret"
-                          type="password"
-                          value={serverFormData.oauth_client_secret}
-                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_client_secret: e.target.value })}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={8}>
-                        <TextField
-                          fullWidth
-                          label="Token URL"
-                          value={serverFormData.oauth_token_url}
-                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_token_url: e.target.value })}
-                        />
-                      </Grid>
-                      <Grid item xs={12} md={4}>
-                        <TextField
-                          fullWidth
-                          label="Scope (optional)"
-                          value={serverFormData.oauth_scope}
-                          onChange={(e) => setServerFormData({ ...serverFormData, oauth_scope: e.target.value })}
-                        />
-                      </Grid>
-                    </>
-                  )}
-                </Grid>
-              </AccordionDetails>
-            </Accordion>
-          </Grid>
+                      {serverFormData.oauth_enabled && (
+                        <>
+                          <Grid item xs={12} md={6}>
+                            <TextField
+                              fullWidth
+                              label="Client ID"
+                              value={serverFormData.oauth_client_id}
+                              onChange={(e) => setServerFormData({ ...serverFormData, oauth_client_id: e.target.value })}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={6}>
+                            <TextField
+                              fullWidth
+                              label="Client Secret"
+                              type="password"
+                              value={serverFormData.oauth_client_secret}
+                              onChange={(e) => setServerFormData({ ...serverFormData, oauth_client_secret: e.target.value })}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={8}>
+                            <TextField
+                              fullWidth
+                              label="Token URL"
+                              value={serverFormData.oauth_token_url}
+                              onChange={(e) => setServerFormData({ ...serverFormData, oauth_token_url: e.target.value })}
+                            />
+                          </Grid>
+                          <Grid item xs={12} md={4}>
+                            <TextField
+                              fullWidth
+                              label="Scope (optional)"
+                              value={serverFormData.oauth_scope}
+                              onChange={(e) => setServerFormData({ ...serverFormData, oauth_scope: e.target.value })}
+                            />
+                          </Grid>
+                        </>
+                      )}
+                    </Grid>
+                  </AccordionDetails>
+                </Accordion>
+              </Grid>
+            </>
+          )}
 
           <Grid item xs={12}>
             <Accordion>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <SettingsIcon sx={{ mr: 1 }} />
-                <Typography>Advanced Settings</Typography>
+                <Typography>Settings</Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} md={6}>
-                    <TextField
-                      fullWidth
-                      label="Timeout (seconds)"
-                      type="number"
-                      value={serverFormData.timeout}
-                      onChange={(e) => setServerFormData({ ...serverFormData, timeout: parseInt(e.target.value) || 30 })}
-                      inputProps={{ min: 5, max: 300 }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} md={6}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={serverFormData.auto_start}
-                          onChange={(e) => setServerFormData({ ...serverFormData, auto_start: e.target.checked })}
+                  {dialogType === 'server' && (
+                    <>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Timeout (seconds)"
+                          type="number"
+                          value={serverFormData.timeout}
+                          onChange={(e) => setServerFormData({ ...serverFormData, timeout: parseInt(e.target.value) || 30 })}
+                          inputProps={{ min: 5, max: 300 }}
                         />
-                      }
-                      label="Auto-connect on startup"
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Custom Headers (JSON)"
-                      value={serverFormData.headers}
-                      onChange={(e) => setServerFormData({ ...serverFormData, headers: e.target.value })}
-                      placeholder='{"Authorization": "Bearer token", "X-Custom": "value"}'
-                      multiline
-                      rows={3}
-                    />
-                  </Grid>
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={serverFormData.auto_start}
+                              onChange={(e) => setServerFormData({ ...serverFormData, auto_start: e.target.checked })}
+                            />
+                          }
+                          label="Auto-connect on startup"
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Custom Headers (JSON)"
+                          value={serverFormData.headers}
+                          onChange={(e) => setServerFormData({ ...serverFormData, headers: e.target.value })}
+                          placeholder='{"Authorization": "Bearer token", "X-Custom": "value"}'
+                          multiline
+                          rows={3}
+                        />
+                      </Grid>
+                    </>
+                  )}
+                  {dialogType === 'edit-server' && (
+                    <Grid item xs={12}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={serverFormData.auto_start}
+                            onChange={(e) => setServerFormData({ ...serverFormData, auto_start: e.target.checked })}
+                          />
+                        }
+                        label="Auto-connect on startup"
+                      />
+                    </Grid>
+                  )}
                 </Grid>
               </AccordionDetails>
             </Accordion>
@@ -565,11 +647,11 @@ const ToolsPage: React.FC = () => {
       <DialogActions>
         <Button onClick={closeDialog}>Cancel</Button>
         <Button 
-          onClick={createRemoteServer} 
+          onClick={dialogType === 'edit-server' ? updateRemoteServer : createRemoteServer}
           variant="contained" 
-          disabled={loading || !serverFormData.name || !serverFormData.base_url}
+          disabled={loading || (dialogType === 'server' && (!serverFormData.name || !serverFormData.base_url)) || (dialogType === 'edit-server' && !serverFormData.display_name)}
         >
-          {loading ? <CircularProgress size={20} /> : 'Create Server'}
+          {loading ? <CircularProgress size={20} /> : dialogType === 'edit-server' ? 'Update Server' : 'Create Server'}
         </Button>
       </DialogActions>
     </Dialog>
@@ -1031,6 +1113,10 @@ const ToolsPage: React.FC = () => {
       >
         {actionType === 'server' && actionItem && (
           [
+            <MenuItem key="edit" onClick={() => { openDialog('edit-server', actionItem); handleActionClose(); }}>
+              <EditIcon sx={{ mr: 1 }} />
+              Edit
+            </MenuItem>,
             <MenuItem key="toggle" onClick={() => toggleServer(actionItem.id, actionItem.status !== 'enabled')}>
               <ToggleIcon sx={{ mr: 1 }} />
               {actionItem.status === 'enabled' ? 'Disable' : 'Enable'}

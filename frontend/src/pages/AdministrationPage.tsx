@@ -20,7 +20,6 @@ import {
   FormControlLabel,
   Alert,
   CircularProgress,
-  Snackbar,
   Tabs,
   Tab,
   Menu,
@@ -50,6 +49,7 @@ import {
 import { chatterSDK } from '../services/chatter-sdk';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
 import { useSSE } from '../services/sse-context';
+import { toastService } from '../services/toast-service';
 import CustomScrollbar from '../components/CustomScrollbar';
 
 const AdministrationPage: React.FC = () => {
@@ -60,8 +60,6 @@ const AdministrationPage: React.FC = () => {
   const [dialogType, setDialogType] = useState<'user' | 'backup' | 'plugin' | 'job'>('user');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
   
   // More options menu state
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
@@ -307,9 +305,20 @@ const AdministrationPage: React.FC = () => {
     }
   };
 
-  const showSnackbar = (message: string) => {
-    setSnackbarMessage(message);
-    setSnackbarOpen(true);
+  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+    switch (type) {
+      case 'success':
+        toastService.success(message);
+        break;
+      case 'error':
+        toastService.error(message);
+        break;
+      case 'warning':
+        toastService.warning(message);
+        break;
+      default:
+        toastService.info(message);
+    }
   };
 
   const openUserActionsMenu = (e: React.MouseEvent<HTMLElement>, user: any) => {
@@ -331,18 +340,18 @@ const AdministrationPage: React.FC = () => {
   const handleUserSettingsSave = async () => {
     try {
       // In a real app, this would call the API to update the user
-      showSnackbar('User settings updated successfully!');
+      showToast('User settings updated successfully!', 'success');
       setUserSettingsOpen(false);
       setEditingUser(null);
     } catch {
-      showSnackbar('Failed to update user settings');
+      showToast('Failed to update user settings', 'error');
     }
   };
 
   const handleBackupDownload = async () => {
     try {
       setLoading(true);
-      showSnackbar('Backup download functionality will be available soon');
+      showToast('Backup download functionality will be available soon', 'info');
     } catch (error: any) {
       console.error('Error downloading backup:', error);
       setError('Failed to download backup');
@@ -355,10 +364,10 @@ const AdministrationPage: React.FC = () => {
     try {
       if (enabled) {
         await chatterSDK.plugins.enablePluginApiV1PluginsPluginIdEnablePost({ pluginId });
-        showSnackbar('Plugin enabled successfully');
+        showToast('Plugin enabled successfully', 'success');
       } else {
         await chatterSDK.plugins.disablePluginApiV1PluginsPluginIdDisablePost({ pluginId });
-        showSnackbar('Plugin disabled successfully');
+        showToast('Plugin disabled successfully', 'success');
       }
       loadPlugins();
     } catch (error: any) {
@@ -409,7 +418,7 @@ const AdministrationPage: React.FC = () => {
               password: formData.password,
             }
           });
-          showSnackbar('User created successfully!');
+          showToast('User created successfully!', 'success');
           break;
         case 'backup':
           await chatterSDK.dataManagement.createBackupApiV1DataBackupPost({
@@ -420,7 +429,7 @@ const AdministrationPage: React.FC = () => {
               include_files: formData.includeDocuments,
             }
           });
-          showSnackbar('Backup created successfully!');
+          showToast('Backup created successfully!', 'success');
           loadBackups();
           break;
         case 'plugin':
@@ -430,7 +439,7 @@ const AdministrationPage: React.FC = () => {
               enable_on_install: true,
             }
           });
-          showSnackbar('Plugin installation started successfully!');
+          showToast('Plugin installation started successfully!', 'success');
           loadPlugins();
           break;
         case 'job':
@@ -445,7 +454,7 @@ const AdministrationPage: React.FC = () => {
               schedule_at: formData.scheduleAt ? new Date(formData.scheduleAt).toISOString() : undefined,
             };
             await chatterSDK.jobs.createJobApiV1JobsPost({ jobCreateRequest });
-            showSnackbar('Job created successfully!');
+            showToast('Job created successfully!', 'success');
             addNotification({
               title: 'Job Created',
               message: `Job "${formData.jobName}" has been created and ${formData.scheduleAt ? 'scheduled' : 'queued for execution'}`,
@@ -493,21 +502,21 @@ const AdministrationPage: React.FC = () => {
         setError('');
         switch (type) {
           case 'user':
-            showSnackbar('User deletion functionality requires implementation of admin user management API');
+            showToast('User deletion functionality requires implementation of admin user management API', 'warning');
             break;
           case 'backup':
-            showSnackbar('Backup deletion is not yet supported by the API');
+            showToast('Backup deletion is not yet supported by the API', 'warning');
             break;
           case 'plugin':
             await chatterSDK.plugins.uninstallPluginApiV1PluginsPluginIdDelete({
               pluginId: id
             });
-            showSnackbar('Plugin uninstalled successfully!');
+            showToast('Plugin uninstalled successfully!', 'success');
             loadPlugins();
             break;
           case 'job':
             await chatterSDK.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId: id });
-            showSnackbar('Job cancelled successfully!');
+            showToast('Job cancelled successfully!', 'success');
             loadJobs();
             loadJobStats();
             break;
@@ -527,13 +536,13 @@ const AdministrationPage: React.FC = () => {
       setError('');
       switch (type) {
         case 'user':
-          showSnackbar('User editing functionality requires implementation of admin user management API');
+          showToast('User editing functionality requires implementation of admin user management API', 'warning');
           break;
         case 'backup':
-          showSnackbar('Backup editing functionality would be implemented with backup management API');
+          showToast('Backup editing functionality would be implemented with backup management API', 'warning');
           break;
         case 'plugin':
-          showSnackbar('Plugin editing functionality would be implemented based on plugin architecture');
+          showToast('Plugin editing functionality would be implemented based on plugin architecture', 'warning');
           break;
       }
     } catch (error: any) {
@@ -1135,13 +1144,6 @@ const AdministrationPage: React.FC = () => {
           <Button variant="contained" onClick={handleUserSettingsSave}>Save</Button>
         </DialogActions>
       </Dialog>
-
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-        message={snackbarMessage}
-      />
     </Box>
   );
 };

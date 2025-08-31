@@ -25,7 +25,6 @@ import {
   Switch,
   FormControlLabel,
   Alert,
-  Snackbar,
   Menu,
   ListItemIcon,
 } from '@mui/material';
@@ -39,6 +38,7 @@ import {
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
+import { toastService } from '../services/toast-service';
 import {
   Provider,
   ProviderCreate,
@@ -63,9 +63,6 @@ const ModelManagementPage: React.FC = () => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   // Pagination state
   const [providersPage, setProvidersPage] = useState(1);
@@ -143,9 +140,20 @@ const ModelManagementPage: React.FC = () => {
     [models]
   );
 
-  const showSnackbar = (message: string) => {
-    setSnackbarMessage(message);
-    setSnackbarOpen(true);
+  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+    switch (type) {
+      case 'success':
+        toastService.success(message);
+        break;
+      case 'error':
+        toastService.error(message);
+        break;
+      case 'warning':
+        toastService.warning(message);
+        break;
+      default:
+        toastService.info(message);
+    }
   };
 
   // Action menu handlers
@@ -285,7 +293,7 @@ const ModelManagementPage: React.FC = () => {
       await chatterSDK.modelRegistry.createProviderApiV1ModelsProvidersPost({ providerCreate: providerForm });
       setProviderDialogOpen(false);
       setEditingProvider(null);
-      showSnackbar('Provider created');
+      showToast('Provider created', 'success');
       loadData();
     } catch (e: any) {
       console.error(e);
@@ -300,7 +308,7 @@ const ModelManagementPage: React.FC = () => {
       await chatterSDK.modelRegistry.createModelApiV1ModelsModelsPost({ modelDefCreate: modelForm });
       setModelDialogOpen(false);
       setEditingModel(null);
-      showSnackbar('Model created');
+      showToast('Model created', 'success');
       loadData();
     } catch (e: any) {
       console.error(e);
@@ -315,7 +323,7 @@ const ModelManagementPage: React.FC = () => {
       await chatterSDK.modelRegistry.createEmbeddingSpaceApiV1ModelsEmbeddingSpacesPost({ embeddingSpaceCreate: spaceForm });
       setSpaceDialogOpen(false);
       setEditingSpace(null);
-      showSnackbar('Embedding space created');
+      showToast('Embedding space created', 'success');
       loadData();
     } catch (e: any) {
       console.error(e);
@@ -338,7 +346,7 @@ const ModelManagementPage: React.FC = () => {
         providerId: id,
         defaultProvider: defaultProviderBody,
       });
-      showSnackbar('Default provider updated');
+      showToast('Default provider updated', 'success');
       loadData();
     } catch (e: any) {
       console.error(e);
@@ -349,7 +357,7 @@ const ModelManagementPage: React.FC = () => {
   const handleSetDefaultModel = async (id: string) => {
     try {
       await chatterSDK.modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost({ modelId: id });
-      showSnackbar('Default model updated');
+      showToast('Default model updated', 'success');
       loadData();
     } catch (e: any) {
       console.error(e);
@@ -360,7 +368,7 @@ const ModelManagementPage: React.FC = () => {
   const handleSetDefaultSpace = async (id: string) => {
     try {
       await chatterSDK.modelRegistry.setDefaultEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdSetDefaultPost({ spaceId: id });
-      showSnackbar('Default embedding space updated');
+      showToast('Default embedding space updated', 'success');
       loadData();
     } catch (e: any) {
       console.error(e);
@@ -385,7 +393,7 @@ const ModelManagementPage: React.FC = () => {
       });
       setProviderDialogOpen(false);
       setEditingProvider(null);
-      showSnackbar('Provider updated');
+      showToast('Provider updated', 'success');
       loadData();
     } catch (e: any) {
       console.error(e);
@@ -410,7 +418,7 @@ const ModelManagementPage: React.FC = () => {
       });
       setModelDialogOpen(false);
       setEditingModel(null);
-      showSnackbar('Model updated');
+      showToast('Model updated', 'success');
       loadData();
     } catch (e: any) {
       console.error(e);
@@ -435,7 +443,7 @@ const ModelManagementPage: React.FC = () => {
       });
       setSpaceDialogOpen(false);
       setEditingSpace(null);
-      showSnackbar('Embedding space updated');
+      showToast('Embedding space updated', 'success');
       loadData();
     } catch (e: any) {
       console.error(e);
@@ -461,7 +469,7 @@ const ModelManagementPage: React.FC = () => {
     if (window.confirm(`Are you sure you want to delete provider "${provider.display_name}"?`)) {
       try {
         await chatterSDK.modelRegistry.deleteProviderApiV1ModelsProvidersProviderIdDelete({ providerId: provider.id });
-        showSnackbar('Provider deleted');
+        showToast('Provider deleted', 'success');
         loadData();
       } catch (e: any) {
         console.error(e);
@@ -474,7 +482,7 @@ const ModelManagementPage: React.FC = () => {
     if (window.confirm(`Are you sure you want to delete model "${model.display_name}"?`)) {
       try {
         await chatterSDK.modelRegistry.deleteModelApiV1ModelsModelsModelIdDelete({ modelId: model.id });
-        showSnackbar('Model deleted');
+        showToast('Model deleted', 'success');
         loadData();
       } catch (e: any) {
         console.error(e);
@@ -487,7 +495,7 @@ const ModelManagementPage: React.FC = () => {
     if (window.confirm(`Are you sure you want to delete embedding space "${space.display_name}"?`)) {
       try {
         await chatterSDK.modelRegistry.deleteEmbeddingSpaceApiV1ModelsEmbeddingSpacesSpaceIdDelete({ spaceId: space.id });
-        showSnackbar('Embedding space deleted');
+        showToast('Embedding space deleted', 'success');
         loadData();
       } catch (e: any) {
         console.error(e);
@@ -1418,14 +1426,6 @@ const ModelManagementPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setSnackbarOpen(false)}
-        message={snackbarMessage}
-      />
     </Box>
   );
 };

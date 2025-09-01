@@ -353,35 +353,42 @@ def create_problem_response(
 
 
 def create_problem_detail(
-    status_code: int,
+    status: int,
     title: str,
     detail: str | None = None,
-    type_suffix: str | None = None,
+    type_: str | None = None,
     instance: str | None = None,
     **extra_fields: Any,
-) -> ProblemDetail:
+) -> dict[str, Any]:
     """Create a RFC 9457 compliant problem detail.
 
     Args:
-        status_code: HTTP status code
+        status: HTTP status code
         title: Human-readable summary of the problem type
         detail: Human-readable explanation specific to this occurrence
-        type_suffix: Suffix to append to the base problem type URI
+        type_: Problem type URI (defaults to about:blank)
         instance: URI reference identifying the specific occurrence
         **extra_fields: Additional problem details
 
     Returns:
-        ProblemDetail object
+        Problem detail dictionary
     """
-    problem = ProblemException(
-        status_code=status_code,
-        title=title,
-        detail=detail,
-        type_suffix=type_suffix,
-        instance=instance,
-        **extra_fields,
-    )
-    return problem.to_problem_detail()
+    problem_dict = {
+        "status": status,
+        "title": title,
+        "type": type_ or "about:blank",
+    }
+    
+    if detail is not None:
+        problem_dict["detail"] = detail
+    
+    if instance is not None:
+        problem_dict["instance"] = instance
+    
+    # Add extra fields
+    problem_dict.update(extra_fields)
+    
+    return problem_dict
 
 
 class ProblemDetailResponse(JSONResponse):
@@ -389,27 +396,42 @@ class ProblemDetailResponse(JSONResponse):
 
     def __init__(
         self,
-        problem_detail: ProblemDetail,
-        status_code: int | None = None,
+        status: int,
+        title: str,
+        detail: str | None = None,
+        type_: str | None = None,
+        instance: str | None = None,
         headers: dict[str, str] | None = None,
-        **kwargs: Any,
+        **extra_fields: Any,
     ) -> None:
         """Initialize problem detail response.
 
         Args:
-            problem_detail: Problem detail object
-            status_code: HTTP status code (defaults to problem detail status)
+            status: HTTP status code
+            title: Human-readable summary of the problem type
+            detail: Human-readable explanation specific to this occurrence
+            type_: Problem type URI
+            instance: URI reference identifying the specific occurrence
             headers: Additional HTTP headers
-            **kwargs: Additional JSONResponse arguments
+            **extra_fields: Additional problem details
         """
         final_headers = {
             "Content-Type": "application/problem+json",
             **(headers or {})
         }
 
+        # Create problem detail dictionary
+        problem_dict = create_problem_detail(
+            status=status,
+            title=title,
+            detail=detail,
+            type_=type_,
+            instance=instance,
+            **extra_fields
+        )
+
         super().__init__(
-            content=problem_detail.model_dump(exclude_none=True),
-            status_code=status_code or problem_detail.status,
+            content=problem_dict,
+            status_code=status,
             headers=final_headers,
-            **kwargs,
         )

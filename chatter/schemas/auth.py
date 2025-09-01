@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, model_validator, field_validator
 
 
 class UserBase(BaseModel):
@@ -21,10 +21,21 @@ class UserBase(BaseModel):
     avatar_url: str | None = Field(
         None, max_length=500, description="Avatar URL"
     )
+    phone_number: str | None = Field(
+        None, max_length=20, description="Phone number"
+    )
+
+
+class UserRegistration(UserBase):
+    """Schema for user registration."""
+
+    password: str = Field(
+        ..., min_length=8, max_length=128, description="Password"
+    )
 
 
 class UserCreate(UserBase):
-    """Schema for user registration."""
+    """Schema for user creation (alias for UserRegistration)."""
 
     password: str = Field(
         ..., min_length=8, max_length=128, description="Password"
@@ -34,6 +45,7 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     """Schema for user profile updates."""
 
+    email: EmailStr | None = Field(None, description="User email address")
     full_name: str | None = Field(
         None, max_length=255, description="Full name"
     )
@@ -42,6 +54,9 @@ class UserUpdate(BaseModel):
     )
     avatar_url: str | None = Field(
         None, max_length=500, description="Avatar URL"
+    )
+    phone_number: str | None = Field(
+        None, max_length=20, description="Phone number"
     )
     default_llm_provider: str | None = Field(
         None, description="Default LLM provider"
@@ -80,10 +95,19 @@ class UserResponse(UserBase):
 class UserLogin(BaseModel):
     """Schema for user login."""
 
-    username: str = Field(
-        ..., min_length=3, max_length=50, description="Username"
+    email: EmailStr | None = Field(None, description="User email address")
+    username: str | None = Field(
+        None, min_length=3, max_length=50, description="Username"
     )
     password: str = Field(..., description="Password")
+    remember_me: bool = Field(False, description="Remember login")
+
+    @model_validator(mode='after')
+    def validate_email_or_username(self):
+        """Ensure either email or username is provided."""
+        if not self.email and not self.username:
+            raise ValueError('Either email or username must be provided')
+        return self
 
 
 class TokenResponse(BaseModel):
@@ -117,6 +141,10 @@ class PasswordReset(BaseModel):
     """Schema for password reset request."""
 
     email: EmailStr = Field(..., description="User email address")
+    token: str | None = Field(None, description="Password reset token")
+    new_password: str | None = Field(
+        None, min_length=8, max_length=128, description="New password"
+    )
 
 
 class PasswordResetConfirm(BaseModel):
@@ -150,21 +178,6 @@ class APIKeyResponse(BaseModel):
     api_key_name: str = Field(..., description="API key name")
 
 
-class UserRegistration(BaseModel):
-    """Schema for user registration."""
-
-    email: EmailStr = Field(..., description="User email address")
-    username: str = Field(
-        ..., min_length=3, max_length=50, description="Username"
-    )
-    password: str = Field(
-        ..., min_length=8, max_length=128, description="Password"
-    )
-    full_name: str | None = Field(
-        None, max_length=255, description="Full name"
-    )
-
-
 class RefreshTokenRequest(BaseModel):
     """Schema for refresh token request."""
 
@@ -173,6 +186,34 @@ class RefreshTokenRequest(BaseModel):
 
 class UserPreferences(BaseModel):
     """Schema for user preferences."""
+
+    user_id: str = Field(..., description="User ID")
+    language: str = Field("en", description="Preferred language")
+    timezone: str = Field("UTC", description="Preferred timezone")
+    theme: str = Field("light", description="UI theme preference")
+    notifications_enabled: bool = Field(True, description="Enable notifications")
+    email_notifications: bool = Field(True, description="Enable email notifications")
+    
+    @field_validator('language')
+    @classmethod
+    def validate_language(cls, v):
+        """Validate language code."""
+        valid_languages = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko']
+        if v not in valid_languages:
+            raise ValueError(f'Language must be one of: {valid_languages}')
+        return v
+    
+    @field_validator('timezone')
+    @classmethod
+    def validate_timezone(cls, v):
+        """Validate timezone."""
+        # Basic timezone validation
+        if not v or len(v) < 3:
+            raise ValueError('Invalid timezone')
+        return v
+
+
+# Remove duplicate UserRegistration class and clean up
 
     theme: str = Field(default="light", description="UI theme preference")
     language: str = Field(default="en", description="Language preference")

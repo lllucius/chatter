@@ -45,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
+import { toastService } from '../services/toast-service';
 import { DocumentResponse, DocumentSearchRequest } from '../sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
@@ -62,7 +63,6 @@ const DocumentsPage: React.FC = () => {
 
   const [documents, setDocuments] = useState<DocumentResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
@@ -140,7 +140,7 @@ const DocumentsPage: React.FC = () => {
   const loadDocuments = async () => {
     try {
       setLoading(true);
-      setError('');
+      
       const response = await chatterSDK.documents.listDocumentsApiV1DocumentsGet({});
       setDocuments(response.data.documents);
     } catch (err: any) {
@@ -423,11 +423,6 @@ const DocumentsPage: React.FC = () => {
           </Button>
         </Box>
       </Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
       {/* Statistics Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid

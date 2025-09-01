@@ -41,12 +41,12 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
+import { toastService } from '../services/toast-service';
 import { AgentResponse, AgentUpdateRequest, AgentCreateRequest } from '../sdk';
 
 const AgentsPage: React.FC = () => {
   const [agents, setAgents] = useState<AgentResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AgentResponse | null>(null);
   const [saving, setSaving] = useState(false);
@@ -81,7 +81,7 @@ const AgentsPage: React.FC = () => {
   const loadAgents = useCallback(async () => {
     try {
       setLoading(true);
-      setError('');
+      
       const response = await chatterSDK.agents.listAgentsApiV1AgentsGet();
       setAgents(response.data.agents);
       setTotal(response.data.total);
@@ -199,11 +199,6 @@ const AgentsPage: React.FC = () => {
           </Button>
         </Box>
       </Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
       {/* Statistics */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid

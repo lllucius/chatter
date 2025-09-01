@@ -98,7 +98,7 @@ dependencies = [
     
     # MCP and tools
     "mcp==1.13.0",
-    "httpx-sse==0.4.1",
+    "httpx-sse>=0.4.0,<1.0.0",
 ]
 
 [project.optional-dependencies]

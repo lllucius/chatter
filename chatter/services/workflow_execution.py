@@ -80,8 +80,10 @@ class WorkflowExecutionService:
             )
 
             # Check cache first
-            cache_key = self._get_cache_key(conversation.id, chat_request)
-            cached_result = await workflow_cache.get(cache_key)
+            # TODO: Implement proper workflow result caching
+            # cache_key = self._get_cache_key(conversation.id, chat_request)
+            # cached_result = await workflow_cache.get(cache_key)
+            cached_result = None
 
             if cached_result:
                 logger.debug(

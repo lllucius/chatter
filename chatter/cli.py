@@ -267,10 +267,7 @@ def create_prompt(
     async def _create():
         api_client = get_api_client()
         try:
-            # Initialize all variables to avoid unbound variable errors
-            parsed_tags = None
-
-            # Interactive mode
+            # Handle interactive vs non-interactive mode
             if interactive:
                 console.print("[bold]Creating new prompt[/bold]\\n")
                 name = Prompt.ask("Prompt name")
@@ -294,19 +291,9 @@ def create_prompt(
                     if tags_input
                     else None
                 )
-            # For non-interactive mode, variables come from function parameters
-
-            # For non-interactive mode, use function parameters
-            # (In interactive mode, they're overridden above)
-            if not interactive:
-                # Validate required parameters
-                if not name:
-                    console.print("[red]Error: Name is required[/red]")
-                    raise typer.Exit(1)
-                if not content:
-                    console.print("[red]Error: Content is required[/red]")
-                    raise typer.Exit(1)
-
+            else:
+                # Use function parameters (already assigned via function signature)
+                # Just prepare parsed_tags from the tags parameter
                 parsed_tags = (
                     [
                         tag.strip()
@@ -316,6 +303,15 @@ def create_prompt(
                     if tags
                     else None
                 )
+
+            # Validate required parameters in non-interactive mode
+            if not interactive:
+                if not name:
+                    console.print("[red]Error: Name is required[/red]")
+                    raise typer.Exit(1)
+                if not content:
+                    console.print("[red]Error: Content is required[/red]")
+                    raise typer.Exit(1)
 
             # Prepare data
             prompt_data = {
@@ -497,14 +493,13 @@ def test_prompt(
     """Test a prompt with variables."""
 
     async def _test():
+        import json
         api_client = get_api_client()
         try:
             # Parse variables
             test_variables = {}
             if variables:
                 try:
-                    import json
-
                     test_variables = json.loads(variables)
                 except json.JSONDecodeError:
                     console.print(
@@ -1630,7 +1625,7 @@ def create_profile(
     async def _create():
         api_client = get_api_client()
         try:
-            # Interactive mode
+            # Handle interactive vs non-interactive mode
             if interactive:
                 console.print("[bold]Creating new LLM profile[/bold]\n")
                 name = Prompt.ask("Profile name")
@@ -1647,6 +1642,13 @@ def create_profile(
                     "System prompt (optional)", default=""
                 )
                 public = Confirm.ask("Make public?", default=False)
+            # For non-interactive mode, variables come from function parameters
+
+            # Validate required parameters in non-interactive mode
+            if not interactive:
+                if not name:
+                    console.print("[red]Error: Name is required[/red]")
+                    raise typer.Exit(1)
 
             # Prepare data
             profile_data = {
@@ -2102,6 +2104,7 @@ def upload_document(
     async def _upload():
         nonlocal title
         api_client = get_api_client()
+        files = None  # Initialize to handle cleanup in finally block
         try:
             file_path_obj = Path(file_path)
 
@@ -2150,7 +2153,7 @@ def upload_document(
         except Exception as e:
             console.print(f"❌ Upload failed: {e}")
         finally:
-            if "files" in locals():
+            if files:
                 files["file"][1].close()
             await api_client.close()
 

@@ -439,3 +439,36 @@ class CustomWorkflowBuilder:
         
         self.custom_templates[template.name] = template
         return template
+
+
+class TemplateRegistry:
+    """Registry for managing workflow templates."""
+    
+    def __init__(self):
+        """Initialize template registry."""
+        self.templates = WORKFLOW_TEMPLATES.copy()
+        self.custom_templates = {}
+    
+    def register_template(self, template: WorkflowTemplate) -> None:
+        """Register a new template."""
+        self.custom_templates[template.name] = template
+    
+    def get_template(self, name: str) -> WorkflowTemplate:
+        """Get a template by name."""
+        if name in self.custom_templates:
+            return self.custom_templates[name]
+        elif name in self.templates:
+            return self.templates[name]
+        else:
+            raise WorkflowConfigurationError(f"Template '{name}' not found")
+    
+    def list_templates(self) -> list[str]:
+        """List all available template names."""
+        return list(self.templates.keys()) + list(self.custom_templates.keys())
+    
+    def remove_template(self, name: str) -> bool:
+        """Remove a custom template."""
+        if name in self.custom_templates:
+            del self.custom_templates[name]
+            return True
+        return False

@@ -553,3 +553,42 @@ class WorkflowTemplateError(WorkflowError):
 
     def _get_type_suffix(self) -> str:
         return "workflow-template-error"
+
+
+class EmbeddingModelError(ChatterBaseException):
+    """Embedding model specific errors."""
+
+    def __init__(self, message: str, model_name: str | None = None, **kwargs):
+        details = {}
+        if model_name:
+            details["model_name"] = model_name
+
+        super().__init__(
+            message=message,
+            status_code=500,
+            details=details,
+            **kwargs
+        )
+
+
+class DimensionMismatchError(EmbeddingModelError):
+    """Dimension mismatch errors for embedding models."""
+
+    def __init__(
+        self, 
+        message: str, 
+        expected_dimension: int | None = None,
+        actual_dimension: int | None = None,
+        **kwargs
+    ):
+        details = {}
+        if expected_dimension is not None:
+            details["expected_dimension"] = expected_dimension
+        if actual_dimension is not None:
+            details["actual_dimension"] = actual_dimension
+
+        super().__init__(
+            message=message,
+            details=details,
+            **kwargs
+        )

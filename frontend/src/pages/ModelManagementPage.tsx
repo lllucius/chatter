@@ -62,7 +62,6 @@ const ModelManagementPage: React.FC = () => {
   const [spaces, setSpaces] = useState<EmbeddingSpaceWithModel[]>([]);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>('');
 
   // Pagination state
   const [providersPage, setProvidersPage] = useState(1);
@@ -197,7 +196,7 @@ const ModelManagementPage: React.FC = () => {
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    setError('');
+    
     try {
       // Use the chatterSDK modelRegistry instance with pagination
       const [pResp, mResp, sResp] = await Promise.all([
@@ -230,7 +229,6 @@ const ModelManagementPage: React.FC = () => {
       setSpacesTotal(s.total || 0);
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to load model registry data');
     } finally {
       setLoading(false);
     }
@@ -288,7 +286,7 @@ const ModelManagementPage: React.FC = () => {
   }, [spaceDialogOpen, embeddingModels]);
 
   const handleCreateProvider = async () => {
-    setError(''); // Clear any previous errors
+     // Clear any previous errors
     try {
       await chatterSDK.modelRegistry.createProviderApiV1ModelsProvidersPost({ providerCreate: providerForm });
       setProviderDialogOpen(false);
@@ -303,7 +301,7 @@ const ModelManagementPage: React.FC = () => {
   };
 
   const handleCreateModel = async () => {
-    setError(''); // Clear any previous errors
+     // Clear any previous errors
     try {
       await chatterSDK.modelRegistry.createModelApiV1ModelsModelsPost({ modelDefCreate: modelForm });
       setModelDialogOpen(false);
@@ -318,7 +316,7 @@ const ModelManagementPage: React.FC = () => {
   };
 
   const handleCreateSpace = async () => {
-    setError(''); // Clear any previous errors
+     // Clear any previous errors
     try {
       await chatterSDK.modelRegistry.createEmbeddingSpaceApiV1ModelsEmbeddingSpacesPost({ embeddingSpaceCreate: spaceForm });
       setSpaceDialogOpen(false);
@@ -350,7 +348,6 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to set default provider');
     }
   };
 
@@ -361,7 +358,6 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to set default model');
     }
   };
 
@@ -372,7 +368,6 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to set default embedding space');
     }
   };
 
@@ -397,7 +392,6 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to update provider');
     }
   };
 
@@ -422,7 +416,6 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to update model');
     }
   };
 
@@ -447,7 +440,6 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      setError(e?.message || 'Failed to update embedding space');
     }
   };
 
@@ -473,7 +465,6 @@ const ModelManagementPage: React.FC = () => {
         loadData();
       } catch (e: any) {
         console.error(e);
-        setError(e?.message || 'Failed to delete provider');
       }
     }
   };
@@ -486,7 +477,6 @@ const ModelManagementPage: React.FC = () => {
         loadData();
       } catch (e: any) {
         console.error(e);
-        setError(e?.message || 'Failed to delete model');
       }
     }
   };
@@ -499,7 +489,6 @@ const ModelManagementPage: React.FC = () => {
         loadData();
       } catch (e: any) {
         console.error(e);
-        setError(e?.message || 'Failed to delete embedding space');
       }
     }
   };
@@ -661,11 +650,6 @@ const ModelManagementPage: React.FC = () => {
         </Box>
       </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
 
       <Tabs
         value={activeTab}

@@ -41,13 +41,16 @@ class ConversationService:
         self.query_service = ConversationQueryService(session)
 
     async def create_conversation(
-        self, user_id: str, conversation_data: ConversationCreateSchema
+        self, user_id: str, conversation_data: ConversationCreateSchema = None, title: str = None, model: str = None, **kwargs
     ) -> Conversation:
         """Create a new conversation.
 
         Args:
             user_id: User ID creating the conversation
-            conversation_data: Conversation creation data
+            conversation_data: Conversation creation data (optional)
+            title: Conversation title (if not using conversation_data)
+            model: Model to use (if not using conversation_data)
+            **kwargs: Additional conversation parameters
 
         Returns:
             Created conversation
@@ -56,16 +59,43 @@ class ConversationService:
             ValidationError: If conversation data is invalid
         """
         try:
-            conversation = Conversation(
-                title=conversation_data.title,
-                user_id=user_id,
-                profile_id=conversation_data.profile_id,
-                status=ConversationStatus.ACTIVE,
-                temperature=conversation_data.temperature,
-                max_tokens=conversation_data.max_tokens,
-                workflow_config=conversation_data.workflow_config,
-                metadata=conversation_data.metadata or {},
-            )
+            # Support both styles of calling
+            if conversation_data is None:
+                # Create from individual parameters
+                if not title:
+                    raise ValueError("Title is required")
+                if not model:
+                    raise ValueError("Model is required")
+                
+                # Validate user_id format
+                try:
+                    from uuid import UUID
+                    UUID(user_id)
+                except ValueError:
+                    raise ValueError("Invalid user ID format")
+                
+                conversation = Conversation(
+                    title=title,
+                    user_id=user_id,
+                    status=ConversationStatus.ACTIVE,
+                    profile_id=kwargs.get('profile_id'),
+                    temperature=kwargs.get('temperature', 0.7),
+                    max_tokens=kwargs.get('max_tokens', 1000),
+                    workflow_config=kwargs.get('workflow_config'),
+                    metadata=kwargs.get('metadata', {}),
+                )
+            else:
+                # Use schema object
+                conversation = Conversation(
+                    title=conversation_data.title,
+                    user_id=user_id,
+                    profile_id=conversation_data.profile_id,
+                    status=ConversationStatus.ACTIVE,
+                    temperature=conversation_data.temperature,
+                    max_tokens=conversation_data.max_tokens,
+                    workflow_config=conversation_data.workflow_config,
+                    metadata=conversation_data.metadata or {},
+                )
 
             self.session.add(conversation)
             await self.session.flush()  # Get the ID without committing
@@ -121,7 +151,7 @@ class ConversationService:
         return conversation
 
     async def list_conversations(
-        self, user_id: str, limit: int = 20, offset: int = 0
+        self, user_id: str, limit: int = 20, offset: int = 0, sort_field: str = "updated_at", sort_order: str = "desc"
     ) -> Sequence[Conversation]:
         """List conversations for a user.
 
@@ -129,13 +159,15 @@ class ConversationService:
             user_id: User ID
             limit: Maximum conversations to return
             offset: Number of conversations to skip
+            sort_field: Field to sort by
+            sort_order: Sort order (asc/desc)
 
         Returns:
             List of conversations
         """
         try:
             conversations = await get_user_conversations_optimized(
-                self.session, user_id, limit, offset
+                self.session, user_id, limit, offset, sort_field, sort_order
             )
 
             logger.debug(
@@ -143,7 +175,9 @@ class ConversationService:
                 user_id=user_id,
                 count=len(conversations),
                 limit=limit,
-                offset=offset
+                offset=offset,
+                sort_field=sort_field,
+                sort_order=sort_order
             )
 
             return conversations
@@ -157,14 +191,16 @@ class ConversationService:
             raise
 
     async def update_conversation(
-        self, conversation_id: str, user_id: str, update_data: ConversationUpdateSchema
+        self, conversation_id: str, user_id: str, update_data: ConversationUpdateSchema = None, title: str = None, **kwargs
     ) -> Conversation:
         """Update conversation.
 
         Args:
             conversation_id: Conversation ID
             user_id: User ID for access control
-            update_data: Update data
+            update_data: Update data (optional)
+            title: New title (if not using update_data)
+            **kwargs: Additional update parameters
 
         Returns:
             Updated conversation
@@ -179,14 +215,25 @@ class ConversationService:
                 conversation_id, user_id, include_messages=False
             )
 
+            # Support both styles
+            if update_data is None:
+                # Create update object from parameters
+                update_data = type('UpdateData', (), {
+                    'title': title,
+                    'status': kwargs.get('status'),
+                    'temperature': kwargs.get('temperature'),
+                    'max_tokens': kwargs.get('max_tokens'),
+                    'metadata': kwargs.get('metadata')
+                })()
+
             # Update fields if provided
             if update_data.title is not None:
                 conversation.title = update_data.title
 
-            if update_data.status is not None:
+            if hasattr(update_data, 'status') and update_data.status is not None:
                 conversation.status = update_data.status
 
-            if update_data.temperature is not None:
+            if hasattr(update_data, 'temperature') and update_data.temperature is not None:
                 conversation.temperature = update_data.temperature
 
             if update_data.max_tokens is not None:
@@ -262,7 +309,7 @@ class ConversationService:
             raise
 
     async def search_conversations(
-        self, user_id: str, search_term: str, limit: int = 20
+        self, user_id: str, search_term: str, limit: int = 20, offset: int = 0
     ) -> Sequence[Conversation]:
         """Search conversations by title or content.
 
@@ -270,20 +317,23 @@ class ConversationService:
             user_id: User ID
             search_term: Search term
             limit: Maximum results to return
+            offset: Number of results to skip
 
         Returns:
             List of matching conversations
         """
         try:
             conversations = await self.query_service.search_conversations(
-                user_id, search_term, limit
+                user_id, search_term, limit, offset
             )
 
             logger.debug(
                 "Searched conversations",
                 user_id=user_id,
                 search_term=search_term,
-                results_count=len(conversations)
+                results_count=len(conversations),
+                offset=offset,
+                limit=limit
             )
 
             return conversations
@@ -411,3 +461,131 @@ class ConversationService:
                 error=str(e)
             )
             raise
+
+    async def get_conversation_count(self, user_id: str) -> int:
+        """Get total conversation count for user.
+        
+        Args:
+            user_id: User ID
+            
+        Returns:
+            Number of conversations
+        """
+        try:
+            query = (
+                select(Conversation)
+                .where(and_(
+                    Conversation.user_id == user_id,
+                    Conversation.status != ConversationStatus.DELETED
+                ))
+            )
+            result = await self.session.execute(query)
+            conversations = result.scalars().all()
+            return len(conversations)
+        except Exception as e:
+            logger.error(f"Failed to get conversation count: {e}")
+            return 0
+
+    async def archive_conversation(self, conversation_id: str, user_id: str) -> bool:
+        """Archive a conversation.
+        
+        Args:
+            conversation_id: Conversation ID
+            user_id: User ID for access control
+            
+        Returns:
+            True if archived successfully
+        """
+        try:
+            conversation = await self.get_conversation(conversation_id, user_id, include_messages=False)
+            conversation.status = ConversationStatus.ARCHIVED
+            await self.session.flush()
+            
+            logger.info(f"Archived conversation {conversation_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to archive conversation: {e}")
+            return False
+
+    async def unarchive_conversation(self, conversation_id: str, user_id: str) -> bool:
+        """Unarchive a conversation.
+        
+        Args:
+            conversation_id: Conversation ID
+            user_id: User ID for access control
+            
+        Returns:
+            True if unarchived successfully
+        """
+        try:
+            conversation = await self.get_conversation(conversation_id, user_id, include_messages=False)
+            conversation.status = ConversationStatus.ACTIVE
+            await self.session.flush()
+            
+            logger.info(f"Unarchived conversation {conversation_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to unarchive conversation: {e}")
+            return False
+
+    async def get_conversation_metadata(self, conversation_id: str, user_id: str) -> dict:
+        """Get conversation metadata.
+        
+        Args:
+            conversation_id: Conversation ID
+            user_id: User ID for access control
+            
+        Returns:
+            Conversation metadata
+        """
+        try:
+            conversation = await self.get_conversation(conversation_id, user_id, include_messages=False)
+            return {
+                'id': conversation.id,
+                'title': conversation.title,
+                'status': conversation.status,
+                'created_at': conversation.created_at,
+                'updated_at': conversation.updated_at,
+                'metadata': conversation.metadata
+            }
+        except Exception as e:
+            logger.error(f"Failed to get conversation metadata: {e}")
+            return {}
+
+    async def bulk_delete_conversations(self, conversation_ids: list[str], user_id: str) -> int:
+        """Delete multiple conversations.
+        
+        Args:
+            conversation_ids: List of conversation IDs
+            user_id: User ID for access control
+            
+        Returns:
+            Number of conversations deleted
+        """
+        deleted_count = 0
+        for conv_id in conversation_ids:
+            try:
+                await self.delete_conversation(conv_id, user_id)
+                deleted_count += 1
+            except Exception as e:
+                logger.error(f"Failed to delete conversation {conv_id}: {e}")
+        
+        logger.info(f"Bulk deleted {deleted_count} conversations")
+        return deleted_count
+
+    async def get_recent_conversations(self, user_id: str, limit: int = 10) -> list[Conversation]:
+        """Get recent conversations for user.
+        
+        Args:
+            user_id: User ID
+            limit: Maximum number to return
+            
+        Returns:
+            List of recent conversations
+        """
+        try:
+            conversations = await self.list_conversations(user_id, limit=limit)
+            return conversations
+        except Exception as e:
+            logger.error(f"Failed to get recent conversations: {e}")
+            return []

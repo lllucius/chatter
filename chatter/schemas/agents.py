@@ -34,14 +34,16 @@ class AgentStatus(str, Enum):
     MAINTENANCE = "maintenance"
 
 
-class AgentCapability(BaseModel):
-    """Agent capability definition."""
-    name: str
-    description: str
-    required_tools: list[str] = Field(default_factory=list)
-    required_models: list[str] = Field(default_factory=list)
-    confidence_threshold: float = 0.7
-    enabled: bool = True
+class AgentCapability(str, Enum):
+    """Agent capabilities."""
+    NATURAL_LANGUAGE = "natural_language"
+    MEMORY = "memory"
+    CODE_GENERATION = "code_generation"
+    TOOL_USE = "tool_use"
+    ANALYTICAL = "analytical"
+    CREATIVE = "creative"
+    RESEARCH = "research"
+    SUPPORT = "support"
 
 
 class AgentProfile(BaseModel):
@@ -49,11 +51,11 @@ class AgentProfile(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     description: str
-    agent_type: AgentType
+    type: AgentType
     status: AgentStatus = AgentStatus.INACTIVE
 
     # Behavior configuration
-    system_prompt: str
+    system_message: str
     personality_traits: list[str] = Field(default_factory=list)
     knowledge_domains: list[str] = Field(default_factory=list)
     response_style: str = "professional"

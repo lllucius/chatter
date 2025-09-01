@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
+from datetime import UTC, datetime
 from typing import Any, TypeVar
 
 from chatter.utils.logging import get_logger
@@ -213,3 +214,241 @@ def get_model_registry():
 def get_workflow_manager():
     """Get workflow manager with dependency injection."""
     return container.get_lazy("workflow_manager")
+
+
+class CircularDependencyDetector:
+    """Detector for circular dependencies in service registration."""
+
+    def __init__(self):
+        """Initialize the circular dependency detector."""
+        self.dependency_graph: dict[str, set[str]] = {}
+
+    def add_dependency(self, service: str, dependency: str) -> None:
+        """Add a dependency relationship.
+        
+        Args:
+            service: Name of the service
+            dependency: Name of the dependency
+        """
+        if service not in self.dependency_graph:
+            self.dependency_graph[service] = set()
+        self.dependency_graph[service].add(dependency)
+
+    def detect_circular_dependencies(self) -> list[list[str]]:
+        """Detect circular dependencies.
+        
+        Returns:
+            List of circular dependency chains
+        """
+        visited = set()
+        rec_stack = set()
+        cycles = []
+
+        def dfs(node: str, path: list[str]) -> None:
+            visited.add(node)
+            rec_stack.add(node)
+            path.append(node)
+
+            for neighbor in self.dependency_graph.get(node, set()):
+                if neighbor not in visited:
+                    dfs(neighbor, path.copy())
+                elif neighbor in rec_stack:
+                    # Found a cycle
+                    cycle_start = path.index(neighbor)
+                    cycles.append(path[cycle_start:] + [neighbor])
+
+            rec_stack.remove(node)
+
+        for service in self.dependency_graph:
+            if service not in visited:
+                dfs(service, [])
+
+        return cycles
+
+
+class LazyServiceLoader:
+    """Loader for services that should be initialized lazily."""
+
+    def __init__(self):
+        """Initialize the lazy service loader."""
+        self.loaders: dict[str, callable] = {}
+        self.loaded_services: dict[str, Any] = {}
+
+    def register_loader(self, name: str, loader: callable) -> None:
+        """Register a lazy loader for a service.
+        
+        Args:
+            name: Name of the service
+            loader: Callable that returns the service instance
+        """
+        self.loaders[name] = loader
+
+    def get_service(self, name: str) -> Any:
+        """Get a service, loading it lazily if needed.
+        
+        Args:
+            name: Name of the service
+            
+        Returns:
+            Service instance
+        """
+        if name not in self.loaded_services:
+            if name not in self.loaders:
+                raise ValueError(f"No loader registered for service: {name}")
+            self.loaded_services[name] = self.loaders[name]()
+        return self.loaded_services[name]
+
+    def is_loaded(self, name: str) -> bool:
+        """Check if a service is already loaded.
+        
+        Args:
+            name: Name of the service
+            
+        Returns:
+            True if service is loaded
+        """
+        return name in self.loaded_services
+
+
+class ServiceLifecycleManager:
+    """Manager for service lifecycle events."""
+
+    def __init__(self):
+        """Initialize the service lifecycle manager."""
+        self.services: dict[str, Any] = {}
+        self.lifecycle_handlers: dict[str, dict[str, callable]] = {}
+
+    def register_service(self, name: str, service: Any) -> None:
+        """Register a service.
+        
+        Args:
+            name: Name of the service
+            service: Service instance
+        """
+        self.services[name] = service
+        self._trigger_lifecycle_event(name, "created")
+
+    def start_service(self, name: str) -> None:
+        """Start a service.
+        
+        Args:
+            name: Name of the service
+        """
+        if name in self.services:
+            service = self.services[name]
+            if hasattr(service, 'start'):
+                service.start()
+            self._trigger_lifecycle_event(name, "started")
+
+    def stop_service(self, name: str) -> None:
+        """Stop a service.
+        
+        Args:
+            name: Name of the service
+        """
+        if name in self.services:
+            service = self.services[name]
+            if hasattr(service, 'stop'):
+                service.stop()
+            self._trigger_lifecycle_event(name, "stopped")
+
+    def register_lifecycle_handler(
+        self, 
+        service_name: str, 
+        event: str, 
+        handler: callable
+    ) -> None:
+        """Register a lifecycle event handler.
+        
+        Args:
+            service_name: Name of the service
+            event: Lifecycle event name
+            handler: Event handler function
+        """
+        if service_name not in self.lifecycle_handlers:
+            self.lifecycle_handlers[service_name] = {}
+        self.lifecycle_handlers[service_name][event] = handler
+
+    def _trigger_lifecycle_event(self, service_name: str, event: str) -> None:
+        """Trigger a lifecycle event.
+        
+        Args:
+            service_name: Name of the service
+            event: Event name
+        """
+        handlers = self.lifecycle_handlers.get(service_name, {})
+        if event in handlers:
+            handlers[event](self.services[service_name])
+
+
+class ServiceRegistry:
+    """Registry for managing service instances and their metadata."""
+
+    def __init__(self):
+        """Initialize the service registry."""
+        self.services: dict[str, dict[str, Any]] = {}
+
+    def register(
+        self, 
+        name: str, 
+        service: Any, 
+        metadata: dict[str, Any] | None = None
+    ) -> None:
+        """Register a service.
+        
+        Args:
+            name: Name of the service
+            service: Service instance
+            metadata: Optional service metadata
+        """
+        self.services[name] = {
+            "instance": service,
+            "metadata": metadata or {},
+            "registered_at": datetime.now(UTC).isoformat()
+        }
+
+    def get(self, name: str) -> Any:
+        """Get a service by name.
+        
+        Args:
+            name: Name of the service
+            
+        Returns:
+            Service instance
+            
+        Raises:
+            KeyError: If service is not registered
+        """
+        if name not in self.services:
+            raise KeyError(f"Service not found: {name}")
+        return self.services[name]["instance"]
+
+    def unregister(self, name: str) -> None:
+        """Unregister a service.
+        
+        Args:
+            name: Name of the service
+        """
+        if name in self.services:
+            del self.services[name]
+
+    def list_services(self) -> list[str]:
+        """List all registered service names.
+        
+        Returns:
+            List of service names
+        """
+        return list(self.services.keys())
+
+    def get_metadata(self, name: str) -> dict[str, Any]:
+        """Get metadata for a service.
+        
+        Args:
+            name: Name of the service
+            
+        Returns:
+            Service metadata
+        """
+        if name not in self.services:
+            return {}
+        return self.services[name]["metadata"]

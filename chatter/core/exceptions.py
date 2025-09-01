@@ -440,3 +440,67 @@ def create_error_response(error: Exception) -> dict[str, Any]:
 
 # Alias for backward compatibility with tests
 ChatterBaseException = ChatterError
+
+
+class AgentError(ChatterBaseException):
+    """Base class for agent-related errors."""
+
+    def __init__(self, message: str, agent_id: str | None = None, **kwargs):
+        details = {}
+        if agent_id:
+            details["agent_id"] = agent_id
+
+        super().__init__(
+            message=message,
+            status_code=500,
+            details=details,
+            **kwargs
+        )
+
+
+class AgentExecutionError(AgentError):
+    """Agent execution specific errors."""
+
+    def __init__(
+        self,
+        message: str,
+        agent_id: str | None = None,
+        task: str | None = None,
+        **kwargs
+    ):
+        details = {}
+        if agent_id:
+            details["agent_id"] = agent_id
+        if task:
+            details["failed_task"] = task
+
+        super().__init__(
+            message=message,
+            agent_id=agent_id,
+            details=details,
+            **kwargs
+        )
+
+
+class ServiceNotFoundError(NotFoundError):
+    """Service not found error for dependency injection."""
+
+    def __init__(self, service_name: str, **kwargs):
+        super().__init__(
+            message=f"Service not found: {service_name}",
+            resource_type="service",
+            resource_id=service_name,
+            **kwargs
+        )
+
+
+class DocumentNotFoundError(NotFoundError):
+    """Document not found error."""
+
+    def __init__(self, document_id: str, **kwargs):
+        super().__init__(
+            message=f"Document not found: {document_id}",
+            resource_type="document",
+            resource_id=document_id,
+            **kwargs
+        )

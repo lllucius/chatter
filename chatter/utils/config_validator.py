@@ -297,6 +297,216 @@ class ConfigurationValidator:
                 warnings=len(self.warnings)
             )
 
+    def validate_database_config(self, config: dict) -> dict:
+        """Validate database configuration.
+        
+        Args:
+            config: Database configuration dictionary
+            
+        Returns:
+            dict: Validation result with 'valid' and 'errors' keys
+        """
+        errors = []
+        
+        database_url = config.get('DATABASE_URL', '')
+        if not database_url:
+            errors.append("DATABASE_URL is required")
+        else:
+            # Check for weak credentials
+            weak_passwords = ["chatter_password", "password", "admin", "CHANGE_THIS_PASSWORD", "change_me"]
+            try:
+                parsed = urlparse(database_url)
+                if (parsed.username in ["chatter", "postgres", "admin"] and
+                    parsed.password in weak_passwords):
+                    errors.append("Database is using weak/default credentials")
+            except Exception as e:
+                errors.append(f"Invalid DATABASE_URL format: {str(e)}")
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors
+        }
+
+    def validate_api_key(self, api_key: str, provider: str = "unknown") -> dict:
+        """Validate API key format and strength.
+        
+        Args:
+            api_key: The API key to validate
+            provider: The provider name (openai, anthropic, etc.)
+            
+        Returns:
+            dict: Validation result with 'valid' and 'errors' keys
+        """
+        errors = []
+        
+        if not api_key:
+            errors.append(f"{provider} API key is required")
+        elif len(api_key) < 10:
+            errors.append(f"{provider} API key appears too short")
+        elif api_key in ["your-api-key", "sk-test", "test-key"]:
+            errors.append(f"{provider} API key appears to be a placeholder")
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors
+        }
+
+    def validate_redis_config(self, config: dict) -> dict:
+        """Validate Redis configuration.
+        
+        Args:
+            config: Redis configuration dictionary
+            
+        Returns:
+            dict: Validation result with 'valid' and 'errors' keys
+        """
+        errors = []
+        
+        redis_url = config.get('REDIS_URL', '')
+        if redis_url:
+            try:
+                parsed = urlparse(redis_url)
+                if not parsed.scheme:
+                    errors.append("Redis URL must include scheme (redis:// or rediss://)")
+                if parsed.password in ["password", "redis", "admin"]:
+                    errors.append("Redis is using weak/default password")
+            except Exception as e:
+                errors.append(f"Invalid REDIS_URL format: {str(e)}")
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors
+        }
+
+    def validate_url_security(self, url: str, require_ssl: bool = False) -> dict:
+        """Validate URL security settings.
+        
+        Args:
+            url: URL to validate
+            require_ssl: Whether SSL/TLS is required
+            
+        Returns:
+            dict: Validation result with 'valid' and 'errors' keys
+        """
+        errors = []
+        
+        if not url:
+            errors.append("URL is required")
+            return {'valid': False, 'errors': errors}
+        
+        try:
+            parsed = urlparse(url)
+            if require_ssl and parsed.scheme not in ['https', 'rediss']:
+                errors.append("SSL/TLS is required (use https:// or rediss://)")
+        except Exception as e:
+            errors.append(f"Invalid URL format: {str(e)}")
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors
+        }
+
+    def validate_completeness(self, config: dict, required_configs: list) -> list:
+        """Validate that all required configuration is present.
+        
+        Args:
+            config: Configuration dictionary
+            required_configs: List of required configuration keys
+            
+        Returns:
+            list: List of missing configuration keys
+        """
+        missing = []
+        for key in required_configs:
+            if key not in config or not config[key]:
+                missing.append(key)
+        return missing
+
+    def detect_sensitive_patterns(self, value: str) -> bool:
+        """Detect if a value contains sensitive data patterns.
+        
+        Args:
+            value: Value to check
+            
+        Returns:
+            bool: True if sensitive patterns are detected
+        """
+        if not isinstance(value, str):
+            return False
+            
+        sensitive_patterns = [
+            'password', 'secret', 'key', 'token', 'credential',
+            'private', 'auth', 'signature', 'hash', 'salt'
+        ]
+        
+        value_lower = value.lower()
+        return any(pattern in value_lower for pattern in sensitive_patterns)
+
+    def is_placeholder_value(self, value: str) -> bool:
+        """Check if a value is a placeholder.
+        
+        Args:
+            value: Value to check
+            
+        Returns:
+            bool: True if the value appears to be a placeholder
+        """
+        if not isinstance(value, str):
+            return False
+            
+        placeholder_patterns = [
+            'change_me', 'change_this', 'replace_me', 'your_', 'placeholder',
+            'example', 'test', 'demo', 'sample', 'xxx', 'TODO',
+            'CHANGE_THIS_PASSWORD', 'your_super_secret_key_here'
+        ]
+        
+        value_lower = value.lower()
+        return any(pattern.lower() in value_lower for pattern in placeholder_patterns)
+
+    def validate_full_config(self, config: dict) -> dict:
+        """Perform complete configuration validation.
+        
+        Args:
+            config: Full configuration dictionary
+            
+        Returns:
+            dict: Validation result with 'valid', 'errors', and 'warnings' keys
+        """
+        errors = []
+        warnings = []
+        
+        # Validate database
+        db_result = self.validate_database_config(config)
+        if not db_result['valid']:
+            errors.extend(db_result['errors'])
+        
+        # Validate API keys
+        if 'OPENAI_API_KEY' in config:
+            openai_result = self.validate_api_key(config['OPENAI_API_KEY'], 'OpenAI')
+            if not openai_result['valid']:
+                errors.extend(openai_result['errors'])
+        
+        if 'ANTHROPIC_API_KEY' in config:
+            anthropic_result = self.validate_api_key(config['ANTHROPIC_API_KEY'], 'Anthropic')
+            if not anthropic_result['valid']:
+                errors.extend(anthropic_result['errors'])
+        
+        # Validate Redis if present
+        redis_result = self.validate_redis_config(config)
+        if not redis_result['valid']:
+            warnings.extend(redis_result['errors'])  # Redis is optional, so warnings
+        
+        # Check for placeholders
+        for key, value in config.items():
+            if isinstance(value, str) and self.is_placeholder_value(value):
+                warnings.append(f"{key} appears to contain a placeholder value")
+        
+        return {
+            'valid': len(errors) == 0,
+            'errors': errors,
+            'warnings': warnings
+        }
+
 
 def validate_startup_configuration() -> None:
     """Validate configuration at application startup.

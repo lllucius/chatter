@@ -32,6 +32,53 @@ from chatter.utils.security import (
 logger = get_logger(__name__)
 
 
+def refresh_access_token(refresh_token: str) -> str | None:
+    """Refresh an access token using a refresh token.
+    
+    Args:
+        refresh_token: The refresh token
+        
+    Returns:
+        New access token if valid, None otherwise
+    """
+    try:
+        # Verify the refresh token
+        payload = verify_token(refresh_token)
+        if not payload:
+            return None
+        
+        # Create new access token with same user data
+        user_data = {
+            "user_id": payload.get("user_id"),
+            "email": payload.get("email"),
+            "username": payload.get("username")
+        }
+        
+        return create_access_token(data=user_data)
+    except Exception:
+        return None
+
+
+def validate_email_format(email: str) -> bool:
+    """Validate email format.
+    
+    Args:
+        email: Email address to validate
+        
+    Returns:
+        True if email format is valid, False otherwise
+    """
+    import re
+    
+    # Basic email validation regex
+    email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    
+    if not email or not isinstance(email, str):
+        return False
+    
+    return bool(re.match(email_pattern, email))
+
+
 # Use RFC 9457 compliant problem classes instead of HTTPException subclasses
 AuthenticationError = AuthenticationProblem
 AuthorizationError = AuthorizationProblem

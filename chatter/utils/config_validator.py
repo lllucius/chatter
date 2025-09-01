@@ -80,6 +80,51 @@ class ConfigurationValidator:
         if settings.db_max_overflow < 0:
             self.errors.append("Database max overflow cannot be negative")
 
+    def validate_secret_key(self, secret_key: str) -> None:
+        """Validate a secret key for strength and security.
+        
+        Args:
+            secret_key: The secret key to validate
+            
+        Raises:
+            ValueError: If the secret key is weak, insecure, or too short
+        """
+        # Check for weak/default keys and common patterns
+        weak_keys = [
+            "secret",
+            "password", 
+            "your-secret-key",
+            "development",
+            "test",
+            "admin",
+            "default",
+            "mysecretkey",
+            "your_super_secret_key_here_change_this_in_production",
+            "CHANGE_THIS_SECRET_KEY_IN_PRODUCTION",
+            "change_me"
+        ]
+        
+        # Check exact matches (case-insensitive)
+        if secret_key.lower() in [key.lower() for key in weak_keys]:
+            raise ValueError(f"Secret key is weak or using default value: {secret_key}")
+        
+        # Check for keys that start with common weak patterns  
+        weak_patterns = ["secret", "password", "admin", "test", "default"]
+        for pattern in weak_patterns:
+            if secret_key.lower().startswith(pattern.lower()):
+                raise ValueError(f"Secret key is weak or contains insecure pattern: {secret_key}")
+        
+        # Check minimum length
+        if len(secret_key) < 8:
+            raise ValueError(f"Secret key is too short: {len(secret_key)} characters (minimum 8)")
+        
+        # Check for simple patterns (all same character, simple sequences)
+        if len(set(secret_key)) == 1:  # All same character
+            raise ValueError("Secret key contains only repeated characters (insecure)")
+        
+        if secret_key.isdigit() and len(secret_key) <= 12:  # Simple number sequences
+            raise ValueError("Secret key is a simple numeric sequence (insecure)")
+
     def _validate_security_settings(self) -> None:
         """Validate security configuration."""
         # Check secret key strength

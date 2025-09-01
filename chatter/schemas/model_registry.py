@@ -1,7 +1,7 @@
 """Pydantic schemas for model/embedding registry."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Sequence
 
 from pydantic import BaseModel, Field
 
@@ -168,7 +168,7 @@ class EmbeddingSpaceWithModel(EmbeddingSpace):
 # Query and list schemas
 class ProviderList(BaseModel):
     """List of providers with pagination."""
-    providers: list[Provider]
+    providers: Sequence[Provider]
     total: int
     page: int
     per_page: int
@@ -176,7 +176,7 @@ class ProviderList(BaseModel):
 
 class ModelDefList(BaseModel):
     """List of model definitions with pagination."""
-    models: list[ModelDefWithProvider]
+    models: Sequence[ModelDefWithProvider]
     total: int
     page: int
     per_page: int
@@ -184,7 +184,7 @@ class ModelDefList(BaseModel):
 
 class EmbeddingSpaceList(BaseModel):
     """List of embedding spaces with pagination."""
-    spaces: list[EmbeddingSpaceWithModel]
+    spaces: Sequence[EmbeddingSpaceWithModel]
     total: int
     page: int
     per_page: int

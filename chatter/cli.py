@@ -152,10 +152,10 @@ def list_prompts(
     tags: str = typer.Option(
         None, "--tags", help="Filter by tags (comma-separated)"
     ),
-    public: bool = typer.Option(
+    public: bool | None = typer.Option(
         None, "--public", help="Filter by public status"
     ),
-    chain: bool = typer.Option(
+    chain: bool | None = typer.Option(
         None, "--chain", help="Filter by chain status"
     ),
     limit: int = typer.Option(
@@ -292,24 +292,7 @@ def create_prompt(
                     else None
                 )
             else:
-                # Use function parameters (explicitly assign to local variables)
-                local_name = name
-                local_content = content
-                local_category = category
-                local_description = description
-                local_prompt_type = prompt_type
-                local_template_format = template_format
-                local_public = public
-                
-                # Reassign to expected variable names
-                name = local_name
-                content = local_content
-                category = local_category
-                description = local_description
-                prompt_type = local_prompt_type
-                template_format = local_template_format
-                public = local_public
-                
+                # Use function parameters directly
                 parsed_tags = (
                     [
                         tag.strip()
@@ -615,10 +598,10 @@ def serve(
     workers: int = typer.Option(
         None, "--workers", "-w", help="Number of workers"
     ),
-    reload: bool = typer.Option(
+    reload: bool | None = typer.Option(
         None, "--reload", "-r", help="Enable auto-reload"
     ),
-    debug: bool = typer.Option(
+    debug: bool | None = typer.Option(
         None, "--debug", "-d", help="Enable debug mode"
     ),
 ) -> None:
@@ -1448,7 +1431,7 @@ def list_profiles(
     tags: str = typer.Option(
         None, "--tags", help="Filter by tags (comma-separated)"
     ),
-    public: bool = typer.Option(
+    public: bool | None = typer.Option(
         None, "--public", help="Filter by public status"
     ),
     limit: int = typer.Option(
@@ -1659,25 +1642,8 @@ def create_profile(
                 )
                 public = Confirm.ask("Make public?", default=False)
             else:
-                # For non-interactive mode, use function parameters (explicitly assign to local variables)
-                local_name = name
-                local_description = description
-                local_provider = provider
-                local_model = model
-                local_temperature = temperature
-                local_max_tokens = max_tokens
-                local_system_prompt = system_prompt
-                local_public = public
-                
-                # Reassign to expected variable names
-                name = local_name
-                description = local_description
-                provider = local_provider
-                model = local_model
-                temperature = local_temperature
-                max_tokens = local_max_tokens
-                system_prompt = local_system_prompt
-                public = local_public
+                # For non-interactive mode, use function parameters directly
+                pass
 
             # Validate required parameters in non-interactive mode
             if not interactive:

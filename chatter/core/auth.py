@@ -74,7 +74,7 @@ def validate_email_format(email: str) -> bool:
     # Basic email validation regex
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     
-    if not email or not isinstance(email, str):
+    if not email:
         return False
     
     return bool(re.match(email_pattern, email))

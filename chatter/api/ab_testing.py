@@ -595,10 +595,7 @@ async def get_ab_test_results(
             confidence_intervals_formatted[variant_id] = {}
             for metric, value in intervals.items():
                 # Convert single float to list of floats [lower, upper]
-                if isinstance(value, (int, float)):
-                    confidence_intervals_formatted[variant_id][metric] = [float(value), float(value)]
-                else:
-                    confidence_intervals_formatted[variant_id][metric] = [float(value), float(value)]
+                confidence_intervals_formatted[variant_id][metric] = [float(value), float(value)]
 
         return ABTestResultsResponse(
             test_id=test_id,

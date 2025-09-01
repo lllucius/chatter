@@ -427,3 +427,43 @@ class PerformanceMonitor:
 
 # Global performance monitor
 performance_monitor = PerformanceMonitor()
+
+
+class BatchProcessor:
+    """Batch processor for workflow operations."""
+    
+    def __init__(self, batch_size: int = 10, max_concurrent: int = 5):
+        """Initialize batch processor."""
+        self.batch_size = batch_size
+        self.max_concurrent = max_concurrent
+        self.pending_items = []
+        self.processor_func = None
+    
+    def set_processor(self, processor_func):
+        """Set the processing function."""
+        self.processor_func = processor_func
+    
+    async def add_item(self, item):
+        """Add item to batch and process if batch is full."""
+        self.pending_items.append(item)
+        
+        if len(self.pending_items) >= self.batch_size:
+            return await self._process_batch()
+        
+        return None
+    
+    async def flush(self):
+        """Process any remaining items."""
+        if self.pending_items and self.processor_func:
+            return await self._process_batch()
+        return None
+    
+    async def _process_batch(self):
+        """Process the current batch."""
+        if not self.processor_func or not self.pending_items:
+            return None
+        
+        batch_items = self.pending_items[:self.batch_size]
+        self.pending_items = self.pending_items[self.batch_size:]
+        
+        return await self.processor_func(batch_items)

@@ -819,6 +819,10 @@ class DatabaseManager:
             await self.session.close()
 
 
+# Alias for backward compatibility
+DatabaseConnectionManager = DatabaseManager
+
+
 async def execute_query(query: str, **params) -> any:
     """Execute a raw SQL query.
 

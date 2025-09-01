@@ -415,7 +415,10 @@ class TestExceptionHandling:
         """Test exception chaining."""
         # Arrange
         original = ValueError("Original")
-        middle = RuntimeError("Middle") from original
+        try:
+            raise RuntimeError("Middle") from original
+        except RuntimeError as middle:
+            pass
         
         # Act
         final = ChatterException("Final", cause=middle)

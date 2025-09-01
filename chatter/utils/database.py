@@ -4,12 +4,23 @@ import asyncio
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import event, text
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+# Compatibility layer for SQLAlchemy versions
+try:
+    from sqlalchemy.ext.asyncio import (
+        AsyncEngine,
+        AsyncSession,
+        async_sessionmaker,
+        create_async_engine,
+    )
+except ImportError:
+    # Fallback for older SQLAlchemy versions
+    from sqlalchemy.ext.asyncio import (
+        AsyncEngine,
+        AsyncSession,
+        create_async_engine,
+    )
+    from sqlalchemy.orm import sessionmaker
+    async_sessionmaker = sessionmaker
 
 from chatter.config import settings
 from chatter.models.base import Base

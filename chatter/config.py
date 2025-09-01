@@ -478,6 +478,7 @@ class Settings(BaseSettings):
                 "localhost",
                 "127.0.0.1",
                 "0.0.0.0",
+                "testserver",  # Add testserver for pytest TestClient
                 f"localhost:{self.port}",
                 f"127.0.0.1:{self.port}",
                 f"0.0.0.0:{self.port}"

@@ -356,13 +356,13 @@ class DataManager:
     async def bulk_delete_documents(self, document_ids: list[str], user_id: str) -> dict[str, Any]:
         """Bulk delete documents using DocumentService."""
         from chatter.core.documents import DocumentService
-        from chatter.utils.database import get_async_session_factory
+        from chatter.utils.database import get_session_maker
 
         success_count = 0
         error_count = 0
         errors = []
 
-        async_session_factory = get_async_session_factory()
+        async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             document_service = DocumentService(session)
 
@@ -399,13 +399,13 @@ class DataManager:
             ChatService,
         )
         from chatter.services.llm import LLMService
-        from chatter.utils.database import get_async_session_factory
+        from chatter.utils.database import get_session_maker
 
         success_count = 0
         error_count = 0
         errors = []
 
-        async_session_factory = get_async_session_factory()
+        async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             llm_service = LLMService()
             chat_service = ChatService(session, llm_service)
@@ -436,13 +436,13 @@ class DataManager:
     async def bulk_delete_prompts(self, prompt_ids: list[str], user_id: str) -> dict[str, Any]:
         """Bulk delete prompts using PromptService."""
         from chatter.core.prompts import PromptService
-        from chatter.utils.database import get_async_session_factory
+        from chatter.utils.database import get_session_maker
 
         success_count = 0
         error_count = 0
         errors = []
 
-        async_session_factory = get_async_session_factory()
+        async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             prompt_service = PromptService(session)
 

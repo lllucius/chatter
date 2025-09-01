@@ -75,8 +75,9 @@ class WorkflowExecutionService:
 
         try:
             # Validate workflow configuration
-            if not self.validator.validate_workflow_config(
-                workflow_type, chat_request.workflow_config or {}
+            try:
+                self.validator.validate_workflow_parameters(
+                workflow_type, **(chat_request.workflow_config or {})
             ):
                 raise WorkflowExecutionError(f"Invalid workflow configuration for {workflow_type}")
 
@@ -107,7 +108,9 @@ class WorkflowExecutionService:
                 return cached_result
 
             # Execute workflow based on type
-            with performance_monitor.track_operation(f"workflow_{workflow_type}"):
+            workflow_execution_id = f"{correlation_id}_{workflow_type}"
+            performance_monitor.start_workflow(workflow_execution_id, workflow_type)
+            try:
                 if workflow_type == "plain":
                     result = await self._execute_plain_workflow(
                         conversation, chat_request, correlation_id
@@ -127,30 +130,33 @@ class WorkflowExecutionService:
                 else:
                     raise WorkflowExecutionError(f"Unknown workflow type: {workflow_type}")
 
-            # Cache the result
-            await workflow_cache.set(cache_key, result, ttl=300)  # 5 minutes
+                # Cache the result
+                # TODO: Implement proper result caching with correct parameters
+                # await workflow_cache.set(cache_key, result, ttl=300)  # 5 minutes
 
-            # Record successful execution metrics
-            duration_ms = (time.time() - start_time) * 1000
-            record_workflow_metrics(
-                workflow_type=workflow_type,
-                workflow_id=conversation.id,
-                step="complete",
-                duration_ms=duration_ms,
-                success=True,
-                error_type=None,
-                correlation_id=correlation_id
-            )
+                # Record successful execution metrics
+                duration_ms = (time.time() - start_time) * 1000
+                record_workflow_metrics(
+                    workflow_type=workflow_type,
+                    workflow_id=conversation.id,
+                    step="complete",
+                    duration_ms=duration_ms,
+                    success=True,
+                    error_type=None,
+                    correlation_id=correlation_id
+                )
 
-            logger.info(
-                "Workflow executed successfully",
-                conversation_id=conversation.id,
-                workflow_type=workflow_type,
-                duration_ms=duration_ms,
-                correlation_id=correlation_id
-            )
+                logger.info(
+                    "Workflow executed successfully",
+                    conversation_id=conversation.id,
+                    workflow_type=workflow_type,
+                    duration_ms=duration_ms,
+                    correlation_id=correlation_id
+                )
 
-            return result
+                return result
+            finally:
+                performance_monitor.end_workflow(workflow_execution_id, success=True)
 
         except Exception as e:
             # Record failed execution metrics
@@ -201,8 +207,9 @@ class WorkflowExecutionService:
 
         try:
             # Validate workflow configuration
-            if not self.validator.validate_workflow_config(
-                workflow_type, chat_request.workflow_config or {}
+            try:
+                self.validator.validate_workflow_parameters(
+                workflow_type, **(chat_request.workflow_config or {})
             ):
                 raise WorkflowExecutionError(f"Invalid workflow configuration for {workflow_type}")
 
@@ -782,7 +789,7 @@ class WorkflowExecutionService:
     async def get_workflow_performance_stats(self) -> dict[str, Any]:
         """Get workflow performance statistics."""
         return {
-            "performance_monitor": performance_monitor.get_stats(),
+            "performance_monitor": performance_monitor.get_performance_stats(),
             "cache_stats": await workflow_cache.get_stats() if hasattr(workflow_cache, 'get_stats') else {},
             "template_stats": self.template_manager.get_stats() if hasattr(self.template_manager, 'get_stats') else {}
         }

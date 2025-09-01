@@ -350,8 +350,8 @@ class DynamicVectorStoreService:
     ) -> list[tuple[DocumentChunk, float]]:
         """Perform similarity search using JSON embeddings (fallback)."""
         try:
-            # Select chunks that have legacy JSON embeddings
-            query = select(DocumentChunk).where(DocumentChunk.embedding.is_not(None))
+            # Select chunks that have embeddings
+            query = select(DocumentChunk).where(DocumentChunk.embedding_models.is_not(None))
 
             # Apply filters
             if document_ids:
@@ -496,10 +496,7 @@ class DynamicVectorStoreService:
             # Chunks with any embeddings (legacy or dynamic metadata)
             embedded_result = await self.session.execute(
                 select(func.count(DocumentChunk.id)).where(
-                    or_(
-                        DocumentChunk.embedding.is_not(None),
-                        DocumentChunk.embedding_models.is_not(None),
-                    )
+                    DocumentChunk.embedding_models.is_not(None)
                 )
             )
             stats["embedded_chunks"] = int(embedded_result.scalar() or 0)

@@ -7,8 +7,6 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 
-# Note: Removed module mocking as all dependencies are properly installed
-
 # Async event loop configuration for tests
 @pytest.fixture(scope="session")
 def event_loop():

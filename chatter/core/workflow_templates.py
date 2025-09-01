@@ -262,3 +262,180 @@ class WorkflowTemplateManager:
 
         result["valid"] = result["requirements_met"]
         return result
+
+
+class CustomWorkflowBuilder:
+    """Builder for creating custom workflows from templates and specifications."""
+    
+    def __init__(self):
+        """Initialize custom workflow builder."""
+        self.template_manager = WorkflowTemplateManager()
+        self.custom_templates = {}
+        self.builder_history = []
+    
+    def create_custom_template(
+        self,
+        name: str,
+        description: str,
+        workflow_type: str,
+        base_template: str | None = None,
+        **custom_params: Any
+    ) -> WorkflowTemplate:
+        """Create a custom workflow template."""
+        # Start with base template if provided
+        if base_template:
+            base = self.template_manager.get_template(base_template)
+            default_params = base.default_params.copy()
+            default_params.update(custom_params.get("default_params", {}))
+            
+            required_tools = custom_params.get("required_tools", base.required_tools)
+            required_retrievers = custom_params.get("required_retrievers", base.required_retrievers)
+        else:
+            default_params = custom_params.get("default_params", {})
+            required_tools = custom_params.get("required_tools")
+            required_retrievers = custom_params.get("required_retrievers")
+        
+        # Create custom template
+        custom_template = WorkflowTemplate(
+            name=name,
+            workflow_type=workflow_type,
+            description=description,
+            default_params=default_params,
+            required_tools=required_tools,
+            required_retrievers=required_retrievers
+        )
+        
+        # Store custom template
+        self.custom_templates[name] = custom_template
+        
+        return custom_template
+    
+    def build_workflow_spec(
+        self,
+        template_name: str,
+        customizations: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Build a complete workflow specification from template and customizations."""
+        # Get template (custom or built-in)
+        if template_name in self.custom_templates:
+            template = self.custom_templates[template_name]
+        else:
+            template = self.template_manager.get_template(template_name)
+        
+        # Build specification
+        spec = {
+            "template_name": template_name,
+            "workflow_type": template.workflow_type,
+            "description": template.description,
+            "parameters": template.default_params.copy(),
+            "required_tools": template.required_tools or [],
+            "required_retrievers": template.required_retrievers or []
+        }
+        
+        # Apply customizations
+        if customizations:
+            if "parameters" in customizations:
+                spec["parameters"].update(customizations["parameters"])
+            
+            if "additional_tools" in customizations:
+                spec["required_tools"].extend(customizations["additional_tools"])
+            
+            if "additional_retrievers" in customizations:
+                spec["required_retrievers"].extend(customizations["additional_retrievers"])
+            
+            # Apply other customizations
+            for key, value in customizations.items():
+                if key not in ["parameters", "additional_tools", "additional_retrievers"]:
+                    spec[key] = value
+        
+        return spec
+    
+    async def validate_workflow_spec(self, spec: dict[str, Any]) -> dict[str, Any]:
+        """Validate a workflow specification."""
+        validation_result = {
+            "valid": True,
+            "errors": [],
+            "warnings": []
+        }
+        
+        # Check required fields
+        required_fields = ["workflow_type", "parameters"]
+        for field in required_fields:
+            if field not in spec:
+                validation_result["errors"].append(f"Missing required field: {field}")
+                validation_result["valid"] = False
+        
+        # Validate workflow type
+        valid_types = ["plain", "tools", "rag", "full"]
+        if spec.get("workflow_type") not in valid_types:
+            validation_result["errors"].append(
+                f"Invalid workflow type: {spec.get('workflow_type')}. Must be one of: {valid_types}"
+            )
+            validation_result["valid"] = False
+        
+        # Validate parameters
+        params = spec.get("parameters", {})
+        if "system_message" not in params:
+            validation_result["warnings"].append("No system message specified")
+        
+        if "max_tool_calls" in params and params["max_tool_calls"] <= 0:
+            validation_result["errors"].append("max_tool_calls must be positive")
+            validation_result["valid"] = False
+        
+        # Check tool requirements
+        if spec.get("required_tools"):
+            # In a real implementation, you'd check against available tools
+            validation_result["warnings"].append(
+                f"Required tools specified: {spec['required_tools']}. Ensure they are available."
+            )
+        
+        return validation_result
+    
+    def get_custom_templates(self) -> dict[str, WorkflowTemplate]:
+        """Get all custom templates."""
+        return self.custom_templates.copy()
+    
+    def delete_custom_template(self, name: str) -> bool:
+        """Delete a custom template."""
+        if name in self.custom_templates:
+            del self.custom_templates[name]
+            return True
+        return False
+    
+    def export_template(self, name: str) -> dict[str, Any] | None:
+        """Export a template as a dictionary."""
+        template = None
+        
+        if name in self.custom_templates:
+            template = self.custom_templates[name]
+        else:
+            try:
+                template = self.template_manager.get_template(name)
+            except:
+                return None
+        
+        if template:
+            return {
+                "name": template.name,
+                "workflow_type": template.workflow_type,
+                "description": template.description,
+                "default_params": template.default_params,
+                "required_tools": template.required_tools,
+                "required_retrievers": template.required_retrievers
+            }
+        
+        return None
+    
+    def import_template(self, template_data: dict[str, Any]) -> WorkflowTemplate:
+        """Import a template from dictionary data."""
+        template = WorkflowTemplate(
+            name=template_data["name"],
+            workflow_type=template_data["workflow_type"],
+            description=template_data["description"],
+            default_params=template_data.get("default_params", {}),
+            required_tools=template_data.get("required_tools"),
+            required_retrievers=template_data.get("required_retrievers")
+        )
+        
+        self.custom_templates[template.name] = template
+        return template

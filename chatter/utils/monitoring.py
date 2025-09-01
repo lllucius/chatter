@@ -675,3 +675,100 @@ class AlertManager:
                 escalated.append(alert)
         
         return escalated
+
+
+class MonitoringService:
+    """Legacy monitoring service - wraps AdvancedMetricsCollector for backward compatibility."""
+    
+    def __init__(self, max_history: int = 10000):
+        """Initialize monitoring service."""
+        self.request_metrics = deque(maxlen=max_history)
+        self.database_metrics = deque(maxlen=max_history)
+        self.error_counts = defaultdict(int)
+        self.start_time = time.time()
+        
+        # Use the advanced metrics collector internally
+        self._collector = AdvancedMetricsCollector(max_history)
+    
+    def record_request(self, metrics: RequestMetrics) -> None:
+        """Record request metrics."""
+        self.request_metrics.append(metrics)
+        self._collector.record_request(metrics)
+    
+    def record_database_query(self, metrics: DatabaseMetrics) -> None:
+        """Record database query metrics."""
+        self.database_metrics.append(metrics)
+        self._collector.record_database_operation(metrics)
+    
+    def record_error(self, error_type: str, error_message: str = "") -> None:
+        """Record error occurrence."""
+        self.error_counts[error_type] += 1
+        logger.error(f"Error recorded: {error_type} - {error_message}")
+    
+    def get_system_health(self) -> dict[str, Any]:
+        """Get system health status."""
+        health = self._collector.get_system_health()
+        
+        # Add legacy fields for backward compatibility
+        health["uptime_seconds"] = time.time() - self.start_time
+        health["request_rate"] = len(self.request_metrics) / max(time.time() - self.start_time, 1)
+        
+        return health
+    
+    def get_performance_stats(self) -> dict[str, Any]:
+        """Get performance statistics."""
+        return self._collector.get_performance_summary()
+    
+    def get_error_summary(self) -> dict[str, int]:
+        """Get error count summary."""
+        return dict(self.error_counts)
+    
+    def reset_metrics(self) -> None:
+        """Reset all metrics."""
+        self.request_metrics.clear()
+        self.database_metrics.clear() 
+        self.error_counts.clear()
+        self.start_time = time.time()
+
+
+class PerformanceTracker:
+    """Performance tracking utility."""
+    
+    def __init__(self):
+        """Initialize performance tracker."""
+        self.tracked_operations = {}
+        self.operation_times = defaultdict(list)
+    
+    def start_operation(self, operation_id: str, operation_type: str) -> None:
+        """Start tracking an operation."""
+        self.tracked_operations[operation_id] = {
+            "type": operation_type,
+            "start_time": time.time()
+        }
+    
+    def end_operation(self, operation_id: str) -> float:
+        """End tracking an operation and return duration."""
+        if operation_id not in self.tracked_operations:
+            return 0.0
+        
+        operation = self.tracked_operations[operation_id]
+        duration = time.time() - operation["start_time"]
+        
+        self.operation_times[operation["type"]].append(duration)
+        del self.tracked_operations[operation_id]
+        
+        return duration
+    
+    def get_operation_stats(self, operation_type: str) -> dict[str, float]:
+        """Get statistics for an operation type."""
+        times = self.operation_times.get(operation_type, [])
+        
+        if not times:
+            return {"count": 0, "avg": 0.0, "min": 0.0, "max": 0.0}
+        
+        return {
+            "count": len(times),
+            "avg": sum(times) / len(times),
+            "min": min(times),
+            "max": max(times)
+        }

@@ -37,70 +37,82 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "fastapi==0.116.1",
-    "fastapi-problem==0.11.5",
-    "uvicorn[standard]==0.35.0",
-    "hypercorn==0.17.3",
-    "uvloop==0.21.0",
-    "sqlalchemy[asyncio]==2.0.43",
-    "asyncpg==0.30.0",
-    "alembic==1.16.5",
-    "psycopg2-binary==2.9.10",
+    # Core FastAPI ecosystem
+    "fastapi>=0.116.1",
+    "uvicorn[standard]>=0.35.0",
+    "uvloop>=0.21.0",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "email-validator>=2.0.0",
+    "python-dotenv>=1.1.1",
+    
+    # Database and persistence
+    "sqlalchemy[asyncio]>=2.0.43",
+    "asyncpg>=0.30.0",
+    "alembic>=1.16.5",
     "pgvector>=0.2.5,<0.4",
-    "langchain==0.3.27",
-    "langchain-community==0.3.29",
-    "langchain-core==0.3.75",
-    "langchain-openai==0.3.32",
-    "langchain-anthropic==0.3.19",
-    "langchain-google-genai==2.1.10",
-    "langchain-cohere==0.4.5",
-    "langchain-postgres==0.0.15",
-    "langchain-mcp-adapters==0.1.9",
-    "langgraph==0.6.6",
-    "langgraph-checkpoint-postgres==2.0.23",
-    "langgraph-checkpoint-sqlite==2.0.11",
-    "unstructured[all-docs]==0.18.14",
-    "langchain-unstructured==0.1.6",
-    "pypdf==6.0.0",
-    "python-multipart==0.0.20",
-    "python-jose[cryptography]==3.5.0",
-    "passlib[bcrypt]==1.7.4",
-    "pydantic==2.11.7",
-    "pydantic-settings==2.10.1",
-    "python-dotenv==1.1.1",
-    "httpx==0.28.1",
-    "aiofiles==24.1.0",
-    "asyncio-mqtt==0.16.2",
-    "structlog==25.4.0",
-    "opentelemetry-api==1.36.0",
-    "opentelemetry-sdk==1.36.0",
-    "slowapi==0.1.9",
-    "redis==6.4.0",
-    "aioredis==2.0.1",
-    "typer==0.17.3",
-    "rich==14.1.0",
-    "click==8.2.1",
-    "pendulum==3.1.0",
-    "orjson==3.11.3",
-    "apscheduler==3.11.0",
-    "mcp==1.13.1",
-    "httpx-sse==0.4.1",
+    "redis>=6.4.0",
+    
+    # LangChain/AI ecosystem - using compatible versions
+    "langchain>=0.3.27",
+    "langchain-core>=0.3.75", 
+    "langchain-community>=0.3.29",
+    "langchain-openai>=0.3.32",
+    "langchain-anthropic>=0.3.19",
+    "langchain-google-genai>=2.1.10",
+    "langchain-cohere>=0.4.5",
+    "langchain-postgres>=0.0.15",
+    "langchain-mcp-adapters>=0.1.9",
+    "langgraph>=0.6.6",
+    "langgraph-checkpoint-postgres>=2.0.23",
+    
+    # Document processing
+    "unstructured[all-docs]>=0.18.14",
+    "pypdf>=6.0.0",
+    
+    # Authentication
+    "python-jose[cryptography]>=3.5.0",
+    "passlib[bcrypt]>=1.7.4",
+    
+    # HTTP and async utilities
+    "httpx>=0.28.1",
+    "aiofiles>=24.1.0",
+    "httpx-sse>=0.4.0,<0.5.0",  # Compatible with cohere requirements
+    
+    # CLI and utilities
+    "typer>=0.17.3",
+    "rich>=14.1.0",
+    "structlog>=25.4.0",
+    "apscheduler>=3.11.0",
+    
+    # AI/tool integration
+    "mcp>=1.13.1",
+    
+    # Additional required utilities  
+    "ulid-py>=1.1.0",
+    "bcrypt>=4.0.0",
+    "numpy>=1.26.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest==8.4.1",
-    "pytest-asyncio==1.1.0",
-    "pytest-cov==6.2.1",
-    "pytest-mock==3.14.1",
-    "httpx==0.28.1",
-    "ruff==0.12.11",
-    "mypy==1.17.1",
-    "black==25.1.0",
-    "isort==6.0.1",
-    "mkdocs==1.6.1",
-    "mkdocs-material==9.6.18",
-    "mkdocstrings[python]==0.30.0",
+    # Testing
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0", 
+    "pytest-cov>=6.2.1",
+    "pytest-mock>=3.14.1",
+    "httpx>=0.28.1",  # For test client
+    
+    # Code quality and formatting
+    "ruff>=0.12.11",
+    "mypy>=1.17.1",
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    
+    # Documentation
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.18",
+    "mkdocstrings[python]>=0.30.0",
 ]
 
 [project.scripts]

@@ -19,6 +19,7 @@ from chatter.schemas.ab_testing import (
     ABTestUpdateRequest,
     TestStatus,
 )
+from chatter.services.ab_testing import MetricType
 from chatter.services.ab_testing import ABTestManager
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
@@ -346,6 +347,8 @@ async def update_ab_test(
             update_data["traffic_percentage"] = update_data["traffic_percentage"] / 100.0
 
         updated_test = await ab_test_manager.update_test(test_id, update_data)
+        if not updated_test:
+            raise InternalServerProblem(detail="Failed to update A/B test")
 
         # Convert to response format (reuse logic from get_ab_test)
         from chatter.schemas.ab_testing import (
@@ -572,13 +575,30 @@ async def get_ab_test_results(
         metrics = []
         for variant_name, variant_results in results.variant_results.items():
             for metric_name, metric_value in variant_results.items():
+                # Map string metric name to MetricType enum
+                try:
+                    metric_type = MetricType(metric_name)
+                except ValueError:
+                    metric_type = MetricType.CUSTOM
+                
                 metrics.append(TestMetric(
-                    metric_type=metric_name,  # This would need proper enum mapping
+                    metric_type=metric_type,
                     variant_name=variant_name,
                     value=float(metric_value),
                     sample_size=100,  # Placeholder
                     confidence_interval=None,
                 ))
+
+        # Convert confidence intervals to expected format
+        confidence_intervals_formatted = {}
+        for variant_id, intervals in results.confidence_intervals.items():
+            confidence_intervals_formatted[variant_id] = {}
+            for metric, value in intervals.items():
+                # Convert single float to list of floats [lower, upper]
+                if isinstance(value, (int, float)):
+                    confidence_intervals_formatted[variant_id][metric] = [float(value), float(value)]
+                else:
+                    confidence_intervals_formatted[variant_id][metric] = [float(value), float(value)]
 
         return ABTestResultsResponse(
             test_id=test_id,
@@ -586,7 +606,7 @@ async def get_ab_test_results(
             status=TestStatus.COMPLETED,  # Would need to fetch from test
             metrics=metrics,
             statistical_significance=results.statistical_significance,
-            confidence_intervals=results.confidence_intervals,
+            confidence_intervals=confidence_intervals_formatted,
             winning_variant=None,  # Would be determined from analysis
             recommendation="Continue monitoring",  # Would be generated
             generated_at=results.analysis_date,
@@ -626,14 +646,14 @@ async def get_ab_test_metrics(
         # Placeholder metrics
         metrics = [
             TestMetric(
-                metric_type="response_time",
+                metric_type=MetricType.RESPONSE_TIME,
                 variant_name="control",
                 value=1.5,
                 sample_size=50,
                 confidence_interval=None,
             ),
             TestMetric(
-                metric_type="response_time",
+                metric_type=MetricType.RESPONSE_TIME,
                 variant_name="variant_a",
                 value=1.2,
                 sample_size=50,

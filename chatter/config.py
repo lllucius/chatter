@@ -1,23 +1,25 @@
 """Configuration management for Chatter application."""
 
+from typing import Any
+
 # Compatibility layer for pydantic v1/v2
 try:
     from pydantic import Field, field_validator, model_validator
     from pydantic_settings import BaseSettings, SettingsConfigDict
-    PYDANTIC_V2 = True
+    _PYDANTIC_V2 = True
 except ImportError:
     # Fallback for pydantic v1
     from pydantic import BaseSettings, Field, validator, root_validator
-    PYDANTIC_V2 = False
+    _PYDANTIC_V2 = False
     
     # Create compatibility functions for v1
-    def field_validator(field_name):
+    def field_validator(field_name: str):
         """Compatibility wrapper for pydantic v1 validator."""
         def decorator(func):
             return validator(field_name, allow_reuse=True)(func)
         return decorator
     
-    def model_validator(mode='after'):
+    def model_validator(mode: str = 'after'):
         """Compatibility wrapper for pydantic v1 root_validator."""
         def decorator(func):
             return root_validator(pre=(mode != 'after'), allow_reuse=True)(func)
@@ -25,8 +27,11 @@ except ImportError:
     
     # Mock SettingsConfigDict for v1 compatibility
     class SettingsConfigDict:
-        def __init__(self, **kwargs):
+        def __init__(self, **kwargs: Any):
             pass
+
+# Export the version flag
+PYDANTIC_V2 = _PYDANTIC_V2
 
 
 class Settings(BaseSettings):

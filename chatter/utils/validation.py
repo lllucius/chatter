@@ -6,7 +6,6 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from fastapi import HTTPException, Request
-from pydantic import ValidationError
 from starlette.responses import Response
 
 from chatter.config import settings
@@ -14,6 +13,11 @@ from chatter.schemas.utilities import ValidationRule
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+class ValidationError(Exception):
+    """Custom validation error for input validation."""
+    pass
 
 
 class InputValidator:

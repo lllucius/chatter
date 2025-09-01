@@ -7,13 +7,13 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import HTTPException, Request
-from pydantic import ValidationError
 from starlette.responses import Response
 
 from chatter.schemas.utilities import ValidationRule
 from chatter.utils.validation import (
     InputValidator,
     ValidationMiddleware,
+    ValidationError,
     sanitize_filename,
     sanitize_html,
     validate_email,
@@ -507,7 +507,7 @@ class TestValidationMiddleware:
         
         # Mock request body to raise ValidationError
         async def mock_json():
-            raise ValidationError("Invalid JSON", ValueError)
+            raise ValidationError("Invalid JSON")
         
         mock_request.json = mock_json
 
@@ -666,7 +666,7 @@ class TestValidationIntegration:
         # Act & Assert
         for payload in xss_payloads:
             # Should fail validation
-            with pytest.raises(ValueError):
+            with pytest.raises(ValidationError):
                 validator.validate_input("text", payload)
             
             # Should be sanitized

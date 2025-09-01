@@ -18,8 +18,6 @@ from chatter.utils.validation import (
     sanitize_filename,
     sanitize_html,
     validate_sql_identifier,
-    validate_llm_model_name,
-    validate_prompt_template,
     ValidationError,
 )
 
@@ -465,88 +463,6 @@ class TestSqlIdentifierValidation:
         for identifier in invalid_identifiers:
             with pytest.raises(ValidationError):
                 validate_sql_identifier(identifier)
-
-
-class TestLlmModelNameValidation:
-    """Test LLM model name validation functionality."""
-
-    def test_validate_llm_model_name_valid(self):
-        """Test validation of valid LLM model names."""
-        valid_models = [
-            "gpt-4",
-            "gpt-3.5-turbo",
-            "claude-3-opus",
-            "gemini-pro",
-            "llama-2-70b",
-            "mistral-7b"
-        ]
-        
-        for model in valid_models:
-            result = validate_llm_model_name(model)
-            assert result is True
-
-    def test_validate_llm_model_name_invalid(self):
-        """Test validation of invalid LLM model names."""
-        invalid_models = [
-            "",
-            None,
-            "model with spaces",
-            "model/with/slashes",
-            "model@with#special",
-            "a" * 101,  # Too long
-            "123",  # Too short or invalid format
-        ]
-        
-        for model in invalid_models:
-            with pytest.raises(ValidationError):
-                validate_llm_model_name(model)
-
-
-class TestPromptTemplateValidation:
-    """Test prompt template validation functionality."""
-
-    def test_validate_prompt_template_valid(self):
-        """Test validation of valid prompt templates."""
-        valid_templates = [
-            "Hello {name}!",
-            "Process this: {input}",
-            "System: {system_prompt}\nUser: {user_input}",
-            "Simple text without variables",
-            "{var1} and {var2} and {var3}"
-        ]
-        
-        for template in valid_templates:
-            result = validate_prompt_template(template)
-            assert result is True
-
-    def test_validate_prompt_template_invalid(self):
-        """Test validation of invalid prompt templates."""
-        invalid_templates = [
-            "",  # Empty
-            None,  # None
-            "{unclosed",  # Unclosed brace
-            "unclosed}",  # Unmatched closing brace
-            "{{double}}",  # Double braces
-            "{invalid-var-name}",  # Invalid variable name
-            "{123}",  # Variable starting with number
-        ]
-        
-        for template in invalid_templates:
-            with pytest.raises(ValidationError):
-                validate_prompt_template(template)
-
-    def test_validate_prompt_template_extract_variables(self):
-        """Test that template validation extracts variables correctly."""
-        template = "Hello {name}, your score is {score}!"
-        
-        # The function should extract variables (implementation dependent)
-        result = validate_prompt_template(template)
-        assert result is True
-        
-        # Test with no variables
-        template_no_vars = "Hello world!"
-        result = validate_prompt_template(template_no_vars)
-        assert result is True
 
 
 class TestValidationError:

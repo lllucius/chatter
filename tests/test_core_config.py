@@ -36,7 +36,7 @@ class TestSettings:
         env_vars = {
             "APP_NAME": "Test Chatter",
             "APP_VERSION": "1.0.0",
-            "ENVIRONMENT": "production",
+            "ENVIRONMENT": "testing",  # Use testing instead of production
             "DEBUG": "true",
             "HOST": "localhost",
             "PORT": "3000",
@@ -50,11 +50,27 @@ class TestSettings:
             # Assert
             assert settings.app_name == "Test Chatter"
             assert settings.app_version == "1.0.0"
-            assert settings.environment == "production"
+            assert settings.environment == "testing"
             assert settings.debug is True
             assert settings.host == "localhost"
             assert settings.port == 3000
             assert settings.workers == 4
+
+    def test_production_debug_validation(self):
+        """Test that debug mode is forbidden in production."""
+        # Arrange
+        env_vars = {
+            "ENVIRONMENT": "production",
+            "DEBUG": "true",
+            "SECRET_KEY": "a-very-long-secret-key-for-production-use-that-is-definitely-over-32-characters"
+        }
+
+        with patch.dict(os.environ, env_vars):
+            # Act & Assert
+            with pytest.raises(ValidationError) as exc_info:
+                Settings()
+            
+            assert "Debug mode must be disabled in production" in str(exc_info.value)
 
     def test_database_configuration(self):
         """Test database configuration settings."""

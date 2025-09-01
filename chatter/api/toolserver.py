@@ -730,11 +730,11 @@ async def bulk_server_operation(
         ) from None
 
 
-@router.get("/tools/all", response_model=list[dict])
+@router.get("/tools/all", response_model=list[dict[str, Any]])
 async def list_all_tools(
     current_user: User = Depends(get_current_user),
     tool_server_service: ToolServerService = Depends(get_tool_server_service),
-) -> list[dict]:
+) -> list[dict[str, Any]]:
     """List all tools across all servers.
 
     Args:

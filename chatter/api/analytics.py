@@ -548,8 +548,15 @@ async def export_analytics(
             period=period,
         )
 
+        # Convert time range to tuple, handling None values
+        date_range = None
+        if time_range.start_date and time_range.end_date:
+            date_range = (time_range.start_date, time_range.end_date)
+
         export_data = await analytics_service.export_analytics(
-            current_user.id, metrics, time_range, format
+            format, 
+            date_range,
+            {"user_id": current_user.id, "metrics": metrics}
         )
 
         if format == "json":

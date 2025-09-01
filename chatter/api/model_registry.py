@@ -1,5 +1,6 @@
 """Model and embedding registry endpoints."""
 
+from collections.abc import Sequence
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -52,7 +53,7 @@ async def list_providers(
     providers, total = await service.list_providers(params)
 
     return ProviderList(
-        providers=list(providers),
+        providers=list(providers),  # Convert sequence to list
         total=total,
         page=page,
         per_page=per_page

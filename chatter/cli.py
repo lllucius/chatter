@@ -41,15 +41,15 @@ except ImportError:
             "components": {"schemas": {}},
         }
     
-    def export_openapi_json(spec: dict[str, Any], path: Path) -> None:
+    def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
         """Export OpenAPI spec as JSON."""
-        with open(path, 'w') as f:
+        with open(output_path, 'w') as f:
             json.dump(spec, f, indent=2)
     
-    def export_openapi_yaml(spec: dict[str, Any], path: Path) -> None:
+    def export_openapi_yaml(spec: dict[str, Any], output_path: Path) -> None:
         """Export OpenAPI spec as YAML."""
         import yaml
-        with open(path, 'w') as f:
+        with open(output_path, 'w') as f:
             yaml.dump(spec, f, default_flow_style=False)
 
 app = typer.Typer(
@@ -294,6 +294,7 @@ def create_prompt(
                     if tags_input
                     else None
                 )
+            # For non-interactive mode, variables come from function parameters
 
             # For non-interactive mode, use function parameters
             # (In interactive mode, they're overridden above)

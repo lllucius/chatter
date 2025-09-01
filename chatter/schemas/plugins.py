@@ -71,6 +71,9 @@ class PluginInstance(BaseModel):
     installed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
     usage_stats: dict[str, Any] = Field(default_factory=dict)
+    enabled: bool = Field(default=True, description="Whether the plugin is enabled")
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Last update timestamp")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional plugin metadata")
 
 
 class PluginInstallRequest(BaseModel):

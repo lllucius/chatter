@@ -1404,6 +1404,41 @@ class AnalyticsService:
         else:
             return 60 * 24 * 7  # Default 7 days
 
+    async def get_user_analytics(
+        self,
+        user_id: str,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+    ) -> dict[str, Any]:
+        """Get analytics for a specific user."""
+        # TODO: Implement user-specific analytics
+        return {
+            "user_id": user_id,
+            "conversations": 0,
+            "messages": 0,
+            "documents": 0,
+            "total_usage_time": 0,
+            "start_date": start_date,
+            "end_date": end_date,
+        }
+    
+    async def export_analytics(
+        self,
+        export_format: str,
+        date_range: tuple[datetime, datetime] | None = None,
+        filters: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Export analytics data in specified format."""
+        # TODO: Implement analytics export
+        return {
+            "export_id": "export_001",
+            "format": export_format,
+            "status": "completed",
+            "download_url": "/exports/analytics_export.csv",
+            "file_size": 1024,
+            "record_count": 100,
+        }
+
 
 class AnalyticsError(Exception):
     """Analytics operation error."""

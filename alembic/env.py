@@ -74,8 +74,12 @@ def do_run_migrations(connection: Connection) -> None:
 
 async def run_async_migrations() -> None:
     """Run migrations in async mode."""
+    database_url = config.get_main_option("sqlalchemy.url")
+    if database_url is None:
+        raise ValueError("Database URL not found in configuration")
+    
     connectable = create_async_engine(
-        config.get_main_option("sqlalchemy.url"),
+        database_url,
         poolclass=pool.NullPool,
     )
 

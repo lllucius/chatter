@@ -749,6 +749,26 @@ class DocumentService:
                 error=str(e),
             )
 
+    async def reprocess_document(self, document_id: str, user_id: str) -> bool:
+        """Reprocess a document."""
+        try:
+            # Get the document first
+            document = await self.get_document(document_id, user_id)
+            if not document:
+                return False
+            
+            # Trigger reprocessing (similar to process_document but for existing docs)
+            await self.process_document(document_id, user_id)
+            return True
+        except Exception as e:
+            logger.error(
+                "Failed to reprocess document",
+                document_id=document_id,
+                user_id=user_id,
+                error=str(e),
+            )
+            return False
+
 
 class DocumentError(Exception):
     """Document operation error."""

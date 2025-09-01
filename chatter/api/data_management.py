@@ -1,5 +1,7 @@
 """Data management endpoints."""
 
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, status
 
 from chatter.api.auth import get_current_user
@@ -9,6 +11,7 @@ from chatter.schemas.data_management import (
     BackupListResponse,
     BackupRequest,
     BackupResponse,
+    BackupType,
     BulkDeleteResponse,
     ExportDataRequest,
     ExportDataResponse,
@@ -50,7 +53,7 @@ async def export_data(
             download_url=export_info.get("download_url"),
             file_size=export_info.get("file_size"),
             record_count=export_info.get("record_count"),
-            created_at=export_info.get("created_at"),
+            created_at=export_info.get("created_at") or datetime.now(UTC),
             completed_at=export_info.get("completed_at"),
             expires_at=export_info.get("expires_at"),
         )
@@ -81,7 +84,7 @@ async def create_backup(
             file_size=backup_info.get("file_size"),
             compressed_size=backup_info.get("compressed_size"),
             record_count=backup_info.get("record_count"),
-            created_at=backup_info.get("created_at"),
+            created_at=backup_info.get("created_at") or datetime.now(UTC),
             completed_at=backup_info.get("completed_at"),
             expires_at=backup_info.get("expires_at"),
             encrypted=backup_info.get("encrypted", backup_request.encrypt),
@@ -110,15 +113,15 @@ async def list_backups(
         for backup in backups:
             backup_responses.append(
                 BackupResponse(
-                    id=backup.get("id"),
-                    name=backup.get("name"),
+                    id=backup.get("id") or "unknown",
+                    name=backup.get("name") or "Unknown Backup",
                     description=backup.get("description"),
-                    backup_type=backup.get("backup_type"),
-                    status=backup.get("status"),
+                    backup_type=backup.get("backup_type") or BackupType.FULL,
+                    status=backup.get("status") or "unknown",
                     file_size=backup.get("file_size"),
                     compressed_size=backup.get("compressed_size"),
                     record_count=backup.get("record_count"),
-                    created_at=backup.get("created_at"),
+                    created_at=backup.get("created_at") or datetime.now(UTC),
                     completed_at=backup.get("completed_at"),
                     expires_at=backup.get("expires_at"),
                     encrypted=backup.get("encrypted", False),
@@ -153,7 +156,7 @@ async def restore_from_backup(
             status=restore_info.get("status", "pending"),
             progress=restore_info.get("progress", 0),
             records_restored=restore_info.get("records_restored", 0),
-            started_at=restore_info.get("started_at"),
+            started_at=restore_info.get("started_at") or datetime.now(UTC),
             completed_at=restore_info.get("completed_at"),
             error_message=restore_info.get("error_message"),
         )
@@ -184,7 +187,7 @@ async def get_storage_stats(
             storage_by_user=stats.get("storage_by_user", {}),
             growth_rate_mb_per_day=stats.get("growth_rate_mb_per_day", 0.0),
             projected_size_30_days=stats.get("projected_size_30_days", 0),
-            last_updated=stats.get("last_updated"),
+            last_updated=stats.get("last_updated") or datetime.now(UTC),
         )
     except Exception as e:
         logger.error("Failed to get storage stats", error=str(e))

@@ -52,7 +52,7 @@ async def list_providers(
     providers, total = await service.list_providers(params)
 
     return ProviderList(
-        providers=providers,
+        providers=list(providers),
         total=total,
         page=page,
         per_page=per_page
@@ -210,7 +210,7 @@ async def list_models(
     models, total = await service.list_models(provider_id, model_type, params)
 
     return ModelDefList(
-        models=models,
+        models=list(models),
         total=total,
         page=page,
         per_page=per_page
@@ -254,9 +254,21 @@ async def create_model(
         )
 
     model = await service.create_model(model_data)
+    
+    if not model:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create model"
+        )
 
     # Refresh to get provider relationship
     model = await service.get_model(model.id)
+    
+    if not model:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve created model"
+        )
 
     logger.info(
         "Created model",
@@ -288,6 +300,12 @@ async def update_model(
 
     # Refresh to get provider relationship
     model = await service.get_model(model.id)
+    
+    if not model:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve updated model"
+        )
 
     logger.info(
         "Updated model",
@@ -373,7 +391,7 @@ async def list_embedding_spaces(
     spaces, total = await service.list_embedding_spaces(model_id, params)
 
     return EmbeddingSpaceList(
-        spaces=spaces,
+        spaces=list(spaces),
         total=total,
         page=page,
         per_page=per_page
@@ -429,9 +447,21 @@ async def create_embedding_space(
 
     try:
         space = await service.create_embedding_space(space_data)
+        
+        if not space:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create embedding space"
+            )
 
         # Refresh to get full relationships
         space = await service.get_embedding_space(space.id)
+        
+        if not space:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to retrieve created embedding space"
+            )
 
         logger.info(
             "Created embedding space",
@@ -475,6 +505,12 @@ async def update_embedding_space(
 
     # Refresh to get full relationships
     space = await service.get_embedding_space(space.id)
+    
+    if not space:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve updated embedding space"
+        )
 
     logger.info(
         "Updated embedding space",

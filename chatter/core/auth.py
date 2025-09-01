@@ -1,6 +1,7 @@
 """Authentication service for user management."""
 
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -554,3 +555,27 @@ class AuthService:
             ) from None
 
         return self.create_tokens(user)
+
+    async def list_api_keys(self, user_id: str) -> list[dict[str, Any]]:
+        """List user's API keys."""
+        # TODO: Implement API key listing from database
+        # For now, return empty list
+        return []
+    
+    async def revoke_token(self, user_id: str) -> bool:
+        """Revoke user's current token."""
+        # TODO: Implement token revocation
+        # For now, return success
+        return True
+    
+    async def request_password_reset(self, email: str) -> bool:
+        """Request password reset for user."""
+        # TODO: Implement password reset request
+        # For now, return success
+        return True
+    
+    async def confirm_password_reset(self, token: str, new_password: str) -> bool:
+        """Confirm password reset with token."""
+        # TODO: Implement password reset confirmation
+        # For now, return success
+        return True

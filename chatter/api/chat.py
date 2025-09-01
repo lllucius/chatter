@@ -266,7 +266,7 @@ async def add_message_to_conversation(
     """Add a new message to existing conversation."""
     try:
         created_message = await chat_service.add_message_to_conversation(
-            conversation_id, current_user.id, message.content
+            conversation_id, current_user.id, message.role, message.content
         )
         return MessageResponse.model_validate(created_message)
     except NotFoundError:

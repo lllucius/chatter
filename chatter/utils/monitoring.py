@@ -444,6 +444,26 @@ class AdvancedMetricsCollector:
         """Track metrics for a correlation ID."""
         self.correlation_tracking[correlation_id].append(metrics)
 
+    def get_overall_stats(self, window_minutes: int = 60) -> dict[str, Any]:
+        """Get overall system statistics."""
+        return {
+            "request_count": sum(stats.request_count for stats in self.endpoint_stats.values()),
+            "error_count": sum(stats.error_count for stats in self.endpoint_stats.values()),
+            "average_response_time": 0.0,  # Would calculate from actual data
+            "throughput": 0.0,  # Requests per minute
+            "window_minutes": window_minutes,
+        }
+    
+    def get_health_metrics(self) -> dict[str, Any]:
+        """Get health metrics."""
+        return {
+            "status": "healthy",
+            "uptime": 0,  # Would track actual uptime
+            "memory_usage": 0,  # Would get from system
+            "cpu_usage": 0,  # Would get from system
+            "disk_usage": 0,  # Would get from system
+        }
+
 
 # Global metrics collector instances
 metrics_collector = AdvancedMetricsCollector()

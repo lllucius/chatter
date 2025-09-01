@@ -463,7 +463,7 @@ class AgentManager:
         agent_type: AgentType,
         description: str,
         system_prompt: str,
-        llm: BaseChatModel,
+        llm: BaseChatModel | None = None,
         **kwargs,
     ) -> str:
         """Create a new AI agent.
@@ -495,6 +495,10 @@ class AgentManager:
             raise ValueError(f"Unsupported agent type: {agent_type}")
 
         # Create agent instance
+        if llm is None:
+            # TODO: Create a default LLM or get from configuration
+            # For now, we'll pass None and let the agent handle it
+            pass
         agent = agent_class(profile=profile, llm=llm)
         self.agents[profile.id] = agent
 

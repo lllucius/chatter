@@ -1,6 +1,7 @@
 """Analytics and statistics endpoints."""
 
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -436,7 +437,7 @@ async def get_tool_server_analytics(
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
     ),
-) -> dict:
+) -> dict[str, Any]:
     """Get tool server analytics.
 
     Args:
@@ -477,7 +478,7 @@ async def get_user_analytics(
     period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service),
-) -> dict:
+) -> dict[str, Any]:
     """Get per-user analytics.
 
     Args:

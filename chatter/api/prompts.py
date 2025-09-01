@@ -80,6 +80,7 @@ async def list_prompts(
     category: PromptCategory | None = Query(None, description="Filter by category"),
     tags: list[str] | None = Query(None, description="Filter by tags"),
     is_public: bool | None = Query(None, description="Filter by public status"),
+    is_chain: bool | None = Query(None, description="Filter by chain status"),
     limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
     sort_by: str = Query("created_at", description="Sort field"),
@@ -94,6 +95,7 @@ async def list_prompts(
         category: Filter by category
         tags: Filter by tags
         is_public: Filter by public status
+        is_chain: Filter by chain status
         limit: Maximum number of results
         offset: Number of results to skip
         sort_by: Sort field
@@ -112,6 +114,7 @@ async def list_prompts(
             category=category,
             tags=tags,
             is_public=is_public,
+            is_chain=is_chain,
             limit=limit,
             offset=offset,
             sort_by=sort_by,

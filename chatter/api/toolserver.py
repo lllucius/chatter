@@ -1,5 +1,6 @@
 """Tool server management API endpoints."""
 
+from typing import Any
 
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -759,7 +760,7 @@ async def test_server_connectivity(
     server_id: str,
     current_user: User = Depends(get_current_user),
     tool_server_service: ToolServerService = Depends(get_tool_server_service),
-) -> dict:
+) -> dict[str, Any]:
     """Test connectivity to an external MCP server.
 
     Args:
@@ -857,7 +858,7 @@ async def revoke_tool_permission(
     permission_id: str,
     current_user: User = Depends(get_current_user),
     access_service: ToolAccessService = Depends(get_tool_access_service),
-) -> dict:
+) -> dict[str, Any]:
     """Revoke tool permission.
 
     Args:
@@ -991,7 +992,7 @@ async def refresh_server_tools(
     server_id: str,
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service),
-) -> dict:
+) -> dict[str, Any]:
     """Refresh tools for a remote server.
 
     Args:
@@ -1028,7 +1029,7 @@ async def refresh_server_tools(
             )
             db_server = result.scalar_one_or_none()
             if db_server:
-                await service._discover_server_tools(db_server)
+                await service.discover_server_tools(db_server)
                 await service.session.commit()
 
         return {

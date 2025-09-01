@@ -4,7 +4,7 @@ import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import and_, desc, func, literal, select
+from sqlalchemy import and_, desc, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.models.conversation import (
@@ -483,10 +483,16 @@ class AnalyticsService:
             )
 
             response_stats = response_stats_result.first()
-            avg_response_time = float(response_stats[0] or 0)
-            median_response_time = float(response_stats[1] or 0)
-            p95_response_time = float(response_stats[2] or 0)
-            p99_response_time = float(response_stats[3] or 0)
+            if response_stats:
+                avg_response_time = float(response_stats[0] or 0)
+                median_response_time = float(response_stats[1] or 0)
+                p95_response_time = float(response_stats[2] or 0)
+                p99_response_time = float(response_stats[3] or 0)
+            else:
+                avg_response_time = 0.0
+                median_response_time = 0.0
+                p95_response_time = 0.0
+                p99_response_time = 0.0
 
             # Throughput metrics
             throughput_result = await self.session.execute(
@@ -506,8 +512,12 @@ class AnalyticsService:
             )
 
             throughput_stats = throughput_result.first()
-            total_requests = throughput_stats[0] or 0
-            total_tokens = throughput_stats[1] or 0
+            if throughput_stats:
+                total_requests = throughput_stats[0] or 0
+                total_tokens = throughput_stats[1] or 0
+            else:
+                total_requests = 0
+                total_tokens = 0
 
             # Calculate per-minute rates (assuming time range)
             time_range_minutes = self._get_time_range_minutes(
@@ -928,7 +938,7 @@ class AnalyticsService:
                 usage_filters.append(ToolUsage.user_id == user_id)
 
             usage_where = (
-                and_(*usage_filters) if usage_filters else None
+                and_(*usage_filters) if usage_filters else text("1=1")
             )
 
             # Daily usage counts
@@ -942,7 +952,7 @@ class AnalyticsService:
                         func.date(ToolUsage.called_at) == today,
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -957,7 +967,7 @@ class AnalyticsService:
                         ).replace(tzinfo=UTC),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -972,7 +982,7 @@ class AnalyticsService:
                         ).replace(tzinfo=UTC),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -986,7 +996,7 @@ class AnalyticsService:
                         ToolUsage.success is False,
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -1004,7 +1014,7 @@ class AnalyticsService:
                         ToolUsage.success is False,
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -1022,7 +1032,7 @@ class AnalyticsService:
                         ToolUsage.response_time_ms.is_not(None),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -1039,7 +1049,7 @@ class AnalyticsService:
                         ToolUsage.response_time_ms.is_not(None),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -1138,7 +1148,7 @@ class AnalyticsService:
                 .select_from(ServerTool)
                 .join(ToolServer)
                 .outerjoin(ToolUsage)
-                .where(usage_where if usage_where is not None else True)
+                .where(usage_where if usage_where is not None else text("1=1"))
                 .group_by(
                     ServerTool.id,
                     ServerTool.name,
@@ -1198,7 +1208,7 @@ class AnalyticsService:
                         >= datetime.now(UTC) - timedelta(days=30),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
                 .group_by(func.date(ToolUsage.called_at))

@@ -44,7 +44,6 @@ import { ProfileResponse, ProfileCreate, ProfileUpdate } from '../sdk';
 const ProfilesPage: React.FC = () => {
   const [profiles, setProfiles] = useState<ProfileResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [dialogError, setDialogError] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -84,7 +83,7 @@ const ProfilesPage: React.FC = () => {
   const loadProfiles = async () => {
     try {
       setLoading(true);
-      setError('');
+      
       const response = await chatterSDK.profiles.listProfilesApiV1ProfilesGet({});
       setProfiles(response.data.profiles);
     } catch (err: any) {
@@ -237,11 +236,6 @@ const ProfilesPage: React.FC = () => {
           </Button>
         </Box>
       </Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
       <Card>
         <TableContainer>
           <Table>

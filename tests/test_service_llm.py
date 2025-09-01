@@ -5,8 +5,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.models.conversation import Conversation, ConversationStatus
-from chatter.models.message import Message, MessageRole
+from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from chatter.models.user import User
 from chatter.services.llm import LLMService
 

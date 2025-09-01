@@ -83,49 +83,32 @@ class ChatterBaseException(Exception):
 ChatterError = ChatterBaseException
 
 
-class ChatServiceError(ChatterBaseException):
-    """Chat service-related errors."""
+class ServiceError(ChatterError):
+    """Generic service layer errors."""
 
-    def __init__(self, message: str, **kwargs):
+    def __init__(self, service_name: str, message: str, **kwargs):
         super().__init__(
-            message=message,
+            message=f"{service_name}: {message}",
             status_code=500,
+            details={"service": service_name},
             **kwargs
         )
 
+    def _get_error_title(self) -> str:
+        return "Service Error"
 
-class LLMServiceError(ChatterBaseException):
-    """LLM service-related errors."""
-
-    def __init__(self, message: str, **kwargs):
-        super().__init__(
-            message=message,
-            status_code=500,
-            **kwargs
-        )
+    def _get_type_suffix(self) -> str:
+        return "service-error"
 
 
-class ServiceError(ChatterBaseException):
-    """Base class for service-related errors."""
 
-    def __init__(self, message: str, service_name: str, **kwargs):
-        super().__init__(
-            message=message,
-            status_code=500,
-            service_name=service_name,
-            **kwargs
-        )
 
 
 class DatabaseError(ServiceError):
     """Database-related errors."""
 
     def __init__(self, message: str, **kwargs):
-        super().__init__(
-            message=message,
-            service_name="database",
-            **kwargs
-        )
+        super().__init__("database", message, **kwargs)
 
 
 class ValidationError(ChatterBaseException):
@@ -181,8 +164,8 @@ class RateLimitError(ServiceError):
 
     def __init__(self, message: str, **kwargs):
         super().__init__(
-            message=message,
-            service_name="rate_limiter",
+            "rate_limiter",
+            message,
             status_code=429,
             **kwargs
         )
@@ -207,15 +190,8 @@ class ConfigurationError(ChatterBaseException):
         return safe_message
 
 
-class WorkflowError(ChatterBaseException):
-    """Workflow execution errors."""
-
-    def __init__(self, message: str, **kwargs):
-        super().__init__(
-            message=message,
-            status_code=500,
-            **kwargs
-        )
+class NotFoundError(ChatterBaseException):
+    """Resource not found errors."""
 
     def __init__(
         self,
@@ -237,11 +213,16 @@ class WorkflowError(ChatterBaseException):
             **kwargs
         )
 
-    def _get_error_title(self) -> str:
-        return "Resource Not Found"
 
-    def _get_type_suffix(self) -> str:
-        return "resource-not-found"
+class WorkflowError(ChatterBaseException):
+    """Workflow execution errors."""
+
+    def __init__(self, message: str, **kwargs):
+        super().__init__(
+            message=message,
+            status_code=500,
+            **kwargs
+        )
 
 
 class ConflictError(ChatterError):
@@ -266,30 +247,12 @@ class ConflictError(ChatterError):
         return "resource-conflict"
 
 
-class ServiceError(ChatterError):
-    """Generic service layer errors."""
 
-    def __init__(self, service_name: str, message: str, **kwargs):
-        super().__init__(
-            message=f"{service_name}: {message}",
-            status_code=500,
-            details={"service": service_name},
-            **kwargs
-        )
-
-    def _get_error_title(self) -> str:
-        return "Service Error"
-
-    def _get_type_suffix(self) -> str:
-        return "service-error"
-
-
-# Specific service errors
 class ChatServiceError(ServiceError):
     """Chat service specific errors."""
 
     def __init__(self, message: str, **kwargs):
-        super().__init__(service_name="ChatService", message=message, **kwargs)
+        super().__init__("ChatService", message, **kwargs)
 
 
 class LLMServiceError(ServiceError):
@@ -298,8 +261,8 @@ class LLMServiceError(ServiceError):
     def __init__(self, message: str, provider: str | None = None, **kwargs):
         details = {"provider": provider} if provider else {}
         super().__init__(
-            service_name="LLMService",
-            message=message,
+            "LLMService",
+            message,
             details=details,
             **kwargs
         )
@@ -309,7 +272,7 @@ class MCPServiceError(ServiceError):
     """MCP service specific errors."""
 
     def __init__(self, message: str, **kwargs):
-        super().__init__(service_name="MCPService", message=message, **kwargs)
+        super().__init__("MCPService", message, **kwargs)
 
 
 class VectorStoreError(ServiceError):
@@ -318,8 +281,8 @@ class VectorStoreError(ServiceError):
     def __init__(self, message: str, store_type: str | None = None, **kwargs):
         details = {"store_type": store_type} if store_type else {}
         super().__init__(
-            service_name="VectorStoreService",
-            message=message,
+            "VectorStoreService",
+            message,
             details=details,
             **kwargs
         )
@@ -331,48 +294,14 @@ class DocumentProcessingError(ServiceError):
     def __init__(self, message: str, document_type: str | None = None, **kwargs):
         details = {"document_type": document_type} if document_type else {}
         super().__init__(
-            service_name="DocumentProcessingService",
-            message=message,
+            "DocumentProcessingService",
+            message,
             details=details,
             **kwargs
         )
 
 
-class ConfigurationError(ChatterError):
-    """Configuration-related errors."""
 
-    def __init__(self, message: str, **kwargs):
-        super().__init__(
-            message=message,
-            status_code=500,
-            **kwargs
-        )
-
-    def _get_error_title(self) -> str:
-        return "Configuration Error"
-
-    def _get_type_suffix(self) -> str:
-        return "configuration-error"
-
-
-# Workflow-specific errors
-class WorkflowError(ChatterError):
-    """Workflow execution errors."""
-
-    def __init__(self, message: str, workflow_type: str | None = None, **kwargs):
-        details = {"workflow_type": workflow_type} if workflow_type else {}
-        super().__init__(
-            message=message,
-            status_code=500,
-            details=details,
-            **kwargs
-        )
-
-    def _get_error_title(self) -> str:
-        return "Workflow Error"
-
-    def _get_type_suffix(self) -> str:
-        return "workflow-error"
 
 
 class WorkflowConfigurationError(WorkflowError):
@@ -457,14 +386,14 @@ def handle_service_error(
     error_message = message or f"Error in {func_name}: {str(error)}"
 
     # Map known exception types to appropriate ChatterError subclasses
-    if isinstance(error, PermissionError | OSError):
+    if isinstance(error, FileNotFoundError):
+        return NotFoundError(error_message, cause=error)
+    elif isinstance(error, PermissionError | OSError):
         return AuthorizationError(error_message, cause=error)
     elif isinstance(error, ValueError | TypeError):
         return ValidationError(error_message, cause=error)
-    elif isinstance(error, FileNotFoundError):
-        return NotFoundError(error_message, cause=error)
     else:
-        return ServiceError(service_name=service_name, message=error_message, cause=error)
+        return ServiceError(service_name, error_message, cause=error)
 
 
 def create_error_response(error: Exception) -> dict[str, Any]:
@@ -490,5 +419,3 @@ def create_error_response(error: Exception) -> dict[str, Any]:
 
 # Alias for backward compatibility with tests
 ChatterBaseException = ChatterError
-DatabaseError = ServiceError
-RateLimitError = ServiceError

@@ -191,8 +191,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 class RateLimitExceeded(Exception):
     """Exception raised when rate limit is exceeded."""
     
-    def __init__(self, message: str, retry_after: int | None = None):
+    def __init__(self, message: str = "Rate limit exceeded", 
+                 limit: int | None = None, 
+                 window: int | None = None,
+                 retry_after: int | None = None):
         super().__init__(message)
+        self.message = message
+        self.limit = limit
+        self.window = window
         self.retry_after = retry_after
 
 
@@ -289,27 +295,48 @@ def get_client_ip(request: Request) -> str:
     if request.client:
         client_ip = request.client.host
     
-    # Check for forwarded headers
-    forwarded_for = request.headers.get("x-forwarded-for")
+    # Check for forwarded headers (case-insensitive)
+    forwarded_for = None
+    real_ip = None
+    forwarded = None
+    
+    for header_name, header_value in request.headers.items():
+        header_lower = header_name.lower()
+        if header_lower == "x-forwarded-for":
+            forwarded_for = header_value
+        elif header_lower == "x-real-ip":
+            real_ip = header_value
+        elif header_lower == "forwarded":
+            forwarded = header_value
+    
+    # X-Forwarded-For header (highest priority per test expectations)
     if forwarded_for:
         client_ip = forwarded_for.split(",")[0].strip()
     
-    real_ip = request.headers.get("x-real-ip")
-    if real_ip:
+    # X-Real-IP header (second priority)
+    elif real_ip:
         client_ip = real_ip.strip()
+    
+    # Parse RFC 7239 Forwarded header (lowest priority)
+    elif forwarded:
+        # Look for for= parameter
+        import re
+        match = re.search(r'for=([^;,\s]+)', forwarded)
+        if match:
+            client_ip = match.group(1).strip('"')
     
     return client_ip
 
 
-def create_rate_limit_key(request: Request, prefix: str = "rate_limit") -> str:
-    """Create rate limit key from request."""
-    client_ip = get_client_ip(request)
+def create_rate_limit_key(client_ip: str, path: str, user_id: str | None = None, prefix: str = "rate_limit") -> str:
+    """Create rate limit key from client info."""
     
-    # Try to get user ID from auth
-    auth_header = request.headers.get("authorization")
-    if auth_header:
-        import hashlib
-        user_hash = hashlib.sha256(auth_header.encode()).hexdigest()[:16]
-        return f"{prefix}:user:{user_hash}"
+    # Normalize path by removing trailing slashes and making lowercase
+    normalized_path = path.rstrip('/').lower()
     
-    return f"{prefix}:ip:{client_ip}"
+    # If user ID is provided, include both user and IP for stronger rate limiting
+    if user_id:
+        return f"{prefix}:user:{user_id}:ip:{client_ip}:{normalized_path}"
+    
+    # Otherwise use IP-based key only
+    return f"{prefix}:ip:{client_ip}:{normalized_path}"

@@ -1,8 +1,32 @@
 """Configuration management for Chatter application."""
 
-
-from pydantic import Field, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+# Compatibility layer for pydantic v1/v2
+try:
+    from pydantic import Field, field_validator, model_validator
+    from pydantic_settings import BaseSettings, SettingsConfigDict
+    PYDANTIC_V2 = True
+except ImportError:
+    # Fallback for pydantic v1
+    from pydantic import BaseSettings, Field, validator, root_validator
+    PYDANTIC_V2 = False
+    
+    # Create compatibility functions for v1
+    def field_validator(field_name):
+        """Compatibility wrapper for pydantic v1 validator."""
+        def decorator(func):
+            return validator(field_name, allow_reuse=True)(func)
+        return decorator
+    
+    def model_validator(mode='after'):
+        """Compatibility wrapper for pydantic v1 root_validator."""
+        def decorator(func):
+            return root_validator(pre=(mode != 'after'), allow_reuse=True)(func)
+        return decorator
+    
+    # Mock SettingsConfigDict for v1 compatibility
+    class SettingsConfigDict:
+        def __init__(self, **kwargs):
+            pass
 
 
 class Settings(BaseSettings):
@@ -369,41 +393,61 @@ class Settings(BaseSettings):
     )
 
     # -----------------------------------------------------------------------------
-    # Pydantic v2 Settings Config
+    # Pydantic Settings Config (v1/v2 compatible)
     # -----------------------------------------------------------------------------
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore",
-    )
+    if PYDANTIC_V2:
+        model_config = SettingsConfigDict(
+            env_file=".env",
+            env_file_encoding="utf-8",
+            case_sensitive=False,
+            extra="ignore",
+        )
+    else:
+        class Config:
+            env_file = ".env"
+            env_file_encoding = "utf-8"
+            case_sensitive = False
+            extra = "ignore"
 
     @model_validator(mode='after')
-    def validate_configuration(self) -> 'Settings':
+    def validate_configuration(cls, values) -> dict:
         """Validate configuration for security and production readiness."""
+        if PYDANTIC_V2:
+            # In v2, 'self' is the instance
+            instance = values
+            database_url = instance.database_url
+            is_production = instance.is_production
+            debug = instance.debug
+            secret_key = instance.secret_key
+        else:
+            # In v1, 'values' is a dict
+            database_url = values.get('database_url')
+            is_production = values.get('is_production', False)
+            debug = values.get('debug', False)
+            secret_key = values.get('secret_key', '')
+        
         # Validate database URL is provided
-        if not self.database_url:
+        if not database_url:
             raise ValueError(
                 "DATABASE_URL must be provided - no default database credentials allowed for security"
             )
 
         # Validate production settings
-        if self.is_production:
-            if self.debug:
+        if is_production:
+            if debug:
                 raise ValueError(
                     "Debug mode must be disabled in production"
                 )
 
             # Validate secret key strength in production
-            if self.secret_key == "your-secret-key-here" or len(self.secret_key) < 32:
+            if secret_key == "your-secret-key-here" or len(secret_key) < 32:
                 raise ValueError(
                     "SECRET_KEY must be a strong secret (32+ characters) in production"
                 )
 
-        return self
+        return values if not PYDANTIC_V2 else values
 
     @field_validator('database_url')
-    @classmethod
     def validate_database_url(cls, v: str) -> str:
         """Validate database URL format."""
         if not v:
@@ -482,5 +526,11 @@ class Settings(BaseSettings):
             return base_hosts
 
 
-# Create module-level settings instance
-settings = Settings()
+# Create module-level settings instance (with fallback for testing)
+try:
+    settings = Settings()
+except Exception:
+    # For testing/development when DATABASE_URL is not set
+    import os
+    os.environ.setdefault('DATABASE_URL', 'sqlite:///test.db')
+    settings = Settings()

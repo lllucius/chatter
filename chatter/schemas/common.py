@@ -1,5 +1,9 @@
 """Common schemas used across the API."""
 
+from datetime import datetime
+from enum import Enum
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -48,6 +52,73 @@ class GetRequestBase(BaseModel):
 
 
 class DeleteRequestBase(BaseModel):
+    """Base schema for delete requests."""
+
+    pass
+
+
+class BaseSchema(BaseModel):
+    """Base schema with common fields and configuration."""
+
+    class Config:
+        """Pydantic configuration."""
+        from_attributes = True
+        use_enum_values = True
+
+
+class PaginationParams(BaseModel):
+    """Pagination parameters for requests."""
+
+    page: int = Field(1, ge=1, description="Page number")
+    size: int = Field(20, ge=1, le=100, description="Page size")
+
+
+class PaginationResponse(BaseModel):
+    """Pagination information for responses."""
+
+    page: int = Field(..., description="Current page number")
+    size: int = Field(..., description="Page size")
+    total: int = Field(..., description="Total number of items")
+    pages: int = Field(..., description="Total number of pages")
+
+
+class ErrorResponse(BaseModel):
+    """Standard error response schema."""
+
+    error: str = Field(..., description="Error message")
+    code: str = Field(..., description="Error code")
+    details: dict[str, Any] | None = Field(None, description="Error details")
+
+
+class SuccessResponse(BaseModel):
+    """Standard success response schema."""
+
+    success: bool = Field(True, description="Success indicator")
+    message: str = Field(..., description="Success message")
+    data: dict[str, Any] | None = Field(None, description="Response data")
+
+
+class TimestampMixin(BaseModel):
+    """Mixin for models with timestamp fields."""
+
+    created_at: datetime = Field(..., description="Creation timestamp")
+    updated_at: datetime = Field(..., description="Last update timestamp")
+
+
+class SortOrder(str, Enum):
+    """Sort order enumeration."""
+
+    ASC = "asc"
+    DESC = "desc"
+
+
+class FilterParams(BaseModel):
+    """Base filter parameters."""
+
+    search: str | None = Field(None, description="Search query")
+    tags: list[str] | None = Field(None, description="Filter by tags")
+    created_after: datetime | None = Field(None, description="Created after date")
+    created_before: datetime | None = Field(None, description="Created before date")
     """Base schema for delete requests."""
 
     pass

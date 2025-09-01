@@ -263,6 +263,64 @@ class InternalServerProblem(ProblemException):
         )
 
 
+class UnauthorizedProblem(ProblemException):
+    """Unauthorized access problem."""
+
+    def __init__(
+        self,
+        detail: str = "Authentication required",
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            title="Unauthorized",
+            detail=detail,
+            type_suffix="unauthorized",
+            headers={"WWW-Authenticate": "Bearer"},
+            **kwargs,
+        )
+
+
+class ForbiddenProblem(ProblemException):
+    """Forbidden access problem."""
+
+    def __init__(
+        self,
+        detail: str = "Access forbidden",
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(
+            status_code=status.HTTP_403_FORBIDDEN,
+            title="Forbidden",
+            detail=detail,
+            type_suffix="forbidden",
+            **kwargs,
+        )
+
+
+class ServiceUnavailableProblem(ProblemException):
+    """Service unavailable problem."""
+
+    def __init__(
+        self,
+        detail: str = "The service is temporarily unavailable",
+        retry_after: int | None = None,
+        **kwargs: Any,
+    ) -> None:
+        headers = {}
+        if retry_after:
+            headers["Retry-After"] = str(retry_after)
+
+        super().__init__(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            title="Service Unavailable",
+            detail=detail,
+            type_suffix="service-unavailable",
+            headers=headers,
+            **kwargs,
+        )
+
+
 def create_problem_response(
     status_code: int,
     title: str,

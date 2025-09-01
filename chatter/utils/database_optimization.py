@@ -130,7 +130,7 @@ class QueryOptimizer:
             Optimized query with eager loading
         """
         if include_user:
-            query = query.options(joinedload(Document.user))
+            query = query.options(joinedload(Document.owner))
 
         if include_chunks:
             # Use selectinload for potentially large chunk collections

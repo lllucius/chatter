@@ -146,7 +146,7 @@ class PGVectorStore(AbstractVectorStore):
             self._store = PGVector(
                 embeddings=self.embeddings,
                 collection_name=self.collection_name,
-                connection_string=self.connection_string,
+                connection=self.connection_string,
                 use_jsonb=True,
             )
             logger.info(

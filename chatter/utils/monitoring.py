@@ -447,8 +447,8 @@ class AdvancedMetricsCollector:
     def get_overall_stats(self, window_minutes: int = 60) -> dict[str, Any]:
         """Get overall system statistics."""
         return {
-            "request_count": sum(stats.request_count for stats in self.endpoint_stats.values()),
-            "error_count": sum(stats.error_count for stats in self.endpoint_stats.values()),
+            "request_count": sum(stats.request_count for stats in self.stats_by_endpoint.values()),
+            "error_count": sum(stats.error_count for stats in self.stats_by_endpoint.values()),
             "average_response_time": 0.0,  # Would calculate from actual data
             "throughput": 0.0,  # Requests per minute
             "window_minutes": window_minutes,

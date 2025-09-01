@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, TypeVar
+from typing import Any, Callable, TypeVar
 
 from chatter.utils.logging import get_logger
 
@@ -17,7 +17,7 @@ class DependencyContainer:
     def __init__(self):
         """Initialize the dependency container."""
         self._services: dict[str, Any] = {}
-        self._factories: dict[str, callable] = {}
+        self._factories: dict[str, Callable] = {}
         self._singletons: dict[str, Any] = {}
         self._lazy_loaders: dict[str, callable] = {}
 
@@ -32,7 +32,7 @@ class DependencyContainer:
         self._singletons[key] = instance
         logger.debug(f"Registered singleton: {key}")
 
-    def register_factory(self, service_type: type[T], factory: callable[[], T]) -> None:
+    def register_factory(self, service_type: type[T], factory: Callable[[], T]) -> None:
         """Register a factory function for creating service instances.
 
         Args:

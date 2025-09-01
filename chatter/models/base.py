@@ -40,7 +40,7 @@ class Base(DeclarativeBase):
     - created_at / updated_at timestamps
     """
 
-    @declared_attr.directive
+    @declared_attr.directive  # pylint: disable=no-self-argument
     def __tablename__(cls) -> str:
         """Generate table name from class name using snake_case and plural form."""
         # Convert CamelCase to snake_case

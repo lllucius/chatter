@@ -758,7 +758,8 @@ class DocumentService:
                 return False
             
             # Trigger reprocessing (similar to process_document but for existing docs)
-            await self.process_document(document_id, user_id)
+            processing_request = DocumentProcessingRequest(reprocess=True)
+            await self.process_document(document_id, user_id, processing_request)
             return True
         except Exception as e:
             logger.error(

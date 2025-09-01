@@ -712,11 +712,18 @@ class AnalyticsService:
             )
 
             processing_stats = processing_result.first()
-            avg_processing_time = float(processing_stats[0] or 0)
-            processed_docs = processing_stats[1] or 0
-            total_docs = processing_stats[2] or 0
-            total_chunks = processing_stats[3] or 0
-            avg_chunks = float(processing_stats[4] or 0)
+            if processing_stats:
+                avg_processing_time = float(processing_stats[0] or 0)
+                processed_docs = processing_stats[1] or 0
+                total_docs = processing_stats[2] or 0
+                total_chunks = processing_stats[3] or 0
+                avg_chunks = float(processing_stats[4] or 0)
+            else:
+                avg_processing_time = 0.0
+                processed_docs = 0
+                total_docs = 0
+                total_chunks = 0
+                avg_chunks = 0.0
 
             processing_success_rate = (
                 processed_docs / total_docs if total_docs > 0 else 0
@@ -731,8 +738,12 @@ class AnalyticsService:
             )
 
             storage_stats = storage_result.first()
-            total_storage = storage_stats[0] or 0
-            avg_size = float(storage_stats[1] or 0)
+            if storage_stats:
+                total_storage = storage_stats[0] or 0
+                avg_size = float(storage_stats[1] or 0)
+            else:
+                total_storage = 0
+                avg_size = 0.0
 
             # Storage by type
             storage_by_type_result = await self.session.execute(
@@ -756,8 +767,12 @@ class AnalyticsService:
             )
 
             search_stats = search_result.first()
-            total_searches = search_stats[0] or 0
-            total_views = search_stats[1] or 0
+            if search_stats:
+                total_searches = search_stats[0] or 0
+                total_views = search_stats[1] or 0
+            else:
+                total_searches = 0
+                total_views = 0
 
             # Most viewed documents
             most_viewed_result = await self.session.execute(
@@ -834,10 +849,16 @@ class AnalyticsService:
             )
 
             user_stats = user_activity_result.first()
-            total_users = user_stats[0] or 0
-            active_users_today = user_stats[1] or 0
-            active_users_week = user_stats[2] or 0
-            active_users_month = user_stats[3] or 0
+            if user_stats:
+                total_users = user_stats[0] or 0
+                active_users_today = user_stats[1] or 0
+                active_users_week = user_stats[2] or 0
+                active_users_month = user_stats[3] or 0
+            else:
+                total_users = 0
+                active_users_today = 0
+                active_users_week = 0
+                active_users_month = 0
 
             # System health (placeholder values)
             system_health = {

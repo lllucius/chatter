@@ -13,16 +13,13 @@ from starlette.responses import Response
 from chatter.schemas.utilities import ValidationRule
 from chatter.utils.validation import (
     InputValidator,
-    ValidationMiddleware,
     sanitize_filename,
     sanitize_html,
-    validate_api_key_format,
-    validate_email_format,
+    validate_email,
     validate_file_size,
     validate_file_type,
-    validate_json_structure,
-    validate_url_format,
-    validate_username_format,
+    validate_json_schema,
+    validate_url,
 )
 
 

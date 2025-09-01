@@ -4,8 +4,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from chatter.core.exceptions import EmbeddingError
-from chatter.services.embeddings import EmbeddingsService
+from chatter.services.embeddings import EmbeddingError, EmbeddingService
 
 
 @pytest.mark.unit
@@ -15,7 +14,7 @@ class TestEmbeddingsService:
     def setup_method(self):
         """Set up test fixtures."""
         self.mock_session = AsyncMock()
-        self.embeddings_service = EmbeddingsService(self.mock_session)
+        self.embeddings_service = EmbeddingService(self.mock_session)
 
     @pytest.mark.asyncio
     async def test_generate_text_embedding_success(self):
@@ -308,7 +307,7 @@ class TestEmbeddingsServiceIntegration:
     def setup_method(self):
         """Set up test fixtures."""
         self.mock_session = AsyncMock()
-        self.embeddings_service = EmbeddingsService(self.mock_session)
+        self.embeddings_service = EmbeddingService(self.mock_session)
 
     @pytest.mark.asyncio
     async def test_document_embedding_workflow(self):
@@ -369,7 +368,7 @@ class TestEmbeddingsServiceHelpers:
     def setup_method(self):
         """Set up test fixtures."""
         self.mock_session = AsyncMock()
-        self.embeddings_service = EmbeddingsService(self.mock_session)
+        self.embeddings_service = EmbeddingService(self.mock_session)
 
     def test_text_preprocessing(self):
         """Test text preprocessing functionality."""

@@ -455,11 +455,17 @@ class AgentManager:
     def __init__(self):
         """Initialize the agent manager."""
         self.agents: dict[str, BaseAgent] = {}
+        self.registry = AgentRegistry()
         self.agent_classes: dict[AgentType, type[BaseAgent]] = {
             AgentType.CONVERSATIONAL: ConversationalAgent,
             AgentType.TASK_ORIENTED: TaskOrientedAgent,
+            AgentType.SPECIALIST: SpecializedAgent,
             # Add more agent types as needed
         }
+        
+        # Register agent types in the registry
+        for agent_type, agent_class in self.agent_classes.items():
+            self.registry.register_agent_type(agent_type.value, agent_class)
 
     async def create_agent(
         self,
@@ -669,6 +675,216 @@ class AgentManager:
             "agent_types": agent_types,
             "total_interactions": total_interactions,
         }
+
+
+class AgentRegistry:
+    """Registry for managing agent types and instances."""
+
+    def __init__(self):
+        """Initialize the agent registry."""
+        self.agent_types: dict[str, type[BaseAgent]] = {}
+        self.agent_instances: dict[str, BaseAgent] = {}
+
+    def register_agent_type(self, name: str, agent_class: type[BaseAgent]) -> None:
+        """Register an agent type.
+        
+        Args:
+            name: Name of the agent type
+            agent_class: Agent class to register
+        """
+        self.agent_types[name] = agent_class
+
+    def get_agent_type(self, name: str) -> type[BaseAgent] | None:
+        """Get an agent type by name.
+        
+        Args:
+            name: Name of the agent type
+            
+        Returns:
+            Agent class or None if not found
+        """
+        return self.agent_types.get(name)
+
+    def list_agent_types(self) -> list[str]:
+        """List all registered agent types.
+        
+        Returns:
+            List of agent type names
+        """
+        return list(self.agent_types.keys())
+
+
+class AgentExecutor:
+    """Executor for running agent tasks."""
+
+    def __init__(self):
+        """Initialize the agent executor."""
+        self.active_tasks: dict[str, Any] = {}
+
+    async def execute_agent_task(
+        self,
+        agent: BaseAgent,
+        task: str,
+        context: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Execute a task with an agent.
+        
+        Args:
+            agent: The agent to execute the task
+            task: Task description
+            context: Optional context for the task
+            
+        Returns:
+            Task execution result
+        """
+        task_id = f"task_{len(self.active_tasks)}"
+        self.active_tasks[task_id] = {
+            "agent": agent,
+            "task": task,
+            "context": context or {},
+            "status": "running"
+        }
+
+        try:
+            # Execute the task through the agent
+            result = await agent.process_message(task, context or {})
+            self.active_tasks[task_id]["status"] = "completed"
+            self.active_tasks[task_id]["result"] = result
+            return {
+                "task_id": task_id,
+                "status": "completed",
+                "result": result
+            }
+        except Exception as e:
+            self.active_tasks[task_id]["status"] = "failed"
+            self.active_tasks[task_id]["error"] = str(e)
+            raise
+
+    def get_task_status(self, task_id: str) -> dict[str, Any] | None:
+        """Get the status of a task.
+        
+        Args:
+            task_id: ID of the task
+            
+        Returns:
+            Task status or None if not found
+        """
+        return self.active_tasks.get(task_id)
+
+
+class SpecializedAgent(BaseAgent):
+    """Specialized agent with domain expertise."""
+
+    def __init__(self, profile: AgentProfile, llm: BaseChatModel):
+        """Initialize the specialized agent.
+        
+        Args:
+            profile: Agent profile and configuration
+            llm: Language model instance
+        """
+        super().__init__(profile, llm)
+        self.specialization = getattr(profile, 'specialization', 'general')
+        self.domain_knowledge: dict[str, Any] = {}
+
+    async def process_message(
+        self,
+        message: str,
+        context: dict[str, Any] | None = None,
+        user_id: str | None = None,
+    ) -> dict[str, Any]:
+        """Process a message with specialized domain knowledge.
+        
+        Args:
+            message: Input message to process
+            context: Additional context for processing
+            user_id: Optional user identifier
+            
+        Returns:
+            Processing result with specialized insights
+        """
+        context = context or {}
+        
+        # Add specialized context
+        specialized_context = {
+            **context,
+            "specialization": self.specialization,
+            "domain_knowledge": self.domain_knowledge
+        }
+        
+        # Build specialized system message
+        system_message = SystemMessage(
+            content=f"{self.profile.system_message}\n"
+                   f"You are specialized in: {self.specialization}"
+        )
+        
+        # Create messages for processing
+        messages = [
+            system_message,
+            HumanMessage(content=message)
+        ]
+        
+        try:
+            # Process with LLM
+            response = await self.llm.ainvoke(messages)
+            
+            # Calculate confidence based on specialization match
+            confidence = self._calculate_specialized_confidence(message, specialized_context)
+            
+            # Create interaction record
+            interaction = AgentInteraction(
+                id=f"interaction_{len(self.conversation_history.get(user_id or 'default', []))}",
+                agent_id=self.profile.id,
+                user_id=user_id or "default",
+                message=message,
+                response=response.content,
+                confidence_score=confidence,
+                context=specialized_context,
+                timestamp=datetime.now(UTC),
+            )
+            
+            # Store interaction
+            if user_id:
+                if user_id not in self.conversation_history:
+                    self.conversation_history[user_id] = []
+                self.conversation_history[user_id].append(interaction)
+            
+            # Update metrics
+            self.performance_metrics["total_interactions"] += 1
+            
+            return {
+                "response": response.content,
+                "confidence": confidence,
+                "specialization": self.specialization,
+                "interaction_id": interaction.id,
+            }
+            
+        except Exception as e:
+            logger.error(f"Error processing message: {e}")
+            raise
+    
+    def _calculate_specialized_confidence(
+        self, 
+        message: str, 
+        context: dict[str, Any]
+    ) -> float:
+        """Calculate confidence score based on specialization match.
+        
+        Args:
+            message: Input message
+            context: Processing context
+            
+        Returns:
+            Confidence score between 0.0 and 1.0
+        """
+        # Simple specialization-based confidence calculation
+        base_confidence = 0.7
+        
+        # Boost confidence if message matches specialization
+        if self.specialization.lower() in message.lower():
+            base_confidence += 0.2
+            
+        # Cap at 1.0
+        return min(base_confidence, 1.0)
 
 
 # Global agent manager instance

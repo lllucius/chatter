@@ -162,6 +162,30 @@ class TestCLICommands:
         assert result.exit_code == 0
         assert "Documentation and SDK generation commands" in result.stdout
 
+    def test_docs_generate_help(self):
+        """Test docs generate command help."""
+        result = self.runner.invoke(app, ["docs", "generate", "--help"])
+        assert result.exit_code == 0
+        assert "Generate OpenAPI documentation" in result.stdout
+        assert "--clean" in result.stdout
+
+    def test_docs_sdk_help(self):
+        """Test docs sdk command help."""
+        result = self.runner.invoke(app, ["docs", "sdk", "--help"])
+        assert result.exit_code == 0
+        assert "Generate SDK from OpenAPI specification" in result.stdout
+        assert "python, typescript, or all" in result.stdout
+        assert "--clean" in result.stdout
+
+    def test_docs_workflow_help(self):
+        """Test docs workflow command help."""
+        result = self.runner.invoke(app, ["docs", "workflow", "--help"])
+        assert result.exit_code == 0
+        assert "Run the complete documentation and SDK generation workflow" in result.stdout
+        assert "--python-only" in result.stdout
+        assert "--typescript-only" in result.stdout
+        assert "--clean" in result.stdout
+
     def test_profiles_command_help(self):
         """Test profiles command help."""
         result = self.runner.invoke(app, ["profiles", "--help"])

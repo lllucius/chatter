@@ -251,10 +251,16 @@ class AnalyticsService:
             )
 
             usage_totals = total_usage_result.first()
-            total_prompt_tokens = usage_totals[0] or 0
-            total_completion_tokens = usage_totals[1] or 0
-            total_tokens = usage_totals[2] or 0
-            total_cost = float(usage_totals[3] or 0)
+            if usage_totals:
+                total_prompt_tokens = usage_totals[0] or 0
+                total_completion_tokens = usage_totals[1] or 0
+                total_tokens = usage_totals[2] or 0
+                total_cost = float(usage_totals[3] or 0)
+            else:
+                total_prompt_tokens = 0
+                total_completion_tokens = 0
+                total_tokens = 0
+                total_cost = 0.0
 
             # Usage by model
             model_usage_result = await self.session.execute(
@@ -404,9 +410,14 @@ class AnalyticsService:
             )
 
             activity_stats = activity_result.first()
-            active_days = activity_stats[0] or 0
-            peak_usage_hour = int(activity_stats[1] or 0)
-            conversations_per_day = float(activity_stats[2] or 0)
+            if activity_stats:
+                active_days = activity_stats[0] or 0
+                peak_usage_hour = int(activity_stats[1] or 0)
+                conversations_per_day = float(activity_stats[2] or 0)
+            else:
+                active_days = 0
+                peak_usage_hour = 0
+                conversations_per_day = 0.0
 
             return {
                 "total_prompt_tokens": total_prompt_tokens,

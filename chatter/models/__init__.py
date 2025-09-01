@@ -6,7 +6,7 @@ from chatter.models.analytics import (
     ProfileStats,
     PromptStats,
 )
-from chatter.models.conversation import Conversation, Message
+from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from chatter.models.document import Document, DocumentChunk
 from chatter.models.profile import Profile
 from chatter.models.prompt import Prompt
@@ -25,7 +25,9 @@ from chatter.models.user import User
 __all__ = [
     "User",
     "Conversation",
-    "Message",
+    "ConversationStatus",
+    "Message", 
+    "MessageRole",
     "Document",
     "DocumentChunk",
     "Profile",

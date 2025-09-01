@@ -8,8 +8,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.models.agent import Agent
-from chatter.models.conversation import Conversation, ConversationStatus
-from chatter.models.message import Message, MessageRole
+from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from chatter.models.user import User
 from chatter.services.chat import ChatService
 

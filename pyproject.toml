@@ -46,7 +46,7 @@ dependencies = [
     "asyncpg==0.30.0",
     "alembic==1.16.5",
     "psycopg2-binary==2.9.10",
-    "pgvector==0.4.1",
+    "pgvector>=0.2.5,<0.4",
     "langchain==0.3.27",
     "langchain-community==0.3.29",
     "langchain-core==0.3.75",

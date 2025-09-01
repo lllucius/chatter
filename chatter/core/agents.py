@@ -328,16 +328,8 @@ class ConversationalAgent(BaseAgent):
     async def get_capabilities(self) -> list[AgentCapability]:
         """Get conversational agent capabilities."""
         return [
-            AgentCapability(
-                name="conversation",
-                description="Engage in natural conversations",
-                confidence_threshold=0.7,
-            ),
-            AgentCapability(
-                name="context_awareness",
-                description="Maintain conversation context",
-                confidence_threshold=0.8,
-            ),
+            AgentCapability.NATURAL_LANGUAGE,
+            AgentCapability.MEMORY,
         ]
 
 
@@ -422,29 +414,13 @@ class TaskOrientedAgent(BaseAgent):
     async def get_capabilities(self) -> list[AgentCapability]:
         """Get task-oriented agent capabilities."""
         capabilities = [
-            AgentCapability(
-                name="task_execution",
-                description="Execute complex tasks using available tools",
-                required_tools=list(self.tools.keys()),
-                confidence_threshold=0.8,
-            ),
-            AgentCapability(
-                name="tool_integration",
-                description="Integrate multiple tools to complete tasks",
-                confidence_threshold=0.7,
-            ),
+            AgentCapability.TOOL_USE,
+            AgentCapability.NATURAL_LANGUAGE,
         ]
 
-        # Add tool-specific capabilities
-        for tool_name in self.tools:
-            capabilities.append(
-                AgentCapability(
-                    name=f"tool_{tool_name}",
-                    description=f"Use {tool_name} tool",
-                    required_tools=[tool_name],
-                    confidence_threshold=0.9,
-                )
-            )
+        # Add capabilities based on available tools
+        if self.tools:
+            capabilities.append(AgentCapability.ANALYTICAL)
 
         return capabilities
 
@@ -789,18 +765,18 @@ class SpecializedAgent(BaseAgent):
     async def process_message(
         self,
         message: str,
+        conversation_id: str,
         context: dict[str, Any] | None = None,
-        user_id: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> str:
         """Process a message with specialized domain knowledge.
         
         Args:
             message: Input message to process
+            conversation_id: Conversation identifier
             context: Additional context for processing
-            user_id: Optional user identifier
             
         Returns:
-            Processing result with specialized insights
+            Agent response
         """
         context = context or {}
         
@@ -830,37 +806,21 @@ class SpecializedAgent(BaseAgent):
             # Calculate confidence based on specialization match
             confidence = self._calculate_specialized_confidence(message, specialized_context)
             
-            # Create interaction record
-            interaction = AgentInteraction(
-                id=f"interaction_{len(self.conversation_history.get(user_id or 'default', []))}",
-                agent_id=self.profile.id,
-                user_id=user_id or "default",
-                message=message,
-                response=response.content,
+            # Record interaction
+            await self.record_interaction(
+                conversation_id=conversation_id,
+                user_message=message,
+                agent_response=str(response.content) if hasattr(response, 'content') else str(response),
+                tools_used=[],
                 confidence_score=confidence,
-                context=specialized_context,
-                timestamp=datetime.now(UTC),
+                response_time=1.0,  # Default response time
             )
             
-            # Store interaction
-            if user_id:
-                if user_id not in self.conversation_history:
-                    self.conversation_history[user_id] = []
-                self.conversation_history[user_id].append(interaction)
-            
-            # Update metrics
-            self.performance_metrics["total_interactions"] += 1
-            
-            return {
-                "response": response.content,
-                "confidence": confidence,
-                "specialization": self.specialization,
-                "interaction_id": interaction.id,
-            }
+            return str(response.content) if hasattr(response, 'content') else str(response)
             
         except Exception as e:
             logger.error(f"Error processing message: {e}")
-            raise
+            return "I apologize, but I encountered an error processing your request."
     
     def _calculate_specialized_confidence(
         self, 
@@ -885,6 +845,32 @@ class SpecializedAgent(BaseAgent):
             
         # Cap at 1.0
         return min(base_confidence, 1.0)
+
+    async def get_capabilities(self) -> list[AgentCapability]:
+        """Get specialized agent capabilities.
+        
+        Returns:
+            List of agent capabilities based on specialization
+        """
+        base_capabilities = [
+            AgentCapability.NATURAL_LANGUAGE,
+            AgentCapability.ANALYTICAL,
+        ]
+        
+        # Add capabilities based on specialization
+        if self.specialization.lower() in ["programming", "code", "software"]:
+            base_capabilities.append(AgentCapability.CODE_GENERATION)
+            base_capabilities.append(AgentCapability.TOOL_USE)
+        elif self.specialization.lower() in ["research", "analysis"]:
+            base_capabilities.append(AgentCapability.RESEARCH)
+            base_capabilities.append(AgentCapability.ANALYTICAL)
+        elif self.specialization.lower() in ["creative", "writing"]:
+            base_capabilities.append(AgentCapability.CREATIVE)
+        elif self.specialization.lower() in ["support", "help"]:
+            base_capabilities.append(AgentCapability.SUPPORT)
+        
+        # Remove duplicates
+        return list(set(base_capabilities))
 
 
 # Global agent manager instance

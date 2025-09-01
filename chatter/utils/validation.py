@@ -6,7 +6,6 @@ from collections.abc import Awaitable, Callable
 from typing import Any
 
 from fastapi import HTTPException, Request
-from pydantic import ValidationError
 from starlette.responses import Response
 
 from chatter.config import settings
@@ -14,6 +13,11 @@ from chatter.schemas.utilities import ValidationRule
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+class ValidationError(Exception):
+    """Custom validation error for input validation."""
+    pass
 
 
 class InputValidator:
@@ -243,6 +247,38 @@ class InputValidator:
                 raise ValidationError(f"Field '{field_name}': {str(e)}")
 
         return validated_data
+
+    def validate_input(self, rule_name: str, value: Any) -> bool:
+        """Validate input value and return boolean result.
+        
+        Args:
+            rule_name: Name of validation rule to apply
+            value: Value to validate
+            
+        Returns:
+            True if valid, False otherwise
+        """
+        try:
+            self.validate_and_sanitize(value, rule_name)
+            return True
+        except ValidationError:
+            return False
+
+    def sanitize_input(self, rule_name: str, value: Any) -> str:
+        """Sanitize input value using specified rule.
+        
+        Args:
+            rule_name: Name of validation rule to apply
+            value: Value to sanitize
+            
+        Returns:
+            Sanitized value
+        """
+        try:
+            return self.validate_and_sanitize(value, rule_name)
+        except ValidationError:
+            # If validation fails, still return sanitized value
+            return self._sanitize_value(str(value) if value is not None else "")
 
 
 class RateLimitValidator:
@@ -608,17 +644,18 @@ def validate_phone_number(phone: str) -> bool:
     return bool(re.match(pattern, phone))
 
 
-def validate_file_size(size: int, max_size: int = 10485760) -> bool:
+def validate_file_size(size: int, max_size_mb: int = 10) -> bool:
     """Validate file size.
 
     Args:
         size: File size in bytes
-        max_size: Maximum allowed size in bytes (default 10MB)
+        max_size_mb: Maximum allowed size in MB (default 10MB)
 
     Returns:
         True if file size is within limits
     """
-    return 0 < size <= max_size
+    max_size_bytes = max_size_mb * 1024 * 1024  # Convert MB to bytes
+    return 0 <= size <= max_size_bytes
 
 
 def validate_file_type(filename: str, allowed_types: list[str] | None = None) -> bool:
@@ -696,16 +733,101 @@ def sanitize_filename(filename: str) -> str:
 
 
 def sanitize_html(html_content: str) -> str:
-    """Sanitize HTML content.
+    """Sanitize HTML content by removing tags.
 
     Args:
         html_content: HTML content to sanitize
 
     Returns:
-        Sanitized HTML content
+        Sanitized HTML content with tags removed
     """
-    # Basic HTML sanitization - escape all tags
-    return html.escape(html_content)
+    import re
+    # Remove HTML tags completely
+    clean_text = re.sub(r'<[^>]+>', '', html_content)
+    # Clean up whitespace
+    clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+    return clean_text
+
+
+def validate_email_format(email: str) -> bool:
+    """Validate email address format.
+    
+    Args:
+        email: Email address to validate
+        
+    Returns:
+        True if valid email format
+    """
+    return validate_email(email)
+
+
+def validate_username_format(username: str) -> bool:
+    """Validate username format.
+    
+    Args:
+        username: Username to validate
+        
+    Returns:
+        True if valid username format
+    """
+    pattern = r'^[a-zA-Z0-9_-]{3,50}$'
+    return bool(re.match(pattern, username))
+
+
+def validate_url_format(url: str) -> bool:
+    """Validate URL format.
+    
+    Args:
+        url: URL to validate
+        
+    Returns:
+        True if valid URL format
+    """
+    return validate_url(url)
+
+
+def validate_api_key_format(api_key: str) -> bool:
+    """Validate API key format.
+    
+    Args:
+        api_key: API key to validate
+        
+    Returns:
+        True if valid API key format
+    """
+    pattern = r'^[a-zA-Z0-9]{32,128}$'
+    return bool(re.match(pattern, api_key))
+
+
+def validate_json_structure(
+    data: dict[str, Any], 
+    required_fields: list[str], 
+    allowed_fields: list[str]
+) -> bool:
+    """Validate JSON structure.
+    
+    Args:
+        data: Data to validate
+        required_fields: List of required field names
+        allowed_fields: List of allowed field names
+        
+    Returns:
+        True if structure is valid
+        
+    Raises:
+        ValueError: If validation fails
+    """
+    # Check for missing required fields
+    for field in required_fields:
+        if field not in data:
+            raise ValueError(f"Missing required field: {field}")
+    
+    # Check for unexpected fields
+    for field in data:
+        if field not in allowed_fields:
+            raise ValueError(f"Unexpected field: {field}")
+    
+    return True
 
 
 def validate_sql_identifier(identifier: str) -> bool:

@@ -14,9 +14,13 @@ from chatter.utils.problem import (
     ConflictProblem,
     InternalServerProblem,
     ServiceUnavailableProblem,
-    TooManyRequestsProblem,
+    RateLimitProblem,  # Changed from TooManyRequestsProblem
+    BadRequestProblem,
+    UnauthorizedProblem,
+    ForbiddenProblem,
+    ProblemDetailResponse,
     create_problem_response,
-    problem_detail_handler,
+    create_problem_detail,
 )
 from chatter.schemas.utilities import ProblemDetail
 
@@ -217,10 +221,10 @@ class TestSpecificProblemExceptions:
         assert exception.detail == "Service temporarily unavailable"
         assert exception.extra_fields["retry_after"] == 60
 
-    def test_too_many_requests_problem(self):
-        """Test TooManyRequestsProblem."""
+    def test_rate_limit_problem(self):
+        """Test RateLimitProblem."""
         # Arrange & Act
-        exception = TooManyRequestsProblem(
+        exception = RateLimitProblem(
             detail="Rate limit exceeded",
             retry_after=120,
             limit=100,
@@ -229,7 +233,7 @@ class TestSpecificProblemExceptions:
 
         # Assert
         assert exception.status_code == 429
-        assert exception.title == "Too Many Requests"
+        assert exception.title == "Rate Limited"
         assert exception.detail == "Rate limit exceeded"
         assert exception.extra_fields["retry_after"] == 120
         assert exception.extra_fields["limit"] == 100
@@ -279,62 +283,23 @@ class TestProblemUtilities:
         assert response.headers["content-type"] == "application/problem+json"
         assert response.headers["Retry-After"] == "60"
 
-    @pytest.mark.asyncio
-    async def test_problem_detail_handler_with_problem_exception(self):
-        """Test problem detail handler with ProblemException."""
+    def test_problem_exception_to_response(self):
+        """Test ProblemException.to_response method."""
         # Arrange
         request = Mock(spec=Request)
         request.url.path = "/api/test"
         
         exception = ValidationProblem(
             detail="Validation failed",
-            errors=["field is required"]
+            validation_errors=[{"field": "name", "message": "required"}]
         )
 
         # Act
-        response = await problem_detail_handler(request, exception)
+        response = exception.to_response(request)
 
         # Assert
         assert isinstance(response, JSONResponse)
         assert response.status_code == 422
-        assert response.headers["content-type"] == "application/problem+json"
-
-    @pytest.mark.asyncio
-    async def test_problem_detail_handler_with_http_exception(self):
-        """Test problem detail handler with regular HTTPException."""
-        # Arrange
-        request = Mock(spec=Request)
-        request.url.path = "/api/test"
-        
-        from fastapi import HTTPException
-        exception = HTTPException(
-            status_code=400,
-            detail="Bad request"
-        )
-
-        # Act
-        response = await problem_detail_handler(request, exception)
-
-        # Assert
-        assert isinstance(response, JSONResponse)
-        assert response.status_code == 400
-        assert response.headers["content-type"] == "application/problem+json"
-
-    @pytest.mark.asyncio
-    async def test_problem_detail_handler_with_generic_exception(self):
-        """Test problem detail handler with generic exception."""
-        # Arrange
-        request = Mock(spec=Request)
-        request.url.path = "/api/test"
-        
-        exception = ValueError("Something went wrong")
-
-        # Act
-        response = await problem_detail_handler(request, exception)
-
-        # Assert
-        assert isinstance(response, JSONResponse)
-        assert response.status_code == 500
         assert response.headers["content-type"] == "application/problem+json"
 
 
@@ -377,7 +342,7 @@ class TestProblemIntegration:
     def test_problem_response_headers(self):
         """Test problem response headers."""
         # Arrange
-        exception = TooManyRequestsProblem(
+        exception = RateLimitProblem(
             detail="Rate limit exceeded",
             retry_after=60
         )

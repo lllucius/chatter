@@ -637,6 +637,158 @@ class DocumentProcessingService:
                 "pypdf_available": PYPDF_AVAILABLE,
             }
 
+    async def get_user_documents(
+        self, 
+        user_id: str, 
+        offset: int = 0, 
+        limit: int = 50
+    ) -> list[Document]:
+        """Get documents for a specific user.
+        
+        Args:
+            user_id: User identifier
+            offset: Number of documents to skip
+            limit: Maximum number of documents to return
+            
+        Returns:
+            List of user documents
+        """
+        try:
+            result = await self.session.execute(
+                select(Document)
+                .where(Document.owner_id == user_id)
+                .offset(offset)
+                .limit(limit)
+                .order_by(Document.created_at.desc())
+            )
+            return list(result.scalars().all())
+        except Exception as e:
+            logger.error("Failed to get user documents", user_id=user_id, error=str(e))
+            return []
+
+    async def get_document(self, document_id: str, user_id: str | None = None) -> Document | None:
+        """Get a document by ID.
+        
+        Args:
+            document_id: Document identifier
+            user_id: Optional user identifier for ownership check
+            
+        Returns:
+            Document or None if not found
+        """
+        try:
+            query = select(Document).where(Document.id == document_id)
+            if user_id:
+                query = query.where(Document.owner_id == user_id)
+                
+            result = await self.session.execute(query)
+            return result.scalar_one_or_none()
+        except Exception as e:
+            logger.error("Failed to get document", document_id=document_id, error=str(e))
+            return None
+
+    async def update_document(
+        self, 
+        document_id: str, 
+        updates: dict[str, Any], 
+        user_id: str | None = None
+    ) -> Document | None:
+        """Update a document.
+        
+        Args:
+            document_id: Document identifier
+            updates: Updates to apply
+            user_id: Optional user identifier for ownership check
+            
+        Returns:
+            Updated document or None if not found
+        """
+        try:
+            document = await self.get_document(document_id, user_id)
+            if not document:
+                return None
+                
+            for key, value in updates.items():
+                if hasattr(document, key):
+                    setattr(document, key, value)
+                    
+            document.updated_at = datetime.now(UTC)
+            await self.session.commit()
+            await self.session.refresh(document)
+            
+            logger.info("Document updated", document_id=document_id)
+            return document
+        except Exception as e:
+            await self.session.rollback()
+            logger.error("Failed to update document", document_id=document_id, error=str(e))
+            return None
+
+    async def delete_document(self, document_id: str, user_id: str | None = None) -> bool:
+        """Delete a document.
+        
+        Args:
+            document_id: Document identifier
+            user_id: Optional user identifier for ownership check
+            
+        Returns:
+            True if deleted, False if not found
+        """
+        try:
+            document = await self.get_document(document_id, user_id)
+            if not document:
+                return False
+                
+            await self.session.delete(document)
+            await self.session.commit()
+            
+            logger.info("Document deleted", document_id=document_id)
+            return True
+        except Exception as e:
+            await self.session.rollback()
+            logger.error("Failed to delete document", document_id=document_id, error=str(e))
+            return False
+
+    async def search_documents(
+        self,
+        query: str,
+        user_id: str | None = None,
+        document_type: str | None = None,
+        limit: int = 10
+    ) -> list[Document]:
+        """Search documents.
+        
+        Args:
+            query: Search query
+            user_id: Optional user identifier to filter by owner
+            document_type: Optional document type filter
+            limit: Maximum number of results
+            
+        Returns:
+            List of matching documents
+        """
+        try:
+            # Build query conditions
+            conditions = []
+            if user_id:
+                conditions.append(Document.owner_id == user_id)
+            if document_type:
+                conditions.append(Document.document_type == document_type)
+                
+            # Simple text search in filename and extracted text
+            search_condition = Document.filename.ilike(f"%{query}%")
+            if hasattr(Document, 'extracted_text'):
+                search_condition = search_condition | Document.extracted_text.ilike(f"%{query}%")
+            conditions.append(search_condition)
+            
+            # Execute query
+            db_query = select(Document).where(and_(*conditions)).limit(limit)
+            result = await self.session.execute(db_query)
+            
+            return list(result.scalars().all())
+        except Exception as e:
+            logger.error("Failed to search documents", query=query, error=str(e))
+            return []
+
 
 class DocumentProcessingError(Exception):
     """Document processing error."""

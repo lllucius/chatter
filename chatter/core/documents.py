@@ -887,8 +887,13 @@ class DocumentProcessor:
 class DocumentSearchEngine:
     """Search engine for finding documents."""
 
-    def __init__(self):
-        """Initialize the document search engine."""
+    def __init__(self, session: AsyncSession | None = None):
+        """Initialize the document search engine.
+        
+        Args:
+            session: Optional database session for advanced search
+        """
+        self.session = session
         self.indexed_documents: dict[str, dict[str, Any]] = {}
         self.search_index: dict[str, set[str]] = {}
 

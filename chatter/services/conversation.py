@@ -167,7 +167,7 @@ class ConversationService:
         """
         try:
             conversations = await get_user_conversations_optimized(
-                self.session, user_id, limit, offset, sort_field, sort_order
+                self.session, user_id, limit, offset
             )
 
             logger.debug(
@@ -324,7 +324,7 @@ class ConversationService:
         """
         try:
             conversations = await self.query_service.search_conversations(
-                user_id, search_term, limit, offset
+                user_id, search_term, limit
             )
 
             logger.debug(

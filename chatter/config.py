@@ -415,7 +415,7 @@ class Settings(BaseSettings):
             extra = "ignore"
 
     @model_validator(mode='after')
-    def validate_configuration(cls, values) -> dict:
+    def validate_configuration(self, values) -> dict:
         """Validate configuration for security and production readiness."""
         if PYDANTIC_V2:
             # In v2, 'self' is the instance

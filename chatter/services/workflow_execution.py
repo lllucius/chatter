@@ -75,14 +75,15 @@ class WorkflowExecutionService:
 
         try:
             # Validate workflow configuration
-            if not self.validator.validate_workflow_config(
-                workflow_type, chat_request.workflow_config or {}
-            ):
-                raise WorkflowExecutionError(f"Invalid workflow configuration for {workflow_type}")
+            self.validator.validate_workflow_parameters(
+                workflow_type, **(chat_request.workflow_config or {})
+            )
 
             # Check cache first
-            cache_key = self._get_cache_key(conversation.id, chat_request)
-            cached_result = await workflow_cache.get(cache_key)
+            # TODO: Implement proper workflow result caching
+            # cache_key = self._get_cache_key(conversation.id, chat_request)
+            # cached_result = await workflow_cache.get(cache_key)
+            cached_result = None
 
             if cached_result:
                 logger.debug(
@@ -107,28 +108,31 @@ class WorkflowExecutionService:
                 return cached_result
 
             # Execute workflow based on type
-            with performance_monitor.track_operation(f"workflow_{workflow_type}"):
-                if workflow_type == "plain":
-                    result = await self._execute_plain_workflow(
-                        conversation, chat_request, correlation_id
-                    )
-                elif workflow_type == "rag":
-                    result = await self._execute_rag_workflow(
-                        conversation, chat_request, correlation_id
-                    )
-                elif workflow_type == "tools":
-                    result = await self._execute_tools_workflow(
-                        conversation, chat_request, correlation_id
-                    )
-                elif workflow_type == "full":
-                    result = await self._execute_full_workflow(
-                        conversation, chat_request, correlation_id
-                    )
-                else:
-                    raise WorkflowExecutionError(f"Unknown workflow type: {workflow_type}")
+            workflow_execution_id = f"{correlation_id}_{workflow_type}"
+            performance_monitor.start_workflow(workflow_execution_id, workflow_type)
+            
+            if workflow_type == "plain":
+                result = await self._execute_plain_workflow(
+                    conversation, chat_request, correlation_id
+                )
+            elif workflow_type == "rag":
+                result = await self._execute_rag_workflow(
+                    conversation, chat_request, correlation_id
+                )
+            elif workflow_type == "tools":
+                result = await self._execute_tools_workflow(
+                    conversation, chat_request, correlation_id
+                )
+            elif workflow_type == "full":
+                result = await self._execute_full_workflow(
+                    conversation, chat_request, correlation_id
+                )
+            else:
+                raise WorkflowExecutionError(f"Unknown workflow type: {workflow_type}")
 
             # Cache the result
-            await workflow_cache.set(cache_key, result, ttl=300)  # 5 minutes
+            # TODO: Implement proper result caching with correct parameters
+            # await workflow_cache.set(cache_key, result, ttl=300)  # 5 minutes
 
             # Record successful execution metrics
             duration_ms = (time.time() - start_time) * 1000
@@ -173,6 +177,8 @@ class WorkflowExecutionService:
                 correlation_id=correlation_id
             )
             raise WorkflowExecutionError(f"Workflow execution failed: {e}")
+        finally:
+            performance_monitor.end_workflow(workflow_execution_id, success=True)
 
     async def execute_workflow_streaming(
         self,
@@ -201,10 +207,12 @@ class WorkflowExecutionService:
 
         try:
             # Validate workflow configuration
-            if not self.validator.validate_workflow_config(
-                workflow_type, chat_request.workflow_config or {}
-            ):
-                raise WorkflowExecutionError(f"Invalid workflow configuration for {workflow_type}")
+            try:
+                self.validator.validate_workflow_parameters(
+                    workflow_type, **(chat_request.workflow_config or {})
+                )
+            except Exception as e:
+                raise WorkflowExecutionError(f"Invalid workflow configuration for {workflow_type}: {e}")
 
             logger.info(
                 "Starting streaming workflow execution",
@@ -782,7 +790,7 @@ class WorkflowExecutionService:
     async def get_workflow_performance_stats(self) -> dict[str, Any]:
         """Get workflow performance statistics."""
         return {
-            "performance_monitor": performance_monitor.get_stats(),
+            "performance_monitor": performance_monitor.get_performance_stats(),
             "cache_stats": await workflow_cache.get_stats() if hasattr(workflow_cache, 'get_stats') else {},
             "template_stats": self.template_manager.get_stats() if hasattr(self.template_manager, 'get_stats') else {}
         }

@@ -41,7 +41,7 @@ class Base(DeclarativeBase):
     """
 
     @declared_attr.directive
-    def __tablename__(cls) -> str:
+    def __tablename__(cls) -> str:  # pylint: disable=E0213
         """Generate table name from class name using snake_case and plural form."""
         # Convert CamelCase to snake_case
         name = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", cls.__name__)

@@ -78,6 +78,28 @@ class ChatterBaseException(Exception):
         """Return the error message."""
         return self.message
 
+    def to_problem_detail(self):
+        """Convert to ProblemDetail format for RFC 9457 compliance."""
+        from chatter.utils.problem import create_problem_detail
+        
+        return create_problem_detail(
+            status=self.status_code,
+            title=self._get_error_title(),
+            detail=self.message,
+            type_=f"about:blank#{self.error_code.lower().replace('_', '-')}",
+            **self.details or {}
+        )
+
+    def _get_error_title(self) -> str:
+        """Get a human-readable error title."""
+        # Convert class name to title case
+        class_name = self.__class__.__name__
+        if class_name.endswith('Error'):
+            class_name = class_name[:-5]
+        # Add spaces before capitals
+        import re
+        return re.sub(r'([a-z])([A-Z])', r'\1 \2', class_name)
+
 
 # Alias for backward compatibility
 ChatterError = ChatterBaseException
@@ -185,7 +207,7 @@ class ConfigurationError(ChatterBaseException):
         """Get a safe version of the error message without sensitive data."""
         # Remove sensitive values from message
         safe_message = self.message
-        if hasattr(self, 'config_value') and self.config_value:
+        if hasattr(self, 'config_value') and getattr(self, 'config_value', None):
             safe_message = safe_message.replace(str(self.config_value), "***")
         return safe_message
 

@@ -41,12 +41,12 @@ except ImportError:
             "components": {"schemas": {}},
         }
     
-    def export_openapi_json(spec, path):
+    def export_openapi_json(spec: dict[str, Any], path: Path) -> None:
         """Export OpenAPI spec as JSON."""
         with open(path, 'w') as f:
             json.dump(spec, f, indent=2)
     
-    def export_openapi_yaml(spec, path):
+    def export_openapi_yaml(spec: dict[str, Any], path: Path) -> None:
         """Export OpenAPI spec as YAML."""
         import yaml
         with open(path, 'w') as f:
@@ -86,7 +86,7 @@ class APIClient:
             headers["Authorization"] = f"Bearer {self.access_token}"
         return headers
 
-    async def request(self, method: str, endpoint: str, **kwargs):
+    async def request(self, method: str, endpoint: str, **kwargs: Any) -> Any:
         """Make an HTTP request to the API."""
         url = f"{self.base_url}{settings.api_prefix}{endpoint}"
         headers = self._get_headers()
@@ -768,7 +768,7 @@ def config_show(
 ) -> None:
     """Show current configuration."""
 
-    def format_value(value):
+    def format_value(value: Any) -> str:
         """Format configuration value for display."""
         if isinstance(value, str) and any(
             key in value.lower()
@@ -906,9 +906,10 @@ def health_check() -> None:
             from chatter.services.dynamic_vector_store import (
                 DynamicVectorStoreService,
             )
-            from chatter.utils.database import get_session
+            from chatter.utils.database import get_session_maker
 
-            async with get_session() as session:
+            session_maker = get_session_maker()
+            async with session_maker() as session:
                 vector_service = DynamicVectorStoreService(session)
                 # Simple connectivity test - check if service initializes
                 if hasattr(vector_service, '_stores'):
@@ -922,9 +923,10 @@ def health_check() -> None:
         llm_status = "❌ LLM Providers: Not configured"
         try:
             from chatter.services.llm import LLMService
-            from chatter.utils.database import get_session
+            from chatter.utils.database import get_session_maker
 
-            async with get_session() as session:
+            session_maker = get_session_maker()
+            async with session_maker() as session:
                 llm_service = LLMService(session)
                 # Check if any API keys are configured
                 if hasattr(llm_service, '_get_providers'):
@@ -1253,15 +1255,15 @@ def generate_workflow(
     typescript_files = []
 
     try:
-        from scripts.utils.files import clean_directory
+        from scripts.utils.files import ensure_directory
 
         # Clean directories if requested
         if clean:
             console.print("🧹 Cleaning output directories...")
             if (output_path / "docs").exists():
-                clean_directory(output_path / "docs")
+                ensure_directory(output_path / "docs", clean=True)
             if (output_path / "sdk").exists():
-                clean_directory(output_path / "sdk")
+                ensure_directory(output_path / "sdk", clean=True)
 
         # Generate documentation
         if not sdk_only and not typescript_only and not python_only:

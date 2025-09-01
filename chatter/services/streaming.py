@@ -47,6 +47,18 @@ class StreamingEvent:
             self.timestamp = time.time()
 
 
+# Alias for compatibility with test imports
+StreamEvent = StreamingEvent
+
+
+class StreamingError(Exception):
+    """Exception raised during streaming operations."""
+    
+    def __init__(self, message: str, event_type: StreamingEventType | None = None):
+        super().__init__(message)
+        self.event_type = event_type
+
+
 class StreamingService:
     """Streaming service with token-level streaming and comprehensive workflow support."""
 

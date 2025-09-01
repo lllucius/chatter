@@ -32,6 +32,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
+import { toastService } from '../services/toast-service';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from '../sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import ChatConfigPanel from './ChatConfigPanel';
@@ -58,7 +59,6 @@ const ChatPage: React.FC = () => {
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [currentConversation, setCurrentConversation] = useState<ConversationResponse | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   // New state for advanced features
@@ -126,7 +126,7 @@ const ChatPage: React.FC = () => {
         setSelectedProfile(profilesResponse.data.profiles[0].id);
       }
     } catch (err: any) {
-      setError('Failed to load chat data');
+      toastService.error('Failed to load chat data');
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -137,7 +137,6 @@ const ChatPage: React.FC = () => {
   // Return the created conversation so callers can use its id immediately
   const startNewConversation = useCallback(async (): Promise<ConversationResponse | null> => {
     try {
-      setError('');
       await loadData();
       
       const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
@@ -167,7 +166,7 @@ const ChatPage: React.FC = () => {
       }
       return response.data;
     } catch (err: any) {
-      setError('Failed to start new conversation');
+      toastService.error('Failed to start new conversation');
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -178,8 +177,6 @@ const ChatPage: React.FC = () => {
 
   const onSelectConversation = useCallback(async (conversation: ConversationResponse) => {
     try {
-      setError('');
-      
       // Set current conversation
       setCurrentConversation(conversation);
       
@@ -201,7 +198,7 @@ const ChatPage: React.FC = () => {
       // Scroll to bottom after messages are set
       setTimeout(() => scrollToBottom(), 100);
     } catch (err: any) {
-      setError('Failed to load conversation');
+      toastService.error('Failed to load conversation');
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -449,7 +446,7 @@ const ChatPage: React.FC = () => {
         }
       }
     } catch (err: any) {
-      setError('Failed to send message');
+      toastService.error('Failed to send message');
       console.error(err);
 
       const errorMessage: ChatMessage = {
@@ -562,7 +559,7 @@ const ChatPage: React.FC = () => {
         setMessages(prev => [...prev, assistantMessage]);
       }
     } catch (err: any) {
-      setError('Failed to regenerate message');
+      toastService.error('Failed to regenerate message');
       console.error(err);
     } finally {
       setLoading(false);
@@ -586,14 +583,12 @@ const ChatPage: React.FC = () => {
     // In a real implementation, you would load the conversation messages here
     // For now, we'll just clear the current messages
     setMessages([]);
-    setError('');
   }, []);
 
   const handleClearConversation = useCallback(() => {
     if (window.confirm('Are you sure you want to clear this conversation?')) {
       setMessages([]);
       setCurrentConversation(null);
-      setError('');
     }
   }, []);
 
@@ -602,84 +597,76 @@ const ChatPage: React.FC = () => {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        flex: 1,
-        minHeight: 0,
+        height: '100%',
+        overflow: 'hidden',
       }}
     >
-      {error && (
-        <Alert severity="error" sx={{ mb: 1 }}>
-          {error}
-        </Alert>
-      )}
-
-      {/* Quick Actions Bar */}
-      <Card sx={{ flexShrink: 0, mb: 1, position: 'relative', zIndex: 1 }}>
-        <CardContent sx={{ py: 1, px: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={streamingEnabled}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStreamingEnabled(e.target.checked)}
-                    icon={<SpeedIcon />}
-                    checkedIcon={<StreamIcon />}
-                  />
-                }
-                label={streamingEnabled ? 'Streaming' : 'Standard'}
+      {/* Page Title */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
+          Chat
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={streamingEnabled}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStreamingEnabled(e.target.checked)}
+                icon={<SpeedIcon />}
+                checkedIcon={<StreamIcon />}
               />
-              <Divider orientation="vertical" flexItem />
-              <Button variant="outlined" size="small" onClick={startNewConversation} startIcon={<RefreshIcon />}>
-                New Chat
-              </Button>
-              <Button 
-                variant="outlined" 
-                size="small" 
-                onClick={() => setHistoryDialogOpen(true)} 
-                startIcon={<HistoryIcon />}
-              >
-                History
-              </Button>
-              <Button 
-                variant="outlined" 
-                size="small" 
-                onClick={() => setExportDialogOpen(true)} 
-                startIcon={<DownloadIcon />}
-                disabled={messages.length === 0}
-              >
-                Export
-              </Button>
-              <Button 
-                variant="outlined" 
-                size="small" 
-                onClick={handleClearConversation} 
-                startIcon={<ClearIcon />}
-                disabled={messages.length === 0}
-                color="warning"
-              >
-                Clear
-              </Button>
-              {currentConversation && (
-                <Chip
-                  label={`${currentConversation.title} (${messages.length} messages)`}
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-            </Box>
+            }
+            label={streamingEnabled ? 'Streaming' : 'Standard'}
+          />
+          <Divider orientation="vertical" flexItem />
+          <Button variant="outlined" size="small" onClick={startNewConversation} startIcon={<RefreshIcon />}>
+            New Chat
+          </Button>
+          <Button 
+            variant="outlined" 
+            size="small" 
+            onClick={() => setHistoryDialogOpen(true)} 
+            startIcon={<HistoryIcon />}
+          >
+            History
+          </Button>
+          <Button 
+            variant="outlined" 
+            size="small" 
+            onClick={() => setExportDialogOpen(true)} 
+            startIcon={<DownloadIcon />}
+            disabled={messages.length === 0}
+          >
+            Export
+          </Button>
+          <Button 
+            variant="outlined" 
+            size="small" 
+            onClick={handleClearConversation} 
+            startIcon={<ClearIcon />}
+            disabled={messages.length === 0}
+            color="warning"
+          >
+            Clear
+          </Button>
+          {currentConversation && (
+            <Chip
+              label={`${currentConversation.title} (${messages.length} messages)`}
+              size="small"
+              variant="outlined"
+            />
+          )}
+          {/* Toggle right drawer */}
+          <Tooltip title={open ? 'Hide Settings' : 'Show Settings'}>
+            <IconButton onClick={() => setOpen(!open)} size="small">
+              <TuneIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </Box>
 
-            {/* Toggle right drawer */}
-            <Tooltip title={open ? 'Hide Settings' : 'Show Settings'}>
-              <IconButton onClick={() => setOpen(!open)} size="small">
-                <TuneIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Messages Area */}
-      <Card sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', mb: 1 }}>
+      {/* Messages Area - Auto-expand to fill space */}
+      <Card sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', mb: 2 }}>
         <CardContent
           sx={{
             flex: 1,
@@ -756,8 +743,17 @@ const ChatPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Message Input */}
-      <Paper sx={{ p: 1.5, flexShrink: 0 }}>
+      {/* Message Input - Locked to bottom */}
+      <Paper 
+        sx={{ 
+          p: 1.5, 
+          position: 'sticky',
+          bottom: 0,
+          zIndex: 1,
+          borderTop: 1,
+          borderColor: 'divider',
+        }}
+      >
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
           <TextField
             fullWidth

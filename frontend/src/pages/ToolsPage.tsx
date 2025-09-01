@@ -150,7 +150,6 @@ const ToolsPage: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'server' | 'tool' | 'permission' | 'role-access' | 'access-check' | 'edit-server'>('server');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [editingServer, setEditingServer] = useState<RemoteServer | null>(null);
 
   // Menu state
@@ -424,7 +423,6 @@ const ToolsPage: React.FC = () => {
 
   const closeDialog = () => {
     setDialogOpen(false);
-    setError('');
     setEditingServer(null);
   };
 
@@ -445,11 +443,10 @@ const ToolsPage: React.FC = () => {
       setLoading(true);
       const response = await chatterSDK.getToolServers();
       setRemoteServers(response.data || []);
-      setError('');
+      
     } catch (err) {
       console.error('Failed to load remote servers:', err);
       const errorMessage = 'Failed to load remote servers';
-      setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -461,11 +458,10 @@ const ToolsPage: React.FC = () => {
       setLoading(true);
       const response = await chatterSDK.getAllTools();
       setTools(response.data || []);
-      setError('');
+      
     } catch (err) {
       console.error('Failed to load tools:', err);
       const errorMessage = 'Failed to load tools';
-      setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -482,11 +478,10 @@ const ToolsPage: React.FC = () => {
       // Load user permissions  
       const response = await chatterSDK.getUserPermissions(userResponse.id);
       setPermissions(response.data || []);
-      setError('');
+      
     } catch (err) {
       console.error('Failed to load permissions:', err);
       const errorMessage = 'Failed to load permissions';
-      setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -498,11 +493,10 @@ const ToolsPage: React.FC = () => {
       setLoading(true);
       const response = await chatterSDK.getRoleAccessRules();
       setRoleAccessRules(response.data || []);
-      setError('');
+      
     } catch (err) {
       console.error('Failed to load role access rules:', err);
       const errorMessage = 'Failed to load role access rules';
-      setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -520,7 +514,7 @@ const ToolsPage: React.FC = () => {
   const createRemoteServer = async () => {
     try {
       setLoading(true);
-      setError('');
+      
 
       const serverData = {
         name: serverFormData.name,
@@ -546,7 +540,6 @@ const ToolsPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to create remote server:', err);
       const errorMessage = 'Failed to create remote server';
-      setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -558,7 +551,7 @@ const ToolsPage: React.FC = () => {
     
     try {
       setLoading(true);
-      setError('');
+      
 
       const updateData = {
         display_name: serverFormData.display_name,
@@ -581,7 +574,6 @@ const ToolsPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to update server:', err);
       const errorMessage = 'Failed to update server';
-      setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -649,7 +641,7 @@ const ToolsPage: React.FC = () => {
   const grantPermission = async () => {
     try {
       setLoading(true);
-      setError('');
+      
 
       await chatterSDK.grantToolPermission(permissionFormData);
       showToast('Permission granted successfully', 'success');
@@ -658,7 +650,6 @@ const ToolsPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to grant permission:', err);
       const errorMessage = 'Failed to grant permission';
-      setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -680,7 +671,7 @@ const ToolsPage: React.FC = () => {
   const createRoleAccessRule = async () => {
     try {
       setLoading(true);
-      setError('');
+      
 
       await chatterSDK.createRoleAccessRule(roleAccessFormData);
       showToast('Role access rule created successfully', 'success');
@@ -689,7 +680,6 @@ const ToolsPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to create role access rule:', err);
       const errorMessage = 'Failed to create role access rule';
-      setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -700,7 +690,7 @@ const ToolsPage: React.FC = () => {
   const checkAccess = async () => {
     try {
       setLoading(true);
-      setError('');
+      
 
       const result = await chatterSDK.checkToolAccess(accessCheckFormData);
       setAccessCheckResult(result.data);
@@ -708,7 +698,6 @@ const ToolsPage: React.FC = () => {
     } catch (err) {
       console.error('Failed to check access:', err);
       const errorMessage = 'Failed to check access';
-      setError(errorMessage);
       showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
@@ -752,7 +741,6 @@ const ToolsPage: React.FC = () => {
     <Dialog open={dialogOpen && (dialogType === 'server' || dialogType === 'edit-server')} onClose={closeDialog} maxWidth="md" fullWidth>
       <DialogTitle>{dialogType === 'edit-server' ? 'Edit Server Configuration' : 'Add Remote MCP Server'}</DialogTitle>
       <DialogContent>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         
         <Grid container spacing={3} sx={{ mt: 1 }}>
           {/* Basic Information */}
@@ -1020,7 +1008,6 @@ const ToolsPage: React.FC = () => {
     <Dialog open={dialogOpen && dialogType === 'role-access'} onClose={closeDialog} maxWidth="sm" fullWidth>
       <DialogTitle>Create Role Access Rule</DialogTitle>
       <DialogContent>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         
         <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={12}>
@@ -1125,7 +1112,6 @@ const ToolsPage: React.FC = () => {
     <Dialog open={dialogOpen && dialogType === 'access-check'} onClose={closeDialog} maxWidth="sm" fullWidth>
       <DialogTitle>Check Tool Access</DialogTitle>
       <DialogContent>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         
         <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={12}>
@@ -1234,7 +1220,6 @@ const ToolsPage: React.FC = () => {
     <Dialog open={dialogOpen && dialogType === 'permission'} onClose={closeDialog} maxWidth="sm" fullWidth>
       <DialogTitle>Grant Tool Permission</DialogTitle>
       <DialogContent>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
         
         <Grid container spacing={2} sx={{ mt: 1 }}>
           <Grid item xs={12}>

@@ -19,6 +19,35 @@ def event_loop():
 
 
 @pytest.fixture
+async def job_queue():
+    """Create a job queue instance for testing and ensure it's cleaned up."""
+    from chatter.services.job_queue import AdvancedJobQueue
+    
+    queue = AdvancedJobQueue(max_workers=2)
+    yield queue
+    
+    # Ensure cleanup to prevent hanging
+    if queue.running:
+        await queue.stop()
+
+
+# Cleanup fixture to prevent hanging due to background services
+@pytest.fixture(scope="session", autouse=True)
+async def cleanup_global_services():
+    """Ensure global services are stopped after tests to prevent hanging."""
+    yield
+    
+    # Stop global job queue if it was started during tests
+    try:
+        from chatter.services.job_queue import job_queue
+        if job_queue.running:
+            await job_queue.stop()
+    except Exception:
+        # Ignore errors during cleanup
+        pass
+
+
+@pytest.fixture
 def mock_session():
     """Create a mock database session for testing."""
     session = AsyncMock()

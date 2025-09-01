@@ -292,8 +292,24 @@ def create_prompt(
                     else None
                 )
             else:
-                # Use function parameters (already assigned via function signature)
-                # Just prepare parsed_tags from the tags parameter
+                # Use function parameters (explicitly assign to local variables)
+                local_name = name
+                local_content = content
+                local_category = category
+                local_description = description
+                local_prompt_type = prompt_type
+                local_template_format = template_format
+                local_public = public
+                
+                # Reassign to expected variable names
+                name = local_name
+                content = local_content
+                category = local_category
+                description = local_description
+                prompt_type = local_prompt_type
+                template_format = local_template_format
+                public = local_public
+                
                 parsed_tags = (
                     [
                         tag.strip()
@@ -1642,7 +1658,26 @@ def create_profile(
                     "System prompt (optional)", default=""
                 )
                 public = Confirm.ask("Make public?", default=False)
-            # For non-interactive mode, variables come from function parameters
+            else:
+                # For non-interactive mode, use function parameters (explicitly assign to local variables)
+                local_name = name
+                local_description = description
+                local_provider = provider
+                local_model = model
+                local_temperature = temperature
+                local_max_tokens = max_tokens
+                local_system_prompt = system_prompt
+                local_public = public
+                
+                # Reassign to expected variable names
+                name = local_name
+                description = local_description
+                provider = local_provider
+                model = local_model
+                temperature = local_temperature
+                max_tokens = local_max_tokens
+                system_prompt = local_system_prompt
+                public = local_public
 
             # Validate required parameters in non-interactive mode
             if not interactive:

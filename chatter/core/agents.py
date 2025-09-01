@@ -889,3 +889,7 @@ class SpecializedAgent(BaseAgent):
 
 # Global agent manager instance
 agent_manager = AgentManager()
+
+
+# Alias for backward compatibility and common usage
+Agent = BaseAgent

@@ -29,6 +29,9 @@ from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+# Import QueryOptimizer from database_optimization for backward compatibility
+from chatter.utils.database_optimization import QueryOptimizer
+
 # Global database engine and session maker
 _engine: AsyncEngine | None = None
 _session_maker: async_sessionmaker[AsyncSession] | None = None
@@ -871,3 +874,35 @@ async def health_check() -> dict:
             "connected": False,
             "error": str(e),
         }
+
+
+async def create_tables() -> bool:
+    """Create database tables.
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        engine = get_engine()
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        return True
+    except Exception as e:
+        logger.error("Failed to create tables", error=str(e))
+        return False
+
+
+async def drop_tables() -> bool:
+    """Drop database tables.
+
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        engine = get_engine()
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
+        return True
+    except Exception as e:
+        logger.error("Failed to drop tables", error=str(e))
+        return False

@@ -45,6 +45,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
+import { toastService } from '../services/toast-service';
 import { DocumentResponse, DocumentSearchRequest } from '../sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';

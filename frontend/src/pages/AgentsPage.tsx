@@ -41,6 +41,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
+import { toastService } from '../services/toast-service';
 import { AgentResponse, AgentUpdateRequest, AgentCreateRequest } from '../sdk';
 
 const AgentsPage: React.FC = () => {

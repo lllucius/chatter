@@ -38,13 +38,12 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
+import { toastService } from '../services/toast-service';
 import { PromptResponse, PromptCreate, PromptUpdate } from '../sdk';
 
 const PromptsPage: React.FC = () => {
   const [prompts, setPrompts] = useState<PromptResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [dialogError, setDialogError] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -73,19 +72,19 @@ const PromptsPage: React.FC = () => {
   const loadPrompts = async () => {
     try {
       setLoading(true);
-      setError('');
+      
       const response = await chatterSDK.prompts.listPromptsApiV1PromptsGet({}); 
       const data = response.data;
       setPrompts(data.prompts);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load prompts');
+      toastService.error(err.response?.data?.detail || 'Failed to load prompts');
     } finally {
       setLoading(false);
     }
   };
 
   const handleOpenDialog = (prompt?: PromptResponse) => {
-    setDialogError(''); // Clear any previous dialog errors
+     // Clear any previous dialog errors
     if (prompt) {
       setEditingPrompt(prompt);
       setFormData({
@@ -113,7 +112,7 @@ const PromptsPage: React.FC = () => {
   const handleSave = async () => {
     try {
       setSaving(true);
-      setDialogError(''); // Clear any previous dialog errors
+       // Clear any previous dialog errors
       if (editingPrompt) {
         const response = await chatterSDK.prompts.updatePromptApiV1PromptsPromptIdPut({ promptId: editingPrompt.id, promptUpdate: formData as PromptUpdate });
         setPrompts(prev => prev.map(p => p.id === editingPrompt.id ? response.data : p));
@@ -123,7 +122,7 @@ const PromptsPage: React.FC = () => {
       }
       setDialogOpen(false);
     } catch (err: any) {
-      setDialogError(err.response?.data?.detail || 'Failed to save prompt');
+      toastService.error(err.response?.data?.detail || 'Failed to save prompt');
     } finally {
       setSaving(false);
     }
@@ -138,7 +137,7 @@ const PromptsPage: React.FC = () => {
       await chatterSDK.prompts.deletePromptApiV1PromptsPromptIdDelete({ promptId: promptId });
       setPrompts(prev => prev.filter(p => p.id !== promptId));
     } catch (err: any) {
-      setError('Failed to delete prompt');
+      toastService.error('Failed to delete prompt');
     }
   };
 
@@ -190,11 +189,7 @@ const PromptsPage: React.FC = () => {
           </Button>
         </Box>
       </Box>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
+      {/* Action buttons and table will be here */}
       <Card>
         <TableContainer>
           <Table>
@@ -330,11 +325,6 @@ const PromptsPage: React.FC = () => {
           {editingPrompt ? 'Edit Prompt' : 'Create Prompt'}
         </DialogTitle>
         <DialogContent>
-          {dialogError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {dialogError}
-            </Alert>
-          )}
           <Grid container spacing={3} sx={{ mt: 1 }}>
             <Grid
               size={{

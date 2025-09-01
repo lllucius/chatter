@@ -38,6 +38,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
+import { toastService } from '../services/toast-service';
 import { ProfileResponse, ProfileCreate, ProfileUpdate } from '../sdk';
 
 const ProfilesPage: React.FC = () => {

@@ -37,10 +37,12 @@ class WorkflowError(Exception):
 class WorkflowContext:
     """Context for workflow execution."""
     
-    def __init__(self, workflow_id: str, data: Optional[Dict[str, Any]] = None):
-        self.workflow_id = workflow_id
+    def __init__(self, workflow_id: str = None, user_id: str = None, data: Optional[Dict[str, Any]] = None):
+        self.workflow_id = workflow_id or str(uuid4())
+        self.user_id = user_id
         self.data = data or {}
         self.variables: Dict[str, Any] = {}
+        self.step_results: Dict[str, Any] = {}
         self.started_at = datetime.utcnow()
         self.completed_at: Optional[datetime] = None
     
@@ -51,18 +53,63 @@ class WorkflowContext:
     def get_variable(self, key: str, default: Any = None) -> Any:
         """Get a variable from the workflow context."""
         return self.variables.get(key, default)
+    
+    def update_variables(self, variables: Dict[str, Any]) -> None:
+        """Update multiple variables."""
+        self.variables.update(variables)
+    
+    def set_step_result(self, step_id: str, result: Any) -> None:
+        """Set result for a workflow step."""
+        self.step_results[step_id] = result
+    
+    def get_step_result(self, step_id: str, default: Any = None) -> Any:
+        """Get result for a workflow step."""
+        return self.step_results.get(step_id, default)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert context to dictionary."""
+        return {
+            "workflow_id": self.workflow_id,
+            "user_id": self.user_id,
+            "data": self.data,
+            "variables": self.variables,
+            "step_results": self.step_results,
+            "started_at": self.started_at.isoformat() if self.started_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "WorkflowContext":
+        """Create context from dictionary."""
+        context = cls(
+            workflow_id=data.get("workflow_id"),
+            user_id=data.get("user_id"),
+            data=data.get("data", {})
+        )
+        context.variables = data.get("variables", {})
+        context.step_results = data.get("step_results", {})
+        
+        # Parse timestamps
+        if data.get("started_at"):
+            context.started_at = datetime.fromisoformat(data["started_at"])
+        if data.get("completed_at"):
+            context.completed_at = datetime.fromisoformat(data["completed_at"])
+        
+        return context
 
 
 class WorkflowResult:
     """Result of workflow execution."""
     
-    def __init__(self, workflow_id: str, status: WorkflowStatus):
+    def __init__(self, workflow_id: str, status: WorkflowStatus, output: Optional[Dict[str, Any]] = None, errors: Optional[List[WorkflowError]] = None):
         self.workflow_id = workflow_id
         self.status = status
-        self.data: Dict[str, Any] = {}
-        self.errors: List[WorkflowError] = []
+        self.output = output or {}
+        self.data = self.output  # Alias for backward compatibility
+        self.errors: List[WorkflowError] = errors or []
         self.started_at = datetime.utcnow()
         self.completed_at: Optional[datetime] = None
+        self.execution_time = 0.0
     
     def add_error(self, error: WorkflowError) -> None:
         """Add an error to the result."""
@@ -71,6 +118,19 @@ class WorkflowResult:
     def set_data(self, key: str, value: Any) -> None:
         """Set data in the result."""
         self.data[key] = value
+        self.output[key] = value  # Keep both in sync
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert result to dictionary."""
+        return {
+            "workflow_id": self.workflow_id,
+            "status": self.status.value,
+            "output": self.output,
+            "errors": [{"message": str(e), "step_id": getattr(e, 'step_id', None)} for e in self.errors],
+            "started_at": self.started_at.isoformat() if self.started_at else None,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "execution_time": self.execution_time,
+        }
 
 
 class WorkflowStep:
@@ -105,6 +165,15 @@ class WorkflowStep:
     async def _execute_impl(self, context: WorkflowContext) -> Any:
         """Implementation of step execution."""
         raise NotImplementedError("Subclasses must implement _execute_impl")
+    
+    def validate(self) -> bool:
+        """Validate the workflow step configuration."""
+        # Basic validation - step must have an ID and name
+        if not self.step_id:
+            return False
+        if not self.name:
+            return False
+        return True
 
 
 class ConditionalStep(WorkflowStep):

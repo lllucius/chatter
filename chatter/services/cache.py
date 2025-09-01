@@ -16,12 +16,43 @@ logger = get_logger(__name__)
 class CacheService:
     """Redis-based caching service with optional graceful fallback."""
 
-    def __init__(self):
-        """Initialize cache service."""
+    def __init__(
+        self,
+        config: dict = None,
+        pool_config: dict = None,
+        key_prefix: str = None,
+        serializer: callable = None,
+        deserializer: callable = None,
+        fallback_to_memory: bool = False,
+        instance_id: str = None,
+    ):
+        """Initialize cache service.
+        
+        Args:
+            config: Redis connection configuration
+            pool_config: Redis connection pool configuration
+            key_prefix: Prefix to add to all cache keys
+            serializer: Custom serialization function
+            deserializer: Custom deserialization function
+            fallback_to_memory: Enable in-memory fallback when Redis unavailable
+            instance_id: Instance identifier for distributed caching
+        """
         self.redis: Redis | None = None
         self._connected = False
         self._enabled = settings.cache_enabled
         self._connection_attempts = 0
+        
+        # Store configuration
+        self.config = config or {}
+        self.pool_config = pool_config or {}
+        self.key_prefix = key_prefix or ""
+        self.serializer = serializer
+        self.deserializer = deserializer
+        self.fallback_to_memory = fallback_to_memory
+        self.instance_id = instance_id
+        
+        # In-memory fallback storage
+        self._memory_cache = {} if fallback_to_memory else None
 
         if not self._enabled:
             logger.info("Cache service disabled by configuration")
@@ -229,6 +260,97 @@ class CacheService:
             await self.connect()
 
         return self.is_connected()
+
+    def add_prefix(self, key: str) -> str:
+        """Add prefix to cache key.
+        
+        Args:
+            key: Original key
+            
+        Returns:
+            Prefixed key
+        """
+        if self.key_prefix:
+            return f"{self.key_prefix}{key}"
+        return key
+
+    def is_valid_key(self, key: str) -> bool:
+        """Validate cache key format.
+        
+        Args:
+            key: Cache key to validate
+            
+        Returns:
+            True if key is valid
+        """
+        if not key or not isinstance(key, str):
+            return False
+        
+        # Basic validation - no whitespace, reasonable length
+        if len(key) > 250 or ' ' in key or '\n' in key or '\t' in key:
+            return False
+        
+        return True
+
+    async def get_statistics(self) -> dict:
+        """Get cache statistics.
+        
+        Returns:
+            Dictionary with cache statistics
+        """
+        if not self.is_connected():
+            return {
+                "connected": False,
+                "memory_usage": 0,
+                "keys_count": 0,
+                "hit_rate": 0.0
+            }
+        
+        try:
+            info = await self.redis.info()
+            return {
+                "connected": True,
+                "memory_usage": info.get("used_memory", 0),
+                "keys_count": await self.redis.dbsize(),
+                "hit_rate": float(info.get("keyspace_hit_rate", 0)),
+                "uptime": info.get("uptime_in_seconds", 0)
+            }
+        except Exception as e:
+            logger.error(f"Failed to get cache statistics: {e}")
+            return {"connected": False, "error": str(e)}
+
+    async def warm_cache(self, data: dict) -> bool:
+        """Warm cache with provided data.
+        
+        Args:
+            data: Dictionary of key-value pairs to cache
+            
+        Returns:
+            True if successful
+        """
+        try:
+            if not self.is_connected():
+                if self.fallback_to_memory and self._memory_cache is not None:
+                    self._memory_cache.update(data)
+                    return True
+                return False
+            
+            # Use pipeline for efficient bulk operations
+            async with self.redis.pipeline() as pipe:
+                for key, value in data.items():
+                    prefixed_key = self.add_prefix(key)
+                    if isinstance(value, (dict, list)):
+                        value = json.dumps(value)
+                    pipe.set(prefixed_key, value)
+                
+                await pipe.execute()
+            
+            logger.info(f"Cache warmed with {len(data)} items")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Cache warming failed: {e}")
+            return False
 
 
 # Global cache service instance

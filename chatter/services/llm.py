@@ -311,6 +311,126 @@ class LLMService:
 
         return langchain_messages
 
+    async def generate(
+        self,
+        messages: list[dict],
+        provider: str,
+        model: str,
+        max_retries: int = 1,
+        track_cost: bool = False,
+        **kwargs
+    ) -> dict[str, Any]:
+        """Generate response using specified provider and model.
+        
+        Args:
+            messages: List of message dictionaries with role and content
+            provider: Provider name (openai, anthropic, etc.)
+            model: Model name
+            max_retries: Maximum retry attempts
+            track_cost: Whether to track cost information
+            **kwargs: Additional parameters
+            
+        Returns:
+            Response dictionary with content, role, and optionally usage info
+        """
+        # Convert dict messages to LangChain format
+        langchain_messages = []
+        for msg in messages:
+            role = msg.get("role", "user")
+            content = msg.get("content", "")
+            
+            if role == "system":
+                langchain_messages.append(SystemMessage(content=content))
+            elif role == "assistant":
+                langchain_messages.append(AIMessage(content=content))
+            else:  # user or any other role
+                langchain_messages.append(HumanMessage(content=content))
+        
+        # Get provider instance
+        try:
+            provider_instance = await self.get_provider(provider)
+        except Exception:
+            # If provider not found, try to create a simple instance
+            if provider.lower() == "openai":
+                api_key = os.getenv("OPENAI_API_KEY", "dummy")
+                provider_instance = ChatOpenAI(
+                    api_key=api_key,
+                    model=model,
+                    temperature=kwargs.get("temperature", 0.7),
+                    max_tokens=kwargs.get("max_tokens", 1000)
+                )
+            elif provider.lower() == "anthropic":
+                api_key = os.getenv("ANTHROPIC_API_KEY", "dummy")
+                provider_instance = ChatAnthropic(
+                    api_key=api_key,
+                    model=model,
+                    temperature=kwargs.get("temperature", 0.7),
+                    max_tokens=kwargs.get("max_tokens", 1000)
+                )
+            else:
+                raise LLMProviderError(f"Unsupported provider: {provider}")
+        
+        # Generate response with retries
+        last_exception = None
+        for attempt in range(max_retries):
+            try:
+                response = await provider_instance.ainvoke(langchain_messages)
+                
+                result = {
+                    "content": response.content,
+                    "role": "assistant"
+                }
+                
+                # Add usage info if available
+                if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                    result["usage"] = {
+                        "input_tokens": response.usage_metadata.get("input_tokens", 0),
+                        "output_tokens": response.usage_metadata.get("output_tokens", 0),
+                        "total_tokens": response.usage_metadata.get("total_tokens", 0)
+                    }
+                
+                if track_cost:
+                    # Add cost calculation if needed
+                    result["cost"] = self._calculate_cost(result.get("usage", {}), provider, model)
+                
+                return result
+                
+            except Exception as e:
+                last_exception = e
+                if attempt < max_retries - 1:
+                    logger.warning(f"Attempt {attempt + 1} failed, retrying: {e}")
+                    await asyncio.sleep(0.5 * (attempt + 1))  # Exponential backoff
+                else:
+                    logger.error(f"All {max_retries} attempts failed: {e}")
+        
+        raise LLMProviderError(f"Failed to generate response after {max_retries} attempts: {last_exception}")
+    
+    def _calculate_cost(self, usage: dict, provider: str, model: str) -> dict:
+        """Calculate approximate cost based on usage."""
+        # Simplified cost calculation - would need real pricing data
+        input_tokens = usage.get("input_tokens", 0)
+        output_tokens = usage.get("output_tokens", 0)
+        
+        # Example pricing (per 1K tokens)
+        if provider.lower() == "openai":
+            if "gpt-4" in model.lower():
+                input_cost = input_tokens * 0.03 / 1000
+                output_cost = output_tokens * 0.06 / 1000
+            else:  # gpt-3.5-turbo
+                input_cost = input_tokens * 0.001 / 1000
+                output_cost = output_tokens * 0.002 / 1000
+        else:
+            # Default pricing
+            input_cost = input_tokens * 0.001 / 1000
+            output_cost = output_tokens * 0.002 / 1000
+        
+        return {
+            "input_cost": input_cost,
+            "output_cost": output_cost,
+            "total_cost": input_cost + output_cost,
+            "currency": "USD"
+        }
+
     async def generate_response(
         self,
         messages: list[BaseMessage],
@@ -627,3 +747,89 @@ class LLMService:
             enable_memory=enable_memory,
             memory_window=memory_window,
         )
+
+    async def generate_with_fallback(
+        self,
+        messages: list[dict],
+        primary_provider: str,
+        fallback_provider: str,
+        model: str,
+        **kwargs
+    ) -> dict[str, Any]:
+        """Generate response with fallback provider.
+        
+        Args:
+            messages: List of message dictionaries
+            primary_provider: Primary provider to try first
+            fallback_provider: Fallback provider if primary fails
+            model: Model name
+            **kwargs: Additional parameters
+            
+        Returns:
+            Response with provider_used field
+        """
+        try:
+            result = await self.generate(messages, primary_provider, model, **kwargs)
+            result["provider_used"] = primary_provider
+            return result
+        except Exception as e:
+            logger.warning(f"Primary provider {primary_provider} failed: {e}, trying fallback")
+            try:
+                result = await self.generate(messages, fallback_provider, model, **kwargs)
+                result["provider_used"] = fallback_provider
+                return result
+            except Exception as fallback_error:
+                raise LLMProviderError(f"Both providers failed. Primary: {e}, Fallback: {fallback_error}")
+
+    async def generate_with_context(
+        self,
+        messages: list[dict],
+        conversation_id: str,
+        provider: str,
+        model: str,
+        **kwargs
+    ) -> dict[str, Any]:
+        """Generate response with conversation context.
+        
+        Args:
+            messages: List of message dictionaries
+            conversation_id: Conversation ID for context
+            provider: Provider name
+            model: Model name
+            **kwargs: Additional parameters
+            
+        Returns:
+            Response dictionary
+        """
+        # In a real implementation, this would load context from the conversation
+        # For now, just pass through to generate
+        result = await self.generate(messages, provider, model, **kwargs)
+        result["conversation_id"] = conversation_id
+        return result
+
+    async def generate_with_load_balancing(
+        self,
+        messages: list[dict],
+        providers: list[str],
+        model: str,
+        **kwargs
+    ) -> dict[str, Any]:
+        """Generate response with load balancing across providers.
+        
+        Args:
+            messages: List of message dictionaries
+            providers: List of provider names to balance across
+            model: Model name
+            **kwargs: Additional parameters
+            
+        Returns:
+            Response with provider_used field
+        """
+        # Simple round-robin load balancing
+        # In production, this would use more sophisticated logic
+        import random
+        provider = random.choice(providers)
+        
+        result = await self.generate(messages, provider, model, **kwargs)
+        result["provider_used"] = provider
+        return result

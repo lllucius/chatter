@@ -605,3 +605,16 @@ def generate_secure_secret(length: int = 32) -> str:
 
     alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
     return "".join(secrets.choice(alphabet) for _ in range(length))
+
+
+def generate_session_id(length: int = 32) -> str:
+    """Generate a secure session ID.
+    
+    Args:
+        length: Length of the session ID
+        
+    Returns:
+        Secure session ID string
+    """
+    import secrets
+    return secrets.token_urlsafe(length)

@@ -10,12 +10,11 @@ import uuid
 from typing import Any
 
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import ProblemException
 
 logger = get_logger(__name__)
 
 
-class ChatterError(ProblemException):
+class ChatterBaseException(Exception):
     """Base exception for all Chatter-specific errors.
 
     This provides a unified error handling approach across all application layers.
@@ -25,76 +24,137 @@ class ChatterError(ProblemException):
     def __init__(
         self,
         message: str,
-        status_code: int = 500,
         error_code: str | None = None,
+        status_code: int = 500,
         details: dict[str, Any] | None = None,
-        cause: Exception | None = None,
         **kwargs
     ):
         """Initialize Chatter error.
 
         Args:
             message: Human-readable error description
-            status_code: HTTP status code
             error_code: Application-specific error code
+            status_code: HTTP status code
             details: Additional error details
-            cause: Original exception that caused this error
-            **kwargs: Additional fields for problem details
+            **kwargs: Additional fields for error context
         """
-        self.error_code = error_code or self.__class__.__name__
-        self.details = details or {}
-        self.cause = cause
+        super().__init__(message)
+        self.message = message
+        self.error_code = error_code or self._get_default_error_code()
+        self.status_code = status_code
+        self.details = details
         self.error_id = str(uuid.uuid4())
-        self.status_code = status_code  # Store status_code before calling super
+        
+        # Set any additional properties
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
-        # Build problem details
-        extra_fields = {
-            "errorCode": self.error_code,
-            "errorId": self.error_id,
-            **self.details,
-            **kwargs
-        }
+        # Log error details
+        self._log_error()
 
-        if cause:
-            extra_fields["causedBy"] = {
-                "type": type(cause).__name__,
-                "message": str(cause)
-            }
+    def _get_default_error_code(self) -> str:
+        """Get default error code based on class name."""
+        # Convert CamelCase to UPPER_CASE_WITH_UNDERSCORES
+        import re
+        name = self.__class__.__name__
+        # Remove 'Error' suffix if present
+        if name.endswith('Error'):
+            name = name[:-5]
+        # Convert to uppercase with underscores
+        name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).upper()
+        return f"{name}_ERROR"
 
-        super().__init__(
-            status_code=status_code,
-            title=self._get_error_title(),
-            detail=message,
-            type_suffix=self._get_type_suffix(),
-            **extra_fields
-        )
-
-        # Log error details after initialization
-        self._log_error(message)
-
-    def _get_error_title(self) -> str:
-        """Get the error title for RFC 9457 response."""
-        return "Application Error"
-
-    def _get_type_suffix(self) -> str:
-        """Get the type suffix for RFC 9457 problem type URI."""
-        return "application-error"
-
-    def _log_error(self, message: str) -> None:
+    def _log_error(self) -> None:
         """Log the error with appropriate level and context."""
         logger.error(
-            f"{self.__class__.__name__}: {message}",
+            f"{self.__class__.__name__}: {self.message}",
             error_id=self.error_id,
             error_code=self.error_code,
             status_code=self.status_code,
             details=self.details,
-            cause=str(self.cause) if self.cause else None,
-            traceback=traceback.format_exc() if self.cause else None
+        )
+
+    def __str__(self) -> str:
+        """Return the error message."""
+        return self.message
+
+
+# Alias for backward compatibility
+ChatterError = ChatterBaseException
+
+
+class ChatServiceError(ChatterBaseException):
+    """Chat service-related errors."""
+
+    def __init__(self, message: str, **kwargs):
+        super().__init__(
+            message=message,
+            status_code=500,
+            **kwargs
         )
 
 
-# Service-specific error classes
-class AuthenticationError(ChatterError):
+class LLMServiceError(ChatterBaseException):
+    """LLM service-related errors."""
+
+    def __init__(self, message: str, **kwargs):
+        super().__init__(
+            message=message,
+            status_code=500,
+            **kwargs
+        )
+
+
+class ServiceError(ChatterBaseException):
+    """Base class for service-related errors."""
+
+    def __init__(self, message: str, service_name: str, **kwargs):
+        super().__init__(
+            message=message,
+            status_code=500,
+            service_name=service_name,
+            **kwargs
+        )
+
+
+class DatabaseError(ServiceError):
+    """Database-related errors."""
+
+    def __init__(self, message: str, **kwargs):
+        super().__init__(
+            message=message,
+            service_name="database",
+            **kwargs
+        )
+
+
+class ValidationError(ChatterBaseException):
+    """Data validation errors."""
+
+    def __init__(self, message: str, field_errors: dict | None = None, **kwargs):
+        super().__init__(
+            message=message,
+            status_code=400,
+            field_errors=field_errors,
+            **kwargs
+        )
+
+    @classmethod
+    def aggregate(cls, errors: list["ValidationError"]) -> "ValidationError":
+        """Aggregate multiple validation errors."""
+        messages = [error.message for error in errors]
+        field_errors = {}
+        for error in errors:
+            if hasattr(error, 'field_errors') and error.field_errors:
+                field_errors.update(error.field_errors)
+        
+        return cls(
+            message="; ".join(messages),
+            field_errors=field_errors
+        )
+
+
+class AuthenticationError(ChatterBaseException):
     """Authentication-related errors."""
 
     def __init__(self, message: str = "Authentication failed", **kwargs):
@@ -104,14 +164,8 @@ class AuthenticationError(ChatterError):
             **kwargs
         )
 
-    def _get_error_title(self) -> str:
-        return "Authentication Required"
 
-    def _get_type_suffix(self) -> str:
-        return "authentication-required"
-
-
-class AuthorizationError(ChatterError):
+class AuthorizationError(ChatterBaseException):
     """Authorization-related errors."""
 
     def __init__(self, message: str = "Access forbidden", **kwargs):
@@ -121,33 +175,47 @@ class AuthorizationError(ChatterError):
             **kwargs
         )
 
-    def _get_error_title(self) -> str:
-        return "Access Forbidden"
 
-    def _get_type_suffix(self) -> str:
-        return "access-forbidden"
+class RateLimitError(ServiceError):
+    """Rate limiting errors."""
 
-
-class ValidationError(ChatterError):
-    """Data validation errors."""
-
-    def __init__(self, message: str, validation_errors: list | None = None, **kwargs):
+    def __init__(self, message: str, **kwargs):
         super().__init__(
             message=message,
-            status_code=422,
-            details={"validation_errors": validation_errors or []},
+            service_name="rate_limiter",
+            status_code=429,
             **kwargs
         )
 
-    def _get_error_title(self) -> str:
-        return "Validation Failed"
 
-    def _get_type_suffix(self) -> str:
-        return "validation-failed"
+class ConfigurationError(ChatterBaseException):
+    """Configuration-related errors."""
+
+    def __init__(self, message: str, **kwargs):
+        super().__init__(
+            message=message,
+            status_code=500,
+            **kwargs
+        )
+
+    def get_safe_message(self) -> str:
+        """Get a safe version of the error message without sensitive data."""
+        # Remove sensitive values from message
+        safe_message = self.message
+        if hasattr(self, 'config_value') and self.config_value:
+            safe_message = safe_message.replace(str(self.config_value), "***")
+        return safe_message
 
 
-class NotFoundError(ChatterError):
-    """Resource not found errors."""
+class WorkflowError(ChatterBaseException):
+    """Workflow execution errors."""
+
+    def __init__(self, message: str, **kwargs):
+        super().__init__(
+            message=message,
+            status_code=500,
+            **kwargs
+        )
 
     def __init__(
         self,

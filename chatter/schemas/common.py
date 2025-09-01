@@ -70,16 +70,26 @@ class PaginationParams(BaseModel):
     """Pagination parameters for requests."""
 
     page: int = Field(1, ge=1, description="Page number")
-    size: int = Field(20, ge=1, le=100, description="Page size")
+    limit: int = Field(20, ge=1, le=100, description="Page size limit")
 
 
 class PaginationResponse(BaseModel):
     """Pagination information for responses."""
 
     page: int = Field(..., description="Current page number")
-    size: int = Field(..., description="Page size")
-    total: int = Field(..., description="Total number of items")
-    pages: int = Field(..., description="Total number of pages")
+    limit: int = Field(..., description="Page size limit")
+    total_count: int = Field(..., description="Total number of items")
+    total_pages: int = Field(..., description="Total number of pages")
+    
+    @property
+    def has_next_page(self) -> bool:
+        """Check if there is a next page."""
+        return self.page < self.total_pages
+    
+    @property
+    def has_prev_page(self) -> bool:
+        """Check if there is a previous page."""
+        return self.page > 1
 
 
 class ErrorResponse(BaseModel):
@@ -118,6 +128,8 @@ class FilterParams(BaseModel):
     search: str | None = Field(None, description="Search query")
     tags: list[str] | None = Field(None, description="Filter by tags")
     created_after: datetime | None = Field(None, description="Created after date")
+    start_date: datetime | None = Field(None, description="Start date for filtering")
+    end_date: datetime | None = Field(None, description="End date for filtering")
     created_before: datetime | None = Field(None, description="Created before date")
     """Base schema for delete requests."""
 

@@ -7,24 +7,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 
-# Mock required modules that may not be available in test environment
-class MockModule:
-    def __getattr__(self, name):
-        return MagicMock()
-
-# Mock modules that might not be available
-for module_name in [
-    'fastapi',
-    'sqlalchemy.ext.asyncio',
-    'chatter.models',
-    'chatter.core',
-    'chatter.services',
-    'chatter.api',
-    'chatter.utils',
-    'chatter.schemas'
-]:
-    if module_name not in sys.modules:
-        sys.modules[module_name] = MockModule()
+# Note: Removed module mocking as all dependencies are properly installed
 
 # Async event loop configuration for tests
 @pytest.fixture(scope="session")

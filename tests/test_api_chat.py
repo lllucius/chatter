@@ -8,10 +8,9 @@ from fastapi import status
 from fastapi.testclient import TestClient
 
 from chatter.api.auth import get_current_user
-from chatter.api.chat import get_chat_service, get_llm_service
+from chatter.api.chat import get_chat_service
 from chatter.main import app
-from chatter.models.conversation import Conversation, ConversationStatus
-from chatter.models.message import Message, MessageRole
+from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from chatter.models.user import User
 from chatter.services.chat import ChatService
 from chatter.services.llm import LLMService
@@ -25,7 +24,6 @@ class TestChatEndpoints:
         """Set up test fixtures."""
         self.client = TestClient(app)
         self.mock_chat_service = AsyncMock(spec=ChatService)
-        self.mock_llm_service = AsyncMock(spec=LLMService)
         self.mock_user = User(
             id="test-user-id",
             email="test@example.com",
@@ -35,7 +33,6 @@ class TestChatEndpoints:
 
         # Override dependencies
         app.dependency_overrides[get_chat_service] = lambda: self.mock_chat_service
-        app.dependency_overrides[get_llm_service] = lambda: self.mock_llm_service
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
 
     def teardown_method(self):
@@ -47,8 +44,7 @@ class TestChatEndpoints:
         # Arrange
         conversation_data = {
             "title": "Test Conversation",
-            "description": "A test conversation",
-            "agent_id": "test-agent-id"
+            "description": "A test conversation"
         }
 
         mock_conversation = Conversation(
@@ -56,7 +52,6 @@ class TestChatEndpoints:
             title=conversation_data["title"],
             description=conversation_data["description"],
             user_id=self.mock_user.id,
-            agent_id=conversation_data["agent_id"],
             status=ConversationStatus.ACTIVE
         )
 

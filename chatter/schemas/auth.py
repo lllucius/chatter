@@ -2,7 +2,13 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, Field, model_validator, field_validator
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 
 class UserBase(BaseModel):
@@ -193,7 +199,7 @@ class UserPreferences(BaseModel):
     theme: str = Field("light", description="UI theme preference")
     notifications_enabled: bool = Field(True, description="Enable notifications")
     email_notifications: bool = Field(True, description="Enable email notifications")
-    
+
     @field_validator('language')
     @classmethod
     def validate_language(cls, v):
@@ -202,7 +208,7 @@ class UserPreferences(BaseModel):
         if v not in valid_languages:
             raise ValueError(f'Language must be one of: {valid_languages}')
         return v
-    
+
     @field_validator('timezone')
     @classmethod
     def validate_timezone(cls, v):

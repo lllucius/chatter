@@ -1,24 +1,16 @@
 """Tests for model registry API endpoints."""
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, MagicMock, patch
-from sqlalchemy.exc import IntegrityError
 
-from chatter.main import app
 from chatter.api.auth import get_current_user
-from chatter.models.user import User
-from chatter.models.registry import ModelType
-from chatter.schemas.model_registry import (
-    ProviderCreate,
-    ProviderUpdate,
-    ModelDefCreate,
-    ModelDefUpdate,
-    EmbeddingSpaceCreate,
-    EmbeddingSpaceUpdate,
-)
 from chatter.core.model_registry import ModelRegistryService
+from chatter.main import app
+from chatter.models.registry import ModelType
+from chatter.models.user import User
 from chatter.utils.database import get_session
 
 
@@ -35,9 +27,9 @@ class TestProviderEndpoints:
             username="testuser",
             is_active=True
         )
-        
+
         self.mock_session = AsyncMock()
-        
+
         # Override dependencies
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
         app.dependency_overrides[get_session] = lambda: self.mock_session
@@ -58,7 +50,7 @@ class TestProviderEndpoints:
                 "config": {"api_base": "https://api.openai.com/v1"}
             },
             {
-                "id": "provider-2", 
+                "id": "provider-2",
                 "name": "Anthropic",
                 "provider_type": "llm",
                 "is_active": True,
@@ -66,13 +58,13 @@ class TestProviderEndpoints:
             }
         ]
         mock_total = 2
-        
+
         with patch.object(ModelRegistryService, 'list_providers') as mock_list:
             mock_list.return_value = (mock_providers, mock_total)
-            
+
             # Act
             response = self.client.get("/registry/providers?page=1&per_page=20")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -93,13 +85,13 @@ class TestProviderEndpoints:
                 "is_active": True
             }
         ]
-        
+
         with patch.object(ModelRegistryService, 'list_providers') as mock_list:
             mock_list.return_value = (mock_providers, 1)
-            
+
             # Act
             response = self.client.get("/registry/providers?active_only=true")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -117,13 +109,13 @@ class TestProviderEndpoints:
             "is_active": True,
             "config": {"api_key": "***"}
         }
-        
+
         with patch.object(ModelRegistryService, 'get_provider') as mock_get:
             mock_get.return_value = mock_provider
-            
+
             # Act
             response = self.client.get(f"/registry/providers/{provider_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -134,13 +126,13 @@ class TestProviderEndpoints:
         """Test provider retrieval when provider doesn't exist."""
         # Arrange
         provider_id = "nonexistent-provider"
-        
+
         with patch.object(ModelRegistryService, 'get_provider') as mock_get:
             mock_get.return_value = None
-            
+
             # Act
             response = self.client.get(f"/registry/providers/{provider_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_404_NOT_FOUND
             assert "Provider not found" in response.json()["detail"]
@@ -150,30 +142,30 @@ class TestProviderEndpoints:
         # Arrange
         provider_data = {
             "name": "New Provider",
-            "provider_type": "llm", 
+            "provider_type": "llm",
             "description": "A test provider",
             "config": {"api_base": "https://api.example.com"},
             "is_active": True
         }
-        
+
         mock_created_provider = {
             "id": "new-provider-123",
             "name": "New Provider",
             "provider_type": "llm",
-            "description": "A test provider", 
+            "description": "A test provider",
             "is_active": True,
             "config": {"api_base": "https://api.example.com"}
         }
-        
+
         with patch.object(ModelRegistryService, 'get_provider_by_name') as mock_check:
             mock_check.return_value = None  # No existing provider
-            
+
             with patch.object(ModelRegistryService, 'create_provider') as mock_create:
                 mock_create.return_value = mock_created_provider
-                
+
                 # Act
                 response = self.client.post("/registry/providers", json=provider_data)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_201_CREATED
                 data = response.json()
@@ -188,18 +180,18 @@ class TestProviderEndpoints:
             "name": "Existing Provider",
             "provider_type": "llm"
         }
-        
+
         mock_existing_provider = {
             "id": "existing-provider",
             "name": "Existing Provider"
         }
-        
+
         with patch.object(ModelRegistryService, 'get_provider_by_name') as mock_check:
             mock_check.return_value = mock_existing_provider
-            
+
             # Act
             response = self.client.post("/registry/providers", json=provider_data)
-            
+
             # Assert
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert "already exists" in response.json()["detail"]
@@ -213,20 +205,20 @@ class TestProviderEndpoints:
             "description": "Updated description",
             "is_active": False
         }
-        
+
         mock_updated_provider = {
             "id": provider_id,
-            "name": "Updated Provider", 
+            "name": "Updated Provider",
             "description": "Updated description",
             "is_active": False
         }
-        
+
         with patch.object(ModelRegistryService, 'update_provider') as mock_update:
             mock_update.return_value = mock_updated_provider
-            
+
             # Act
             response = self.client.put(f"/registry/providers/{provider_id}", json=update_data)
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -237,13 +229,13 @@ class TestProviderEndpoints:
         """Test successful provider deletion."""
         # Arrange
         provider_id = "provider-delete-123"
-        
+
         with patch.object(ModelRegistryService, 'delete_provider') as mock_delete:
             mock_delete.return_value = True
-            
+
             # Act
             response = self.client.delete(f"/registry/providers/{provider_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -255,16 +247,16 @@ class TestProviderEndpoints:
         # Arrange
         provider_id = "provider-default-123"
         model_type = ModelType.CHAT
-        
+
         with patch.object(ModelRegistryService, 'set_default_provider') as mock_set:
             mock_set.return_value = True
-            
+
             # Act
             response = self.client.post(
                 f"/registry/providers/{provider_id}/set-default",
                 json={"model_type": model_type.value}
             )
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -272,7 +264,7 @@ class TestProviderEndpoints:
             assert data["provider_id"] == provider_id
 
 
-@pytest.mark.unit 
+@pytest.mark.unit
 class TestModelEndpoints:
     """Test model definition API endpoints."""
 
@@ -285,9 +277,9 @@ class TestModelEndpoints:
             username="testuser",
             is_active=True
         )
-        
+
         self.mock_session = AsyncMock()
-        
+
         # Override dependencies
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
         app.dependency_overrides[get_session] = lambda: self.mock_session
@@ -310,7 +302,7 @@ class TestModelEndpoints:
             },
             {
                 "id": "model-2",
-                "name": "claude-3", 
+                "name": "claude-3",
                 "model_type": "chat",
                 "provider_id": "anthropic-provider",
                 "is_active": True,
@@ -318,13 +310,13 @@ class TestModelEndpoints:
             }
         ]
         mock_total = 2
-        
+
         with patch.object(ModelRegistryService, 'list_models') as mock_list:
             mock_list.return_value = (mock_models, mock_total)
-            
+
             # Act
             response = self.client.get("/registry/models")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -346,13 +338,13 @@ class TestModelEndpoints:
             },
             "config": {"temperature": 0.7}
         }
-        
+
         with patch.object(ModelRegistryService, 'get_model_with_provider') as mock_get:
             mock_get.return_value = mock_model
-            
+
             # Act
             response = self.client.get(f"/registry/models/{model_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -371,7 +363,7 @@ class TestModelEndpoints:
             "config": {"max_tokens": 2048},
             "is_active": True
         }
-        
+
         mock_created_model = {
             "id": "new-model-123",
             "name": "new-model",
@@ -381,19 +373,19 @@ class TestModelEndpoints:
             "config": {"max_tokens": 2048},
             "is_active": True
         }
-        
+
         with patch.object(ModelRegistryService, 'get_provider') as mock_check_provider:
             mock_check_provider.return_value = {"id": "provider-123", "name": "Test Provider"}
-            
+
             with patch.object(ModelRegistryService, 'get_model_by_name_and_provider') as mock_check:
                 mock_check.return_value = None
-                
+
                 with patch.object(ModelRegistryService, 'create_model') as mock_create:
                     mock_create.return_value = mock_created_model
-                    
+
                     # Act
                     response = self.client.post("/registry/models", json=model_data)
-                    
+
                     # Assert
                     assert response.status_code == status.HTTP_201_CREATED
                     data = response.json()
@@ -409,20 +401,20 @@ class TestModelEndpoints:
             "description": "Updated description",
             "config": {"max_tokens": 4096}
         }
-        
+
         mock_updated_model = {
             "id": model_id,
             "name": "updated-model",
             "description": "Updated description",
             "config": {"max_tokens": 4096}
         }
-        
+
         with patch.object(ModelRegistryService, 'update_model') as mock_update:
             mock_update.return_value = mock_updated_model
-            
+
             # Act
             response = self.client.put(f"/registry/models/{model_id}", json=update_data)
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -433,13 +425,13 @@ class TestModelEndpoints:
         """Test successful model deletion."""
         # Arrange
         model_id = "model-delete-123"
-        
+
         with patch.object(ModelRegistryService, 'delete_model') as mock_delete:
             mock_delete.return_value = True
-            
+
             # Act
             response = self.client.delete(f"/registry/models/{model_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -460,9 +452,9 @@ class TestEmbeddingSpaceEndpoints:
             username="testuser",
             is_active=True
         )
-        
+
         self.mock_session = AsyncMock()
-        
+
         # Override dependencies
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
         app.dependency_overrides[get_session] = lambda: self.mock_session
@@ -493,13 +485,13 @@ class TestEmbeddingSpaceEndpoints:
             }
         ]
         mock_total = 2
-        
+
         with patch.object(ModelRegistryService, 'list_embedding_spaces') as mock_list:
             mock_list.return_value = (mock_spaces, mock_total)
-            
+
             # Act
             response = self.client.get("/registry/embedding-spaces")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -518,7 +510,7 @@ class TestEmbeddingSpaceEndpoints:
             "distance_metric": "cosine",
             "is_active": True
         }
-        
+
         mock_created_space = {
             "id": "new-space-123",
             "name": "new-embedding-space",
@@ -528,19 +520,19 @@ class TestEmbeddingSpaceEndpoints:
             "distance_metric": "cosine",
             "is_active": True
         }
-        
+
         with patch.object(ModelRegistryService, 'get_model') as mock_check_model:
             mock_check_model.return_value = {"id": "embedding-model-123", "model_type": "embedding"}
-            
+
             with patch.object(ModelRegistryService, 'get_embedding_space_by_name') as mock_check:
                 mock_check.return_value = None
-                
+
                 with patch.object(ModelRegistryService, 'create_embedding_space') as mock_create:
                     mock_create.return_value = mock_created_space
-                    
+
                     # Act
                     response = self.client.post("/registry/embedding-spaces", json=space_data)
-                    
+
                     # Assert
                     assert response.status_code == status.HTTP_201_CREATED
                     data = response.json()
@@ -560,13 +552,13 @@ class TestEmbeddingSpaceEndpoints:
                 "name": "embedding-model"
             }
         }
-        
+
         with patch.object(ModelRegistryService, 'get_embedding_space_with_model') as mock_get:
             mock_get.return_value = mock_space
-            
+
             # Act
             response = self.client.get(f"/registry/embedding-spaces/{space_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -583,20 +575,20 @@ class TestEmbeddingSpaceEndpoints:
             "description": "Updated description",
             "is_active": False
         }
-        
+
         mock_updated_space = {
             "id": space_id,
             "name": "updated-space",
             "description": "Updated description",
             "is_active": False
         }
-        
+
         with patch.object(ModelRegistryService, 'update_embedding_space') as mock_update:
             mock_update.return_value = mock_updated_space
-            
+
             # Act
             response = self.client.put(f"/registry/embedding-spaces/{space_id}", json=update_data)
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -607,13 +599,13 @@ class TestEmbeddingSpaceEndpoints:
         """Test successful embedding space deletion."""
         # Arrange
         space_id = "space-delete-123"
-        
+
         with patch.object(ModelRegistryService, 'delete_embedding_space') as mock_delete:
             mock_delete.return_value = True
-            
+
             # Act
             response = self.client.delete(f"/registry/embedding-spaces/{space_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -634,9 +626,9 @@ class TestDefaultEndpoints:
             username="testuser",
             is_active=True
         )
-        
+
         self.mock_session = AsyncMock()
-        
+
         # Override dependencies
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
         app.dependency_overrides[get_session] = lambda: self.mock_session
@@ -656,13 +648,13 @@ class TestDefaultEndpoints:
             "is_active": True,
             "is_default": True
         }
-        
+
         with patch.object(ModelRegistryService, 'get_default_provider') as mock_get:
             mock_get.return_value = mock_provider
-            
+
             # Act
             response = self.client.get(f"/registry/defaults/provider/{model_type}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -683,13 +675,13 @@ class TestDefaultEndpoints:
                 "name": "OpenAI"
             }
         }
-        
+
         with patch.object(ModelRegistryService, 'get_default_model') as mock_get:
             mock_get.return_value = mock_model
-            
+
             # Act
             response = self.client.get(f"/registry/defaults/model/{model_type}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -710,13 +702,13 @@ class TestDefaultEndpoints:
                 "name": "text-embedding-ada-002"
             }
         }
-        
+
         with patch.object(ModelRegistryService, 'get_default_embedding_space') as mock_get:
             mock_get.return_value = mock_space
-            
+
             # Act
             response = self.client.get("/registry/defaults/embedding-space")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -738,9 +730,9 @@ class TestModelRegistryIntegration:
             username="integrationuser",
             is_active=True
         )
-        
+
         self.mock_session = AsyncMock()
-        
+
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
         app.dependency_overrides[get_session] = lambda: self.mock_session
 
@@ -756,23 +748,23 @@ class TestModelRegistryIntegration:
             "provider_type": "llm",
             "config": {"api_base": "https://api.example.com"}
         }
-        
+
         mock_provider = {
             "id": "integration-provider-123",
             "name": "Integration Provider",
             "provider_type": "llm"
         }
-        
+
         with patch.object(ModelRegistryService, 'get_provider_by_name') as mock_check_provider:
             mock_check_provider.return_value = None
-            
+
             with patch.object(ModelRegistryService, 'create_provider') as mock_create_provider:
                 mock_create_provider.return_value = mock_provider
-                
+
                 provider_response = self.client.post("/registry/providers", json=provider_data)
                 assert provider_response.status_code == status.HTTP_201_CREATED
                 provider_id = provider_response.json()["id"]
-        
+
         # Step 2: Create model for that provider
         model_data = {
             "name": "integration-model",
@@ -780,22 +772,22 @@ class TestModelRegistryIntegration:
             "provider_id": provider_id,
             "config": {"max_tokens": 4096}
         }
-        
+
         mock_model = {
             "id": "integration-model-123",
             "name": "integration-model",
             "provider_id": provider_id
         }
-        
+
         with patch.object(ModelRegistryService, 'get_provider') as mock_get_provider:
             mock_get_provider.return_value = mock_provider
-            
+
             with patch.object(ModelRegistryService, 'get_model_by_name_and_provider') as mock_check_model:
                 mock_check_model.return_value = None
-                
+
                 with patch.object(ModelRegistryService, 'create_model') as mock_create_model:
                     mock_create_model.return_value = mock_model
-                    
+
                     model_response = self.client.post("/registry/models", json=model_data)
                     assert model_response.status_code == status.HTTP_201_CREATED
                     assert model_response.json()["provider_id"] == provider_id
@@ -807,66 +799,66 @@ class TestModelRegistryIntegration:
             "name": "Embedding Provider",
             "provider_type": "embedding"
         }
-        
+
         mock_provider = {
             "id": "embedding-provider-123",
             "name": "Embedding Provider"
         }
-        
+
         with patch.object(ModelRegistryService, 'get_provider_by_name') as mock_check:
             mock_check.return_value = None
-            
+
             with patch.object(ModelRegistryService, 'create_provider') as mock_create:
                 mock_create.return_value = mock_provider
-                
+
                 provider_response = self.client.post("/registry/providers", json=provider_data)
                 provider_id = provider_response.json()["id"]
-        
+
         # Step 2: Create embedding model
         model_data = {
             "name": "embedding-model",
             "model_type": "embedding",
             "provider_id": provider_id
         }
-        
+
         mock_model = {
             "id": "embedding-model-123",
             "name": "embedding-model",
             "model_type": "embedding"
         }
-        
+
         with patch.object(ModelRegistryService, 'get_provider'):
             with patch.object(ModelRegistryService, 'get_model_by_name_and_provider') as mock_check:
                 mock_check.return_value = None
-                
+
                 with patch.object(ModelRegistryService, 'create_model') as mock_create:
                     mock_create.return_value = mock_model
-                    
+
                     model_response = self.client.post("/registry/models", json=model_data)
                     model_id = model_response.json()["id"]
-        
+
         # Step 3: Create embedding space
         space_data = {
             "name": "test-embedding-space",
             "dimension": 1536,
             "model_id": model_id
         }
-        
+
         mock_space = {
             "id": "embedding-space-123",
             "name": "test-embedding-space",
             "model_id": model_id
         }
-        
+
         with patch.object(ModelRegistryService, 'get_model') as mock_get_model:
             mock_get_model.return_value = mock_model
-            
+
             with patch.object(ModelRegistryService, 'get_embedding_space_by_name') as mock_check_space:
                 mock_check_space.return_value = None
-                
+
                 with patch.object(ModelRegistryService, 'create_embedding_space') as mock_create_space:
                     mock_create_space.return_value = mock_space
-                    
+
                     space_response = self.client.post("/registry/embedding-spaces", json=space_data)
                     assert space_response.status_code == status.HTTP_201_CREATED
                     assert space_response.json()["model_id"] == model_id
@@ -876,50 +868,50 @@ class TestModelRegistryIntegration:
         # Set up existing provider and model
         provider_id = "default-test-provider"
         model_id = "default-test-model"
-        
+
         # Step 1: Set default provider
         with patch.object(ModelRegistryService, 'set_default_provider') as mock_set_provider:
             mock_set_provider.return_value = True
-            
+
             set_response = self.client.post(
                 f"/registry/providers/{provider_id}/set-default",
                 json={"model_type": "chat"}
             )
             assert set_response.status_code == status.HTTP_200_OK
-        
+
         # Step 2: Set default model
         with patch.object(ModelRegistryService, 'set_default_model') as mock_set_model:
             mock_set_model.return_value = True
-            
+
             set_model_response = self.client.post(
                 f"/registry/models/{model_id}/set-default",
                 json={"model_type": "chat"}
             )
             assert set_model_response.status_code == status.HTTP_200_OK
-        
+
         # Step 3: Retrieve defaults
         mock_default_provider = {
             "id": provider_id,
             "name": "Default Provider",
             "is_default": True
         }
-        
+
         mock_default_model = {
             "id": model_id,
             "name": "Default Model",
             "is_default": True,
             "provider": mock_default_provider
         }
-        
+
         with patch.object(ModelRegistryService, 'get_default_provider') as mock_get_provider:
             mock_get_provider.return_value = mock_default_provider
-            
+
             with patch.object(ModelRegistryService, 'get_default_model') as mock_get_model:
                 mock_get_model.return_value = mock_default_model
-                
+
                 provider_response = self.client.get("/registry/defaults/provider/chat")
                 model_response = self.client.get("/registry/defaults/model/chat")
-                
+
                 assert provider_response.status_code == status.HTTP_200_OK
                 assert model_response.status_code == status.HTTP_200_OK
                 assert provider_response.json()["is_default"] is True

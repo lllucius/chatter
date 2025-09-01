@@ -110,7 +110,7 @@ class WorkflowExecutionService:
             # Execute workflow based on type
             workflow_execution_id = f"{correlation_id}_{workflow_type}"
             performance_monitor.start_workflow(workflow_execution_id, workflow_type)
-            
+
             if workflow_type == "plain":
                 result = await self._execute_plain_workflow(
                     conversation, chat_request, correlation_id

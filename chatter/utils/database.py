@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import event, text
+
 # Compatibility layer for SQLAlchemy versions
 try:
     from sqlalchemy.ext.asyncio import (

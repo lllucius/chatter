@@ -1,15 +1,16 @@
 """Tests for document processing API endpoints."""
 
+from io import BytesIO
+from unittest.mock import patch
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, MagicMock, patch
-from io import BytesIO
 
-from chatter.main import app
 from chatter.api.auth import get_current_user
-from chatter.models.user import User
+from chatter.main import app
 from chatter.models.document import Document
+from chatter.models.user import User
 
 
 @pytest.mark.unit
@@ -25,7 +26,7 @@ class TestDocumentEndpoints:
             username="testuser",
             is_active=True
         )
-        
+
         # Override dependencies
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
 
@@ -38,7 +39,7 @@ class TestDocumentEndpoints:
         # Arrange
         file_content = b"This is a test document content."
         file_data = {"file": ("test.txt", BytesIO(file_content), "text/plain")}
-        
+
         mock_document = Document(
             id="doc-123",
             title="test.txt",
@@ -47,10 +48,10 @@ class TestDocumentEndpoints:
             file_type="text/plain",
             file_size=len(file_content)
         )
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.process_document') as mock_process:
             mock_process.return_value = mock_document
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.post(
@@ -58,7 +59,7 @@ class TestDocumentEndpoints:
                 files=file_data,
                 headers=headers
             )
-            
+
             # Assert
             assert response.status_code == status.HTTP_201_CREATED
             response_data = response.json()
@@ -70,7 +71,7 @@ class TestDocumentEndpoints:
         # Arrange
         file_content = b"Binary content"
         file_data = {"file": ("test.exe", BytesIO(file_content), "application/x-executable")}
-        
+
         # Act
         headers = {"Authorization": "Bearer test-token"}
         response = self.client.post(
@@ -78,7 +79,7 @@ class TestDocumentEndpoints:
             files=file_data,
             headers=headers
         )
-        
+
         # Assert
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -87,7 +88,7 @@ class TestDocumentEndpoints:
         # Arrange
         large_content = b"x" * (10 * 1024 * 1024 + 1)  # > 10MB
         file_data = {"file": ("large.txt", BytesIO(large_content), "text/plain")}
-        
+
         # Act
         headers = {"Authorization": "Bearer test-token"}
         response = self.client.post(
@@ -95,7 +96,7 @@ class TestDocumentEndpoints:
             files=file_data,
             headers=headers
         )
-        
+
         # Assert
         assert response.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE
 
@@ -111,19 +112,19 @@ class TestDocumentEndpoints:
             ),
             Document(
                 id="doc-2",
-                title="Document 2", 
+                title="Document 2",
                 content="Content 2",
                 user_id=self.mock_user.id
             )
         ]
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.get_user_documents') as mock_get:
             mock_get.return_value = mock_documents
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.get("/api/v1/documents", headers=headers)
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -139,14 +140,14 @@ class TestDocumentEndpoints:
             content="Test content",
             user_id=self.mock_user.id
         )
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.get_document') as mock_get:
             mock_get.return_value = mock_document
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.get(f"/api/v1/documents/{document_id}", headers=headers)
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -156,15 +157,15 @@ class TestDocumentEndpoints:
         """Test retrieving non-existent document."""
         # Arrange
         document_id = "non-existent"
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.get_document') as mock_get:
             from chatter.core.exceptions import NotFoundError
             mock_get.side_effect = NotFoundError("Document not found")
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.get(f"/api/v1/documents/{document_id}", headers=headers)
-            
+
             # Assert
             assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -176,17 +177,17 @@ class TestDocumentEndpoints:
             "title": "Updated Title",
             "tags": ["updated", "test"]
         }
-        
+
         mock_document = Document(
             id=document_id,
             title=update_data["title"],
             content="Original content",
             user_id=self.mock_user.id
         )
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.update_document') as mock_update:
             mock_update.return_value = mock_document
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.put(
@@ -194,7 +195,7 @@ class TestDocumentEndpoints:
                 json=update_data,
                 headers=headers
             )
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -204,14 +205,14 @@ class TestDocumentEndpoints:
         """Test deleting a document."""
         # Arrange
         document_id = "doc-123"
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.delete_document') as mock_delete:
             mock_delete.return_value = True
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.delete(f"/api/v1/documents/{document_id}", headers=headers)
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -221,7 +222,7 @@ class TestDocumentEndpoints:
         """Test document search functionality."""
         # Arrange
         search_query = "test content"
-        
+
         mock_results = [
             Document(
                 id="doc-1",
@@ -230,17 +231,17 @@ class TestDocumentEndpoints:
                 user_id=self.mock_user.id
             )
         ]
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.search_documents') as mock_search:
             mock_search.return_value = mock_results
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.get(
                 f"/api/v1/documents/search?q={search_query}",
                 headers=headers
             )
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -255,15 +256,15 @@ class TestDocumentEndpoints:
             "chunk_overlap": 100,
             "extract_metadata": True
         }
-        
+
         mock_chunks = [
             {"id": "chunk-1", "content": "First chunk", "metadata": {}},
             {"id": "chunk-2", "content": "Second chunk", "metadata": {}}
         ]
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.process_with_chunking') as mock_process:
             mock_process.return_value = mock_chunks
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.post(
@@ -271,7 +272,7 @@ class TestDocumentEndpoints:
                 json=processing_options,
                 headers=headers
             )
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -281,7 +282,7 @@ class TestDocumentEndpoints:
         """Test extracting metadata from document."""
         # Arrange
         document_id = "doc-123"
-        
+
         mock_metadata = {
             "author": "Test Author",
             "created_date": "2024-01-01",
@@ -289,14 +290,14 @@ class TestDocumentEndpoints:
             "language": "en",
             "topics": ["testing", "documents"]
         }
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.extract_metadata') as mock_extract:
             mock_extract.return_value = mock_metadata
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.get(f"/api/v1/documents/{document_id}/metadata", headers=headers)
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -320,14 +321,14 @@ class TestDocumentEndpoints:
                 "failed": 2
             }
         }
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.get_analytics') as mock_analytics_func:
             mock_analytics_func.return_value = mock_analytics
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.get("/api/v1/documents/analytics", headers=headers)
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -340,15 +341,15 @@ class TestDocumentEndpoints:
             ("files", ("doc1.txt", BytesIO(b"Content 1"), "text/plain")),
             ("files", ("doc2.txt", BytesIO(b"Content 2"), "text/plain")),
         ]
-        
+
         mock_results = [
             {"id": "doc-1", "title": "doc1.txt", "status": "success"},
             {"id": "doc-2", "title": "doc2.txt", "status": "success"}
         ]
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.bulk_upload') as mock_bulk:
             mock_bulk.return_value = mock_results
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.post(
@@ -356,7 +357,7 @@ class TestDocumentEndpoints:
                 files=files,
                 headers=headers
             )
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
@@ -372,10 +373,10 @@ class TestDocumentIntegration:
         self.client = TestClient(app)
         self.mock_user = User(
             id="integration-user-id",
-            email="integration@example.com", 
+            email="integration@example.com",
             username="integrationuser"
         )
-        
+
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
 
     def teardown_method(self):
@@ -387,63 +388,63 @@ class TestDocumentIntegration:
         # Upload document
         file_content = b"This is a comprehensive test document for processing workflow."
         file_data = {"file": ("workflow_test.txt", BytesIO(file_content), "text/plain")}
-        
+
         mock_document = Document(
             id="workflow-doc-id",
             title="workflow_test.txt",
             content=file_content.decode(),
             user_id=self.mock_user.id
         )
-        
+
         with patch('chatter.services.document_processing.DocumentProcessor.process_document') as mock_process:
             mock_process.return_value = mock_document
-            
+
             headers = {"Authorization": "Bearer integration-token"}
-            
+
             # Upload
             upload_response = self.client.post(
                 "/api/v1/documents/upload",
                 files=file_data,
                 headers=headers
             )
-            
+
             assert upload_response.status_code == status.HTTP_201_CREATED
             doc_id = upload_response.json()["id"]
-            
+
             # Process with chunking
             with patch('chatter.services.document_processing.DocumentProcessor.process_with_chunking') as mock_chunk:
                 mock_chunk.return_value = [
                     {"id": "chunk-1", "content": "First part of document", "metadata": {}},
                     {"id": "chunk-2", "content": "Second part of document", "metadata": {}}
                 ]
-                
+
                 process_response = self.client.post(
                     f"/api/v1/documents/{doc_id}/process",
                     json={"chunk_size": 1000},
                     headers=headers
                 )
-                
+
                 assert process_response.status_code == status.HTTP_200_OK
-                
+
                 # Extract metadata
                 with patch('chatter.services.document_processing.DocumentProcessor.extract_metadata') as mock_meta:
                     mock_meta.return_value = {"word_count": 50, "language": "en"}
-                    
+
                     metadata_response = self.client.get(
                         f"/api/v1/documents/{doc_id}/metadata",
                         headers=headers
                     )
-                    
+
                     assert metadata_response.status_code == status.HTTP_200_OK
-                    
+
                     # Search for document
                     with patch('chatter.services.document_processing.DocumentProcessor.search_documents') as mock_search:
                         mock_search.return_value = [mock_document]
-                        
+
                         search_response = self.client.get(
                             "/api/v1/documents/search?q=workflow",
                             headers=headers
                         )
-                        
+
                         assert search_response.status_code == status.HTTP_200_OK
                         assert len(search_response.json()["documents"]) == 1

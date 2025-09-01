@@ -515,7 +515,7 @@ def create_app() -> FastAPI:
                         return FileResponse(index_file)
                     else:
                         return {"error": "Frontend not available"}
-                        
+
                 logger.info("Frontend static files mounted successfully")
             else:
                 logger.warning("Frontend static directory not found, skipping mount")

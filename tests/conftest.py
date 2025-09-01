@@ -1,12 +1,11 @@
 """Test configuration and fixtures for Chatter application."""
 
 import asyncio
-from collections.abc import AsyncGenerator
-from typing import Any
-from unittest.mock import AsyncMock, MagicMock
 import sys
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
 
 # Mock required modules that may not be available in test environment
 class MockModule:

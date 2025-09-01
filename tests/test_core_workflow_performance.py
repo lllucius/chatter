@@ -2,16 +2,16 @@
 
 import asyncio
 import time
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from chatter.core.workflow_performance import (
-    WorkflowCache,
+    BatchProcessor,
     LazyToolLoader,
     PerformanceMonitor,
+    WorkflowCache,
     WorkflowOptimizer,
-    BatchProcessor,
-    AsyncWorkflowPool
 )
 
 
@@ -38,11 +38,11 @@ class TestWorkflowCache:
         provider = "openai"
         workflow_type = "full"
         config = {"temperature": 0.7, "max_tokens": 1000}
-        
+
         # Act
         key1 = self.cache._generate_cache_key(provider, workflow_type, config)
         key2 = self.cache._generate_cache_key(provider, workflow_type, config)
-        
+
         # Assert
         assert key1 == key2
         assert isinstance(key1, str)
@@ -55,11 +55,11 @@ class TestWorkflowCache:
         workflow_type = "full"
         config1 = {"temperature": 0.7}
         config2 = {"temperature": 0.8}
-        
+
         # Act
         key1 = self.cache._generate_cache_key(provider, workflow_type, config1)
         key2 = self.cache._generate_cache_key(provider, workflow_type, config2)
-        
+
         # Assert
         assert key1 != key2
 
@@ -70,11 +70,11 @@ class TestWorkflowCache:
         workflow_type = "full"
         config1 = {"temperature": 0.7, "max_tokens": 1000}
         config2 = {"max_tokens": 1000, "temperature": 0.7}
-        
+
         # Act
         key1 = self.cache._generate_cache_key(provider, workflow_type, config1)
         key2 = self.cache._generate_cache_key(provider, workflow_type, config2)
-        
+
         # Assert
         assert key1 == key2
 
@@ -82,7 +82,7 @@ class TestWorkflowCache:
         """Test cache miss when cache is empty."""
         # Act
         result = self.cache.get("openai", "full", {"temperature": 0.7})
-        
+
         # Assert
         assert result is None
         assert self.cache.cache_misses == 1
@@ -95,11 +95,11 @@ class TestWorkflowCache:
         workflow_type = "full"
         config = {"temperature": 0.7}
         mock_workflow = MagicMock()
-        
+
         # Act
         self.cache.put(provider, workflow_type, config, mock_workflow)
         result = self.cache.get(provider, workflow_type, config)
-        
+
         # Assert
         assert result == mock_workflow
         assert self.cache.cache_hits == 1
@@ -110,15 +110,15 @@ class TestWorkflowCache:
         # Arrange
         workflows = [MagicMock() for _ in range(4)]
         configs = [{"temp": i * 0.1} for i in range(4)]
-        
+
         # Act - Fill cache beyond max size
-        for i, (config, workflow) in enumerate(zip(configs, workflows)):
+        for i, (config, workflow) in enumerate(zip(configs, workflows, strict=False)):
             self.cache.put("openai", "full", config, workflow)
             if i < 3:  # First 3 should fit
                 assert len(self.cache.cache) == i + 1
             else:  # 4th should trigger eviction
                 assert len(self.cache.cache) == 3
-        
+
         # Assert - Least recently used item should be evicted
         # First item should be evicted, others should remain
         assert self.cache.get("openai", "full", configs[0]) is None  # Evicted
@@ -133,19 +133,19 @@ class TestWorkflowCache:
         workflow_type = "full"
         config = {"temperature": 0.7}
         mock_workflow = MagicMock()
-        
+
         self.cache.put(provider, workflow_type, config, mock_workflow)
-        
+
         # Get initial access time
         cache_key = self.cache._generate_cache_key(provider, workflow_type, config)
         initial_time = self.cache.access_times[cache_key]
-        
+
         # Wait a bit and access again
         time.sleep(0.01)
-        
+
         # Act
         self.cache.get(provider, workflow_type, config)
-        
+
         # Assert
         new_time = self.cache.access_times[cache_key]
         assert new_time > initial_time
@@ -157,14 +157,14 @@ class TestWorkflowCache:
         workflow_type = "full"
         config = {"temperature": 0.7}
         mock_workflow = MagicMock()
-        
+
         # Act
         self.cache.get(provider, workflow_type, config)  # Miss
         self.cache.put(provider, workflow_type, config, mock_workflow)
         self.cache.get(provider, workflow_type, config)  # Hit
         self.cache.get(provider, workflow_type, config)  # Hit
         self.cache.get("other", "type", {})  # Miss
-        
+
         # Assert
         assert self.cache.cache_hits == 2
         assert self.cache.cache_misses == 2
@@ -175,10 +175,10 @@ class TestWorkflowCache:
         # Arrange
         self.cache.put("openai", "full", {"temp": 0.7}, MagicMock())
         self.cache.put("anthropic", "tools", {"temp": 0.5}, MagicMock())
-        
+
         # Act
         self.cache.clear()
-        
+
         # Assert
         assert len(self.cache.cache) == 0
         assert len(self.cache.access_times) == 0
@@ -207,10 +207,10 @@ class TestLazyToolLoader:
             "class": "Calculator",
             "init_params": {"precision": 10}
         }
-        
+
         # Act
         self.loader.register_tool(tool_name, tool_config)
-        
+
         # Assert
         assert tool_name in self.loader.tool_configs
         assert self.loader.tool_configs[tool_name] == tool_config
@@ -226,18 +226,18 @@ class TestLazyToolLoader:
             "init_params": {}
         }
         mock_tool = MagicMock()
-        
+
         self.loader.register_tool(tool_name, tool_config)
-        
+
         with patch('importlib.import_module') as mock_import:
             mock_module = MagicMock()
             mock_calculator_class = MagicMock(return_value=mock_tool)
             mock_module.Calculator = mock_calculator_class
             mock_import.return_value = mock_module
-            
+
             # Act
             tool = self.loader.get_tool(tool_name)
-            
+
             # Assert
             assert tool == mock_tool
             assert tool_name in self.loader.loaded_tools
@@ -250,10 +250,10 @@ class TestLazyToolLoader:
         tool_name = "calculator"
         mock_tool = MagicMock()
         self.loader.loaded_tools[tool_name] = mock_tool
-        
+
         # Act
         tool = self.loader.get_tool(tool_name)
-        
+
         # Assert
         assert tool == mock_tool
 
@@ -262,7 +262,7 @@ class TestLazyToolLoader:
         # Act & Assert
         with pytest.raises(ValueError) as exc_info:
             self.loader.get_tool("nonexistent_tool")
-        
+
         assert "not registered" in str(exc_info.value)
 
     def test_get_available_tools(self):
@@ -271,10 +271,10 @@ class TestLazyToolLoader:
         self.loader.register_tool("tool1", {"module": "mod1"})
         self.loader.register_tool("tool2", {"module": "mod2"})
         self.loader.loaded_tools["tool3"] = MagicMock()  # Already loaded
-        
+
         # Act
         available = self.loader.get_available_tools()
-        
+
         # Assert
         assert "tool1" in available
         assert "tool2" in available
@@ -285,16 +285,16 @@ class TestLazyToolLoader:
         # Arrange
         tools_to_preload = ["tool1", "tool2"]
         mock_tools = [MagicMock(), MagicMock()]
-        
+
         self.loader.register_tool("tool1", {"module": "mod1", "class": "Tool1"})
         self.loader.register_tool("tool2", {"module": "mod2", "class": "Tool2"})
-        
+
         with patch.object(self.loader, 'get_tool') as mock_get_tool:
             mock_get_tool.side_effect = mock_tools
-            
+
             # Act
             self.loader.preload_tools(tools_to_preload)
-            
+
             # Assert
             assert mock_get_tool.call_count == 2
             mock_get_tool.assert_any_call("tool1")
@@ -320,10 +320,10 @@ class TestPerformanceMonitor:
         """Test starting workflow monitoring."""
         # Arrange
         workflow_id = "test-workflow-123"
-        
+
         # Act
         self.monitor.start_monitoring(workflow_id)
-        
+
         # Assert
         assert workflow_id in self.monitor.active_workflows
         assert "start_time" in self.monitor.active_workflows[workflow_id]
@@ -334,13 +334,13 @@ class TestPerformanceMonitor:
         # Arrange
         workflow_id = "test-workflow-123"
         self.monitor.start_monitoring(workflow_id)
-        
+
         # Small delay to ensure execution time > 0
         time.sleep(0.001)
-        
+
         # Act
         metrics = self.monitor.stop_monitoring(workflow_id)
-        
+
         # Assert
         assert workflow_id not in self.monitor.active_workflows
         assert workflow_id in self.monitor.execution_times
@@ -353,23 +353,23 @@ class TestPerformanceMonitor:
         # Act & Assert
         with pytest.raises(ValueError) as exc_info:
             self.monitor.stop_monitoring("nonexistent-workflow")
-        
+
         assert "not being monitored" in str(exc_info.value)
 
     def test_get_performance_summary(self):
         """Test getting performance summary."""
         # Arrange
         workflow_ids = ["workflow1", "workflow2", "workflow3"]
-        
+
         # Simulate multiple workflow executions
         for workflow_id in workflow_ids:
             self.monitor.start_monitoring(workflow_id)
             time.sleep(0.001)  # Small delay
             self.monitor.stop_monitoring(workflow_id)
-        
+
         # Act
         summary = self.monitor.get_performance_summary()
-        
+
         # Assert
         assert summary["total_workflows"] == 3
         assert "avg_execution_time" in summary
@@ -382,16 +382,16 @@ class TestPerformanceMonitor:
         """Test getting performance history for specific workflow."""
         # Arrange
         workflow_id = "repeated-workflow"
-        
+
         # Execute same workflow multiple times
         for _ in range(3):
             self.monitor.start_monitoring(workflow_id)
             time.sleep(0.001)
             self.monitor.stop_monitoring(workflow_id)
-        
+
         # Act
         history = self.monitor.get_workflow_history(workflow_id)
-        
+
         # Assert
         assert len(history) == 3
         assert all("execution_time" in entry for entry in history)
@@ -404,13 +404,13 @@ class TestPerformanceMonitor:
         for i, exec_time in enumerate(normal_times):
             workflow_id = f"normal-{i}"
             self.monitor.execution_times[workflow_id] = [exec_time]
-        
+
         # Add an anomalous slow execution
         self.monitor.execution_times["slow-workflow"] = [1.0]  # 10x slower
-        
+
         # Act
         anomalies = self.monitor.detect_anomalies(threshold_multiplier=3.0)
-        
+
         # Assert
         assert len(anomalies) > 0
         assert any("slow-workflow" in anomaly["workflow_id"] for anomaly in anomalies)
@@ -440,7 +440,7 @@ class TestWorkflowOptimizer:
             "max_tool_calls": 10,
             "tools": ["calculator", "search", "web_browser"]
         }
-        
+
         # Mock performance data
         mock_metrics = {
             "execution_time": 5.2,
@@ -448,12 +448,12 @@ class TestWorkflowOptimizer:
             "tool_usage": {"calculator": 3, "search": 2},
             "cache_hit_rate": 0.6
         }
-        
+
         # Act
         analysis = self.optimizer.analyze_workflow_performance(
             workflow_config, mock_metrics
         )
-        
+
         # Assert
         assert "performance_score" in analysis
         assert "bottlenecks" in analysis
@@ -472,26 +472,26 @@ class TestWorkflowOptimizer:
             "temperature": 0.9,    # High randomness
             "tools": ["tool1", "tool2", "tool3", "tool4", "tool5"]  # Many tools
         }
-        
+
         performance_data = {
             "execution_time": 30.0,  # Slow
             "memory_usage": 500.0,   # High memory
             "tool_usage": {"tool1": 1, "tool2": 0, "tool3": 0, "tool4": 0, "tool5": 0},
             "cache_hit_rate": 0.1    # Low cache hit
         }
-        
+
         # Act
         suggestions = self.optimizer.suggest_optimizations(
             slow_workflow_config, performance_data
         )
-        
+
         # Assert
         assert len(suggestions) > 0
-        
+
         # Should suggest reducing memory window
         memory_suggestions = [s for s in suggestions if "memory" in s.lower()]
         assert len(memory_suggestions) > 0
-        
+
         # Should suggest removing unused tools
         tool_suggestions = [s for s in suggestions if "tool" in s.lower()]
         assert len(tool_suggestions) > 0
@@ -507,25 +507,25 @@ class TestWorkflowOptimizer:
             "temperature": 0.8,
             "tools": ["useful_tool", "unused_tool1", "unused_tool2"]
         }
-        
+
         usage_stats = {
             "tool_usage": {"useful_tool": 50, "unused_tool1": 1, "unused_tool2": 0},
             "avg_memory_used": 30,  # Using much less than allocated
             "avg_tool_calls": 5     # Using much less than max
         }
-        
+
         # Act
         optimized_config = self.optimizer.optimize_workflow_config(
             original_config, usage_stats
         )
-        
+
         # Assert
         # Should reduce memory window based on actual usage
         assert optimized_config["memory_window"] < original_config["memory_window"]
-        
+
         # Should reduce max_tool_calls based on actual usage
         assert optimized_config["max_tool_calls"] < original_config["max_tool_calls"]
-        
+
         # Should keep useful tools, remove unused ones
         assert "useful_tool" in optimized_config["tools"]
         assert len(optimized_config["tools"]) < len(original_config["tools"])
@@ -538,13 +538,13 @@ class TestWorkflowOptimizer:
             "enable_memory": True,
             "memory_window": 50
         }
-        
+
         variants = [
             {"memory_window": 25},
             {"memory_window": 50},
             {"memory_window": 100}
         ]
-        
+
         # Mock execution function
         async def mock_execute_workflow(config):
             # Simulate execution time based on memory window
@@ -554,21 +554,21 @@ class TestWorkflowOptimizer:
                 "memory_usage": config["memory_window"] * 2.0,
                 "result": "success"
             }
-        
+
         # Act
         async def run_benchmark():
             return await self.optimizer.benchmark_workflow_variants(
                 base_config, variants, mock_execute_workflow, iterations=1
             )
-        
+
         # Run async test
         results = asyncio.run(run_benchmark())
-        
+
         # Assert
         assert len(results) == 3
         assert all("avg_execution_time" in result for result in results)
         assert all("config" in result for result in results)
-        
+
         # Results should be ordered by performance (fastest first)
         execution_times = [r["avg_execution_time"] for r in results]
         assert execution_times == sorted(execution_times)
@@ -595,22 +595,22 @@ class TestBatchProcessor:
         # Arrange
         async def mock_process_batch(items):
             return [f"processed_{item}" for item in items]
-        
+
         # Act
         self.processor.set_processor(mock_process_batch)
-        
+
         # Add items
         results = []
         for i in range(5):
             result = await self.processor.add_item(f"item_{i}")
             if result:
                 results.extend(result)
-        
+
         # Process any remaining items
         remaining = await self.processor.flush()
         if remaining:
             results.extend(remaining)
-        
+
         # Assert
         assert len(results) == 5
         assert all("processed_item_" in result for result in results)
@@ -620,20 +620,20 @@ class TestBatchProcessor:
         """Test automatic batch processing when batch size reached."""
         # Arrange
         processed_batches = []
-        
+
         async def mock_process_batch(items):
             processed_batches.append(items)
             return [f"processed_{item}" for item in items]
-        
+
         self.processor.set_processor(mock_process_batch)
-        
+
         # Act - Add exactly batch_size items
         results = []
         for i in range(3):  # batch_size = 3
             result = await self.processor.add_item(f"item_{i}")
             if result:
                 results.extend(result)
-        
+
         # Assert
         assert len(processed_batches) == 1
         assert len(processed_batches[0]) == 3
@@ -644,26 +644,26 @@ class TestBatchProcessor:
         """Test concurrent processing of multiple batches."""
         # Arrange
         processor = BatchProcessor(batch_size=2, max_concurrent=3)
-        
+
         processing_order = []
-        
+
         async def mock_process_batch(items):
             batch_id = f"batch_{len(processing_order)}"
             processing_order.append(batch_id)
             await asyncio.sleep(0.1)  # Simulate processing time
             return [f"processed_{item}_{batch_id}" for item in items]
-        
+
         processor.set_processor(mock_process_batch)
-        
+
         # Act - Add enough items to create multiple batches
         tasks = []
         for i in range(6):  # Will create 3 batches of size 2
             task = asyncio.create_task(processor.add_item(f"item_{i}"))
             tasks.append(task)
-        
+
         # Wait for all processing to complete
-        results = await asyncio.gather(*tasks)
-        
+        await asyncio.gather(*tasks)
+
         # Assert
         # Should have processed 3 batches
         assert len(processing_order) == 3
@@ -680,7 +680,7 @@ class TestWorkflowPerformanceIntegration:
         cache = WorkflowCache(max_size=10)
         monitor = PerformanceMonitor()
         optimizer = WorkflowOptimizer()
-        
+
         # Mock workflow configuration
         base_config = {
             "workflow_type": "full",
@@ -689,32 +689,32 @@ class TestWorkflowPerformanceIntegration:
             "max_tool_calls": 10,
             "tools": ["calculator", "search"]
         }
-        
+
         mock_workflow = MagicMock()
-        
+
         # Step 1: Cache miss - create and cache workflow
         cached_workflow = cache.get("openai", "full", base_config)
         assert cached_workflow is None
-        
+
         cache.put("openai", "full", base_config, mock_workflow)
-        
+
         # Step 2: Cache hit - retrieve cached workflow
         cached_workflow = cache.get("openai", "full", base_config)
         assert cached_workflow == mock_workflow
-        
+
         # Step 3: Monitor performance
         workflow_id = "performance-test"
         monitor.start_monitoring(workflow_id)
-        
+
         # Simulate workflow execution
         await asyncio.sleep(0.01)
-        
+
         metrics = monitor.stop_monitoring(workflow_id)
-        
+
         # Step 4: Analyze and optimize
         analysis = optimizer.analyze_workflow_performance(base_config, metrics)
         suggestions = optimizer.suggest_optimizations(base_config, metrics)
-        
+
         # Assert
         assert analysis["performance_score"] >= 0.0
         assert len(suggestions) >= 0
@@ -727,11 +727,11 @@ class TestWorkflowPerformanceIntegration:
         # Arrange
         cache = WorkflowCache(max_size=50)
         monitor = PerformanceMonitor()
-        
+
         # Simulate many concurrent workflow requests
         num_workflows = 20
         workflow_configs = []
-        
+
         for i in range(num_workflows):
             config = {
                 "workflow_type": "full",
@@ -739,7 +739,7 @@ class TestWorkflowPerformanceIntegration:
                 "max_tokens": 1000 + i * 100
             }
             workflow_configs.append(config)
-        
+
         async def simulate_workflow_execution(config_id, config):
             # Check cache first
             cached = cache.get("openai", "full", config)
@@ -748,40 +748,40 @@ class TestWorkflowPerformanceIntegration:
                 mock_workflow = MagicMock()
                 cache.put("openai", "full", config, mock_workflow)
                 cached = mock_workflow
-            
+
             # Monitor execution
             workflow_id = f"workflow_{config_id}"
             monitor.start_monitoring(workflow_id)
-            
+
             # Simulate execution time
             await asyncio.sleep(0.001 + config_id * 0.0001)
-            
+
             return monitor.stop_monitoring(workflow_id)
-        
+
         # Act - Execute all workflows concurrently
         start_time = time.time()
-        
+
         tasks = [
             simulate_workflow_execution(i, config)
             for i, config in enumerate(workflow_configs)
         ]
-        
+
         results = await asyncio.gather(*tasks)
-        
+
         end_time = time.time()
         total_time = end_time - start_time
-        
+
         # Assert
         assert len(results) == num_workflows
         assert all("execution_time" in result for result in results)
-        
+
         # Cache should have improved performance
         assert cache.cache_hits > 0
         assert cache.get_hit_rate() > 0
-        
+
         # Total time should be reasonable (parallelization working)
         assert total_time < 1.0  # Should complete in under 1 second
-        
+
         # Performance summary should be available
         summary = monitor.get_performance_summary()
         assert summary["total_workflows"] == num_workflows

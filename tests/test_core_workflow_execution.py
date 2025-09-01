@@ -1,13 +1,16 @@
 """Tests for workflow execution core functionality."""
 
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timedelta
+from unittest.mock import patch
 
 import pytest
 
-from chatter.core.workflow_execution import WorkflowExecutor, WorkflowStep, WorkflowResult
 from chatter.core.exceptions import WorkflowExecutionError
+from chatter.core.workflow_execution import (
+    WorkflowExecutor,
+    WorkflowResult,
+    WorkflowStep,
+)
 
 
 @pytest.mark.unit
@@ -30,7 +33,7 @@ class TestWorkflowExecutor:
                 config={"source": "user_input"}
             ),
             WorkflowStep(
-                id="step-2", 
+                id="step-2",
                 name="Process Data",
                 type="llm_call",
                 config={"model": "gpt-4", "prompt": "Process the input"}
@@ -42,30 +45,30 @@ class TestWorkflowExecutor:
                 config={"format": "json"}
             )
         ]
-        
+
         workflow_config = {
             "id": "simple-workflow",
             "name": "Simple Processing Workflow",
             "steps": workflow_steps
         }
-        
-        expected_result = WorkflowResult(
+
+        WorkflowResult(
             workflow_id="simple-workflow",
             status="completed",
             outputs={"formatted_data": {"result": "processed"}},
             execution_time=1.5
         )
-        
+
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             mock_execute_step.side_effect = [
                 {"input_data": "user input"},
                 {"processed_data": "AI processed result"},
                 {"formatted_data": {"result": "processed"}}
             ]
-            
+
             # Act
             result = await self.workflow_executor.execute_workflow(workflow_config)
-            
+
             # Assert
             assert result.status == "completed"
             assert "formatted_data" in result.outputs
@@ -90,31 +93,31 @@ class TestWorkflowExecutor:
                 condition="step-1.result == true"
             ),
             WorkflowStep(
-                id="step-2b", 
+                id="step-2b",
                 name="Short Text Processing",
                 type="llm_call",
                 config={"model": "gpt-3.5-turbo"},
                 condition="step-1.result == false"
             )
         ]
-        
+
         workflow_config = {
             "id": "conditional-workflow",
             "steps": workflow_steps
         }
-        
+
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             mock_execute_step.side_effect = [
                 {"result": True},  # Condition step
                 {"processed_data": "Long text result"}  # Long text processing
             ]
-            
+
             with patch.object(self.workflow_executor, '_evaluate_condition') as mock_condition:
                 mock_condition.side_effect = [True, False]  # First condition true, second false
-                
+
                 # Act
                 result = await self.workflow_executor.execute_workflow(workflow_config)
-                
+
                 # Assert
                 assert result.status == "completed"
                 # Should execute step-1 and step-2a, but not step-2b
@@ -134,7 +137,7 @@ class TestWorkflowExecutor:
             WorkflowStep(
                 id="step-2a",
                 name="Process Path A",
-                type="llm_call", 
+                type="llm_call",
                 config={"model": "gpt-4"},
                 parallel_group="group-1"
             ),
@@ -153,12 +156,12 @@ class TestWorkflowExecutor:
                 dependencies=["step-2a", "step-2b"]
             )
         ]
-        
+
         workflow_config = {
             "id": "parallel-workflow",
             "steps": workflow_steps
         }
-        
+
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             mock_execute_step.side_effect = [
                 {"input_data": "user input"},
@@ -166,16 +169,16 @@ class TestWorkflowExecutor:
                 {"result_b": "Path B result"},
                 {"combined": "Merged results"}
             ]
-            
+
             with patch.object(self.workflow_executor, '_execute_parallel_steps') as mock_parallel:
                 mock_parallel.return_value = [
                     {"result_a": "Path A result"},
                     {"result_b": "Path B result"}
                 ]
-                
+
                 # Act
                 result = await self.workflow_executor.execute_workflow(workflow_config)
-                
+
                 # Assert
                 assert result.status == "completed"
                 mock_parallel.assert_called_once()
@@ -193,27 +196,27 @@ class TestWorkflowExecutor:
             ),
             WorkflowStep(
                 id="step-2",
-                name="Failing Step", 
+                name="Failing Step",
                 type="llm_call",
                 config={"model": "gpt-4"}
             )
         ]
-        
+
         workflow_config = {
             "id": "failing-workflow",
             "steps": workflow_steps
         }
-        
+
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             mock_execute_step.side_effect = [
                 {"data": "success"},
                 Exception("Step execution failed")
             ]
-            
+
             # Act & Assert
             with pytest.raises(WorkflowExecutionError) as exc_info:
                 await self.workflow_executor.execute_workflow(workflow_config)
-            
+
             assert "Step execution failed" in str(exc_info.value)
 
     @pytest.mark.asyncio
@@ -229,23 +232,23 @@ class TestWorkflowExecutor:
                 retry_config={"max_retries": 3, "backoff_factor": 1.5}
             )
         ]
-        
+
         workflow_config = {
             "id": "retry-workflow",
             "steps": workflow_steps
         }
-        
+
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             # Fail twice, then succeed
             mock_execute_step.side_effect = [
                 Exception("Temporary failure"),
-                Exception("Another failure"), 
+                Exception("Another failure"),
                 {"result": "success on third try"}
             ]
-            
+
             # Act
             result = await self.workflow_executor.execute_workflow(workflow_config)
-            
+
             # Assert
             assert result.status == "completed"
             assert mock_execute_step.call_count == 3
@@ -266,16 +269,16 @@ class TestWorkflowExecutor:
                 )
             ]
         }
-        
+
         async def slow_execution(*args, **kwargs):
             await asyncio.sleep(2.0)  # Longer than timeout
             return {"result": "too slow"}
-        
+
         with patch.object(self.workflow_executor, '_execute_step', side_effect=slow_execution):
             # Act & Assert
             with pytest.raises(WorkflowExecutionError) as exc_info:
                 await self.workflow_executor.execute_workflow(workflow_config)
-            
+
             assert "timeout" in str(exc_info.value).lower()
 
     @pytest.mark.asyncio
@@ -291,27 +294,27 @@ class TestWorkflowExecutor:
             ),
             WorkflowStep(
                 id="step-2",
-                name="State Step 2", 
+                name="State Step 2",
                 type="processor",
                 config={}
             )
         ]
-        
+
         workflow_config = {
             "id": "state-workflow",
             "steps": workflow_steps
         }
-        
+
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             mock_execute_step.side_effect = [
                 {"intermediate_result": "step 1 done"},
                 {"final_result": "step 2 done"}
             ]
-            
+
             with patch.object(self.workflow_executor, '_save_workflow_state') as mock_save_state:
                 # Act
                 result = await self.workflow_executor.execute_workflow(workflow_config)
-                
+
                 # Assert
                 assert result.status == "completed"
                 # State should be saved after each step
@@ -339,13 +342,13 @@ class TestWorkflowExecutor:
                 )
             ]
         }
-        
+
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             mock_execute_step.return_value = {"result": "success"}
-            
+
             # Act
             result = await self.workflow_executor.execute_workflow(workflow_config)
-            
+
             # Assert
             assert result.status == "completed"
             # Check that variables were substituted in the step config
@@ -369,20 +372,20 @@ class TestWorkflowExecutor:
                 )
             ]
         }
-        
+
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             mock_execute_step.return_value = {"result": "success"}
-            
+
             with patch.object(self.workflow_executor, '_collect_step_metrics') as mock_metrics:
                 mock_metrics.return_value = {
                     "execution_time": 1.2,
                     "memory_usage": "50MB",
                     "api_calls": 1
                 }
-                
+
                 # Act
                 result = await self.workflow_executor.execute_workflow(workflow_config)
-                
+
                 # Assert
                 assert result.status == "completed"
                 assert "metrics" in result.__dict__ or hasattr(result, 'metrics')
@@ -403,14 +406,14 @@ class TestWorkflowExecutor:
                 )
             ]
         }
-        
+
         with patch.object(self.workflow_executor, '_validate_workflow') as mock_validate:
             mock_validate.side_effect = ValueError("Invalid step type: unknown_type")
-            
+
             # Act & Assert
             with pytest.raises(ValueError) as exc_info:
                 await self.workflow_executor.execute_workflow(invalid_workflow_config)
-            
+
             assert "Invalid step type" in str(exc_info.value)
 
 
@@ -451,7 +454,7 @@ class TestWorkflowExecutorIntegration:
                 )
             ]
         }
-        
+
         # Mock all step executions
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             mock_execute_step.side_effect = [
@@ -459,10 +462,10 @@ class TestWorkflowExecutorIntegration:
                 {"processed_data": "AI processed the integration test input"},
                 {"formatted_output": {"result": "integration test complete"}}
             ]
-            
+
             # Act
             result = await self.workflow_executor.execute_workflow(workflow_config)
-            
+
             # Assert
             assert result.workflow_id == "integration-workflow"
             assert result.status == "completed"
@@ -505,7 +508,7 @@ class TestWorkflowExecutorIntegration:
                 ),
                 WorkflowStep(
                     id="fallback-process",
-                    name="Fallback Processing", 
+                    name="Fallback Processing",
                     type="llm_call",
                     config={"model": "${fallback_model}"},
                     condition="condition.result == false"
@@ -519,7 +522,7 @@ class TestWorkflowExecutorIntegration:
                 )
             ]
         }
-        
+
         # Mock all required methods
         with patch.object(self.workflow_executor, '_execute_step') as mock_execute_step:
             mock_execute_step.side_effect = [
@@ -528,16 +531,16 @@ class TestWorkflowExecutorIntegration:
                 {"processed": "primary processing complete"},
                 {"final_result": "workflow complete"}
             ]
-            
+
             with patch.object(self.workflow_executor, '_evaluate_condition') as mock_condition:
                 mock_condition.side_effect = [True, False]
-                
+
                 with patch.object(self.workflow_executor, '_collect_step_metrics') as mock_metrics:
                     mock_metrics.return_value = {"execution_time": 0.5}
-                    
+
                     # Act
                     result = await self.workflow_executor.execute_workflow(complex_workflow)
-                    
+
                     # Assert
                     assert result.status == "completed"
                     assert result.workflow_id == "complex-workflow"
@@ -568,19 +571,19 @@ class TestWorkflowStepTypes:
                 "max_tokens": 500
             }
         )
-        
+
         expected_output = {
             "response": "Analysis complete",
             "tokens_used": 125,
             "model_used": "gpt-4"
         }
-        
+
         with patch.object(self.workflow_executor, '_call_llm_service') as mock_llm:
             mock_llm.return_value = expected_output
-            
+
             # Act
             result = await self.workflow_executor._execute_step(llm_step, {"input": "test data"})
-            
+
             # Assert
             assert result["response"] == "Analysis complete"
             assert result["tokens_used"] == 125
@@ -600,16 +603,16 @@ class TestWorkflowStepTypes:
                 "false_path": "simple_processing"
             }
         )
-        
+
         with patch.object(self.workflow_executor, '_evaluate_condition') as mock_condition:
             mock_condition.return_value = True
-            
+
             # Act
             result = await self.workflow_executor._execute_step(
-                condition_step, 
+                condition_step,
                 {"input": {"length": 150, "data": "test"}}
             )
-            
+
             # Assert
             assert result["result"] is True
             assert result["next_path"] == "detailed_processing"
@@ -627,21 +630,21 @@ class TestWorkflowStepTypes:
                 "sources": ["step1", "step2"]
             }
         )
-        
+
         input_data = {
             "step1": {"result": "A", "confidence": 0.9},
             "step2": {"result": "B", "confidence": 0.8}
         }
-        
+
         with patch.object(self.workflow_executor, '_aggregate_results') as mock_aggregate:
             mock_aggregate.return_value = {
                 "combined_result": "A+B",
                 "average_confidence": 0.85
             }
-            
+
             # Act
             result = await self.workflow_executor._execute_step(aggregator_step, input_data)
-            
+
             # Assert
             assert result["combined_result"] == "A+B"
             assert result["average_confidence"] == 0.85

@@ -321,7 +321,7 @@ class LLMService:
         **kwargs
     ) -> dict[str, Any]:
         """Generate response using specified provider and model.
-        
+
         Args:
             messages: List of message dictionaries with role and content
             provider: Provider name (openai, anthropic, etc.)
@@ -329,7 +329,7 @@ class LLMService:
             max_retries: Maximum retry attempts
             track_cost: Whether to track cost information
             **kwargs: Additional parameters
-            
+
         Returns:
             Response dictionary with content, role, and optionally usage info
         """
@@ -338,14 +338,14 @@ class LLMService:
         for msg in messages:
             role = msg.get("role", "user")
             content = msg.get("content", "")
-            
+
             if role == "system":
                 langchain_messages.append(SystemMessage(content=content))
             elif role == "assistant":
                 langchain_messages.append(AIMessage(content=content))
             else:  # user or any other role
                 langchain_messages.append(HumanMessage(content=content))
-        
+
         # Get provider instance
         try:
             provider_instance = await self.get_provider(provider)
@@ -369,18 +369,18 @@ class LLMService:
                 )
             else:
                 raise LLMProviderError(f"Unsupported provider: {provider}")
-        
+
         # Generate response with retries
         last_exception = None
         for attempt in range(max_retries):
             try:
                 response = await provider_instance.ainvoke(langchain_messages)
-                
+
                 result = {
                     "content": response.content,
                     "role": "assistant"
                 }
-                
+
                 # Add usage info if available
                 if hasattr(response, 'usage_metadata') and response.usage_metadata:
                     result["usage"] = {
@@ -388,13 +388,13 @@ class LLMService:
                         "output_tokens": response.usage_metadata.get("output_tokens", 0),
                         "total_tokens": response.usage_metadata.get("total_tokens", 0)
                     }
-                
+
                 if track_cost:
                     # Add cost calculation if needed
                     result["cost"] = self._calculate_cost(result.get("usage", {}), provider, model)
-                
+
                 return result
-                
+
             except Exception as e:
                 last_exception = e
                 if attempt < max_retries - 1:
@@ -402,15 +402,15 @@ class LLMService:
                     await asyncio.sleep(0.5 * (attempt + 1))  # Exponential backoff
                 else:
                     logger.error(f"All {max_retries} attempts failed: {e}")
-        
+
         raise LLMProviderError(f"Failed to generate response after {max_retries} attempts: {last_exception}")
-    
+
     def _calculate_cost(self, usage: dict, provider: str, model: str) -> dict:
         """Calculate approximate cost based on usage."""
         # Simplified cost calculation - would need real pricing data
         input_tokens = usage.get("input_tokens", 0)
         output_tokens = usage.get("output_tokens", 0)
-        
+
         # Example pricing (per 1K tokens)
         if provider.lower() == "openai":
             if "gpt-4" in model.lower():
@@ -423,7 +423,7 @@ class LLMService:
             # Default pricing
             input_cost = input_tokens * 0.001 / 1000
             output_cost = output_tokens * 0.002 / 1000
-        
+
         return {
             "input_cost": input_cost,
             "output_cost": output_cost,
@@ -757,14 +757,14 @@ class LLMService:
         **kwargs
     ) -> dict[str, Any]:
         """Generate response with fallback provider.
-        
+
         Args:
             messages: List of message dictionaries
             primary_provider: Primary provider to try first
             fallback_provider: Fallback provider if primary fails
             model: Model name
             **kwargs: Additional parameters
-            
+
         Returns:
             Response with provider_used field
         """
@@ -790,14 +790,14 @@ class LLMService:
         **kwargs
     ) -> dict[str, Any]:
         """Generate response with conversation context.
-        
+
         Args:
             messages: List of message dictionaries
             conversation_id: Conversation ID for context
             provider: Provider name
             model: Model name
             **kwargs: Additional parameters
-            
+
         Returns:
             Response dictionary
         """
@@ -815,13 +815,13 @@ class LLMService:
         **kwargs
     ) -> dict[str, Any]:
         """Generate response with load balancing across providers.
-        
+
         Args:
             messages: List of message dictionaries
             providers: List of provider names to balance across
             model: Model name
             **kwargs: Additional parameters
-            
+
         Returns:
             Response with provider_used field
         """
@@ -829,7 +829,7 @@ class LLMService:
         # In production, this would use more sophisticated logic
         import random
         provider = random.choice(providers)
-        
+
         result = await self.generate(messages, provider, model, **kwargs)
         result["provider_used"] = provider
         return result

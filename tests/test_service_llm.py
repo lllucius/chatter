@@ -1,15 +1,14 @@
 """Tests for LLM service functionality."""
 
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.services.llm import LLMService
 from chatter.models.conversation import Conversation, ConversationStatus
 from chatter.models.message import Message, MessageRole
 from chatter.models.user import User
+from chatter.services.llm import LLMService
 
 
 @pytest.mark.unit
@@ -20,14 +19,14 @@ class TestLLMService:
         """Set up test fixtures."""
         self.mock_session = AsyncMock(spec=AsyncSession)
         self.llm_service = LLMService(self.mock_session)
-        
+
         # Mock user and conversation
         self.mock_user = User(
             id="test-user-id",
             email="test@example.com",
             username="testuser"
         )
-        
+
         self.mock_conversation = Conversation(
             id="test-conv-id",
             title="Test Conversation",
@@ -44,19 +43,19 @@ class TestLLMService:
             {"role": "user", "content": "Hello"},
             {"role": "assistant", "content": "Hi! How can I help you?"}
         ]
-        
+
         expected_response = "The capital of France is Paris."
-        
+
         with patch.object(self.llm_service, '_call_llm_provider') as mock_llm_call:
             mock_llm_call.return_value = expected_response
-            
+
             # Act
             result = await self.llm_service.generate_response(
                 message=message,
                 context=context,
                 conversation_id=self.mock_conversation.id
             )
-            
+
             # Assert
             assert result == expected_response
             mock_llm_call.assert_called_once()
@@ -67,19 +66,19 @@ class TestLLMService:
         # Arrange
         message = "Calculate 2 + 2"
         agent_id = "math-assistant"
-        
+
         expected_response = "2 + 2 = 4"
-        
+
         with patch.object(self.llm_service, '_call_llm_provider') as mock_llm_call:
             mock_llm_call.return_value = expected_response
-            
+
             # Act
             result = await self.llm_service.generate_response(
                 message=message,
                 agent_id=agent_id,
                 conversation_id=self.mock_conversation.id
             )
-            
+
             # Assert
             assert result == expected_response
             mock_llm_call.assert_called_once()
@@ -90,25 +89,25 @@ class TestLLMService:
         # Arrange
         message = "Tell me a story"
         chunks = ["Once ", "upon ", "a ", "time..."]
-        
+
         async def mock_stream():
             for chunk in chunks:
                 yield chunk
-        
+
         with patch.object(self.llm_service, '_stream_llm_provider') as mock_stream_call:
             mock_stream_call.return_value = mock_stream()
-            
+
             # Act
             response_stream = self.llm_service.generate_streaming_response(
                 message=message,
                 conversation_id=self.mock_conversation.id
             )
-            
+
             # Collect all chunks
             result_chunks = []
             async for chunk in response_stream:
                 result_chunks.append(chunk)
-            
+
             # Assert
             assert result_chunks == chunks
             mock_stream_call.assert_called_once()
@@ -131,13 +130,13 @@ class TestLLMService:
                 "capabilities": ["text", "analysis"]
             }
         ]
-        
+
         with patch.object(self.llm_service, '_fetch_available_models') as mock_fetch:
             mock_fetch.return_value = expected_models
-            
+
             # Act
             models = await self.llm_service.get_available_models()
-            
+
             # Assert
             assert len(models) == 2
             assert models[0]["id"] == "gpt-4"
@@ -149,12 +148,12 @@ class TestLLMService:
         # Arrange
         valid_model = "gpt-4"
         invalid_model = "nonexistent-model"
-        
+
         available_models = [{"id": "gpt-4"}, {"id": "claude-3"}]
-        
+
         with patch.object(self.llm_service, 'get_available_models') as mock_get_models:
             mock_get_models.return_value = available_models
-            
+
             # Act & Assert
             assert await self.llm_service.validate_model(valid_model) is True
             assert await self.llm_service.validate_model(invalid_model) is False
@@ -176,7 +175,7 @@ class TestLLMService:
                 }
             }
         ]
-        
+
         # Mock tool call response
         tool_call_response = {
             "tool_calls": [
@@ -186,23 +185,23 @@ class TestLLMService:
                 }
             ]
         }
-        
+
         tool_result = {"temperature": "22°C", "condition": "sunny"}
         final_response = "The weather in Paris is 22°C and sunny."
-        
+
         with patch.object(self.llm_service, '_call_llm_provider') as mock_llm_call:
             mock_llm_call.side_effect = [tool_call_response, final_response]
-            
+
             with patch.object(self.llm_service, '_execute_tool_call') as mock_tool_exec:
                 mock_tool_exec.return_value = tool_result
-                
+
                 # Act
                 result = await self.llm_service.generate_response_with_tools(
                     message=message,
                     tools=available_tools,
                     conversation_id=self.mock_conversation.id
                 )
-                
+
                 # Assert
                 assert result == final_response
                 assert mock_llm_call.call_count == 2
@@ -216,15 +215,15 @@ class TestLLMService:
             {"role": "user", "content": "Hello"},
             {"role": "assistant", "content": "Hi there!"}
         ]
-        
+
         expected_tokens = {"prompt_tokens": 15, "completion_tokens": 8, "total_tokens": 23}
-        
+
         with patch.object(self.llm_service, '_count_tokens') as mock_count:
             mock_count.return_value = expected_tokens
-            
+
             # Act
             tokens = await self.llm_service.calculate_token_usage(messages)
-            
+
             # Assert
             assert tokens["total_tokens"] == 23
             assert tokens["prompt_tokens"] == 15
@@ -235,12 +234,12 @@ class TestLLMService:
         """Test rate limiting handling."""
         # Arrange
         message = "Test message"
-        
+
         from chatter.core.exceptions import RateLimitError
-        
+
         with patch.object(self.llm_service, '_call_llm_provider') as mock_llm_call:
             mock_llm_call.side_effect = RateLimitError("Rate limit exceeded")
-            
+
             # Act & Assert
             with pytest.raises(RateLimitError):
                 await self.llm_service.generate_response(
@@ -253,22 +252,22 @@ class TestLLMService:
         """Test handling of context length limits."""
         # Arrange
         long_message = "Very long message " * 1000  # Simulate long context
-        
+
         with patch.object(self.llm_service, '_check_context_length') as mock_check:
             mock_check.return_value = False  # Context too long
-            
+
             with patch.object(self.llm_service, '_truncate_context') as mock_truncate:
                 mock_truncate.return_value = [{"role": "user", "content": "Truncated message"}]
-                
+
                 with patch.object(self.llm_service, '_call_llm_provider') as mock_llm_call:
                     mock_llm_call.return_value = "Response to truncated context"
-                    
+
                     # Act
                     result = await self.llm_service.generate_response(
                         message=long_message,
                         conversation_id=self.mock_conversation.id
                     )
-                    
+
                     # Assert
                     assert result == "Response to truncated context"
                     mock_truncate.assert_called_once()
@@ -278,20 +277,20 @@ class TestLLMService:
         """Test fallback between multiple LLM providers."""
         # Arrange
         message = "Test message"
-        
+
         with patch.object(self.llm_service, '_call_llm_provider') as mock_llm_call:
             # First provider fails, second succeeds
             mock_llm_call.side_effect = [
                 Exception("Primary provider failed"),
                 "Response from fallback provider"
             ]
-            
+
             # Act
             result = await self.llm_service.generate_response_with_fallback(
                 message=message,
                 conversation_id=self.mock_conversation.id
             )
-            
+
             # Assert
             assert result == "Response from fallback provider"
             assert mock_llm_call.call_count == 2
@@ -301,7 +300,7 @@ class TestLLMService:
         """Test conversation context management."""
         # Arrange
         conversation_id = self.mock_conversation.id
-        
+
         # Mock existing messages
         existing_messages = [
             Message(
@@ -319,13 +318,13 @@ class TestLLMService:
                 user_id=None
             )
         ]
-        
+
         with patch.object(self.llm_service, '_get_conversation_messages') as mock_get_msgs:
             mock_get_msgs.return_value = existing_messages
-            
+
             # Act
             context = await self.llm_service.build_conversation_context(conversation_id)
-            
+
             # Assert
             assert len(context) == 2
             assert context[0]["role"] == "user"
@@ -348,23 +347,23 @@ class TestLLMServiceIntegration:
         """Test complete conversation flow with LLM service."""
         # This would test the full integration with actual or mocked LLM providers
         # For now, we'll mock the external dependencies
-        
+
         conversation_id = "integration-conv-id"
-        
+
         # Mock conversation messages retrieval
         with patch.object(self.llm_service, '_get_conversation_messages') as mock_get_msgs:
             mock_get_msgs.return_value = []
-            
+
             # Mock LLM provider call
             with patch.object(self.llm_service, '_call_llm_provider') as mock_llm_call:
                 mock_llm_call.return_value = "Hello! I'm ready to help you."
-                
+
                 # Act
                 response = await self.llm_service.generate_response(
                     message="Hello, AI assistant!",
                     conversation_id=conversation_id
                 )
-                
+
                 # Assert
                 assert response == "Hello! I'm ready to help you."
                 mock_get_msgs.assert_called_once_with(conversation_id)
@@ -374,18 +373,18 @@ class TestLLMServiceIntegration:
     async def test_error_recovery_and_logging(self):
         """Test error recovery and proper logging."""
         message = "Test message for error handling"
-        
+
         with patch.object(self.llm_service, '_call_llm_provider') as mock_llm_call:
             # Simulate provider error
             mock_llm_call.side_effect = Exception("Provider temporarily unavailable")
-            
+
             # Act & Assert
             with pytest.raises(Exception) as exc_info:
                 await self.llm_service.generate_response(
                     message=message,
                     conversation_id="test-conv-id"
                 )
-            
+
             assert "Provider temporarily unavailable" in str(exc_info.value)
 
 
@@ -401,7 +400,7 @@ class TestLLMServiceConfiguration:
         """Test LLM service initialization."""
         # Act
         llm_service = LLMService(self.mock_session)
-        
+
         # Assert
         assert llm_service.session == self.mock_session
         assert hasattr(llm_service, 'config')
@@ -410,10 +409,10 @@ class TestLLMServiceConfiguration:
         """Test LLM provider configuration."""
         # Arrange
         llm_service = LLMService(self.mock_session)
-        
+
         # Act
         providers = llm_service.get_configured_providers()
-        
+
         # Assert
         assert isinstance(providers, list)
         # Should have at least one provider configured
@@ -424,21 +423,21 @@ class TestLLMServiceConfiguration:
         """Test model selection logic."""
         # Arrange
         llm_service = LLMService(self.mock_session)
-        
+
         preferences = {
             "task_type": "general",
             "quality": "high",
             "speed": "medium"
         }
-        
+
         with patch.object(llm_service, 'get_available_models') as mock_get_models:
             mock_get_models.return_value = [
                 {"id": "gpt-4", "quality": "high", "speed": "medium"},
                 {"id": "gpt-3.5-turbo", "quality": "medium", "speed": "high"}
             ]
-            
+
             # Act
             selected_model = await llm_service.select_optimal_model(preferences)
-            
+
             # Assert
             assert selected_model in ["gpt-4", "gpt-3.5-turbo"]

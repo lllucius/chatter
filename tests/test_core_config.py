@@ -1,8 +1,9 @@
 """Tests for configuration management."""
 
-import pytest
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
+
+import pytest
 from pydantic import ValidationError
 
 from chatter.config import Settings
@@ -16,13 +17,13 @@ class TestSettings:
         """Test default configuration values."""
         # Act
         settings = Settings()
-        
+
         # Assert application settings
         assert settings.app_name == "Chatter API"
         assert settings.app_version == "0.1.0"
         assert settings.environment == "development"
         assert settings.debug is False
-        
+
         # Assert server settings
         assert settings.host == "0.0.0.0"
         assert settings.port == 8000
@@ -41,11 +42,11 @@ class TestSettings:
             "PORT": "3000",
             "WORKERS": "4"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert settings.app_name == "Test Chatter"
             assert settings.app_version == "1.0.0"
@@ -64,11 +65,11 @@ class TestSettings:
             "DATABASE_POOL_SIZE": "20",
             "DATABASE_MAX_OVERFLOW": "10"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert settings.database_url == "postgresql://user:pass@localhost:5432/testdb"
             assert settings.database_echo is True
@@ -85,11 +86,11 @@ class TestSettings:
             "CACHE_ENABLED": "true",
             "CACHE_TTL": "7200"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert settings.redis_url == "redis://localhost:6380/1"
             assert settings.redis_password == "test_password"
@@ -108,11 +109,11 @@ class TestSettings:
             "ALLOWED_HOSTS": "localhost,127.0.0.1,example.com",
             "CORS_ORIGINS": "http://localhost:3000,https://app.example.com"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert settings.secret_key == "test-secret-key-123"
             assert settings.jwt_algorithm == "HS512"
@@ -134,11 +135,11 @@ class TestSettings:
             "TEMPERATURE": "0.8",
             "LLM_TIMEOUT": "60"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert settings.openai_api_key == "sk-test-key-123"
             assert settings.anthropic_api_key == "ant-test-key-456"
@@ -158,11 +159,11 @@ class TestSettings:
             "VECTOR_SEARCH_LIMIT": "20",
             "SIMILARITY_THRESHOLD": "0.8"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert settings.vector_store_type == "pgvector"
             assert settings.embedding_model == "text-embedding-ada-002"
@@ -180,11 +181,11 @@ class TestSettings:
             "STRUCTURED_LOGGING": "true",
             "SENTRY_DSN": "https://test@sentry.io/123456"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert settings.monitoring_enabled is True
             assert settings.metrics_enabled is True
@@ -196,24 +197,24 @@ class TestSettings:
         """Test validation of invalid port numbers."""
         # Arrange
         env_vars = {"PORT": "99999"}  # Port too high
-        
+
         with patch.dict(os.environ, env_vars):
             # Act & Assert
             with pytest.raises(ValidationError) as exc_info:
                 Settings()
-            
+
             assert "port" in str(exc_info.value).lower()
 
     def test_invalid_database_url_validation(self):
         """Test validation of invalid database URLs."""
         # Arrange
         env_vars = {"DATABASE_URL": "invalid-url"}
-        
+
         with patch.dict(os.environ, env_vars):
             # Act & Assert
             with pytest.raises(ValidationError) as exc_info:
                 Settings()
-            
+
             # Should fail URL validation
             assert "database_url" in str(exc_info.value).lower()
 
@@ -224,12 +225,12 @@ class TestSettings:
             "ENVIRONMENT": "production",
             "SECRET_KEY": ""  # Empty secret key
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act & Assert
             with pytest.raises(ValidationError) as exc_info:
                 Settings()
-            
+
             assert "secret_key" in str(exc_info.value).lower()
 
     def test_model_dump_excludes_secrets(self):
@@ -240,13 +241,13 @@ class TestSettings:
             "OPENAI_API_KEY": "sk-secret-openai-key",
             "DATABASE_URL": "postgresql://user:password@localhost/db"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             settings = Settings()
-            
+
             # Act
             config_dict = settings.model_dump(exclude={"secret_key", "openai_api_key", "database_url"})
-            
+
             # Assert
             assert "secret_key" not in config_dict
             assert "openai_api_key" not in config_dict
@@ -265,10 +266,10 @@ class TestSettings:
             "secret_key": "test-secret-key",
             "debug": True
         }
-        
+
         # Act
         settings = Settings(**valid_config)
-        
+
         # Assert
         assert settings.app_name == "Test App"
         assert settings.environment == "test"
@@ -282,11 +283,11 @@ class TestSettings:
         env_vars = {
             "CORS_ORIGINS": "http://localhost:3000,https://app.example.com,https://admin.example.com"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert isinstance(settings.cors_origins, list)
             assert len(settings.cors_origins) == 3
@@ -300,11 +301,11 @@ class TestSettings:
         env_vars = {
             "ALLOWED_HOSTS": "localhost,127.0.0.1,*.example.com,api.domain.com"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert isinstance(settings.allowed_hosts, list)
             assert "localhost" in settings.allowed_hosts
@@ -317,13 +318,13 @@ class TestSettings:
             "SECRET_KEY": "super-secret-key",
             "OPENAI_API_KEY": "sk-secret-key"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             settings = Settings()
-            
+
             # Act
             repr_str = repr(settings)
-            
+
             # Assert - secrets should be masked or not shown
             assert "super-secret-key" not in repr_str
             assert "sk-secret-key" not in repr_str
@@ -342,11 +343,11 @@ class TestSettingsIntegration:
             "DEBUG": "true",
             "DATABASE_URL": "postgresql://localhost/integration_test"
         }
-        
+
         with patch.dict(os.environ, mock_env_content):
             # Act
             settings = Settings()
-            
+
             # Assert
             assert settings.app_name == "Integration Test App"
             assert settings.environment == "test"
@@ -367,7 +368,7 @@ class TestSettingsIntegration:
         }):
             # Act
             settings = Settings()
-            
+
             # Assert production settings are valid
             assert settings.environment == "production"
             assert settings.secret_key == "production-secret-key"
@@ -380,7 +381,7 @@ class TestSettingsIntegration:
         # Test development settings
         with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
             dev_settings = Settings()
-            
+
         # Test production settings
         with patch.dict(os.environ, {
             "ENVIRONMENT": "production",
@@ -388,12 +389,12 @@ class TestSettingsIntegration:
             "DEBUG": "false"
         }):
             prod_settings = Settings()
-            
+
         # Assert differences
         assert dev_settings.environment == "development"
         assert prod_settings.environment == "production"
         assert prod_settings.debug is False
-        
+
     def test_settings_caching(self):
         """Test that settings are properly cached/singleton pattern."""
         # Arrange
@@ -401,7 +402,7 @@ class TestSettingsIntegration:
             # Act
             settings1 = Settings()
             settings2 = Settings()
-            
+
             # Assert - settings should have same values
             assert settings1.app_name == settings2.app_name
             assert settings1.app_name == "Cached Test App"

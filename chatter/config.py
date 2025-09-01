@@ -1,6 +1,5 @@
 """Configuration management for Chatter application."""
 
-from typing import Any
 
 # Using pydantic v2
 from pydantic import Field, field_validator, model_validator
@@ -373,7 +372,7 @@ class Settings(BaseSettings):
     )
 
     # -----------------------------------------------------------------------------
-    # Pydantic Settings Config 
+    # Pydantic Settings Config
     # -----------------------------------------------------------------------------
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -390,7 +389,7 @@ class Settings(BaseSettings):
         is_production = self.is_production
         debug = self.debug
         secret_key = self.secret_key
-        
+
         # Validate database URL is provided
         if not database_url:
             raise ValueError(

@@ -54,7 +54,7 @@ StreamEventType = StreamingEventType
 
 class StreamingError(Exception):
     """Exception raised during streaming operations."""
-    
+
     def __init__(self, message: str, event_type: StreamingEventType | None = None):
         super().__init__(message)
         self.event_type = event_type

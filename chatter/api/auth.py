@@ -109,7 +109,7 @@ async def login(
         raise AuthenticationProblem(
             detail="Username or email is required"
         ) from None
-    
+
     user = await auth_service.authenticate_user(
         identifier, user_data.password
     )

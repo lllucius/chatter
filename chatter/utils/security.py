@@ -609,10 +609,10 @@ def generate_secure_secret(length: int = 32) -> str:
 
 def generate_session_id(length: int = 32) -> str:
     """Generate a secure session ID.
-    
+
     Args:
         length: Length of the session ID
-        
+
     Returns:
         Secure session ID string
     """

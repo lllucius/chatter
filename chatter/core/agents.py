@@ -5,7 +5,11 @@ from datetime import UTC, datetime
 from typing import Any
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import (
+    BaseMessage,
+    HumanMessage,
+    SystemMessage,
+)
 from langchain_core.tools import BaseTool
 
 from chatter.core.langgraph import ConversationState, workflow_manager

@@ -1,19 +1,15 @@
 """Tests for plugin management API endpoints."""
 
+from unittest.mock import patch
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, MagicMock, patch
 
-from chatter.main import app
 from chatter.api.auth import get_current_user
+from chatter.main import app
 from chatter.models.user import User
-from chatter.schemas.plugins import (
-    PluginInstallRequest,
-    PluginUpdateRequest,
-    PluginListRequest,
-)
-from chatter.services.plugins import PluginManager, PluginError
+from chatter.services.plugins import PluginError
 
 
 @pytest.mark.unit
@@ -29,7 +25,7 @@ class TestPluginEndpoints:
             username="testuser",
             is_active=True
         )
-        
+
         # Override dependencies
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
 
@@ -50,7 +46,7 @@ class TestPluginEndpoints:
                 "endpoint": "https://api.example.com"
             }
         }
-        
+
         mock_installed_plugin = {
             "id": "plugin-123",
             "name": "Test Plugin",
@@ -72,13 +68,13 @@ class TestPluginEndpoints:
                 "license": "MIT"
             }
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.install_plugin.return_value = mock_installed_plugin
-            
+
             # Act
             response = self.client.post("/plugins/install", json=install_data)
-            
+
             # Assert
             assert response.status_code == status.HTTP_201_CREATED
             data = response.json()
@@ -99,7 +95,7 @@ class TestPluginEndpoints:
             "auto_enable": False,
             "verify_signature": True
         }
-        
+
         mock_installed_plugin = {
             "id": "file-plugin-456",
             "name": "File Plugin",
@@ -109,13 +105,13 @@ class TestPluginEndpoints:
             "is_enabled": False,  # auto_enable was False
             "installed_by": self.mock_user.id
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.install_plugin.return_value = mock_installed_plugin
-            
+
             # Act
             response = self.client.post("/plugins/install", json=install_data)
-            
+
             # Assert
             assert response.status_code == status.HTTP_201_CREATED
             data = response.json()
@@ -131,10 +127,10 @@ class TestPluginEndpoints:
             "repository": "",  # Empty repository
             "version": "not-a-version"  # Invalid version format
         }
-        
+
         # Act
         response = self.client.post("/plugins/install", json=invalid_install_data)
-        
+
         # Assert
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -145,13 +141,13 @@ class TestPluginEndpoints:
             "source": "github",
             "repository": "owner/existing-plugin"
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.install_plugin.side_effect = PluginError("Plugin already exists")
-            
+
             # Act
             response = self.client.post("/plugins/install", json=install_data)
-            
+
             # Assert
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert "already exists" in response.json()["detail"]
@@ -175,20 +171,20 @@ class TestPluginEndpoints:
                 "name": "Plugin 2",
                 "description": "Second test plugin",
                 "version": "2.1.0",
-                "status": "installed", 
+                "status": "installed",
                 "is_enabled": False,
                 "capabilities": ["data_processing", "analytics"],
                 "installed_by": "other-user-id"
             }
         ]
         mock_total = 2
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.list_plugins.return_value = (mock_plugins, mock_total)
-            
+
             # Act
             response = self.client.get("/plugins/?page=1&per_page=10")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -211,13 +207,13 @@ class TestPluginEndpoints:
                 "capabilities": ["llm_integration"]
             }
         ]
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.list_plugins.return_value = (mock_enabled_plugins, 1)
-            
+
             # Act
             response = self.client.get("/plugins/?enabled=true&capability=llm_integration")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -252,13 +248,13 @@ class TestPluginEndpoints:
             "installed_by": self.mock_user.id,
             "last_updated": "2024-01-15T00:00:00Z"
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.get_plugin.return_value = mock_plugin
-            
+
             # Act
             response = self.client.get(f"/plugins/{plugin_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -272,13 +268,13 @@ class TestPluginEndpoints:
         """Test plugin retrieval when plugin doesn't exist."""
         # Arrange
         plugin_id = "nonexistent-plugin"
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.get_plugin.side_effect = PluginError("Plugin not found")
-            
+
             # Act
             response = self.client.get(f"/plugins/{plugin_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -294,7 +290,7 @@ class TestPluginEndpoints:
             },
             "auto_restart": True
         }
-        
+
         mock_updated_plugin = {
             "id": plugin_id,
             "name": "Updated Plugin",
@@ -306,13 +302,13 @@ class TestPluginEndpoints:
             },
             "last_updated": "2024-01-20T00:00:00Z"
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.update_plugin.return_value = mock_updated_plugin
-            
+
             # Act
             response = self.client.put(f"/plugins/{plugin_id}", json=update_data)
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -324,13 +320,13 @@ class TestPluginEndpoints:
         """Test successful plugin deletion."""
         # Arrange
         plugin_id = "plugin-delete-123"
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.uninstall_plugin.return_value = True
-            
+
             # Act
             response = self.client.delete(f"/plugins/{plugin_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -341,13 +337,13 @@ class TestPluginEndpoints:
         """Test plugin deletion when plugin is in use."""
         # Arrange
         plugin_id = "plugin-in-use-123"
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.uninstall_plugin.side_effect = PluginError("Plugin is currently in use")
-            
+
             # Act
             response = self.client.delete(f"/plugins/{plugin_id}")
-            
+
             # Assert
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert "in use" in response.json()["detail"]
@@ -356,20 +352,20 @@ class TestPluginEndpoints:
         """Test successful plugin enabling."""
         # Arrange
         plugin_id = "plugin-enable-123"
-        
+
         mock_result = {
             "success": True,
             "plugin_id": plugin_id,
             "action": "enabled",
             "message": "Plugin enabled successfully"
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.enable_plugin.return_value = mock_result
-            
+
             # Act
             response = self.client.post(f"/plugins/{plugin_id}/enable")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -381,13 +377,13 @@ class TestPluginEndpoints:
         """Test enabling plugin that's already enabled."""
         # Arrange
         plugin_id = "plugin-already-enabled"
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.enable_plugin.side_effect = PluginError("Plugin is already enabled")
-            
+
             # Act
             response = self.client.post(f"/plugins/{plugin_id}/enable")
-            
+
             # Assert
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert "already enabled" in response.json()["detail"]
@@ -396,20 +392,20 @@ class TestPluginEndpoints:
         """Test successful plugin disabling."""
         # Arrange
         plugin_id = "plugin-disable-123"
-        
+
         mock_result = {
             "success": True,
             "plugin_id": plugin_id,
             "action": "disabled",
             "message": "Plugin disabled successfully"
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.disable_plugin.return_value = mock_result
-            
+
             # Act
             response = self.client.post(f"/plugins/{plugin_id}/disable")
-            
+
             # Assert
             assert response.status_code == status.HTTP_200_OK
             data = response.json()
@@ -421,15 +417,15 @@ class TestPluginEndpoints:
         """Test disabling plugin that has active dependencies."""
         # Arrange
         plugin_id = "plugin-with-deps"
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.disable_plugin.side_effect = PluginError(
                 "Cannot disable plugin: other plugins depend on it"
             )
-            
+
             # Act
             response = self.client.post(f"/plugins/{plugin_id}/disable")
-            
+
             # Assert
             assert response.status_code == status.HTTP_400_BAD_REQUEST
             assert "depend on it" in response.json()["detail"]
@@ -448,7 +444,7 @@ class TestPluginValidation:
             username="testuser",
             is_active=True
         )
-        
+
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
 
     def teardown_method(self):
@@ -463,10 +459,10 @@ class TestPluginValidation:
             "version": "1.0.0"
             # Missing 'source' field
         }
-        
+
         # Act
         response = self.client.post("/plugins/install", json=install_data)
-        
+
         # Assert
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
         errors = response.json()["detail"]
@@ -481,10 +477,10 @@ class TestPluginValidation:
             "repository": "owner/plugin-repo",
             "version": "not.a.version"  # Invalid semantic version
         }
-        
+
         # Act
         response = self.client.post("/plugins/install", json=install_data)
-        
+
         # Assert
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -495,10 +491,10 @@ class TestPluginValidation:
         update_data = {
             "config": "not an object"  # Should be a dict/object
         }
-        
+
         # Act
         response = self.client.put(f"/plugins/{plugin_id}", json=update_data)
-        
+
         # Assert
         assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -516,7 +512,7 @@ class TestPluginIntegration:
             username="integrationuser",
             is_active=True
         )
-        
+
         app.dependency_overrides[get_current_user] = lambda: self.mock_user
 
     def teardown_method(self):
@@ -532,7 +528,7 @@ class TestPluginIntegration:
             "version": "1.0.0",
             "auto_enable": False
         }
-        
+
         mock_installed_plugin = {
             "id": "lifecycle-plugin-123",
             "name": "Lifecycle Test Plugin",
@@ -540,28 +536,28 @@ class TestPluginIntegration:
             "status": "installed",
             "is_enabled": False
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.install_plugin.return_value = mock_installed_plugin
-            
+
             install_response = self.client.post("/plugins/install", json=install_data)
             assert install_response.status_code == status.HTTP_201_CREATED
             plugin_id = install_response.json()["id"]
-        
+
         # Step 2: Enable plugin
         mock_enable_result = {
             "success": True,
             "plugin_id": plugin_id,
             "action": "enabled"
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.enable_plugin.return_value = mock_enable_result
-            
+
             enable_response = self.client.post(f"/plugins/{plugin_id}/enable")
             assert enable_response.status_code == status.HTTP_200_OK
             assert enable_response.json()["success"] is True
-        
+
         # Step 3: Configure plugin
         config_data = {
             "config": {
@@ -569,7 +565,7 @@ class TestPluginIntegration:
                 "timeout": 60
             }
         }
-        
+
         mock_updated_plugin = {
             "id": plugin_id,
             "name": "Lifecycle Test Plugin",
@@ -580,32 +576,32 @@ class TestPluginIntegration:
                 "timeout": 60
             }
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.update_plugin.return_value = mock_updated_plugin
-            
+
             update_response = self.client.put(f"/plugins/{plugin_id}", json=config_data)
             assert update_response.status_code == status.HTTP_200_OK
             assert update_response.json()["config"]["timeout"] == 60
-        
+
         # Step 4: Disable plugin
         mock_disable_result = {
             "success": True,
             "plugin_id": plugin_id,
             "action": "disabled"
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.disable_plugin.return_value = mock_disable_result
-            
+
             disable_response = self.client.post(f"/plugins/{plugin_id}/disable")
             assert disable_response.status_code == status.HTTP_200_OK
             assert disable_response.json()["action"] == "disabled"
-        
+
         # Step 5: Uninstall plugin
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.uninstall_plugin.return_value = True
-            
+
             delete_response = self.client.delete(f"/plugins/{plugin_id}")
             assert delete_response.status_code == status.HTTP_200_OK
             assert delete_response.json()["deleted"] is True
@@ -618,19 +614,19 @@ class TestPluginIntegration:
             "repository": "test/base-plugin",
             "version": "1.0.0"
         }
-        
+
         mock_base_plugin = {
             "id": "base-plugin-123",
             "name": "Base Plugin",
             "capabilities": ["core_functionality"]
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.install_plugin.return_value = mock_base_plugin
-            
+
             base_response = self.client.post("/plugins/install", json=base_plugin_data)
             base_plugin_id = base_response.json()["id"]
-        
+
         # Step 2: Install dependent plugin
         dependent_plugin_data = {
             "source": "github",
@@ -638,30 +634,30 @@ class TestPluginIntegration:
             "version": "1.0.0",
             "dependencies": [base_plugin_id]
         }
-        
+
         mock_dependent_plugin = {
             "id": "dependent-plugin-456",
             "name": "Dependent Plugin",
             "dependencies": [base_plugin_id],
             "capabilities": ["extended_functionality"]
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.install_plugin.return_value = mock_dependent_plugin
-            
+
             dependent_response = self.client.post("/plugins/install", json=dependent_plugin_data)
             dependent_plugin_id = dependent_response.json()["id"]
-        
+
         # Step 3: Try to disable base plugin (should fail due to dependency)
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.disable_plugin.side_effect = PluginError(
                 f"Cannot disable plugin: {dependent_plugin_id} depends on it"
             )
-            
+
             disable_response = self.client.post(f"/plugins/{base_plugin_id}/disable")
             assert disable_response.status_code == status.HTTP_400_BAD_REQUEST
             assert "depends on it" in disable_response.json()["detail"]
-        
+
         # Step 4: Disable dependent plugin first
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.disable_plugin.return_value = {
@@ -669,10 +665,10 @@ class TestPluginIntegration:
                 "plugin_id": dependent_plugin_id,
                 "action": "disabled"
             }
-            
+
             disable_dependent_response = self.client.post(f"/plugins/{dependent_plugin_id}/disable")
             assert disable_dependent_response.status_code == status.HTTP_200_OK
-        
+
         # Step 5: Now disable base plugin (should succeed)
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.disable_plugin.return_value = {
@@ -680,7 +676,7 @@ class TestPluginIntegration:
                 "plugin_id": base_plugin_id,
                 "action": "disabled"
             }
-            
+
             disable_base_response = self.client.post(f"/plugins/{base_plugin_id}/disable")
             assert disable_base_response.status_code == status.HTTP_200_OK
 
@@ -711,16 +707,16 @@ class TestPluginIntegration:
                 "downloads": 800
             }
         ]
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.list_plugins.return_value = (mock_available_plugins, 2)
-            
+
             marketplace_response = self.client.get("/plugins/?status=available")
             assert marketplace_response.status_code == status.HTTP_200_OK
             plugins = marketplace_response.json()["plugins"]
             assert len(plugins) == 2
             assert all(p["status"] == "available" for p in plugins)
-        
+
         # Step 2: Get detailed information about a specific plugin
         plugin_details = {
             "id": "marketplace-plugin-1",
@@ -743,17 +739,17 @@ class TestPluginIntegration:
                 "2.0.0": "Major rewrite with performance improvements"
             }
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.get_plugin.return_value = plugin_details
-            
+
             details_response = self.client.get("/plugins/marketplace-plugin-1")
             assert details_response.status_code == status.HTTP_200_OK
             data = details_response.json()
             assert data["name"] == "Analytics Plugin"
             assert "visualization" in data["capabilities"]
             assert "documentation" in data["metadata"]
-        
+
         # Step 3: Install the selected plugin
         install_data = {
             "source": "marketplace",
@@ -761,7 +757,7 @@ class TestPluginIntegration:
             "version": "2.1.0",
             "auto_enable": True
         }
-        
+
         mock_installed_plugin = {
             "id": "marketplace-plugin-1",
             "name": "Analytics Plugin",
@@ -769,10 +765,10 @@ class TestPluginIntegration:
             "is_enabled": True,
             "installed_by": self.mock_user.id
         }
-        
+
         with patch('chatter.services.plugins.plugin_manager') as mock_manager:
             mock_manager.install_plugin.return_value = mock_installed_plugin
-            
+
             install_response = self.client.post("/plugins/install", json=install_data)
             assert install_response.status_code == status.HTTP_201_CREATED
             assert install_response.json()["status"] == "installed"

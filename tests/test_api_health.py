@@ -1,9 +1,10 @@
 """Tests for health API endpoints."""
 
+from unittest.mock import patch
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, patch
 
 from chatter.main import app
 
@@ -20,7 +21,7 @@ class TestHealthEndpoints:
         """Test basic health check endpoint."""
         # Act
         response = self.client.get("/api/v1/health")
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -32,7 +33,7 @@ class TestHealthEndpoints:
         """Test health check with detailed information."""
         # Act
         response = self.client.get("/api/v1/health?detailed=true")
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -46,16 +47,16 @@ class TestHealthEndpoints:
         """Test health check when database is unavailable."""
         # Arrange
         mock_get_session.side_effect = Exception("Database connection failed")
-        
+
         # Act
         response = self.client.get("/api/v1/health?detailed=true")
-        
+
         # Assert
         # Health check should still return 200 but indicate database issues
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
         assert response_data["status"] in ["degraded", "healthy"]  # Depending on implementation
-        
+
         if "services" in response_data:
             assert "database" in response_data["services"]
 
@@ -63,7 +64,7 @@ class TestHealthEndpoints:
         """Test readiness probe endpoint."""
         # Act
         response = self.client.get("/api/v1/health/ready")
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -73,7 +74,7 @@ class TestHealthEndpoints:
         """Test liveness probe endpoint."""
         # Act
         response = self.client.get("/api/v1/health/live")
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -83,11 +84,11 @@ class TestHealthEndpoints:
         """Test metrics endpoint for monitoring."""
         # Act
         response = self.client.get("/api/v1/health/metrics")
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
-        
+
         # Check for expected metrics
         expected_metrics = [
             "uptime",
@@ -96,7 +97,7 @@ class TestHealthEndpoints:
             "active_connections",
             "request_count"
         ]
-        
+
         for metric in expected_metrics:
             assert metric in response_data or "metrics" in response_data
 
@@ -104,7 +105,7 @@ class TestHealthEndpoints:
         """Test version information endpoint."""
         # Act
         response = self.client.get("/api/v1/health/version")
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
@@ -115,7 +116,7 @@ class TestHealthEndpoints:
         """Test that CORS headers are present on health check."""
         # Act
         response = self.client.get("/api/v1/health")
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         # Check for CORS headers if configured
@@ -126,7 +127,7 @@ class TestHealthEndpoints:
             "access-control-allow-methods",
             "access-control-allow-headers"
         ]
-        
+
         # At least one CORS header should be present if CORS is enabled
         # This is a flexible test since CORS configuration may vary
         assert any(header in headers for header in cors_headers) or True
@@ -144,11 +145,11 @@ class TestHealthIntegration:
         """Test health check endpoint under simulated load."""
         # Simulate multiple concurrent requests
         responses = []
-        
+
         for _ in range(10):
             response = self.client.get("/api/v1/health")
             responses.append(response)
-        
+
         # All requests should succeed
         for response in responses:
             assert response.status_code == status.HTTP_200_OK
@@ -157,16 +158,16 @@ class TestHealthIntegration:
     def test_health_check_response_time(self):
         """Test that health check responds quickly."""
         import time
-        
+
         # Act
         start_time = time.time()
         response = self.client.get("/api/v1/health")
         end_time = time.time()
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_time = end_time - start_time
-        
+
         # Health check should respond in under 1 second
         assert response_time < 1.0
 
@@ -174,17 +175,17 @@ class TestHealthIntegration:
         """Test that all health-related endpoints are accessible."""
         health_endpoints = [
             "/api/v1/health",
-            "/api/v1/health/ready", 
+            "/api/v1/health/ready",
             "/api/v1/health/live",
             "/api/v1/health/metrics",
             "/api/v1/health/version"
         ]
-        
+
         for endpoint in health_endpoints:
             response = self.client.get(endpoint)
             # Should return either 200 (implemented) or 404 (not implemented yet)
             assert response.status_code in [status.HTTP_200_OK, status.HTTP_404_NOT_FOUND]
-            
+
             # If implemented, should have proper JSON response
             if response.status_code == status.HTTP_200_OK:
                 assert response.headers.get("content-type", "").startswith("application/json")
@@ -203,15 +204,15 @@ class TestHealthResponseStructure:
         """Test basic health response has required fields."""
         # Act
         response = self.client.get("/api/v1/health")
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
-        
+
         # Required fields
         assert "status" in data
         assert data["status"] in ["healthy", "degraded", "unhealthy"]
-        
+
         # Optional fields that might be present
         optional_fields = ["timestamp", "version", "uptime", "services"]
         for field in optional_fields:
@@ -222,19 +223,19 @@ class TestHealthResponseStructure:
         """Test detailed health response structure."""
         # Act
         response = self.client.get("/api/v1/health?detailed=true")
-        
+
         # Assert
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
-        
+
         # Should have basic fields
         assert "status" in data
-        
+
         # May have services breakdown
         if "services" in data:
             services = data["services"]
             assert isinstance(services, dict)
-            
+
             # Common services that might be checked
             possible_services = ["database", "redis", "llm_service", "vector_store"]
             for service in possible_services:
@@ -248,7 +249,7 @@ class TestHealthResponseStructure:
         """Test readiness probe response structure."""
         # Act
         response = self.client.get("/api/v1/health/ready")
-        
+
         # Assert
         if response.status_code == status.HTTP_200_OK:
             data = response.json()
@@ -259,7 +260,7 @@ class TestHealthResponseStructure:
         """Test liveness probe response structure."""
         # Act
         response = self.client.get("/api/v1/health/live")
-        
+
         # Assert
         if response.status_code == status.HTTP_200_OK:
             data = response.json()
@@ -270,27 +271,27 @@ class TestHealthResponseStructure:
         """Test metrics endpoint response structure."""
         # Act
         response = self.client.get("/api/v1/health/metrics")
-        
+
         # Assert
         if response.status_code == status.HTTP_200_OK:
             data = response.json()
             assert isinstance(data, dict)
-            
+
             # If metrics are present, they should be numbers or strings
-            for key, value in data.items():
-                assert isinstance(value, (int, float, str, dict))
+            for _key, value in data.items():
+                assert isinstance(value, int | float | str | dict)
 
     def test_version_response_structure(self):
         """Test version endpoint response structure."""
         # Act
         response = self.client.get("/api/v1/health/version")
-        
+
         # Assert
         if response.status_code == status.HTTP_200_OK:
             data = response.json()
             assert "version" in data
             assert isinstance(data["version"], str)
-            
+
             # Other possible fields
             optional_fields = ["build_date", "git_commit", "environment"]
             for field in optional_fields:
@@ -310,7 +311,7 @@ class TestHealthErrorHandling:
         """Test health check with invalid query parameters."""
         # Act
         response = self.client.get("/api/v1/health?invalid_param=true")
-        
+
         # Assert
         # Should still work, invalid params should be ignored
         assert response.status_code == status.HTTP_200_OK
@@ -321,7 +322,7 @@ class TestHealthErrorHandling:
         """Test health check with wrong HTTP method."""
         # Act
         response = self.client.post("/api/v1/health", json={})
-        
+
         # Assert
         assert response.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
@@ -329,18 +330,18 @@ class TestHealthErrorHandling:
         """Test that health endpoints handle internal exceptions gracefully."""
         # This test ensures that even if there are internal errors,
         # the health check doesn't completely fail
-        
+
         with patch('chatter.api.health.get_health_status') as mock_health:
             # Simulate an internal error
             mock_health.side_effect = Exception("Internal error")
-            
+
             response = self.client.get("/api/v1/health")
-            
+
             # Health check should either:
             # 1. Return 200 with degraded status, or
             # 2. Return 500 but still have a JSON response
             assert response.status_code in [status.HTTP_200_OK, status.HTTP_500_INTERNAL_SERVER_ERROR]
-            
+
             if response.status_code == status.HTTP_200_OK:
                 data = response.json()
                 assert "status" in data

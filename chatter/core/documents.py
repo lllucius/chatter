@@ -756,7 +756,7 @@ class DocumentService:
             document = await self.get_document(document_id, user_id)
             if not document:
                 return False
-            
+
             # Trigger reprocessing (similar to process_document but for existing docs)
             processing_request = DocumentProcessingRequest(reprocess=True)
             await self.process_document(document_id, user_id, processing_request)

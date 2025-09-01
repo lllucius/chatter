@@ -40,12 +40,12 @@ except ImportError:
             "paths": {},
             "components": {"schemas": {}},
         }
-    
+
     def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
         """Export OpenAPI spec as JSON."""
         with open(output_path, 'w') as f:
             json.dump(spec, f, indent=2)
-    
+
     def export_openapi_yaml(spec: dict[str, Any], output_path: Path) -> None:
         """Export OpenAPI spec as YAML."""
         import yaml
@@ -858,7 +858,7 @@ def config_test() -> None:
         )
     else:
         console.print("✅ Configuration looks good!")
-    
+
     # Always exit with 0 for config test command - it's informational
 
 
@@ -988,26 +988,26 @@ def generate_docs(
 
         # Create output directory
         output_path = Path(output_dir)
-        
+
         # Clean if requested
         if clean and output_path.exists():
             import shutil
             console.print(f"🧹 Cleaning output directory: {output_path}")
             shutil.rmtree(output_path)
-            
+
         output_path.mkdir(parents=True, exist_ok=True)
 
         # Generate OpenAPI spec
         spec = generate_openapi_spec()
 
         generated_files = []
-        
+
         # Export in requested formats
         if format in ["json", "all"]:
             json_file = output_path / "openapi.json"
             export_openapi_json(spec, json_file)
             generated_files.append(json_file)
-            
+
             version = spec.get("info", {}).get("version", "unknown")
             versioned_json = output_path / f"openapi-v{version}.json"
             export_openapi_json(spec, versioned_json)
@@ -1017,7 +1017,7 @@ def generate_docs(
             yaml_file = output_path / "openapi.yaml"
             export_openapi_yaml(spec, yaml_file)
             generated_files.append(yaml_file)
-            
+
             version = spec.get("info", {}).get("version", "unknown")
             versioned_yaml = output_path / f"openapi-v{version}.yaml"
             export_openapi_yaml(spec, versioned_yaml)
@@ -1085,8 +1085,11 @@ def generate_sdk(
 
     try:
         from scripts.sdk.python_sdk import PythonSDKGenerator
-        from scripts.sdk.typescript_sdk import TypeScriptSDKGenerator  
-        from scripts.utils.config import get_default_python_config, get_default_typescript_config
+        from scripts.sdk.typescript_sdk import TypeScriptSDKGenerator
+        from scripts.utils.config import (
+            get_default_python_config,
+            get_default_typescript_config,
+        )
 
         # Prepare output directory
         output_path = Path(output_dir)
@@ -1103,11 +1106,11 @@ def generate_sdk(
             console.print("🐍 Generating Python SDK...")
             python_config = get_default_python_config(project_root)
             python_config.output_dir = output_path / "python"
-            
+
             python_generator = PythonSDKGenerator(python_config)
             python_success = python_generator.generate_with_cleanup()
             success = success and python_success
-            
+
             if python_success and python_generator.validate():
                 python_files = [
                     str(f) for f in python_config.output_dir.rglob("*")
@@ -1121,11 +1124,11 @@ def generate_sdk(
             console.print("📦 Generating TypeScript SDK...")
             ts_config = get_default_typescript_config(project_root)
             ts_config.output_dir = output_path / "typescript"
-            
+
             ts_generator = TypeScriptSDKGenerator(ts_config)
             ts_success = ts_generator.generate_with_cleanup()
             success = success and ts_success
-            
+
             if ts_success and ts_generator.validate():
                 ts_files = [
                     str(f) for f in ts_config.output_dir.rglob("*")
@@ -1135,10 +1138,10 @@ def generate_sdk(
                 console.print(f"✅ TypeScript SDK generated with {len(ts_files)} files")
 
         if success:
-            console.print(f"\n🎉 SDK generation completed successfully!")
+            console.print("\n🎉 SDK generation completed successfully!")
             console.print(f"📁 SDK location: {output_path}")
             console.print(f"📄 Total files generated: {len(generated_files)}")
-            
+
             console.print("\n📋 Next steps:")
             if language in ["python", "all"]:
                 console.print(f"   • Test Python SDK: cd {output_path / 'python'} && pip install -e .")
@@ -1213,7 +1216,7 @@ def generate_workflow(
         False, "--docs-only", help="Generate only documentation, skip SDK"
     ),
     sdk_only: bool = typer.Option(
-        False, "--sdk-only", help="Generate only SDK, skip documentation"  
+        False, "--sdk-only", help="Generate only SDK, skip documentation"
     ),
     python_only: bool = typer.Option(
         False, "--python-only", help="Generate only Python SDK, skip TypeScript and docs"
@@ -1263,13 +1266,13 @@ def generate_workflow(
         # Generate documentation
         if not sdk_only and not typescript_only and not python_only:
             console.print("\n📚 Generating OpenAPI Documentation...")
-            
+
             docs_success = True
             try:
                 # Use the existing generate_docs function
                 docs_output = output_path / "docs" / "api"
                 docs_output.mkdir(parents=True, exist_ok=True)
-                
+
                 from scripts.generate_openapi import (
                     export_openapi_json,
                     export_openapi_yaml,
@@ -1277,12 +1280,12 @@ def generate_workflow(
                 )
 
                 spec = generate_openapi_spec()
-                
+
                 if docs_format in ["json", "all"]:
                     export_openapi_json(spec, docs_output / "openapi.json")
                     version = spec.get("info", {}).get("version", "unknown")
                     export_openapi_json(spec, docs_output / f"openapi-v{version}.json")
-                
+
                 if docs_format in ["yaml", "all"]:
                     export_openapi_yaml(spec, docs_output / "openapi.yaml")
                     version = spec.get("info", {}).get("version", "unknown")
@@ -1292,20 +1295,25 @@ def generate_workflow(
                 for file in docs_output.glob("*"):
                     if file.is_file():
                         docs_files.append(str(file))
-                
+
                 console.print(f"✅ Documentation generated with {len(docs_files)} files")
-                
+
             except Exception as e:
                 console.print(f"❌ Documentation generation failed: {e}")
                 docs_success = False
-                
+
             success = success and docs_success
 
         # Generate SDKs
         if not docs_only:
             from scripts.sdk.python_sdk import PythonSDKGenerator
-            from scripts.sdk.typescript_sdk import TypeScriptSDKGenerator
-            from scripts.utils.config import get_default_python_config, get_default_typescript_config
+            from scripts.sdk.typescript_sdk import (
+                TypeScriptSDKGenerator,
+            )
+            from scripts.utils.config import (
+                get_default_python_config,
+                get_default_typescript_config,
+            )
 
             # Generate Python SDK
             if not typescript_only:
@@ -1313,10 +1321,10 @@ def generate_workflow(
                 try:
                     python_config = get_default_python_config(project_root)
                     python_config.output_dir = output_path / "sdk" / "python"
-                    
+
                     python_generator = PythonSDKGenerator(python_config)
                     python_success = python_generator.generate_with_cleanup()
-                    
+
                     if python_success and python_generator.validate():
                         python_files = [
                             str(f) for f in python_config.output_dir.rglob("*")
@@ -1326,9 +1334,9 @@ def generate_workflow(
                     else:
                         console.print("❌ Python SDK generation failed")
                         python_success = False
-                        
+
                     success = success and python_success
-                    
+
                 except Exception as e:
                     console.print(f"❌ Python SDK generation failed: {e}")
                     success = False
@@ -1339,10 +1347,10 @@ def generate_workflow(
                 try:
                     ts_config = get_default_typescript_config(project_root)
                     ts_config.output_dir = output_path / "sdk" / "typescript"
-                    
+
                     ts_generator = TypeScriptSDKGenerator(ts_config)
                     ts_success = ts_generator.generate_with_cleanup()
-                    
+
                     if ts_success and ts_generator.validate():
                         typescript_files = [
                             str(f) for f in ts_config.output_dir.rglob("*")
@@ -1352,9 +1360,9 @@ def generate_workflow(
                     else:
                         console.print("❌ TypeScript SDK generation failed")
                         ts_success = False
-                        
+
                     success = success and ts_success
-                    
+
                 except Exception as e:
                     console.print(f"❌ TypeScript SDK generation failed: {e}")
                     success = False
@@ -1363,7 +1371,7 @@ def generate_workflow(
         if success:
             console.print("\n🎉 Workflow completed successfully!")
             console.print(f"📁 Output directory: {output_path}")
-            
+
             if docs_files:
                 console.print(f"📚 Documentation files: {len(docs_files)}")
             if python_files:

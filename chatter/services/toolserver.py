@@ -1175,7 +1175,7 @@ class ToolServerService:
                 "Failed to initialize built-in servers", error=str(e)
             )
             raise
-    
+
     async def test_connectivity(self, server_id: str) -> dict[str, Any]:
         """Test connectivity to a tool server."""
         try:
@@ -1183,21 +1183,21 @@ class ToolServerService:
             query = select(ToolServer).where(ToolServer.id == server_id)
             result = await self.session.execute(query)
             server = result.scalar_one_or_none()
-            
+
             if not server:
                 return {
                     "success": False,
                     "error": "Server not found",
                     "status": "not_found"
                 }
-            
+
             # Test connection based on server type
             if server.server_type == "remote":
                 success = await self._connect_remote_server(server)
             else:
                 # For local servers, just check if they're running
                 success = server.status == "running"
-            
+
             return {
                 "success": success,
                 "status": "connected" if success else "failed",
@@ -1205,7 +1205,7 @@ class ToolServerService:
                 "server_name": server.name,
                 "server_type": server.server_type,
             }
-            
+
         except Exception as e:
             logger.error(
                 "Failed to test server connectivity",

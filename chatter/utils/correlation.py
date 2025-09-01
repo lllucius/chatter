@@ -61,7 +61,7 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
             if header_name.lower() == 'x-correlation-id':
                 correlation_id = header_value
                 break
-        
+
         if not correlation_id or not correlation_id.strip():
             correlation_id = generate_correlation_id()
 

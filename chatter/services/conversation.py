@@ -66,14 +66,14 @@ class ConversationService:
                     raise ValueError("Title is required")
                 if not model:
                     raise ValueError("Model is required")
-                
+
                 # Validate user_id format
                 try:
                     from uuid import UUID
                     UUID(user_id)
                 except ValueError:
                     raise ValueError("Invalid user ID format")
-                
+
                 conversation = Conversation(
                     title=title,
                     user_id=user_id,
@@ -464,10 +464,10 @@ class ConversationService:
 
     async def get_conversation_count(self, user_id: str) -> int:
         """Get total conversation count for user.
-        
+
         Args:
             user_id: User ID
-            
+
         Returns:
             Number of conversations
         """
@@ -488,11 +488,11 @@ class ConversationService:
 
     async def archive_conversation(self, conversation_id: str, user_id: str) -> bool:
         """Archive a conversation.
-        
+
         Args:
             conversation_id: Conversation ID
             user_id: User ID for access control
-            
+
         Returns:
             True if archived successfully
         """
@@ -500,7 +500,7 @@ class ConversationService:
             conversation = await self.get_conversation(conversation_id, user_id, include_messages=False)
             conversation.status = ConversationStatus.ARCHIVED
             await self.session.flush()
-            
+
             logger.info(f"Archived conversation {conversation_id}")
             return True
         except Exception as e:
@@ -509,11 +509,11 @@ class ConversationService:
 
     async def unarchive_conversation(self, conversation_id: str, user_id: str) -> bool:
         """Unarchive a conversation.
-        
+
         Args:
             conversation_id: Conversation ID
             user_id: User ID for access control
-            
+
         Returns:
             True if unarchived successfully
         """
@@ -521,7 +521,7 @@ class ConversationService:
             conversation = await self.get_conversation(conversation_id, user_id, include_messages=False)
             conversation.status = ConversationStatus.ACTIVE
             await self.session.flush()
-            
+
             logger.info(f"Unarchived conversation {conversation_id}")
             return True
         except Exception as e:
@@ -530,11 +530,11 @@ class ConversationService:
 
     async def get_conversation_metadata(self, conversation_id: str, user_id: str) -> dict:
         """Get conversation metadata.
-        
+
         Args:
             conversation_id: Conversation ID
             user_id: User ID for access control
-            
+
         Returns:
             Conversation metadata
         """
@@ -554,11 +554,11 @@ class ConversationService:
 
     async def bulk_delete_conversations(self, conversation_ids: list[str], user_id: str) -> int:
         """Delete multiple conversations.
-        
+
         Args:
             conversation_ids: List of conversation IDs
             user_id: User ID for access control
-            
+
         Returns:
             Number of conversations deleted
         """
@@ -569,17 +569,17 @@ class ConversationService:
                 deleted_count += 1
             except Exception as e:
                 logger.error(f"Failed to delete conversation {conv_id}: {e}")
-        
+
         logger.info(f"Bulk deleted {deleted_count} conversations")
         return deleted_count
 
     async def get_recent_conversations(self, user_id: str, limit: int = 10) -> list[Conversation]:
         """Get recent conversations for user.
-        
+
         Args:
             user_id: User ID
             limit: Maximum number to return
-            
+
         Returns:
             List of recent conversations
         """

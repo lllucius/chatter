@@ -1,18 +1,18 @@
 """Tests for monitoring and metrics collection utilities."""
 
-import pytest
 import time
-from unittest.mock import patch, MagicMock
 from collections import deque
-from datetime import datetime, UTC
+from unittest.mock import patch
+
+import pytest
 
 from chatter.utils.monitoring import (
-    MetricType,
-    RequestMetrics,
+    AlertManager,
     DatabaseMetrics,
+    MetricType,
     MonitoringService,
     PerformanceTracker,
-    AlertManager
+    RequestMetrics,
 )
 
 
@@ -24,7 +24,7 @@ class TestMetrics:
         """Test RequestMetrics creation and attributes."""
         # Arrange
         timestamp = time.time()
-        
+
         # Act
         metrics = RequestMetrics(
             timestamp=timestamp,
@@ -39,7 +39,7 @@ class TestMetrics:
             db_queries=2,
             db_time_ms=45.67
         )
-        
+
         # Assert
         assert metrics.timestamp == timestamp
         assert metrics.method == "GET"
@@ -57,7 +57,7 @@ class TestMetrics:
         """Test DatabaseMetrics creation and attributes."""
         # Arrange
         timestamp = time.time()
-        
+
         # Act
         metrics = DatabaseMetrics(
             timestamp=timestamp,
@@ -68,7 +68,7 @@ class TestMetrics:
             correlation_id="test-corr-456",
             query_hash="hash-abc123"
         )
-        
+
         # Assert
         assert metrics.timestamp == timestamp
         assert metrics.operation == "select"
@@ -101,7 +101,7 @@ class TestMonitoringService:
         """Test monitoring service initialization."""
         # Act
         service = MonitoringService()
-        
+
         # Assert
         assert isinstance(service.request_metrics, deque)
         assert isinstance(service.database_metrics, deque)
@@ -119,10 +119,10 @@ class TestMonitoringService:
             response_time_ms=256.78,
             correlation_id="req-123"
         )
-        
+
         # Act
         self.monitoring.record_request(request_metric)
-        
+
         # Assert
         assert len(self.monitoring.request_metrics) == 1
         recorded_metric = self.monitoring.request_metrics[0]
@@ -141,10 +141,10 @@ class TestMonitoringService:
             rows_affected=1,
             correlation_id="db-456"
         )
-        
+
         # Act
         self.monitoring.record_database_query(db_metric)
-        
+
         # Assert
         assert len(self.monitoring.database_metrics) == 1
         recorded_metric = self.monitoring.database_metrics[0]
@@ -157,18 +157,18 @@ class TestMonitoringService:
         # Arrange
         error_type = "ValidationError"
         error_message = "Invalid input format"
-        
+
         # Act
         self.monitoring.record_error(
             error_type=error_type,
             error_message=error_message,
             correlation_id="err-789"
         )
-        
+
         # Assert
         assert error_type in self.monitoring.error_counts
         assert self.monitoring.error_counts[error_type] == 1
-        
+
         # Record another error of same type
         self.monitoring.record_error(error_type, "Another error", "err-790")
         assert self.monitoring.error_counts[error_type] == 2
@@ -187,10 +187,10 @@ class TestMonitoringService:
                 correlation_id=f"req-{i}"
             )
             self.monitoring.record_request(metric)
-        
+
         # Act
         stats = self.monitoring.get_request_stats()
-        
+
         # Assert
         assert stats["total_requests"] == 5
         assert stats["avg_response_time_ms"] == 200.0  # (100+150+200+250+300)/5
@@ -202,8 +202,8 @@ class TestMonitoringService:
         # Arrange
         operations = ["select", "select", "insert", "update", "delete"]
         durations = [50, 75, 120, 90, 60]
-        
-        for op, duration in zip(operations, durations):
+
+        for op, duration in zip(operations, durations, strict=False):
             metric = DatabaseMetrics(
                 timestamp=time.time(),
                 operation=op,
@@ -213,10 +213,10 @@ class TestMonitoringService:
                 correlation_id=f"db-{op}"
             )
             self.monitoring.record_database_query(metric)
-        
+
         # Act
         stats = self.monitoring.get_database_stats()
-        
+
         # Assert
         assert stats["total_queries"] == 5
         assert stats["avg_query_time_ms"] == 79.0  # (50+75+120+90+60)/5
@@ -227,13 +227,13 @@ class TestMonitoringService:
         """Test getting error statistics."""
         # Arrange
         error_types = ["ValidationError", "DatabaseError", "ValidationError", "TimeoutError"]
-        
+
         for error_type in error_types:
             self.monitoring.record_error(error_type, "Test error", f"err-{error_type}")
-        
+
         # Act
         stats = self.monitoring.get_error_stats()
-        
+
         # Assert
         assert stats["total_errors"] == 4
         assert stats["error_types"]["ValidationError"] == 2
@@ -253,10 +253,10 @@ class TestMonitoringService:
                 response_time_ms=100,
                 correlation_id=f"req-{i}"
             ))
-        
+
         # Act
         health = self.monitoring.get_system_health()
-        
+
         # Assert
         assert "status" in health
         assert "uptime_seconds" in health
@@ -269,7 +269,7 @@ class TestMonitoringService:
         # Arrange
         old_timestamp = time.time() - 3600  # 1 hour ago
         recent_timestamp = time.time()
-        
+
         # Add old metric
         old_metric = RequestMetrics(
             timestamp=old_timestamp,
@@ -279,7 +279,7 @@ class TestMonitoringService:
             response_time_ms=100,
             correlation_id="old-req"
         )
-        
+
         # Add recent metric
         recent_metric = RequestMetrics(
             timestamp=recent_timestamp,
@@ -289,13 +289,13 @@ class TestMonitoringService:
             response_time_ms=100,
             correlation_id="recent-req"
         )
-        
+
         self.monitoring.record_request(old_metric)
         self.monitoring.record_request(recent_metric)
-        
+
         # Act
         cleaned_count = self.monitoring.cleanup_old_metrics(max_age_seconds=1800)  # 30 minutes
-        
+
         # Assert
         assert cleaned_count == 1  # Old metric should be removed
         assert len(self.monitoring.request_metrics) == 1
@@ -316,7 +316,7 @@ class TestPerformanceTracker:
         with self.tracker.track_operation("test_operation") as operation:
             time.sleep(0.1)  # Simulate work
             operation.add_metadata("items_processed", 10)
-        
+
         # Assert
         metrics = self.tracker.get_operation_metrics("test_operation")
         assert len(metrics) == 1
@@ -330,10 +330,10 @@ class TestPerformanceTracker:
         def test_function(x, y):
             time.sleep(0.05)  # Simulate work
             return x + y
-        
+
         # Act
         result = test_function(3, 4)
-        
+
         # Assert
         assert result == 7
         metrics = self.tracker.get_operation_metrics("decorated_function")
@@ -344,15 +344,15 @@ class TestPerformanceTracker:
         """Test performance tracker statistics."""
         # Arrange
         operation_name = "batch_processing"
-        
+
         # Record multiple operations
         for i in range(5):
             with self.tracker.track_operation(operation_name):
                 time.sleep(0.02 * (i + 1))  # Variable duration
-        
+
         # Act
         stats = self.tracker.get_operation_stats(operation_name)
-        
+
         # Assert
         assert stats["count"] == 5
         assert stats["avg_duration_ms"] > 0
@@ -378,7 +378,7 @@ class TestAlertManager:
             source="system_monitor",
             metadata={"memory_usage": "85%"}
         )
-        
+
         # Assert
         assert alert_id is not None
         alerts = self.alert_manager.get_active_alerts()
@@ -394,15 +394,15 @@ class TestAlertManager:
             threshold=500.0,
             level="warning"
         )
-        
+
         # Act - Below threshold
         self.alert_manager.check_threshold("response_time", 300.0)
         alerts_below = self.alert_manager.get_active_alerts()
-        
+
         # Act - Above threshold
         self.alert_manager.check_threshold("response_time", 600.0)
         alerts_above = self.alert_manager.get_active_alerts()
-        
+
         # Assert
         assert len(alerts_below) == 0
         assert len(alerts_above) == 1
@@ -416,15 +416,15 @@ class TestAlertManager:
             message="Database connection lost",
             source="database_monitor"
         )
-        
+
         # Act
         resolved = self.alert_manager.resolve_alert(alert_id, "Database connection restored")
-        
+
         # Assert
         assert resolved is True
         active_alerts = self.alert_manager.get_active_alerts()
         assert len(active_alerts) == 0
-        
+
         resolved_alerts = self.alert_manager.get_resolved_alerts()
         assert len(resolved_alerts) == 1
         assert resolved_alerts[0]["resolution_message"] == "Database connection restored"
@@ -434,19 +434,19 @@ class TestAlertManager:
         # Arrange
         with patch('time.time') as mock_time:
             mock_time.return_value = 1000.0
-            
+
             alert_id = self.alert_manager.create_alert(
                 level="warning",
                 message="Test alert",
                 source="test"
             )
-            
+
             # Simulate time passing
             mock_time.return_value = 1000.0 + 3600  # 1 hour later
-            
+
             # Act
             escalated_alerts = self.alert_manager.check_escalation(escalation_time_seconds=1800)  # 30 min
-            
+
             # Assert
             assert len(escalated_alerts) == 1
             assert escalated_alerts[0]["id"] == alert_id
@@ -467,12 +467,12 @@ class TestMonitoringIntegration:
         """Test complete monitoring workflow."""
         # Arrange
         correlation_id = "integration-test-123"
-        
+
         # Act - Track a complete request flow
         with self.tracker.track_operation("request_processing") as operation:
             # Simulate request processing
             operation.add_metadata("user_id", "user-123")
-            
+
             # Record request start
             request_metric = RequestMetrics(
                 timestamp=time.time(),
@@ -482,7 +482,7 @@ class TestMonitoringIntegration:
                 response_time_ms=0,  # Will be updated
                 correlation_id=correlation_id
             )
-            
+
             # Simulate database operations
             db_metric = DatabaseMetrics(
                 timestamp=time.time(),
@@ -493,21 +493,21 @@ class TestMonitoringIntegration:
                 correlation_id=correlation_id
             )
             self.monitoring.record_database_query(db_metric)
-            
+
             # Simulate processing time
             time.sleep(0.05)
-            
+
             # Update and record final request metric
             request_metric.response_time_ms = 75.0
             request_metric.db_queries = 1
             request_metric.db_time_ms = 45.0
             self.monitoring.record_request(request_metric)
-        
+
         # Assert monitoring data was recorded
         request_stats = self.monitoring.get_request_stats()
         db_stats = self.monitoring.get_database_stats()
         performance_stats = self.tracker.get_operation_stats("request_processing")
-        
+
         assert request_stats["total_requests"] == 1
         assert db_stats["total_queries"] == 1
         assert performance_stats["count"] == 1
@@ -516,11 +516,11 @@ class TestMonitoringIntegration:
         """Test monitoring integration with alerting."""
         # Arrange
         self.alert_manager.set_threshold("error_rate", 0.1, "warning")  # 10% error rate
-        
+
         # Simulate requests with some errors
         for i in range(10):
             status_code = 500 if i < 2 else 200  # 20% error rate
-            
+
             request_metric = RequestMetrics(
                 timestamp=time.time(),
                 method="GET",
@@ -530,16 +530,16 @@ class TestMonitoringIntegration:
                 correlation_id=f"req-{i}"
             )
             self.monitoring.record_request(request_metric)
-            
+
             if status_code == 500:
                 self.monitoring.record_error("APIError", f"Request failed: {i}", f"req-{i}")
-        
+
         # Check if alert should be triggered
         stats = self.monitoring.get_request_stats()
         error_rate = stats["error_rate"]
-        
+
         self.alert_manager.check_threshold("error_rate", error_rate)
-        
+
         # Assert alert was created
         alerts = self.alert_manager.get_active_alerts()
         assert len(alerts) == 1
@@ -549,7 +549,7 @@ class TestMonitoringIntegration:
         """Test detection of performance bottlenecks."""
         # Arrange
         slow_operations = ["heavy_computation", "external_api_call", "file_processing"]
-        
+
         # Simulate operations with different performance characteristics
         for operation in slow_operations:
             with self.tracker.track_operation(operation):
@@ -559,15 +559,15 @@ class TestMonitoringIntegration:
                     time.sleep(0.05)  # Medium operation
                 else:
                     time.sleep(0.01)  # Fast operation
-        
+
         # Act - Find slowest operations
         all_stats = {}
         for operation in slow_operations:
             all_stats[operation] = self.tracker.get_operation_stats(operation)
-        
+
         # Assert - Heavy computation should be slowest
         heavy_stats = all_stats["heavy_computation"]
         file_stats = all_stats["file_processing"]
-        
+
         assert heavy_stats["avg_duration_ms"] > file_stats["avg_duration_ms"]
         assert heavy_stats["avg_duration_ms"] >= 100  # At least 100ms

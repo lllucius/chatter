@@ -1,6 +1,5 @@
 """Model and embedding registry endpoints."""
 
-from collections.abc import Sequence
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -255,7 +254,7 @@ async def create_model(
         )
 
     model = await service.create_model(model_data)
-    
+
     if not model:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -264,7 +263,7 @@ async def create_model(
 
     # Refresh to get provider relationship
     model = await service.get_model(model.id)
-    
+
     if not model:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -301,7 +300,7 @@ async def update_model(
 
     # Refresh to get provider relationship
     model = await service.get_model(model.id)
-    
+
     if not model:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -448,7 +447,7 @@ async def create_embedding_space(
 
     try:
         space = await service.create_embedding_space(space_data)
-        
+
         if not space:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -457,7 +456,7 @@ async def create_embedding_space(
 
         # Refresh to get full relationships
         space = await service.get_embedding_space(space.id)
-        
+
         if not space:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -506,7 +505,7 @@ async def update_embedding_space(
 
     # Refresh to get full relationships
     space = await service.get_embedding_space(space.id)
-    
+
     if not space:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

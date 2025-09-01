@@ -1,9 +1,10 @@
 """Tests for agent management API endpoints."""
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
 from fastapi import status
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, patch
 
 from chatter.main import app
 
@@ -31,7 +32,7 @@ class TestAgentEndpoints:
             },
             "system_prompt": "You are a helpful AI assistant."
         }
-        
+
         mock_agent = {
             "id": "agent-123",
             "name": "Test Agent",
@@ -48,19 +49,19 @@ class TestAgentEndpoints:
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T00:00:00Z"
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.agents.get_agent_manager') as mock_manager:
                 mock_agent_manager = AsyncMock()
                 mock_agent_manager.create_agent.return_value = mock_agent
                 mock_manager.return_value = mock_agent_manager
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.post("/api/v1/agents/", json=agent_data, headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_201_CREATED
                 response_data = response.json()
@@ -75,14 +76,14 @@ class TestAgentEndpoints:
             "name": "",  # Empty name should be invalid
             "agent_type": "invalid_type"
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.post("/api/v1/agents/", json=invalid_agent_data, headers=headers)
-            
+
             # Assert
             assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
@@ -100,19 +101,19 @@ class TestAgentEndpoints:
             "created_at": "2024-01-01T00:00:00Z",
             "updated_at": "2024-01-01T00:00:00Z"
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.agents.get_agent_manager') as mock_manager:
                 mock_agent_manager = AsyncMock()
                 mock_agent_manager.get_agent.return_value = mock_agent
                 mock_manager.return_value = mock_agent_manager
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get(f"/api/v1/agents/{agent_id}", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -123,19 +124,19 @@ class TestAgentEndpoints:
         """Test agent retrieval when agent doesn't exist."""
         # Arrange
         agent_id = "nonexistent-agent"
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.agents.get_agent_manager') as mock_manager:
                 mock_agent_manager = AsyncMock()
                 mock_agent_manager.get_agent.return_value = None
                 mock_manager.return_value = mock_agent_manager
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get(f"/api/v1/agents/{agent_id}", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_404_NOT_FOUND
 
@@ -150,16 +151,16 @@ class TestAgentEndpoints:
                 "status": "active"
             },
             {
-                "id": "agent-2", 
+                "id": "agent-2",
                 "name": "Agent 2",
                 "agent_type": "workflow",
                 "status": "inactive"
             }
         ]
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.agents.get_agent_manager') as mock_manager:
                 mock_agent_manager = AsyncMock()
                 mock_agent_manager.list_agents.return_value = {
@@ -169,11 +170,11 @@ class TestAgentEndpoints:
                     "offset": 0
                 }
                 mock_manager.return_value = mock_agent_manager
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get("/api/v1/agents/", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -191,7 +192,7 @@ class TestAgentEndpoints:
                 "temperature": 0.8
             }
         }
-        
+
         mock_updated_agent = {
             "id": agent_id,
             "name": "Updated Agent Name",
@@ -201,19 +202,19 @@ class TestAgentEndpoints:
             "status": "active",
             "updated_at": "2024-01-02T00:00:00Z"
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.agents.get_agent_manager') as mock_manager:
                 mock_agent_manager = AsyncMock()
                 mock_agent_manager.update_agent.return_value = mock_updated_agent
                 mock_manager.return_value = mock_agent_manager
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.patch(f"/api/v1/agents/{agent_id}", json=update_data, headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -224,19 +225,19 @@ class TestAgentEndpoints:
         """Test successful agent deletion."""
         # Arrange
         agent_id = "agent-123"
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.agents.get_agent_manager') as mock_manager:
                 mock_agent_manager = AsyncMock()
                 mock_agent_manager.delete_agent.return_value = True
                 mock_manager.return_value = mock_agent_manager
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.delete(f"/api/v1/agents/{agent_id}", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -252,7 +253,7 @@ class TestAgentEndpoints:
             "context": {"user_preference": "concise"},
             "stream": False
         }
-        
+
         mock_response = {
             "response": "I can help you with various tasks including answering questions, providing information, and assisting with analysis.",
             "metadata": {
@@ -261,23 +262,23 @@ class TestAgentEndpoints:
                 "model_used": "gpt-3.5-turbo"
             }
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.agents.get_agent_manager') as mock_manager:
                 mock_agent_manager = AsyncMock()
                 mock_agent_manager.interact_with_agent.return_value = mock_response
                 mock_manager.return_value = mock_agent_manager
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.post(
-                    f"/api/v1/agents/{agent_id}/interact", 
-                    json=interaction_data, 
+                    f"/api/v1/agents/{agent_id}/interact",
+                    json=interaction_data,
                     headers=headers
                 )
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -298,19 +299,19 @@ class TestAgentEndpoints:
             "last_interaction": "2024-01-01T12:00:00Z",
             "popular_capabilities": ["text_generation", "question_answering"]
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.agents.get_agent_manager') as mock_manager:
                 mock_agent_manager = AsyncMock()
                 mock_agent_manager.get_agent_stats.return_value = mock_stats
                 mock_manager.return_value = mock_agent_manager
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get(f"/api/v1/agents/{agent_id}/stats", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -330,7 +331,7 @@ class TestAgentIntegration:
     def test_agent_lifecycle_integration(self):
         """Test complete agent lifecycle - create, update, interact, delete."""
         headers = {"Authorization": "Bearer integration-token"}
-        
+
         # Create agent
         agent_data = {
             "name": "Integration Test Agent",
@@ -339,47 +340,47 @@ class TestAgentIntegration:
             "capabilities": ["text_generation"],
             "model_config": {"temperature": 0.7}
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.agents.get_agent_manager') as mock_manager:
                 mock_agent_manager = AsyncMock()
-                
+
                 # Mock create
                 created_agent = {"id": "integration-agent-id", **agent_data, "status": "active"}
                 mock_agent_manager.create_agent.return_value = created_agent
-                
+
                 create_response = self.client.post("/api/v1/agents/", json=agent_data, headers=headers)
                 assert create_response.status_code == status.HTTP_201_CREATED
                 agent_id = create_response.json()["id"]
-                
+
                 # Mock update
                 updated_agent = {**created_agent, "name": "Updated Integration Agent"}
                 mock_agent_manager.update_agent.return_value = updated_agent
-                
+
                 update_response = self.client.patch(
                     f"/api/v1/agents/{agent_id}",
                     json={"name": "Updated Integration Agent"},
                     headers=headers
                 )
                 assert update_response.status_code == status.HTTP_200_OK
-                
+
                 # Mock interact
                 interaction_response = {"response": "Hello from integration test", "metadata": {}}
                 mock_agent_manager.interact_with_agent.return_value = interaction_response
-                
+
                 interact_response = self.client.post(
                     f"/api/v1/agents/{agent_id}/interact",
                     json={"message": "Hello"},
                     headers=headers
                 )
                 assert interact_response.status_code == status.HTTP_200_OK
-                
+
                 # Mock delete
                 mock_agent_manager.delete_agent.return_value = True
-                
+
                 delete_response = self.client.delete(f"/api/v1/agents/{agent_id}", headers=headers)
                 assert delete_response.status_code == status.HTTP_200_OK
-                
+
                 mock_manager.return_value = mock_agent_manager

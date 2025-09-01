@@ -554,7 +554,7 @@ async def export_analytics(
             date_range = (time_range.start_date, time_range.end_date)
 
         export_data = await analytics_service.export_analytics(
-            format, 
+            format,
             date_range,
             {"user_id": current_user.id, "metrics": metrics}
         )

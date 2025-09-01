@@ -1,10 +1,10 @@
 """Tests for analytics API endpoints."""
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from datetime import datetime, UTC
 from fastapi import status
 from fastapi.testclient import TestClient
-from unittest.mock import AsyncMock, patch
 
 from chatter.main import app
 
@@ -31,19 +31,19 @@ class TestAnalyticsEndpoints:
             "start_date": "2024-01-01T00:00:00Z",
             "end_date": "2024-01-08T00:00:00Z"
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
                 mock_analytics.get_conversation_stats.return_value = mock_stats
                 mock_service.return_value = mock_analytics
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get("/api/v1/analytics/conversations", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -56,7 +56,7 @@ class TestAnalyticsEndpoints:
         # Arrange
         start_date = "2024-01-01T00:00:00Z"
         end_date = "2024-01-31T23:59:59Z"
-        
+
         mock_stats = {
             "total_conversations": 450,
             "active_conversations": 67,
@@ -65,22 +65,22 @@ class TestAnalyticsEndpoints:
             "start_date": start_date,
             "end_date": end_date
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
                 mock_analytics.get_conversation_stats.return_value = mock_stats
                 mock_service.return_value = mock_analytics
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get(
                     f"/api/v1/analytics/conversations?start_date={start_date}&end_date={end_date}",
                     headers=headers
                 )
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -104,19 +104,19 @@ class TestAnalyticsEndpoints:
             "error_rate": 0.02,
             "period": "24h"
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
                 mock_analytics.get_usage_metrics.return_value = mock_metrics
                 mock_service.return_value = mock_analytics
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get("/api/v1/analytics/usage", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -141,19 +141,19 @@ class TestAnalyticsEndpoints:
                 {"endpoint": "/api/v1/agents/interact", "avg_time": 2.8}
             ]
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
                 mock_analytics.get_performance_metrics.return_value = mock_metrics
                 mock_service.return_value = mock_analytics
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get("/api/v1/analytics/performance", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -184,19 +184,19 @@ class TestAnalyticsEndpoints:
                 "avg_embedding_time": 0.15
             }
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
                 mock_analytics.get_document_analytics.return_value = mock_analytics
                 mock_service.return_value = mock_analytics
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get("/api/v1/analytics/documents", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -211,7 +211,7 @@ class TestAnalyticsEndpoints:
             "system_health": "healthy",
             "service_status": {
                 "database": "healthy",
-                "redis": "healthy", 
+                "redis": "healthy",
                 "vector_store": "healthy",
                 "job_queue": "degraded"
             },
@@ -231,19 +231,19 @@ class TestAnalyticsEndpoints:
                 }
             ]
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
                 mock_analytics.get_system_analytics.return_value = mock_analytics
                 mock_service.return_value = mock_analytics
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get("/api/v1/analytics/system", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -283,19 +283,19 @@ class TestAnalyticsEndpoints:
                 }
             ]
         }
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
                 mock_analytics.get_dashboard_data.return_value = mock_dashboard
                 mock_service.return_value = mock_analytics
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get("/api/v1/analytics/dashboard", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
@@ -306,7 +306,7 @@ class TestAnalyticsEndpoints:
         """Test analytics access without authentication."""
         # Act
         response = self.client.get("/api/v1/analytics/conversations")
-        
+
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
@@ -315,16 +315,16 @@ class TestAnalyticsEndpoints:
         # Arrange
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
                 mock_analytics.get_conversation_stats.side_effect = ValueError("Invalid period")
                 mock_service.return_value = mock_analytics
-                
+
                 # Act
                 headers = {"Authorization": "Bearer test-token"}
                 response = self.client.get("/api/v1/analytics/conversations?period=invalid", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_400_BAD_REQUEST
 
@@ -340,56 +340,56 @@ class TestAnalyticsIntegration:
     def test_analytics_data_consistency(self):
         """Test consistency across different analytics endpoints."""
         headers = {"Authorization": "Bearer integration-token"}
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
-                
+
                 # Mock conversation stats
                 mock_analytics.get_conversation_stats.return_value = {
                     "total_conversations": 100,
                     "period": "7d"
                 }
-                
-                # Mock usage metrics  
+
+                # Mock usage metrics
                 mock_analytics.get_usage_metrics.return_value = {
                     "total_api_calls": 5000,
                     "period": "7d"
                 }
-                
+
                 # Mock dashboard data
                 mock_analytics.get_dashboard_data.return_value = {
                     "overview": {"total_conversations": 100},
                     "usage": {"api_calls_today": 5000}
                 }
-                
+
                 mock_service.return_value = mock_analytics
-                
+
                 # Get data from different endpoints
                 conv_response = self.client.get("/api/v1/analytics/conversations", headers=headers)
                 usage_response = self.client.get("/api/v1/analytics/usage", headers=headers)
                 dashboard_response = self.client.get("/api/v1/analytics/dashboard", headers=headers)
-                
+
                 # Verify all responses are successful
                 assert conv_response.status_code == status.HTTP_200_OK
                 assert usage_response.status_code == status.HTTP_200_OK
                 assert dashboard_response.status_code == status.HTTP_200_OK
-                
+
                 # Verify data consistency (in real implementation, these should match)
                 conv_data = conv_response.json()
                 dashboard_data = dashboard_response.json()
-                
+
                 assert conv_data["total_conversations"] == dashboard_data["overview"]["total_conversations"]
 
     def test_analytics_performance_tracking(self):
         """Test analytics performance metrics collection."""
         headers = {"Authorization": "Bearer integration-token"}
-        
+
         with patch('chatter.api.auth.get_current_user') as mock_auth:
             mock_auth.return_value = {"id": "user-123", "username": "testuser"}
-            
+
             with patch('chatter.api.analytics.get_analytics_service') as mock_service:
                 mock_analytics = AsyncMock()
                 mock_analytics.get_performance_metrics.return_value = {
@@ -398,14 +398,14 @@ class TestAnalyticsIntegration:
                     "error_rate": 0.01
                 }
                 mock_service.return_value = mock_analytics
-                
+
                 # Act
                 response = self.client.get("/api/v1/analytics/performance", headers=headers)
-                
+
                 # Assert
                 assert response.status_code == status.HTTP_200_OK
                 response_data = response.json()
-                
+
                 # Verify performance metrics are within expected ranges
                 assert 0 <= response_data["avg_response_time"] <= 10  # Reasonable response time
                 assert 0 <= response_data["error_rate"] <= 1  # Error rate is a percentage

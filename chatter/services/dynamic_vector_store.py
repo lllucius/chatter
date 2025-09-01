@@ -11,7 +11,7 @@ import json
 import math
 from typing import Any
 
-from sqlalchemy import create_engine, func, or_, select
+from sqlalchemy import create_engine, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import sessionmaker
 

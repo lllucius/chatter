@@ -80,12 +80,12 @@ class PaginationResponse(BaseModel):
     limit: int = Field(..., description="Page size limit")
     total_count: int = Field(..., description="Total number of items")
     total_pages: int = Field(..., description="Total number of pages")
-    
+
     @property
     def has_next_page(self) -> bool:
         """Check if there is a next page."""
         return self.page < self.total_pages
-    
+
     @property
     def has_prev_page(self) -> bool:
         """Check if there is a previous page."""

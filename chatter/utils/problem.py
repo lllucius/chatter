@@ -378,16 +378,16 @@ def create_problem_detail(
         "title": title,
         "type": type_ or "about:blank",
     }
-    
+
     if detail is not None:
         problem_dict["detail"] = detail
-    
+
     if instance is not None:
         problem_dict["instance"] = instance
-    
+
     # Add extra fields
     problem_dict.update(extra_fields)
-    
+
     return problem_dict
 
 

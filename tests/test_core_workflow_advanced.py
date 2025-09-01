@@ -1,17 +1,15 @@
 """Tests for advanced workflow features including conditional and composite workflows."""
 
-import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from uuid import uuid4
 
-from chatter.core.workflow_advanced import (
-    ConditionalWorkflowConfig,
-    CompositeWorkflowConfig,
-    AdvancedWorkflowManager,
-    ExecutionStrategy
-)
+import pytest
+
 from chatter.core.exceptions import WorkflowExecutionError
+from chatter.core.workflow_advanced import (
+    AdvancedWorkflowManager,
+    CompositeWorkflowConfig,
+    ConditionalWorkflowConfig,
+)
 
 
 @pytest.mark.unit
@@ -30,10 +28,10 @@ class TestConditionalWorkflowConfig:
             "query_complexity": {"mode": "tools", "enable_memory": True},
             "default": {"mode": "plain", "key": "default"}
         }
-        
+
         # Act
         config = ConditionalWorkflowConfig(conditions, workflow_configs)
-        
+
         # Assert
         assert config.conditions == conditions
         assert config.workflow_configs == workflow_configs
@@ -47,12 +45,12 @@ class TestConditionalWorkflowConfig:
             "default": {"mode": "basic", "key": "default"}
         }
         config = ConditionalWorkflowConfig(conditions, workflow_configs)
-        
+
         context = {"user_role": "admin", "other_data": "value"}
-        
+
         # Act
         result = config.evaluate_conditions(context)
-        
+
         # Assert
         assert result == "user_role"
 
@@ -69,12 +67,12 @@ class TestConditionalWorkflowConfig:
             "default": {"mode": "basic", "key": "default"}
         }
         config = ConditionalWorkflowConfig(conditions, workflow_configs)
-        
+
         context = {"complexity_score": 0.85}
-        
+
         # Act
         result = config.evaluate_conditions(context)
-        
+
         # Assert
         assert result == "complexity_score"
 
@@ -91,12 +89,12 @@ class TestConditionalWorkflowConfig:
             "default": {"mode": "basic", "key": "default"}
         }
         config = ConditionalWorkflowConfig(conditions, workflow_configs)
-        
+
         context = {"user_tier": "enterprise", "department": "marketing"}
-        
+
         # Act
         result = config.evaluate_conditions(context)
-        
+
         # Assert
         assert result == "user_tier"  # First matching condition
 
@@ -113,12 +111,12 @@ class TestConditionalWorkflowConfig:
             "default": {"mode": "basic", "key": "default"}
         }
         config = ConditionalWorkflowConfig(conditions, workflow_configs)
-        
+
         context = {"user_tier": "basic", "complexity_score": 0.3}
-        
+
         # Act
         result = config.evaluate_conditions(context)
-        
+
         # Assert
         assert result == "default"
 
@@ -128,12 +126,12 @@ class TestConditionalWorkflowConfig:
         conditions = {"user_tier": "premium"}
         workflow_configs = {"user_tier": {"mode": "premium"}}
         config = ConditionalWorkflowConfig(conditions, workflow_configs)
-        
+
         context = {"user_tier": "basic"}
-        
+
         # Act
         result = config.evaluate_conditions(context)
-        
+
         # Assert
         assert result is None
 
@@ -146,12 +144,12 @@ class TestConditionalWorkflowConfig:
             "default": {"mode": "basic", "key": "default"}
         }
         config = ConditionalWorkflowConfig(conditions, workflow_configs)
-        
+
         context = {"other_field": "other_value"}
-        
+
         # Act
         result = config.evaluate_conditions(context)
-        
+
         # Assert
         assert result == "default"
 
@@ -168,10 +166,10 @@ class TestCompositeWorkflowConfig:
             {"id": "workflow2", "type": "synthesis"}
         ]
         execution_strategy = "sequential"
-        
+
         # Act
         config = CompositeWorkflowConfig(workflows, execution_strategy)
-        
+
         # Assert
         assert config.workflows == workflows
         assert config.execution_strategy == execution_strategy
@@ -182,10 +180,10 @@ class TestCompositeWorkflowConfig:
         """Test CompositeWorkflowConfig with default execution strategy."""
         # Arrange
         workflows = [{"id": "workflow1"}]
-        
+
         # Act
         config = CompositeWorkflowConfig(workflows)
-        
+
         # Assert
         assert config.execution_strategy == "sequential"
 
@@ -197,10 +195,10 @@ class TestCompositeWorkflowConfig:
             {"id": "workflow2", "type": "independent"}
         ]
         execution_strategy = "parallel"
-        
+
         # Act
         config = CompositeWorkflowConfig(workflows, execution_strategy)
-        
+
         # Assert
         assert config.execution_strategy == "parallel"
 
@@ -212,10 +210,10 @@ class TestCompositeWorkflowConfig:
             {"id": "workflow2", "condition": "input.type == 'image'"}
         ]
         execution_strategy = "conditional"
-        
+
         # Act
         config = CompositeWorkflowConfig(workflows, execution_strategy)
-        
+
         # Assert
         assert config.execution_strategy == "conditional"
 
@@ -233,23 +231,23 @@ class TestAdvancedWorkflowManager:
         """Test creating conditional workflow with matching conditions."""
         # Arrange
         mock_llm = MagicMock()
-        
+
         conditions = {"user_tier": {"in": ["premium"]}}
         workflow_configs = {
             "user_tier": {"mode": "full", "enable_memory": True},
             "default": {"mode": "basic", "key": "default"}
         }
         context = {"user_tier": "premium"}
-        
+
         with patch('chatter.core.workflow_advanced.create_workflow') as mock_create:
             mock_workflow = MagicMock()
             mock_create.return_value = mock_workflow
-            
+
             # Act
             result = await self.manager.create_conditional_workflow(
                 mock_llm, conditions, workflow_configs, context
             )
-            
+
             # Assert
             assert result == mock_workflow
             mock_create.assert_called_once()
@@ -262,23 +260,23 @@ class TestAdvancedWorkflowManager:
         """Test creating conditional workflow with no matching conditions."""
         # Arrange
         mock_llm = MagicMock()
-        
+
         conditions = {"user_tier": {"in": ["premium"]}}
         workflow_configs = {
             "user_tier": {"mode": "full"},
             "default": {"mode": "basic", "key": "default"}
         }
         context = {"user_tier": "basic"}
-        
+
         with patch('chatter.core.workflow_advanced.create_workflow') as mock_create:
             mock_workflow = MagicMock()
             mock_create.return_value = mock_workflow
-            
+
             # Act
             result = await self.manager.create_conditional_workflow(
                 mock_llm, conditions, workflow_configs, context
             )
-            
+
             # Assert
             assert result == mock_workflow
             called_config = mock_create.call_args[1]['config']
@@ -289,16 +287,16 @@ class TestAdvancedWorkflowManager:
         """Test creating conditional workflow with no match and no default."""
         # Arrange
         mock_llm = MagicMock()
-        
+
         conditions = {"user_tier": "premium"}
         workflow_configs = {"user_tier": {"mode": "full"}}
         context = {"user_tier": "basic"}
-        
+
         # Act
         result = await self.manager.create_conditional_workflow(
             mock_llm, conditions, workflow_configs, context
         )
-        
+
         # Assert
         assert result is None
 
@@ -311,27 +309,27 @@ class TestAdvancedWorkflowManager:
             {"id": "step2", "type": "synthesis"}
         ]
         composite_config = CompositeWorkflowConfig(workflows, "sequential")
-        
+
         mock_workflow1 = AsyncMock()
         mock_workflow1.ainvoke.return_value = {"step1_result": "analysis_complete"}
         mock_workflow2 = AsyncMock()
         mock_workflow2.ainvoke.return_value = {"step2_result": "synthesis_complete"}
-        
+
         with patch.object(self.manager, '_create_workflow_from_config') as mock_create:
             mock_create.side_effect = [mock_workflow1, mock_workflow2]
-            
+
             input_data = {"initial_input": "test_data"}
-            
+
             # Act
             result = await self.manager.execute_composite_workflow(
                 composite_config, input_data
             )
-            
+
             # Assert
             assert len(result) == 2
             assert "step1_result" in result[0]
             assert "step2_result" in result[1]
-            
+
             # Verify sequential execution (second workflow gets first's output)
             assert mock_workflow1.ainvoke.call_count == 1
             assert mock_workflow2.ainvoke.call_count == 1
@@ -345,27 +343,27 @@ class TestAdvancedWorkflowManager:
             {"id": "branch2", "type": "independent2"}
         ]
         composite_config = CompositeWorkflowConfig(workflows, "parallel")
-        
+
         mock_workflow1 = AsyncMock()
         mock_workflow1.ainvoke.return_value = {"branch1_result": "result1"}
         mock_workflow2 = AsyncMock()
         mock_workflow2.ainvoke.return_value = {"branch2_result": "result2"}
-        
+
         with patch.object(self.manager, '_create_workflow_from_config') as mock_create:
             mock_create.side_effect = [mock_workflow1, mock_workflow2]
-            
+
             input_data = {"shared_input": "test_data"}
-            
+
             # Act
             result = await self.manager.execute_composite_workflow(
                 composite_config, input_data
             )
-            
+
             # Assert
             assert len(result) == 2
             assert any("branch1_result" in r for r in result)
             assert any("branch2_result" in r for r in result)
-            
+
             # Verify both workflows were called
             mock_workflow1.ainvoke.assert_called_once()
             mock_workflow2.ainvoke.assert_called_once()
@@ -381,29 +379,29 @@ class TestAdvancedWorkflowManager:
                 "condition": "input_type == 'text'"
             },
             {
-                "id": "image_workflow", 
+                "id": "image_workflow",
                 "type": "image_processing",
                 "condition": "input_type == 'image'"
             }
         ]
         composite_config = CompositeWorkflowConfig(workflows, "conditional")
-        
+
         mock_text_workflow = AsyncMock()
         mock_text_workflow.ainvoke.return_value = {"text_result": "processed_text"}
-        
+
         with patch.object(self.manager, '_create_workflow_from_config') as mock_create:
             mock_create.return_value = mock_text_workflow
-            
+
             with patch.object(self.manager, '_evaluate_workflow_condition') as mock_evaluate:
                 mock_evaluate.side_effect = [True, False]  # First condition matches
-                
+
                 input_data = {"input_type": "text", "content": "test text"}
-                
+
                 # Act
                 result = await self.manager.execute_composite_workflow(
                     composite_config, input_data
                 )
-                
+
                 # Assert
                 assert len(result) == 1
                 assert "text_result" in result[0]
@@ -418,12 +416,12 @@ class TestAdvancedWorkflowManager:
             "user_tier": {"mode": "full"},
             "default": {"mode": "basic", "key": "default"}
         }
-        
+
         # Act
         self.manager.register_conditional_config(
             config_name, conditions, workflow_configs
         )
-        
+
         # Assert
         assert config_name in self.manager.conditional_configs
         config = self.manager.conditional_configs[config_name]
@@ -440,12 +438,12 @@ class TestAdvancedWorkflowManager:
             {"id": "step3", "type": "postprocessing"}
         ]
         execution_strategy = "sequential"
-        
+
         # Act
         self.manager.register_composite_config(
             config_name, workflows, execution_strategy
         )
-        
+
         # Assert
         assert config_name in self.manager.composite_configs
         config = self.manager.composite_configs[config_name]
@@ -462,23 +460,23 @@ class TestAdvancedWorkflowManager:
             "complexity": {"mode": "advanced"},
             "default": {"mode": "simple", "key": "default"}
         }
-        
+
         self.manager.register_conditional_config(
             config_name, conditions, workflow_configs
         )
-        
+
         mock_llm = MagicMock()
         context = {"complexity": 0.85}
-        
+
         with patch('chatter.core.workflow_advanced.create_workflow') as mock_create:
             mock_workflow = MagicMock()
             mock_create.return_value = mock_workflow
-            
+
             # Act
             result = await self.manager.execute_registered_conditional_workflow(
                 config_name, mock_llm, context
             )
-            
+
             # Assert
             assert result == mock_workflow
             called_config = mock_create.call_args[1]['config']
@@ -493,26 +491,26 @@ class TestAdvancedWorkflowManager:
             {"id": "analyze", "type": "analysis"},
             {"id": "summarize", "type": "summary"}
         ]
-        
+
         self.manager.register_composite_config(
             config_name, workflows, "sequential"
         )
-        
+
         input_data = {"text": "test input"}
-        
+
         mock_workflow1 = AsyncMock()
         mock_workflow1.ainvoke.return_value = {"analysis": "complete"}
         mock_workflow2 = AsyncMock()
         mock_workflow2.ainvoke.return_value = {"summary": "done"}
-        
+
         with patch.object(self.manager, '_create_workflow_from_config') as mock_create:
             mock_create.side_effect = [mock_workflow1, mock_workflow2]
-            
+
             # Act
             result = await self.manager.execute_registered_composite_workflow(
                 config_name, input_data
             )
-            
+
             # Assert
             assert len(result) == 2
             assert "analysis" in result[0]
@@ -527,11 +525,11 @@ class TestAdvancedWorkflowManager:
         self.manager.register_composite_config(
             "composite1", [{"id": "step1"}], "sequential"
         )
-        
+
         # Act
         conditional_configs = self.manager.list_conditional_configs()
         composite_configs = self.manager.list_composite_configs()
-        
+
         # Assert
         assert "conditional1" in conditional_configs
         assert "composite1" in composite_configs
@@ -554,7 +552,7 @@ class TestAdvancedWorkflowIntegration:
             "query_complexity": {"min": 0.5, "max": 1.0},
             "priority_level": {"in": ["high", "urgent"]}
         }
-        
+
         workflow_configs = {
             "user_tier": {
                 "mode": "full",
@@ -580,7 +578,7 @@ class TestAdvancedWorkflowIntegration:
                 "key": "default"
             }
         }
-        
+
         # Test scenarios
         test_scenarios = [
             (
@@ -600,26 +598,26 @@ class TestAdvancedWorkflowIntegration:
                 "default"
             )
         ]
-        
+
         mock_llm = MagicMock()
-        
+
         for context, expected_key in test_scenarios:
             with patch('chatter.core.workflow_advanced.create_workflow') as mock_create:
                 mock_workflow = MagicMock()
                 mock_create.return_value = mock_workflow
-                
+
                 # Act
                 result = await self.manager.create_conditional_workflow(
                     mock_llm, conditions, workflow_configs, context
                 )
-                
+
                 # Assert
                 assert result == mock_workflow
                 if expected_key == "default":
                     expected_config = workflow_configs["default"]
                 else:
                     expected_config = workflow_configs[expected_key]
-                
+
                 called_config = mock_create.call_args[1]['config']
                 assert called_config["mode"] == expected_config["mode"]
 
@@ -631,7 +629,7 @@ class TestAdvancedWorkflowIntegration:
             {"id": "parallel_step1", "type": "independent_analysis"},
             {"id": "parallel_step2", "type": "independent_validation"}
         ]
-        
+
         main_workflows = [
             {"id": "preprocessing", "type": "data_prep"},
             {
@@ -642,9 +640,9 @@ class TestAdvancedWorkflowIntegration:
             },
             {"id": "postprocessing", "type": "result_synthesis"}
         ]
-        
+
         main_config = CompositeWorkflowConfig(main_workflows, "sequential")
-        
+
         # Mock workflow results
         prep_result = {"preprocessed_data": "cleaned"}
         parallel_results = [
@@ -652,18 +650,18 @@ class TestAdvancedWorkflowIntegration:
             {"validation_result": "passed"}
         ]
         post_result = {"final_result": "synthesized"}
-        
+
         mock_prep_workflow = AsyncMock()
         mock_prep_workflow.ainvoke.return_value = prep_result
-        
+
         mock_parallel_workflow1 = AsyncMock()
         mock_parallel_workflow1.ainvoke.return_value = parallel_results[0]
         mock_parallel_workflow2 = AsyncMock()
         mock_parallel_workflow2.ainvoke.return_value = parallel_results[1]
-        
+
         mock_post_workflow = AsyncMock()
         mock_post_workflow.ainvoke.return_value = post_result
-        
+
         with patch.object(self.manager, '_create_workflow_from_config') as mock_create:
             mock_create.side_effect = [
                 mock_prep_workflow,
@@ -671,18 +669,18 @@ class TestAdvancedWorkflowIntegration:
                 mock_parallel_workflow2,
                 mock_post_workflow
             ]
-            
+
             with patch.object(self.manager, 'execute_composite_workflow') as mock_composite:
                 # Mock the nested composite execution
                 mock_composite.return_value = parallel_results
-                
+
                 input_data = {"raw_data": "input"}
-                
+
                 # Act
                 result = await self.manager.execute_composite_workflow(
                     main_config, input_data
                 )
-                
+
                 # Assert
                 # Verify the main workflow structure was executed
                 assert len(result) >= 2  # At least preprocessing and composite results
@@ -695,16 +693,16 @@ class TestAdvancedWorkflowIntegration:
             {"id": "basic_step1", "type": "simple_analysis"},
             {"id": "basic_step2", "type": "simple_output"}
         ]
-        
+
         advanced_composite = [
             {"id": "advanced_step1", "type": "deep_analysis"},
             {"id": "advanced_step2", "type": "model_ensemble"},
             {"id": "advanced_step3", "type": "confidence_scoring"},
             {"id": "advanced_step4", "type": "detailed_output"}
         ]
-        
+
         conditions = {"complexity_level": {"min": 0.7, "max": 1.0}}
-        
+
         workflow_configs = {
             "complexity_level": {
                 "type": "composite",
@@ -718,12 +716,12 @@ class TestAdvancedWorkflowIntegration:
                 "key": "default"
             }
         }
-        
+
         # Test high complexity scenario
         high_complexity_context = {"complexity_level": 0.9}
-        
+
         mock_llm = MagicMock()
-        
+
         with patch.object(self.manager, 'execute_composite_workflow') as mock_composite:
             mock_composite.return_value = [
                 {"analysis": "deep_insights"},
@@ -731,12 +729,12 @@ class TestAdvancedWorkflowIntegration:
                 {"confidence": 0.95},
                 {"output": "detailed_result"}
             ]
-            
+
             # Act
-            result = await self.manager.create_conditional_workflow(
+            await self.manager.create_conditional_workflow(
                 mock_llm, conditions, workflow_configs, high_complexity_context
             )
-            
+
             # Assert
             # Verify conditional logic selected the advanced composite workflow
             # In real implementation, this would trigger composite execution
@@ -751,27 +749,27 @@ class TestAdvancedWorkflowIntegration:
             {"id": "risky_step", "type": "external_api_call"},
             {"id": "recovery_step", "type": "fallback_processing"}
         ]
-        
+
         composite_config = CompositeWorkflowConfig(workflows, "sequential")
-        
+
         mock_reliable_workflow = AsyncMock()
         mock_reliable_workflow.ainvoke.return_value = {"preprocessed": "success"}
-        
+
         mock_risky_workflow = AsyncMock()
         mock_risky_workflow.ainvoke.side_effect = WorkflowExecutionError("API failure")
-        
+
         mock_recovery_workflow = AsyncMock()
         mock_recovery_workflow.ainvoke.return_value = {"recovered": "fallback_result"}
-        
+
         with patch.object(self.manager, '_create_workflow_from_config') as mock_create:
             mock_create.side_effect = [
                 mock_reliable_workflow,
                 mock_risky_workflow,
                 mock_recovery_workflow
             ]
-            
+
             input_data = {"input": "test"}
-            
+
             # Act & Assert
             # In a real implementation, this should handle the error gracefully
             # and potentially execute recovery steps
@@ -798,18 +796,18 @@ class TestAdvancedWorkflowIntegration:
             "complexity": {"mode": "advanced"},
             "default": {"mode": "basic", "key": "default"}
         }
-        
+
         # This should not raise an exception
         conditional_config = ConditionalWorkflowConfig(valid_conditions, valid_workflow_configs)
         assert conditional_config is not None
-        
+
         # Test valid composite configuration
         valid_workflows = [
             {"id": "step1", "type": "input"},
             {"id": "step2", "type": "process"},
             {"id": "step3", "type": "output"}
         ]
-        
+
         composite_config = CompositeWorkflowConfig(valid_workflows, "sequential")
         assert composite_config is not None
         assert len(composite_config.workflows) == 3

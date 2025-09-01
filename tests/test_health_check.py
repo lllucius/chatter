@@ -1,7 +1,7 @@
 """Basic health check tests for the Chatter application."""
 
+
 import pytest
-from unittest.mock import MagicMock
 
 
 @pytest.mark.unit

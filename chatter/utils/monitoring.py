@@ -453,7 +453,7 @@ class AdvancedMetricsCollector:
             "throughput": 0.0,  # Requests per minute
             "window_minutes": window_minutes,
         }
-    
+
     def get_health_metrics(self) -> dict[str, Any]:
         """Get health metrics."""
         return {

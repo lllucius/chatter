@@ -1,18 +1,18 @@
 """Tests for workflow templates and common use cases."""
 
-import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 
-from chatter.core.workflow_templates import (
-    WorkflowTemplate,
-    WORKFLOW_TEMPLATES,
-    WorkflowTemplateManager,
-    CustomWorkflowBuilder,
-    TemplateRegistry
-)
+import pytest
+
 from chatter.core.exceptions import (
     WorkflowConfigurationError,
-    WorkflowTemplateError
+    WorkflowTemplateError,
+)
+from chatter.core.workflow_templates import (
+    WORKFLOW_TEMPLATES,
+    CustomWorkflowBuilder,
+    TemplateRegistry,
+    WorkflowTemplate,
+    WorkflowTemplateManager,
 )
 
 
@@ -29,7 +29,7 @@ class TestWorkflowTemplate:
         default_params = {"param1": "value1"}
         required_tools = ["tool1", "tool2"]
         required_retrievers = ["retriever1"]
-        
+
         # Act
         template = WorkflowTemplate(
             name=name,
@@ -39,7 +39,7 @@ class TestWorkflowTemplate:
             required_tools=required_tools,
             required_retrievers=required_retrievers
         )
-        
+
         # Assert
         assert template.name == name
         assert template.workflow_type == workflow_type
@@ -57,7 +57,7 @@ class TestWorkflowTemplate:
             description="Minimal template",
             default_params={}
         )
-        
+
         # Assert
         assert template.required_tools is None
         assert template.required_retrievers is None
@@ -71,7 +71,7 @@ class TestBuiltInTemplates:
         """Test customer support template is properly defined."""
         # Act
         template = WORKFLOW_TEMPLATES["customer_support"]
-        
+
         # Assert
         assert template.name == "customer_support"
         assert template.workflow_type == "full"
@@ -85,7 +85,7 @@ class TestBuiltInTemplates:
         """Test code assistant template is properly defined."""
         # Act
         template = WORKFLOW_TEMPLATES["code_assistant"]
-        
+
         # Assert
         assert template.name == "code_assistant"
         assert template.workflow_type == "tools"
@@ -97,7 +97,7 @@ class TestBuiltInTemplates:
         """Test research assistant template is properly defined."""
         # Act
         template = WORKFLOW_TEMPLATES["research_assistant"]
-        
+
         # Assert
         assert template.name == "research_assistant"
         assert template.workflow_type == "full"
@@ -108,7 +108,7 @@ class TestBuiltInTemplates:
         """Test content writer template is properly defined."""
         # Act
         template = WORKFLOW_TEMPLATES["content_writer"]
-        
+
         # Assert
         assert template.name == "content_writer"
         assert template.workflow_type == "plain"
@@ -118,7 +118,7 @@ class TestBuiltInTemplates:
         """Test data analyst template is properly defined."""
         # Act
         template = WORKFLOW_TEMPLATES["data_analyst"]
-        
+
         # Assert
         assert template.name == "data_analyst"
         assert template.workflow_type == "tools"
@@ -141,7 +141,7 @@ class TestBuiltInTemplates:
         cs_message = cs_template.default_params["system_message"]
         assert "helpful" in cs_message.lower()
         assert "professional" in cs_message.lower()
-        
+
         # Code assistant should mention programming
         code_template = WORKFLOW_TEMPLATES["code_assistant"]
         code_message = code_template.default_params["system_message"]
@@ -161,7 +161,7 @@ class TestWorkflowTemplateManager:
         """Test getting an existing template."""
         # Act
         template = self.manager.get_template("customer_support")
-        
+
         # Assert
         assert template is not None
         assert template.name == "customer_support"
@@ -171,14 +171,14 @@ class TestWorkflowTemplateManager:
         # Act & Assert
         with pytest.raises(WorkflowTemplateError) as exc_info:
             self.manager.get_template("nonexistent_template")
-        
+
         assert "not found" in str(exc_info.value)
 
     def test_list_templates(self):
         """Test listing all available templates."""
         # Act
         templates = self.manager.list_templates()
-        
+
         # Assert
         assert len(templates) > 0
         assert "customer_support" in templates
@@ -190,7 +190,7 @@ class TestWorkflowTemplateManager:
         full_templates = self.manager.list_templates_by_type("full")
         tools_templates = self.manager.list_templates_by_type("tools")
         plain_templates = self.manager.list_templates_by_type("plain")
-        
+
         # Assert
         assert len(full_templates) > 0
         assert len(tools_templates) > 0
@@ -206,12 +206,12 @@ class TestWorkflowTemplateManager:
             "memory_window": 30,
             "user_name": "John Doe"
         }
-        
+
         # Act
         workflow_config = self.manager.create_workflow_from_template(
             template_name, custom_params
         )
-        
+
         # Assert
         assert workflow_config["workflow_type"] == "full"
         assert workflow_config["enable_memory"] is True
@@ -226,13 +226,13 @@ class TestWorkflowTemplateManager:
             "memory_window": "invalid_value",  # Should be integer
             "temperature": 2.5  # Should be between 0 and 1
         }
-        
+
         # Act & Assert
         with pytest.raises(WorkflowConfigurationError) as exc_info:
             self.manager.create_workflow_from_template(
                 template_name, invalid_params
             )
-        
+
         assert "invalid" in str(exc_info.value).lower()
 
     def test_validate_template_requirements(self):
@@ -241,12 +241,12 @@ class TestWorkflowTemplateManager:
         template_name = "customer_support"
         available_tools = ["search_kb", "create_ticket", "escalate", "other_tool"]
         available_retrievers = ["support_docs", "faq_docs"]
-        
+
         # Act
         result = self.manager.validate_template_requirements(
             template_name, available_tools, available_retrievers
         )
-        
+
         # Assert
         assert result.valid is True
 
@@ -256,12 +256,12 @@ class TestWorkflowTemplateManager:
         template_name = "customer_support"
         available_tools = ["search_kb"]  # Missing create_ticket, escalate
         available_retrievers = ["support_docs"]
-        
+
         # Act
         result = self.manager.validate_template_requirements(
             template_name, available_tools, available_retrievers
         )
-        
+
         # Assert
         assert result.valid is False
         assert len(result.errors) > 0
@@ -273,7 +273,7 @@ class TestWorkflowTemplateManager:
         support_suggestions = self.manager.get_template_suggestions("customer service")
         code_suggestions = self.manager.get_template_suggestions("programming help")
         research_suggestions = self.manager.get_template_suggestions("research project")
-        
+
         # Assert
         assert "customer_support" in support_suggestions
         assert "code_assistant" in code_suggestions
@@ -288,10 +288,10 @@ class TestWorkflowTemplateManager:
             "supported_workflow_types": ["full", "tools", "plain"],
             "available_models": ["gpt-4", "gpt-3.5-turbo"]
         }
-        
+
         # Act
         compatible_templates = self.manager.get_compatible_templates(system_capabilities)
-        
+
         # Assert
         assert len(compatible_templates) > 0
         assert "customer_support" in compatible_templates
@@ -316,12 +316,12 @@ class TestCustomWorkflowBuilder:
             "additional_tools": ["premium_escalate"],
             "custom_system_message": "You are a premium support assistant."
         }
-        
+
         # Act
         custom_workflow = self.builder.build_from_template(
             base_template, customizations
         )
-        
+
         # Assert
         assert custom_workflow["name"] == "Premium Support"
         assert custom_workflow["memory_window"] == 100
@@ -342,10 +342,10 @@ class TestCustomWorkflowBuilder:
             "required_tools": ["crm_search", "lead_qualify"],
             "required_retrievers": ["sales_materials"]
         }
-        
+
         # Act
         custom_template = self.builder.build_custom_template(custom_specs)
-        
+
         # Assert
         assert custom_template.name == "sales_assistant"
         assert custom_template.workflow_type == "full"
@@ -366,12 +366,12 @@ class TestCustomWorkflowBuilder:
             "temperature": 0.7,  # Add new
             "tools": ["tool1", "tool3"]  # Override list
         }
-        
+
         # Act
         merged_config = self.builder.merge_template_configs(
             base_config, override_config
         )
-        
+
         # Assert
         assert merged_config["enable_memory"] is True  # Preserved
         assert merged_config["memory_window"] == 100  # Overridden
@@ -390,17 +390,17 @@ class TestCustomWorkflowBuilder:
                 "max_tokens": 1000
             }
         }
-        
+
         invalid_spec = {
             "name": "",  # Invalid empty name
             "workflow_type": "invalid_type",  # Invalid type
             "description": "Invalid template"
         }
-        
+
         # Act
         valid_result = self.builder.validate_custom_template(valid_spec)
         invalid_result = self.builder.validate_custom_template(invalid_spec)
-        
+
         # Assert
         assert valid_result.valid is True
         assert invalid_result.valid is False
@@ -423,10 +423,10 @@ class TestTemplateRegistry:
             description="Custom test template",
             default_params={"test_param": "test_value"}
         )
-        
+
         # Act
         self.registry.register_template(custom_template)
-        
+
         # Assert
         assert "custom_test" in self.registry.list_templates()
         retrieved = self.registry.get_template("custom_test")
@@ -447,13 +447,13 @@ class TestTemplateRegistry:
             description="Second template",
             default_params={}
         )
-        
+
         self.registry.register_template(template1)
-        
+
         # Act & Assert
         with pytest.raises(WorkflowTemplateError) as exc_info:
             self.registry.register_template(template2)
-        
+
         assert "already exists" in str(exc_info.value)
 
     def test_unregister_template(self):
@@ -465,13 +465,13 @@ class TestTemplateRegistry:
             description="Temporary template",
             default_params={}
         )
-        
+
         self.registry.register_template(custom_template)
         assert "temporary" in self.registry.list_templates()
-        
+
         # Act
         self.registry.unregister_template("temporary")
-        
+
         # Assert
         assert "temporary" not in self.registry.list_templates()
 
@@ -484,19 +484,19 @@ class TestTemplateRegistry:
             description="Original description",
             default_params={"param1": "value1"}
         )
-        
+
         updated_template = WorkflowTemplate(
             name="updateable",
             workflow_type="full",
             description="Updated description",
             default_params={"param1": "updated_value", "param2": "value2"}
         )
-        
+
         self.registry.register_template(original_template)
-        
+
         # Act
         self.registry.update_template(updated_template)
-        
+
         # Assert
         retrieved = self.registry.get_template("updateable")
         assert retrieved.workflow_type == "full"
@@ -512,23 +512,23 @@ class TestTemplateRegistry:
             description="Version 1",
             default_params={"version": "1.0"}
         )
-        
+
         v2_template = WorkflowTemplate(
             name="versioned",
             workflow_type="full",
             description="Version 2",
             default_params={"version": "2.0"}
         )
-        
+
         # Act
         self.registry.register_template(v1_template, version="1.0")
         self.registry.register_template(v2_template, version="2.0")
-        
+
         # Assert
         v1_retrieved = self.registry.get_template("versioned", version="1.0")
         v2_retrieved = self.registry.get_template("versioned", version="2.0")
         latest_retrieved = self.registry.get_template("versioned")  # Should get latest
-        
+
         assert v1_retrieved.default_params["version"] == "1.0"
         assert v2_retrieved.default_params["version"] == "2.0"
         assert latest_retrieved.default_params["version"] == "2.0"
@@ -549,27 +549,27 @@ class TestWorkflowTemplateIntegration:
         # Step 1: Get template suggestions
         suggestions = self.manager.get_template_suggestions("customer support")
         assert "customer_support" in suggestions
-        
+
         # Step 2: Validate template requirements
         available_tools = ["search_kb", "create_ticket", "escalate"]
         available_retrievers = ["support_docs"]
-        
+
         validation = self.manager.validate_template_requirements(
             "customer_support", available_tools, available_retrievers
         )
         assert validation.valid is True
-        
+
         # Step 3: Create workflow from template
         custom_params = {
             "memory_window": 75,
             "agent_name": "SupportBot",
             "escalation_threshold": 3
         }
-        
+
         workflow_config = self.manager.create_workflow_from_template(
             "customer_support", custom_params
         )
-        
+
         # Step 4: Verify workflow configuration
         assert workflow_config["workflow_type"] == "full"
         assert workflow_config["memory_window"] == 75
@@ -591,21 +591,21 @@ class TestWorkflowTemplateIntegration:
             "required_tools": ["test_tool"],
             "required_retrievers": ["test_retriever"]
         }
-        
+
         custom_template = self.builder.build_custom_template(custom_specs)
-        
+
         # Step 2: Register custom template
         self.registry.register_template(custom_template)
-        
+
         # Step 3: Use custom template via manager
         # First, we need to make the manager aware of the registry
         self.manager.registry = self.registry
-        
+
         workflow_config = self.manager.create_workflow_from_template(
             "integration_test_template",
             {"temperature": 0.8}
         )
-        
+
         # Step 4: Verify custom template usage
         assert workflow_config["workflow_type"] == "tools"
         assert workflow_config["enable_memory"] is False
@@ -615,8 +615,8 @@ class TestWorkflowTemplateIntegration:
     def test_template_inheritance_and_customization(self):
         """Test template inheritance and customization patterns."""
         # Step 1: Create base template
-        base_template = self.manager.get_template("customer_support")
-        
+        self.manager.get_template("customer_support")
+
         # Step 2: Create specialized templates based on base
         enterprise_customizations = {
             "name": "Enterprise Support",
@@ -625,7 +625,7 @@ class TestWorkflowTemplateIntegration:
             "additional_tools": ["enterprise_escalate", "priority_routing"],
             "sla_requirements": {"response_time": 300}  # 5 minutes
         }
-        
+
         basic_customizations = {
             "name": "Basic Support",
             "memory_window": 25,
@@ -633,21 +633,21 @@ class TestWorkflowTemplateIntegration:
             "excluded_tools": ["escalate"],  # Basic users can't escalate
             "response_style": "friendly_but_concise"
         }
-        
+
         # Step 3: Build customized workflows
         enterprise_workflow = self.builder.build_from_template(
             "customer_support", enterprise_customizations
         )
-        
+
         basic_workflow = self.builder.build_from_template(
             "customer_support", basic_customizations
         )
-        
+
         # Step 4: Verify customizations applied correctly
         assert enterprise_workflow["name"] == "Enterprise Support"
         assert enterprise_workflow["memory_window"] == 150
         assert "enterprise_escalate" in enterprise_workflow["additional_tools"]
-        
+
         assert basic_workflow["name"] == "Basic Support"
         assert basic_workflow["memory_window"] == 25
         assert basic_workflow["max_tool_calls"] == 3
@@ -657,7 +657,7 @@ class TestWorkflowTemplateIntegration:
         """Test template system performance with many registered templates."""
         # Arrange - Register many custom templates
         template_count = 100
-        
+
         for i in range(template_count):
             template = WorkflowTemplate(
                 name=f"perf_test_template_{i}",
@@ -666,26 +666,26 @@ class TestWorkflowTemplateIntegration:
                 default_params={"template_id": i}
             )
             self.registry.register_template(template)
-        
+
         # Act - Perform operations that should remain fast
         import time
-        
+
         start_time = time.time()
-        
+
         # List all templates
         all_templates = self.registry.list_templates()
-        
+
         # Get specific templates
         for i in range(0, template_count, 10):  # Every 10th template
             template = self.registry.get_template(f"perf_test_template_{i}")
             assert template is not None
-        
+
         # Search templates
         tool_templates = self.registry.list_templates_by_type("tools")
-        
+
         end_time = time.time()
         execution_time = end_time - start_time
-        
+
         # Assert - Operations complete in reasonable time
         assert len(all_templates) >= template_count
         assert len(tool_templates) >= template_count

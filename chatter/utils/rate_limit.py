@@ -190,9 +190,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
 class RateLimitExceeded(Exception):
     """Exception raised when rate limit is exceeded."""
-    
-    def __init__(self, message: str = "Rate limit exceeded", 
-                 limit: int | None = None, 
+
+    def __init__(self, message: str = "Rate limit exceeded",
+                 limit: int | None = None,
                  window: int | None = None,
                  retry_after: int | None = None):
         super().__init__(message)
@@ -204,11 +204,11 @@ class RateLimitExceeded(Exception):
 
 class RateLimiter:
     """Generic rate limiter interface."""
-    
+
     async def is_allowed(self, key: str, limit: int, window: int) -> bool:
         """Check if request is allowed."""
         raise NotImplementedError
-    
+
     async def get_remaining(self, key: str, limit: int, window: int) -> int:
         """Get remaining requests in window."""
         raise NotImplementedError
@@ -216,90 +216,90 @@ class RateLimiter:
 
 class MemoryRateLimiter(RateLimiter):
     """In-memory rate limiter implementation."""
-    
+
     def __init__(self):
         self.requests: dict[str, list[float]] = {}
-    
+
     async def is_allowed(self, key: str, limit: int, window: int) -> bool:
         """Check if request is allowed."""
         current_time = time.time()
-        
+
         if key not in self.requests:
             self.requests[key] = []
-        
+
         # Clean old requests
         self.requests[key] = [
             req_time for req_time in self.requests[key]
             if current_time - req_time < window
         ]
-        
+
         if len(self.requests[key]) < limit:
             self.requests[key].append(current_time)
             return True
-        
+
         return False
-    
+
     async def get_remaining(self, key: str, limit: int, window: int) -> int:
         """Get remaining requests in window."""
         current_time = time.time()
-        
+
         if key not in self.requests:
             return limit
-        
+
         # Clean old requests
         self.requests[key] = [
             req_time for req_time in self.requests[key]
             if current_time - req_time < window
         ]
-        
+
         return max(0, limit - len(self.requests[key]))
 
 
 class RedisRateLimiter(RateLimiter):
     """Redis-based rate limiter implementation."""
-    
+
     def __init__(self, redis_client):
         self.redis = redis_client
-    
+
     async def is_allowed(self, key: str, limit: int, window: int) -> bool:
         """Check if request is allowed using Redis."""
         current_time = int(time.time())
         pipe = self.redis.pipeline()
-        
+
         # Use sliding window with Redis
         pipe.zremrangebyscore(key, 0, current_time - window)
         pipe.zcard(key)
         pipe.zadd(key, {str(current_time): current_time})
         pipe.expire(key, window)
-        
+
         results = await pipe.execute()
         request_count = results[1]
-        
+
         return request_count < limit
-    
+
     async def get_remaining(self, key: str, limit: int, window: int) -> int:
         """Get remaining requests in window using Redis."""
         current_time = int(time.time())
-        
+
         # Clean old entries and count current
         await self.redis.zremrangebyscore(key, 0, current_time - window)
         current_count = await self.redis.zcard(key)
-        
+
         return max(0, limit - current_count)
 
 
 def get_client_ip(request: Request) -> str:
     """Extract client IP from request."""
     client_ip = "unknown"
-    
+
     if request.client:
         client_ip = request.client.host
-    
+
     # Check for forwarded headers (case-insensitive)
     forwarded_for = None
     real_ip = None
     forwarded = None
-    
+
     for header_name, header_value in request.headers.items():
         header_lower = header_name.lower()
         if header_lower == "x-forwarded-for":
@@ -308,15 +308,15 @@ def get_client_ip(request: Request) -> str:
             real_ip = header_value
         elif header_lower == "forwarded":
             forwarded = header_value
-    
+
     # X-Forwarded-For header (highest priority per test expectations)
     if forwarded_for:
         client_ip = forwarded_for.split(",")[0].strip()
-    
+
     # X-Real-IP header (second priority)
     elif real_ip:
         client_ip = real_ip.strip()
-    
+
     # Parse RFC 7239 Forwarded header (lowest priority)
     elif forwarded:
         # Look for for= parameter
@@ -324,19 +324,19 @@ def get_client_ip(request: Request) -> str:
         match = re.search(r'for=([^;,\s]+)', forwarded)
         if match:
             client_ip = match.group(1).strip('"')
-    
+
     return client_ip
 
 
 def create_rate_limit_key(client_ip: str, path: str, user_id: str | None = None, prefix: str = "rate_limit") -> str:
     """Create rate limit key from client info."""
-    
+
     # Normalize path by removing trailing slashes and making lowercase
     normalized_path = path.rstrip('/').lower()
-    
+
     # If user ID is provided, include both user and IP for stronger rate limiting
     if user_id:
         return f"{prefix}:user:{user_id}:ip:{client_ip}:{normalized_path}"
-    
+
     # Otherwise use IP-based key only
     return f"{prefix}:ip:{client_ip}:{normalized_path}"

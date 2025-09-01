@@ -5,7 +5,6 @@ handling across all layers of the application, implementing RFC 9457 Problem
 Details consistently.
 """
 
-import traceback
 import uuid
 from typing import Any
 
@@ -44,7 +43,7 @@ class ChatterBaseException(Exception):
         self.status_code = status_code
         self.details = details
         self.error_id = str(uuid.uuid4())
-        
+
         # Set any additional properties
         for key, value in kwargs.items():
             setattr(self, key, value)
@@ -81,7 +80,7 @@ class ChatterBaseException(Exception):
     def to_problem_detail(self):
         """Convert to ProblemDetail format for RFC 9457 compliance."""
         from chatter.utils.problem import create_problem_detail
-        
+
         return create_problem_detail(
             status=self.status_code,
             title=self._get_error_title(),
@@ -152,7 +151,7 @@ class ValidationError(ChatterBaseException):
         for error in errors:
             if hasattr(error, 'field_errors') and error.field_errors:
                 field_errors.update(error.field_errors)
-        
+
         return cls(
             message="; ".join(messages),
             field_errors=field_errors

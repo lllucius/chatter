@@ -112,8 +112,8 @@ class AnalyticsService:
 
             token_stats = token_stats_result.first()
             if token_stats:
-                total_input_tokens = token_stats[0] or 0
-                total_output_tokens = token_stats[1] or 0
+                token_stats[0] or 0
+                token_stats[1] or 0
                 total_tokens = token_stats[2] or 0
                 total_cost = float(token_stats[3] or 0)
                 avg_response_time = float(token_stats[4] or 0)
@@ -1463,7 +1463,7 @@ class AnalyticsService:
             "start_date": start_date,
             "end_date": end_date,
         }
-    
+
     async def export_analytics(
         self,
         export_format: str,

@@ -19,8 +19,7 @@ from chatter.schemas.ab_testing import (
     ABTestUpdateRequest,
     TestStatus,
 )
-from chatter.services.ab_testing import MetricType
-from chatter.services.ab_testing import ABTestManager
+from chatter.services.ab_testing import ABTestManager, MetricType
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,
@@ -61,7 +60,7 @@ async def create_ab_test(
     try:
         # Convert request data to ABTest model format
 
-        from chatter.services.ab_testing import ABTest, TestMetric
+        from chatter.services.ab_testing import TestMetric
         from chatter.services.ab_testing import (
             TestVariant as ServiceTestVariant,
         )
@@ -79,7 +78,7 @@ async def create_ab_test(
             variants.append(variant)
 
         # Create primary metric from first metric in list
-        primary_metric = TestMetric(
+        TestMetric(
             name=test_data.metrics[0].value,
             metric_type=test_data.metrics[0],
         )
@@ -580,7 +579,7 @@ async def get_ab_test_results(
                     metric_type = MetricType(metric_name)
                 except ValueError:
                     metric_type = MetricType.CUSTOM
-                
+
                 metrics.append(TestMetric(
                     metric_type=metric_type,
                     variant_name=variant_name,

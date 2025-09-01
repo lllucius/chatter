@@ -1,20 +1,16 @@
 """Tests for workflow validation utilities."""
 
+
 import pytest
-from unittest.mock import MagicMock, patch
 
 from chatter.core.workflow_validation import (
+    InputSanitizer,
+    ParameterValidator,
+    SchemaValidator,
+    StepValidator,
     ValidationResult,
     ValidationRule,
-    InputSanitizer,
     WorkflowValidator,
-    StepValidator,
-    ParameterValidator,
-    SchemaValidator
-)
-from chatter.core.exceptions import (
-    WorkflowConfigurationError,
-    WorkflowValidationError
 )
 
 
@@ -26,7 +22,7 @@ class TestValidationResult:
         """Test ValidationResult for successful validation."""
         # Act
         result = ValidationResult(valid=True)
-        
+
         # Assert
         assert result.valid is True
         assert result.errors == []
@@ -35,10 +31,10 @@ class TestValidationResult:
         """Test ValidationResult for failed validation."""
         # Arrange
         errors = ["Error 1", "Error 2"]
-        
+
         # Act
         result = ValidationResult(valid=False, errors=errors)
-        
+
         # Assert
         assert result.valid is False
         assert result.errors == errors
@@ -47,7 +43,7 @@ class TestValidationResult:
         """Test ValidationResult default initialization."""
         # Act
         result = ValidationResult()
-        
+
         # Assert
         assert result.valid is True
         assert result.errors == []
@@ -62,10 +58,10 @@ class TestValidationRule:
         # Arrange
         name = "test_rule"
         message = "Test validation message"
-        
+
         # Act
         rule = ValidationRule(name, message)
-        
+
         # Assert
         assert rule.name == name
         assert rule.message == message
@@ -74,10 +70,10 @@ class TestValidationRule:
         """Test ValidationRule default validate method."""
         # Arrange
         rule = ValidationRule("test", "message")
-        
+
         # Act
         result = rule.validate("any_value")
-        
+
         # Assert
         assert result is True
 
@@ -90,10 +86,10 @@ class TestInputSanitizer:
         """Test sanitizing normal text."""
         # Arrange
         text = "Hello, world! This is a normal text."
-        
+
         # Act
         sanitized = InputSanitizer.sanitize_text(text)
-        
+
         # Assert
         assert sanitized == text
 
@@ -101,7 +97,7 @@ class TestInputSanitizer:
         """Test sanitizing empty string."""
         # Act
         sanitized = InputSanitizer.sanitize_text("")
-        
+
         # Assert
         assert sanitized == ""
 
@@ -109,7 +105,7 @@ class TestInputSanitizer:
         """Test sanitizing None input."""
         # Act
         sanitized = InputSanitizer.sanitize_text(None)
-        
+
         # Assert
         assert sanitized == ""
 
@@ -117,10 +113,10 @@ class TestInputSanitizer:
         """Test sanitizing text with control characters."""
         # Arrange
         text = "Hello\x00\x01\x02 World"
-        
+
         # Act
         sanitized = InputSanitizer.sanitize_text(text)
-        
+
         # Assert
         assert "\x00" not in sanitized
         assert "\x01" not in sanitized
@@ -131,10 +127,10 @@ class TestInputSanitizer:
         """Test sanitizing text preserves allowed whitespace."""
         # Arrange
         text = "Hello\tWorld\nNew Line\rReturn"
-        
+
         # Act
         sanitized = InputSanitizer.sanitize_text(text)
-        
+
         # Assert
         assert "\t" in sanitized
         assert "\n" in sanitized
@@ -145,10 +141,10 @@ class TestInputSanitizer:
         # Arrange
         text = "A" * 15000
         max_length = 5000
-        
+
         # Act
         sanitized = InputSanitizer.sanitize_text(text, max_length=max_length)
-        
+
         # Assert
         assert len(sanitized) == max_length
 
@@ -161,10 +157,10 @@ class TestInputSanitizer:
             "offset": "0",
             "malicious": "'; DROP TABLE users; --"
         }
-        
+
         # Act
         sanitized = InputSanitizer.sanitize_query_parameters(params)
-        
+
         # Assert
         assert "search term" in sanitized["q"]
         assert sanitized["limit"] == "10"
@@ -178,7 +174,7 @@ class TestInputSanitizer:
             "uploads/image.jpg",
             "data/config.json"
         ]
-        
+
         # Act & Assert
         for path in safe_paths:
             assert InputSanitizer.validate_file_path(path) is True
@@ -192,7 +188,7 @@ class TestInputSanitizer:
             "..\\..\\windows\\system32",
             "uploads/../config/secrets.env"
         ]
-        
+
         # Act & Assert
         for path in unsafe_paths:
             assert InputSanitizer.validate_file_path(path) is False
@@ -205,10 +201,10 @@ class TestInputSanitizer:
             "user_id": "user-123",
             "session_data": {"key": "value\x00\x01"}
         }
-        
+
         # Act
         sanitized = InputSanitizer.sanitize_user_input(user_input)
-        
+
         # Assert
         assert "<script>" not in sanitized["message"]
         assert "alert" not in sanitized["message"]
@@ -229,7 +225,7 @@ class TestWorkflowValidator:
         # Arrange
         valid_config = {
             "id": "test-workflow",
-            "name": "Test Workflow", 
+            "name": "Test Workflow",
             "description": "A test workflow",
             "steps": [
                 {
@@ -240,10 +236,10 @@ class TestWorkflowValidator:
                 }
             ]
         }
-        
+
         # Act
         result = self.validator.validate_workflow_config(valid_config)
-        
+
         # Assert
         assert result.valid is True
         assert len(result.errors) == 0
@@ -255,10 +251,10 @@ class TestWorkflowValidator:
             "name": "Test Workflow",
             # Missing 'id' and 'steps'
         }
-        
+
         # Act
         result = self.validator.validate_workflow_config(invalid_config)
-        
+
         # Assert
         assert result.valid is False
         assert len(result.errors) > 0
@@ -279,10 +275,10 @@ class TestWorkflowValidator:
                 }
             ]
         }
-        
+
         # Act
         result = self.validator.validate_workflow_config(invalid_config)
-        
+
         # Assert
         assert result.valid is False
         assert any("type" in error.lower() for error in result.errors)
@@ -303,12 +299,12 @@ class TestWorkflowValidator:
             "tools": ["tool1", "tool2", "tool3"],
             "actions": ["read", "write", "execute"]
         }
-        
+
         # Act
         result = self.validator.validate_workflow_permissions(
             workflow_config, user_permissions
         )
-        
+
         # Assert
         assert result.valid is True
 
@@ -326,12 +322,12 @@ class TestWorkflowValidator:
             "role": "user",  # Insufficient role
             "tools": ["tool1"]  # Missing tool2
         }
-        
+
         # Act
         result = self.validator.validate_workflow_permissions(
             workflow_config, user_permissions
         )
-        
+
         # Assert
         assert result.valid is False
         assert len(result.errors) > 0
@@ -347,12 +343,12 @@ class TestWorkflowValidator:
             }
         }
         available_services = ["llm_service", "vector_store", "analytics_service"]
-        
+
         # Act
         result = self.validator.validate_workflow_dependencies(
             workflow_config, available_services
         )
-        
+
         # Assert
         assert result.valid is True
 
@@ -366,12 +362,12 @@ class TestWorkflowValidator:
             }
         }
         available_services = ["llm_service", "vector_store"]
-        
+
         # Act
         result = self.validator.validate_workflow_dependencies(
             workflow_config, available_services
         )
-        
+
         # Assert
         assert result.valid is False
         assert any("missing_service" in error for error in result.errors)
@@ -398,10 +394,10 @@ class TestStepValidator:
                 "max_tokens": 1000
             }
         }
-        
+
         # Act
         result = self.validator.validate_step(valid_step)
-        
+
         # Assert
         assert result.valid is True
 
@@ -413,10 +409,10 @@ class TestStepValidator:
             "type": "llm_call",
             "config": {}
         }
-        
+
         # Act
         result = self.validator.validate_step(invalid_step)
-        
+
         # Assert
         assert result.valid is False
         assert any("id" in error.lower() for error in result.errors)
@@ -434,10 +430,10 @@ class TestStepValidator:
                 "temperature": 0.5
             }
         }
-        
+
         # Act
         result = self.validator.validate_llm_call_step(llm_step)
-        
+
         # Assert
         assert result.valid is True
 
@@ -453,10 +449,10 @@ class TestStepValidator:
                 # Missing 'model'
             }
         }
-        
+
         # Act
         result = self.validator.validate_llm_call_step(invalid_llm_step)
-        
+
         # Assert
         assert result.valid is False
         assert any("model" in error.lower() for error in result.errors)
@@ -474,10 +470,10 @@ class TestStepValidator:
                 "false_path": "step-3"
             }
         }
-        
+
         # Act
         result = self.validator.validate_condition_step(condition_step)
-        
+
         # Assert
         assert result.valid is True
 
@@ -493,10 +489,10 @@ class TestStepValidator:
                 "parameters": {"operation": "add", "a": 5, "b": 3}
             }
         }
-        
+
         # Act
         result = self.validator.validate_tool_call_step(tool_step)
-        
+
         # Assert
         assert result.valid is True
 
@@ -513,7 +509,7 @@ class TestParameterValidator:
         """Test validating temperature in valid range."""
         # Arrange
         valid_temperatures = [0.0, 0.5, 1.0, 0.7, 0.1]
-        
+
         # Act & Assert
         for temp in valid_temperatures:
             result = self.validator.validate_temperature(temp)
@@ -523,7 +519,7 @@ class TestParameterValidator:
         """Test validating temperature outside valid range."""
         # Arrange
         invalid_temperatures = [-0.1, 1.1, 2.0, -1.0]
-        
+
         # Act & Assert
         for temp in invalid_temperatures:
             result = self.validator.validate_temperature(temp)
@@ -533,7 +529,7 @@ class TestParameterValidator:
         """Test validating valid max_tokens values."""
         # Arrange
         valid_tokens = [1, 100, 1000, 4096, 8192]
-        
+
         # Act & Assert
         for tokens in valid_tokens:
             result = self.validator.validate_max_tokens(tokens)
@@ -543,7 +539,7 @@ class TestParameterValidator:
         """Test validating invalid max_tokens values."""
         # Arrange
         invalid_tokens = [0, -1, 100000, "not_a_number"]
-        
+
         # Act & Assert
         for tokens in invalid_tokens:
             result = self.validator.validate_max_tokens(tokens)
@@ -553,7 +549,7 @@ class TestParameterValidator:
         """Test validating supported model names."""
         # Arrange
         supported_models = ["gpt-4", "gpt-3.5-turbo", "claude-3", "llama-2"]
-        
+
         # Act & Assert
         for model in supported_models:
             result = self.validator.validate_model_name(model)
@@ -563,7 +559,7 @@ class TestParameterValidator:
         """Test validating unsupported model names."""
         # Arrange
         unsupported_models = ["unknown-model", "", None, "deprecated-model"]
-        
+
         # Act & Assert
         for model in unsupported_models:
             result = self.validator.validate_model_name(model)
@@ -590,10 +586,10 @@ class TestSchemaValidator:
             "required": ["name"]
         }
         data = {"name": "John", "age": 30}
-        
+
         # Act
         result = self.validator.validate_json_schema(data, schema)
-        
+
         # Assert
         assert result.valid is True
 
@@ -609,10 +605,10 @@ class TestSchemaValidator:
             "required": ["name"]
         }
         data = {"age": -5}  # Missing required 'name', invalid age
-        
+
         # Act
         result = self.validator.validate_json_schema(data, schema)
-        
+
         # Assert
         assert result.valid is False
         assert len(result.errors) > 0
@@ -629,18 +625,18 @@ class TestSchemaValidator:
             },
             "required": ["result"]
         }
-        
+
         valid_output = {
             "result": "Task completed successfully",
             "confidence": 0.95,
             "metadata": {"timestamp": "2024-01-01T00:00:00Z"}
         }
-        
+
         # Act
         result = self.validator.validate_workflow_output_schema(
             valid_output, output_schema
         )
-        
+
         # Assert
         assert result.valid is True
 
@@ -701,7 +697,7 @@ class TestWorkflowValidationIntegration:
                 "optional_services": ["analytics_service"]
             }
         }
-        
+
         # Mock available services and user permissions
         available_services = ["llm_service", "analytics_service"]
         user_permissions = {
@@ -709,10 +705,10 @@ class TestWorkflowValidationIntegration:
             "tools": ["calculator", "search", "other_tool"],
             "actions": ["read", "write", "execute"]
         }
-        
+
         # Act - Validate complete workflow
         config_result = self.workflow_validator.validate_workflow_config(complete_workflow)
-        
+
         if config_result.valid:
             perm_result = self.workflow_validator.validate_workflow_permissions(
                 complete_workflow, user_permissions
@@ -720,13 +716,13 @@ class TestWorkflowValidationIntegration:
             dep_result = self.workflow_validator.validate_workflow_dependencies(
                 complete_workflow, available_services
             )
-            
+
             # Validate individual steps
             step_results = []
             for step in complete_workflow["steps"]:
                 step_result = self.step_validator.validate_step(step)
                 step_results.append(step_result)
-        
+
         # Assert - All validations pass
         assert config_result.valid is True
         assert perm_result.valid is True
@@ -751,23 +747,23 @@ class TestWorkflowValidationIntegration:
                 }
             ]
         }
-        
+
         # Act
         config_result = self.workflow_validator.validate_workflow_config(invalid_workflow)
-        
+
         # Validate the invalid step
         step_result = self.step_validator.validate_step(invalid_workflow["steps"][0])
-        
+
         # Validate parameters
         temp_result = self.param_validator.validate_temperature(2.0)
         model_result = self.param_validator.validate_model_name("unsupported-model")
-        
+
         # Assert - All validations should fail
         assert config_result.valid is False
         assert step_result.valid is False
         assert temp_result.valid is False
         assert model_result.valid is False
-        
+
         # Check that errors are descriptive
         assert len(config_result.errors) > 0
         assert len(step_result.errors) > 0

@@ -1,7 +1,8 @@
 """Pydantic schemas for model/embedding registry."""
 
+from collections.abc import Sequence
 from datetime import datetime
-from typing import Any, Sequence
+from typing import Any
 
 from pydantic import BaseModel, Field
 

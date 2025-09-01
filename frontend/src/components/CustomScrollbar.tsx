@@ -19,8 +19,8 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
       top: '0px',
       borderRadius: '3px',
       backgroundColor: theme.palette.mode === 'dark' 
-        ? 'rgba(255, 255, 255, 0.1)' 
-        : 'rgba(0, 0, 0, 0.1)',
+        ? 'rgba(255, 255, 255, 0.15)' 
+        : 'rgba(0, 0, 0, 0.15)',
     },
     trackHorizontal: {
       position: 'absolute' as const,
@@ -30,8 +30,8 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
       bottom: '0px',
       borderRadius: '3px',
       backgroundColor: theme.palette.mode === 'dark' 
-        ? 'rgba(255, 255, 255, 0.1)' 
-        : 'rgba(0, 0, 0, 0.1)',
+        ? 'rgba(255, 255, 255, 0.15)' 
+        : 'rgba(0, 0, 0, 0.15)',
     },
     // Thumb styles
     thumbVertical: {
@@ -41,8 +41,8 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
       minHeight: '20px',
       borderRadius: '2px',
       backgroundColor: theme.palette.mode === 'dark' 
-        ? 'rgba(255, 255, 255, 0.4)' 
-        : 'rgba(0, 0, 0, 0.4)',
+        ? 'rgba(255, 255, 255, 0.6)' 
+        : 'rgba(0, 0, 0, 0.6)',
       cursor: 'pointer',
       transition: 'background-color 0.2s ease',
       margin: '1px',
@@ -54,8 +54,8 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
       minWidth: '20px',
       borderRadius: '2px',
       backgroundColor: theme.palette.mode === 'dark' 
-        ? 'rgba(255, 255, 255, 0.4)' 
-        : 'rgba(0, 0, 0, 0.4)',
+        ? 'rgba(255, 255, 255, 0.6)' 
+        : 'rgba(0, 0, 0, 0.6)',
       cursor: 'pointer',
       transition: 'background-color 0.2s ease',
       margin: '1px',
@@ -103,19 +103,22 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, ...p
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.6)' 
-                  : 'rgba(0, 0, 0, 0.6)';
+                  ? 'rgba(255, 255, 255, 0.8)' 
+                  : 'rgba(0, 0, 0, 0.8)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = theme.palette.mode === 'dark' 
-                  ? 'rgba(255, 255, 255, 0.4)' 
-                  : 'rgba(0, 0, 0, 0.4)';
+                  ? 'rgba(255, 255, 255, 0.6)' 
+                  : 'rgba(0, 0, 0, 0.6)';
               }}
             />
           );
         },
       }}
       trackClickBehavior={'jump' as any}
+      removeTracksWhenNotUsed={true}
+      removeTrackYWhenNotUsed={true}
+      removeTrackXWhenNotUsed={true}
       {...props}
     >
       {children}

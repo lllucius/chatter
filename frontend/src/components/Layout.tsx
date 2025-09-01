@@ -190,7 +190,7 @@ const LayoutFrame: React.FC = () => {
   };
 
   const renderNavigation = (isMobile: boolean = false) => (
-    <CustomScrollbar style={{ height: 'calc(100vh - 64px)' }}>
+    <CustomScrollbar style={{ height: isMobile ? 'calc(100vh - 128px)' : 'calc(100vh - 64px)' }}>
       <List sx={{ pt: 0 }}>
         {navSections.map((section) => (
           <React.Fragment key={section.title}>

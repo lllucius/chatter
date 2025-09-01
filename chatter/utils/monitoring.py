@@ -602,3 +602,76 @@ def record_workflow_metrics(
     )
 
     metrics_collector.record_workflow_operation(metrics)
+
+
+class AlertManager:
+    """Manager for system alerts and thresholds."""
+    
+    def __init__(self):
+        """Initialize alert manager."""
+        self.alerts = {}
+        self.thresholds = {}
+        self.alert_id_counter = 0
+    
+    def create_alert(self, level: str, message: str, source: str) -> str:
+        """Create a new alert."""
+        self.alert_id_counter += 1
+        alert_id = str(self.alert_id_counter)
+        
+        self.alerts[alert_id] = {
+            "id": alert_id,
+            "level": level,
+            "message": message,
+            "source": source,
+            "timestamp": time.time(),
+            "resolved": False,
+            "resolution_message": None
+        }
+        
+        return alert_id
+    
+    def resolve_alert(self, alert_id: str, resolution_message: str) -> bool:
+        """Resolve an alert."""
+        if alert_id in self.alerts:
+            self.alerts[alert_id]["resolved"] = True
+            self.alerts[alert_id]["resolution_message"] = resolution_message
+            return True
+        return False
+    
+    def get_active_alerts(self) -> list[dict]:
+        """Get all active alerts."""
+        return [alert for alert in self.alerts.values() if not alert["resolved"]]
+    
+    def get_resolved_alerts(self) -> list[dict]:
+        """Get all resolved alerts."""
+        return [alert for alert in self.alerts.values() if alert["resolved"]]
+    
+    def set_threshold(self, metric: str, threshold: float, level: str) -> None:
+        """Set a threshold for a metric."""
+        self.thresholds[metric] = {"threshold": threshold, "level": level}
+    
+    def check_threshold(self, metric: str, value: float) -> None:
+        """Check if a metric value exceeds threshold."""
+        if metric in self.thresholds:
+            threshold_info = self.thresholds[metric]
+            if value > threshold_info["threshold"]:
+                self.create_alert(
+                    level=threshold_info["level"],
+                    message=f"{metric} exceeded threshold: {value} > {threshold_info['threshold']}",
+                    source="threshold_monitor"
+                )
+    
+    def check_escalation(self, escalation_time_seconds: int) -> list[dict]:
+        """Check for alerts that should be escalated."""
+        current_time = time.time()
+        escalated = []
+        
+        for alert in self.alerts.values():
+            if (not alert["resolved"] and 
+                current_time - alert["timestamp"] > escalation_time_seconds and
+                alert["level"] == "warning"):
+                # Escalate to critical
+                alert["level"] = "critical"
+                escalated.append(alert)
+        
+        return escalated

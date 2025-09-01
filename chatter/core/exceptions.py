@@ -102,6 +102,7 @@ class ChatterBaseException(Exception):
 
 # Alias for backward compatibility
 ChatterError = ChatterBaseException
+ChatterException = ChatterBaseException  # Additional alias for tests
 
 
 class ServiceError(ChatterError):
@@ -322,6 +323,20 @@ class DocumentProcessingError(ServiceError):
         )
 
 
+class ExternalServiceError(ServiceError):
+    """External service integration errors."""
+
+    def __init__(self, service_name: str, message: str, **kwargs):
+        super().__init__(service_name, message, **kwargs)
+
+
+class EmbeddingError(ServiceError):
+    """Embedding service specific errors."""
+
+    def __init__(self, message: str, **kwargs):
+        super().__init__("EmbeddingService", message, **kwargs)
+
+
 
 
 
@@ -504,3 +519,37 @@ class DocumentNotFoundError(NotFoundError):
             resource_id=document_id,
             **kwargs
         )
+
+
+class WorkflowMetricsError(WorkflowError):
+    """Workflow metrics specific errors."""
+
+    def __init__(self, message: str, **kwargs):
+        super().__init__(message=message, **kwargs)
+
+    def _get_error_title(self) -> str:
+        return "Workflow Metrics Error"
+
+    def _get_type_suffix(self) -> str:
+        return "workflow-metrics-error"
+
+
+class WorkflowTemplateError(WorkflowError):
+    """Workflow template specific errors."""
+
+    def __init__(self, message: str, template_name: str | None = None, **kwargs):
+        details = {}
+        if template_name:
+            details["template_name"] = template_name
+
+        super().__init__(
+            message=message,
+            details=details,
+            **kwargs
+        )
+
+    def _get_error_title(self) -> str:
+        return "Workflow Template Error"
+
+    def _get_type_suffix(self) -> str:
+        return "workflow-template-error"

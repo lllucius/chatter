@@ -211,3 +211,58 @@ def clear_embedding_models():
     """Clear all registered embedding models (useful for testing)."""
     global embedding_models
     embedding_models.clear()
+
+
+class DynamicEmbeddingService:
+    """Service for dynamic embedding operations."""
+    
+    def __init__(self, session=None):
+        """Initialize the service with an optional database session."""
+        self.session = session
+    
+    async def store_embeddings(self, model_name: str, dimension: int, embeddings_data: list[dict]) -> bool:
+        """Store embeddings in dynamic table."""
+        try:
+            # Get or create the embedding model for this dimension
+            embedding_model = get_embedding_model(model_name, dimension)
+            
+            # Create instances and add to session
+            for data in embeddings_data:
+                instance = embedding_model(
+                    document_id=data["document_id"],
+                    chunk_id=data.get("chunk_id", data["document_id"]),
+                    embedding=data["embedding"],
+                    content=data["text"],
+                    extra_metadata=data.get("metadata")
+                )
+                self.session.add(instance)
+            
+            await self.session.commit()
+            return True
+        except Exception as e:
+            logger.error(f"Failed to store embeddings: {e}")
+            return False
+    
+    async def retrieve_embeddings(self, model_name: str, dimension: int, document_id: str) -> list:
+        """Retrieve embeddings from dynamic table."""
+        try:
+            embedding_model = get_embedding_model(model_name, dimension)
+            from sqlalchemy import select
+            
+            query = select(embedding_model).where(embedding_model.document_id == document_id)
+            result = await self.session.execute(query)
+            return result.scalars().all()
+        except Exception as e:
+            logger.error(f"Failed to retrieve embeddings: {e}")
+            return []
+    
+    async def search_similar_embeddings(self, model_name: str, dimension: int, query_embedding: list[float], limit: int = 5) -> list:
+        """Search for similar embeddings."""
+        try:
+            embedding_model = get_embedding_model(model_name, dimension)
+            # This would need proper vector similarity search implementation
+            # For now, return empty list as placeholder
+            return []
+        except Exception as e:
+            logger.error(f"Failed to search similar embeddings: {e}")
+            return []

@@ -9,7 +9,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from langchain_core.tools import BaseTool
+try:
+    from langchain_core.tools import BaseTool
+except ImportError:
+    # Fallback for when langchain_core is not available
+    class BaseTool:
+        """Fallback BaseTool class."""
+        pass
 
 from chatter.config import settings
 from chatter.schemas.plugins import (
@@ -23,6 +29,11 @@ from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+class PluginError(Exception):
+    """Plugin operation error."""
+    pass
 
 
 class BasePlugin(ABC):

@@ -4,14 +4,39 @@ import asyncio
 from abc import ABC, abstractmethod
 from typing import Any
 
-from langchain_core.documents import Document
-from langchain_core.embeddings import Embeddings
-from langchain_postgres import PGVector
+try:
+    from langchain_core.documents import Document
+    from langchain_core.embeddings import Embeddings
+    from langchain_postgres import PGVector
+except ImportError:
+    # Fallback classes when langchain is not available
+    class Document:
+        def __init__(self, page_content: str = "", metadata: dict = None):
+            self.page_content = page_content
+            self.metadata = metadata or {}
+    
+    class Embeddings:
+        pass
+    
+    class PGVector:
+        pass
 
 from chatter.config import settings
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+class VectorSearchResult:
+    """Result from vector search operation."""
+    
+    def __init__(self, id: str, score: float, document=None, vector=None):
+        """Initialize search result."""
+        self.id = id
+        self.score = score
+        self.document = document
+        self.vector = vector
+        self.similarity = score  # Alias for backward compatibility
 
 
 class VectorStoreError(Exception):
@@ -462,3 +487,6 @@ class VectorStoreManager:
 
 # Global vector store manager instance
 vector_store_manager = VectorStoreManager()
+
+# Alias for backward compatibility
+VectorStore = AbstractVectorStore

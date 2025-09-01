@@ -752,7 +752,7 @@ const ToolsPage: React.FC = () => {
           
           {/* Server Name - only for new servers */}
           {dialogType === 'server' && (
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
               <TextField
                 fullWidth
                 label="Server Name"
@@ -765,7 +765,7 @@ const ToolsPage: React.FC = () => {
           )}
           
           {/* Display Name - always visible */}
-          <Grid item xs={12} md={dialogType === 'server' ? 6 : 12}>
+          <Grid item xs={12}>
             <TextField
               fullWidth
               label="Display Name"
@@ -799,7 +799,7 @@ const ToolsPage: React.FC = () => {
                 </Typography>
               </Grid>
               
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Base URL"
@@ -811,7 +811,7 @@ const ToolsPage: React.FC = () => {
                 />
               </Grid>
               
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12}>
                 <FormControl fullWidth>
                   <InputLabel>Transport Type</InputLabel>
                   <Select
@@ -845,7 +845,7 @@ const ToolsPage: React.FC = () => {
             </Typography>
           </Grid>
           
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <TextField
               fullWidth
               label="Timeout (seconds)"
@@ -857,18 +857,16 @@ const ToolsPage: React.FC = () => {
             />
           </Grid>
           
-          <Grid item xs={12} md={6}>
-            <Box sx={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={serverFormData.auto_start}
-                    onChange={(e) => setServerFormData({ ...serverFormData, auto_start: e.target.checked })}
-                  />
-                }
-                label="Auto-connect on startup"
-              />
-            </Box>
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={serverFormData.auto_start}
+                  onChange={(e) => setServerFormData({ ...serverFormData, auto_start: e.target.checked })}
+                />
+              }
+              label="Auto-connect on startup"
+            />
           </Grid>
 
           {/* OAuth Authentication Section */}
@@ -893,7 +891,7 @@ const ToolsPage: React.FC = () => {
           
           {serverFormData.oauth_enabled && (
             <>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Client ID"
@@ -903,7 +901,7 @@ const ToolsPage: React.FC = () => {
                 />
               </Grid>
               
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Client Secret"
@@ -914,7 +912,7 @@ const ToolsPage: React.FC = () => {
                 />
               </Grid>
               
-              <Grid item xs={12} md={8}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Token URL"
@@ -925,7 +923,7 @@ const ToolsPage: React.FC = () => {
                 />
               </Grid>
               
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12}>
                 <TextField
                   fullWidth
                   label="Scope (optional)"

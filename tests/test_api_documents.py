@@ -1,7 +1,7 @@
 """Tests for document processing API endpoints."""
 
 from io import BytesIO
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 from fastapi import status
@@ -40,16 +40,20 @@ class TestDocumentEndpoints:
         file_content = b"This is a test document content."
         file_data = {"file": ("test.txt", BytesIO(file_content), "text/plain")}
 
-        mock_document = Document(
+        mock_document = MagicMock(
             id="doc-123",
             title="test.txt",
             content="This is a test document content.",
-            user_id=self.mock_user.id,
-            file_type="text/plain",
-            file_size=len(file_content)
+            owner_id=self.mock_user.id,
+            filename="test.txt",
+            original_filename="test.txt",
+            file_size=len(file_content),
+            file_hash="testhash",
+            mime_type="text/plain",
+            document_type="text"
         )
 
-        with patch('chatter.services.document_processing.DocumentProcessor.process_document') as mock_process:
+        with patch('chatter.services.document_processing.DocumentProcessingService.process_document') as mock_process:
             mock_process.return_value = mock_document
 
             # Act
@@ -102,23 +106,36 @@ class TestDocumentEndpoints:
 
     def test_get_documents_success(self):
         """Test retrieving user documents."""
-        # Arrange
+        # Arrange - Use mock objects instead of trying to create complex Document instances
+        from unittest.mock import MagicMock
         mock_documents = [
-            Document(
+            MagicMock(
                 id="doc-1",
                 title="Document 1",
                 content="Content 1",
-                user_id=self.mock_user.id
+                owner_id=self.mock_user.id,
+                filename="doc1.txt",
+                original_filename="doc1.txt",
+                file_size=100,
+                file_hash="hash1",
+                mime_type="text/plain",
+                document_type="text"
             ),
-            Document(
+            MagicMock(
                 id="doc-2",
                 title="Document 2",
                 content="Content 2",
-                user_id=self.mock_user.id
+                owner_id=self.mock_user.id,
+                filename="doc2.txt",
+                original_filename="doc2.txt",
+                file_size=200,
+                file_hash="hash2",
+                mime_type="text/plain",
+                document_type="text"
             )
         ]
 
-        with patch('chatter.services.document_processing.DocumentProcessor.get_user_documents') as mock_get:
+        with patch('chatter.services.document_processing.DocumentProcessingService.get_user_documents') as mock_get:
             mock_get.return_value = mock_documents
 
             # Act
@@ -134,14 +151,20 @@ class TestDocumentEndpoints:
         """Test retrieving specific document."""
         # Arrange
         document_id = "doc-123"
-        mock_document = Document(
+        mock_document = MagicMock(
             id=document_id,
             title="Test Document",
             content="Test content",
-            user_id=self.mock_user.id
+            owner_id=self.mock_user.id,
+            filename="test.txt",
+            original_filename="test.txt",
+            file_size=100,
+            file_hash="testhash",
+            mime_type="text/plain",
+            document_type="text"
         )
 
-        with patch('chatter.services.document_processing.DocumentProcessor.get_document') as mock_get:
+        with patch('chatter.services.document_processing.DocumentProcessingService.get_document') as mock_get:
             mock_get.return_value = mock_document
 
             # Act
@@ -158,7 +181,7 @@ class TestDocumentEndpoints:
         # Arrange
         document_id = "non-existent"
 
-        with patch('chatter.services.document_processing.DocumentProcessor.get_document') as mock_get:
+        with patch('chatter.services.document_processing.DocumentProcessingService.get_document') as mock_get:
             from chatter.core.exceptions import NotFoundError
             mock_get.side_effect = NotFoundError("Document not found")
 
@@ -178,14 +201,20 @@ class TestDocumentEndpoints:
             "tags": ["updated", "test"]
         }
 
-        mock_document = Document(
+        mock_document = MagicMock(
             id=document_id,
             title=update_data["title"],
             content="Original content",
-            user_id=self.mock_user.id
+            owner_id=self.mock_user.id,
+            filename="test.txt",
+            original_filename="test.txt",
+            file_size=100,
+            file_hash="testhash",
+            mime_type="text/plain",
+            document_type="text"
         )
 
-        with patch('chatter.services.document_processing.DocumentProcessor.update_document') as mock_update:
+        with patch('chatter.services.document_processing.DocumentProcessingService.update_document') as mock_update:
             mock_update.return_value = mock_document
 
             # Act
@@ -206,7 +235,7 @@ class TestDocumentEndpoints:
         # Arrange
         document_id = "doc-123"
 
-        with patch('chatter.services.document_processing.DocumentProcessor.delete_document') as mock_delete:
+        with patch('chatter.services.document_processing.DocumentProcessingService.delete_document') as mock_delete:
             mock_delete.return_value = True
 
             # Act
@@ -224,15 +253,21 @@ class TestDocumentEndpoints:
         search_query = "test content"
 
         mock_results = [
-            Document(
+            MagicMock(
                 id="doc-1",
                 title="Test Document",
                 content="This contains test content",
-                user_id=self.mock_user.id
+                owner_id=self.mock_user.id,
+                filename="test.txt",
+                original_filename="test.txt",
+                file_size=100,
+                file_hash="testhash",
+                mime_type="text/plain",
+                document_type="text"
             )
         ]
 
-        with patch('chatter.services.document_processing.DocumentProcessor.search_documents') as mock_search:
+        with patch('chatter.services.document_processing.DocumentProcessingService.search_documents') as mock_search:
             mock_search.return_value = mock_results
 
             # Act
@@ -262,7 +297,7 @@ class TestDocumentEndpoints:
             {"id": "chunk-2", "content": "Second chunk", "metadata": {}}
         ]
 
-        with patch('chatter.services.document_processing.DocumentProcessor.process_with_chunking') as mock_process:
+        with patch('chatter.services.document_processing.DocumentProcessingService.process_with_chunking') as mock_process:
             mock_process.return_value = mock_chunks
 
             # Act
@@ -291,7 +326,7 @@ class TestDocumentEndpoints:
             "topics": ["testing", "documents"]
         }
 
-        with patch('chatter.services.document_processing.DocumentProcessor.extract_metadata') as mock_extract:
+        with patch('chatter.services.document_processing.DocumentProcessingService.extract_metadata') as mock_extract:
             mock_extract.return_value = mock_metadata
 
             # Act
@@ -322,7 +357,7 @@ class TestDocumentEndpoints:
             }
         }
 
-        with patch('chatter.services.document_processing.DocumentProcessor.get_analytics') as mock_analytics_func:
+        with patch('chatter.services.document_processing.DocumentProcessingService.get_analytics') as mock_analytics_func:
             mock_analytics_func.return_value = mock_analytics
 
             # Act
@@ -347,7 +382,7 @@ class TestDocumentEndpoints:
             {"id": "doc-2", "title": "doc2.txt", "status": "success"}
         ]
 
-        with patch('chatter.services.document_processing.DocumentProcessor.bulk_upload') as mock_bulk:
+        with patch('chatter.services.document_processing.DocumentProcessingService.bulk_upload') as mock_bulk:
             mock_bulk.return_value = mock_results
 
             # Act
@@ -389,14 +424,20 @@ class TestDocumentIntegration:
         file_content = b"This is a comprehensive test document for processing workflow."
         file_data = {"file": ("workflow_test.txt", BytesIO(file_content), "text/plain")}
 
-        mock_document = Document(
+        mock_document = MagicMock(
             id="workflow-doc-id",
             title="workflow_test.txt",
             content=file_content.decode(),
-            user_id=self.mock_user.id
+            owner_id=self.mock_user.id,
+            filename="workflow_test.txt",
+            original_filename="workflow_test.txt",
+            file_size=len(file_content),
+            file_hash="workflowhash",
+            mime_type="text/plain",
+            document_type="text"
         )
 
-        with patch('chatter.services.document_processing.DocumentProcessor.process_document') as mock_process:
+        with patch('chatter.services.document_processing.DocumentProcessingService.process_document') as mock_process:
             mock_process.return_value = mock_document
 
             headers = {"Authorization": "Bearer integration-token"}
@@ -412,7 +453,7 @@ class TestDocumentIntegration:
             doc_id = upload_response.json()["id"]
 
             # Process with chunking
-            with patch('chatter.services.document_processing.DocumentProcessor.process_with_chunking') as mock_chunk:
+            with patch('chatter.services.document_processing.DocumentProcessingService.process_with_chunking') as mock_chunk:
                 mock_chunk.return_value = [
                     {"id": "chunk-1", "content": "First part of document", "metadata": {}},
                     {"id": "chunk-2", "content": "Second part of document", "metadata": {}}
@@ -427,7 +468,7 @@ class TestDocumentIntegration:
                 assert process_response.status_code == status.HTTP_200_OK
 
                 # Extract metadata
-                with patch('chatter.services.document_processing.DocumentProcessor.extract_metadata') as mock_meta:
+                with patch('chatter.services.document_processing.DocumentProcessingService.extract_metadata') as mock_meta:
                     mock_meta.return_value = {"word_count": 50, "language": "en"}
 
                     metadata_response = self.client.get(
@@ -438,7 +479,7 @@ class TestDocumentIntegration:
                     assert metadata_response.status_code == status.HTTP_200_OK
 
                     # Search for document
-                    with patch('chatter.services.document_processing.DocumentProcessor.search_documents') as mock_search:
+                    with patch('chatter.services.document_processing.DocumentProcessingService.search_documents') as mock_search:
                         mock_search.return_value = [mock_document]
 
                         search_response = self.client.get(

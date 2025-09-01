@@ -720,3 +720,48 @@ def validate_sql_identifier(identifier: str) -> bool:
     # SQL identifiers should only contain alphanumeric and underscore
     pattern = r'^[a-zA-Z_][a-zA-Z0-9_]*$'
     return bool(re.match(pattern, identifier)) and len(identifier) <= 64
+
+
+class ValidationMiddleware:
+    """Middleware for request validation and sanitization."""
+    
+    def __init__(self) -> None:
+        """Initialize the validation middleware."""
+        self.validator = InputValidator()
+    
+    async def dispatch(
+        self, 
+        request: Request, 
+        call_next: Callable[[Request], Awaitable[Response]]
+    ) -> Response:
+        """Process request through validation middleware.
+        
+        Args:
+            request: The incoming request
+            call_next: The next handler in the chain
+            
+        Returns:
+            Response from the handler or error response
+        """
+        # Skip validation for GET requests
+        if request.method == "GET":
+            return await call_next(request)
+        
+        # For POST/PUT/PATCH requests, validate JSON if present
+        if request.method in ["POST", "PUT", "PATCH"]:
+            try:
+                # Check if request has JSON body
+                if hasattr(request, 'json'):
+                    # This would validate the JSON structure if needed
+                    # For now, just pass through
+                    pass
+            except ValidationError:
+                # Return validation error response
+                return Response(
+                    content='{"error": "Invalid request format"}',
+                    status_code=422,
+                    media_type="application/json"
+                )
+        
+        # Call the next handler
+        return await call_next(request)

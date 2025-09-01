@@ -532,3 +532,191 @@ def sanitize_input(text: str) -> str:
         Sanitized text
     """
     return input_validator._sanitize_value(text)
+
+
+def validate_email(email: str) -> bool:
+    """Validate email address format.
+    
+    Args:
+        email: Email address to validate
+        
+    Returns:
+        True if valid email format
+    """
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email))
+
+
+def validate_password(password: str) -> bool:
+    """Validate password strength.
+    
+    Args:
+        password: Password to validate
+        
+    Returns:
+        True if password meets requirements
+    """
+    if len(password) < 8:
+        return False
+    
+    # Check for uppercase, lowercase, digit, and special character
+    has_upper = any(c.isupper() for c in password)
+    has_lower = any(c.islower() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    has_special = any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password)
+    
+    return has_upper and has_lower and has_digit and has_special
+
+
+def validate_url(url: str) -> bool:
+    """Validate URL format.
+    
+    Args:
+        url: URL to validate
+        
+    Returns:
+        True if valid URL format
+    """
+    pattern = r'^https?://[^\s/$.?#].[^\s]*$'
+    return bool(re.match(pattern, url))
+
+
+def validate_uuid(uuid_str: str) -> bool:
+    """Validate UUID format.
+    
+    Args:
+        uuid_str: UUID string to validate
+        
+    Returns:
+        True if valid UUID format
+    """
+    pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+    return bool(re.match(pattern, uuid_str.lower()))
+
+
+def validate_phone_number(phone: str) -> bool:
+    """Validate phone number format.
+    
+    Args:
+        phone: Phone number to validate
+        
+    Returns:
+        True if valid phone number format
+    """
+    # Simple international phone validation
+    pattern = r'^\+?[\d\s\-\(\)]{7,15}$'
+    return bool(re.match(pattern, phone))
+
+
+def validate_file_size(size: int, max_size: int = 10485760) -> bool:
+    """Validate file size.
+    
+    Args:
+        size: File size in bytes
+        max_size: Maximum allowed size in bytes (default 10MB)
+        
+    Returns:
+        True if file size is within limits
+    """
+    return 0 < size <= max_size
+
+
+def validate_file_type(filename: str, allowed_types: list[str] | None = None) -> bool:
+    """Validate file type by extension.
+    
+    Args:
+        filename: Name of file to validate
+        allowed_types: List of allowed file extensions
+        
+    Returns:
+        True if file type is allowed
+    """
+    if allowed_types is None:
+        allowed_types = ['.txt', '.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg']
+    
+    import os
+    _, ext = os.path.splitext(filename.lower())
+    return ext in allowed_types
+
+
+def validate_json_schema(data: dict, schema: dict) -> bool:
+    """Validate data against JSON schema.
+    
+    Args:
+        data: Data to validate
+        schema: JSON schema to validate against
+        
+    Returns:
+        True if data matches schema
+    """
+    try:
+        # Basic validation - in practice you'd use jsonschema library
+        for field, field_type in schema.get('properties', {}).items():
+            if field in data:
+                expected_type = field_type.get('type')
+                if expected_type == 'string' and not isinstance(data[field], str):
+                    return False
+                elif expected_type == 'integer' and not isinstance(data[field], int):
+                    return False
+                elif expected_type == 'number' and not isinstance(data[field], (int, float)):
+                    return False
+                elif expected_type == 'boolean' and not isinstance(data[field], bool):
+                    return False
+        return True
+    except Exception:
+        return False
+
+
+def sanitize_filename(filename: str) -> str:
+    """Sanitize filename for safe storage.
+    
+    Args:
+        filename: Original filename
+        
+    Returns:
+        Sanitized filename
+    """
+    # Remove path components
+    import os
+    filename = os.path.basename(filename)
+    
+    # Replace unsafe characters
+    unsafe_chars = '<>:"/\\|?*'
+    for char in unsafe_chars:
+        filename = filename.replace(char, '_')
+    
+    # Remove leading/trailing dots and spaces
+    filename = filename.strip('. ')
+    
+    # Ensure not empty
+    if not filename:
+        filename = 'unnamed'
+    
+    return filename
+
+
+def sanitize_html(html_content: str) -> str:
+    """Sanitize HTML content.
+    
+    Args:
+        html_content: HTML content to sanitize
+        
+    Returns:
+        Sanitized HTML content
+    """
+    # Basic HTML sanitization - escape all tags
+    return html.escape(html_content)
+
+
+def validate_sql_identifier(identifier: str) -> bool:
+    """Validate SQL identifier (table name, column name, etc.).
+    
+    Args:
+        identifier: SQL identifier to validate
+        
+    Returns:
+        True if valid SQL identifier
+    """
+    # SQL identifiers should only contain alphanumeric and underscore
+    pattern = r'^[a-zA-Z_][a-zA-Z0-9_]*$'
+    return bool(re.match(pattern, identifier)) and len(identifier) <= 64

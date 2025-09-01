@@ -148,6 +148,44 @@ class APIKeyResponse(BaseModel):
     id: str = Field(..., description="User ID")
     api_key: str = Field(..., description="API key")
     api_key_name: str = Field(..., description="API key name")
+
+
+class UserRegistration(BaseModel):
+    """Schema for user registration."""
+
+    email: EmailStr = Field(..., description="User email address")
+    username: str = Field(
+        ..., min_length=3, max_length=50, description="Username"
+    )
+    password: str = Field(
+        ..., min_length=8, max_length=128, description="Password"
+    )
+    full_name: str | None = Field(
+        None, max_length=255, description="Full name"
+    )
+
+
+class RefreshTokenRequest(BaseModel):
+    """Schema for refresh token request."""
+
+    refresh_token: str = Field(..., description="Refresh token")
+
+
+class UserPreferences(BaseModel):
+    """Schema for user preferences."""
+
+    theme: str = Field(default="light", description="UI theme preference")
+    language: str = Field(default="en", description="Language preference")
+    timezone: str = Field(default="UTC", description="Timezone preference")
+    email_notifications: bool = Field(
+        default=True, description="Email notifications enabled"
+    )
+    push_notifications: bool = Field(
+        default=True, description="Push notifications enabled"
+    )
+    default_model: str | None = Field(
+        None, description="Default AI model preference"
+    )
     created_at: datetime = Field(..., description="Creation date")
 
     class Config:

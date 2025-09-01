@@ -674,6 +674,93 @@ class ABTestManager:
 
         logger.info(f"Analyzed results for test {test_id}")
 
+    async def get_test(self, test_id: str) -> ABTest | None:
+        """Get a test by ID."""
+        return self.tests.get(test_id)
+    
+    async def update_test(self, test_id: str, update_data: dict[str, Any]) -> ABTest | None:
+        """Update a test configuration."""
+        test = self.tests.get(test_id)
+        if not test:
+            return None
+        
+        # Update allowed fields
+        for field, value in update_data.items():
+            if hasattr(test, field):
+                setattr(test, field, value)
+        
+        self.tests[test_id] = test
+        logger.info(f"Updated test {test_id}")
+        return test
+    
+    async def delete_test(self, test_id: str) -> bool:
+        """Delete a test."""
+        if test_id in self.tests:
+            del self.tests[test_id]
+            # Clean up related data
+            if test_id in self.results:
+                del self.results[test_id]
+            logger.info(f"Deleted test {test_id}")
+            return True
+        return False
+    
+    async def complete_test(self, test_id: str) -> bool:
+        """Mark a test as completed."""
+        test = self.tests.get(test_id)
+        if test:
+            test.status = TestStatus.COMPLETED
+            test.end_date = datetime.now(UTC)
+            logger.info(f"Completed test {test_id}")
+            return True
+        return False
+    
+    async def analyze_test(self, test_id: str) -> TestResult | None:
+        """Analyze test results."""
+        await self._analyze_test_results(test_id)
+        return self.results.get(test_id)
+    
+    async def end_test(self, test_id: str, winner_variant: str | None = None) -> bool:
+        """End a test with optional winner selection."""
+        test = self.tests.get(test_id)
+        if test:
+            test.status = TestStatus.COMPLETED
+            test.end_date = datetime.now(UTC)
+            if winner_variant:
+                # Store winner information in metadata
+                if not test.metadata:
+                    test.metadata = {}
+                test.metadata["winner_variant"] = winner_variant
+            logger.info(f"Ended test {test_id}")
+            return True
+        return False
+    
+    async def get_test_performance(self, test_id: str) -> dict[str, Any] | None:
+        """Get test performance metrics."""
+        test = self.tests.get(test_id)
+        result = self.results.get(test_id)
+        
+        if not test:
+            return None
+        
+        performance = {
+            "test_id": test_id,
+            "status": test.status.value,
+            "total_participants": len([a for a in self.assignments.values() if a.test_id == test_id]),
+            "events_count": len([e for e in self.events if e.test_id == test_id]),
+            "start_date": test.start_date,
+            "end_date": test.end_date,
+        }
+        
+        if result:
+            performance.update({
+                "variant_results": result.variant_results,
+                "statistical_significance": result.statistical_significance,
+                "confidence_intervals": result.confidence_intervals,
+                "recommendations": result.recommendations,
+            })
+        
+        return performance
+
 
 # Global A/B test manager
 ab_test_manager = ABTestManager()

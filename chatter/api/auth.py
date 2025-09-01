@@ -103,8 +103,15 @@ async def login(
     Returns:
         User data and authentication tokens
     """
+    # Use email or username for authentication
+    identifier = user_data.username or user_data.email
+    if not identifier:
+        raise AuthenticationProblem(
+            detail="Username or email is required"
+        ) from None
+    
     user = await auth_service.authenticate_user(
-        user_data.username, user_data.password
+        identifier, user_data.password
     )
     if not user:
         raise AuthenticationProblem(
@@ -140,7 +147,7 @@ async def refresh_token(
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(
-    current_user=Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ) -> UserResponse:
     """Get current user information.
 
@@ -156,7 +163,7 @@ async def get_current_user_info(
 @router.put("/me", response_model=UserResponse)
 async def update_profile(
     user_data: UserUpdate,
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> UserResponse:
     """Update current user profile.
@@ -178,7 +185,7 @@ async def update_profile(
 @router.post("/change-password", response_model=PasswordChangeResponse)
 async def change_password(
     password_data: PasswordChange,
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> PasswordChangeResponse:
     """Change user password.
@@ -205,7 +212,7 @@ async def change_password(
 @router.post("/api-key", response_model=APIKeyResponse)
 async def create_api_key(
     key_data: APIKeyCreate,
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> APIKeyResponse:
     """Create API key for current user.
@@ -226,13 +233,12 @@ async def create_api_key(
         id=current_user.id,
         api_key=api_key,
         api_key_name=key_data.name,
-        created_at=current_user.updated_at,
     )
 
 
 @router.delete("/api-key", response_model=APIKeyRevokeResponse)
 async def revoke_api_key(
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> APIKeyRevokeResponse:
     """Revoke current user's API key.
@@ -250,7 +256,7 @@ async def revoke_api_key(
 
 @router.get("/api-keys", response_model=list[APIKeyResponse])
 async def list_api_keys(
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> list[APIKeyResponse]:
     """List user's API keys.
@@ -268,7 +274,7 @@ async def list_api_keys(
 
 @router.post("/logout", response_model=LogoutResponse)
 async def logout(
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> LogoutResponse:
     """Logout and revoke current token.
@@ -324,7 +330,7 @@ async def confirm_password_reset(
 
 @router.delete("/account", response_model=AccountDeactivateResponse)
 async def deactivate_account(
-    current_user=Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> AccountDeactivateResponse:
     """Deactivate current user account.

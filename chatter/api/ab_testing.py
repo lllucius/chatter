@@ -1,6 +1,7 @@
 """A/B testing management endpoints."""
 
 from datetime import UTC, datetime
+from typing import Any
 
 from fastapi import APIRouter, Depends, status
 
@@ -16,6 +17,7 @@ from chatter.schemas.ab_testing import (
     ABTestResponse,
     ABTestResultsResponse,
     ABTestUpdateRequest,
+    TestStatus,
 )
 from chatter.services.ab_testing import ABTestManager
 from chatter.utils.logging import get_logger
@@ -90,25 +92,26 @@ async def create_ab_test(
             ))
 
         # Create test
-        ab_test = ABTest(
+
+        test_id = await ab_test_manager.create_test(
             name=test_data.name,
             description=test_data.description,
             test_type=test_data.test_type,
             variants=variants,
+            primary_metric={
+                "name": test_data.metrics[0].value,
+                "metric_type": test_data.metrics[0].value,
+            },
+            created_by=current_user.username,
+            secondary_metrics=[{
+                "name": metric.value,
+                "metric_type": metric.value,
+            } for metric in test_data.metrics[1:]],
             allocation_strategy=test_data.allocation_strategy,
             traffic_percentage=test_data.traffic_percentage / 100.0,
-            primary_metric=primary_metric,
-            secondary_metrics=secondary_metrics,
             duration_days=test_data.duration_days,
-            confidence_level=test_data.confidence_level,
-            minimum_sample_size=test_data.min_sample_size,
             target_users=test_data.target_audience or {},
-            created_by=current_user.username,
-            tags=test_data.tags,
-            metadata=test_data.metadata,
         )
-
-        test_id = await ab_test_manager.create_test(ab_test)
         created_test = await ab_test_manager.get_test(test_id)
 
         if not created_test:
@@ -572,14 +575,15 @@ async def get_ab_test_results(
                 metrics.append(TestMetric(
                     metric_type=metric_name,  # This would need proper enum mapping
                     variant_name=variant_name,
-                    value=metric_value,
-                    sample_size=100,  # Would need to be calculated
+                    value=float(metric_value),
+                    sample_size=100,  # Placeholder
+                    confidence_interval=None,
                 ))
 
         return ABTestResultsResponse(
             test_id=test_id,
             test_name="Test Name",  # Would need to fetch from test
-            status="completed",  # Would need to fetch from test
+            status=TestStatus.COMPLETED,  # Would need to fetch from test
             metrics=metrics,
             statistical_significance=results.statistical_significance,
             confidence_intervals=results.confidence_intervals,
@@ -626,12 +630,14 @@ async def get_ab_test_metrics(
                 variant_name="control",
                 value=1.5,
                 sample_size=50,
+                confidence_interval=None,
             ),
             TestMetric(
                 metric_type="response_time",
                 variant_name="variant_a",
                 value=1.2,
                 sample_size=50,
+                confidence_interval=None,
             ),
         ]
 
@@ -676,10 +682,10 @@ async def end_ab_test(
             ) from None
 
         return ABTestActionResponse(
-            test_id=test_id,
-            action="ended",
+            success=True,
             message=f"A/B test ended with winner: {winner_variant}",
-            timestamp=datetime.now(UTC),
+            test_id=test_id,
+            new_status=TestStatus.COMPLETED,
         )
 
     except Exception as e:
@@ -687,12 +693,12 @@ async def end_ab_test(
         raise InternalServerProblem(detail="Failed to end A/B test") from e
 
 
-@router.get("/{test_id}/performance", response_model=dict)
+@router.get("/{test_id}/performance", response_model=dict[str, Any])
 async def get_ab_test_performance(
     test_id: str,
     current_user: User = Depends(get_current_user),
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
-) -> dict:
+) -> dict[str, Any]:
     """Get A/B test performance results by variant.
 
     Args:

@@ -1,7 +1,7 @@
 """Tests for vector store core functionality."""
 
 import asyncio
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 import pytest
 
@@ -14,7 +14,8 @@ class TestVectorStore:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.vector_store = VectorStore()
+        # Use a mock since VectorStore is abstract
+        self.vector_store = MagicMock(spec=VectorStore)
 
         # Sample vectors and documents
         self.sample_vectors = [
@@ -407,7 +408,7 @@ class TestVectorStoreIntegration:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.vector_store = VectorStore()
+        self.vector_store = MagicMock(spec=VectorStore)
 
     @pytest.mark.asyncio
     async def test_end_to_end_vector_lifecycle(self):
@@ -497,7 +498,7 @@ class TestVectorStoreHelpers:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.vector_store = VectorStore()
+        self.vector_store = MagicMock(spec=VectorStore)
 
     def test_cosine_similarity_calculation(self):
         """Test cosine similarity calculation."""

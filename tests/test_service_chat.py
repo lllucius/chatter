@@ -7,7 +7,6 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.models.agent import Agent
 from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from chatter.models.user import User
 from chatter.services.chat import ChatService
@@ -20,7 +19,8 @@ class TestChatService:
     def setup_method(self):
         """Set up test fixtures."""
         self.mock_session = AsyncMock(spec=AsyncSession)
-        self.chat_service = ChatService(self.mock_session)
+        self.mock_llm_service = AsyncMock()
+        self.chat_service = ChatService(self.mock_session, self.mock_llm_service)
 
         # Mock user
         self.mock_user = User(
@@ -30,13 +30,13 @@ class TestChatService:
             is_active=True
         )
 
-        # Mock agent
-        self.mock_agent = Agent(
-            id="test-agent-id",
-            name="Test Agent",
-            description="A test agent",
-            user_id=self.mock_user.id
-        )
+        # Mock agent using MagicMock instead of instantiating abstract class
+        from unittest.mock import MagicMock
+        self.mock_agent = MagicMock()
+        self.mock_agent.id = "test-agent-id"
+        self.mock_agent.name = "Test Agent"
+        self.mock_agent.description = "A test agent"
+        self.mock_agent.user_id = self.mock_user.id
 
     @pytest.mark.asyncio
     async def test_create_conversation_success(self):
@@ -45,7 +45,7 @@ class TestChatService:
         conversation_data = {
             "title": "Test Conversation",
             "description": "A test conversation",
-            "agent_id": self.mock_agent.id
+            "profile_id": "test-profile-id"
         }
 
         expected_conversation = Conversation(
@@ -53,17 +53,19 @@ class TestChatService:
             title=conversation_data["title"],
             description=conversation_data["description"],
             user_id=self.mock_user.id,
-            agent_id=conversation_data["agent_id"],
+            profile_id=conversation_data["profile_id"],
             status=ConversationStatus.ACTIVE
         )
 
-        with patch.object(self.chat_service, '_create_conversation_record') as mock_create:
+        with patch.object(self.chat_service.conversation_service, 'create_conversation') as mock_create:
             mock_create.return_value = expected_conversation
 
             # Act
+            from chatter.schemas.chat import ConversationCreate
+            conversation_schema = ConversationCreate(**conversation_data)
             result = await self.chat_service.create_conversation(
                 user_id=self.mock_user.id,
-                **conversation_data
+                conversation_data=conversation_schema
             )
 
             # Assert
@@ -520,7 +522,8 @@ class TestChatServiceIntegration:
     def setup_method(self):
         """Set up test fixtures."""
         self.mock_session = AsyncMock(spec=AsyncSession)
-        self.chat_service = ChatService(self.mock_session)
+        self.mock_llm_service = AsyncMock()
+        self.chat_service = ChatService(self.mock_session, self.mock_llm_service)
 
         self.mock_user = User(
             id="integration-user-id",
@@ -657,7 +660,8 @@ class TestChatServiceErrorHandling:
     def setup_method(self):
         """Set up test fixtures."""
         self.mock_session = AsyncMock(spec=AsyncSession)
-        self.chat_service = ChatService(self.mock_session)
+        self.mock_llm_service = AsyncMock()
+        self.chat_service = ChatService(self.mock_session, self.mock_llm_service)
 
         self.mock_user = User(
             id="test-user-id",

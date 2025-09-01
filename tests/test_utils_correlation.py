@@ -124,7 +124,7 @@ class TestCorrelationIdMiddleware:
         
         # Should return response with correlation ID header
         assert result == response
-        assert response.headers["X-Correlation-ID"] == "existing-id-123"
+        assert response.headers["x-correlation-id"] == "existing-id-123"
 
     @pytest.mark.asyncio
     async def test_middleware_without_correlation_id(self):
@@ -149,8 +149,8 @@ class TestCorrelationIdMiddleware:
         
         # Should return response with generated correlation ID header
         assert result == response
-        assert "X-Correlation-ID" in response.headers
-        correlation_id = response.headers["X-Correlation-ID"]
+        assert "x-correlation-id" in response.headers
+        correlation_id = response.headers["x-correlation-id"]
         assert len(correlation_id) > 0
 
     @pytest.mark.asyncio
@@ -197,7 +197,7 @@ class TestCorrelationIdMiddleware:
                 return response
             
             result = await self.middleware.dispatch(request, mock_call_next)
-            assert response.headers["X-Correlation-ID"] == "test-id-case"
+            assert response.headers["x-correlation-id"] == "test-id-case"
 
     @pytest.mark.asyncio
     async def test_middleware_preserves_existing_response_headers(self):
@@ -219,7 +219,7 @@ class TestCorrelationIdMiddleware:
         # Should preserve existing headers and add correlation ID
         assert response.headers["Content-Type"] == "application/json"
         assert response.headers["Cache-Control"] == "no-cache"
-        assert response.headers["X-Correlation-ID"] == "preserve-test"
+        assert response.headers["x-correlation-id"] == "preserve-test"
 
     @pytest.mark.asyncio
     async def test_middleware_handles_call_next_exception(self):
@@ -291,8 +291,8 @@ class TestCorrelationIdMiddleware:
         result = await self.middleware.dispatch(request, mock_call_next)
         
         # Should have generated new correlation ID
-        assert "X-Correlation-ID" in response.headers
-        assert len(response.headers["X-Correlation-ID"]) > 0
+        assert "x-correlation-id" in response.headers
+        assert len(response.headers["x-correlation-id"]) > 0
 
     @pytest.mark.asyncio
     async def test_middleware_whitespace_correlation_id_header(self):
@@ -313,7 +313,7 @@ class TestCorrelationIdMiddleware:
         result = await self.middleware.dispatch(request, mock_call_next)
         
         # Should have generated new correlation ID (not whitespace)
-        assert "X-Correlation-ID" in response.headers
-        correlation_id = response.headers["X-Correlation-ID"]
+        assert "x-correlation-id" in response.headers
+        correlation_id = response.headers["x-correlation-id"]
         assert correlation_id.strip() != ""
         assert len(correlation_id) > 0

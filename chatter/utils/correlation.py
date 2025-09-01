@@ -55,10 +55,15 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
             Response with correlation ID header
         """
         # Get correlation ID from header or generate new one
-        correlation_id = request.headers.get(
-            'x-correlation-id',
-            generate_correlation_id()
-        )
+        # Handle case-insensitive header lookup
+        correlation_id = None
+        for header_name, header_value in request.headers.items():
+            if header_name.lower() == 'x-correlation-id':
+                correlation_id = header_value
+                break
+        
+        if not correlation_id or not correlation_id.strip():
+            correlation_id = generate_correlation_id()
 
         # Set in context for logging and other services
         set_correlation_id(correlation_id)
@@ -66,7 +71,7 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
         # Process request
         response = await call_next(request)
 
-        # Add correlation ID to response headers
+        # Add correlation ID to response headers (using lowercase as standard)
         response.headers['x-correlation-id'] = correlation_id
 
         return response

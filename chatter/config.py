@@ -2,36 +2,11 @@
 
 from typing import Any
 
-# Compatibility layer for pydantic v1/v2
-try:
-    from pydantic import Field, field_validator, model_validator
-    from pydantic_settings import BaseSettings, SettingsConfigDict
-    _PYDANTIC_V2 = True
-except ImportError:
-    # Fallback for pydantic v1
-    from pydantic import BaseSettings, Field, validator, root_validator
-    _PYDANTIC_V2 = False
-    
-    # Create compatibility functions for v1
-    def field_validator(field_name: str):
-        """Compatibility wrapper for pydantic v1 validator."""
-        def decorator(func):
-            return validator(field_name, allow_reuse=True)(func)
-        return decorator
-    
-    def model_validator(mode: str = 'after'):
-        """Compatibility wrapper for pydantic v1 root_validator."""
-        def decorator(func):
-            return root_validator(pre=(mode != 'after'), allow_reuse=True)(func)
-        return decorator
-    
-    # Mock SettingsConfigDict for v1 compatibility
-    class SettingsConfigDict:
-        def __init__(self, **kwargs: Any):
-            pass
+# Using pydantic v2
+from pydantic import Field, field_validator, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Export the version flag
-PYDANTIC_V2 = _PYDANTIC_V2
+PYDANTIC_V2 = True
 
 
 class Settings(BaseSettings):
@@ -398,38 +373,23 @@ class Settings(BaseSettings):
     )
 
     # -----------------------------------------------------------------------------
-    # Pydantic Settings Config (v1/v2 compatible)
+    # Pydantic Settings Config 
     # -----------------------------------------------------------------------------
-    if PYDANTIC_V2:
-        model_config = SettingsConfigDict(
-            env_file=".env",
-            env_file_encoding="utf-8",
-            case_sensitive=False,
-            extra="ignore",
-        )
-    else:
-        class Config:
-            env_file = ".env"
-            env_file_encoding = "utf-8"
-            case_sensitive = False
-            extra = "ignore"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",
+    )
 
     @model_validator(mode='after')
-    def validate_configuration(self, values) -> dict:
+    def validate_configuration(self) -> 'Settings':
         """Validate configuration for security and production readiness."""
-        if PYDANTIC_V2:
-            # In v2, 'self' is the instance
-            instance = values
-            database_url = instance.database_url
-            is_production = instance.is_production
-            debug = instance.debug
-            secret_key = instance.secret_key
-        else:
-            # In v1, 'values' is a dict
-            database_url = values.get('database_url')
-            is_production = values.get('is_production', False)
-            debug = values.get('debug', False)
-            secret_key = values.get('secret_key', '')
+        # In v2, 'self' is the instance
+        database_url = self.database_url
+        is_production = self.is_production
+        debug = self.debug
+        secret_key = self.secret_key
         
         # Validate database URL is provided
         if not database_url:
@@ -450,9 +410,10 @@ class Settings(BaseSettings):
                     "SECRET_KEY must be a strong secret (32+ characters) in production"
                 )
 
-        return values if not PYDANTIC_V2 else values
+        return self
 
     @field_validator('database_url')
+    @classmethod
     def validate_database_url(cls, v: str) -> str:
         """Validate database URL format."""
         if not v:

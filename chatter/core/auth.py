@@ -74,7 +74,7 @@ def validate_email_format(email: str) -> bool:
     # Basic email validation regex
     email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     
-    if not email or not isinstance(email, str):
+    if not email:
         return False
     
     return bool(re.match(email_pattern, email))
@@ -85,11 +85,11 @@ AuthenticationError = AuthenticationProblem
 AuthorizationError = AuthorizationProblem
 
 
-def UserAlreadyExistsError(detail="User already exists"):
+def UserAlreadyExistsError(detail: str = "User already exists"):
     return ConflictProblem(detail=detail, conflicting_resource="user")
 
 
-def UserNotFoundError(detail="User not found"):
+def UserNotFoundError(detail: str = "User not found"):
     return NotFoundProblem(detail=detail, resource_type="user")
 
 
@@ -464,7 +464,7 @@ class AuthService:
         logger.info("User deactivated", user_id=user.id)
         return True
 
-    def create_tokens(self, user: User) -> dict:
+    def create_tokens(self, user: User) -> dict[str, Any]:
         """Create access and refresh tokens for user.
 
         Args:
@@ -528,7 +528,7 @@ class AuthService:
 
         return user
 
-    async def refresh_access_token(self, refresh_token: str) -> dict:
+    async def refresh_access_token(self, refresh_token: str) -> dict[str, Any]:
         """Refresh access token using refresh token.
 
         Args:

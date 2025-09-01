@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_core.tools import BaseTool
 
 from chatter.core.langgraph import ConversationState, workflow_manager
@@ -287,7 +287,7 @@ class ConversationalAgent(BaseAgent):
             recent_interactions = await self.get_conversation_context(conversation_id)
 
             # Build message history
-            messages = [SystemMessage(content=self.profile.system_prompt)]
+            messages: list[BaseMessage] = [SystemMessage(content=self.profile.system_prompt)]
 
             # Add recent conversation history
             for interaction in recent_interactions:
@@ -299,7 +299,7 @@ class ConversationalAgent(BaseAgent):
 
             # Generate response
             response = await self.llm.ainvoke(messages)
-            response_text = response.content if hasattr(response, 'content') else str(response)
+            response_text = str(response.content) if hasattr(response, 'content') else str(response)
 
             # Calculate response time and confidence
             response_time = (datetime.now(UTC) - start_time).total_seconds()
@@ -387,7 +387,7 @@ class TaskOrientedAgent(BaseAgent):
             if result and "messages" in result:
                 last_message = result["messages"][-1]
                 response_text = (
-                    last_message.content
+                    str(last_message.content)
                     if hasattr(last_message, 'content')
                     else str(last_message)
                 )
@@ -464,7 +464,7 @@ class AgentManager:
         description: str,
         system_prompt: str,
         llm: BaseChatModel | None = None,
-        **kwargs,
+        **kwargs: Any,
     ) -> str:
         """Create a new AI agent.
 
@@ -497,8 +497,7 @@ class AgentManager:
         # Create agent instance
         if llm is None:
             # TODO: Create a default LLM or get from configuration
-            # For now, we'll pass None and let the agent handle it
-            pass
+            raise ValueError("LLM is required but not provided")
         agent = agent_class(profile=profile, llm=llm)
         self.agents[profile.id] = agent
 

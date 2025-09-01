@@ -53,7 +53,7 @@ async def list_providers(
     providers, total = await service.list_providers(params)
 
     return ProviderList(
-        providers=list(providers),  # Convert sequence to list
+        providers=providers,  # Can use sequence directly
         total=total,
         page=page,
         per_page=per_page
@@ -211,7 +211,7 @@ async def list_models(
     models, total = await service.list_models(provider_id, model_type, params)
 
     return ModelDefList(
-        models=list(models),
+        models=models,
         total=total,
         page=page,
         per_page=per_page
@@ -392,7 +392,7 @@ async def list_embedding_spaces(
     spaces, total = await service.list_embedding_spaces(model_id, params)
 
     return EmbeddingSpaceList(
-        spaces=list(spaces),
+        spaces=spaces,
         total=total,
         page=page,
         per_page=per_page

@@ -502,7 +502,7 @@ async def get_user_analytics(
         )
 
         return await analytics_service.get_user_analytics(
-            user_id, time_range
+            user_id, time_range.start_date, time_range.end_date
         )
 
     except Exception as e:

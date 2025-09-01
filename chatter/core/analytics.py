@@ -4,7 +4,7 @@ import asyncio
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import and_, desc, func, literal, select
+from sqlalchemy import and_, desc, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.models.conversation import (
@@ -251,10 +251,16 @@ class AnalyticsService:
             )
 
             usage_totals = total_usage_result.first()
-            total_prompt_tokens = usage_totals[0] or 0
-            total_completion_tokens = usage_totals[1] or 0
-            total_tokens = usage_totals[2] or 0
-            total_cost = float(usage_totals[3] or 0)
+            if usage_totals:
+                total_prompt_tokens = usage_totals[0] or 0
+                total_completion_tokens = usage_totals[1] or 0
+                total_tokens = usage_totals[2] or 0
+                total_cost = float(usage_totals[3] or 0)
+            else:
+                total_prompt_tokens = 0
+                total_completion_tokens = 0
+                total_tokens = 0
+                total_cost = 0.0
 
             # Usage by model
             model_usage_result = await self.session.execute(
@@ -404,9 +410,14 @@ class AnalyticsService:
             )
 
             activity_stats = activity_result.first()
-            active_days = activity_stats[0] or 0
-            peak_usage_hour = int(activity_stats[1] or 0)
-            conversations_per_day = float(activity_stats[2] or 0)
+            if activity_stats:
+                active_days = activity_stats[0] or 0
+                peak_usage_hour = int(activity_stats[1] or 0)
+                conversations_per_day = float(activity_stats[2] or 0)
+            else:
+                active_days = 0
+                peak_usage_hour = 0
+                conversations_per_day = 0.0
 
             return {
                 "total_prompt_tokens": total_prompt_tokens,
@@ -472,10 +483,16 @@ class AnalyticsService:
             )
 
             response_stats = response_stats_result.first()
-            avg_response_time = float(response_stats[0] or 0)
-            median_response_time = float(response_stats[1] or 0)
-            p95_response_time = float(response_stats[2] or 0)
-            p99_response_time = float(response_stats[3] or 0)
+            if response_stats:
+                avg_response_time = float(response_stats[0] or 0)
+                median_response_time = float(response_stats[1] or 0)
+                p95_response_time = float(response_stats[2] or 0)
+                p99_response_time = float(response_stats[3] or 0)
+            else:
+                avg_response_time = 0.0
+                median_response_time = 0.0
+                p95_response_time = 0.0
+                p99_response_time = 0.0
 
             # Throughput metrics
             throughput_result = await self.session.execute(
@@ -495,8 +512,12 @@ class AnalyticsService:
             )
 
             throughput_stats = throughput_result.first()
-            total_requests = throughput_stats[0] or 0
-            total_tokens = throughput_stats[1] or 0
+            if throughput_stats:
+                total_requests = throughput_stats[0] or 0
+                total_tokens = throughput_stats[1] or 0
+            else:
+                total_requests = 0
+                total_tokens = 0
 
             # Calculate per-minute rates (assuming time range)
             time_range_minutes = self._get_time_range_minutes(
@@ -691,11 +712,18 @@ class AnalyticsService:
             )
 
             processing_stats = processing_result.first()
-            avg_processing_time = float(processing_stats[0] or 0)
-            processed_docs = processing_stats[1] or 0
-            total_docs = processing_stats[2] or 0
-            total_chunks = processing_stats[3] or 0
-            avg_chunks = float(processing_stats[4] or 0)
+            if processing_stats:
+                avg_processing_time = float(processing_stats[0] or 0)
+                processed_docs = processing_stats[1] or 0
+                total_docs = processing_stats[2] or 0
+                total_chunks = processing_stats[3] or 0
+                avg_chunks = float(processing_stats[4] or 0)
+            else:
+                avg_processing_time = 0.0
+                processed_docs = 0
+                total_docs = 0
+                total_chunks = 0
+                avg_chunks = 0.0
 
             processing_success_rate = (
                 processed_docs / total_docs if total_docs > 0 else 0
@@ -710,8 +738,12 @@ class AnalyticsService:
             )
 
             storage_stats = storage_result.first()
-            total_storage = storage_stats[0] or 0
-            avg_size = float(storage_stats[1] or 0)
+            if storage_stats:
+                total_storage = storage_stats[0] or 0
+                avg_size = float(storage_stats[1] or 0)
+            else:
+                total_storage = 0
+                avg_size = 0.0
 
             # Storage by type
             storage_by_type_result = await self.session.execute(
@@ -735,8 +767,12 @@ class AnalyticsService:
             )
 
             search_stats = search_result.first()
-            total_searches = search_stats[0] or 0
-            total_views = search_stats[1] or 0
+            if search_stats:
+                total_searches = search_stats[0] or 0
+                total_views = search_stats[1] or 0
+            else:
+                total_searches = 0
+                total_views = 0
 
             # Most viewed documents
             most_viewed_result = await self.session.execute(
@@ -813,10 +849,16 @@ class AnalyticsService:
             )
 
             user_stats = user_activity_result.first()
-            total_users = user_stats[0] or 0
-            active_users_today = user_stats[1] or 0
-            active_users_week = user_stats[2] or 0
-            active_users_month = user_stats[3] or 0
+            if user_stats:
+                total_users = user_stats[0] or 0
+                active_users_today = user_stats[1] or 0
+                active_users_week = user_stats[2] or 0
+                active_users_month = user_stats[3] or 0
+            else:
+                total_users = 0
+                active_users_today = 0
+                active_users_week = 0
+                active_users_month = 0
 
             # System health (placeholder values)
             system_health = {
@@ -917,7 +959,7 @@ class AnalyticsService:
                 usage_filters.append(ToolUsage.user_id == user_id)
 
             usage_where = (
-                and_(*usage_filters) if usage_filters else None
+                and_(*usage_filters) if usage_filters else text("1=1")
             )
 
             # Daily usage counts
@@ -931,7 +973,7 @@ class AnalyticsService:
                         func.date(ToolUsage.called_at) == today,
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -946,7 +988,7 @@ class AnalyticsService:
                         ).replace(tzinfo=UTC),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -961,7 +1003,7 @@ class AnalyticsService:
                         ).replace(tzinfo=UTC),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -975,7 +1017,7 @@ class AnalyticsService:
                         ToolUsage.success is False,
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -993,7 +1035,7 @@ class AnalyticsService:
                         ToolUsage.success is False,
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -1011,7 +1053,7 @@ class AnalyticsService:
                         ToolUsage.response_time_ms.is_not(None),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -1028,7 +1070,7 @@ class AnalyticsService:
                         ToolUsage.response_time_ms.is_not(None),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
             )
@@ -1127,7 +1169,7 @@ class AnalyticsService:
                 .select_from(ServerTool)
                 .join(ToolServer)
                 .outerjoin(ToolUsage)
-                .where(usage_where if usage_where is not None else True)
+                .where(usage_where if usage_where is not None else text("1=1"))
                 .group_by(
                     ServerTool.id,
                     ServerTool.name,
@@ -1187,7 +1229,7 @@ class AnalyticsService:
                         >= datetime.now(UTC) - timedelta(days=30),
                         usage_where
                         if usage_where is not None
-                        else True,
+                        else text("1=1"),
                     )
                 )
                 .group_by(func.date(ToolUsage.called_at))

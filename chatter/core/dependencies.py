@@ -17,9 +17,9 @@ class DependencyContainer:
     def __init__(self):
         """Initialize the dependency container."""
         self._services: dict[str, Any] = {}
-        self._factories: dict[str, Callable] = {}
+        self._factories: dict[str, Callable[..., Any]] = {}
         self._singletons: dict[str, Any] = {}
-        self._lazy_loaders: dict[str, callable] = {}
+        self._lazy_loaders: dict[str, Callable[..., Any]] = {}
 
     def register_singleton(self, service_type: type[T], instance: T) -> None:
         """Register a singleton instance.

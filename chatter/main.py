@@ -493,22 +493,36 @@ def create_app() -> FastAPI:
     import os
     static_dir = os.path.join(os.path.dirname(__file__), "../frontend/build")
     if os.path.exists(static_dir):
-        app.mount("/static", StaticFiles(directory=os.path.join(static_dir, "static")), name="static")
+        try:
+            static_files_dir = os.path.join(static_dir, "static")
+            if os.path.exists(static_files_dir):
+                app.mount("/static", StaticFiles(directory=static_files_dir), name="static")
 
-        # Serve React app for all non-API routes
-        @app.get("/{full_path:path}")
-        async def serve_react_app(full_path: str):
-            # Don't intercept API routes, docs, or health checks
-            if (full_path.startswith("api/") or
-                    full_path.startswith("health") or
-                    full_path.startswith("docs") or
-                    full_path.startswith("redoc") or
-                    full_path.startswith("openapi.json")):
-                return {"error": "Not found"}
+                # Serve React app for all non-API routes
+                @app.get("/{full_path:path}")
+                async def serve_react_app(full_path: str):
+                    # Don't intercept API routes, docs, or health checks
+                    if (full_path.startswith("api/") or
+                            full_path.startswith("health") or
+                            full_path.startswith("docs") or
+                            full_path.startswith("redoc") or
+                            full_path.startswith("openapi.json")):
+                        return {"error": "Not found"}
 
-            from fastapi.responses import FileResponse
-            index_file = os.path.join(static_dir, "index.html")
-            return FileResponse(index_file)
+                    from fastapi.responses import FileResponse
+                    index_file = os.path.join(static_dir, "index.html")
+                    if os.path.exists(index_file):
+                        return FileResponse(index_file)
+                    else:
+                        return {"error": "Frontend not available"}
+                        
+                logger.info("Frontend static files mounted successfully")
+            else:
+                logger.warning("Frontend static directory not found, skipping mount")
+        except Exception as e:
+            logger.warning(f"Failed to mount static files: {e}")
+    else:
+        logger.debug("Frontend build directory not found, skipping frontend setup")
 
     # Setup enhanced documentation
     try:

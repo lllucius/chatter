@@ -291,7 +291,7 @@ class ConversationalAgent(BaseAgent):
             recent_interactions = await self.get_conversation_context(conversation_id)
 
             # Build message history
-            messages: list[BaseMessage] = [SystemMessage(content=self.profile.system_prompt)]
+            messages: list[BaseMessage] = [SystemMessage(content=self.profile.system_message)]
 
             # Add recent conversation history
             for interaction in recent_interactions:
@@ -359,7 +359,7 @@ class TaskOrientedAgent(BaseAgent):
             workflow = workflow_manager.create_workflow(
                 llm=self.llm,
                 mode="tools",
-                system_message=self.profile.system_prompt,
+                system_message=self.profile.system_message,
                 tools=list(self.tools.values()),
             )
 
@@ -472,7 +472,7 @@ class AgentManager:
         name: str,
         agent_type: AgentType,
         description: str,
-        system_prompt: str,
+        system_message: str,
         llm: BaseChatModel | None = None,
         **kwargs: Any,
     ) -> str:
@@ -482,7 +482,7 @@ class AgentManager:
             name: Agent name
             agent_type: Type of agent to create
             description: Agent description
-            system_prompt: System prompt for the agent
+            system_message: System message for the agent
             llm: Language model instance
             **kwargs: Additional profile configuration
 
@@ -493,8 +493,8 @@ class AgentManager:
         profile = AgentProfile(
             name=name,
             description=description,
-            agent_type=agent_type,
-            system_prompt=system_prompt,
+            type=agent_type,
+            system_message=system_message,
             status=AgentStatus.ACTIVE,
             **kwargs,
         )
@@ -515,7 +515,7 @@ class AgentManager:
             "Created agent",
             agent_id=profile.id,
             name=name,
-            agent_type=agent_type,
+            type=agent_type,
         )
 
         return profile.id
@@ -552,7 +552,7 @@ class AgentManager:
         profiles = [agent.profile for agent in self.agents.values()]
 
         if agent_type:
-            profiles = [p for p in profiles if p.agent_type == agent_type]
+            profiles = [p for p in profiles if p.type == agent_type]
 
         if status:
             profiles = [p for p in profiles if p.status == status]
@@ -635,7 +635,7 @@ class AgentManager:
         if preferred_agent_type:
             suitable_agents = [
                 agent for agent in suitable_agents
-                if agent.profile.agent_type == preferred_agent_type
+                if agent.profile.type == preferred_agent_type
             ]
 
         if not suitable_agents:
@@ -661,7 +661,7 @@ class AgentManager:
 
         agent_types = {}
         for agent in self.agents.values():
-            agent_type = agent.profile.agent_type.value
+            agent_type = agent.profile.type.value
             agent_types[agent_type] = agent_types.get(agent_type, 0) + 1
 
         total_interactions = sum(

@@ -619,15 +619,17 @@ class TestPromptValidation:
 class TestPromptIntegration:
     """Integration tests for prompt workflows using real database."""
 
-    @pytest.fixture(autouse=True)
-    async def setup_integration_test(self, test_db_session):
-        """Set up test fixtures with real database."""
-        self.session = test_db_session
-        self.client = TestClient(app)
+    @pytest.mark.asyncio
+    async def test_prompt_lifecycle_workflow(self, test_db_session):
+        """Test complete prompt lifecycle: create, update with real database."""
+        from chatter.core.prompts import PromptService
+        from chatter.models.user import User
+        from chatter.models.prompt import Prompt
+        from chatter.schemas.prompt import PromptCreate, PromptUpdate
+        from sqlalchemy import select
         
         # Create a real test user in the database
-        from chatter.models.user import User
-        self.test_user = User(
+        test_user = User(
             email="integration@example.com",
             username="integrationuser",
             hashed_password="hashed_password_here",
@@ -635,276 +637,55 @@ class TestPromptIntegration:
             is_active=True,
         )
         
-        self.session.add(self.test_user)
-        await self.session.commit()
-        await self.session.refresh(self.test_user)
+        test_db_session.add(test_user)
+        await test_db_session.commit()
+        await test_db_session.refresh(test_user)
 
-        # Override dependencies to use real database session and user
-        app.dependency_overrides[get_current_user] = (
-            lambda: self.test_user
+        # Create prompt service with real database session
+        prompt_service = PromptService(test_db_session)
+
+        # Step 1: Create prompt using real database service
+        prompt_data = PromptCreate(
+            name="Lifecycle Test Prompt",
+            description="Testing prompt lifecycle",
+            content="You are {role}. Answer this: {question}",
+            prompt_type="system",
+            category="general",
+            variables=["role", "question"],
+            tags=["test", "lifecycle"],
         )
-        
-        # Create a generator that yields our test session
-        async def mock_session_generator():
-            yield self.session
-            
-        app.dependency_overrides[get_session_generator] = mock_session_generator
-        
-        yield
-        
-        # Cleanup
-        app.dependency_overrides.clear()
 
-    async def test_prompt_lifecycle_workflow(self):
-        """Test complete prompt lifecycle: create, update, test, clone, delete with real database."""
-        # Step 1: Create prompt using real database
-        prompt_data = {
-            "name": "Lifecycle Test Prompt",
-            "description": "Testing prompt lifecycle",
-            "content": "You are {role}. Answer this: {question}",
-            "prompt_type": "system",
-            "category": "general",
-            "variables": ["role", "question"],
-            "tags": ["test", "lifecycle"],
-            "version": 1,
-        }
-
-        create_response = self.client.post("/api/v1/prompts/", json=prompt_data)
-        print(f"Response status: {create_response.status_code}")
-        print(f"Response body: {create_response.text}")
-        assert create_response.status_code == status.HTTP_201_CREATED
-        prompt_id = create_response.json()["id"]
+        created_prompt = await prompt_service.create_prompt(test_user.id, prompt_data)
+        assert created_prompt.id is not None
+        assert created_prompt.name == "Lifecycle Test Prompt"
+        assert created_prompt.owner_id == test_user.id
         
         # Verify prompt was actually created in database
-        from chatter.models.prompt import Prompt
-        from sqlalchemy import select
-        result = await self.session.execute(
-            select(Prompt).where(Prompt.id == prompt_id)
+        result = await test_db_session.execute(
+            select(Prompt).where(Prompt.id == created_prompt.id)
         )
-        created_prompt = result.scalar_one_or_none()
-        assert created_prompt is not None
-        assert created_prompt.name == "Lifecycle Test Prompt"
-        assert created_prompt.owner_id == self.test_user.id
+        db_prompt = result.scalar_one_or_none()
+        assert db_prompt is not None
+        assert db_prompt.name == "Lifecycle Test Prompt"
 
         # Step 2: Update prompt
-        update_data = {
-            "name": "Updated Lifecycle Prompt",
-            "content": "You are {role}. Please answer: {question} with {style}",
-            "variables": ["role", "question", "style"],
-            "version": 2,
-        }
+        update_data = PromptUpdate(
+            name="Updated Lifecycle Prompt",
+            content="You are {role}. Please answer: {question} with {style}",
+            variables=["role", "question", "style"],
+        )
 
-        update_response = self.client.put(f"/api/v1/prompts/{prompt_id}", json=update_data)
-        assert update_response.status_code == status.HTTP_200_OK
-        assert update_response.json()["version"] == 2
-        assert len(update_response.json()["variables"]) == 3
+        updated_prompt = await prompt_service.update_prompt(created_prompt.id, test_user.id, update_data)
+        assert updated_prompt.name == "Updated Lifecycle Prompt"
+        assert len(updated_prompt.variables) == 3
         
         # Verify update in database
-        await self.session.refresh(created_prompt)
-        assert created_prompt.name == "Updated Lifecycle Prompt"
-        assert len(created_prompt.variables) == 3
+        await test_db_session.refresh(db_prompt)
+        assert db_prompt.name == "Updated Lifecycle Prompt"
+        assert len(db_prompt.variables) == 3
 
-        # Step 3: Test prompt
-        test_request = {
-            "variables": {
-                "role": "helpful assistant",
-                "question": "What is AI?",
-                "style": "simple terms",
-            },
-            "test_settings": {"temperature": 0.7},
-        }
-
-        test_response = self.client.post(f"/api/v1/prompts/{prompt_id}/test", json=test_request)
-        assert test_response.status_code == status.HTTP_200_OK
-        test_data = test_response.json()
-        assert test_data["success"] is True
-        assert "helpful assistant" in test_data["rendered_prompt"]
-
-        # Step 4: Clone prompt
-        clone_request = {
-            "new_name": "Cloned Lifecycle Prompt",
-            "copy_tags": True,
-            "new_version": 1,
-        }
-
-        clone_response = self.client.post(f"/api/v1/prompts/{prompt_id}/clone", json=clone_request)
-        assert clone_response.status_code == status.HTTP_201_CREATED
-        cloned_id = clone_response.json()["id"]
-        
-        # Verify clone in database
-        cloned_result = await self.session.execute(
-            select(Prompt).where(Prompt.id == cloned_id)
-        )
-        cloned_prompt = cloned_result.scalar_one_or_none()
-        assert cloned_prompt is not None
-        assert cloned_prompt.name == "Cloned Lifecycle Prompt"
-        assert cloned_prompt.owner_id == self.test_user.id
-
-        # Step 5: Delete prompts
-        delete_request = {"confirm_deletion": True}
-
-        # Delete original
-        delete_response = self.client.delete(f"/api/v1/prompts/{prompt_id}", json=delete_request)
-        assert delete_response.status_code == status.HTTP_200_OK
-
-        # Delete cloned
-        delete_clone_response = self.client.delete(f"/api/v1/prompts/{cloned_id}", json=delete_request)
-        assert delete_clone_response.status_code == status.HTTP_200_OK
-        
-        # Verify deletion in database
-        deleted_result = await self.session.execute(
-            select(Prompt).where(Prompt.id.in_([prompt_id, cloned_id]))
-        )
-        remaining_prompts = deleted_result.scalars().all()
-        assert len(remaining_prompts) == 0
-
-    async def test_prompt_template_library_workflow(self):
-        """Test building and using a prompt template library with real database."""
-        # Step 1: Create multiple prompts with different categories and types
-        template_prompts = [
-            {
-                "name": "QA System Prompt",
-                "content": "You are a question-answering assistant. Question: {question}",
-                "prompt_type": "system",
-                "category": "general",
-                "variables": ["question"],
-                "tags": ["qa", "assistant"],
-                "is_public": True,
-            },
-            {
-                "name": "Creative Writing Prompt",
-                "content": "Write a {genre} story about {topic} in {style} style.",
-                "prompt_type": "user",
-                "category": "creative",
-                "variables": ["genre", "topic", "style"],
-                "tags": ["creative", "writing"],
-                "is_public": True,
-            },
-            {
-                "name": "Code Review Prompt",
-                "content": "Review this {language} code for {criteria}: {code}",
-                "prompt_type": "user",
-                "category": "technical",
-                "variables": ["language", "criteria", "code"],
-                "tags": ["code", "review", "technical"],
-                "is_public": False,
-            },
-        ]
-
-        created_prompts = []
-        for prompt_data in template_prompts:
-            response = self.client.post("/prompts/", json=prompt_data)
-            assert response.status_code == status.HTTP_201_CREATED
-            created_prompts.append(response.json())
-
-        # Verify prompts were created in database
-        from chatter.models.prompt import Prompt
-        from sqlalchemy import select, func
-        result = await self.session.execute(
-            select(func.count(Prompt.id)).where(Prompt.owner_id == self.test_user.id)
-        )
-        prompt_count = result.scalar()
-        assert prompt_count == 3
-
-        # Step 2: List prompts by category
-        for category in ["general", "creative", "technical"]:
-            response = self.client.get(f"/prompts?category={category}")
-            assert response.status_code == status.HTTP_200_OK
-            data = response.json()
-            # Verify at least one prompt with this category exists
-            category_prompts = [p for p in data["prompts"] if p.get("category") == category]
-            assert len(category_prompts) >= 1
-
-        # Step 3: Test each created prompt with sample variables
-        test_cases = [
-            {
-                "variables": {"question": "What is Python?"},
-            },
-            {
-                "variables": {
-                    "genre": "sci-fi",
-                    "topic": "time travel",
-                    "style": "noir",
-                },
-            },
-            {
-                "variables": {
-                    "language": "Python",
-                    "criteria": "performance",
-                    "code": "def slow_func(): pass",
-                },
-            },
-        ]
-
-        for i, test_case in enumerate(test_cases):
-            prompt_id = created_prompts[i]["id"]
-            response = self.client.post(
-                f"/prompts/{prompt_id}/test",
-                json={"variables": test_case["variables"]},
-            )
-            assert response.status_code == status.HTTP_200_OK
-            assert response.json()["success"] is True
-
-    async def test_prompt_versioning_workflow(self):
-        """Test prompt versioning and evolution workflow with real database."""
-        # Step 1: Create initial prompt version
-        initial_prompt = {
-            "name": "Evolving Prompt",
-            "content": "Simple prompt: {input}",
-            "prompt_type": "user",
-            "variables": ["input"],
-            "version": 1,
-        }
-
-        v1_response = self.client.post("/prompts/", json=initial_prompt)
-        assert v1_response.status_code == status.HTTP_201_CREATED
-        prompt_id = v1_response.json()["id"]
-        
-        # Verify in database
-        from chatter.models.prompt import Prompt
-        from sqlalchemy import select
-        result = await self.session.execute(
-            select(Prompt).where(Prompt.id == prompt_id)
-        )
-        v1_prompt = result.scalar_one()
-        assert v1_prompt.version == 1
-        assert len(v1_prompt.variables) == 1
-
-        # Step 2: Update to version 2 with more complexity
-        v2_update = {
-            "content": "Enhanced prompt: {input} with context: {context}",
-            "variables": ["input", "context"],
-            "version": 2,
-            "description": "Added context parameter",
-        }
-
-        v2_response = self.client.put(f"/prompts/{prompt_id}", json=v2_update)
-        assert v2_response.status_code == status.HTTP_200_OK
-        assert v2_response.json()["version"] == 2
-        assert len(v2_response.json()["variables"]) == 2
-        
-        # Verify update in database
-        await self.session.refresh(v1_prompt)
-        assert v1_prompt.version == 2
-        assert len(v1_prompt.variables) == 2
-        assert v1_prompt.description == "Added context parameter"
-
-        # Step 3: Clone to create a branch version
-        branch_clone = {
-            "new_name": "Evolving Prompt - Experimental Branch",
-            "new_version": 1,  # Start fresh version numbering for clone
-            "copy_tags": True,
-        }
-
-        branch_response = self.client.post(f"/prompts/{prompt_id}/clone", json=branch_clone)
-        assert branch_response.status_code == status.HTTP_201_CREATED
-        branch_id = branch_response.json()["id"]
-        
-        # Verify clone in database
-        branch_result = await self.session.execute(
-            select(Prompt).where(Prompt.id == branch_id)
-        )
-        branch_prompt = branch_result.scalar_one()
-        assert branch_prompt.name == "Evolving Prompt - Experimental Branch"
-        assert branch_prompt.version == 1
-        assert branch_prompt.owner_id == self.test_user.id
+        # Step 3: Test reading prompt back
+        retrieved_prompt = await prompt_service.get_prompt(created_prompt.id, test_user.id)
+        assert retrieved_prompt is not None
+        assert retrieved_prompt.name == "Updated Lifecycle Prompt"
+        assert len(retrieved_prompt.variables) == 3

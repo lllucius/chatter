@@ -33,7 +33,7 @@ from chatter.schemas.chat import (
 )
 from chatter.services.chat import ChatService
 from chatter.services.llm import LLMService
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,
@@ -46,7 +46,7 @@ router = APIRouter()
 
 
 async def get_chat_service(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> ChatService:
     """Get chat service instance.
 

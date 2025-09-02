@@ -17,7 +17,7 @@ from chatter.schemas.analytics import (
     SystemAnalyticsResponse,
     UsageMetricsResponse,
 )
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem
 
@@ -26,7 +26,7 @@ router = APIRouter()
 
 
 async def get_analytics_service(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> AnalyticsService:
     """Get analytics service instance."""
     return AnalyticsService(session)

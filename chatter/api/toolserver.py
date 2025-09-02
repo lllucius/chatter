@@ -34,7 +34,7 @@ from chatter.services.toolserver import (
     ToolServerService,
     ToolServerServiceError,
 )
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,
@@ -48,7 +48,7 @@ router = APIRouter()
 
 
 async def get_tool_server_service(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> ToolServerService:
     """Get tool server service instance.
 
@@ -62,7 +62,7 @@ async def get_tool_server_service(
 
 
 async def get_tool_access_service(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> ToolAccessService:
     """Get tool access service instance.
 

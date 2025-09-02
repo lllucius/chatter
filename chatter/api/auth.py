@@ -24,7 +24,7 @@ from chatter.schemas.auth import (
     UserResponse,
     UserUpdate,
 )
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import AuthenticationProblem
 
@@ -34,7 +34,7 @@ security = HTTPBearer()
 
 
 async def get_auth_service(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> AuthService:
     """Get authentication service instance.
 

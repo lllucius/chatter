@@ -50,7 +50,68 @@ postgresql_proc = factories.postgresql_proc(
     unixsocketdir="/tmp",  # Use tmp directory for socket
 )
 
-postgresql = factories.postgresql("postgresql_proc")
+# Create session-scoped postgresql fixture to match db_engine scope
+def postgresql_session_factory(process_fixture_name: str):
+    """
+    Create a session-scoped postgresql fixture factory.
+    
+    This is needed because the default postgresql fixture from pytest-postgresql
+    is function-scoped, but our db_engine fixture needs to be session-scoped
+    to avoid creating multiple database engines per test session.
+    
+    Args:
+        process_fixture_name: Name of the postgresql_proc fixture
+        
+    Returns:
+        Session-scoped postgresql fixture function
+    """
+    
+    @pytest.fixture(scope="session")
+    def postgresql_session_fixture(request):
+        """Session-scoped PostgreSQL database connection."""
+        from pytest_postgresql.janitor import DatabaseJanitor
+        import psycopg
+        from pytest_postgresql.config import get_config
+        
+        proc_fixture = request.getfixturevalue(process_fixture_name)
+        config = get_config(request)
+
+        pg_host = proc_fixture.host
+        pg_port = proc_fixture.port
+        pg_user = proc_fixture.user
+        pg_password = proc_fixture.password
+        pg_options = proc_fixture.options
+        pg_db = proc_fixture.dbname
+        
+        janitor = DatabaseJanitor(
+            user=pg_user,
+            host=pg_host,
+            port=pg_port,
+            dbname=pg_db,
+            template_dbname=proc_fixture.template_dbname,
+            version=proc_fixture.version,
+            password=pg_password,
+        )
+        if config["drop_test_database"]:
+            janitor.drop()
+        with janitor:
+            db_connection = psycopg.connect(
+                dbname=pg_db,
+                user=pg_user,
+                password=pg_password,
+                host=pg_host,
+                port=pg_port,
+                options=pg_options,
+            )
+            try:
+                yield db_connection
+            finally:
+                db_connection.close()
+    
+    return postgresql_session_fixture
+
+# Create the session-scoped postgresql fixture
+postgresql = postgresql_session_factory("postgresql_proc")
 
 
 @pytest.fixture(scope="session")

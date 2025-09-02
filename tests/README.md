@@ -4,6 +4,51 @@ This document demonstrates how to use the implemented test suite foundation.
 
 ## Running Tests
 
+### Prerequisites
+
+**PostgreSQL Database Required**: The test suite uses a real PostgreSQL database for testing to ensure compatibility with production PostgreSQL features including pgvector extension.
+
+#### PostgreSQL Setup
+
+1. **Install PostgreSQL** (if not already installed):
+   ```bash
+   # Ubuntu/Debian
+   sudo apt-get install postgresql postgresql-contrib postgresql-client
+   
+   # macOS with Homebrew
+   brew install postgresql
+   
+   # Start PostgreSQL service
+   sudo systemctl start postgresql  # Linux
+   brew services start postgresql   # macOS
+   ```
+
+2. **Create test database and user**:
+   ```bash
+   # Connect as postgres user
+   sudo -u postgres psql
+   
+   # Create test user and database
+   CREATE USER test_user WITH PASSWORD 'test_password';
+   CREATE DATABASE chatter_test OWNER test_user;
+   GRANT ALL PRIVILEGES ON DATABASE chatter_test TO test_user;
+   
+   # Enable pgvector extension (optional, for vector store tests)
+   \c chatter_test
+   CREATE EXTENSION IF NOT EXISTS vector;
+   
+   \q
+   ```
+
+3. **Verify connection**:
+   ```bash
+   # Test connection manually
+   psql postgresql://test_user:test_password@localhost:5432/chatter_test -c "SELECT 1;"
+   
+   # Or use the verification script
+   python scripts/verify_test_db.py
+   ```
+
 ### Basic Test Execution
 ```bash
 # Run all tests

@@ -1,5 +1,6 @@
 """Tests for main FastAPI application."""
 
+import asyncio
 import pytest
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from fastapi.testclient import TestClient
@@ -8,10 +9,9 @@ from fastapi import Request, HTTPException
 from chatter.main import (
     app,
     LoggingMiddleware,
-    RateLimitMiddleware,
     create_app,
-    get_health_status,
 )
+from chatter.utils.rate_limit import RateLimitMiddleware
 
 
 @pytest.mark.unit 
@@ -282,61 +282,54 @@ class TestHealthEndpoint:
     async def test_get_health_status_healthy(self):
         """Test health status when all systems are healthy."""
         # Arrange
-        with patch('chatter.main.get_session') as mock_get_session:
-            mock_session = AsyncMock()
-            mock_get_session.return_value.__aenter__.return_value = mock_session
-            mock_session.execute = AsyncMock()
-
-            with patch('chatter.main.redis_client') as mock_redis:
-                mock_redis.ping = AsyncMock()
-
-                # Act
-                status = await get_health_status()
+        from chatter.api.health import health_check_endpoint
+        
+        with patch('chatter.api.health.settings') as mock_settings:
+            mock_settings.app_version = "1.0.0"
+            mock_settings.environment = "test"
+            
+            # Act
+            response = await health_check_endpoint()
 
         # Assert
-        assert status["status"] == "healthy"
-        assert "database" in status["checks"]
-        assert "redis" in status["checks"]
-        assert status["checks"]["database"]["status"] == "healthy"
-        assert status["checks"]["redis"]["status"] == "healthy"
+        assert response.status == "healthy"
+        assert response.service == "chatter"
+        assert response.version == "1.0.0"
+        assert response.environment == "test"
 
     @pytest.mark.asyncio
-    async def test_get_health_status_database_unhealthy(self):
-        """Test health status when database is unhealthy."""
+    async def test_readiness_check_healthy(self):
+        """Test readiness check when database is healthy."""
         # Arrange
-        with patch('chatter.main.get_session') as mock_get_session:
-            mock_get_session.side_effect = Exception("Database connection failed")
-
-            with patch('chatter.main.redis_client') as mock_redis:
-                mock_redis.ping = AsyncMock()
-
-                # Act
-                status = await get_health_status()
-
-        # Assert
-        assert status["status"] == "degraded"
-        assert status["checks"]["database"]["status"] == "unhealthy"
-        assert status["checks"]["redis"]["status"] == "healthy"
-
-    @pytest.mark.asyncio
-    async def test_get_health_status_redis_unhealthy(self):
-        """Test health status when Redis is unhealthy."""
-        # Arrange
-        with patch('chatter.main.get_session') as mock_get_session:
+        from chatter.api.health import readiness_check
+        
+        with patch('chatter.api.health.health_check') as mock_health_check:
+            mock_health_check.return_value = True
             mock_session = AsyncMock()
-            mock_get_session.return_value.__aenter__.return_value = mock_session
-            mock_session.execute = AsyncMock()
-
-            with patch('chatter.main.redis_client') as mock_redis:
-                mock_redis.ping.side_effect = Exception("Redis connection failed")
-
-                # Act
-                status = await get_health_status()
+            
+            # Act
+            response = await readiness_check(session=mock_session)
 
         # Assert
-        assert status["status"] == "degraded"
-        assert status["checks"]["database"]["status"] == "healthy"
-        assert status["checks"]["redis"]["status"] == "unhealthy"
+        assert response.status == "ready"
+        assert response.checks["database"]["status"] == "healthy"
+
+    @pytest.mark.asyncio 
+    async def test_readiness_check_database_unhealthy(self):
+        """Test readiness check when database is unhealthy."""
+        # Arrange
+        from chatter.api.health import readiness_check
+        
+        with patch('chatter.api.health.health_check') as mock_health_check:
+            mock_health_check.return_value = False
+            mock_session = AsyncMock()
+            
+            # Act
+            response = await readiness_check(session=mock_session)
+
+        # Assert
+        assert response.status == "not_ready"
+        assert response.checks["database"]["status"] == "unhealthy"
 
 
 @pytest.mark.integration

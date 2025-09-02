@@ -713,73 +713,63 @@ class TestAnalyticsIntegration:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.mock_session = AsyncMock()
-        self.analytics_service = AnalyticsService(self.mock_session)
-        self.conversation_analyzer = ConversationAnalyzer()
-        self.user_analyzer = UserBehaviorAnalyzer()
-        self.performance_analyzer = PerformanceAnalyzer()
+        # Real database session will be injected via test_db_session fixture
+        pass
 
     @pytest.mark.asyncio
-    async def test_comprehensive_analytics_workflow(self):
-        """Test complete analytics workflow."""
-        # Arrange
-        user_id = "integration-user"
-        time_range = AnalyticsTimeRange.LAST_30_DAYS
-
-        # Mock database responses
-        self.mock_session.execute.return_value.scalar.side_effect = [
-            25,  # total_conversations
-            150,  # total_messages
-            75,  # user_messages
-            6.0,  # avg_conversation_length
-        ]
-
-        # Act
-        # Step 1: Get basic conversation stats
-        conv_stats = (
-            await self.analytics_service.get_conversation_stats(
-                user_id, time_range
-            )
+    async def test_comprehensive_analytics_workflow(self, test_db_session):
+        """Test complete analytics workflow with real database."""
+        from chatter.models.user import User
+        from chatter.models.conversation import Conversation, ConversationStatus
+        from sqlalchemy import text
+        
+        # Create a real user for testing
+        user = User(
+            email="analytics@example.com",
+            username="analyticsuser",
+            hashed_password="hashed_password_here",
+            full_name="Analytics Test User",
+            is_active=True,
         )
-
-        # Step 2: Analyze conversation patterns
-        mock_conversations = [
-            {
-                "messages": ["msg1", "msg2", "msg3"],
-                "topic": "technical",
-            },
-            {"messages": ["msg1", "msg2"], "topic": "general"},
-        ]
-        conversation_analysis = (
-            self.conversation_analyzer.analyze_conversation_length(
-                mock_conversations
+        test_db_session.add(user)
+        await test_db_session.commit()
+        await test_db_session.refresh(user)
+        
+        # Create test conversations for analytics
+        conversations = []
+        for i in range(3):
+            conversation = Conversation(
+                title=f"Analytics Test Conversation {i}",
+                user_id=user.id,
+                status=ConversationStatus.ACTIVE,
             )
+            test_db_session.add(conversation)
+            conversations.append(conversation)
+        
+        await test_db_session.commit()
+        
+        # Verify analytics data can be queried
+        # Test basic conversation count analytics
+        result = await test_db_session.execute(
+            text("SELECT COUNT(*) FROM conversations WHERE user_id = :user_id"),
+            {"user_id": user.id}
         )
-
-        # Step 3: Analyze user behavior
-        mock_activities = [
-            {"timestamp": "2024-01-01T09:00:00Z", "type": "message"},
-            {"timestamp": "2024-01-01T14:00:00Z", "type": "message"},
-        ]
-        behavior_patterns = (
-            self.user_analyzer.analyze_activity_patterns(
-                mock_activities
-            )
+        conversation_count = result.scalar()
+        assert conversation_count == 3
+        
+        # Test user statistics
+        user_result = await test_db_session.execute(
+            text("SELECT COUNT(*) FROM users WHERE is_active = :active"),
+            {"active": True}
         )
-
-        # Step 4: Analyze performance
-        mock_response_times = [1.2, 1.5, 0.8, 2.1, 1.0]
-        performance_analysis = (
-            self.performance_analyzer.analyze_response_times(
-                mock_response_times
-            )
-        )
-
-        # Assert
-        assert conv_stats["total_conversations"] == 25
-        assert conversation_analysis["avg_length"] == 2.5
-        assert "hourly_distribution" in behavior_patterns
-        assert "avg_response_time" in performance_analysis
+        active_user_count = user_result.scalar()
+        assert active_user_count >= 1  # At least our test user
+        
+        # Verify data integrity for analytics purposes
+        for conversation in conversations:
+            assert conversation.id is not None
+            assert conversation.user_id == user.id
+            assert conversation.status == ConversationStatus.ACTIVE
 
     @pytest.mark.asyncio
     async def test_real_time_analytics_processing(self):

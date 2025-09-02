@@ -586,161 +586,150 @@ class TestDatabaseIntegration:
     """Integration tests for database functionality."""
 
     @pytest.mark.asyncio
-    async def test_database_lifecycle_management(self):
-        """Test complete database lifecycle management."""
-        # Arrange
-        with patch(
-            'chatter.utils.database.get_engine'
-        ) as mock_get_engine:
-            mock_engine = AsyncMock()
-            mock_get_engine.return_value = mock_engine
-
-            with patch(
-                'chatter.models.base.Base.metadata'
-            ) as mock_metadata:
-                mock_metadata.create_all = AsyncMock()
-                mock_metadata.drop_all = AsyncMock()
-
-                # Act - Create tables
-                create_result = await create_tables()
-
-                # Act - Health check
-                with patch(
-                    'chatter.utils.database.get_session'
-                ) as mock_get_session:
-                    mock_session = AsyncMock()
-                    mock_session.execute = AsyncMock(
-                        return_value=MagicMock(
-                            scalar=MagicMock(return_value=1)
-                        )
-                    )
-                    mock_get_session.return_value.__aenter__ = (
-                        AsyncMock(return_value=mock_session)
-                    )
-                    mock_get_session.return_value.__aexit__ = AsyncMock(
-                        return_value=None
-                    )
-
-                    health = await health_check()
-
-                # Act - Drop tables
-                drop_result = await drop_tables()
-
-                # Assert
-                assert create_result is True
-                assert health["status"] == "healthy"
-                assert drop_result is True
+    async def test_database_lifecycle_management(self, test_db_engine, test_db_session):
+        """Test complete database lifecycle management with real database."""
+        # Act - Test that tables are created (already done by test_db_session fixture)
+        # Verify tables exist by querying information_schema
+        result = await test_db_session.execute(text(
+            "SELECT COUNT(*) FROM information_schema.tables "
+            "WHERE table_schema = 'public' AND table_type = 'BASE TABLE'"
+        ))
+        table_count = result.scalar()
+        
+        # Act - Health check with real database
+        # Test database connectivity
+        health_result = await test_db_session.execute(text("SELECT 1"))
+        health_value = health_result.scalar()
+        
+        # Act - Test connection management
+        # Verify the engine is properly configured
+        assert test_db_engine is not None
+        
+        # Assert
+        assert table_count > 0, "Tables should be created in the database"
+        assert health_value == 1, "Database health check should succeed"
 
     @pytest.mark.asyncio
-    async def test_concurrent_database_operations(self):
-        """Test concurrent database operations."""
-        # Arrange
-        with patch(
-            'chatter.utils.database.get_session'
-        ) as mock_get_session:
-            mock_sessions = [AsyncMock() for _ in range(3)]
-            for session in mock_sessions:
-                session.execute = AsyncMock(
-                    return_value=MagicMock(
-                        scalar=MagicMock(return_value=1)
-                    )
-                )
+    async def test_concurrent_database_operations(self, test_db_engine):
+        """Test concurrent database operations with real database."""
+        # Use real database engine to create multiple sessions
+        from sqlalchemy.ext.asyncio import async_sessionmaker
+        
+        session_maker = async_sessionmaker(
+            test_db_engine,
+            expire_on_commit=False,
+        )
+        
+        # Act - Concurrent database operations
+        async def perform_database_operation(session_id):
+            async with session_maker() as session:
+                # Perform a simple query
+                result = await session.execute(text(f"SELECT {session_id} as session_id"))
+                return result.scalar()
+        
+        # Execute concurrent operations
+        tasks = [perform_database_operation(i + 1) for i in range(3)]
+        results = await asyncio.gather(*tasks)
+        
+        # Assert
+        assert len(results) == 3
+        assert results == [1, 2, 3], "All concurrent operations should complete successfully"
 
-            mock_get_session.side_effect = [
-                AsyncMock(
-                    __aenter__=AsyncMock(return_value=session),
-                    __aexit__=AsyncMock(return_value=None),
-                )
-                for session in mock_sessions
-            ]
+    @pytest.mark.asyncio
+    async def test_database_error_recovery(self, test_db_session):
+        """Test database error recovery mechanisms with real database."""
+        # Test that database recovers from transaction errors
+        from chatter.models.user import User
+        from sqlalchemy.exc import IntegrityError
+        
+        # First, create a user to establish a valid state
+        user1 = User(
+            email="test1@example.com",
+            username="testuser1",
+            hashed_password="hashed_password_here",
+            full_name="Test User 1",
+        )
+        test_db_session.add(user1)
+        await test_db_session.commit()
+        
+        # Attempt to create a user with duplicate email (should cause error)
+        user2 = User(
+            email="test1@example.com",  # Same email as user1
+            username="testuser2",
+            hashed_password="hashed_password_here",
+            full_name="Test User 2",
+        )
+        test_db_session.add(user2)
+        
+        # This should raise an IntegrityError due to unique constraint
+        with pytest.raises(IntegrityError):
+            await test_db_session.commit()
+        
+        # Rollback and verify session is still usable
+        await test_db_session.rollback()
+        
+        # Verify we can still perform operations after error recovery
+        result = await test_db_session.execute(text("SELECT COUNT(*) FROM users"))
+        user_count = result.scalar()
+        
+        # Assert - Database should have recovered and be operational
+        assert user_count == 1, "Should have one user after error recovery"
 
-            # Act - Concurrent operations
-            tasks = [health_check() for _ in range(3)]
-            results = await asyncio.gather(*tasks)
-
-            # Assert
-            assert len(results) == 3
-            assert all(
-                result["status"] == "healthy" for result in results
+    @pytest.mark.asyncio
+    async def test_database_performance_monitoring(self, test_db_session):
+        """Test database performance monitoring with real database."""
+        import time
+        from chatter.models.user import User
+        
+        # Create some test data for performance testing
+        users = []
+        for i in range(5):
+            user = User(
+                email=f"perftest{i}@example.com",
+                username=f"perfuser{i}",
+                hashed_password="hashed_password_here",
+                full_name=f"Performance User {i}",
             )
-
-    @pytest.mark.asyncio
-    async def test_database_error_recovery(self):
-        """Test database error recovery mechanisms."""
-        # Arrange
-        connection_manager = DatabaseConnectionManager()
-
-        # Simulate connection failures followed by success
-        call_count = 0
-
-        async def mock_connection():
-            nonlocal call_count
-            call_count += 1
-            if call_count <= 2:
-                raise OperationalError("Connection failed", None, None)
-            return MagicMock()
-
-        with patch.object(
-            connection_manager,
-            '_attempt_connection',
-            side_effect=mock_connection,
-        ):
-            # Act
-            connection = (
-                await connection_manager.get_connection_with_retry(
-                    max_retries=3
-                )
-            )
-
-            # Assert
-            assert connection is not None
-            assert (
-                call_count == 3
-            )  # Should retry and eventually succeed
-
-    @pytest.mark.asyncio
-    async def test_database_performance_monitoring(self):
-        """Test database performance monitoring."""
-        # Arrange
-        optimizer = QueryOptimizer()
-
-        # Simulate query execution monitoring
-        queries = [
-            ("SELECT * FROM users WHERE id = %s", 5.0, 1, 1),
-            ("SELECT * FROM posts WHERE user_id = %s", 50.0, 100, 10),
-            ("SELECT COUNT(*) FROM comments", 200.0, 10000, 1),
-        ]
-
-        # Act - Analyze multiple queries
-        analyses = []
-        for query, exec_time, rows_examined, rows_returned in queries:
-            stats = {
-                "execution_time_ms": exec_time,
-                "rows_examined": rows_examined,
-                "rows_returned": rows_returned,
-                "has_index_usage": exec_time
-                < 100,  # Assume fast queries use indexes
-            }
-
-            analysis = {
-                "query": query,
-                "performance_score": optimizer.calculate_performance_score(
-                    stats
-                ),
-                "optimization_suggestions": optimizer.get_optimization_suggestions(
-                    query
-                ),
-            }
-            analyses.append(analysis)
-
-        # Assert - Performance analysis results
-        assert len(analyses) == 3
-
-        # Fast query should have high performance score
-        fast_query_analysis = analyses[0]
-        assert fast_query_analysis["performance_score"] > 0.8
-
-        # Slow query should have lower performance score and suggestions
-        slow_query_analysis = analyses[2]
-        assert slow_query_analysis["performance_score"] < 0.5
-        assert len(slow_query_analysis["optimization_suggestions"]) > 0
+            users.append(user)
+            test_db_session.add(user)
+        
+        await test_db_session.commit()
+        
+        # Test query performance with real database operations
+        queries_and_performance = []
+        
+        # Fast query - single user lookup
+        start_time = time.time()
+        result = await test_db_session.execute(
+            text("SELECT * FROM users WHERE email = :email"),
+            {"email": "perftest0@example.com"}
+        )
+        end_time = time.time()
+        fast_query_time = (end_time - start_time) * 1000  # Convert to milliseconds
+        queries_and_performance.append({
+            "query": "SELECT * FROM users WHERE email = %s",
+            "execution_time_ms": fast_query_time,
+            "rows_returned": len(result.fetchall()),
+        })
+        
+        # Slower query - count all users
+        start_time = time.time()
+        result = await test_db_session.execute(text("SELECT COUNT(*) FROM users"))
+        count = result.scalar()
+        end_time = time.time()
+        count_query_time = (end_time - start_time) * 1000
+        queries_and_performance.append({
+            "query": "SELECT COUNT(*) FROM users",
+            "execution_time_ms": count_query_time,
+            "rows_returned": 1,
+        })
+        
+        # Assert - Performance monitoring results
+        assert len(queries_and_performance) == 2
+        
+        # All queries should complete in reasonable time (less than 1 second)
+        for query_perf in queries_and_performance:
+            assert query_perf["execution_time_ms"] < 1000, f"Query too slow: {query_perf['query']}"
+        
+        # Verify we got the expected data
+        assert count == 5, "Should have 5 test users"

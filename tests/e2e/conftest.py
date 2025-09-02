@@ -8,11 +8,75 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
+from pytest_postgresql import factories
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 # Add the project root to the path for imports
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 )
+
+# =============================================================================
+# Import real database fixtures for E2E tests
+# =============================================================================
+
+# Define postgresql_proc fixture with custom settings for E2E tests
+postgresql_proc = factories.postgresql_proc(
+    port=None,  # Use a random port
+    unixsocketdir="/tmp",  # Use /tmp for socket dir
+)
+
+# Create a postgresql database client fixture for E2E tests
+postgresql = factories.postgresql("postgresql_proc")
+
+
+@pytest.fixture(scope="session")
+def postgresql_database(postgresql_proc):
+    """Session-scoped PostgreSQL database fixture for E2E tests."""
+    return postgresql_proc
+
+
+@pytest.fixture
+async def test_db_engine(postgresql):
+    """Create async database engine for E2E testing."""
+    # Use the postgresql database client fixture
+    # Construct async connection URL from postgresql database info
+    db_url = (
+        f"postgresql+asyncpg://{postgresql.info.user}@{postgresql.info.host}:"
+        f"{postgresql.info.port}/{postgresql.info.dbname}"
+    )
+    
+    engine = create_async_engine(
+        db_url,
+        echo=False,  # Set to True for SQL debugging
+        future=True,
+    )
+    
+    yield engine
+    
+    # Cleanup
+    await engine.dispose()
+
+
+@pytest.fixture
+async def test_db_session(test_db_engine):
+    """Create async database session for E2E testing."""
+    from chatter.models.base import Base
+    
+    # Create all tables
+    async with test_db_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
+    # Create session
+    session_maker = async_sessionmaker(
+        test_db_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+    
+    async with session_maker() as session:
+        yield session
+        # Session will be automatically closed after the test
 
 
 @pytest.fixture(scope="session")
@@ -25,23 +89,19 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 
 @pytest.fixture(scope="session")
 async def app():
-    """Create a FastAPI app instance for testing."""
-    # Mock database and configuration for E2E tests
+    """Create a FastAPI app instance for testing with real database setup."""
     import os
     from unittest.mock import patch
 
-    # Set test environment variables
-    os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///test.db")
+    # Set test environment variables (but don't override DATABASE_URL - let real DB fixtures handle it)
     os.environ.setdefault(
         "SECRET_KEY",
         "test-secret-key-for-e2e-tests-only-not-for-production",
     )
     os.environ.setdefault("ENVIRONMENT", "test")
 
-    # Mock database operations to prevent actual database connections
+    # Mock non-database operations that don't need real connections for E2E tests
     with (
-        patch('chatter.utils.database.init_database') as mock_init_db,
-        patch('chatter.utils.database.close_database') as mock_close_db,
         patch(
             'chatter.services.toolserver.ToolServerService.initialize_builtin_servers'
         ) as mock_init_servers,
@@ -50,8 +110,6 @@ async def app():
         ) as mock_start_scheduler,
     ):
 
-        mock_init_db.return_value = None
-        mock_close_db.return_value = None
         mock_init_servers.return_value = None
         mock_start_scheduler.return_value = None
 

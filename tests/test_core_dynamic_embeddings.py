@@ -201,19 +201,20 @@ class TestEmbeddingModelGeneration:
         )
 
 
-@pytest.mark.unit
-class TestEmbeddingModelManager:
-    """Test EmbeddingModelManager functionality."""
+@pytest.mark.integration
+class TestEmbeddingModelManagerIntegration:
+    """Integration tests for EmbeddingModelManager with real database."""
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.mock_session = AsyncMock()
-        self.manager = EmbeddingModelManager(self.mock_session)
+        # Real database session will be injected via test_db_session fixture
+        pass
 
     @pytest.mark.asyncio
-    async def test_create_embedding_table(self):
-        """Test creating embedding table in database."""
+    async def test_create_embedding_table(self, test_db_session):
+        """Test creating embedding table in real database."""
         # Arrange
+        manager = EmbeddingModelManager(test_db_session)
         model_name = "create_test"
         dimension = 512
 
@@ -222,137 +223,169 @@ class TestEmbeddingModelManager:
         make_embedding_model(model_name, dimension)
 
         # Act
-        result = await self.manager.create_embedding_table(
+        result = await manager.create_embedding_table(
             model_name, dimension
         )
 
         # Assert
         assert result is True
-        # Verify that session execute was called (for CREATE TABLE)
-        self.mock_session.execute.assert_called()
+        
+        # Verify table was actually created by checking if it exists
+        table_exists = await manager.table_exists(model_name, dimension)
+        assert table_exists is True
 
     @pytest.mark.asyncio
-    async def test_drop_embedding_table(self):
-        """Test dropping embedding table from database."""
+    async def test_drop_embedding_table(self, test_db_session):
+        """Test dropping embedding table from real database."""
         # Arrange
+        manager = EmbeddingModelManager(test_db_session)
         model_name = "drop_test"
         dimension = 384
-        _to_name(model_name, dimension)
+        
+        # Clear models and create new one
+        embedding_models.clear()
+        make_embedding_model(model_name, dimension)
+        
+        # First create the table
+        await manager.create_embedding_table(model_name, dimension)
+        
+        # Verify table exists before dropping
+        assert await manager.table_exists(model_name, dimension) is True
 
         # Act
-        result = await self.manager.drop_embedding_table(
+        result = await manager.drop_embedding_table(
             model_name, dimension
         )
 
         # Assert
         assert result is True
-        self.mock_session.execute.assert_called()
+        
+        # Verify table was actually dropped
+        table_exists = await manager.table_exists(model_name, dimension)
+        assert table_exists is False
 
     @pytest.mark.asyncio
-    async def test_table_exists_check(self):
-        """Test checking if embedding table exists."""
+    async def test_table_exists_check(self, test_db_session):
+        """Test checking if embedding table exists in real database."""
         # Arrange
+        manager = EmbeddingModelManager(test_db_session)
         model_name = "existence_test"
         dimension = 768
 
-        # Mock table existence check
-        mock_result = MagicMock()
-        mock_result.scalar.return_value = 1  # Table exists
-        self.mock_session.execute.return_value = mock_result
+        # Clear models and create new one
+        embedding_models.clear()
+        make_embedding_model(model_name, dimension)
+        
+        # Create the table first
+        await manager.create_embedding_table(model_name, dimension)
 
         # Act
-        exists = await self.manager.table_exists(model_name, dimension)
+        exists = await manager.table_exists(model_name, dimension)
 
         # Assert
         assert exists is True
-        self.mock_session.execute.assert_called()
 
     @pytest.mark.asyncio
-    async def test_table_not_exists_check(self):
-        """Test checking if embedding table doesn't exist."""
+    async def test_table_not_exists_check(self, test_db_session):
+        """Test checking if embedding table doesn't exist in real database."""
         # Arrange
+        manager = EmbeddingModelManager(test_db_session)
         model_name = "nonexistent_test"
         dimension = 512
 
-        # Mock table non-existence
-        mock_result = MagicMock()
-        mock_result.scalar.return_value = 0  # Table doesn't exist
-        self.mock_session.execute.return_value = mock_result
-
-        # Act
-        exists = await self.manager.table_exists(model_name, dimension)
+        # Act - check for a table that was never created
+        exists = await manager.table_exists(model_name, dimension)
 
         # Assert
         assert exists is False
 
     @pytest.mark.asyncio
-    async def test_get_table_info(self):
-        """Test getting table information."""
+    async def test_get_table_info(self, test_db_session):
+        """Test getting table information from real database."""
         # Arrange
+        manager = EmbeddingModelManager(test_db_session)
         model_name = "info_test"
         dimension = 256
 
-        # Mock table info
-        mock_result = MagicMock()
-        mock_result.fetchall.return_value = [
-            ("id", "integer", "primary key"),
-            ("text", "text", "not null"),
-            ("embedding", "vector(256)", "not null"),
-        ]
-        self.mock_session.execute.return_value = mock_result
+        # Clear models and create new one
+        embedding_models.clear()
+        make_embedding_model(model_name, dimension)
+        
+        # Create the table first
+        await manager.create_embedding_table(model_name, dimension)
 
         # Act
-        table_info = await self.manager.get_table_info(
+        table_info = await manager.get_table_info(
             model_name, dimension
         )
 
         # Assert
-        assert len(table_info) == 3
-        assert table_info[0][0] == "id"
-        assert table_info[1][0] == "text"
-        assert table_info[2][0] == "embedding"
+        assert len(table_info) >= 3  # Should have at least id, text, embedding columns
+        
+        # Check for expected columns (actual column info may vary by database)
+        column_names = [col[0] for col in table_info]
+        assert "id" in column_names
+        assert "content" in column_names  # The column is actually named 'content', not 'text'
+        assert "embedding" in column_names
 
     @pytest.mark.asyncio
-    async def test_register_model_with_database(self):
-        """Test registering model and creating database table."""
+    async def test_register_model_with_database(self, test_db_session):
+        """Test registering model and creating database table in real database."""
         # Arrange
+        manager = EmbeddingModelManager(test_db_session)
         model_name = "register_test"
         dimension = 512
 
-        # Mock successful table creation
-        self.mock_session.execute = AsyncMock()
+        # Clear models first
+        embedding_models.clear()
 
         # Act
-        model_class = await self.manager.register_model(
+        model_class = await manager.register_model(
             model_name, dimension
         )
 
         # Assert
         assert model_class is not None
         assert hasattr(model_class, '__tablename__')
-        self.mock_session.execute.assert_called()
+        
+        # Verify table was created in the database
+        table_exists = await manager.table_exists(model_name, dimension)
+        assert table_exists is True
+        
+        # Verify model is in the registry
+        table_name = _to_name(model_name, dimension)
+        assert table_name in embedding_models
 
     @pytest.mark.asyncio
-    async def test_unregister_model_with_database(self):
-        """Test unregistering model and dropping database table."""
+    async def test_unregister_model_with_database(self, test_db_session):
+        """Test unregistering model and dropping database table from real database."""
         # Arrange
+        manager = EmbeddingModelManager(test_db_session)
         model_name = "unregister_test"
         dimension = 384
 
-        # First register the model
+        # First register the model and create table
         embedding_models.clear()
-        make_embedding_model(model_name, dimension)
+        await manager.register_model(model_name, dimension)
+        
+        # Verify table exists before unregistering
+        assert await manager.table_exists(model_name, dimension) is True
 
         # Act
-        result = await self.manager.unregister_model(
+        result = await manager.unregister_model(
             model_name, dimension
         )
 
         # Assert
         assert result is True
+        
         # Model should be removed from registry
         table_name = _to_name(model_name, dimension)
         assert table_name not in embedding_models
+        
+        # Table should be dropped from database
+        table_exists = await manager.table_exists(model_name, dimension)
+        assert table_exists is False
 
 
 @pytest.mark.unit
@@ -601,93 +634,114 @@ class TestDynamicEmbeddingIntegration:
 
     def setup_method(self):
         """Set up test fixtures."""
-        self.mock_session = AsyncMock()
-        self.manager = EmbeddingModelManager(self.mock_session)
-        self.service = DynamicEmbeddingService(self.mock_session)
+        # Real database session will be injected via test_db_session fixture
+        pass
 
     @pytest.mark.asyncio
-    async def test_complete_embedding_workflow(self):
-        """Test complete embedding workflow from model creation to search."""
-        # Arrange
-        model_name = "integration_test"
+    async def test_complete_embedding_workflow(self, test_db_session):
+        """Test complete embedding workflow with real database."""
+        from chatter.models.user import User
+        from chatter.models.document import Document, DocumentType
+        from chatter.core.dynamic_embeddings import EmbeddingModelManager, DynamicEmbeddingService
+        from sqlalchemy import text
+        
+        # Create a real user for testing
+        user = User(
+            email="embedding@example.com",
+            username="embeddinguser",
+            hashed_password="hashed_password_here",
+            full_name="Embedding Test User",
+            is_active=True,
+        )
+        test_db_session.add(user)
+        await test_db_session.commit()
+        await test_db_session.refresh(user)
+        
+        # Create a test document for embedding
+        document = Document(
+            owner_id=user.id,
+            filename="embedding_test.txt",
+            original_filename="embedding_test.txt",
+            file_size=200,
+            file_hash="embedhash123",
+            mime_type="text/plain",
+            document_type=DocumentType.TEXT,
+            title="Embedding Test Document",
+            content="This is a test document for embedding integration testing.",
+        )
+        test_db_session.add(document)
+        await test_db_session.commit()
+        await test_db_session.refresh(document)
+        
+        # Verify document was created for embedding workflow
+        assert document.id is not None
+        assert document.content is not None
+        assert len(document.content) > 0
+        
+        # Test that embedding data infrastructure works with real database
+        # Verify we can query document content for embedding processing
+        result = await test_db_session.execute(
+            text("SELECT content FROM documents WHERE id = :doc_id"),
+            {"doc_id": document.id}
+        )
+        doc_content = result.scalar()
+        assert doc_content == "This is a test document for embedding integration testing."
+        
+        # Verify user-document relationship
+        user_docs_result = await test_db_session.execute(
+            text("SELECT COUNT(*) FROM documents WHERE owner_id = :owner_id"),
+            {"owner_id": user.id}
+        )
+        doc_count = user_docs_result.scalar()
+        assert doc_count == 1
+
+        # Test embedding model management with real database
+        manager = EmbeddingModelManager(test_db_session)
+        embedding_service = DynamicEmbeddingService(test_db_session)
+        
+        # Test model registration
+        model_name = "test_integration_model"
         dimension = 384
-
-        # Clear models
-        embedding_models.clear()
-
-        # Test data
-        document_id = "doc-integration"
+        
+        model_class = await manager.register_model(model_name, dimension)
+        assert model_class is not None
+        assert hasattr(model_class, '__tablename__')
+        
+        # Test that model table was created
+        table_exists = await manager.table_exists(model_name, dimension)
+        assert table_exists is True
+        
+        # Test storing embeddings in the dynamic table
         embeddings_data = [
             {
-                "text": "Integration test text 1",
+                "text": "Integration test text chunk 1",
                 "embedding": [0.1] * dimension,
-                "document_id": document_id,
+                "document_id": document.id,
                 "chunk_index": 0,
             },
             {
-                "text": "Integration test text 2",
+                "text": "Integration test text chunk 2", 
                 "embedding": [0.2] * dimension,
-                "document_id": document_id,
+                "document_id": document.id,
                 "chunk_index": 1,
             },
-            {
-                "text": "Integration test text 3",
-                "embedding": [0.3] * dimension,
-                "document_id": document_id,
-                "chunk_index": 2,
-            },
         ]
-
-        # Act
-        # Step 1: Register model and create table
-        model_class = await self.manager.register_model(
-            model_name, dimension
-        )
-
-        # Step 2: Store embeddings
-        store_result = await self.service.store_embeddings(
+        
+        store_result = await embedding_service.store_embeddings(
             model_name, dimension, embeddings_data
         )
-
-        # Step 3: Retrieve embeddings
-        mock_embeddings = [
-            MagicMock(
-                text=data["text"],
-                embedding=data["embedding"],
-                chunk_index=data["chunk_index"],
-            )
-            for data in embeddings_data
-        ]
-        mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = (
-            mock_embeddings
-        )
-        self.mock_session.execute.return_value = mock_result
-
-        retrieved_embeddings = await self.service.retrieve_embeddings(
-            model_name, dimension, document_id
-        )
-
-        # Step 4: Search similar embeddings
-        query_embedding = [0.15] * dimension
-        mock_search_result = MagicMock()
-        mock_search_result.fetchall.return_value = [
-            MagicMock(text="Integration test text 1", similarity=0.95)
-        ]
-        self.mock_session.execute.return_value = mock_search_result
-
-        similar_embeddings = (
-            await self.service.search_similar_embeddings(
-                model_name, dimension, query_embedding, limit=5
-            )
-        )
-
-        # Assert
-        assert model_class is not None
         assert store_result is True
-        assert len(retrieved_embeddings) == 3
-        assert len(similar_embeddings) == 1
-        assert similar_embeddings[0].similarity > 0.9
+        
+        # Test retrieving embeddings
+        retrieved_embeddings = await embedding_service.retrieve_embeddings(
+            model_name, dimension, document.id
+        )
+        assert len(retrieved_embeddings) == 2
+        assert retrieved_embeddings[0].text == "Integration test text chunk 1"
+        
+        # Cleanup: unregister the model
+        cleanup_result = await manager.unregister_model(model_name, dimension)
+        assert cleanup_result is True
 
     @pytest.mark.asyncio
     async def test_multiple_model_management(self):

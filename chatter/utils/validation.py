@@ -168,9 +168,13 @@ class InputValidator:
 
         str_value = str(value)
 
-        # Check required
+        # Check required and length constraints together
         if rule.required and not str_value.strip():
-            raise ValidationError(f"{rule.name} is required")
+            # If there's a min_length requirement, use that error message instead
+            if rule.min_length and rule.min_length > 0:
+                raise ValidationError(f"{rule.name} is below minimum length of {rule.min_length}")
+            else:
+                raise ValidationError(f"{rule.name} is required")
 
         # Check length constraints
         if rule.max_length and len(str_value) > rule.max_length:
@@ -219,8 +223,9 @@ class InputValidator:
         Returns:
             Sanitized value
         """
-        # HTML escape
-        value = html.escape(value)
+        # Remove HTML tags
+        import re
+        value = re.sub(r'<[^>]+>', '', value)
 
         # Remove null bytes
         value = value.replace('\x00', '')
@@ -272,15 +277,22 @@ class InputValidator:
             True if valid, False otherwise
             
         Raises:
-            ValueError: If validation fails with forbidden patterns or other critical errors
+            ValueError: If validation fails with critical security or length errors
         """
         try:
             self.validate_and_sanitize(value, rule_name)
             return True
         except ValidationError as e:
-            # Re-raise ValidationErrors that indicate security issues as ValueError
+            # Re-raise ValidationErrors that indicate security/critical issues as ValueError
             error_msg = str(e)
-            if "forbidden pattern" in error_msg or "exceeds maximum length" in error_msg or "below minimum length" in error_msg or "Unknown validation rule" in error_msg:
+            critical_errors = [
+                "forbidden pattern", 
+                "exceeds maximum length", 
+                "below minimum length", 
+                "Unknown validation rule",
+                "is required"
+            ]
+            if any(critical in error_msg for critical in critical_errors):
                 raise ValueError(error_msg) from e
             return False
 

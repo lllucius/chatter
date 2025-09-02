@@ -26,6 +26,7 @@ class ChatterBaseException(Exception):
         error_code: str | None = None,
         status_code: int = 500,
         details: dict[str, Any] | None = None,
+        cause: Exception | None = None,
         **kwargs,
     ):
         """Initialize Chatter error.
@@ -35,11 +36,16 @@ class ChatterBaseException(Exception):
             error_code: Application-specific error code
             status_code: HTTP status code
             details: Additional error details
+            cause: Original exception that caused this error
             **kwargs: Additional fields for error context
         """
         super().__init__(message)
         self.message = message
-        self.error_code = error_code or self._get_default_error_code()
+        # Only auto-generate error codes for specific subclasses
+        if error_code is None and self.__class__ != ChatterBaseException:
+            self.error_code = self._get_default_error_code()
+        else:
+            self.error_code = error_code
         self.status_code = status_code
         self.details = details
         self.error_id = str(uuid.uuid4())
@@ -47,6 +53,10 @@ class ChatterBaseException(Exception):
         # Add timestamp
         from datetime import datetime
         self.timestamp = datetime.utcnow().isoformat()
+
+        # Set cause if provided
+        if cause:
+            self.__cause__ = cause
 
         # Set any additional properties
         for key, value in kwargs.items():
@@ -109,6 +119,23 @@ class ChatterBaseException(Exception):
             "status_code": self.status_code,
             "details": self.details,
             "type": self.__class__.__name__,
+            "timestamp": self.timestamp,
+        }
+
+    def to_response_dict(self) -> dict[str, Any]:
+        """Convert exception to API response format.
+        
+        Returns:
+            Dictionary suitable for API responses
+        """
+        return {
+            "error": {
+                "code": self.error_code,
+                "message": self.message,
+                "type": self.__class__.__name__,
+                "details": self.details,
+            },
+            "status": self.status_code,
             "timestamp": self.timestamp,
         }
 
@@ -273,14 +300,15 @@ class AuthorizationError(ChatterBaseException):
         super().__init__(message=message, status_code=403, **kwargs)
 
 
-class RateLimitError(ServiceError):
+class RateLimitError(ChatterBaseException):
     """Rate limiting errors."""
 
     def __init__(self, message: str, **kwargs):
-        # Remove status_code from kwargs to avoid conflict
-        kwargs.pop("status_code", None)
         super().__init__(
-            "rate_limiter", message, status_code=429, **kwargs
+            message=message, 
+            status_code=429, 
+            details={"service": "rate_limiter"}, 
+            **kwargs
         )
 
 
@@ -412,14 +440,15 @@ class DocumentProcessingError(ServiceError):
         )
 
 
-class ExternalServiceError(ServiceError):
+class ExternalServiceError(ChatterBaseException):
     """External service integration errors."""
 
     def __init__(self, message: str, service_name: str | None = None, **kwargs):
-        # If service_name not provided, try to infer from message or use generic
-        if service_name is None:
-            service_name = "ExternalService"
-        super().__init__(service_name, message, **kwargs)
+        # Include service info in details
+        details = kwargs.pop("details", {})
+        if service_name:
+            details["service"] = service_name
+        super().__init__(message=message, details=details, **kwargs)
 
 
 class EmbeddingError(ChatterBaseException):
@@ -475,9 +504,6 @@ class WorkflowExecutionError(WorkflowError):
         step: str | None = None,
         **kwargs,
     ):
-        # Remove status_code from kwargs to avoid conflict
-        kwargs.pop("status_code", None)
-        
         # Merge constructor details with any passed details
         details = kwargs.pop("details", {})
         if workflow_id:
@@ -486,7 +512,7 @@ class WorkflowExecutionError(WorkflowError):
             details["failed_step"] = step
 
         super().__init__(
-            message=message, status_code=500, details=details, **kwargs
+            message=message, details=details, **kwargs
         )
 
     def _get_error_title(self) -> str:

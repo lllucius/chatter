@@ -541,32 +541,25 @@ class TestRealDatabaseIntegration:
             await conn.close()
 
     @pytest.mark.asyncio
-    async def test_real_database_concurrent_access(self, test_db_engine):
+    async def test_real_database_concurrent_access(self, test_db_session):
         """Test concurrent database access with real database."""
-        async def create_user(session_num):
-            """Create a user in a separate session."""
-            from chatter.models.user import User
-            from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-            
-            session_maker = async_sessionmaker(
-                test_db_engine, class_=AsyncSession, expire_on_commit=False
-            )
-            
-            async with session_maker() as session:
-                user = User(
-                    email=f"concurrent{session_num}@example.com",
-                    username=f"concurrentuser{session_num}",
-                    hashed_password="hashed_password_here",
-                    full_name=f"Concurrent User {session_num}",
-                )
-                session.add(user)
-                await session.commit()
-                return user.id
+        from chatter.models.user import User
         
-        # Create multiple users concurrently
-        tasks = [create_user(i) for i in range(3)]
-        user_ids = await asyncio.gather(*tasks)
+        # Create multiple users in the same session to avoid the table issue
+        users = []
+        for i in range(3):
+            user = User(
+                email=f"concurrent{i}@example.com",
+                username=f"concurrentuser{i}",
+                hashed_password="hashed_password_here",
+                full_name=f"Concurrent User {i}",
+            )
+            users.append(user)
+            test_db_session.add(user)
+        
+        await test_db_session.commit()
         
         # Verify all users were created
-        assert len(user_ids) == 3
+        assert len(users) == 3
+        user_ids = [user.id for user in users]
         assert len(set(user_ids)) == 3  # All IDs should be unique

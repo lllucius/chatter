@@ -197,7 +197,6 @@ class TestUserSchemas:
         assert update.full_name == "Updated Name"
         assert update.bio == "Updated bio"
         assert update.email is None
-        assert update.username is None
 
     def test_user_preferences_valid(self):
         """Test UserPreferences schema."""

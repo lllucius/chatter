@@ -349,22 +349,40 @@ class EmbeddingModelManager:
         try:
             table_name = _to_name(model_name, dimension)
 
-            # Execute CREATE TABLE IF NOT EXISTS
-            create_sql = f"""
-            CREATE TABLE IF NOT EXISTS {table_name} (
-                id SERIAL PRIMARY KEY,
-                document_id VARCHAR(26) NOT NULL,
-                chunk_id VARCHAR(26) NOT NULL,
-                embedding {"VECTOR(%d)" % dimension if PGVECTOR_AVAILABLE else "TEXT"} NOT NULL,
-                content TEXT NOT NULL,
-                extra_metadata TEXT,
-                INDEX(document_id),
-                INDEX(chunk_id)
-            );
-            """
+            # Create indexes separately
+            index_sql_1 = f"CREATE INDEX IF NOT EXISTS idx_{table_name}_document_id ON {table_name}(document_id);"
+            index_sql_2 = f"CREATE INDEX IF NOT EXISTS idx_{table_name}_chunk_id ON {table_name}(chunk_id);"
 
             if self.session:
+                # Try to create pgvector extension if needed, but handle failure gracefully
+                vector_available = False
+                if PGVECTOR_AVAILABLE:
+                    try:
+                        await self.session.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+                        await self.session.commit()
+                        vector_available = True
+                    except Exception as e:
+                        logger.warning(f"Could not create vector extension: {e}")
+                        # Rollback the failed transaction
+                        await self.session.rollback()
+                        vector_available = False
+                
+                # Update the SQL to use TEXT if vector is not available
+                embedding_type = f"VECTOR({dimension})" if vector_available else "TEXT"
+                create_sql = f"""
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                    id SERIAL PRIMARY KEY,
+                    document_id VARCHAR(26) NOT NULL,
+                    chunk_id VARCHAR(26) NOT NULL,
+                    embedding {embedding_type} NOT NULL,
+                    content TEXT NOT NULL,
+                    extra_metadata TEXT
+                );
+                """
+                
                 await self.session.execute(text(create_sql))
+                await self.session.execute(text(index_sql_1))
+                await self.session.execute(text(index_sql_2))
                 await self.session.commit()
 
             return True

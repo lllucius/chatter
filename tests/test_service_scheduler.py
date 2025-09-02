@@ -7,7 +7,9 @@ from datetime import datetime, timedelta, UTC
 
 from chatter.services.scheduler import (
     ToolServerScheduler,
-    scheduler,
+    start_scheduler,
+    stop_scheduler,
+    get_scheduler,
 )
 from chatter.models.toolserver import ServerStatus
 

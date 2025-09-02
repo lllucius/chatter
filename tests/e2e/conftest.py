@@ -24,19 +24,40 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 @pytest.fixture(scope="session")
 async def app():
     """Create a FastAPI app instance for testing."""
-    try:
-        from chatter.main import app
-        return app
-    except ImportError:
-        # Create a minimal FastAPI app for testing if main app fails to import
-        from fastapi import FastAPI
-        test_app = FastAPI(title="Test Chatter API")
+    # Mock database and configuration for E2E tests
+    import os
+    from unittest.mock import patch
+    
+    # Set test environment variables
+    os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///test.db")
+    os.environ.setdefault("SECRET_KEY", "test-secret-key-for-e2e-tests-only-not-for-production")
+    os.environ.setdefault("ENVIRONMENT", "test")
+    
+    # Mock database operations to prevent actual database connections
+    with patch('chatter.utils.database.init_database') as mock_init_db, \
+         patch('chatter.utils.database.close_database') as mock_close_db, \
+         patch('chatter.services.toolserver.ToolServerService.initialize_builtin_servers') as mock_init_servers, \
+         patch('chatter.services.scheduler.start_scheduler') as mock_start_scheduler:
         
-        @test_app.get("/health")
-        async def health_check():
-            return {"status": "ok", "message": "Test server running"}
+        mock_init_db.return_value = None
+        mock_close_db.return_value = None  
+        mock_init_servers.return_value = None
+        mock_start_scheduler.return_value = None
         
-        return test_app
+        try:
+            from chatter.main import create_app
+            app = create_app()
+            return app
+        except ImportError:
+            # Create a minimal FastAPI app for testing if main app fails to import
+            from fastapi import FastAPI
+            test_app = FastAPI(title="Test Chatter API")
+            
+            @test_app.get("/health")
+            async def health_check():
+                return {"status": "ok", "message": "Test server running"}
+            
+            return test_app
 
 
 @pytest.fixture(scope="session")

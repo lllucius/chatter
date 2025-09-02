@@ -33,7 +33,7 @@ from chatter.schemas.document import (
     DocumentStatsResponse,
     DocumentUpdate,
 )
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,
@@ -48,7 +48,7 @@ router = APIRouter()
 
 
 async def get_document_service(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> DocumentService:
     """Get document service instance."""
     return DocumentService(session)

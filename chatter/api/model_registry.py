@@ -29,7 +29,7 @@ from chatter.schemas.model_registry import (
     ProviderList,
     ProviderUpdate,
 )
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -46,7 +46,7 @@ async def list_providers(
     active_only: bool = Query(
         True, description="Show only active providers"
     ),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """List all providers."""
@@ -68,7 +68,7 @@ async def list_providers(
 @router.get("/providers/{provider_id}", response_model=Provider)
 async def get_provider(
     provider_id: str,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Get a specific provider."""
@@ -91,7 +91,7 @@ async def get_provider(
 )
 async def create_provider(
     provider_data: ProviderCreate,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Create a new provider."""
@@ -120,7 +120,7 @@ async def create_provider(
 async def update_provider(
     provider_id: str,
     provider_data: ProviderUpdate,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Update a provider."""
@@ -148,7 +148,7 @@ async def update_provider(
 )
 async def delete_provider(
     provider_id: str,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ) -> ProviderDeleteResponse:
     """Delete a provider and all its dependent models and embedding spaces."""
@@ -186,7 +186,7 @@ async def delete_provider(
 async def set_default_provider(
     provider_id: str,
     default_data: DefaultProvider,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ) -> ProviderDefaultResponse:
     """Set a provider as default for a model type."""
@@ -227,7 +227,7 @@ async def list_models(
     active_only: bool = Query(
         True, description="Show only active models"
     ),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """List all model definitions."""
@@ -248,7 +248,7 @@ async def list_models(
 @router.get("/models/{model_id}", response_model=ModelDefWithProvider)
 async def get_model(
     model_id: str,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Get a specific model definition."""
@@ -271,7 +271,7 @@ async def get_model(
 )
 async def create_model(
     model_data: ModelDefCreate,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Create a new model definition."""
@@ -319,7 +319,7 @@ async def create_model(
 async def update_model(
     model_id: str,
     model_data: ModelDefUpdate,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Update a model definition."""
@@ -354,7 +354,7 @@ async def update_model(
 @router.delete("/models/{model_id}", response_model=ModelDeleteResponse)
 async def delete_model(
     model_id: str,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ) -> ModelDeleteResponse:
     """Delete a model definition and its dependent embedding spaces."""
@@ -391,7 +391,7 @@ async def delete_model(
 )
 async def set_default_model(
     model_id: str,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ) -> ModelDefaultResponse:
     """Set a model as default for its type."""
@@ -424,7 +424,7 @@ async def list_embedding_spaces(
     active_only: bool = Query(
         True, description="Show only active spaces"
     ),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """List all embedding spaces."""
@@ -448,7 +448,7 @@ async def list_embedding_spaces(
 )
 async def get_embedding_space(
     space_id: str,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Get a specific embedding space."""
@@ -471,7 +471,7 @@ async def get_embedding_space(
 )
 async def create_embedding_space(
     space_data: EmbeddingSpaceCreate,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Create a new embedding space with backing table and index."""
@@ -548,7 +548,7 @@ async def create_embedding_space(
 async def update_embedding_space(
     space_id: str,
     space_data: EmbeddingSpaceUpdate,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Update an embedding space."""
@@ -586,7 +586,7 @@ async def update_embedding_space(
 )
 async def delete_embedding_space(
     space_id: str,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ) -> EmbeddingSpaceDeleteResponse:
     """Delete an embedding space (does not drop the table)."""
@@ -616,7 +616,7 @@ async def delete_embedding_space(
 )
 async def set_default_embedding_space(
     space_id: str,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ) -> EmbeddingSpaceDefaultResponse:
     """Set an embedding space as default."""
@@ -644,7 +644,7 @@ async def set_default_embedding_space(
 @router.get("/defaults/provider/{model_type}", response_model=Provider)
 async def get_default_provider(
     model_type: ModelType,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Get the default provider for a model type."""
@@ -665,7 +665,7 @@ async def get_default_provider(
 )
 async def get_default_model(
     model_type: ModelType,
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Get the default model for a type."""
@@ -685,7 +685,7 @@ async def get_default_model(
     "/defaults/embedding-space", response_model=EmbeddingSpaceWithModel
 )
 async def get_default_embedding_space(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
 ):
     """Get the default embedding space."""

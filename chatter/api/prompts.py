@@ -19,7 +19,7 @@ from chatter.schemas.prompt import (
     PromptTestResponse,
     PromptUpdate,
 )
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,
@@ -33,7 +33,7 @@ router = APIRouter()
 
 
 async def get_prompt_service(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> PromptService:
     """Get prompt service instance."""
     return PromptService(session)

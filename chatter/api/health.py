@@ -10,7 +10,7 @@ from chatter.schemas.health import (
     MetricsResponse,
     ReadinessCheckResponse,
 )
-from chatter.utils.database import get_session, health_check
+from chatter.utils.database import get_session_generator, health_check
 from chatter.utils.problem import InternalServerProblem
 
 router = APIRouter()
@@ -33,7 +33,7 @@ async def health_check_endpoint() -> HealthCheckResponse:
 
 @router.get("/readyz", response_model=ReadinessCheckResponse)
 async def readiness_check(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> ReadinessCheckResponse:
     """Readiness check endpoint with database connectivity.
 

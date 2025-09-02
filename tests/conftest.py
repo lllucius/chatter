@@ -134,3 +134,61 @@ def sample_document_data():
             "tags": ["test", "document"]
         }
     }
+
+
+# Database model fixtures for testing
+@pytest.fixture
+def test_user():
+    """Create a test user instance."""
+    from chatter.models.user import User
+    
+    user = User(
+        email="test@example.com",
+        username="testuser",
+        hashed_password="hashed_password_here",
+        full_name="Test User",
+    )
+    return user
+
+
+@pytest.fixture
+def test_conversation(test_user):
+    """Create a test conversation instance."""
+    from chatter.models.conversation import Conversation
+    
+    conversation = Conversation(
+        user_id=test_user.id,
+        title="Test Conversation",
+        description="A test conversation",
+    )
+    return conversation
+
+
+@pytest.fixture
+def test_document(test_user):
+    """Create a test document instance."""
+    from chatter.models.document import Document, DocumentType
+    
+    document = Document(
+        owner_id=test_user.id,
+        filename="test.txt",
+        original_filename="test.txt",
+        file_size=100,
+        file_hash="test123",
+        mime_type="text/plain",
+        document_type=DocumentType.TEXT,
+        title="Test Document",
+        content="Test content",
+    )
+    return document
+
+
+@pytest.fixture
+def test_session():
+    """Create a mock test session."""
+    session = MagicMock()
+    session.add = MagicMock()
+    session.commit = MagicMock()
+    session.rollback = MagicMock()
+    session.refresh = MagicMock()
+    return session

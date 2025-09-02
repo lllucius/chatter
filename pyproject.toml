@@ -103,6 +103,10 @@ dev = [
     "pytest-mock>=3.14.1",
     "httpx>=0.28.1",  # For test client
     
+    # Load testing
+    "locust>=2.31.8",
+    "psutil>=6.1.0",  # For performance monitoring
+    
     # Code quality and formatting
     "ruff>=0.12.11",
     "mypy>=1.17.1",
@@ -233,4 +237,7 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
     "unit: marks tests as unit tests",
+    "e2e: marks tests as end-to-end tests",
+    "performance: marks tests as performance tests",
+    "load: marks tests as load tests",
 ]

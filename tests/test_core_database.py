@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
+from sqlalchemy import text
 
 from chatter.utils.database import (
     DatabaseConnectionManager,
@@ -211,6 +212,83 @@ class TestDatabaseUtilities:
                     == "postgresql+asyncpg://user:pass@localhost/testdb"
                 )
                 assert kwargs["echo"] is True
+
+
+@pytest.mark.unit
+class TestRealDatabaseUtilities:
+    """Test database utility functions with real PostgreSQL database."""
+
+    @pytest.mark.asyncio
+    async def test_real_database_connection(self, test_db_session):
+        """Test that we can connect to a real database."""
+        # Test basic database connectivity with real PostgreSQL
+        result = await test_db_session.execute(text("SELECT 1 as test_col"))
+        row = result.fetchone()
+        assert row[0] == 1
+
+    @pytest.mark.asyncio
+    async def test_real_database_tables_exist(self, test_db_session):
+        """Test that tables are created in the real database."""
+        # Test that tables exist in the real PostgreSQL instance
+        # Use test_db_session since it already has tables created
+        result = await test_db_session.execute(text(
+            "SELECT table_name FROM information_schema.tables "
+            "WHERE table_schema = 'public' AND table_type = 'BASE TABLE'"
+        ))
+        tables = [row[0] for row in result.fetchall()]
+        
+        # Check for some expected tables
+        expected_tables = ["users", "conversations", "documents", "profiles"]
+        for table in expected_tables:
+            assert table in tables, f"Table {table} should exist"
+
+    @pytest.mark.asyncio
+    async def test_real_database_session_operations(self, test_db_session):
+        """Test basic database operations with real session."""
+        # Test that we can create and query a user with real database
+        from chatter.models.user import User
+        
+        # Create a test user
+        test_user = User(
+            email="test@example.com",
+            username="testuser",
+            hashed_password="hashed_password_here",
+            full_name="Test User",
+        )
+        
+        # Add user to session
+        test_db_session.add(test_user)
+        await test_db_session.commit()
+        await test_db_session.refresh(test_user)
+        
+        # Verify user was created
+        assert test_user.id is not None
+        assert test_user.email == "test@example.com"
+        assert test_user.username == "testuser"
+
+    @pytest.mark.asyncio
+    async def test_real_database_transaction_rollback(self, test_db_session):
+        """Test transaction rollback with real database."""
+        from chatter.models.user import User
+        
+        # Create a test user but don't commit
+        test_user = User(
+            email="rollback@example.com",
+            username="rollbackuser",
+            hashed_password="hashed_password_here",
+            full_name="Rollback User",
+        )
+        
+        test_db_session.add(test_user)
+        # Intentionally rollback
+        await test_db_session.rollback()
+        
+        # Verify user was not saved
+        result = await test_db_session.execute(
+            text("SELECT COUNT(*) FROM users WHERE email = 'rollback@example.com'")
+        )
+        count = result.scalar()
+        assert count == 0
 
 
 @pytest.mark.unit

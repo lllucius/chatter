@@ -1,9 +1,12 @@
 """Test configuration and fixtures for Chatter application."""
 
 import asyncio
+import os
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+from pytest_postgresql import factories
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
 
 # Async event loop configuration for tests
@@ -192,3 +195,66 @@ def test_session():
     session.rollback = MagicMock()
     session.refresh = MagicMock()
     return session
+
+
+# =============================================================================
+# PostgreSQL Database Fixtures for Real Database Testing
+# =============================================================================
+
+# Define postgresql_proc fixture with custom settings
+postgresql_proc = factories.postgresql_proc(
+    port=None,  # Use a random port
+    unixsocketdir="/tmp",  # Use /tmp for socket dir
+)
+
+# Create a postgresql database client fixture
+postgresql = factories.postgresql("postgresql_proc")
+
+
+@pytest.fixture(scope="session")
+def postgresql_database(postgresql_proc):
+    """Session-scoped PostgreSQL database fixture."""
+    return postgresql_proc
+
+
+@pytest.fixture
+async def test_db_engine(postgresql):
+    """Create async database engine for testing."""
+    # Use the postgresql database client fixture
+    # Construct async connection URL from postgresql database info
+    db_url = (
+        f"postgresql+asyncpg://{postgresql.info.user}@{postgresql.info.host}:"
+        f"{postgresql.info.port}/{postgresql.info.dbname}"
+    )
+    
+    engine = create_async_engine(
+        db_url,
+        echo=False,  # Set to True for SQL debugging
+        future=True,
+    )
+    
+    yield engine
+    
+    # Cleanup
+    await engine.dispose()
+
+
+@pytest.fixture
+async def test_db_session(test_db_engine):
+    """Create async database session for testing."""
+    from chatter.models.base import Base
+    
+    # Create all tables
+    async with test_db_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
+    # Create session
+    session_maker = async_sessionmaker(
+        test_db_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
+    )
+    
+    async with session_maker() as session:
+        yield session
+        # Session will be automatically closed after the test

@@ -857,11 +857,8 @@ class DatabaseManager:
         """Initialize database session context."""
         self.session: AsyncSession | None = None
         self.active_sessions: dict = {}
-
-    @property
-    def engine(self) -> AsyncEngine:
-        """Get the database engine."""
-        return get_engine()
+        # Allow engine to be overridden for testing
+        self.engine = get_engine()
 
     async def __aenter__(self) -> AsyncSession:
         """Enter async context and create session."""
@@ -884,9 +881,9 @@ class DatabaseManager:
         pool = engine.pool
         return {
             "pool_size": pool.size(),
-            "checked_out": pool.checkedout(),
-            "checked_in": pool.checkedin(),
-            "available": pool.checkedin(),
+            "checked_out": pool.checked_out(),
+            "checked_in": pool.checked_in(),
+            "available": pool.checked_in(),
         }
 
     async def _attempt_connection(self):

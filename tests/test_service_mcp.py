@@ -11,7 +11,7 @@ for module_name in [
     'chatter.utils.security',
     'chatter.utils.monitoring',
     'chatter.utils.logging',
-    'mcp'
+    'mcp',
 ]:
     if module_name not in sys.modules:
         sys.modules[module_name] = MagicMock()
@@ -28,7 +28,7 @@ class TestMCPService:
             "name": "test-server",
             "command": "python",
             "args": ["-m", "test_server"],
-            "env": {}
+            "env": {},
         }
 
     @pytest.mark.asyncio
@@ -40,15 +40,19 @@ class TestMCPService:
             "server_info": {
                 "name": "test-server",
                 "version": "1.0.0",
-                "capabilities": ["tools", "resources"]
-            }
+                "capabilities": ["tools", "resources"],
+            },
         }
 
         mcp_service = MagicMock()
-        mcp_service.connect_to_server = AsyncMock(return_value=connection_result)
+        mcp_service.connect_to_server = AsyncMock(
+            return_value=connection_result
+        )
 
         # Act
-        result = await mcp_service.connect_to_server(self.mock_server_config)
+        result = await mcp_service.connect_to_server(
+            self.mock_server_config
+        )
 
         # Assert
         assert result["connected"] is True
@@ -65,21 +69,17 @@ class TestMCPService:
                 "description": "Search the web for information",
                 "inputSchema": {
                     "type": "object",
-                    "properties": {
-                        "query": {"type": "string"}
-                    }
-                }
+                    "properties": {"query": {"type": "string"}},
+                },
             },
             {
                 "name": "file_read",
                 "description": "Read file contents",
                 "inputSchema": {
                     "type": "object",
-                    "properties": {
-                        "path": {"type": "string"}
-                    }
-                }
-            }
+                    "properties": {"path": {"type": "string"}},
+                },
+            },
         ]
 
         mcp_service = MagicMock()
@@ -99,9 +99,7 @@ class TestMCPService:
         # Arrange
         tool_call = {
             "name": "web_search",
-            "arguments": {
-                "query": "Python asyncio best practices"
-            }
+            "arguments": {"query": "Python asyncio best practices"},
         }
 
         execution_result = {
@@ -111,21 +109,22 @@ class TestMCPService:
                     {
                         "title": "Asyncio Best Practices",
                         "url": "https://example.com/asyncio",
-                        "snippet": "Learn the best practices for Python asyncio..."
+                        "snippet": "Learn the best practices for Python asyncio...",
                     }
                 ]
             },
-            "metadata": {
-                "execution_time": 1.5,
-                "tokens_used": 0
-            }
+            "metadata": {"execution_time": 1.5, "tokens_used": 0},
         }
 
         mcp_service = MagicMock()
-        mcp_service.execute_tool = AsyncMock(return_value=execution_result)
+        mcp_service.execute_tool = AsyncMock(
+            return_value=execution_result
+        )
 
         # Act
-        result = await mcp_service.execute_tool("test-server", tool_call)
+        result = await mcp_service.execute_tool(
+            "test-server", tool_call
+        )
 
         # Assert
         assert result["success"] is True
@@ -138,7 +137,7 @@ class TestMCPService:
         # Arrange
         resource_request = {
             "uri": "file:///app/data/document.txt",
-            "mimeType": "text/plain"
+            "mimeType": "text/plain",
         }
 
         resource_content = {
@@ -147,15 +146,19 @@ class TestMCPService:
             "text": "This is the content of the document.",
             "metadata": {
                 "size": 35,
-                "last_modified": "2024-01-01T00:00:00Z"
-            }
+                "last_modified": "2024-01-01T00:00:00Z",
+            },
         }
 
         mcp_service = MagicMock()
-        mcp_service.read_resource = AsyncMock(return_value=resource_content)
+        mcp_service.read_resource = AsyncMock(
+            return_value=resource_content
+        )
 
         # Act
-        content = await mcp_service.read_resource("test-server", resource_request)
+        content = await mcp_service.read_resource(
+            "test-server", resource_request
+        )
 
         # Assert
         assert content["uri"] == resource_request["uri"]
@@ -170,28 +173,30 @@ class TestMCPService:
             "name": "summarize_document",
             "arguments": {
                 "document": "Long document content here...",
-                "max_length": 100
-            }
+                "max_length": 100,
+            },
         }
 
         prompt_result = {
             "messages": [
                 {
                     "role": "user",
-                    "content": "Please summarize the following document in no more than 100 words: Long document content here..."
+                    "content": "Please summarize the following document in no more than 100 words: Long document content here...",
                 }
             ],
             "metadata": {
                 "template_version": "1.0",
-                "variables_used": ["document", "max_length"]
-            }
+                "variables_used": ["document", "max_length"],
+            },
         }
 
         mcp_service = MagicMock()
         mcp_service.get_prompt = AsyncMock(return_value=prompt_result)
 
         # Act
-        result = await mcp_service.get_prompt("test-server", prompt_request)
+        result = await mcp_service.get_prompt(
+            "test-server", prompt_request
+        )
 
         # Assert
         assert len(result["messages"]) == 1
@@ -208,11 +213,13 @@ class TestMCPService:
             "memory_usage": "45MB",
             "tool_count": 5,
             "resource_count": 12,
-            "last_activity": "2024-01-01T01:00:00Z"
+            "last_activity": "2024-01-01T01:00:00Z",
         }
 
         mcp_service = MagicMock()
-        mcp_service.check_server_health = AsyncMock(return_value=health_status)
+        mcp_service.check_server_health = AsyncMock(
+            return_value=health_status
+        )
 
         # Act
         health = await mcp_service.check_server_health("test-server")
@@ -232,17 +239,23 @@ class TestMCPService:
                 "message": "Tool 'nonexistent_tool' not found",
                 "data": {
                     "available_tools": ["web_search", "file_read"]
-                }
+                },
             }
         }
 
         mcp_service = MagicMock()
-        mcp_service.execute_tool = AsyncMock(side_effect=Exception("Tool not found"))
-        mcp_service.handle_mcp_error = MagicMock(return_value=error_response)
+        mcp_service.execute_tool = AsyncMock(
+            side_effect=Exception("Tool not found")
+        )
+        mcp_service.handle_mcp_error = MagicMock(
+            return_value=error_response
+        )
 
         # Act & Assert
         with pytest.raises(Exception) as exc_info:
-            await mcp_service.execute_tool("test-server", {"name": "nonexistent_tool"})
+            await mcp_service.execute_tool(
+                "test-server", {"name": "nonexistent_tool"}
+            )
 
         assert "Tool not found" in str(exc_info.value)
 
@@ -253,22 +266,29 @@ class TestMCPService:
             "name": "valid-server",
             "command": "python",
             "args": ["-m", "server"],
-            "env": {"ENV_VAR": "value"}
+            "env": {"ENV_VAR": "value"},
         }
 
         invalid_config = {
             "name": "",  # Invalid: empty name
             "command": "nonexistent_command",
-            "args": []
+            "args": [],
         }
 
         config_validator = MagicMock()
         config_validator.validate_server_config = MagicMock()
-        config_validator.validate_server_config.side_effect = [True, False]
+        config_validator.validate_server_config.side_effect = [
+            True,
+            False,
+        ]
 
         # Act
-        valid_result = config_validator.validate_server_config(valid_config)
-        invalid_result = config_validator.validate_server_config(invalid_config)
+        valid_result = config_validator.validate_server_config(
+            valid_config
+        )
+        invalid_result = config_validator.validate_server_config(
+            invalid_config
+        )
 
         # Assert
         assert valid_result is True
@@ -284,20 +304,28 @@ class TestMCPService:
             "created_at": "2024-01-01T00:00:00Z",
             "active": True,
             "tools_used": ["web_search"],
-            "resources_accessed": ["file:///app/data/doc.txt"]
+            "resources_accessed": ["file:///app/data/doc.txt"],
         }
 
         session_manager = MagicMock()
-        session_manager.create_session = AsyncMock(return_value=session_data)
-        session_manager.get_session = AsyncMock(return_value=session_data)
+        session_manager.create_session = AsyncMock(
+            return_value=session_data
+        )
+        session_manager.get_session = AsyncMock(
+            return_value=session_data
+        )
         session_manager.close_session = AsyncMock(return_value=True)
 
         # Act
         # Create session
-        created_session = await session_manager.create_session("test-server")
+        created_session = await session_manager.create_session(
+            "test-server"
+        )
 
         # Get session
-        retrieved_session = await session_manager.get_session("session-123")
+        retrieved_session = await session_manager.get_session(
+            "session-123"
+        )
 
         # Close session
         closed = await session_manager.close_session("session-123")
@@ -315,20 +343,24 @@ class TestMCPService:
             "tool_name": "file_read",
             "arguments": {"path": "/etc/passwd"},
             "user_permissions": ["file.read.limited"],
-            "allowed_paths": ["/app/data", "/app/public"]
+            "allowed_paths": ["/app/data", "/app/public"],
         }
 
         security_result = {
             "allowed": False,
             "reason": "Path '/etc/passwd' not in allowed paths",
-            "alternative_suggestion": "Use paths under /app/data or /app/public"
+            "alternative_suggestion": "Use paths under /app/data or /app/public",
         }
 
         security_validator = MagicMock()
-        security_validator.validate_tool_security = AsyncMock(return_value=security_result)
+        security_validator.validate_tool_security = AsyncMock(
+            return_value=security_result
+        )
 
         # Act
-        validation = await security_validator.validate_tool_security(security_check)
+        validation = await security_validator.validate_tool_security(
+            security_check
+        )
 
         # Assert
         assert validation["allowed"] is False
@@ -344,7 +376,7 @@ class TestMCPIntegration:
         self.server_config = {
             "name": "integration-test-server",
             "command": "python",
-            "args": ["-m", "test_mcp_server"]
+            "args": ["-m", "test_mcp_server"],
         }
 
     @pytest.mark.asyncio
@@ -354,32 +386,43 @@ class TestMCPIntegration:
         mcp_service = MagicMock()
 
         # Connection
-        connection_result = {"connected": True, "server_info": {"name": "test-server"}}
-        mcp_service.connect_to_server = AsyncMock(return_value=connection_result)
+        connection_result = {
+            "connected": True,
+            "server_info": {"name": "test-server"},
+        }
+        mcp_service.connect_to_server = AsyncMock(
+            return_value=connection_result
+        )
 
         # Tool listing
-        tools = [{"name": "web_search", "description": "Search the web"}]
+        tools = [
+            {"name": "web_search", "description": "Search the web"}
+        ]
         mcp_service.list_tools = AsyncMock(return_value=tools)
 
         # Tool execution
         execution_result = {
             "success": True,
-            "result": {"results": [{"title": "Test Result"}]}
+            "result": {"results": [{"title": "Test Result"}]},
         }
-        mcp_service.execute_tool = AsyncMock(return_value=execution_result)
+        mcp_service.execute_tool = AsyncMock(
+            return_value=execution_result
+        )
 
         # Act
         # Connect
-        connected = await mcp_service.connect_to_server(self.server_config)
+        connected = await mcp_service.connect_to_server(
+            self.server_config
+        )
 
         # List tools
         available_tools = await mcp_service.list_tools("test-server")
 
         # Execute tool
-        result = await mcp_service.execute_tool("test-server", {
-            "name": "web_search",
-            "arguments": {"query": "test"}
-        })
+        result = await mcp_service.execute_tool(
+            "test-server",
+            {"name": "web_search", "arguments": {"query": "test"}},
+        )
 
         # Assert
         assert connected["connected"] is True
@@ -396,7 +439,7 @@ class TestMCPIntegration:
         mcp_service.connect_to_server = AsyncMock()
         mcp_service.connect_to_server.side_effect = [
             Exception("Connection failed"),
-            {"connected": True, "server_info": {"name": "test-server"}}
+            {"connected": True, "server_info": {"name": "test-server"}},
         ]
 
         # Mock retry mechanism
@@ -410,7 +453,9 @@ class TestMCPIntegration:
             await mcp_service.retry_connection(self.server_config)
 
         # Second attempt should succeed
-        connection = await mcp_service.connect_to_server(self.server_config)
+        connection = await mcp_service.connect_to_server(
+            self.server_config
+        )
 
         # Assert
         assert connection["connected"] is True
@@ -426,7 +471,7 @@ class TestMCPIntegration:
         tool_results = [
             {"success": True, "result": "Result 1"},
             {"success": True, "result": "Result 2"},
-            {"success": True, "result": "Result 3"}
+            {"success": True, "result": "Result 3"},
         ]
 
         mcp_service.execute_tool = AsyncMock()
@@ -436,7 +481,9 @@ class TestMCPIntegration:
         import asyncio
 
         tasks = [
-            mcp_service.execute_tool("server", {"name": f"tool_{i}", "arguments": {}})
+            mcp_service.execute_tool(
+                "server", {"name": f"tool_{i}", "arguments": {}}
+            )
             for i in range(3)
         ]
 

@@ -38,13 +38,16 @@ logger = get_secure_logger(__name__)
 
 class WorkflowExecutionError(Exception):
     """Workflow execution error."""
+
     pass
 
 
 class WorkflowExecutionService:
     """Service for executing chat workflows with various types and streaming."""
 
-    def __init__(self, llm_service: LLMService, message_service: MessageService):
+    def __init__(
+        self, llm_service: LLMService, message_service: MessageService
+    ):
         """Initialize workflow execution service."""
         self.llm_service = llm_service
         self.message_service = message_service
@@ -55,7 +58,7 @@ class WorkflowExecutionService:
         self,
         conversation: Conversation,
         chat_request: ChatRequest,
-        correlation_id: str
+        correlation_id: str,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute a workflow for a chat request.
 
@@ -90,7 +93,7 @@ class WorkflowExecutionService:
                     "Workflow cache hit",
                     conversation_id=conversation.id,
                     workflow_type=workflow_type,
-                    correlation_id=correlation_id
+                    correlation_id=correlation_id,
                 )
 
                 # Record metrics for cached result
@@ -102,14 +105,16 @@ class WorkflowExecutionService:
                     duration_ms=duration_ms,
                     success=True,
                     error_type=None,
-                    correlation_id=correlation_id
+                    correlation_id=correlation_id,
                 )
 
                 return cached_result
 
             # Execute workflow based on type
             workflow_execution_id = f"{correlation_id}_{workflow_type}"
-            performance_monitor.start_workflow(workflow_execution_id, workflow_type)
+            performance_monitor.start_workflow(
+                workflow_execution_id, workflow_type
+            )
 
             if workflow_type == "plain":
                 result = await self._execute_plain_workflow(
@@ -128,7 +133,9 @@ class WorkflowExecutionService:
                     conversation, chat_request, correlation_id
                 )
             else:
-                raise WorkflowExecutionError(f"Unknown workflow type: {workflow_type}")
+                raise WorkflowExecutionError(
+                    f"Unknown workflow type: {workflow_type}"
+                )
 
             # Cache the result
             # TODO: Implement proper result caching with correct parameters
@@ -143,7 +150,7 @@ class WorkflowExecutionService:
                 duration_ms=duration_ms,
                 success=True,
                 error_type=None,
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             logger.info(
@@ -151,7 +158,7 @@ class WorkflowExecutionService:
                 conversation_id=conversation.id,
                 workflow_type=workflow_type,
                 duration_ms=duration_ms,
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             return result
@@ -166,7 +173,7 @@ class WorkflowExecutionService:
                 duration_ms=duration_ms,
                 success=False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             logger.error(
@@ -174,17 +181,21 @@ class WorkflowExecutionService:
                 conversation_id=conversation.id,
                 workflow_type=workflow_type,
                 error=str(e),
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
-            raise WorkflowExecutionError(f"Workflow execution failed: {e}")
+            raise WorkflowExecutionError(
+                f"Workflow execution failed: {e}"
+            )
         finally:
-            performance_monitor.end_workflow(workflow_execution_id, success=True)
+            performance_monitor.end_workflow(
+                workflow_execution_id, success=True
+            )
 
     async def execute_workflow_streaming(
         self,
         conversation: Conversation,
         chat_request: ChatRequest,
-        correlation_id: str
+        correlation_id: str,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute a workflow with streaming response.
 
@@ -209,22 +220,28 @@ class WorkflowExecutionService:
             # Validate workflow configuration
             try:
                 self.validator.validate_workflow_parameters(
-                    workflow_type, **(chat_request.workflow_config or {})
+                    workflow_type,
+                    **(chat_request.workflow_config or {}),
                 )
             except Exception as e:
-                raise WorkflowExecutionError(f"Invalid workflow configuration for {workflow_type}: {e}")
+                raise WorkflowExecutionError(
+                    f"Invalid workflow configuration for {workflow_type}: {e}"
+                )
 
             logger.info(
                 "Starting streaming workflow execution",
                 conversation_id=conversation.id,
                 workflow_type=workflow_type,
                 stream_id=stream_id,
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             # Create workflow event generator
             workflow_generator = self._create_workflow_generator(
-                workflow_type, conversation, chat_request, correlation_id
+                workflow_type,
+                conversation,
+                chat_request,
+                correlation_id,
             )
 
             # Stream with heartbeat, token chunking, etc.
@@ -232,7 +249,7 @@ class WorkflowExecutionService:
                 stream_id,
                 workflow_generator,
                 enable_heartbeat=True,
-                heartbeat_interval=30.0
+                heartbeat_interval=30.0,
             ):
                 yield chunk
 
@@ -245,7 +262,7 @@ class WorkflowExecutionService:
                 duration_ms=duration_ms,
                 success=True,
                 error_type=None,
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             logger.info(
@@ -254,7 +271,7 @@ class WorkflowExecutionService:
                 workflow_type=workflow_type,
                 stream_id=stream_id,
                 duration_ms=duration_ms,
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
         except Exception as e:
@@ -267,7 +284,7 @@ class WorkflowExecutionService:
                 duration_ms=duration_ms,
                 success=False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             logger.error(
@@ -276,26 +293,32 @@ class WorkflowExecutionService:
                 workflow_type=workflow_type,
                 stream_id=stream_id,
                 error=str(e),
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             # Yield error chunk
             yield StreamingChatChunk(
                 type="error",
                 content=f"Workflow execution failed: {str(e)}",
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
     async def _execute_plain_workflow(
-        self, conversation: Conversation, chat_request: ChatRequest, correlation_id: str
+        self,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        correlation_id: str,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute plain chat workflow."""
         messages = self.llm_service.convert_conversation_to_messages(
-            conversation, await self._get_conversation_messages(conversation)
+            conversation,
+            await self._get_conversation_messages(conversation),
         )
 
         # Add user message
-        messages.append(BaseMessage(content=chat_request.message, type="human"))
+        messages.append(
+            BaseMessage(content=chat_request.message, type="human")
+        )
 
         # Get LLM provider
         provider = await self.llm_service.get_default_provider()
@@ -309,14 +332,17 @@ class WorkflowExecutionService:
             role=MessageRole.ASSISTANT,
             content=response.content,
             provider=provider.__class__.__name__,
-            metadata={"workflow_type": "plain"}
+            metadata={"workflow_type": "plain"},
         )
 
         usage_info = {"tokens": 0, "cost": 0.0}
         return response_message, usage_info
 
     async def _execute_rag_workflow(
-        self, conversation: Conversation, chat_request: ChatRequest, correlation_id: str
+        self,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        correlation_id: str,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute RAG workflow."""
         workflow_manager = get_workflow_manager()
@@ -324,10 +350,12 @@ class WorkflowExecutionService:
         # Prepare state
         state = ConversationState(
             conversation_id=conversation.id,
-            messages=await self._get_conversation_messages(conversation),
+            messages=await self._get_conversation_messages(
+                conversation
+            ),
             user_message=chat_request.message,
             workflow_config=chat_request.workflow_config or {},
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
 
         # Run RAG workflow
@@ -336,7 +364,9 @@ class WorkflowExecutionService:
         # Extract response
         ai_message = result.get("response")
         if not isinstance(ai_message, AIMessage):
-            raise WorkflowExecutionError("Invalid RAG workflow response")
+            raise WorkflowExecutionError(
+                "Invalid RAG workflow response"
+            )
 
         response_message = Message(
             conversation_id=conversation.id,
@@ -345,15 +375,18 @@ class WorkflowExecutionService:
             metadata={
                 "workflow_type": "rag",
                 "sources": result.get("sources", []),
-                "documents_used": result.get("documents_used", 0)
-            }
+                "documents_used": result.get("documents_used", 0),
+            },
         )
 
         usage_info = result.get("usage", {"tokens": 0, "cost": 0.0})
         return response_message, usage_info
 
     async def _execute_tools_workflow(
-        self, conversation: Conversation, chat_request: ChatRequest, correlation_id: str
+        self,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        correlation_id: str,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute tools workflow."""
         workflow_manager = get_workflow_manager()
@@ -361,10 +394,12 @@ class WorkflowExecutionService:
         # Prepare state
         state = ConversationState(
             conversation_id=conversation.id,
-            messages=await self._get_conversation_messages(conversation),
+            messages=await self._get_conversation_messages(
+                conversation
+            ),
             user_message=chat_request.message,
             workflow_config=chat_request.workflow_config or {},
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
 
         # Run tools workflow
@@ -373,7 +408,9 @@ class WorkflowExecutionService:
         # Extract response
         ai_message = result.get("response")
         if not isinstance(ai_message, AIMessage):
-            raise WorkflowExecutionError("Invalid tools workflow response")
+            raise WorkflowExecutionError(
+                "Invalid tools workflow response"
+            )
 
         response_message = Message(
             conversation_id=conversation.id,
@@ -382,15 +419,18 @@ class WorkflowExecutionService:
             metadata={
                 "workflow_type": "tools",
                 "tools_used": result.get("tools_used", []),
-                "tool_calls": result.get("tool_calls", 0)
-            }
+                "tool_calls": result.get("tool_calls", 0),
+            },
         )
 
         usage_info = result.get("usage", {"tokens": 0, "cost": 0.0})
         return response_message, usage_info
 
     async def _execute_full_workflow(
-        self, conversation: Conversation, chat_request: ChatRequest, correlation_id: str
+        self,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        correlation_id: str,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute full workflow (RAG + tools)."""
         workflow_manager = get_workflow_manager()
@@ -398,10 +438,12 @@ class WorkflowExecutionService:
         # Prepare state
         state = ConversationState(
             conversation_id=conversation.id,
-            messages=await self._get_conversation_messages(conversation),
+            messages=await self._get_conversation_messages(
+                conversation
+            ),
             user_message=chat_request.message,
             workflow_config=chat_request.workflow_config or {},
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
 
         # Run full workflow
@@ -410,7 +452,9 @@ class WorkflowExecutionService:
         # Extract response
         ai_message = result.get("response")
         if not isinstance(ai_message, AIMessage):
-            raise WorkflowExecutionError("Invalid full workflow response")
+            raise WorkflowExecutionError(
+                "Invalid full workflow response"
+            )
 
         response_message = Message(
             conversation_id=conversation.id,
@@ -421,8 +465,8 @@ class WorkflowExecutionService:
                 "sources": result.get("sources", []),
                 "tools_used": result.get("tools_used", []),
                 "documents_used": result.get("documents_used", 0),
-                "tool_calls": result.get("tool_calls", 0)
-            }
+                "tool_calls": result.get("tool_calls", 0),
+            },
         )
 
         usage_info = result.get("usage", {"tokens": 0, "cost": 0.0})
@@ -433,7 +477,7 @@ class WorkflowExecutionService:
         workflow_type: str,
         conversation: Conversation,
         chat_request: ChatRequest,
-        correlation_id: str
+        correlation_id: str,
     ) -> AsyncGenerator[dict[str, Any], None]:
         """Create workflow event generator with detailed streaming.
 
@@ -451,10 +495,12 @@ class WorkflowExecutionService:
         # Prepare state
         state = ConversationState(
             conversation_id=conversation.id,
-            messages=await self._get_conversation_messages(conversation),
+            messages=await self._get_conversation_messages(
+                conversation
+            ),
             user_message=chat_request.message,
             workflow_config=chat_request.workflow_config or {},
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
 
         # Yield start event
@@ -462,7 +508,7 @@ class WorkflowExecutionService:
             "type": "start",
             "workflow_type": workflow_type,
             "conversation_id": conversation.id,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
 
         # Streaming based on workflow type
@@ -470,18 +516,22 @@ class WorkflowExecutionService:
             async for event in self._stream_plain_workflow(state):
                 yield event
         elif workflow_type in ["rag", "tools", "full"]:
-            async for event in workflow_manager.stream_workflow(workflow_type, state):
+            async for event in workflow_manager.stream_workflow(
+                workflow_type, state
+            ):
                 # Basic workflow events with additional metadata
                 yield self._workflow_event(event, workflow_type)
         else:
-            raise WorkflowExecutionError(f"Unknown workflow type: {workflow_type}")
+            raise WorkflowExecutionError(
+                f"Unknown workflow type: {workflow_type}"
+            )
 
         # Yield completion event
         yield {
             "type": "complete",
             "workflow_type": workflow_type,
             "conversation_id": conversation.id,
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
 
     async def _stream_plain_workflow(
@@ -491,11 +541,13 @@ class WorkflowExecutionService:
         try:
             # Convert conversation to messages
             messages = self.llm_service.convert_conversation_to_messages(
-                None, state.messages  # We'll handle conversation context differently
+                None,
+                state.messages,  # We'll handle conversation context differently
             )
 
             # Add user message
             from langchain_core.messages import HumanMessage
+
             messages.append(HumanMessage(content=state.user_message))
 
             # Get LLM provider
@@ -506,7 +558,7 @@ class WorkflowExecutionService:
                 "type": "thinking",
                 "thought": "Processing request with plain workflow...",
                 "step": "provider_selection",
-                "provider": provider.__class__.__name__
+                "provider": provider.__class__.__name__,
             }
 
             # Stream response tokens
@@ -515,7 +567,9 @@ class WorkflowExecutionService:
 
             # For demonstration, we'll simulate token streaming
             # In a real implementation, this would use the provider's streaming capabilities
-            async for token in self._simulate_token_streaming(provider, messages):
+            async for token in self._simulate_token_streaming(
+                provider, messages
+            ):
                 token_count += 1
                 response_content += token
 
@@ -524,7 +578,7 @@ class WorkflowExecutionService:
                     "content": token,
                     "token_index": token_count,
                     "accumulated_content": response_content,
-                    "provider": provider.__class__.__name__
+                    "provider": provider.__class__.__name__,
                 }
 
                 # Add small delay to simulate realistic streaming
@@ -536,11 +590,13 @@ class WorkflowExecutionService:
                 "content": response_content,
                 "usage": {
                     "tokens": token_count,
-                    "input_tokens": sum(len(msg.content.split()) for msg in messages),
+                    "input_tokens": sum(
+                        len(msg.content.split()) for msg in messages
+                    ),
                     "output_tokens": token_count,
-                    "cost": token_count * 0.00001  # Rough estimate
+                    "cost": token_count * 0.00001,  # Rough estimate
                 },
-                "provider": provider.__class__.__name__
+                "provider": provider.__class__.__name__,
             }
 
         except Exception as e:
@@ -548,7 +604,7 @@ class WorkflowExecutionService:
                 "type": "error",
                 "error": str(e),
                 "error_type": type(e).__name__,
-                "step": "plain_workflow_execution"
+                "step": "plain_workflow_execution",
             }
 
     async def _simulate_token_streaming(
@@ -558,7 +614,11 @@ class WorkflowExecutionService:
         try:
             # Get complete response first
             response = await provider.ainvoke(messages)
-            response_text = response.content if hasattr(response, 'content') else str(response)
+            response_text = (
+                response.content
+                if hasattr(response, 'content')
+                else str(response)
+            )
 
             # Split into tokens (simple word-based tokenization for demo)
             tokens = response_text.split()
@@ -589,24 +649,35 @@ class WorkflowExecutionService:
             # Add token metadata
             workflow_event["token_metadata"] = {
                 "character_count": len(event.get("content", "")),
-                "is_punctuation": event.get("content", "").strip() in ".,!?;:",
-                "is_whitespace": event.get("content", "").isspace()
+                "is_punctuation": event.get("content", "").strip()
+                in ".,!?;:",
+                "is_whitespace": event.get("content", "").isspace(),
             }
 
         elif event_type == "tool_call":
             # Add tool execution metadata
             workflow_event["tool_metadata"] = {
-                "tool_category": self._categorize_tool(event.get("tool_name", "")),
-                "expected_duration": self._estimate_tool_duration(event.get("tool_name", "")),
-                "risk_level": self._assess_tool_risk(event.get("tool_name", ""))
+                "tool_category": self._categorize_tool(
+                    event.get("tool_name", "")
+                ),
+                "expected_duration": self._estimate_tool_duration(
+                    event.get("tool_name", "")
+                ),
+                "risk_level": self._assess_tool_risk(
+                    event.get("tool_name", "")
+                ),
             }
 
         elif event_type == "source":
             # Add source metadata
             workflow_event["source_metadata"] = {
-                "domain": self._extract_domain(event.get("source_url", "")),
-                "content_type": self._detect_content_type(event.get("source_title", "")),
-                "quality_score": self._assess_source_quality(event)
+                "domain": self._extract_domain(
+                    event.get("source_url", "")
+                ),
+                "content_type": self._detect_content_type(
+                    event.get("source_title", "")
+                ),
+                "quality_score": self._assess_source_quality(event),
             }
 
         return workflow_event
@@ -618,7 +689,7 @@ class WorkflowExecutionService:
             "computation": ["calculator", "math", "compute"],
             "data": ["database", "query", "fetch"],
             "file": ["file", "read", "write", "download"],
-            "communication": ["email", "slack", "notify"]
+            "communication": ["email", "slack", "notify"],
         }
 
         tool_name_lower = tool_name.lower()
@@ -635,7 +706,7 @@ class WorkflowExecutionService:
             "computation": 0.1,
             "data": 1.0,
             "file": 0.5,
-            "communication": 3.0
+            "communication": 3.0,
         }
 
         category = self._categorize_tool(tool_name)
@@ -643,8 +714,20 @@ class WorkflowExecutionService:
 
     def _assess_tool_risk(self, tool_name: str) -> str:
         """Assess risk level of tool execution."""
-        high_risk_tools = ["delete", "remove", "execute", "shell", "admin"]
-        medium_risk_tools = ["write", "update", "modify", "send", "post"]
+        high_risk_tools = [
+            "delete",
+            "remove",
+            "execute",
+            "shell",
+            "admin",
+        ]
+        medium_risk_tools = [
+            "write",
+            "update",
+            "modify",
+            "send",
+            "post",
+        ]
 
         tool_name_lower = tool_name.lower()
 
@@ -659,6 +742,7 @@ class WorkflowExecutionService:
         """Extract domain from URL."""
         try:
             from urllib.parse import urlparse
+
             parsed = urlparse(url)
             return parsed.netloc
         except Exception:
@@ -668,19 +752,33 @@ class WorkflowExecutionService:
         """Detect content type from title."""
         content_indicators = {
             "article": ["article", "blog", "post", "news"],
-            "documentation": ["docs", "documentation", "guide", "manual"],
+            "documentation": [
+                "docs",
+                "documentation",
+                "guide",
+                "manual",
+            ],
             "academic": ["paper", "research", "study", "journal"],
-            "reference": ["wiki", "encyclopedia", "reference", "definition"]
+            "reference": [
+                "wiki",
+                "encyclopedia",
+                "reference",
+                "definition",
+            ],
         }
 
         title_lower = title.lower()
         for content_type, indicators in content_indicators.items():
-            if any(indicator in title_lower for indicator in indicators):
+            if any(
+                indicator in title_lower for indicator in indicators
+            ):
                 return content_type
 
         return "general"
 
-    def _assess_source_quality(self, source_event: dict[str, Any]) -> float:
+    def _assess_source_quality(
+        self, source_event: dict[str, Any]
+    ) -> float:
         """Assess quality score of a source (0.0 to 1.0)."""
         score = 0.5  # Base score
 
@@ -689,12 +787,20 @@ class WorkflowExecutionService:
         title = source_event.get("source_title", "")
 
         # Domain reputation
-        trusted_domains = [".edu", ".gov", ".org", "wikipedia.org", "stackoverflow.com"]
+        trusted_domains = [
+            ".edu",
+            ".gov",
+            ".org",
+            "wikipedia.org",
+            "stackoverflow.com",
+        ]
         if any(domain in url for domain in trusted_domains):
             score += 0.3
 
         # Title quality indicators
-        if len(title) > 10 and len(title) < 200:  # Reasonable title length
+        if (
+            len(title) > 10 and len(title) < 200
+        ):  # Reasonable title length
             score += 0.1
 
         # Relevance score from the event
@@ -713,7 +819,7 @@ class WorkflowExecutionService:
         return {
             "workflow_performance": base_stats,
             "streaming_stats": streaming_stats,
-            "streaming_service_status": "active"
+            "streaming_service_status": "active",
         }
 
     async def execute_streaming_workflow(
@@ -721,7 +827,7 @@ class WorkflowExecutionService:
         workflow_type: str,
         conversation: Conversation,
         chat_request: ChatRequest,
-        correlation_id: str
+        correlation_id: str,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute streaming workflow."""
         workflow_manager = get_workflow_manager()
@@ -729,34 +835,40 @@ class WorkflowExecutionService:
         # Prepare state
         state = ConversationState(
             conversation_id=conversation.id,
-            messages=await self._get_conversation_messages(conversation),
+            messages=await self._get_conversation_messages(
+                conversation
+            ),
             user_message=chat_request.message,
             workflow_config=chat_request.workflow_config or {},
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
 
         # Stream workflow execution
-        async for event in workflow_manager.stream_workflow(workflow_type, state):
+        async for event in workflow_manager.stream_workflow(
+            workflow_type, state
+        ):
             # Convert workflow events to streaming chunks
             if event.get("type") == "token":
                 yield StreamingChatChunk(
                     type="token",
                     content=event.get("content", ""),
-                    correlation_id=correlation_id
+                    correlation_id=correlation_id,
                 )
             elif event.get("type") == "tool_call":
                 yield StreamingChatChunk(
                     type="tool_call",
                     content=event.get("tool_name", ""),
                     correlation_id=correlation_id,
-                    metadata={"tool_args": event.get("tool_args", {})}
+                    metadata={"tool_args": event.get("tool_args", {})},
                 )
             elif event.get("type") == "source":
                 yield StreamingChatChunk(
                     type="source",
                     content=event.get("source_title", ""),
                     correlation_id=correlation_id,
-                    metadata={"source_url": event.get("source_url", "")}
+                    metadata={
+                        "source_url": event.get("source_url", "")
+                    },
                 )
             elif event.get("type") == "complete":
                 yield StreamingChatChunk(
@@ -765,11 +877,13 @@ class WorkflowExecutionService:
                     correlation_id=correlation_id,
                     metadata={
                         "usage": event.get("usage", {}),
-                        "message_id": event.get("message_id")
-                    }
+                        "message_id": event.get("message_id"),
+                    },
                 )
 
-    async def _get_conversation_messages(self, conversation: Conversation) -> list[Message]:
+    async def _get_conversation_messages(
+        self, conversation: Conversation
+    ) -> list[Message]:
         """Get messages for conversation in workflow format."""
         if hasattr(conversation, 'messages') and conversation.messages:
             return conversation.messages
@@ -780,7 +894,9 @@ class WorkflowExecutionService:
         )
         return list(messages)
 
-    def _get_cache_key(self, conversation_id: str, chat_request: ChatRequest) -> str:
+    def _get_cache_key(
+        self, conversation_id: str, chat_request: ChatRequest
+    ) -> str:
         """Generate cache key for workflow result."""
         import hashlib
 
@@ -791,6 +907,14 @@ class WorkflowExecutionService:
         """Get workflow performance statistics."""
         return {
             "performance_monitor": performance_monitor.get_performance_stats(),
-            "cache_stats": await workflow_cache.get_stats() if hasattr(workflow_cache, 'get_stats') else {},
-            "template_stats": self.template_manager.get_stats() if hasattr(self.template_manager, 'get_stats') else {}
+            "cache_stats": (
+                await workflow_cache.get_stats()
+                if hasattr(workflow_cache, 'get_stats')
+                else {}
+            ),
+            "template_stats": (
+                self.template_manager.get_stats()
+                if hasattr(self.template_manager, 'get_stats')
+                else {}
+            ),
         }

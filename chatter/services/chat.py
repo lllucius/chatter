@@ -12,12 +12,17 @@ from chatter.models.conversation import (
     Message,
     MessageRole,
 )
-from chatter.schemas.chat import ChatRequest, StreamingChatChunk
+from chatter.schemas.chat import (
+    ChatRequest,
+)
 from chatter.schemas.chat import (
     ConversationCreate as ConversationCreateSchema,
 )
 from chatter.schemas.chat import (
     ConversationUpdate as ConversationUpdateSchema,
+)
+from chatter.schemas.chat import (
+    StreamingChatChunk,
 )
 from chatter.services.conversation import ConversationService
 from chatter.services.llm import LLMService
@@ -45,7 +50,9 @@ class ChatService:
     - LLMService: LLM provider interactions
     """
 
-    def __init__(self, session: AsyncSession, llm_service: LLMService) -> None:
+    def __init__(
+        self, session: AsyncSession, llm_service: LLMService
+    ) -> None:
         """Initialize chat service with dependencies."""
         self.session = session
         self.llm_service = llm_service
@@ -53,7 +60,9 @@ class ChatService:
         # Initialize specialized services
         self.conversation_service = ConversationService(session)
         self.message_service = MessageService(session)
-        self.workflow_service = WorkflowExecutionService(llm_service, self.message_service)
+        self.workflow_service = WorkflowExecutionService(
+            llm_service, self.message_service
+        )
 
     # Conversation management - delegate to ConversationService
 
@@ -61,14 +70,20 @@ class ChatService:
         self, user_id: str, conversation_data: ConversationCreateSchema
     ) -> Conversation:
         """Create a new conversation."""
-        return await self.conversation_service.create_conversation(user_id, conversation_data)
+        return await self.conversation_service.create_conversation(
+            user_id, conversation_data
+        )
 
     async def list_conversations(
         self, user_id: str, limit: int = 20, offset: int = 0
     ) -> tuple[list[Conversation], int]:
         """List conversations for a user with pagination."""
         # Get conversations
-        conversations = await self.conversation_service.list_conversations(user_id, limit, offset)
+        conversations = (
+            await self.conversation_service.list_conversations(
+                user_id, limit, offset
+            )
+        )
 
         # Get total count - for now, we'll implement a simple approach
         # TODO: Add optimized count method to ConversationService
@@ -89,7 +104,10 @@ class ChatService:
         return list(conversations), total
 
     async def get_conversation(
-        self, conversation_id: str, user_id: str, include_messages: bool = True
+        self,
+        conversation_id: str,
+        user_id: str,
+        include_messages: bool = True,
     ) -> Conversation:
         """Get conversation by ID with access control."""
         return await self.conversation_service.get_conversation(
@@ -97,16 +115,23 @@ class ChatService:
         )
 
     async def update_conversation(
-        self, conversation_id: str, user_id: str, update_data: ConversationUpdateSchema
+        self,
+        conversation_id: str,
+        user_id: str,
+        update_data: ConversationUpdateSchema,
     ) -> Conversation:
         """Update conversation."""
         return await self.conversation_service.update_conversation(
             conversation_id, user_id, update_data
         )
 
-    async def delete_conversation(self, conversation_id: str, user_id: str) -> None:
+    async def delete_conversation(
+        self, conversation_id: str, user_id: str
+    ) -> None:
         """Delete conversation (soft delete)."""
-        await self.conversation_service.delete_conversation(conversation_id, user_id)
+        await self.conversation_service.delete_conversation(
+            conversation_id, user_id
+        )
 
     # Message management - delegate to MessageService
 
@@ -115,7 +140,7 @@ class ChatService:
         conversation_id: str,
         user_id: str,
         limit: int | None = None,
-        offset: int = 0
+        offset: int = 0,
     ) -> list[Message]:
         """Get messages for a conversation."""
         messages = await self.message_service.get_conversation_messages(
@@ -129,7 +154,7 @@ class ChatService:
         user_id: str,
         role: MessageRole,
         content: str,
-        metadata: dict[str, Any] | None = None
+        metadata: dict[str, Any] | None = None,
     ) -> Message:
         """Add a message to a conversation."""
         return await self.message_service.add_message_to_conversation(
@@ -140,7 +165,9 @@ class ChatService:
         self, conversation_id: str, message_id: str, user_id: str
     ) -> None:
         """Delete a message."""
-        await self.message_service.delete_message(conversation_id, message_id, user_id)
+        await self.message_service.delete_message(
+            conversation_id, message_id, user_id
+        )
 
     # Core chat functionality - orchestrates all services
 
@@ -166,58 +193,73 @@ class ChatService:
             # Get or create conversation
             if chat_request.conversation_id:
                 conversation = await self.get_conversation(
-                    chat_request.conversation_id, user_id, include_messages=True
+                    chat_request.conversation_id,
+                    user_id,
+                    include_messages=True,
                 )
             else:
                 # Create new conversation
                 from chatter.schemas.chat import ConversationCreate
+
                 conv_data = ConversationCreate(
-                    title=chat_request.message[:50] + "..." if len(chat_request.message) > 50 else chat_request.message,
+                    title=(
+                        chat_request.message[:50] + "..."
+                        if len(chat_request.message) > 50
+                        else chat_request.message
+                    ),
                     profile_id=chat_request.profile_id,
                     temperature=chat_request.temperature,
                     max_tokens=chat_request.max_tokens,
-                    workflow_config=chat_request.workflow_config
+                    workflow_config=chat_request.workflow_config,
                 )
-                conversation = await self.create_conversation(user_id, conv_data)
+                conversation = await self.create_conversation(
+                    user_id, conv_data
+                )
 
             # Add user message
             await self.add_message_to_conversation(
                 conversation.id,
                 user_id,
                 MessageRole.USER,
-                chat_request.message
+                chat_request.message,
             )
 
             # Execute workflow to get response
-            response_message, usage_info = await self.workflow_service.execute_workflow(
-                conversation, chat_request, correlation_id
+            response_message, usage_info = (
+                await self.workflow_service.execute_workflow(
+                    conversation, chat_request, correlation_id
+                )
             )
 
             # Apply usage information to response message
             self._apply_usage_to_message(response_message, usage_info)
 
             # Save response message
-            response_message = await self.message_service.add_message_to_conversation(
-                conversation.id,
-                user_id,
-                response_message.role,
-                response_message.content,
-                response_message.metadata,
-                response_message.input_tokens,
-                response_message.output_tokens,
-                response_message.cost,
-                response_message.provider
+            response_message = (
+                await self.message_service.add_message_to_conversation(
+                    conversation.id,
+                    user_id,
+                    response_message.role,
+                    response_message.content,
+                    response_message.metadata,
+                    response_message.input_tokens,
+                    response_message.output_tokens,
+                    response_message.cost,
+                    response_message.provider,
+                )
             )
 
             # Record metrics
-            duration_ms = (__import__('time').time() - start_time) * 1000
+            duration_ms = (
+                __import__('time').time() - start_time
+            ) * 1000
             record_request_metrics(
                 method="POST",
                 path="/chat",
                 status_code=200,
                 response_time_ms=duration_ms,
                 correlation_id=correlation_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
             logger.info(
@@ -226,28 +268,30 @@ class ChatService:
                 user_id=user_id,
                 workflow_type=chat_request.workflow_type,
                 duration_ms=duration_ms,
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             return conversation, response_message
 
         except Exception as e:
             # Record error metrics
-            duration_ms = (__import__('time').time() - start_time) * 1000
+            duration_ms = (
+                __import__('time').time() - start_time
+            ) * 1000
             record_request_metrics(
                 method="POST",
                 path="/chat",
                 status_code=500,
                 response_time_ms=duration_ms,
                 correlation_id=correlation_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
             logger.error(
                 "Chat request failed",
                 user_id=user_id,
                 error=str(e),
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
             raise ChatServiceError(f"Chat processing failed: {e}")
 
@@ -273,26 +317,35 @@ class ChatService:
             # Get or create conversation
             if chat_request.conversation_id:
                 conversation = await self.get_conversation(
-                    chat_request.conversation_id, user_id, include_messages=True
+                    chat_request.conversation_id,
+                    user_id,
+                    include_messages=True,
                 )
             else:
                 # Create new conversation
                 from chatter.schemas.chat import ConversationCreate
+
                 conv_data = ConversationCreate(
-                    title=chat_request.message[:50] + "..." if len(chat_request.message) > 50 else chat_request.message,
+                    title=(
+                        chat_request.message[:50] + "..."
+                        if len(chat_request.message) > 50
+                        else chat_request.message
+                    ),
                     profile_id=chat_request.profile_id,
                     temperature=chat_request.temperature,
                     max_tokens=chat_request.max_tokens,
-                    workflow_config=chat_request.workflow_config
+                    workflow_config=chat_request.workflow_config,
                 )
-                conversation = await self.create_conversation(user_id, conv_data)
+                conversation = await self.create_conversation(
+                    user_id, conv_data
+                )
 
             # Add user message
             await self.add_message_to_conversation(
                 conversation.id,
                 user_id,
                 MessageRole.USER,
-                chat_request.message
+                chat_request.message,
             )
 
             # Yield start chunk
@@ -300,24 +353,28 @@ class ChatService:
                 type="start",
                 content="",
                 correlation_id=correlation_id,
-                metadata={"conversation_id": conversation.id}
+                metadata={"conversation_id": conversation.id},
             )
 
             # Execute streaming workflow
-            async for chunk in self.workflow_service.execute_workflow_streaming(
+            async for (
+                chunk
+            ) in self.workflow_service.execute_workflow_streaming(
                 conversation, chat_request, correlation_id
             ):
                 yield chunk
 
             # Record metrics
-            duration_ms = (__import__('time').time() - start_time) * 1000
+            duration_ms = (
+                __import__('time').time() - start_time
+            ) * 1000
             record_request_metrics(
                 method="POST",
                 path="/chat/stream",
                 status_code=200,
                 response_time_ms=duration_ms,
                 correlation_id=correlation_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
             logger.info(
@@ -325,33 +382,35 @@ class ChatService:
                 conversation_id=conversation.id,
                 user_id=user_id,
                 duration_ms=duration_ms,
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
         except Exception as e:
             # Record error metrics
-            duration_ms = (__import__('time').time() - start_time) * 1000
+            duration_ms = (
+                __import__('time').time() - start_time
+            ) * 1000
             record_request_metrics(
                 method="POST",
                 path="/chat/stream",
                 status_code=500,
                 response_time_ms=duration_ms,
                 correlation_id=correlation_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
             logger.error(
                 "Streaming chat request failed",
                 user_id=user_id,
                 error=str(e),
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             # Yield error chunk
             yield StreamingChatChunk(
                 type="error",
                 content=f"Chat processing failed: {str(e)}",
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
     # Analytics and performance
@@ -361,18 +420,34 @@ class ChatService:
     ) -> dict[str, Any]:
         """Get analytics for a conversation."""
         # Combine stats from different services
-        conv_stats = await self.conversation_service.get_conversation_stats(conversation_id, user_id)
-        message_stats = await self.message_service.get_message_statistics(conversation_id, user_id)
+        conv_stats = (
+            await self.conversation_service.get_conversation_stats(
+                conversation_id, user_id
+            )
+        )
+        message_stats = (
+            await self.message_service.get_message_statistics(
+                conversation_id, user_id
+            )
+        )
 
         return {
             "conversation": conv_stats,
             "messages": message_stats,
             "combined_metrics": {
-                "total_interactions": conv_stats.get("total_messages", 0) // 2,  # Pairs of user/assistant
-                "avg_tokens_per_interaction": message_stats.get("avg_tokens_per_message", 0) * 2,
+                "total_interactions": conv_stats.get(
+                    "total_messages", 0
+                )
+                // 2,  # Pairs of user/assistant
+                "avg_tokens_per_interaction": message_stats.get(
+                    "avg_tokens_per_message", 0
+                )
+                * 2,
                 "total_cost": message_stats.get("total_cost", 0.0),
-                "efficiency_score": self._calculate_efficiency_score(conv_stats, message_stats)
-            }
+                "efficiency_score": self._calculate_efficiency_score(
+                    conv_stats, message_stats
+                ),
+            },
         }
 
     def get_performance_stats(self) -> dict[str, Any]:
@@ -384,8 +459,8 @@ class ChatService:
                 "conversation_service": "active",
                 "message_service": "active",
                 "workflow_service": "active",
-                "llm_service": "active"
-            }
+                "llm_service": "active",
+            },
         }
 
     async def get_service_health(self) -> dict[str, Any]:
@@ -396,12 +471,14 @@ class ChatService:
             "message_service": "healthy",
             "workflow_service": "healthy",
             "llm_service": "healthy",
-            "database": "connected" if self.session else "disconnected"
+            "database": "connected" if self.session else "disconnected",
         }
 
     # Helper methods
 
-    def _apply_usage_to_message(self, message: Message, usage: dict[str, Any]) -> None:
+    def _apply_usage_to_message(
+        self, message: Message, usage: dict[str, Any]
+    ) -> None:
         """Apply usage information to a message."""
         if "tokens" in usage:
             # Split tokens between input and output if not specified
@@ -446,11 +523,15 @@ class ChatService:
     # Workflow compatibility methods for API compatibility
 
     async def chat_with_workflow(
-        self, user_id: str, chat_request: ChatRequest, workflow_type: str = "basic"
+        self,
+        user_id: str,
+        chat_request: ChatRequest,
+        workflow_type: str = "basic",
     ) -> tuple[Conversation, Message]:
         """Chat with specific workflow type (compatibility wrapper)."""
         # Create a new chat request with the specified workflow type
         from chatter.schemas.chat import ChatRequest
+
         new_request = ChatRequest(
             message=chat_request.message,
             conversation_id=chat_request.conversation_id,
@@ -461,16 +542,20 @@ class ChatService:
             system_prompt_override=chat_request.system_prompt_override,
             enable_retrieval=chat_request.enable_retrieval,
             provider_override=chat_request.provider_override,
-            workflow_config=chat_request.workflow_config
+            workflow_config=chat_request.workflow_config,
         )
         return await self.chat(user_id, new_request)
 
     async def chat_with_template(
-        self, user_id: str, chat_request: ChatRequest, template_name: str
+        self,
+        user_id: str,
+        chat_request: ChatRequest,
+        template_name: str,
     ) -> tuple[Conversation, Message]:
         """Chat with workflow template (compatibility wrapper)."""
         # For now, use the basic chat with template name in metadata
         from chatter.schemas.chat import ChatRequest
+
         workflow_config = chat_request.workflow_config or {}
         workflow_config["template_name"] = template_name
 
@@ -484,16 +569,20 @@ class ChatService:
             system_prompt_override=chat_request.system_prompt_override,
             enable_retrieval=chat_request.enable_retrieval,
             provider_override=chat_request.provider_override,
-            workflow_config=workflow_config
+            workflow_config=workflow_config,
         )
         return await self.chat(user_id, new_request)
 
     async def chat_workflow_streaming(
-        self, user_id: str, chat_request: ChatRequest, workflow_type: str = "basic"
+        self,
+        user_id: str,
+        chat_request: ChatRequest,
+        workflow_type: str = "basic",
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Stream chat with specific workflow type (compatibility wrapper)."""
         # Create a new chat request with the specified workflow type
         from chatter.schemas.chat import ChatRequest
+
         new_request = ChatRequest(
             message=chat_request.message,
             conversation_id=chat_request.conversation_id,
@@ -504,7 +593,7 @@ class ChatService:
             system_prompt_override=chat_request.system_prompt_override,
             enable_retrieval=chat_request.enable_retrieval,
             provider_override=chat_request.provider_override,
-            workflow_config=chat_request.workflow_config
+            workflow_config=chat_request.workflow_config,
         )
         async for chunk in self.chat_streaming(user_id, new_request):
             yield chunk

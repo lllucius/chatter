@@ -53,7 +53,9 @@ class AnalyticsService:
                     and_(Conversation.user_id == user_id, time_filter)
                 )
             )
-            total_conversations = total_conversations_result.scalar() or 0
+            total_conversations = (
+                total_conversations_result.scalar() or 0
+            )
 
             # Conversations by status
             status_result = await self.session.execute(
@@ -197,10 +199,11 @@ class AnalyticsService:
                 "conversations_by_status": conversations_by_status,
                 "total_messages": total_messages,
                 "messages_by_role": messages_by_role,
-                "avg_messages_per_conversation": total_messages
-                / total_conversations
-                if total_conversations > 0
-                else 0,
+                "avg_messages_per_conversation": (
+                    total_messages / total_conversations
+                    if total_conversations > 0
+                    else 0
+                ),
                 "total_tokens_used": total_tokens,
                 "total_cost": total_cost,
                 "avg_response_time_ms": avg_response_time,
@@ -402,7 +405,7 @@ class AnalyticsService:
                                 func.date(Conversation.created_at)
                             )
                         ),
-                        0
+                        0,
                     ),
                 ).where(
                     and_(Conversation.user_id == user_id, time_filter)
@@ -572,9 +575,9 @@ class AnalyticsService:
                         "avg_response_time_ms": float(avg_time),
                         "total_requests": count,
                         "total_tokens": tokens or 0,
-                        "tokens_per_request": (tokens or 0) / count
-                        if count > 0
-                        else 0,
+                        "tokens_per_request": (
+                            (tokens or 0) / count if count > 0 else 0
+                        ),
                     }
 
             # Performance by provider
@@ -610,9 +613,9 @@ class AnalyticsService:
                         "avg_response_time_ms": float(avg_time),
                         "total_requests": count,
                         "total_tokens": tokens or 0,
-                        "tokens_per_request": (tokens or 0) / count
-                        if count > 0
-                        else 0,
+                        "tokens_per_request": (
+                            (tokens or 0) / count if count > 0 else 0
+                        ),
                     }
 
             return {
@@ -971,9 +974,11 @@ class AnalyticsService:
                 select(func.count(ToolUsage.id)).where(
                     and_(
                         func.date(ToolUsage.called_at) == today,
-                        usage_where
-                        if usage_where is not None
-                        else text("1=1"),
+                        (
+                            usage_where
+                            if usage_where is not None
+                            else text("1=1")
+                        ),
                     )
                 )
             )
@@ -986,9 +991,11 @@ class AnalyticsService:
                         >= datetime.combine(
                             week_ago, datetime.min.time()
                         ).replace(tzinfo=UTC),
-                        usage_where
-                        if usage_where is not None
-                        else text("1=1"),
+                        (
+                            usage_where
+                            if usage_where is not None
+                            else text("1=1")
+                        ),
                     )
                 )
             )
@@ -1001,9 +1008,11 @@ class AnalyticsService:
                         >= datetime.combine(
                             month_ago, datetime.min.time()
                         ).replace(tzinfo=UTC),
-                        usage_where
-                        if usage_where is not None
-                        else text("1=1"),
+                        (
+                            usage_where
+                            if usage_where is not None
+                            else text("1=1")
+                        ),
                     )
                 )
             )
@@ -1015,9 +1024,11 @@ class AnalyticsService:
                     and_(
                         func.date(ToolUsage.called_at) == today,
                         ToolUsage.success is False,
-                        usage_where
-                        if usage_where is not None
-                        else text("1=1"),
+                        (
+                            usage_where
+                            if usage_where is not None
+                            else text("1=1")
+                        ),
                     )
                 )
             )
@@ -1033,9 +1044,11 @@ class AnalyticsService:
                             month_ago, datetime.min.time()
                         ).replace(tzinfo=UTC),
                         ToolUsage.success is False,
-                        usage_where
-                        if usage_where is not None
-                        else text("1=1"),
+                        (
+                            usage_where
+                            if usage_where is not None
+                            else text("1=1")
+                        ),
                     )
                 )
             )
@@ -1051,9 +1064,11 @@ class AnalyticsService:
                 select(func.avg(ToolUsage.response_time_ms)).where(
                     and_(
                         ToolUsage.response_time_ms.is_not(None),
-                        usage_where
-                        if usage_where is not None
-                        else text("1=1"),
+                        (
+                            usage_where
+                            if usage_where is not None
+                            else text("1=1")
+                        ),
                     )
                 )
             )
@@ -1068,9 +1083,11 @@ class AnalyticsService:
                 ).where(
                     and_(
                         ToolUsage.response_time_ms.is_not(None),
-                        usage_where
-                        if usage_where is not None
-                        else text("1=1"),
+                        (
+                            usage_where
+                            if usage_where is not None
+                            else text("1=1")
+                        ),
                     )
                 )
             )
@@ -1125,11 +1142,11 @@ class AnalyticsService:
                         "total_calls": total_calls,
                         "total_errors": total_errors,
                         "success_rate": success_rate,
-                        "avg_response_time_ms": float(
-                            row.avg_response_time
-                        )
-                        if row.avg_response_time
-                        else None,
+                        "avg_response_time_ms": (
+                            float(row.avg_response_time)
+                            if row.avg_response_time
+                            else None
+                        ),
                         "last_activity": row.last_activity,
                         "uptime_percentage": None,  # Would need additional tracking
                     }
@@ -1169,7 +1186,11 @@ class AnalyticsService:
                 .select_from(ServerTool)
                 .join(ToolServer)
                 .outerjoin(ToolUsage)
-                .where(usage_where if usage_where is not None else text("1=1"))
+                .where(
+                    usage_where
+                    if usage_where is not None
+                    else text("1=1")
+                )
                 .group_by(
                     ServerTool.id,
                     ServerTool.name,
@@ -1200,9 +1221,11 @@ class AnalyticsService:
                     "total_calls": total_calls,
                     "total_errors": total_errors,
                     "success_rate": success_rate,
-                    "avg_response_time_ms": float(row.avg_response_time)
-                    if row.avg_response_time
-                    else None,
+                    "avg_response_time_ms": (
+                        float(row.avg_response_time)
+                        if row.avg_response_time
+                        else None
+                    ),
                     "last_called": row.last_called,
                     "calls_last_24h": row.calls_last_24h or 0,
                     "errors_last_24h": row.errors_last_24h or 0,
@@ -1227,9 +1250,11 @@ class AnalyticsService:
                     and_(
                         ToolUsage.called_at
                         >= datetime.now(UTC) - timedelta(days=30),
-                        usage_where
-                        if usage_where is not None
-                        else text("1=1"),
+                        (
+                            usage_where
+                            if usage_where is not None
+                            else text("1=1")
+                        ),
                     )
                 )
                 .group_by(func.date(ToolUsage.called_at))
@@ -1496,31 +1521,31 @@ class ConversationAnalyzer:
         self.metrics: dict[str, Any] = {}
 
     async def analyze_conversation(
-        self,
-        conversation_id: str,
-        messages: list[dict[str, Any]]
+        self, conversation_id: str, messages: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Analyze a conversation.
-        
+
         Args:
             conversation_id: ID of the conversation
             messages: List of messages in the conversation
-            
+
         Returns:
             Analysis results
         """
         return {
             "conversation_id": conversation_id,
             "message_count": len(messages),
-            "analysis": "conversation_analyzed"
+            "analysis": "conversation_analyzed",
         }
 
-    def get_conversation_metrics(self, conversation_id: str) -> dict[str, Any]:
+    def get_conversation_metrics(
+        self, conversation_id: str
+    ) -> dict[str, Any]:
         """Get metrics for a conversation.
-        
+
         Args:
             conversation_id: ID of the conversation
-            
+
         Returns:
             Conversation metrics
         """
@@ -1535,34 +1560,32 @@ class PerformanceAnalyzer:
         self.performance_data: dict[str, Any] = {}
 
     async def analyze_performance(
-        self,
-        component: str,
-        metrics: dict[str, Any]
+        self, component: str, metrics: dict[str, Any]
     ) -> dict[str, Any]:
         """Analyze performance of a component.
-        
+
         Args:
             component: Name of the component
             metrics: Performance metrics
-            
+
         Returns:
             Performance analysis results
         """
         return {
             "component": component,
             "metrics": metrics,
-            "analysis": "performance_analyzed"
+            "analysis": "performance_analyzed",
         }
 
     def get_performance_summary(self) -> dict[str, Any]:
         """Get overall performance summary.
-        
+
         Returns:
             Performance summary
         """
         return {
             "overall_health": "good",
-            "components_analyzed": len(self.performance_data)
+            "components_analyzed": len(self.performance_data),
         }
 
 
@@ -1574,31 +1597,29 @@ class TrendAnalyzer:
         self.trend_data: dict[str, Any] = {}
 
     async def analyze_trends(
-        self,
-        data_type: str,
-        time_series_data: list[dict[str, Any]]
+        self, data_type: str, time_series_data: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Analyze trends in time series data.
-        
+
         Args:
             data_type: Type of data being analyzed
             time_series_data: Time series data points
-            
+
         Returns:
             Trend analysis results
         """
         return {
             "data_type": data_type,
             "data_points": len(time_series_data),
-            "trend": "analyzed"
+            "trend": "analyzed",
         }
 
     def get_trend_summary(self, data_type: str) -> dict[str, Any]:
         """Get trend summary for a data type.
-        
+
         Args:
             data_type: Type of data
-            
+
         Returns:
             Trend summary
         """
@@ -1613,31 +1634,29 @@ class UserBehaviorAnalyzer:
         self.user_data: dict[str, Any] = {}
 
     async def analyze_user_behavior(
-        self,
-        user_id: str,
-        interactions: list[dict[str, Any]]
+        self, user_id: str, interactions: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Analyze user behavior patterns.
-        
+
         Args:
             user_id: ID of the user
             interactions: List of user interactions
-            
+
         Returns:
             User behavior analysis results
         """
         return {
             "user_id": user_id,
             "interaction_count": len(interactions),
-            "behavior": "analyzed"
+            "behavior": "analyzed",
         }
 
     def get_user_insights(self, user_id: str) -> dict[str, Any]:
         """Get insights for a specific user.
-        
+
         Args:
             user_id: ID of the user
-            
+
         Returns:
             User insights
         """

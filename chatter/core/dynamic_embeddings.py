@@ -7,9 +7,11 @@ from sqlalchemy.orm import declarative_base
 
 try:
     from pgvector.sqlalchemy import Vector
+
     PGVECTOR_AVAILABLE = True
 except ImportError:
     from sqlalchemy import Text as Vector
+
     PGVECTOR_AVAILABLE = False
 
 from chatter.config import settings
@@ -61,9 +63,14 @@ def make_embedding_model(name: str, dim: int):
         {
             "__tablename__": name,
             "id": Column(Integer, primary_key=True),
-            "document_id": Column(String(26), nullable=False, index=True),
+            "document_id": Column(
+                String(26), nullable=False, index=True
+            ),
             "chunk_id": Column(String(26), nullable=False, index=True),
-            "embedding": Column(Vector(dim) if PGVECTOR_AVAILABLE else String, nullable=False),
+            "embedding": Column(
+                Vector(dim) if PGVECTOR_AVAILABLE else String,
+                nullable=False,
+            ),
             "content": Column(String, nullable=False),
             "extra_metadata": Column(String, nullable=True),
         },
@@ -94,7 +101,9 @@ def ensure_table_and_index(
     table_name = model_class.__table__
 
     if not PGVECTOR_AVAILABLE:
-        logger.warning("pgvector not available, skipping index creation")
+        logger.warning(
+            "pgvector not available, skipping index creation"
+        )
         # Create table without vector index
         Base.metadata.create_all(engine, tables=[table_name])
         return
@@ -106,7 +115,7 @@ def ensure_table_and_index(
     ops = {
         "cosine": "vector_cosine_ops",
         "l2": "vector_l2_ops",
-        "ip": "vector_ip_ops"
+        "ip": "vector_ip_ops",
     }.get(metric, "vector_cosine_ops")
 
     index_name = f"{table_name}_idx"
@@ -126,7 +135,7 @@ def ensure_table_and_index(
         "Created embedding table and index",
         table=table_name,
         index_type="hnsw",
-        metric=metric
+        metric=metric,
     )
 
 
@@ -215,17 +224,22 @@ def clear_embedding_models():
 
 class DynamicEmbeddingService:
     """Service for dynamic embedding operations."""
-    
+
     def __init__(self, session=None):
         """Initialize the service with an optional database session."""
         self.session = session
-    
-    async def store_embeddings(self, model_name: str, dimension: int, embeddings_data: list[dict]) -> bool:
+
+    async def store_embeddings(
+        self,
+        model_name: str,
+        dimension: int,
+        embeddings_data: list[dict],
+    ) -> bool:
         """Store embeddings in dynamic table."""
         try:
             # Get or create the embedding model for this dimension
             embedding_model = get_embedding_model(model_name, dimension)
-            
+
             # Create instances and add to session
             for data in embeddings_data:
                 instance = embedding_model(
@@ -233,30 +247,40 @@ class DynamicEmbeddingService:
                     chunk_id=data.get("chunk_id", data["document_id"]),
                     embedding=data["embedding"],
                     content=data["text"],
-                    extra_metadata=data.get("metadata")
+                    extra_metadata=data.get("metadata"),
                 )
                 self.session.add(instance)
-            
+
             await self.session.commit()
             return True
         except Exception as e:
             logger.error(f"Failed to store embeddings: {e}")
             return False
-    
-    async def retrieve_embeddings(self, model_name: str, dimension: int, document_id: str) -> list:
+
+    async def retrieve_embeddings(
+        self, model_name: str, dimension: int, document_id: str
+    ) -> list:
         """Retrieve embeddings from dynamic table."""
         try:
             embedding_model = get_embedding_model(model_name, dimension)
             from sqlalchemy import select
-            
-            query = select(embedding_model).where(embedding_model.document_id == document_id)
+
+            query = select(embedding_model).where(
+                embedding_model.document_id == document_id
+            )
             result = await self.session.execute(query)
             return result.scalars().all()
         except Exception as e:
             logger.error(f"Failed to retrieve embeddings: {e}")
             return []
-    
-    async def search_similar_embeddings(self, model_name: str, dimension: int, query_embedding: list[float], limit: int = 5) -> list:
+
+    async def search_similar_embeddings(
+        self,
+        model_name: str,
+        dimension: int,
+        query_embedding: list[float],
+        limit: int = 5,
+    ) -> list:
         """Search for similar embeddings."""
         try:
             embedding_model = get_embedding_model(model_name, dimension)
@@ -270,49 +294,61 @@ class DynamicEmbeddingService:
 
 class EmbeddingModelManager:
     """Manager for dynamic embedding models and database operations."""
-    
+
     def __init__(self, session=None):
         """Initialize embedding model manager with database session."""
         self.session = session
-    
-    async def register_model(self, model_name: str, dimension: int) -> type:
+
+    async def register_model(
+        self, model_name: str, dimension: int
+    ) -> type:
         """Register a new embedding model and create its database table."""
         try:
             # Create the model class
             model_class = get_embedding_model(model_name, dimension)
-            
+
             # Create the table if it doesn't exist
             await self.create_embedding_table(model_name, dimension)
-            
-            logger.info(f"Registered embedding model: {model_name} (dim={dimension})")
+
+            logger.info(
+                f"Registered embedding model: {model_name} (dim={dimension})"
+            )
             return model_class
         except Exception as e:
             logger.error(f"Failed to register model {model_name}: {e}")
             raise
-    
-    async def unregister_model(self, model_name: str, dimension: int) -> bool:
+
+    async def unregister_model(
+        self, model_name: str, dimension: int
+    ) -> bool:
         """Unregister an embedding model and optionally drop its table."""
         try:
             table_name = _to_name(model_name, dimension)
-            
+
             # Remove from registry
             if table_name in embedding_models:
                 del embedding_models[table_name]
-            
+
             # Optionally drop the table
             await self.drop_embedding_table(model_name, dimension)
-            
-            logger.info(f"Unregistered embedding model: {model_name} (dim={dimension})")
+
+            logger.info(
+                f"Unregistered embedding model: {model_name} (dim={dimension})"
+            )
             return True
         except Exception as e:
-            logger.error(f"Failed to unregister model {model_name}: {e}")
+            logger.error(
+                f"Failed to unregister model {model_name}: {e}"
+            )
             return False
-    
-    async def create_embedding_table(self, model_name: str, dimension: int) -> bool:
+
+    async def create_embedding_table(
+        self, model_name: str, dimension: int
+    ) -> bool:
         """Create embedding table for the specified model."""
         try:
             table_name = _to_name(model_name, dimension)
-            
+
             # Execute CREATE TABLE IF NOT EXISTS
             create_sql = f"""
             CREATE TABLE IF NOT EXISTS {table_name} (
@@ -326,58 +362,78 @@ class EmbeddingModelManager:
                 INDEX(chunk_id)
             );
             """
-            
+
             if self.session:
                 await self.session.execute(text(create_sql))
                 await self.session.commit()
-            
+
             return True
         except Exception as e:
-            logger.error(f"Failed to create table for {model_name}: {e}")
+            logger.error(
+                f"Failed to create table for {model_name}: {e}"
+            )
             return False
-    
-    async def drop_embedding_table(self, model_name: str, dimension: int) -> bool:
+
+    async def drop_embedding_table(
+        self, model_name: str, dimension: int
+    ) -> bool:
         """Drop embedding table for the specified model."""
         try:
             table_name = _to_name(model_name, dimension)
-            
+
             if self.session:
-                await self.session.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
+                await self.session.execute(
+                    text(f"DROP TABLE IF EXISTS {table_name}")
+                )
                 await self.session.commit()
-            
+
             return True
         except Exception as e:
             logger.error(f"Failed to drop table for {model_name}: {e}")
             return False
-    
-    async def table_exists(self, model_name: str, dimension: int) -> bool:
+
+    async def table_exists(
+        self, model_name: str, dimension: int
+    ) -> bool:
         """Check if embedding table exists."""
         try:
             table_name = _to_name(model_name, dimension)
-            
+
             if self.session:
-                result = await self.session.execute(text(
-                    "SELECT 1 FROM information_schema.tables WHERE table_name = :table_name"
-                ), {"table_name": table_name})
+                result = await self.session.execute(
+                    text(
+                        "SELECT 1 FROM information_schema.tables WHERE table_name = :table_name"
+                    ),
+                    {"table_name": table_name},
+                )
                 return bool(result.scalar())
-            
+
             return False
         except Exception as e:
-            logger.error(f"Failed to check table existence for {model_name}: {e}")
+            logger.error(
+                f"Failed to check table existence for {model_name}: {e}"
+            )
             return False
-    
-    async def get_table_info(self, model_name: str, dimension: int) -> list:
+
+    async def get_table_info(
+        self, model_name: str, dimension: int
+    ) -> list:
         """Get information about the embedding table."""
         try:
             table_name = _to_name(model_name, dimension)
-            
+
             if self.session:
-                result = await self.session.execute(text(
-                    "SELECT column_name, data_type, column_default FROM information_schema.columns WHERE table_name = :table_name"
-                ), {"table_name": table_name})
+                result = await self.session.execute(
+                    text(
+                        "SELECT column_name, data_type, column_default FROM information_schema.columns WHERE table_name = :table_name"
+                    ),
+                    {"table_name": table_name},
+                )
                 return result.fetchall()
-            
+
             return []
         except Exception as e:
-            logger.error(f"Failed to get table info for {model_name}: {e}")
+            logger.error(
+                f"Failed to get table info for {model_name}: {e}"
+            )
             return []

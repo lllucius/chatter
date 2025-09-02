@@ -4,16 +4,16 @@ import pytest
 from pydantic import ValidationError
 
 from chatter.schemas.auth import (
-    UserBase,
-    UserRegistration,
-    UserCreate,
-    UserLogin,
-    UserResponse,
-    UserUpdate,
-    UserPreferences,
-    TokenResponse,
     PasswordReset,
     PasswordResetConfirm,
+    TokenResponse,
+    UserBase,
+    UserCreate,
+    UserLogin,
+    UserPreferences,
+    UserRegistration,
+    UserResponse,
+    UserUpdate,
 )
 
 
@@ -30,7 +30,7 @@ class TestUserSchemas:
             full_name="Test User",
             bio="A test user bio",
             avatar_url="https://example.com/avatar.jpg",
-            phone_number="+1234567890"
+            phone_number="+1234567890",
         )
 
         # Assert
@@ -44,10 +44,7 @@ class TestUserSchemas:
     def test_user_base_minimal(self):
         """Test UserBase with minimal required fields."""
         # Arrange & Act
-        user = UserBase(
-            email="minimal@example.com",
-            username="minimal"
-        )
+        user = UserBase(email="minimal@example.com", username="minimal")
 
         # Assert
         assert user.email == "minimal@example.com"
@@ -61,33 +58,26 @@ class TestUserSchemas:
         """Test UserBase with invalid email."""
         # Arrange & Act & Assert
         with pytest.raises(ValidationError) as exc_info:
-            UserBase(
-                email="invalid-email",
-                username="testuser"
-            )
-        
-        assert "value is not a valid email address" in str(exc_info.value)
+            UserBase(email="invalid-email", username="testuser")
+
+        assert "value is not a valid email address" in str(
+            exc_info.value
+        )
 
     def test_user_base_invalid_username_too_short(self):
         """Test UserBase with username too short."""
         # Arrange & Act & Assert
         with pytest.raises(ValidationError) as exc_info:
-            UserBase(
-                email="test@example.com",
-                username="ab"
-            )
-        
+            UserBase(email="test@example.com", username="ab")
+
         assert "at least 3 characters" in str(exc_info.value)
 
     def test_user_base_invalid_username_too_long(self):
         """Test UserBase with username too long."""
         # Arrange & Act & Assert
         with pytest.raises(ValidationError) as exc_info:
-            UserBase(
-                email="test@example.com",
-                username="a" * 51
-            )
-        
+            UserBase(email="test@example.com", username="a" * 51)
+
         assert "at most 50 characters" in str(exc_info.value)
 
     def test_user_registration_valid(self):
@@ -97,7 +87,7 @@ class TestUserSchemas:
             email="register@example.com",
             username="newuser",
             password="securepassword123",
-            full_name="New User"
+            full_name="New User",
         )
 
         # Assert
@@ -113,9 +103,9 @@ class TestUserSchemas:
             UserRegistration(
                 email="test@example.com",
                 username="testuser",
-                password="short"
+                password="short",
             )
-        
+
         assert "at least 8 characters" in str(exc_info.value)
 
     def test_user_create_equivalent_to_registration(self):
@@ -124,13 +114,13 @@ class TestUserSchemas:
         user_create = UserCreate(
             email="create@example.com",
             username="createuser",
-            password="password123"
+            password="password123",
         )
-        
+
         user_registration = UserRegistration(
             email="create@example.com",
             username="createuser",
-            password="password123"
+            password="password123",
         )
 
         # Assert
@@ -141,10 +131,7 @@ class TestUserSchemas:
     def test_user_login_with_username(self):
         """Test valid UserLogin with username."""
         # Arrange & Act
-        login = UserLogin(
-            username="testuser",
-            password="password123"
-        )
+        login = UserLogin(username="testuser", password="password123")
 
         # Assert
         assert login.username == "testuser"
@@ -155,8 +142,7 @@ class TestUserSchemas:
         """Test UserLogin with email."""
         # Arrange & Act
         login = UserLogin(
-            email="test@example.com",
-            password="password123"
+            email="test@example.com", password="password123"
         )
 
         # Assert
@@ -169,14 +155,16 @@ class TestUserSchemas:
         # Arrange & Act & Assert
         with pytest.raises(ValidationError) as exc_info:
             UserLogin(password="password123")
-        
-        assert "Either email or username must be provided" in str(exc_info.value)
+
+        assert "Either email or username must be provided" in str(
+            exc_info.value
+        )
 
     def test_user_response_structure(self):
         """Test UserResponse schema structure."""
         # Arrange
         from datetime import datetime
-        
+
         # Act
         user_response = UserResponse(
             id="user-123",
@@ -190,7 +178,7 @@ class TestUserSchemas:
             is_verified=False,
             created_at=datetime(2023, 1, 1, 12, 0, 0),
             updated_at=datetime(2023, 1, 1, 12, 30, 0),
-            last_login_at=datetime(2023, 1, 1, 11, 0, 0)
+            last_login_at=datetime(2023, 1, 1, 11, 0, 0),
         )
 
         # Assert
@@ -203,10 +191,7 @@ class TestUserSchemas:
     def test_user_update_partial(self):
         """Test UserUpdate with partial data."""
         # Arrange & Act
-        update = UserUpdate(
-            full_name="Updated Name",
-            bio="Updated bio"
-        )
+        update = UserUpdate(full_name="Updated Name", bio="Updated bio")
 
         # Assert
         assert update.full_name == "Updated Name"
@@ -218,7 +203,7 @@ class TestUserSchemas:
         """Test UserPreferences schema."""
         # Arrange & Act
         from datetime import datetime
-        
+
         preferences = UserPreferences(
             user_id="user-123",
             theme="dark",
@@ -226,7 +211,7 @@ class TestUserSchemas:
             timezone="UTC",
             notifications_enabled=True,
             email_notifications=False,
-            created_at=datetime(2023, 1, 1, 12, 0, 0)
+            created_at=datetime(2023, 1, 1, 12, 0, 0),
         )
 
         # Assert
@@ -239,9 +224,9 @@ class TestUserSchemas:
 
     def test_token_response_structure(self):
         """Test TokenResponse schema."""
-        # Arrange 
+        # Arrange
         from datetime import datetime
-        
+
         user_response = UserResponse(
             id="user-123",
             email="token@example.com",
@@ -249,16 +234,16 @@ class TestUserSchemas:
             is_active=True,
             is_verified=True,
             created_at=datetime(2023, 1, 1, 12, 0, 0),
-            updated_at=datetime(2023, 1, 1, 12, 0, 0)
+            updated_at=datetime(2023, 1, 1, 12, 0, 0),
         )
-        
+
         # Act
         token = TokenResponse(
             access_token="access.token.here",
             refresh_token="refresh.token.here",
             token_type="bearer",
             expires_in=3600,
-            user=user_response
+            user=user_response,
         )
 
         # Assert
@@ -271,9 +256,7 @@ class TestUserSchemas:
     def test_password_reset_request_valid(self):
         """Test PasswordReset schema for request."""
         # Arrange & Act
-        reset_request = PasswordReset(
-            email="reset@example.com"
-        )
+        reset_request = PasswordReset(email="reset@example.com")
 
         # Assert
         assert reset_request.email == "reset@example.com"
@@ -284,8 +267,7 @@ class TestUserSchemas:
         """Test PasswordResetConfirm schema."""
         # Arrange & Act
         reset = PasswordResetConfirm(
-            token="reset-token-123",
-            new_password="newpassword123"
+            token="reset-token-123", new_password="newpassword123"
         )
 
         # Assert
@@ -297,10 +279,9 @@ class TestUserSchemas:
         # Arrange & Act & Assert
         with pytest.raises(ValidationError) as exc_info:
             PasswordResetConfirm(
-                token="reset-token-123",
-                new_password="short"
+                token="reset-token-123", new_password="short"
             )
-        
+
         assert "at least 8 characters" in str(exc_info.value)
 
 
@@ -312,8 +293,7 @@ class TestAuthSchemaValidation:
         """Test email address normalization."""
         # Arrange & Act
         user = UserBase(
-            email="  TEST@EXAMPLE.COM  ",
-            username="testuser"
+            email="  TEST@EXAMPLE.COM  ", username="testuser"
         )
 
         # Assert
@@ -323,13 +303,15 @@ class TestAuthSchemaValidation:
     def test_username_validation_special_chars(self):
         """Test username validation with special characters."""
         # Valid usernames
-        valid_usernames = ["user123", "test_user", "user-name", "User.Name"]
-        
+        valid_usernames = [
+            "user123",
+            "test_user",
+            "user-name",
+            "User.Name",
+        ]
+
         for username in valid_usernames:
-            user = UserBase(
-                email="test@example.com",
-                username=username
-            )
+            user = UserBase(email="test@example.com", username=username)
             assert user.username == username
 
     def test_bio_length_validation(self):
@@ -339,21 +321,21 @@ class TestAuthSchemaValidation:
             UserBase(
                 email="test@example.com",
                 username="testuser",
-                bio="a" * 1001  # Exceeds max length
+                bio="a" * 1001,  # Exceeds max length
             )
-        
+
         assert "at most 1000 characters" in str(exc_info.value)
 
     def test_phone_number_validation(self):
         """Test phone number validation."""
         # Valid phone numbers
         valid_phones = ["+1234567890", "123-456-7890", "(123) 456-7890"]
-        
+
         for phone in valid_phones:
             user = UserBase(
                 email="test@example.com",
                 username="testuser",
-                phone_number=phone
+                phone_number=phone,
             )
             assert user.phone_number == phone
 
@@ -363,7 +345,7 @@ class TestAuthSchemaValidation:
         user = UserBase(
             email="test@example.com",
             username="testuser",
-            avatar_url="https://cdn.example.com/avatars/user123.png"
+            avatar_url="https://cdn.example.com/avatars/user123.png",
         )
 
         # Assert
@@ -377,7 +359,7 @@ class TestAuthSchemaValidation:
             username="serialuser",
             password="password123",
             full_name="Serial User",
-            bio="Test bio"
+            bio="Test bio",
         )
 
         # Act
@@ -389,15 +371,14 @@ class TestAuthSchemaValidation:
         assert data["password"] == "password123"
         assert data["full_name"] == "Serial User"
         assert data["bio"] == "Test bio"
-        assert "id" not in data  # Should not include fields not in schema
+        assert (
+            "id" not in data
+        )  # Should not include fields not in schema
 
     def test_schema_json_serialization(self):
         """Test schema JSON serialization."""
         # Arrange
-        user = UserBase(
-            email="json@example.com",
-            username="jsonuser"
-        )
+        user = UserBase(email="json@example.com", username="jsonuser")
 
         # Act
         json_str = user.model_dump_json()

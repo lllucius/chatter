@@ -40,7 +40,7 @@ class TestSettings:
             "DEBUG": "true",
             "HOST": "localhost",
             "PORT": "3000",
-            "WORKERS": "4"
+            "WORKERS": "4",
         }
 
         with patch.dict(os.environ, env_vars):
@@ -62,15 +62,17 @@ class TestSettings:
         env_vars = {
             "ENVIRONMENT": "production",
             "DEBUG": "true",
-            "SECRET_KEY": "a-very-long-secret-key-for-production-use-that-is-definitely-over-32-characters"
+            "SECRET_KEY": "a-very-long-secret-key-for-production-use-that-is-definitely-over-32-characters",
         }
 
         with patch.dict(os.environ, env_vars):
             # Act & Assert
             with pytest.raises(ValidationError) as exc_info:
                 Settings()
-            
-            assert "Debug mode must be disabled in production" in str(exc_info.value)
+
+            assert "Debug mode must be disabled in production" in str(
+                exc_info.value
+            )
 
     def test_database_configuration(self):
         """Test database configuration settings."""
@@ -79,7 +81,7 @@ class TestSettings:
             "DATABASE_URL": "postgresql://user:pass@localhost:5432/testdb",
             "DATABASE_ECHO": "true",
             "DATABASE_POOL_SIZE": "20",
-            "DATABASE_MAX_OVERFLOW": "10"
+            "DATABASE_MAX_OVERFLOW": "10",
         }
 
         with patch.dict(os.environ, env_vars):
@@ -87,7 +89,10 @@ class TestSettings:
             settings = Settings()
 
             # Assert
-            assert settings.database_url == "postgresql://user:pass@localhost:5432/testdb"
+            assert (
+                settings.database_url
+                == "postgresql://user:pass@localhost:5432/testdb"
+            )
             assert settings.database_echo is True
             assert settings.database_pool_size == 20
             assert settings.database_max_overflow == 10
@@ -100,7 +105,7 @@ class TestSettings:
             "REDIS_PASSWORD": "test_password",
             "REDIS_MAX_CONNECTIONS": "50",
             "CACHE_ENABLED": "true",
-            "CACHE_TTL": "7200"
+            "CACHE_TTL": "7200",
         }
 
         with patch.dict(os.environ, env_vars):
@@ -123,7 +128,7 @@ class TestSettings:
             "JWT_ACCESS_TOKEN_EXPIRE_MINUTES": "60",
             "JWT_REFRESH_TOKEN_EXPIRE_DAYS": "14",
             "ALLOWED_HOSTS": "localhost,127.0.0.1,example.com",
-            "CORS_ORIGINS": "http://localhost:3000,https://app.example.com"
+            "CORS_ORIGINS": "http://localhost:3000,https://app.example.com",
         }
 
         with patch.dict(os.environ, env_vars):
@@ -149,7 +154,7 @@ class TestSettings:
             "DEFAULT_MODEL": "claude-3-sonnet",
             "MAX_TOKENS": "4000",
             "TEMPERATURE": "0.8",
-            "LLM_TIMEOUT": "60"
+            "LLM_TIMEOUT": "60",
         }
 
         with patch.dict(os.environ, env_vars):
@@ -173,7 +178,7 @@ class TestSettings:
             "EMBEDDING_MODEL": "text-embedding-ada-002",
             "EMBEDDING_DIMENSIONS": "1536",
             "VECTOR_SEARCH_LIMIT": "20",
-            "SIMILARITY_THRESHOLD": "0.8"
+            "SIMILARITY_THRESHOLD": "0.8",
         }
 
         with patch.dict(os.environ, env_vars):
@@ -195,7 +200,7 @@ class TestSettings:
             "METRICS_ENABLED": "true",
             "LOG_LEVEL": "INFO",
             "STRUCTURED_LOGGING": "true",
-            "SENTRY_DSN": "https://test@sentry.io/123456"
+            "SENTRY_DSN": "https://test@sentry.io/123456",
         }
 
         with patch.dict(os.environ, env_vars):
@@ -207,7 +212,9 @@ class TestSettings:
             assert settings.metrics_enabled is True
             assert settings.log_level == "INFO"
             assert settings.structured_logging is True
-            assert settings.sentry_dsn == "https://test@sentry.io/123456"
+            assert (
+                settings.sentry_dsn == "https://test@sentry.io/123456"
+            )
 
     def test_invalid_port_validation(self):
         """Test validation of invalid port numbers."""
@@ -239,7 +246,7 @@ class TestSettings:
         # Arrange
         env_vars = {
             "ENVIRONMENT": "production",
-            "SECRET_KEY": ""  # Empty secret key
+            "SECRET_KEY": "",  # Empty secret key
         }
 
         with patch.dict(os.environ, env_vars):
@@ -255,14 +262,16 @@ class TestSettings:
         env_vars = {
             "SECRET_KEY": "super-secret-key",
             "OPENAI_API_KEY": "sk-secret-openai-key",
-            "DATABASE_URL": "postgresql://user:password@localhost/db"
+            "DATABASE_URL": "postgresql://user:password@localhost/db",
         }
 
         with patch.dict(os.environ, env_vars):
             settings = Settings()
 
             # Act
-            config_dict = settings.model_dump(exclude={"secret_key", "openai_api_key", "database_url"})
+            config_dict = settings.model_dump(
+                exclude={"secret_key", "openai_api_key", "database_url"}
+            )
 
             # Assert
             assert "secret_key" not in config_dict
@@ -280,7 +289,7 @@ class TestSettings:
             "port": 8080,
             "database_url": "postgresql://localhost/test",
             "secret_key": "test-secret-key",
-            "debug": True
+            "debug": True,
         }
 
         # Act
@@ -332,7 +341,7 @@ class TestSettings:
         # Arrange
         env_vars = {
             "SECRET_KEY": "super-secret-key",
-            "OPENAI_API_KEY": "sk-secret-key"
+            "OPENAI_API_KEY": "sk-secret-key",
         }
 
         with patch.dict(os.environ, env_vars):
@@ -357,7 +366,7 @@ class TestSettingsIntegration:
             "APP_NAME": "Integration Test App",
             "ENVIRONMENT": "test",
             "DEBUG": "true",
-            "DATABASE_URL": "postgresql://localhost/integration_test"
+            "DATABASE_URL": "postgresql://localhost/integration_test",
         }
 
         with patch.dict(os.environ, mock_env_content):
@@ -372,16 +381,19 @@ class TestSettingsIntegration:
     def test_settings_validation_chain(self):
         """Test complete validation chain for settings."""
         # Arrange
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "production",
-            "SECRET_KEY": "production-secret-key",
-            "DATABASE_URL": "postgresql://prod_user:prod_pass@prod_host:5432/prod_db",
-            "REDIS_URL": "redis://prod_redis:6379/0",
-            "OPENAI_API_KEY": "sk-prod-openai-key",
-            "JWT_ACCESS_TOKEN_EXPIRE_MINUTES": "30",
-            "CORS_ORIGINS": "https://prod.example.com",
-            "ALLOWED_HOSTS": "prod.example.com,api.example.com"
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "production",
+                "SECRET_KEY": "production-secret-key",
+                "DATABASE_URL": "postgresql://prod_user:prod_pass@prod_host:5432/prod_db",
+                "REDIS_URL": "redis://prod_redis:6379/0",
+                "OPENAI_API_KEY": "sk-prod-openai-key",
+                "JWT_ACCESS_TOKEN_EXPIRE_MINUTES": "30",
+                "CORS_ORIGINS": "https://prod.example.com",
+                "ALLOWED_HOSTS": "prod.example.com,api.example.com",
+            },
+        ):
             # Act
             settings = Settings()
 
@@ -399,11 +411,14 @@ class TestSettingsIntegration:
             dev_settings = Settings()
 
         # Test production settings
-        with patch.dict(os.environ, {
-            "ENVIRONMENT": "production",
-            "SECRET_KEY": "production-secret",
-            "DEBUG": "false"
-        }):
+        with patch.dict(
+            os.environ,
+            {
+                "ENVIRONMENT": "production",
+                "SECRET_KEY": "production-secret",
+                "DEBUG": "false",
+            },
+        ):
             prod_settings = Settings()
 
         # Assert differences

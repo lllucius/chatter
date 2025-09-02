@@ -10,13 +10,15 @@ from sqlalchemy import (
     JSON,
     Boolean,
     DateTime,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
     String,
     Text,
 )
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -251,15 +253,17 @@ class Profile(Base):
             "usage_count": self.usage_count,
             "total_tokens_used": self.total_tokens_used,
             "total_cost": self.total_cost,
-            "last_used_at": self.last_used_at.isoformat()
-            if self.last_used_at
-            else None,
+            "last_used_at": (
+                self.last_used_at.isoformat()
+                if self.last_used_at
+                else None
+            ),
             "tags": self.tags,
             "extra_metadata": self.extra_metadata,
-            "created_at": self.created_at.isoformat()
-            if self.created_at
-            else None,
-            "updated_at": self.updated_at.isoformat()
-            if self.updated_at
-            else None,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
         }

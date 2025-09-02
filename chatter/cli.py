@@ -41,16 +41,22 @@ except ImportError:
             "components": {"schemas": {}},
         }
 
-    def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
+    def export_openapi_json(
+        spec: dict[str, Any], output_path: Path
+    ) -> None:
         """Export OpenAPI spec as JSON."""
         with open(output_path, 'w') as f:
             json.dump(spec, f, indent=2)
 
-    def export_openapi_yaml(spec: dict[str, Any], output_path: Path) -> None:
+    def export_openapi_yaml(
+        spec: dict[str, Any], output_path: Path
+    ) -> None:
         """Export OpenAPI spec as YAML."""
         import yaml
+
         with open(output_path, 'w') as f:
             yaml.dump(spec, f, default_flow_style=False)
+
 
 app = typer.Typer(
     name="chatter",
@@ -64,7 +70,11 @@ logger = get_logger(__name__)
 class APIClient:
     """HTTP client for interacting with Chatter API."""
 
-    def __init__(self, base_url: str | None = None, access_token: str | None = None):
+    def __init__(
+        self,
+        base_url: str | None = None,
+        access_token: str | None = None,
+    ):
         self.base_url = (
             base_url or f"http://{settings.host}:{settings.port}"
         )
@@ -86,7 +96,9 @@ class APIClient:
             headers["Authorization"] = f"Bearer {self.access_token}"
         return headers
 
-    async def request(self, method: str, endpoint: str, **kwargs: Any) -> Any:
+    async def request(
+        self, method: str, endpoint: str, **kwargs: Any
+    ) -> Any:
         """Make an HTTP request to the API."""
         url = f"{self.base_url}{settings.api_prefix}{endpoint}"
         headers = self._get_headers()
@@ -213,9 +225,11 @@ def list_prompts(
                     prompt["category"],
                     str(prompt.get("usage_count", 0)),
                     "Yes" if prompt.get("is_public") else "No",
-                    prompt.get("created_at", "")[:10]
-                    if prompt.get("created_at")
-                    else "N/A",
+                    (
+                        prompt.get("created_at", "")[:10]
+                        if prompt.get("created_at")
+                        else "N/A"
+                    ),
                 )
 
             console.print(table)
@@ -309,7 +323,9 @@ def create_prompt(
                     console.print("[red]Error: Name is required[/red]")
                     raise typer.Exit(1)
                 if not content:
-                    console.print("[red]Error: Content is required[/red]")
+                    console.print(
+                        "[red]Error: Content is required[/red]"
+                    )
                     raise typer.Exit(1)
 
             # Prepare data
@@ -422,9 +438,11 @@ def show_prompt(
             )
             stats_table.add_row(
                 "Last Used",
-                response.get("last_used_at", "Never")[:19]
-                if response.get("last_used_at")
-                else "Never",
+                (
+                    response.get("last_used_at", "Never")[:19]
+                    if response.get("last_used_at")
+                    else "Never"
+                ),
             )
 
             console.print(stats_table)
@@ -493,6 +511,7 @@ def test_prompt(
 
     async def _test():
         import json
+
         api_client = get_api_client()
         try:
             # Parse variables
@@ -887,6 +906,7 @@ def health_check() -> None:
         # Check Redis connection
         try:
             from chatter.services.cache import get_cache_service
+
             cache_service = await get_cache_service()
             if cache_service.is_connected():
                 console.print("✅ Redis Cache: Connected")
@@ -908,7 +928,9 @@ def health_check() -> None:
                 vector_service = DynamicVectorStoreService(session)
                 # Simple connectivity test - check if service initializes
                 if hasattr(vector_service, '_stores'):
-                    vector_store_status = "✅ Vector Store: Service available"
+                    vector_store_status = (
+                        "✅ Vector Store: Service available"
+                    )
         except Exception as e:
             vector_store_status = f"⚠️ Vector Store: {e}"
 
@@ -927,25 +949,38 @@ def health_check() -> None:
                 if hasattr(llm_service, '_get_providers'):
                     llm_status = "✅ LLM Service: Available"
                 else:
-                    llm_status = "⚠️ LLM Service: No providers configured"
+                    llm_status = (
+                        "⚠️ LLM Service: No providers configured"
+                    )
         except Exception as e:
             llm_status = f"⚠️ LLM Service: {e}"
 
         console.print(llm_status)
 
         # Check External services
-        external_status = "✅ External Services: Basic connectivity checked"
+        external_status = (
+            "✅ External Services: Basic connectivity checked"
+        )
         try:
             import httpx
+
             # Test basic internet connectivity
             async with httpx.AsyncClient(timeout=5.0) as client:
-                response = await client.get("https://api.github.com/", timeout=5.0)
+                response = await client.get(
+                    "https://api.github.com/", timeout=5.0
+                )
                 if response.status_code == 200:
-                    external_status = "✅ External Services: Internet connectivity OK"
+                    external_status = (
+                        "✅ External Services: Internet connectivity OK"
+                    )
                 else:
-                    external_status = "⚠️ External Services: Limited connectivity"
+                    external_status = (
+                        "⚠️ External Services: Limited connectivity"
+                    )
         except Exception:
-            external_status = "⚠️ External Services: No internet connectivity"
+            external_status = (
+                "⚠️ External Services: No internet connectivity"
+            )
 
         console.print(external_status)
 
@@ -966,7 +1001,9 @@ def generate_docs(
         "all", "--format", "-f", help="Format: json, yaml, or all"
     ),
     clean: bool = typer.Option(
-        False, "--clean", help="Clean output directory before generation"
+        False,
+        "--clean",
+        help="Clean output directory before generation",
     ),
 ) -> None:
     """Generate OpenAPI documentation."""
@@ -992,7 +1029,10 @@ def generate_docs(
         # Clean if requested
         if clean and output_path.exists():
             import shutil
-            console.print(f"🧹 Cleaning output directory: {output_path}")
+
+            console.print(
+                f"🧹 Cleaning output directory: {output_path}"
+            )
             shutil.rmtree(output_path)
 
         output_path.mkdir(parents=True, exist_ok=True)
@@ -1028,13 +1068,17 @@ def generate_docs(
         for file_path in generated_files:
             if file_path.exists():
                 size = file_path.stat().st_size
-                console.print(f"   ✅ {file_path.name} ({size:,} bytes)")
+                console.print(
+                    f"   ✅ {file_path.name} ({size:,} bytes)"
+                )
                 verified_files.append(file_path)
             else:
                 console.print(f"   ❌ Missing: {file_path.name}")
 
         if verified_files:
-            console.print(f"\n✅ Documentation generated successfully in: {output_path}")
+            console.print(
+                f"\n✅ Documentation generated successfully in: {output_path}"
+            )
             console.print(f"📄 Generated {len(verified_files)} files")
             console.print(
                 f"📊 Total endpoints: {len(list(spec.get('paths', {}).keys()))}"
@@ -1042,7 +1086,9 @@ def generate_docs(
             console.print(
                 f"🏷️  Total schemas: {len(spec.get('components', {}).get('schemas', {}))}"
             )
-            console.print(f"\n💡 Serve docs with: chatter docs serve --dir {output_path}")
+            console.print(
+                f"\n💡 Serve docs with: chatter docs serve --dir {output_path}"
+            )
         else:
             console.print("❌ No files were generated successfully")
             raise typer.Exit(1) from None
@@ -1064,7 +1110,9 @@ def generate_sdk(
         "sdk", "--output", "-o", help="Output directory"
     ),
     clean: bool = typer.Option(
-        False, "--clean", help="Clean output directory before generation"
+        False,
+        "--clean",
+        help="Clean output directory before generation",
     ),
 ) -> None:
     """Generate SDK from OpenAPI specification."""
@@ -1095,7 +1143,10 @@ def generate_sdk(
         output_path = Path(output_dir)
         if clean and output_path.exists():
             import shutil
-            console.print(f"🧹 Cleaning output directory: {output_path}")
+
+            console.print(
+                f"🧹 Cleaning output directory: {output_path}"
+            )
             shutil.rmtree(output_path)
 
         success = True
@@ -1113,11 +1164,14 @@ def generate_sdk(
 
             if python_success and python_generator.validate():
                 python_files = [
-                    str(f) for f in python_config.output_dir.rglob("*")
+                    str(f)
+                    for f in python_config.output_dir.rglob("*")
                     if f.is_file() and not f.name.startswith(".")
                 ]
                 generated_files.extend(python_files)
-                console.print(f"✅ Python SDK generated with {len(python_files)} files")
+                console.print(
+                    f"✅ Python SDK generated with {len(python_files)} files"
+                )
 
         # Generate TypeScript SDK
         if language in ["typescript", "all"]:
@@ -1131,23 +1185,34 @@ def generate_sdk(
 
             if ts_success and ts_generator.validate():
                 ts_files = [
-                    str(f) for f in ts_config.output_dir.rglob("*")
+                    str(f)
+                    for f in ts_config.output_dir.rglob("*")
                     if f.is_file() and not f.name.startswith(".")
                 ]
                 generated_files.extend(ts_files)
-                console.print(f"✅ TypeScript SDK generated with {len(ts_files)} files")
+                console.print(
+                    f"✅ TypeScript SDK generated with {len(ts_files)} files"
+                )
 
         if success:
             console.print("\n🎉 SDK generation completed successfully!")
             console.print(f"📁 SDK location: {output_path}")
-            console.print(f"📄 Total files generated: {len(generated_files)}")
+            console.print(
+                f"📄 Total files generated: {len(generated_files)}"
+            )
 
             console.print("\n📋 Next steps:")
             if language in ["python", "all"]:
-                console.print(f"   • Test Python SDK: cd {output_path / 'python'} && pip install -e .")
-                console.print("   • Run Python examples: python examples/basic_usage.py")
+                console.print(
+                    f"   • Test Python SDK: cd {output_path / 'python'} && pip install -e ."
+                )
+                console.print(
+                    "   • Run Python examples: python examples/basic_usage.py"
+                )
             if language in ["typescript", "all"]:
-                console.print(f"   • Test TypeScript SDK: cd {output_path / 'typescript'} && npm install")
+                console.print(
+                    f"   • Test TypeScript SDK: cd {output_path / 'typescript'} && npm install"
+                )
                 console.print("   • Build TypeScript: npm run build")
             console.print("   • Package for release: python -m build")
         else:
@@ -1213,25 +1278,37 @@ def serve_docs(
 @docs_app.command("workflow")
 def generate_workflow(
     docs_only: bool = typer.Option(
-        False, "--docs-only", help="Generate only documentation, skip SDK"
+        False,
+        "--docs-only",
+        help="Generate only documentation, skip SDK",
     ),
     sdk_only: bool = typer.Option(
-        False, "--sdk-only", help="Generate only SDK, skip documentation"
+        False,
+        "--sdk-only",
+        help="Generate only SDK, skip documentation",
     ),
     python_only: bool = typer.Option(
-        False, "--python-only", help="Generate only Python SDK, skip TypeScript and docs"
+        False,
+        "--python-only",
+        help="Generate only Python SDK, skip TypeScript and docs",
     ),
     typescript_only: bool = typer.Option(
-        False, "--typescript-only", help="Generate only TypeScript SDK, skip Python and docs"
+        False,
+        "--typescript-only",
+        help="Generate only TypeScript SDK, skip Python and docs",
     ),
     output_dir: str = typer.Option(
         "./", "--output", "-o", help="Base output directory"
     ),
     docs_format: str = typer.Option(
-        "all", "--docs-format", help="Documentation format: json, yaml, or all"
+        "all",
+        "--docs-format",
+        help="Documentation format: json, yaml, or all",
     ),
     clean: bool = typer.Option(
-        False, "--clean", help="Clean output directories before generating"
+        False,
+        "--clean",
+        help="Clean output directories before generating",
     ),
 ) -> None:
     """Run the complete documentation and SDK generation workflow."""
@@ -1243,7 +1320,9 @@ def generate_workflow(
     sys.path.insert(0, str(project_root))
     output_path = Path(output_dir)
 
-    console.print("🚀 Starting Chatter Documentation and SDK Generation Workflow")
+    console.print(
+        "🚀 Starting Chatter Documentation and SDK Generation Workflow"
+    )
     console.print(f"📁 Project root: {project_root}")
     console.print(f"📂 Output directory: {output_path}")
 
@@ -1282,24 +1361,40 @@ def generate_workflow(
                 spec = generate_openapi_spec()
 
                 if docs_format in ["json", "all"]:
-                    export_openapi_json(spec, docs_output / "openapi.json")
-                    version = spec.get("info", {}).get("version", "unknown")
-                    export_openapi_json(spec, docs_output / f"openapi-v{version}.json")
+                    export_openapi_json(
+                        spec, docs_output / "openapi.json"
+                    )
+                    version = spec.get("info", {}).get(
+                        "version", "unknown"
+                    )
+                    export_openapi_json(
+                        spec, docs_output / f"openapi-v{version}.json"
+                    )
 
                 if docs_format in ["yaml", "all"]:
-                    export_openapi_yaml(spec, docs_output / "openapi.yaml")
-                    version = spec.get("info", {}).get("version", "unknown")
-                    export_openapi_yaml(spec, docs_output / f"openapi-v{version}.yaml")
+                    export_openapi_yaml(
+                        spec, docs_output / "openapi.yaml"
+                    )
+                    version = spec.get("info", {}).get(
+                        "version", "unknown"
+                    )
+                    export_openapi_yaml(
+                        spec, docs_output / f"openapi-v{version}.yaml"
+                    )
 
                 # Collect generated files
                 for file in docs_output.glob("*"):
                     if file.is_file():
                         docs_files.append(str(file))
 
-                console.print(f"✅ Documentation generated with {len(docs_files)} files")
+                console.print(
+                    f"✅ Documentation generated with {len(docs_files)} files"
+                )
 
             except Exception as e:
-                console.print(f"❌ Documentation generation failed: {e}")
+                console.print(
+                    f"❌ Documentation generation failed: {e}"
+                )
                 docs_success = False
 
             success = success and docs_success
@@ -1319,18 +1414,28 @@ def generate_workflow(
             if not typescript_only:
                 console.print("\n🐍 Generating Python SDK...")
                 try:
-                    python_config = get_default_python_config(project_root)
-                    python_config.output_dir = output_path / "sdk" / "python"
+                    python_config = get_default_python_config(
+                        project_root
+                    )
+                    python_config.output_dir = (
+                        output_path / "sdk" / "python"
+                    )
 
                     python_generator = PythonSDKGenerator(python_config)
-                    python_success = python_generator.generate_with_cleanup()
+                    python_success = (
+                        python_generator.generate_with_cleanup()
+                    )
 
                     if python_success and python_generator.validate():
                         python_files = [
-                            str(f) for f in python_config.output_dir.rglob("*")
-                            if f.is_file() and not f.name.startswith(".")
+                            str(f)
+                            for f in python_config.output_dir.rglob("*")
+                            if f.is_file()
+                            and not f.name.startswith(".")
                         ]
-                        console.print(f"✅ Python SDK generated with {len(python_files)} files")
+                        console.print(
+                            f"✅ Python SDK generated with {len(python_files)} files"
+                        )
                     else:
                         console.print("❌ Python SDK generation failed")
                         python_success = False
@@ -1338,33 +1443,47 @@ def generate_workflow(
                     success = success and python_success
 
                 except Exception as e:
-                    console.print(f"❌ Python SDK generation failed: {e}")
+                    console.print(
+                        f"❌ Python SDK generation failed: {e}"
+                    )
                     success = False
 
             # Generate TypeScript SDK
             if not python_only:
                 console.print("\n📦 Generating TypeScript SDK...")
                 try:
-                    ts_config = get_default_typescript_config(project_root)
-                    ts_config.output_dir = output_path / "sdk" / "typescript"
+                    ts_config = get_default_typescript_config(
+                        project_root
+                    )
+                    ts_config.output_dir = (
+                        output_path / "sdk" / "typescript"
+                    )
 
                     ts_generator = TypeScriptSDKGenerator(ts_config)
                     ts_success = ts_generator.generate_with_cleanup()
 
                     if ts_success and ts_generator.validate():
                         typescript_files = [
-                            str(f) for f in ts_config.output_dir.rglob("*")
-                            if f.is_file() and not f.name.startswith(".")
+                            str(f)
+                            for f in ts_config.output_dir.rglob("*")
+                            if f.is_file()
+                            and not f.name.startswith(".")
                         ]
-                        console.print(f"✅ TypeScript SDK generated with {len(typescript_files)} files")
+                        console.print(
+                            f"✅ TypeScript SDK generated with {len(typescript_files)} files"
+                        )
                     else:
-                        console.print("❌ TypeScript SDK generation failed")
+                        console.print(
+                            "❌ TypeScript SDK generation failed"
+                        )
                         ts_success = False
 
                     success = success and ts_success
 
                 except Exception as e:
-                    console.print(f"❌ TypeScript SDK generation failed: {e}")
+                    console.print(
+                        f"❌ TypeScript SDK generation failed: {e}"
+                    )
                     success = False
 
         # Print summary
@@ -1373,30 +1492,46 @@ def generate_workflow(
             console.print(f"📁 Output directory: {output_path}")
 
             if docs_files:
-                console.print(f"📚 Documentation files: {len(docs_files)}")
+                console.print(
+                    f"📚 Documentation files: {len(docs_files)}"
+                )
             if python_files:
-                console.print(f"🐍 Python SDK files: {len(python_files)}")
+                console.print(
+                    f"🐍 Python SDK files: {len(python_files)}"
+                )
             if typescript_files:
-                console.print(f"📦 TypeScript SDK files: {len(typescript_files)}")
+                console.print(
+                    f"📦 TypeScript SDK files: {len(typescript_files)}"
+                )
 
             console.print("\n📋 Next steps:")
             if python_files:
-                console.print(f"   • Test Python SDK: cd {output_path / 'sdk' / 'python'} && pip install -e .")
-                console.print("   • Run Python examples: python examples/basic_usage.py")
+                console.print(
+                    f"   • Test Python SDK: cd {output_path / 'sdk' / 'python'} && pip install -e ."
+                )
+                console.print(
+                    "   • Run Python examples: python examples/basic_usage.py"
+                )
             if typescript_files:
-                console.print(f"   • Test TypeScript SDK: cd {output_path / 'sdk' / 'typescript'} && npm install")
+                console.print(
+                    f"   • Test TypeScript SDK: cd {output_path / 'sdk' / 'typescript'} && npm install"
+                )
                 console.print("   • Build TypeScript: npm run build")
             if docs_files:
                 console.print("   • View docs: chatter docs serve")
             console.print("   • Package for release: python -m build")
         else:
             console.print("❌ Workflow completed with errors!")
-            console.print("   Please check the error messages above and fix any issues.")
+            console.print(
+                "   Please check the error messages above and fix any issues."
+            )
             raise typer.Exit(1) from None
 
     except ImportError as e:
         console.print(f"❌ Import error: {e}")
-        console.print("💡 Make sure all dependencies are installed and scripts are available")
+        console.print(
+            "💡 Make sure all dependencies are installed and scripts are available"
+        )
         raise typer.Exit(1) from None
     except Exception as e:
         console.print(f"❌ Workflow failed: {e}")
@@ -1497,9 +1632,11 @@ def list_profiles(
                     profile["llm_model"],
                     profile["profile_type"],
                     "✓" if profile.get("is_public") else "✗",
-                    profile["created_at"][:10]
-                    if profile.get("created_at")
-                    else "N/A",
+                    (
+                        profile["created_at"][:10]
+                        if profile.get("created_at")
+                        else "N/A"
+                    ),
                 )
 
             console.print(table)
@@ -1771,12 +1908,16 @@ def list_conversations(
                     conv["id"],
                     conv.get("title", "Untitled")[:50],
                     str(conv.get("message_count", 0)),
-                    conv["created_at"][:10]
-                    if conv.get("created_at")
-                    else "N/A",
-                    conv["updated_at"][:10]
-                    if conv.get("updated_at")
-                    else "N/A",
+                    (
+                        conv["created_at"][:10]
+                        if conv.get("created_at")
+                        else "N/A"
+                    ),
+                    (
+                        conv["updated_at"][:10]
+                        if conv.get("updated_at")
+                        else "N/A"
+                    ),
                 )
 
             console.print(table)
@@ -1863,9 +2004,11 @@ def show_conversation(
                         role_color = (
                             "blue"
                             if role == "user"
-                            else "green"
-                            if role == "assistant"
-                            else "yellow"
+                            else (
+                                "green"
+                                if role == "assistant"
+                                else "yellow"
+                            )
                         )
 
                         console.print(
@@ -2037,7 +2180,10 @@ def list_documents(
     async def _list() -> None:
         api_client = get_api_client()
         try:
-            params: dict[str, str | int] = {"limit": limit, "offset": offset}
+            params: dict[str, str | int] = {
+                "limit": limit,
+                "offset": offset,
+            }
             if file_type:
                 params["file_type"] = file_type
 
@@ -2074,9 +2220,11 @@ def list_documents(
                     doc.get("file_type", "unknown"),
                     f"{size_mb:.1f}MB" if size_mb > 0 else "N/A",
                     doc.get("status", "unknown"),
-                    doc["created_at"][:10]
-                    if doc.get("created_at")
-                    else "N/A",
+                    (
+                        doc["created_at"][:10]
+                        if doc.get("created_at")
+                        else "N/A"
+                    ),
                 )
 
             console.print(table)
@@ -2140,9 +2288,9 @@ def upload_document(
             # Remove Content-Type header to let httpx set it for multipart
             headers = {}
             if api_client.access_token:
-                headers[
-                    "Authorization"
-                ] = f"Bearer {api_client.access_token}"
+                headers["Authorization"] = (
+                    f"Bearer {api_client.access_token}"
+                )
 
             url = f"{api_client.base_url}{settings.api_prefix}/documents/upload"
             response = await api_client.client.post(

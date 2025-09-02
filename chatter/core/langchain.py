@@ -34,17 +34,17 @@ class LangChainOrchestrator:
 
             os.environ["LANGCHAIN_TRACING_V2"] = "true"
             if settings.langchain_api_key:
-                os.environ[
-                    "LANGCHAIN_API_KEY"
-                ] = settings.langchain_api_key
+                os.environ["LANGCHAIN_API_KEY"] = (
+                    settings.langchain_api_key
+                )
             if settings.langchain_project:
-                os.environ[
-                    "LANGCHAIN_PROJECT"
-                ] = settings.langchain_project
+                os.environ["LANGCHAIN_PROJECT"] = (
+                    settings.langchain_project
+                )
             if settings.langchain_endpoint:
-                os.environ[
-                    "LANGCHAIN_ENDPOINT"
-                ] = settings.langchain_endpoint
+                os.environ["LANGCHAIN_ENDPOINT"] = (
+                    settings.langchain_endpoint
+                )
             logger.info(
                 "LangSmith tracing enabled",
                 project=settings.langchain_project,

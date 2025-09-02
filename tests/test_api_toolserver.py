@@ -28,14 +28,18 @@ class TestToolServerEndpoints:
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         self.mock_session = AsyncMock()
 
         # Override dependencies
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
-        app.dependency_overrides[get_session] = lambda: self.mock_session
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
+        app.dependency_overrides[get_session] = (
+            lambda: self.mock_session
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -51,15 +55,15 @@ class TestToolServerEndpoints:
             "server_type": "mcp",
             "auth_config": {
                 "type": "api_key",
-                "api_key": "test-api-key"
+                "api_key": "test-api-key",
             },
             "tool_config": {
                 "auto_discover": True,
                 "timeout": 30,
-                "max_retries": 3
+                "max_retries": 3,
             },
             "is_active": True,
-            "tags": ["test", "api"]
+            "tags": ["test", "api"],
         }
 
         mock_created_server = {
@@ -70,12 +74,12 @@ class TestToolServerEndpoints:
             "server_type": "mcp",
             "auth_config": {
                 "type": "api_key",
-                "api_key": "***"  # Masked in response
+                "api_key": "***",  # Masked in response
             },
             "tool_config": {
                 "auto_discover": True,
                 "timeout": 30,
-                "max_retries": 3
+                "max_retries": 3,
             },
             "is_active": True,
             "tags": ["test", "api"],
@@ -83,14 +87,18 @@ class TestToolServerEndpoints:
             "created_by": self.mock_user.id,
             "created_at": "2024-01-01T00:00:00Z",
             "last_health_check": None,
-            "tool_count": 0
+            "tool_count": 0,
         }
 
-        with patch.object(ToolServerService, 'create_tool_server') as mock_create:
+        with patch.object(
+            ToolServerService, 'create_tool_server'
+        ) as mock_create:
             mock_create.return_value = mock_created_server
 
             # Act
-            response = self.client.post("/toolserver/servers", json=server_data)
+            response = self.client.post(
+                "/toolserver/servers", json=server_data
+            )
 
             # Assert
             assert response.status_code == status.HTTP_201_CREATED
@@ -109,14 +117,18 @@ class TestToolServerEndpoints:
         invalid_server_data = {
             "name": "",  # Empty name should fail validation
             "url": "not-a-valid-url",  # Invalid URL format
-            "server_type": "invalid_type"  # Invalid server type
+            "server_type": "invalid_type",  # Invalid server type
         }
 
         # Act
-        response = self.client.post("/toolserver/servers", json=invalid_server_data)
+        response = self.client.post(
+            "/toolserver/servers", json=invalid_server_data
+        )
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     def test_list_tool_servers_success(self):
         """Test successful tool server listing."""
@@ -131,7 +143,7 @@ class TestToolServerEndpoints:
                 "status": "active",
                 "is_active": True,
                 "tool_count": 5,
-                "last_health_check": "2024-01-01T00:00:00Z"
+                "last_health_check": "2024-01-01T00:00:00Z",
             },
             {
                 "id": "server-2",
@@ -142,11 +154,13 @@ class TestToolServerEndpoints:
                 "status": "inactive",
                 "is_active": False,
                 "tool_count": 3,
-                "last_health_check": "2023-12-31T00:00:00Z"
-            }
+                "last_health_check": "2023-12-31T00:00:00Z",
+            },
         ]
 
-        with patch.object(ToolServerService, 'list_tool_servers') as mock_list:
+        with patch.object(
+            ToolServerService, 'list_tool_servers'
+        ) as mock_list:
             mock_list.return_value = mock_servers
 
             # Act
@@ -172,26 +186,24 @@ class TestToolServerEndpoints:
             "server_type": "mcp",
             "status": "active",
             "is_active": True,
-            "auth_config": {
-                "type": "bearer_token",
-                "token": "***"
-            },
-            "tool_config": {
-                "auto_discover": True,
-                "timeout": 30
-            },
+            "auth_config": {"type": "bearer_token", "token": "***"},
+            "tool_config": {"auto_discover": True, "timeout": 30},
             "tags": ["production", "api"],
             "tool_count": 8,
             "last_health_check": "2024-01-01T12:00:00Z",
             "created_by": self.mock_user.id,
-            "created_at": "2024-01-01T00:00:00Z"
+            "created_at": "2024-01-01T00:00:00Z",
         }
 
-        with patch.object(ToolServerService, 'get_tool_server') as mock_get:
+        with patch.object(
+            ToolServerService, 'get_tool_server'
+        ) as mock_get:
             mock_get.return_value = mock_server
 
             # Act
-            response = self.client.get(f"/toolserver/servers/{server_id}")
+            response = self.client.get(
+                f"/toolserver/servers/{server_id}"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -206,11 +218,17 @@ class TestToolServerEndpoints:
         # Arrange
         server_id = "nonexistent-server"
 
-        with patch.object(ToolServerService, 'get_tool_server') as mock_get:
-            mock_get.side_effect = ToolServerServiceError("Tool server not found")
+        with patch.object(
+            ToolServerService, 'get_tool_server'
+        ) as mock_get:
+            mock_get.side_effect = ToolServerServiceError(
+                "Tool server not found"
+            )
 
             # Act
-            response = self.client.get(f"/toolserver/servers/{server_id}")
+            response = self.client.get(
+                f"/toolserver/servers/{server_id}"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -224,38 +242,33 @@ class TestToolServerEndpoints:
             "description": "Updated description",
             "auth_config": {
                 "type": "api_key",
-                "api_key": "new-api-key"
+                "api_key": "new-api-key",
             },
-            "tool_config": {
-                "timeout": 60,
-                "max_retries": 5
-            },
+            "tool_config": {"timeout": 60, "max_retries": 5},
             "is_active": False,
-            "tags": ["updated", "test"]
+            "tags": ["updated", "test"],
         }
 
         mock_updated_server = {
             "id": server_id,
             "name": "Updated Tool Server",
             "description": "Updated description",
-            "auth_config": {
-                "type": "api_key",
-                "api_key": "***"
-            },
-            "tool_config": {
-                "timeout": 60,
-                "max_retries": 5
-            },
+            "auth_config": {"type": "api_key", "api_key": "***"},
+            "tool_config": {"timeout": 60, "max_retries": 5},
             "is_active": False,
             "tags": ["updated", "test"],
-            "updated_at": "2024-01-15T00:00:00Z"
+            "updated_at": "2024-01-15T00:00:00Z",
         }
 
-        with patch.object(ToolServerService, 'update_tool_server') as mock_update:
+        with patch.object(
+            ToolServerService, 'update_tool_server'
+        ) as mock_update:
             mock_update.return_value = mock_updated_server
 
             # Act
-            response = self.client.put(f"/toolserver/servers/{server_id}", json=update_data)
+            response = self.client.put(
+                f"/toolserver/servers/{server_id}", json=update_data
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -270,11 +283,15 @@ class TestToolServerEndpoints:
         # Arrange
         server_id = "server-delete-123"
 
-        with patch.object(ToolServerService, 'delete_tool_server') as mock_delete:
+        with patch.object(
+            ToolServerService, 'delete_tool_server'
+        ) as mock_delete:
             mock_delete.return_value = True
 
             # Act
-            response = self.client.delete(f"/toolserver/servers/{server_id}")
+            response = self.client.delete(
+                f"/toolserver/servers/{server_id}"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -292,14 +309,18 @@ class TestToolServerEndpoints:
             "server_id": server_id,
             "operation": "start",
             "message": "Tool server started successfully",
-            "status": "active"
+            "status": "active",
         }
 
-        with patch.object(ToolServerService, 'start_tool_server') as mock_start:
+        with patch.object(
+            ToolServerService, 'start_tool_server'
+        ) as mock_start:
             mock_start.return_value = mock_result
 
             # Act
-            response = self.client.post(f"/toolserver/servers/{server_id}/start")
+            response = self.client.post(
+                f"/toolserver/servers/{server_id}/start"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -318,14 +339,18 @@ class TestToolServerEndpoints:
             "server_id": server_id,
             "operation": "stop",
             "message": "Tool server stopped successfully",
-            "status": "inactive"
+            "status": "inactive",
         }
 
-        with patch.object(ToolServerService, 'stop_tool_server') as mock_stop:
+        with patch.object(
+            ToolServerService, 'stop_tool_server'
+        ) as mock_stop:
             mock_stop.return_value = mock_result
 
             # Act
-            response = self.client.post(f"/toolserver/servers/{server_id}/stop")
+            response = self.client.post(
+                f"/toolserver/servers/{server_id}/stop"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -344,14 +369,18 @@ class TestToolServerEndpoints:
             "server_id": server_id,
             "operation": "restart",
             "message": "Tool server restarted successfully",
-            "status": "active"
+            "status": "active",
         }
 
-        with patch.object(ToolServerService, 'restart_tool_server') as mock_restart:
+        with patch.object(
+            ToolServerService, 'restart_tool_server'
+        ) as mock_restart:
             mock_restart.return_value = mock_result
 
             # Act
-            response = self.client.post(f"/toolserver/servers/{server_id}/restart")
+            response = self.client.post(
+                f"/toolserver/servers/{server_id}/restart"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -374,15 +403,19 @@ class TestToolServerEndpoints:
             "details": {
                 "connectivity": "ok",
                 "authentication": "ok",
-                "tools_accessible": True
-            }
+                "tools_accessible": True,
+            },
         }
 
-        with patch.object(ToolServerService, 'health_check') as mock_health:
+        with patch.object(
+            ToolServerService, 'health_check'
+        ) as mock_health:
             mock_health.return_value = mock_health_result
 
             # Act
-            response = self.client.post(f"/toolserver/servers/{server_id}/health")
+            response = self.client.post(
+                f"/toolserver/servers/{server_id}/health"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -404,10 +437,13 @@ class TestToolServerEndpoints:
                 "description": "Basic calculator tool",
                 "type": "function",
                 "parameters": {
-                    "expression": {"type": "string", "description": "Math expression"}
+                    "expression": {
+                        "type": "string",
+                        "description": "Math expression",
+                    }
                 },
                 "server_id": server_id,
-                "is_available": True
+                "is_available": True,
             },
             {
                 "id": "tool-2",
@@ -415,18 +451,25 @@ class TestToolServerEndpoints:
                 "description": "Weather information tool",
                 "type": "function",
                 "parameters": {
-                    "location": {"type": "string", "description": "Location for weather"}
+                    "location": {
+                        "type": "string",
+                        "description": "Location for weather",
+                    }
                 },
                 "server_id": server_id,
-                "is_available": True
-            }
+                "is_available": True,
+            },
         ]
 
-        with patch.object(ToolServerService, 'get_server_tools') as mock_get_tools:
+        with patch.object(
+            ToolServerService, 'get_server_tools'
+        ) as mock_get_tools:
             mock_get_tools.return_value = mock_tools
 
             # Act
-            response = self.client.get(f"/toolserver/servers/{server_id}/tools")
+            response = self.client.get(
+                f"/toolserver/servers/{server_id}/tools"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -442,10 +485,7 @@ class TestToolServerEndpoints:
         bulk_operation = {
             "operation": "start",
             "server_ids": ["server-1", "server-2", "server-3"],
-            "options": {
-                "parallel": True,
-                "timeout": 60
-            }
+            "options": {"parallel": True, "timeout": 60},
         }
 
         mock_bulk_result = {
@@ -457,27 +497,31 @@ class TestToolServerEndpoints:
                 {
                     "server_id": "server-1",
                     "success": True,
-                    "message": "Started successfully"
+                    "message": "Started successfully",
                 },
                 {
                     "server_id": "server-2",
                     "success": True,
-                    "message": "Started successfully"
+                    "message": "Started successfully",
                 },
                 {
                     "server_id": "server-3",
                     "success": False,
-                    "message": "Failed to start: connection timeout"
-                }
+                    "message": "Failed to start: connection timeout",
+                },
             ],
-            "execution_time": 45.2
+            "execution_time": 45.2,
         }
 
-        with patch.object(ToolServerService, 'bulk_operation') as mock_bulk:
+        with patch.object(
+            ToolServerService, 'bulk_operation'
+        ) as mock_bulk:
             mock_bulk.return_value = mock_bulk_result
 
             # Act
-            response = self.client.post("/toolserver/servers/bulk", json=bulk_operation)
+            response = self.client.post(
+                "/toolserver/servers/bulk", json=bulk_operation
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -496,25 +540,27 @@ class TestToolServerEndpoints:
                 "name": "calculator",
                 "server_id": "server-1",
                 "server_name": "Math Server",
-                "is_available": True
+                "is_available": True,
             },
             {
                 "id": "tool-2",
                 "name": "weather",
                 "server_id": "server-2",
                 "server_name": "Weather Server",
-                "is_available": True
+                "is_available": True,
             },
             {
                 "id": "tool-3",
                 "name": "search",
                 "server_id": "server-3",
                 "server_name": "Search Server",
-                "is_available": False
-            }
+                "is_available": False,
+            },
         ]
 
-        with patch.object(ToolServerService, 'get_all_tools') as mock_get_all:
+        with patch.object(
+            ToolServerService, 'get_all_tools'
+        ) as mock_get_all:
             mock_get_all.return_value = mock_all_tools
 
             # Act
@@ -540,14 +586,18 @@ class TestToolServerEndpoints:
             "authentication": "valid",
             "tool_discovery": "successful",
             "issues": [],
-            "tested_at": "2024-01-01T12:00:00Z"
+            "tested_at": "2024-01-01T12:00:00Z",
         }
 
-        with patch.object(ToolServerService, 'test_connectivity') as mock_test:
+        with patch.object(
+            ToolServerService, 'test_connectivity'
+        ) as mock_test:
             mock_test.return_value = mock_connectivity_result
 
             # Act
-            response = self.client.post(f"/toolserver/servers/{server_id}/test-connectivity")
+            response = self.client.post(
+                f"/toolserver/servers/{server_id}/test-connectivity"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -568,13 +618,17 @@ class TestToolPermissionEndpoints:
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         self.mock_session = AsyncMock()
 
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
-        app.dependency_overrides[get_session] = lambda: self.mock_session
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
+        app.dependency_overrides[get_session] = (
+            lambda: self.mock_session
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -590,8 +644,8 @@ class TestToolPermissionEndpoints:
             "expires_at": "2024-12-31T23:59:59Z",
             "restrictions": {
                 "max_calls_per_hour": 100,
-                "allowed_operations": ["read", "write"]
-            }
+                "allowed_operations": ["read", "write"],
+            },
         }
 
         mock_created_permission = {
@@ -602,18 +656,22 @@ class TestToolPermissionEndpoints:
             "expires_at": "2024-12-31T23:59:59Z",
             "restrictions": {
                 "max_calls_per_hour": 100,
-                "allowed_operations": ["read", "write"]
+                "allowed_operations": ["read", "write"],
             },
             "created_by": self.mock_user.id,
             "created_at": "2024-01-01T00:00:00Z",
-            "is_active": True
+            "is_active": True,
         }
 
-        with patch.object(ToolAccessService, 'create_tool_permission') as mock_create:
+        with patch.object(
+            ToolAccessService, 'create_tool_permission'
+        ) as mock_create:
             mock_create.return_value = mock_created_permission
 
             # Act
-            response = self.client.post("/toolserver/permissions", json=permission_data)
+            response = self.client.post(
+                "/toolserver/permissions", json=permission_data
+            )
 
             # Assert
             assert response.status_code == status.HTTP_201_CREATED
@@ -629,25 +687,26 @@ class TestToolPermissionEndpoints:
         permission_id = "permission-update-123"
         update_data = {
             "permission_level": "read_only",
-            "restrictions": {
-                "max_calls_per_hour": 50
-            }
+            "restrictions": {"max_calls_per_hour": 50},
         }
 
         mock_updated_permission = {
             "id": permission_id,
             "permission_level": "read_only",
-            "restrictions": {
-                "max_calls_per_hour": 50
-            },
-            "updated_at": "2024-01-15T00:00:00Z"
+            "restrictions": {"max_calls_per_hour": 50},
+            "updated_at": "2024-01-15T00:00:00Z",
         }
 
-        with patch.object(ToolAccessService, 'update_tool_permission') as mock_update:
+        with patch.object(
+            ToolAccessService, 'update_tool_permission'
+        ) as mock_update:
             mock_update.return_value = mock_updated_permission
 
             # Act
-            response = self.client.put(f"/toolserver/permissions/{permission_id}", json=update_data)
+            response = self.client.put(
+                f"/toolserver/permissions/{permission_id}",
+                json=update_data,
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -660,11 +719,15 @@ class TestToolPermissionEndpoints:
         # Arrange
         permission_id = "permission-delete-123"
 
-        with patch.object(ToolAccessService, 'delete_tool_permission') as mock_delete:
+        with patch.object(
+            ToolAccessService, 'delete_tool_permission'
+        ) as mock_delete:
             mock_delete.return_value = True
 
             # Act
-            response = self.client.delete(f"/toolserver/permissions/{permission_id}")
+            response = self.client.delete(
+                f"/toolserver/permissions/{permission_id}"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -678,7 +741,7 @@ class TestToolPermissionEndpoints:
         access_check = {
             "user_id": "user-123",
             "tool_id": "tool-456",
-            "operation": "execute"
+            "operation": "execute",
         }
 
         mock_access_result = {
@@ -688,19 +751,23 @@ class TestToolPermissionEndpoints:
             "permission_level": "read_write",
             "restrictions": {
                 "max_calls_per_hour": 100,
-                "remaining_calls": 87
+                "remaining_calls": 87,
             },
             "access_details": {
                 "source": "user_permission",
-                "expires_at": "2024-12-31T23:59:59Z"
-            }
+                "expires_at": "2024-12-31T23:59:59Z",
+            },
         }
 
-        with patch.object(ToolAccessService, 'check_tool_access') as mock_check:
+        with patch.object(
+            ToolAccessService, 'check_tool_access'
+        ) as mock_check:
             mock_check.return_value = mock_access_result
 
             # Act
-            response = self.client.post("/toolserver/access-check", json=access_check)
+            response = self.client.post(
+                "/toolserver/access-check", json=access_check
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -721,13 +788,17 @@ class TestToolServerIntegration:
             id="integration-user-id",
             email="integration@example.com",
             username="integrationuser",
-            is_active=True
+            is_active=True,
         )
 
         self.mock_session = AsyncMock()
 
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
-        app.dependency_overrides[get_session] = lambda: self.mock_session
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
+        app.dependency_overrides[get_session] = (
+            lambda: self.mock_session
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -743,22 +814,28 @@ class TestToolServerIntegration:
             "server_type": "mcp",
             "auth_config": {
                 "type": "api_key",
-                "api_key": "integration-key"
-            }
+                "api_key": "integration-key",
+            },
         }
 
         mock_created_server = {
             "id": "integration-server-123",
             "name": "Integration Test Server",
             "status": "pending",
-            "is_active": True
+            "is_active": True,
         }
 
-        with patch.object(ToolServerService, 'create_tool_server') as mock_create:
+        with patch.object(
+            ToolServerService, 'create_tool_server'
+        ) as mock_create:
             mock_create.return_value = mock_created_server
 
-            create_response = self.client.post("/toolserver/servers", json=server_data)
-            assert create_response.status_code == status.HTTP_201_CREATED
+            create_response = self.client.post(
+                "/toolserver/servers", json=server_data
+            )
+            assert (
+                create_response.status_code == status.HTTP_201_CREATED
+            )
             server_id = create_response.json()["id"]
 
         # Step 2: Start tool server
@@ -766,13 +843,17 @@ class TestToolServerIntegration:
             "success": True,
             "server_id": server_id,
             "operation": "start",
-            "status": "active"
+            "status": "active",
         }
 
-        with patch.object(ToolServerService, 'start_tool_server') as mock_start:
+        with patch.object(
+            ToolServerService, 'start_tool_server'
+        ) as mock_start:
             mock_start.return_value = mock_start_result
 
-            start_response = self.client.post(f"/toolserver/servers/{server_id}/start")
+            start_response = self.client.post(
+                f"/toolserver/servers/{server_id}/start"
+            )
             assert start_response.status_code == status.HTTP_200_OK
             assert start_response.json()["status"] == "active"
 
@@ -781,27 +862,39 @@ class TestToolServerIntegration:
             "server_id": server_id,
             "status": "healthy",
             "response_time": 100,
-            "tool_count": 3
+            "tool_count": 3,
         }
 
-        with patch.object(ToolServerService, 'health_check') as mock_health:
+        with patch.object(
+            ToolServerService, 'health_check'
+        ) as mock_health:
             mock_health.return_value = mock_health_result
 
-            health_response = self.client.post(f"/toolserver/servers/{server_id}/health")
+            health_response = self.client.post(
+                f"/toolserver/servers/{server_id}/health"
+            )
             assert health_response.status_code == status.HTTP_200_OK
             assert health_response.json()["status"] == "healthy"
 
         # Step 4: Get server tools
         mock_tools = [
-            {"id": "tool-1", "name": "calculator", "is_available": True},
+            {
+                "id": "tool-1",
+                "name": "calculator",
+                "is_available": True,
+            },
             {"id": "tool-2", "name": "weather", "is_available": True},
-            {"id": "tool-3", "name": "search", "is_available": True}
+            {"id": "tool-3", "name": "search", "is_available": True},
         ]
 
-        with patch.object(ToolServerService, 'get_server_tools') as mock_get_tools:
+        with patch.object(
+            ToolServerService, 'get_server_tools'
+        ) as mock_get_tools:
             mock_get_tools.return_value = mock_tools
 
-            tools_response = self.client.get(f"/toolserver/servers/{server_id}/tools")
+            tools_response = self.client.get(
+                f"/toolserver/servers/{server_id}/tools"
+            )
             assert tools_response.status_code == status.HTTP_200_OK
             assert len(tools_response.json()["tools"]) == 3
 
@@ -810,21 +903,29 @@ class TestToolServerIntegration:
             "success": True,
             "server_id": server_id,
             "operation": "stop",
-            "status": "inactive"
+            "status": "inactive",
         }
 
-        with patch.object(ToolServerService, 'stop_tool_server') as mock_stop:
+        with patch.object(
+            ToolServerService, 'stop_tool_server'
+        ) as mock_stop:
             mock_stop.return_value = mock_stop_result
 
-            stop_response = self.client.post(f"/toolserver/servers/{server_id}/stop")
+            stop_response = self.client.post(
+                f"/toolserver/servers/{server_id}/stop"
+            )
             assert stop_response.status_code == status.HTTP_200_OK
             assert stop_response.json()["status"] == "inactive"
 
         # Step 6: Delete tool server
-        with patch.object(ToolServerService, 'delete_tool_server') as mock_delete:
+        with patch.object(
+            ToolServerService, 'delete_tool_server'
+        ) as mock_delete:
             mock_delete.return_value = True
 
-            delete_response = self.client.delete(f"/toolserver/servers/{server_id}")
+            delete_response = self.client.delete(
+                f"/toolserver/servers/{server_id}"
+            )
             assert delete_response.status_code == status.HTTP_200_OK
             assert delete_response.json()["deleted"] is True
 
@@ -839,83 +940,112 @@ class TestToolServerIntegration:
             "user_id": user_id,
             "tool_id": tool_id,
             "permission_level": "read_write",
-            "restrictions": {
-                "max_calls_per_hour": 50
-            }
+            "restrictions": {"max_calls_per_hour": 50},
         }
 
         mock_permission = {
             "id": "permission-123",
             "user_id": user_id,
             "tool_id": tool_id,
-            "permission_level": "read_write"
+            "permission_level": "read_write",
         }
 
-        with patch.object(ToolAccessService, 'create_tool_permission') as mock_create:
+        with patch.object(
+            ToolAccessService, 'create_tool_permission'
+        ) as mock_create:
             mock_create.return_value = mock_permission
 
-            permission_response = self.client.post("/toolserver/permissions", json=permission_data)
-            assert permission_response.status_code == status.HTTP_201_CREATED
+            permission_response = self.client.post(
+                "/toolserver/permissions", json=permission_data
+            )
+            assert (
+                permission_response.status_code
+                == status.HTTP_201_CREATED
+            )
             permission_id = permission_response.json()["id"]
 
         # Step 3: Check tool access
         access_check = {
             "user_id": user_id,
             "tool_id": tool_id,
-            "operation": "execute"
+            "operation": "execute",
         }
 
         mock_access_result = {
             "user_id": user_id,
             "tool_id": tool_id,
             "has_access": True,
-            "permission_level": "read_write"
+            "permission_level": "read_write",
         }
 
-        with patch.object(ToolAccessService, 'check_tool_access') as mock_check:
+        with patch.object(
+            ToolAccessService, 'check_tool_access'
+        ) as mock_check:
             mock_check.return_value = mock_access_result
 
-            access_response = self.client.post("/toolserver/access-check", json=access_check)
+            access_response = self.client.post(
+                "/toolserver/access-check", json=access_check
+            )
             assert access_response.status_code == status.HTTP_200_OK
             assert access_response.json()["has_access"] is True
 
         # Step 4: Update permission to read-only
-        update_data = {
-            "permission_level": "read_only"
-        }
+        update_data = {"permission_level": "read_only"}
 
         mock_updated_permission = {
             "id": permission_id,
-            "permission_level": "read_only"
+            "permission_level": "read_only",
         }
 
-        with patch.object(ToolAccessService, 'update_tool_permission') as mock_update:
+        with patch.object(
+            ToolAccessService, 'update_tool_permission'
+        ) as mock_update:
             mock_update.return_value = mock_updated_permission
 
-            update_response = self.client.put(f"/toolserver/permissions/{permission_id}", json=update_data)
+            update_response = self.client.put(
+                f"/toolserver/permissions/{permission_id}",
+                json=update_data,
+            )
             assert update_response.status_code == status.HTTP_200_OK
-            assert update_response.json()["permission_level"] == "read_only"
+            assert (
+                update_response.json()["permission_level"]
+                == "read_only"
+            )
 
         # Step 5: Check access again (should still have access but read-only)
         mock_updated_access = {
             "user_id": user_id,
             "tool_id": tool_id,
             "has_access": True,
-            "permission_level": "read_only"
+            "permission_level": "read_only",
         }
 
-        with patch.object(ToolAccessService, 'check_tool_access') as mock_check_updated:
+        with patch.object(
+            ToolAccessService, 'check_tool_access'
+        ) as mock_check_updated:
             mock_check_updated.return_value = mock_updated_access
 
-            updated_access_response = self.client.post("/toolserver/access-check", json=access_check)
-            assert updated_access_response.status_code == status.HTTP_200_OK
-            assert updated_access_response.json()["permission_level"] == "read_only"
+            updated_access_response = self.client.post(
+                "/toolserver/access-check", json=access_check
+            )
+            assert (
+                updated_access_response.status_code
+                == status.HTTP_200_OK
+            )
+            assert (
+                updated_access_response.json()["permission_level"]
+                == "read_only"
+            )
 
         # Step 6: Delete permission
-        with patch.object(ToolAccessService, 'delete_tool_permission') as mock_delete:
+        with patch.object(
+            ToolAccessService, 'delete_tool_permission'
+        ) as mock_delete:
             mock_delete.return_value = True
 
-            delete_response = self.client.delete(f"/toolserver/permissions/{permission_id}")
+            delete_response = self.client.delete(
+                f"/toolserver/permissions/{permission_id}"
+            )
             assert delete_response.status_code == status.HTTP_200_OK
 
     def test_multi_server_management_workflow(self):
@@ -925,18 +1055,18 @@ class TestToolServerIntegration:
             {
                 "name": "Math Server",
                 "url": "https://math.tools.com",
-                "server_type": "mcp"
+                "server_type": "mcp",
             },
             {
                 "name": "Weather Server",
                 "url": "https://weather.tools.com",
-                "server_type": "rest"
+                "server_type": "rest",
             },
             {
                 "name": "Search Server",
                 "url": "https://search.tools.com",
-                "server_type": "grpc"
-            }
+                "server_type": "grpc",
+            },
         ]
 
         created_servers = []
@@ -944,13 +1074,17 @@ class TestToolServerIntegration:
             mock_server = {
                 "id": f"multi-server-{i+1}",
                 "name": server_data["name"],
-                "server_type": server_data["server_type"]
+                "server_type": server_data["server_type"],
             }
 
-            with patch.object(ToolServerService, 'create_tool_server') as mock_create:
+            with patch.object(
+                ToolServerService, 'create_tool_server'
+            ) as mock_create:
                 mock_create.return_value = mock_server
 
-                response = self.client.post("/toolserver/servers", json=server_data)
+                response = self.client.post(
+                    "/toolserver/servers", json=server_data
+                )
                 assert response.status_code == status.HTTP_201_CREATED
                 created_servers.append(response.json())
 
@@ -958,7 +1092,7 @@ class TestToolServerIntegration:
         server_ids = [server["id"] for server in created_servers]
         bulk_operation = {
             "operation": "start",
-            "server_ids": server_ids
+            "server_ids": server_ids,
         }
 
         mock_bulk_result = {
@@ -967,43 +1101,81 @@ class TestToolServerIntegration:
             "successful": 3,
             "failed": 0,
             "results": [
-                {"server_id": sid, "success": True} for sid in server_ids
-            ]
+                {"server_id": sid, "success": True}
+                for sid in server_ids
+            ],
         }
 
-        with patch.object(ToolServerService, 'bulk_operation') as mock_bulk:
+        with patch.object(
+            ToolServerService, 'bulk_operation'
+        ) as mock_bulk:
             mock_bulk.return_value = mock_bulk_result
 
-            bulk_response = self.client.post("/toolserver/servers/bulk", json=bulk_operation)
+            bulk_response = self.client.post(
+                "/toolserver/servers/bulk", json=bulk_operation
+            )
             assert bulk_response.status_code == status.HTTP_200_OK
             assert bulk_response.json()["successful"] == 3
 
         # Step 3: Get all tools from all servers
         mock_all_tools = [
-            {"id": "tool-1", "name": "add", "server_id": "multi-server-1"},
-            {"id": "tool-2", "name": "subtract", "server_id": "multi-server-1"},
-            {"id": "tool-3", "name": "current_weather", "server_id": "multi-server-2"},
-            {"id": "tool-4", "name": "forecast", "server_id": "multi-server-2"},
-            {"id": "tool-5", "name": "web_search", "server_id": "multi-server-3"}
+            {
+                "id": "tool-1",
+                "name": "add",
+                "server_id": "multi-server-1",
+            },
+            {
+                "id": "tool-2",
+                "name": "subtract",
+                "server_id": "multi-server-1",
+            },
+            {
+                "id": "tool-3",
+                "name": "current_weather",
+                "server_id": "multi-server-2",
+            },
+            {
+                "id": "tool-4",
+                "name": "forecast",
+                "server_id": "multi-server-2",
+            },
+            {
+                "id": "tool-5",
+                "name": "web_search",
+                "server_id": "multi-server-3",
+            },
         ]
 
-        with patch.object(ToolServerService, 'get_all_tools') as mock_get_all:
+        with patch.object(
+            ToolServerService, 'get_all_tools'
+        ) as mock_get_all:
             mock_get_all.return_value = mock_all_tools
 
-            all_tools_response = self.client.get("/toolserver/tools/all")
+            all_tools_response = self.client.get(
+                "/toolserver/tools/all"
+            )
             assert all_tools_response.status_code == status.HTTP_200_OK
             assert len(all_tools_response.json()) == 5
 
         # Step 4: List servers to verify they're all active
         mock_servers_list = [
-            {"id": server["id"], "name": server["name"], "status": "active"}
+            {
+                "id": server["id"],
+                "name": server["name"],
+                "status": "active",
+            }
             for server in created_servers
         ]
 
-        with patch.object(ToolServerService, 'list_tool_servers') as mock_list:
+        with patch.object(
+            ToolServerService, 'list_tool_servers'
+        ) as mock_list:
             mock_list.return_value = mock_servers_list
 
             list_response = self.client.get("/toolserver/servers")
             assert list_response.status_code == status.HTTP_200_OK
             assert len(list_response.json()) == 3
-            assert all(server["status"] == "active" for server in list_response.json())
+            assert all(
+                server["status"] == "active"
+                for server in list_response.json()
+            )

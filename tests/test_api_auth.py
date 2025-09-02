@@ -24,7 +24,9 @@ class TestAuthEndpoints:
         self.mock_session = AsyncMock(spec=AsyncSession)
 
         # Override dependencies
-        app.dependency_overrides[get_auth_service] = lambda: self.mock_auth_service
+        app.dependency_overrides[get_auth_service] = (
+            lambda: self.mock_auth_service
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -36,20 +38,22 @@ class TestAuthEndpoints:
         user_data = {
             "email": "test@example.com",
             "username": "testuser",
-            "password": "securepassword123"
+            "password": "securepassword123",
         }
 
         mock_user = User(
             id="test-user-id",
             email=user_data["email"],
             username=user_data["username"],
-            is_active=True
+            is_active=True,
         )
 
         self.mock_auth_service.register_user.return_value = mock_user
 
         # Act
-        response = self.client.post("/api/v1/auth/register", json=user_data)
+        response = self.client.post(
+            "/api/v1/auth/register", json=user_data
+        )
 
         # Assert
         assert response.status_code == status.HTTP_201_CREATED
@@ -64,14 +68,19 @@ class TestAuthEndpoints:
         user_data = {
             "email": "existing@example.com",
             "username": "testuser",
-            "password": "securepassword123"
+            "password": "securepassword123",
         }
 
         from chatter.core.exceptions import ConflictError
-        self.mock_auth_service.register_user.side_effect = ConflictError("Email already exists")
+
+        self.mock_auth_service.register_user.side_effect = (
+            ConflictError("Email already exists")
+        )
 
         # Act
-        response = self.client.post("/api/v1/auth/register", json=user_data)
+        response = self.client.post(
+            "/api/v1/auth/register", json=user_data
+        )
 
         # Assert
         assert response.status_code == status.HTTP_409_CONFLICT
@@ -82,34 +91,42 @@ class TestAuthEndpoints:
         invalid_data = {
             "email": "not-an-email",
             "username": "",
-            "password": "short"
+            "password": "short",
         }
 
         # Act
-        response = self.client.post("/api/v1/auth/register", json=invalid_data)
+        response = self.client.post(
+            "/api/v1/auth/register", json=invalid_data
+        )
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     def test_login_success(self):
         """Test successful user login."""
         # Arrange
         login_data = {
             "email": "test@example.com",
-            "password": "securepassword123"
+            "password": "securepassword123",
         }
 
         mock_token_response = {
             "access_token": "mock-access-token",
             "token_type": "bearer",
             "expires_in": 3600,
-            "refresh_token": "mock-refresh-token"
+            "refresh_token": "mock-refresh-token",
         }
 
-        self.mock_auth_service.authenticate_user.return_value = mock_token_response
+        self.mock_auth_service.authenticate_user.return_value = (
+            mock_token_response
+        )
 
         # Act
-        response = self.client.post("/api/v1/auth/login", json=login_data)
+        response = self.client.post(
+            "/api/v1/auth/login", json=login_data
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -122,14 +139,19 @@ class TestAuthEndpoints:
         # Arrange
         login_data = {
             "email": "test@example.com",
-            "password": "wrongpassword"
+            "password": "wrongpassword",
         }
 
         from chatter.core.exceptions import AuthenticationError
-        self.mock_auth_service.authenticate_user.side_effect = AuthenticationError("Invalid credentials")
+
+        self.mock_auth_service.authenticate_user.side_effect = (
+            AuthenticationError("Invalid credentials")
+        )
 
         # Act
-        response = self.client.post("/api/v1/auth/login", json=login_data)
+        response = self.client.post(
+            "/api/v1/auth/login", json=login_data
+        )
 
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -137,20 +159,22 @@ class TestAuthEndpoints:
     def test_refresh_token_success(self):
         """Test successful token refresh."""
         # Arrange
-        refresh_data = {
-            "refresh_token": "valid-refresh-token"
-        }
+        refresh_data = {"refresh_token": "valid-refresh-token"}
 
         mock_token_response = {
             "access_token": "new-access-token",
             "token_type": "bearer",
-            "expires_in": 3600
+            "expires_in": 3600,
         }
 
-        self.mock_auth_service.refresh_token.return_value = mock_token_response
+        self.mock_auth_service.refresh_token.return_value = (
+            mock_token_response
+        )
 
         # Act
-        response = self.client.post("/api/v1/auth/refresh", json=refresh_data)
+        response = self.client.post(
+            "/api/v1/auth/refresh", json=refresh_data
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -164,11 +188,17 @@ class TestAuthEndpoints:
         self.mock_auth_service.logout_user.return_value = True
 
         # Mock get_current_user dependency
-        mock_user = User(id="test-user-id", email="test@example.com", username="testuser")
+        mock_user = User(
+            id="test-user-id",
+            email="test@example.com",
+            username="testuser",
+        )
         app.dependency_overrides[get_current_user] = lambda: mock_user
 
         # Act
-        response = self.client.post("/api/v1/auth/logout", headers=headers)
+        response = self.client.post(
+            "/api/v1/auth/logout", headers=headers
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -179,7 +209,12 @@ class TestAuthEndpoints:
         """Test getting current user profile."""
         # Arrange
         headers = {"Authorization": "Bearer valid-token"}
-        mock_user = User(id="test-user-id", email="test@example.com", username="testuser", is_active=True)
+        mock_user = User(
+            id="test-user-id",
+            email="test@example.com",
+            username="testuser",
+            is_active=True,
+        )
         app.dependency_overrides[get_current_user] = lambda: mock_user
 
         # Act
@@ -197,17 +232,27 @@ class TestAuthEndpoints:
         headers = {"Authorization": "Bearer valid-token"}
         update_data = {
             "username": "newusername",
-            "email": "new@example.com"
+            "email": "new@example.com",
         }
 
-        mock_user = User(id="test-user-id", email="test@example.com", username="testuser")
-        updated_user = User(id="test-user-id", email="new@example.com", username="newusername")
+        mock_user = User(
+            id="test-user-id",
+            email="test@example.com",
+            username="testuser",
+        )
+        updated_user = User(
+            id="test-user-id",
+            email="new@example.com",
+            username="newusername",
+        )
 
         app.dependency_overrides[get_current_user] = lambda: mock_user
         self.mock_auth_service.update_user.return_value = updated_user
 
         # Act
-        response = self.client.put("/api/v1/auth/me", json=update_data, headers=headers)
+        response = self.client.put(
+            "/api/v1/auth/me", json=update_data, headers=headers
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -221,20 +266,30 @@ class TestAuthEndpoints:
         headers = {"Authorization": "Bearer valid-token"}
         password_data = {
             "current_password": "oldpassword",
-            "new_password": "newpassword123"
+            "new_password": "newpassword123",
         }
 
-        mock_user = User(id="test-user-id", email="test@example.com", username="testuser")
+        mock_user = User(
+            id="test-user-id",
+            email="test@example.com",
+            username="testuser",
+        )
         app.dependency_overrides[get_current_user] = lambda: mock_user
         self.mock_auth_service.change_password.return_value = True
 
         # Act
-        response = self.client.post("/api/v1/auth/change-password", json=password_data, headers=headers)
+        response = self.client.post(
+            "/api/v1/auth/change-password",
+            json=password_data,
+            headers=headers,
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
-        assert response_data["message"] == "Password changed successfully"
+        assert (
+            response_data["message"] == "Password changed successfully"
+        )
 
     def test_change_password_invalid_current(self):
         """Test password change with invalid current password."""
@@ -242,17 +297,28 @@ class TestAuthEndpoints:
         headers = {"Authorization": "Bearer valid-token"}
         password_data = {
             "current_password": "wrongpassword",
-            "new_password": "newpassword123"
+            "new_password": "newpassword123",
         }
 
-        mock_user = User(id="test-user-id", email="test@example.com", username="testuser")
+        mock_user = User(
+            id="test-user-id",
+            email="test@example.com",
+            username="testuser",
+        )
         app.dependency_overrides[get_current_user] = lambda: mock_user
 
         from chatter.core.exceptions import AuthenticationError
-        self.mock_auth_service.change_password.side_effect = AuthenticationError("Invalid current password")
+
+        self.mock_auth_service.change_password.side_effect = (
+            AuthenticationError("Invalid current password")
+        )
 
         # Act
-        response = self.client.post("/api/v1/auth/change-password", json=password_data, headers=headers)
+        response = self.client.post(
+            "/api/v1/auth/change-password",
+            json=password_data,
+            headers=headers,
+        )
 
         # Assert
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -273,26 +339,30 @@ class TestAuthIntegration:
 
         # Setup mocks
         mock_auth_service = AsyncMock(spec=AuthService)
-        app.dependency_overrides[get_auth_service] = lambda: mock_auth_service
+        app.dependency_overrides[get_auth_service] = (
+            lambda: mock_auth_service
+        )
 
         # Mock registration
         user_data = {
             "email": "integration@example.com",
             "username": "integrationuser",
-            "password": "securepassword123"
+            "password": "securepassword123",
         }
 
         mock_user = User(
             id="integration-user-id",
             email=user_data["email"],
             username=user_data["username"],
-            is_active=True
+            is_active=True,
         )
 
         mock_auth_service.register_user.return_value = mock_user
 
         # Test registration
-        response = self.client.post("/api/v1/auth/register", json=user_data)
+        response = self.client.post(
+            "/api/v1/auth/register", json=user_data
+        )
         assert response.status_code == status.HTTP_201_CREATED
 
         # Mock login
@@ -300,25 +370,31 @@ class TestAuthIntegration:
             "access_token": "integration-access-token",
             "token_type": "bearer",
             "expires_in": 3600,
-            "refresh_token": "integration-refresh-token"
+            "refresh_token": "integration-refresh-token",
         }
 
-        mock_auth_service.authenticate_user.return_value = mock_token_response
+        mock_auth_service.authenticate_user.return_value = (
+            mock_token_response
+        )
 
         # Test login
         login_data = {
             "email": user_data["email"],
-            "password": user_data["password"]
+            "password": user_data["password"],
         }
 
-        response = self.client.post("/api/v1/auth/login", json=login_data)
+        response = self.client.post(
+            "/api/v1/auth/login", json=login_data
+        )
         assert response.status_code == status.HTTP_200_OK
 
         token_data = response.json()
         assert "access_token" in token_data
 
         # Test authenticated request
-        headers = {"Authorization": f"Bearer {token_data['access_token']}"}
+        headers = {
+            "Authorization": f"Bearer {token_data['access_token']}"
+        }
         app.dependency_overrides[get_current_user] = lambda: mock_user
 
         response = self.client.get("/api/v1/auth/me", headers=headers)

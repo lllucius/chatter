@@ -1,24 +1,24 @@
 """Tests for chat schemas."""
 
-import pytest
 from datetime import datetime
+
+import pytest
 from pydantic import ValidationError
 
+from chatter.models.conversation import ConversationStatus, MessageRole
 from chatter.schemas.chat import (
-    MessageBase,
-    MessageCreate,
-    MessageResponse,
+    ChatRequest,
+    ChatResponse,
     ConversationBase,
     ConversationCreate,
     ConversationResponse,
-    ConversationUpdate,
-    ConversationWithMessages,
-    ChatRequest,
-    ChatResponse,
     ConversationSearchRequest,
     ConversationSearchResponse,
+    ConversationUpdate,
+    MessageBase,
+    MessageCreate,
+    MessageResponse,
 )
-from chatter.models.conversation import MessageRole, ConversationStatus
 
 
 @pytest.mark.unit
@@ -29,8 +29,7 @@ class TestMessageSchemas:
         """Test valid MessageBase creation."""
         # Arrange & Act
         message = MessageBase(
-            role=MessageRole.USER,
-            content="Hello, world!"
+            role=MessageRole.USER, content="Hello, world!"
         )
 
         # Assert
@@ -42,7 +41,7 @@ class TestMessageSchemas:
         # Arrange & Act
         message = MessageCreate(
             role=MessageRole.ASSISTANT,
-            content="How can I help you today?"
+            content="How can I help you today?",
         )
 
         # Assert
@@ -67,7 +66,7 @@ class TestMessageSchemas:
             cost=0.0045,
             finish_reason="stop",
             created_at=datetime(2023, 1, 1, 12, 0, 0),
-            updated_at=datetime(2023, 1, 1, 12, 0, 5)
+            updated_at=datetime(2023, 1, 1, 12, 0, 5),
         )
 
         # Assert
@@ -95,7 +94,7 @@ class TestMessageSchemas:
             content="Minimal message",
             sequence_number=0,
             created_at=datetime(2023, 1, 1, 12, 0, 0),
-            updated_at=datetime(2023, 1, 1, 12, 0, 0)
+            updated_at=datetime(2023, 1, 1, 12, 0, 0),
         )
 
         # Assert
@@ -112,19 +111,13 @@ class TestMessageSchemas:
         """Test message with invalid role."""
         # Arrange & Act & Assert
         with pytest.raises(ValidationError):
-            MessageBase(
-                role="invalid_role",
-                content="Test content"
-            )
+            MessageBase(role="invalid_role", content="Test content")
 
     def test_message_empty_content(self):
         """Test message with empty content."""
         # Arrange & Act & Assert
         with pytest.raises(ValidationError):
-            MessageBase(
-                role=MessageRole.USER,
-                content=""
-            )
+            MessageBase(role=MessageRole.USER, content="")
 
 
 @pytest.mark.unit
@@ -135,8 +128,7 @@ class TestConversationSchemas:
         """Test valid ConversationBase."""
         # Arrange & Act
         conversation = ConversationBase(
-            title="Test Conversation",
-            description="A test conversation"
+            title="Test Conversation", description="A test conversation"
         )
 
         # Assert
@@ -151,14 +143,16 @@ class TestConversationSchemas:
             description="Creating a new conversation",
             profile_id="profile-123",
             system_prompt="You are a helpful assistant",
-            enable_retrieval=True
+            enable_retrieval=True,
         )
 
         # Assert
         assert conversation.title == "New Conversation"
         assert conversation.description == "Creating a new conversation"
         assert conversation.profile_id == "profile-123"
-        assert conversation.system_prompt == "You are a helpful assistant"
+        assert (
+            conversation.system_prompt == "You are a helpful assistant"
+        )
         assert conversation.enable_retrieval is True
 
     def test_conversation_response_complete(self):
@@ -179,7 +173,7 @@ class TestConversationSchemas:
             total_tokens=1500,
             total_cost=0.025,
             created_at=datetime(2023, 1, 1, 12, 0, 0),
-            updated_at=datetime(2023, 1, 1, 13, 0, 0)
+            updated_at=datetime(2023, 1, 1, 13, 0, 0),
         )
 
         # Assert
@@ -196,8 +190,7 @@ class TestConversationSchemas:
         """Test ConversationUpdate with partial fields."""
         # Arrange & Act
         update = ConversationUpdate(
-            title="Updated Title",
-            status=ConversationStatus.ARCHIVED
+            title="Updated Title", status=ConversationStatus.ARCHIVED
         )
 
         # Assert
@@ -209,9 +202,7 @@ class TestConversationSchemas:
         """Test ConversationSearchRequest."""
         # Arrange & Act
         request = ConversationSearchRequest(
-            limit=20,
-            offset=10,
-            search="test query"
+            limit=20, offset=10, search="test query"
         )
 
         # Assert
@@ -233,15 +224,14 @@ class TestConversationSchemas:
                 total_tokens=0,
                 total_cost=0.0,
                 created_at=datetime(2023, 1, 1, 12, 0, 0),
-                updated_at=datetime(2023, 1, 1, 12, 0, 0)
-            ) for i in range(3)
+                updated_at=datetime(2023, 1, 1, 12, 0, 0),
+            )
+            for i in range(3)
         ]
 
         # Act
         response = ConversationSearchResponse(
-            conversations=conversations,
-            total=3,
-            has_more=False
+            conversations=conversations, total=3, has_more=False
         )
 
         # Assert
@@ -258,8 +248,7 @@ class TestChatSchemas:
         """Test basic ChatRequest."""
         # Arrange & Act
         request = ChatRequest(
-            message="Hello, how are you?",
-            conversation_id="conv-123"
+            message="Hello, how are you?", conversation_id="conv-123"
         )
 
         # Assert
@@ -278,7 +267,7 @@ class TestChatSchemas:
             temperature=0.5,
             max_tokens=1500,
             context_limit=10,
-            include_sources=True
+            include_sources=True,
         )
 
         # Assert
@@ -307,13 +296,15 @@ class TestChatSchemas:
             response_time_ms=2000,
             finish_reason="stop",
             sources=["doc-1", "doc-2"],
-            metadata={"confidence": 0.95}
+            metadata={"confidence": 0.95},
         )
 
         # Assert
         assert response.message_id == "msg-789"
         assert response.conversation_id == "conv-123"
-        assert response.content == "Here's my response to your question..."
+        assert (
+            response.content == "Here's my response to your question..."
+        )
         assert response.role == MessageRole.ASSISTANT
         assert response.model_used == "gpt-4"
         assert response.provider_used == "openai"
@@ -339,7 +330,7 @@ class TestChatSchemaValidation:
             request = ChatRequest(
                 message="Test",
                 conversation_id="conv-123",
-                temperature=temp
+                temperature=temp,
             )
             assert request.temperature == temp
 
@@ -350,9 +341,7 @@ class TestChatSchemaValidation:
         """Test max tokens validation."""
         # Valid max_tokens
         request = ChatRequest(
-            message="Test",
-            conversation_id="conv-123",
-            max_tokens=1000
+            message="Test", conversation_id="conv-123", max_tokens=1000
         )
         assert request.max_tokens == 1000
 
@@ -361,23 +350,19 @@ class TestChatSchemaValidation:
             ChatRequest(
                 message="Test",
                 conversation_id="conv-123",
-                max_tokens=-100
+                max_tokens=-100,
             )
 
     def test_message_content_validation(self):
         """Test message content validation."""
         # Empty message should fail
         with pytest.raises(ValidationError):
-            ChatRequest(
-                message="",
-                conversation_id="conv-123"
-            )
+            ChatRequest(message="", conversation_id="conv-123")
 
         # Very long message should be handled by application logic
         long_message = "x" * 10000
         request = ChatRequest(
-            message=long_message,
-            conversation_id="conv-123"
+            message=long_message, conversation_id="conv-123"
         )
         assert len(request.message) == 10000
 
@@ -388,7 +373,7 @@ class TestChatSchemaValidation:
             message="Test serialization",
             conversation_id="conv-serial",
             stream=True,
-            temperature=0.7
+            temperature=0.7,
         )
 
         # Act
@@ -407,7 +392,7 @@ class TestChatSchemaValidation:
             message_id="msg-json",
             conversation_id="conv-json",
             content="JSON test",
-            role=MessageRole.ASSISTANT
+            role=MessageRole.ASSISTANT,
         )
 
         # Act

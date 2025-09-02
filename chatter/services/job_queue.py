@@ -48,14 +48,14 @@ class AdvancedJobQueue:
         self._main_loop: asyncio.AbstractEventLoop | None = None
 
         # Configure APScheduler
-        job_stores = {
-            "default": MemoryJobStore()
-        }
+        job_stores = {"default": MemoryJobStore()}
         # Two executors:
         # - "asyncio" runs jobs inside the event loop (for true async jobs)
         # - "default" runs jobs in a worker thread
         executors = {
-            "default": APSchedulerThreadPoolExecutor(max_workers=self.max_workers),
+            "default": APSchedulerThreadPoolExecutor(
+                max_workers=self.max_workers
+            ),
             "asyncio": AsyncIOExecutor(),
         }
         job_defaults = {
@@ -71,7 +71,9 @@ class AdvancedJobQueue:
             timezone=UTC,
         )
 
-    def register_handler(self, name: str, handler: Callable, executor: str | None = None) -> None:
+    def register_handler(
+        self, name: str, handler: Callable, executor: str | None = None
+    ) -> None:
         """Register a job handler function.
 
         Args:
@@ -90,10 +92,16 @@ class AdvancedJobQueue:
         chosen = executor or "asyncio"
 
         if chosen not in ("asyncio", "default"):
-            raise ValueError("executor must be 'asyncio', 'default', or None")
+            raise ValueError(
+                "executor must be 'asyncio', 'default', or None"
+            )
 
-        self.job_handlers[name] = JobHandlerInfo(func=handler, is_async=is_async, executor=chosen)
-        logger.info(f"Registered job handler: {name} (is_async={is_async}, executor={chosen})")
+        self.job_handlers[name] = JobHandlerInfo(
+            func=handler, is_async=is_async, executor=chosen
+        )
+        logger.info(
+            f"Registered job handler: {name} (is_async={is_async}, executor={chosen})"
+        )
 
     async def add_job(
         self,
@@ -126,7 +134,9 @@ class AdvancedJobQueue:
             Job ID
         """
         if function_name not in self.job_handlers:
-            raise ValueError(f"No handler registered for function: {function_name}")
+            raise ValueError(
+                f"No handler registered for function: {function_name}"
+            )
 
         info = self.job_handlers[function_name]
 
@@ -145,7 +155,9 @@ class AdvancedJobQueue:
         self.jobs[job.id] = job
 
         # Pick correct wrapper and executor up front
-        job_func, executor_name = self._select_wrapper_and_executor(info)
+        job_func, executor_name = self._select_wrapper_and_executor(
+            info
+        )
 
         # Schedule job with APScheduler
         if schedule_at:
@@ -174,6 +186,7 @@ class AdvancedJobQueue:
             run_date = datetime.now(UTC)
             if delay_seconds[priority] > 0:
                 from datetime import timedelta
+
                 run_date += timedelta(seconds=delay_seconds[priority])
 
             self.scheduler.add_job(
@@ -201,7 +214,9 @@ class AdvancedJobQueue:
 
         return job.id
 
-    async def schedule_job(self, job: Job, schedule_at: datetime) -> str:
+    async def schedule_job(
+        self, job: Job, schedule_at: datetime
+    ) -> str:
         """Schedule a job for later execution.
 
         This method is for backwards compatibility with the API.
@@ -218,9 +233,13 @@ class AdvancedJobQueue:
 
         info = self.job_handlers.get(job.function_name)
         if not info:
-            raise ValueError(f"No handler registered for function: {job.function_name}")
+            raise ValueError(
+                f"No handler registered for function: {job.function_name}"
+            )
 
-        job_func, executor_name = self._select_wrapper_and_executor(info)
+        job_func, executor_name = self._select_wrapper_and_executor(
+            info
+        )
 
         # Schedule with APScheduler
         self.scheduler.add_job(
@@ -292,7 +311,9 @@ class AdvancedJobQueue:
                 logger.info(f"Cancelled job {job_id}")
                 return True
             except Exception as e:
-                logger.warning(f"Failed to cancel APScheduler job {job_id}: {e}")
+                logger.warning(
+                    f"Failed to cancel APScheduler job {job_id}: {e}"
+                )
                 return False
         elif job.status == JobStatus.RUNNING:
             # For running jobs, mark for cancellation
@@ -325,7 +346,11 @@ class AdvancedJobQueue:
             jobs = [job for job in jobs if job.status == status]
 
         if tags:
-            jobs = [job for job in jobs if any(tag in job.tags for tag in tags)]
+            jobs = [
+                job
+                for job in jobs
+                if any(tag in job.tags for tag in tags)
+            ]
 
         # Sort by created_at descending
         jobs.sort(key=lambda x: x.created_at, reverse=True)
@@ -342,10 +367,14 @@ class AdvancedJobQueue:
         status_counts: dict[str, int] = {}
 
         for status in JobStatus:
-            status_counts[status.value] = sum(1 for job in self.jobs.values() if job.status == status)
+            status_counts[status.value] = sum(
+                1 for job in self.jobs.values() if job.status == status
+            )
 
         # Get APScheduler stats
-        scheduled_jobs = len(self.scheduler.get_jobs()) if self.running else 0
+        scheduled_jobs = (
+            len(self.scheduler.get_jobs()) if self.running else 0
+        )
 
         return {
             "total_jobs": total_jobs,
@@ -368,10 +397,14 @@ class AdvancedJobQueue:
         status_counts: dict[str, int] = {}
 
         for status in JobStatus:
-            status_counts[status.value] = sum(1 for job in self.jobs.values() if job.status == status)
+            status_counts[status.value] = sum(
+                1 for job in self.jobs.values() if job.status == status
+            )
 
         # Get APScheduler stats
-        scheduled_jobs = len(self.scheduler.get_jobs()) if self.running else 0
+        scheduled_jobs = (
+            len(self.scheduler.get_jobs()) if self.running else 0
+        )
 
         return {
             "total_jobs": total_jobs,
@@ -391,7 +424,9 @@ class AdvancedJobQueue:
             return
 
         self.running = True
-        logger.info(f"Starting job queue with APScheduler (max_workers: {self.max_workers})")
+        logger.info(
+            f"Starting job queue with APScheduler (max_workers: {self.max_workers})"
+        )
 
         # Capture the main event loop so thread workers can bounce async callbacks here
         try:
@@ -420,7 +455,9 @@ class AdvancedJobQueue:
 
     # ----------------- Internal helpers -----------------
 
-    def _select_wrapper_and_executor(self, info: JobHandlerInfo) -> tuple[Callable[..., Any], str]:
+    def _select_wrapper_and_executor(
+        self, info: JobHandlerInfo
+    ) -> tuple[Callable[..., Any], str]:
         """Choose the correct callable and executor name for APScheduler."""
         if info.executor == "default":
             # Orchestration in a worker thread
@@ -475,9 +512,12 @@ class AdvancedJobQueue:
         # Trigger job started event
         try:
             from chatter.services.sse_events import trigger_job_started
+
             await trigger_job_started(job.id, job.name)
         except Exception as e:
-            logger.warning("Failed to trigger job started event", error=str(e))
+            logger.warning(
+                "Failed to trigger job started event", error=str(e)
+            )
 
         start_time = datetime.now(UTC)
 
@@ -485,7 +525,9 @@ class AdvancedJobQueue:
             # Get job handler info
             info = self.job_handlers.get(job.function_name)
             if not info:
-                raise ValueError(f"No handler registered for function: {job.function_name}")
+                raise ValueError(
+                    f"No handler registered for function: {job.function_name}"
+                )
 
             # Execute job with timeout
             if info.is_async:
@@ -496,7 +538,9 @@ class AdvancedJobQueue:
             else:
                 # Run sync work without blocking the loop
                 result = await asyncio.wait_for(
-                    asyncio.to_thread(info.func, *job.args, **job.kwargs),
+                    asyncio.to_thread(
+                        info.func, *job.args, **job.kwargs
+                    ),
                     timeout=job.timeout,
                 )
 
@@ -505,7 +549,9 @@ class AdvancedJobQueue:
             job.completed_at = datetime.now(UTC)
             job.result = result  # Store result on job object too
 
-            execution_time = (job.completed_at - start_time).total_seconds()
+            execution_time = (
+                job.completed_at - start_time
+            ).total_seconds()
 
             job_result = JobResult(
                 job_id=job.id,
@@ -528,9 +574,15 @@ class AdvancedJobQueue:
                 from chatter.services.sse_events import (
                     trigger_job_completed,
                 )
-                await trigger_job_completed(job.id, job.name, result or {})
+
+                await trigger_job_completed(
+                    job.id, job.name, result or {}
+                )
             except Exception as e:
-                logger.warning("Failed to trigger job completed event", error=str(e))
+                logger.warning(
+                    "Failed to trigger job completed event",
+                    error=str(e),
+                )
 
         except TimeoutError:
             await self._handle_job_error(job, "Job timed out")
@@ -559,12 +611,17 @@ class AdvancedJobQueue:
         # Trigger job started event on the main loop if available
         try:
             from chatter.services.sse_events import trigger_job_started
+
             if self._main_loop:
                 asyncio.run_coroutine_threadsafe(
-                    trigger_job_started(job.id, job.name), self._main_loop
+                    trigger_job_started(job.id, job.name),
+                    self._main_loop,
                 )
         except Exception as e:
-            logger.warning("Failed to trigger job started event (thread)", error=str(e))
+            logger.warning(
+                "Failed to trigger job started event (thread)",
+                error=str(e),
+            )
 
         start_time = datetime.now(UTC)
 
@@ -572,7 +629,9 @@ class AdvancedJobQueue:
             job.status = JobStatus.COMPLETED
             job.completed_at = datetime.now(UTC)
             job.result = result
-            execution_time = (job.completed_at - start_time).total_seconds()
+            execution_time = (
+                job.completed_at - start_time
+            ).total_seconds()
             self.results[job.id] = JobResult(
                 job_id=job.id,
                 status=JobStatus.COMPLETED,
@@ -590,14 +649,18 @@ class AdvancedJobQueue:
                 from chatter.services.sse_events import (
                     trigger_job_completed,
                 )
+
                 if self._main_loop:
                     asyncio.run_coroutine_threadsafe(
-                        trigger_job_completed(job.id, job.name, result or {}),
+                        trigger_job_completed(
+                            job.id, job.name, result or {}
+                        ),
                         self._main_loop,
                     )
             except Exception as e:
                 logger.warning(
-                    "Failed to trigger job completed event (thread)", error=str(e)
+                    "Failed to trigger job completed event (thread)",
+                    error=str(e),
                 )
 
         def _handle_error_sync(msg: str) -> None:
@@ -605,7 +668,8 @@ class AdvancedJobQueue:
             try:
                 if self._main_loop:
                     fut = asyncio.run_coroutine_threadsafe(
-                        self._handle_job_error(job, msg), self._main_loop
+                        self._handle_job_error(job, msg),
+                        self._main_loop,
                     )
                     fut.result()  # wait to keep state consistent
                 else:
@@ -613,7 +677,9 @@ class AdvancedJobQueue:
                     job.status = JobStatus.FAILED
                     job.completed_at = datetime.now(UTC)
                     execution_time = (
-                        (job.completed_at - job.started_at).total_seconds()
+                        (
+                            job.completed_at - job.started_at
+                        ).total_seconds()
                         if job.started_at
                         else 0
                     )
@@ -625,17 +691,23 @@ class AdvancedJobQueue:
                         completed_at=job.completed_at,
                     )
             except Exception as e:
-                logger.warning("Error during sync error handling", error=str(e))
+                logger.warning(
+                    "Error during sync error handling", error=str(e)
+                )
 
         try:
             info = self.job_handlers.get(job.function_name)
             if not info:
-                _handle_error_sync(f"No handler registered for function: {job.function_name}")
+                _handle_error_sync(
+                    f"No handler registered for function: {job.function_name}"
+                )
                 return
 
             if info.is_async:
                 if not self._main_loop:
-                    _handle_error_sync("No main event loop available for async handler")
+                    _handle_error_sync(
+                        "No main event loop available for async handler"
+                    )
                     return
 
                 # Schedule coroutine on the main loop and wait here with a timeout
@@ -658,7 +730,9 @@ class AdvancedJobQueue:
         except Exception as e:
             _handle_error_sync(str(e))
 
-    async def _handle_job_error(self, job: Job, error_message: str) -> None:
+    async def _handle_job_error(
+        self, job: Job, error_message: str
+    ) -> None:
         """Handle job execution errors and retries.
 
         Args:
@@ -689,7 +763,9 @@ class AdvancedJobQueue:
             job.completed_at = datetime.now(UTC)
 
             execution_time = (
-                (job.completed_at - job.started_at).total_seconds() if job.started_at else 0
+                (job.completed_at - job.started_at).total_seconds()
+                if job.started_at
+                else 0
             )
 
             job_result = JobResult(
@@ -715,9 +791,13 @@ class AdvancedJobQueue:
                     trigger_job_failed,
                 )
 
-                await trigger_job_failed(job.id, job.name, error_message)
+                await trigger_job_failed(
+                    job.id, job.name, error_message
+                )
             except Exception as e:
-                logger.warning("Failed to trigger job failed event", error=str(e))
+                logger.warning(
+                    "Failed to trigger job failed event", error=str(e)
+                )
 
     async def _schedule_retry(self, job: Job) -> None:
         """Schedule a job retry after delay using APScheduler.
@@ -728,16 +808,22 @@ class AdvancedJobQueue:
         from datetime import timedelta
 
         if not self.running:
-            logger.warning(f"Not scheduling retry for job {job.id} - scheduler not running")
+            logger.warning(
+                f"Not scheduling retry for job {job.id} - scheduler not running"
+            )
             return
 
         info = self.job_handlers.get(job.function_name)
         if not info:
-            logger.error(f"No handler registered for function: {job.function_name}")
+            logger.error(
+                f"No handler registered for function: {job.function_name}"
+            )
             return
 
         # Calculate retry delay (exponential backoff)
-        retry_delay = min(job.retry_delay * (2 ** (job.retry_count - 1)), 3600)  # Cap at 1 hour
+        retry_delay = min(
+            job.retry_delay * (2 ** (job.retry_count - 1)), 3600
+        )  # Cap at 1 hour
         run_date = datetime.now(UTC) + timedelta(seconds=retry_delay)
 
         # Remove existing job if it exists
@@ -747,7 +833,9 @@ class AdvancedJobQueue:
             pass  # Job might not exist in scheduler
 
         # Pick correct wrapper and executor up front
-        job_func, executor_name = self._select_wrapper_and_executor(info)
+        job_func, executor_name = self._select_wrapper_and_executor(
+            info
+        )
 
         # Schedule retry
         self.scheduler.add_job(
@@ -774,15 +862,21 @@ class AdvancedJobQueue:
 
 
 # Global job queue instance
-job_queue = AdvancedJobQueue(max_workers=settings.background_worker_concurrency)
+job_queue = AdvancedJobQueue(
+    max_workers=settings.background_worker_concurrency
+)
 
 
 # Register some default job handlers
-async def document_processing_job(document_id: str, file_content: bytes) -> dict[str, Any]:
+async def document_processing_job(
+    document_id: str, file_content: bytes
+) -> dict[str, Any]:
     """Document processing job handler for background processing."""
     from chatter.utils.database import get_session_maker
 
-    logger.info(f"Starting background processing for document {document_id}")
+    logger.info(
+        f"Starting background processing for document {document_id}"
+    )
 
     try:
         # Get a database session for background processing
@@ -802,14 +896,18 @@ async def document_processing_job(document_id: str, file_content: bytes) -> dict
             )
 
             if success:
-                logger.info(f"Document {document_id} processed successfully in background")
+                logger.info(
+                    f"Document {document_id} processed successfully in background"
+                )
                 return {
                     "document_id": document_id,
                     "status": "processed",
                     "success": True,
                 }
             else:
-                logger.error(f"Document {document_id} processing failed in background")
+                logger.error(
+                    f"Document {document_id} processing failed in background"
+                )
                 return {
                     "document_id": document_id,
                     "status": "failed",
@@ -818,7 +916,10 @@ async def document_processing_job(document_id: str, file_content: bytes) -> dict
                 }
 
     except Exception as e:
-        logger.error(f"Document {document_id} processing error in background", error=str(e))
+        logger.error(
+            f"Document {document_id} processing error in background",
+            error=str(e),
+        )
         return {
             "document_id": document_id,
             "status": "failed",
@@ -827,7 +928,9 @@ async def document_processing_job(document_id: str, file_content: bytes) -> dict
         }
 
 
-async def conversation_summarization_job(conversation_id: str) -> dict[str, Any]:
+async def conversation_summarization_job(
+    conversation_id: str,
+) -> dict[str, Any]:
     """Default conversation summarization job handler."""
     logger.info(f"Summarizing conversation {conversation_id}")
     # Simulate processing time
@@ -851,9 +954,13 @@ async def vector_store_maintenance_job() -> dict[str, Any]:
     }
 
 
-async def data_export_job(user_id: str, export_type: str) -> dict[str, Any]:
+async def data_export_job(
+    user_id: str, export_type: str
+) -> dict[str, Any]:
     """Default data export job handler."""
-    logger.info(f"Exporting data for user {user_id}, type: {export_type}")
+    logger.info(
+        f"Exporting data for user {user_id}, type: {export_type}"
+    )
     # Simulate export work
     await asyncio.sleep(10)
     return {
@@ -867,7 +974,13 @@ async def data_export_job(user_id: str, export_type: str) -> dict[str, Any]:
 # Register default handlers
 # Note: document_processing stays on the 'asyncio' executor by default to keep async DB work
 # on the main loop. Offload any blocking bits inside the handler/service with asyncio.to_thread.
-job_queue.register_handler("document_processing", document_processing_job)
-job_queue.register_handler("conversation_summarization", conversation_summarization_job)
-job_queue.register_handler("vector_store_maintenance", vector_store_maintenance_job)
+job_queue.register_handler(
+    "document_processing", document_processing_job
+)
+job_queue.register_handler(
+    "conversation_summarization", conversation_summarization_job
+)
+job_queue.register_handler(
+    "vector_store_maintenance", vector_store_maintenance_job
+)
 job_queue.register_handler("data_export", data_export_job)

@@ -1,10 +1,7 @@
 """Test configuration and utilities shared across the test suite."""
 
 import os
-import sys
-import asyncio
-from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -13,14 +10,17 @@ import pytest
 TEST_CONFIG = {
     "database_url": os.getenv("TEST_DATABASE_URL", "sqlite:///test.db"),
     "api_base_url": os.getenv("TEST_API_URL", "http://localhost:8000"),
-    "mock_external_apis": os.getenv("MOCK_EXTERNAL_APIS", "true").lower() == "true",
+    "mock_external_apis": os.getenv(
+        "MOCK_EXTERNAL_APIS", "true"
+    ).lower()
+    == "true",
     "test_timeout": int(os.getenv("TEST_TIMEOUT", "30")),
     "load_test_users": int(os.getenv("LOAD_TEST_USERS", "10")),
     "load_test_duration": int(os.getenv("LOAD_TEST_DURATION", "60")),
 }
 
 
-def get_test_config() -> Dict[str, Any]:
+def get_test_config() -> dict[str, Any]:
     """Get test configuration settings."""
     return TEST_CONFIG.copy()
 
@@ -66,43 +66,54 @@ def create_mock_client() -> AsyncMock:
 
 def skip_if_no_server(func):
     """Decorator to skip tests if server is not running."""
+
     def wrapper(*args, **kwargs):
         import requests
+
         try:
-            response = requests.get(TEST_CONFIG["api_base_url"] + "/health", timeout=5)
+            response = requests.get(
+                TEST_CONFIG["api_base_url"] + "/health", timeout=5
+            )
             if response.status_code != 200:
                 pytest.skip("Server not running or not responding")
         except requests.RequestException:
             pytest.skip("Server not accessible")
         return func(*args, **kwargs)
+
     return wrapper
 
 
 def skip_if_no_database(func):
     """Decorator to skip tests if database is not available."""
+
     def wrapper(*args, **kwargs):
         if "sqlite" in TEST_CONFIG["database_url"]:
             return func(*args, **kwargs)  # SQLite should always work
-        
+
         # For other databases, check connectivity
         try:
             import sqlalchemy
-            engine = sqlalchemy.create_engine(TEST_CONFIG["database_url"])
+
+            engine = sqlalchemy.create_engine(
+                TEST_CONFIG["database_url"]
+            )
             with engine.connect():
                 pass
         except Exception:
             pytest.skip("Database not available")
         return func(*args, **kwargs)
+
     return wrapper
 
 
 class TestDataFactory:
     """Factory for creating test data."""
-    
+
     @staticmethod
-    def create_user_data(email: Optional[str] = None) -> Dict[str, Any]:
+    def create_user_data(email: str | None = None) -> dict[str, Any]:
         """Create test user data."""
         import uuid
+
         user_id = str(uuid.uuid4())
         return {
             "id": user_id,
@@ -110,13 +121,16 @@ class TestDataFactory:
             "username": f"testuser_{user_id[:8]}",
             "full_name": "Test User",
             "is_active": True,
-            "created_at": "2024-01-01T00:00:00Z"
+            "created_at": "2024-01-01T00:00:00Z",
         }
-    
+
     @staticmethod
-    def create_conversation_data(user_id: Optional[str] = None) -> Dict[str, Any]:
+    def create_conversation_data(
+        user_id: str | None = None,
+    ) -> dict[str, Any]:
         """Create test conversation data."""
         import uuid
+
         conv_id = str(uuid.uuid4())
         return {
             "id": conv_id,
@@ -124,26 +138,32 @@ class TestDataFactory:
             "description": "A test conversation for automated testing",
             "user_id": user_id or str(uuid.uuid4()),
             "created_at": "2024-01-01T00:00:00Z",
-            "updated_at": "2024-01-01T00:00:00Z"
+            "updated_at": "2024-01-01T00:00:00Z",
         }
-    
+
     @staticmethod
-    def create_message_data(conversation_id: Optional[str] = None) -> Dict[str, Any]:
+    def create_message_data(
+        conversation_id: str | None = None,
+    ) -> dict[str, Any]:
         """Create test message data."""
         import uuid
+
         message_id = str(uuid.uuid4())
         return {
             "id": message_id,
             "conversation_id": conversation_id or str(uuid.uuid4()),
             "role": "user",
             "content": f"Test message content {message_id[:8]}",
-            "created_at": "2024-01-01T00:00:00Z"
+            "created_at": "2024-01-01T00:00:00Z",
         }
-    
+
     @staticmethod
-    def create_document_data(owner_id: Optional[str] = None) -> Dict[str, Any]:
+    def create_document_data(
+        owner_id: str | None = None,
+    ) -> dict[str, Any]:
         """Create test document data."""
         import uuid
+
         doc_id = str(uuid.uuid4())
         return {
             "id": doc_id,
@@ -153,13 +173,14 @@ class TestDataFactory:
             "owner_id": owner_id or str(uuid.uuid4()),
             "file_size": 1024,
             "mime_type": "text/plain",
-            "created_at": "2024-01-01T00:00:00Z"
+            "created_at": "2024-01-01T00:00:00Z",
         }
-    
+
     @staticmethod
-    def create_agent_data() -> Dict[str, Any]:
+    def create_agent_data() -> dict[str, Any]:
         """Create test agent data."""
         import uuid
+
         agent_id = str(uuid.uuid4())
         return {
             "id": agent_id,
@@ -169,39 +190,40 @@ class TestDataFactory:
             "config": {
                 "model": "gpt-4",
                 "temperature": 0.7,
-                "max_tokens": 1000
+                "max_tokens": 1000,
             },
-            "created_at": "2024-01-01T00:00:00Z"
+            "created_at": "2024-01-01T00:00:00Z",
         }
 
 
 class MockLLMService:
     """Mock LLM service for testing."""
-    
+
     @staticmethod
-    def generate_response(prompt: str, **kwargs) -> Dict[str, Any]:
+    def generate_response(prompt: str, **kwargs) -> dict[str, Any]:
         """Generate a mock LLM response."""
         return {
             "content": f"Mock response to: {prompt[:50]}...",
             "usage": {
                 "prompt_tokens": len(prompt.split()),
                 "completion_tokens": 10,
-                "total_tokens": len(prompt.split()) + 10
+                "total_tokens": len(prompt.split()) + 10,
             },
             "model": "mock-gpt-4",
-            "finish_reason": "stop"
+            "finish_reason": "stop",
         }
 
 
 class MockEmbeddingService:
     """Mock embedding service for testing."""
-    
+
     @staticmethod
     def generate_embeddings(texts: list) -> list:
         """Generate mock embeddings."""
         import random
+
         return [[random.random() for _ in range(384)] for _ in texts]
-    
+
     @staticmethod
     def search_similar(query_embedding: list, limit: int = 10) -> list:
         """Mock similarity search."""
@@ -209,7 +231,7 @@ class MockEmbeddingService:
             {
                 "id": f"doc_{i}",
                 "score": 0.9 - (i * 0.1),
-                "content": f"Similar document {i}"
+                "content": f"Similar document {i}",
             }
             for i in range(min(limit, 5))
         ]
@@ -243,35 +265,39 @@ def test_data_factory():
 # Performance monitoring utilities
 class PerformanceMonitor:
     """Monitor test performance."""
-    
+
     def __init__(self):
         self.start_time = None
         self.memory_start = None
-    
+
     def start(self):
         """Start monitoring."""
-        import time
-        import psutil
         import os
-        
+        import time
+
+        import psutil
+
         self.start_time = time.time()
         process = psutil.Process(os.getpid())
         self.memory_start = process.memory_info().rss
-    
-    def stop(self) -> Dict[str, float]:
+
+    def stop(self) -> dict[str, float]:
         """Stop monitoring and return metrics."""
-        import time
-        import psutil
         import os
-        
+        import time
+
+        import psutil
+
         if self.start_time is None:
             return {}
-        
+
         end_time = time.time()
         process = psutil.Process(os.getpid())
         memory_end = process.memory_info().rss
-        
+
         return {
             "duration_seconds": end_time - self.start_time,
-            "memory_delta_mb": (memory_end - self.memory_start) / 1024 / 1024
+            "memory_delta_mb": (memory_end - self.memory_start)
+            / 1024
+            / 1024,
         }

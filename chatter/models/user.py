@@ -29,23 +29,23 @@ class User(Base):
     __table_args__ = (
         CheckConstraint(
             'daily_message_limit IS NULL OR daily_message_limit > 0',
-            name='check_daily_message_limit_positive'
+            name='check_daily_message_limit_positive',
         ),
         CheckConstraint(
             'monthly_message_limit IS NULL OR monthly_message_limit > 0',
-            name='check_monthly_message_limit_positive'
+            name='check_monthly_message_limit_positive',
         ),
         CheckConstraint(
             'max_file_size_mb IS NULL OR max_file_size_mb > 0',
-            name='check_max_file_size_positive'
+            name='check_max_file_size_positive',
         ),
         CheckConstraint(
             "email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'",
-            name='check_email_format'
+            name='check_email_format',
         ),
         CheckConstraint(
             "username ~ '^[a-zA-Z0-9_-]{3,50}$'",
-            name='check_username_format'
+            name='check_username_format',
         ),
     )
 
@@ -158,13 +158,15 @@ class User(Base):
             "is_verified": self.is_verified,
             "default_llm_provider": self.default_llm_provider,
             "default_profile_id": self.default_profile_id,
-            "created_at": self.created_at.isoformat()
-            if self.created_at
-            else None,
-            "updated_at": self.updated_at.isoformat()
-            if self.updated_at
-            else None,
-            "last_login_at": self.last_login_at.isoformat()
-            if self.last_login_at
-            else None,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
+            "last_login_at": (
+                self.last_login_at.isoformat()
+                if self.last_login_at
+                else None
+            ),
         }

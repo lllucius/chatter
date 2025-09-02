@@ -9,6 +9,9 @@ from sqlalchemy import (
     JSON,
     Boolean,
     CheckConstraint,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
     Float,
     ForeignKey,
     Index,
@@ -17,7 +20,6 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -51,40 +53,33 @@ class Conversation(Base):
     __table_args__ = (
         CheckConstraint(
             'temperature IS NULL OR (temperature >= 0.0 AND temperature <= 2.0)',
-            name='check_temperature_range'
+            name='check_temperature_range',
         ),
         CheckConstraint(
             'max_tokens IS NULL OR max_tokens > 0',
-            name='check_max_tokens_positive'
+            name='check_max_tokens_positive',
         ),
         CheckConstraint(
-            'context_window > 0',
-            name='check_context_window_positive'
+            'context_window > 0', name='check_context_window_positive'
         ),
         CheckConstraint(
-            'retrieval_limit > 0',
-            name='check_retrieval_limit_positive'
+            'retrieval_limit > 0', name='check_retrieval_limit_positive'
         ),
         CheckConstraint(
             'retrieval_score_threshold >= 0.0 AND retrieval_score_threshold <= 1.0',
-            name='check_retrieval_score_threshold_range'
+            name='check_retrieval_score_threshold_range',
         ),
         CheckConstraint(
             'message_count >= 0',
-            name='check_message_count_non_negative'
+            name='check_message_count_non_negative',
         ),
         CheckConstraint(
-            'total_tokens >= 0',
-            name='check_total_tokens_non_negative'
+            'total_tokens >= 0', name='check_total_tokens_non_negative'
         ),
         CheckConstraint(
-            'total_cost >= 0.0',
-            name='check_total_cost_non_negative'
+            'total_cost >= 0.0', name='check_total_cost_non_negative'
         ),
-        CheckConstraint(
-            "title != ''",
-            name='check_title_not_empty'
-        ),
+        CheckConstraint("title != ''", name='check_title_not_empty'),
         Index('idx_user_status', 'user_id', 'status'),
         Index('idx_user_created', 'user_id', 'created_at'),
     )
@@ -207,12 +202,12 @@ class Conversation(Base):
             "total_cost": self.total_cost,
             "tags": self.tags,
             "extra_metadata": self.extra_metadata,
-            "created_at": self.created_at.isoformat()
-            if self.created_at
-            else None,
-            "updated_at": self.updated_at.isoformat()
-            if self.updated_at
-            else None,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
         }
 
 
@@ -223,39 +218,44 @@ class Message(Base):
     __table_args__ = (
         CheckConstraint(
             'prompt_tokens IS NULL OR prompt_tokens >= 0',
-            name='check_prompt_tokens_non_negative'
+            name='check_prompt_tokens_non_negative',
         ),
         CheckConstraint(
             'completion_tokens IS NULL OR completion_tokens >= 0',
-            name='check_completion_tokens_non_negative'
+            name='check_completion_tokens_non_negative',
         ),
         CheckConstraint(
             'total_tokens IS NULL OR total_tokens >= 0',
-            name='check_total_tokens_non_negative'
+            name='check_total_tokens_non_negative',
         ),
         CheckConstraint(
             'response_time_ms IS NULL OR response_time_ms >= 0',
-            name='check_response_time_non_negative'
+            name='check_response_time_non_negative',
         ),
         CheckConstraint(
             'cost IS NULL OR cost >= 0.0',
-            name='check_cost_non_negative'
+            name='check_cost_non_negative',
         ),
         CheckConstraint(
-            'retry_count >= 0',
-            name='check_retry_count_non_negative'
+            'retry_count >= 0', name='check_retry_count_non_negative'
         ),
         CheckConstraint(
             'sequence_number >= 0',
-            name='check_sequence_number_non_negative'
+            name='check_sequence_number_non_negative',
         ),
         CheckConstraint(
-            "content != ''",
-            name='check_content_not_empty'
+            "content != ''", name='check_content_not_empty'
         ),
-        UniqueConstraint('conversation_id', 'sequence_number',
-                         name='uq_conversation_sequence'),
-        Index('idx_conversation_sequence', 'conversation_id', 'sequence_number'),
+        UniqueConstraint(
+            'conversation_id',
+            'sequence_number',
+            name='uq_conversation_sequence',
+        ),
+        Index(
+            'idx_conversation_sequence',
+            'conversation_id',
+            'sequence_number',
+        ),
         Index('idx_conversation_role', 'conversation_id', 'role'),
     )
 
@@ -370,10 +370,10 @@ class Message(Base):
             "context_used": self.context_used,
             "extra_metadata": self.extra_metadata,
             "sequence_number": self.sequence_number,
-            "created_at": self.created_at.isoformat()
-            if self.created_at
-            else None,
-            "updated_at": self.updated_at.isoformat()
-            if self.updated_at
-            else None,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
         }

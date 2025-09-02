@@ -35,7 +35,7 @@ class TestBaseAgent:
             description="A test agent",
             type=AgentType.CONVERSATIONAL,
             capabilities=[AgentCapability.NATURAL_LANGUAGE],
-            system_message="You are a helpful test assistant."
+            system_message="You are a helpful test assistant.",
         )
 
     def test_base_agent_initialization(self):
@@ -63,12 +63,14 @@ class TestBaseAgent:
             "average_confidence",
             "average_response_time",
             "feedback_score",
-            "success_rate"
+            "success_rate",
         ]
 
         for metric in expected_metrics:
             assert metric in agent.performance_metrics
-            assert isinstance(agent.performance_metrics[metric], int | float)
+            assert isinstance(
+                agent.performance_metrics[metric], int | float
+            )
 
     def test_add_tool_to_agent(self):
         """Test adding tools to agent."""
@@ -103,11 +105,13 @@ class TestBaseAgent:
         agent = ConversationalAgent(self.agent_profile, self.mock_llm)
 
         # Act
-        agent.update_performance_metrics({
-            "response_time": 1.5,
-            "confidence": 0.85,
-            "feedback_score": 4.2
-        })
+        agent.update_performance_metrics(
+            {
+                "response_time": 1.5,
+                "confidence": 0.85,
+                "feedback_score": 4.2,
+            }
+        )
 
         # Assert
         assert agent.performance_metrics["total_interactions"] == 1
@@ -127,10 +131,15 @@ class TestConversationalAgent:
             name="Conversational Agent",
             description="A conversational AI agent",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE, AgentCapability.MEMORY],
-            system_message="You are a helpful conversational assistant."
+            capabilities=[
+                AgentCapability.NATURAL_LANGUAGE,
+                AgentCapability.MEMORY,
+            ],
+            system_message="You are a helpful conversational assistant.",
         )
-        self.agent = ConversationalAgent(self.agent_profile, self.mock_llm)
+        self.agent = ConversationalAgent(
+            self.agent_profile, self.mock_llm
+        )
 
     @pytest.mark.asyncio
     async def test_process_message_basic(self):
@@ -139,10 +148,14 @@ class TestConversationalAgent:
         message = "Hello, how are you?"
         conversation_id = "conv-123"
 
-        self.mock_llm.ainvoke.return_value = MagicMock(content="I'm doing well, thank you!")
+        self.mock_llm.ainvoke.return_value = MagicMock(
+            content="I'm doing well, thank you!"
+        )
 
         # Act
-        response = await self.agent.process_message(message, conversation_id)
+        response = await self.agent.process_message(
+            message, conversation_id
+        )
 
         # Assert
         assert response is not None
@@ -158,7 +171,9 @@ class TestConversationalAgent:
         conversation_id = "conv-123"
         context = {"previous_topic": "weather"}
 
-        self.mock_llm.ainvoke.return_value = MagicMock(content="You asked about the weather.")
+        self.mock_llm.ainvoke.return_value = MagicMock(
+            content="You asked about the weather."
+        )
 
         # Act
         response = await self.agent.process_message(
@@ -177,7 +192,9 @@ class TestConversationalAgent:
         message = "Test message"
         conversation_id = "conv-123"
 
-        self.mock_llm.ainvoke.return_value = MagicMock(content="Test response")
+        self.mock_llm.ainvoke.return_value = MagicMock(
+            content="Test response"
+        )
 
         # Act
         await self.agent.process_message(message, conversation_id)
@@ -213,12 +230,16 @@ class TestConversationalAgent:
             agent_id=self.agent.profile.id,
             conversation_id=conversation_id,
             user_message="Hello",
-            agent_response="Hi there!"
+            agent_response="Hi there!",
         )
-        self.agent.conversation_history[conversation_id] = [interaction1]
+        self.agent.conversation_history[conversation_id] = [
+            interaction1
+        ]
 
         # Act
-        context = self.agent._build_message_context(conversation_id, max_history=5)
+        context = self.agent._build_message_context(
+            conversation_id, max_history=5
+        )
 
         # Assert
         assert len(context) >= 1
@@ -230,7 +251,9 @@ class TestConversationalAgent:
         response_text = "I am confident about this answer."
 
         # Act
-        confidence = self.agent._calculate_confidence_score(response_text)
+        confidence = self.agent._calculate_confidence_score(
+            response_text
+        )
 
         # Assert
         assert 0.0 <= confidence <= 1.0
@@ -249,9 +272,12 @@ class TestSpecializedAgent:
             name="Code Assistant",
             description="Specialized agent for code assistance",
             type=AgentType.SPECIALIZED,
-            capabilities=[AgentCapability.CODE_GENERATION, AgentCapability.TOOL_USE],
+            capabilities=[
+                AgentCapability.CODE_GENERATION,
+                AgentCapability.TOOL_USE,
+            ],
             system_message="You are a specialized code assistant.",
-            specialization="programming"
+            specialization="programming",
         )
         self.agent = SpecializedAgent(self.agent_profile, self.mock_llm)
 
@@ -267,7 +293,9 @@ class TestSpecializedAgent:
         )
 
         # Act
-        response = await self.agent.process_message(message, conversation_id)
+        response = await self.agent.process_message(
+            message, conversation_id
+        )
 
         # Assert
         assert response is not None
@@ -291,11 +319,15 @@ class TestSpecializedAgent:
         # Mock the LLM to indicate tool usage
         self.mock_llm.ainvoke.return_value = MagicMock(
             content="I'll execute that code for you.",
-            additional_kwargs={"tool_calls": [{"name": "code_executor"}]}
+            additional_kwargs={
+                "tool_calls": [{"name": "code_executor"}]
+            },
         )
 
         # Act
-        response = await self.agent.process_message(message, conversation_id)
+        response = await self.agent.process_message(
+            message, conversation_id
+        )
 
         # Assert
         assert response is not None
@@ -307,13 +339,13 @@ class TestSpecializedAgent:
         programming_messages = [
             "Write a Python function",
             "Debug this code",
-            "Explain this algorithm"
+            "Explain this algorithm",
         ]
 
         non_programming_messages = [
             "What's the weather like?",
             "Tell me a joke",
-            "What's 2+2?"
+            "What's 2+2?",
         ]
 
         # Act & Assert
@@ -351,7 +383,7 @@ class TestAgentManager:
             name="New Agent",
             description="A newly created agent",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE]
+            capabilities=[AgentCapability.NATURAL_LANGUAGE],
         )
 
         # Act
@@ -372,10 +404,12 @@ class TestAgentManager:
             name="Existing Agent",
             description="An existing agent",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE]
+            capabilities=[AgentCapability.NATURAL_LANGUAGE],
         )
 
-        created_agent = await self.manager.create_agent(profile, mock_llm)
+        created_agent = await self.manager.create_agent(
+            profile, mock_llm
+        )
 
         # Act
         retrieved_agent = await self.manager.get_agent("existing-agent")
@@ -402,7 +436,7 @@ class TestAgentManager:
             name="Removable Agent",
             description="An agent to be removed",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE]
+            capabilities=[AgentCapability.NATURAL_LANGUAGE],
         )
 
         await self.manager.create_agent(profile, mock_llm)
@@ -437,22 +471,34 @@ class TestAgentManager:
             id="conv-agent",
             name="Conversational Agent",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE, AgentCapability.MEMORY]
+            capabilities=[
+                AgentCapability.NATURAL_LANGUAGE,
+                AgentCapability.MEMORY,
+            ],
         )
 
         code_profile = AgentProfile(
             id="code-agent",
             name="Code Agent",
             type=AgentType.SPECIALIZED,
-            capabilities=[AgentCapability.CODE_GENERATION, AgentCapability.TOOL_USE]
+            capabilities=[
+                AgentCapability.CODE_GENERATION,
+                AgentCapability.TOOL_USE,
+            ],
         )
 
-        await self.manager.create_agent(conversational_profile, mock_llm)
+        await self.manager.create_agent(
+            conversational_profile, mock_llm
+        )
         await self.manager.create_agent(code_profile, mock_llm)
 
         # Act
-        nl_agents = self.manager.find_agents_by_capability(AgentCapability.NATURAL_LANGUAGE)
-        code_agents = self.manager.find_agents_by_capability(AgentCapability.CODE_GENERATION)
+        nl_agents = self.manager.find_agents_by_capability(
+            AgentCapability.NATURAL_LANGUAGE
+        )
+        code_agents = self.manager.find_agents_by_capability(
+            AgentCapability.CODE_GENERATION
+        )
 
         # Assert
         assert len(nl_agents) == 1
@@ -470,7 +516,7 @@ class TestAgentManager:
             id="status-agent",
             name="Status Agent",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE]
+            capabilities=[AgentCapability.NATURAL_LANGUAGE],
         )
 
         agent = await self.manager.create_agent(profile, mock_llm)
@@ -503,13 +549,13 @@ class TestAgentExecutor:
         mock_agent = AsyncMock()
         mock_agent.process_message.return_value = {
             "content": "Task completed successfully",
-            "confidence": 0.9
+            "confidence": 0.9,
         }
 
         task = {
             "message": "Complete this task",
             "conversation_id": "conv-123",
-            "context": {"priority": "high"}
+            "context": {"priority": "high"},
         }
 
         # Act
@@ -533,14 +579,13 @@ class TestAgentExecutor:
 
         slow_agent.process_message = slow_process
 
-        task = {
-            "message": "Slow task",
-            "conversation_id": "conv-123"
-        }
+        task = {"message": "Slow task", "conversation_id": "conv-123"}
 
         # Act & Assert
         with pytest.raises(asyncio.TimeoutError):
-            await self.executor.execute_task(slow_agent, task, timeout=0.1)
+            await self.executor.execute_task(
+                slow_agent, task, timeout=0.1
+            )
 
     @pytest.mark.asyncio
     async def test_parallel_execution(self):
@@ -551,14 +596,11 @@ class TestAgentExecutor:
         for i, agent in enumerate(agents):
             agent.process_message.return_value = {
                 "content": f"Response from agent {i}",
-                "agent_id": f"agent-{i}"
+                "agent_id": f"agent-{i}",
             }
 
         tasks = [
-            {
-                "message": f"Task {i}",
-                "conversation_id": f"conv-{i}"
-            }
+            {"message": f"Task {i}", "conversation_id": f"conv-{i}"}
             for i in range(3)
         ]
 
@@ -596,8 +638,11 @@ class TestAgentIntegration:
             name="Workflow Test Agent",
             description="Agent for testing complete workflow",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE, AgentCapability.MEMORY],
-            system_message="You are a helpful assistant for workflow testing."
+            capabilities=[
+                AgentCapability.NATURAL_LANGUAGE,
+                AgentCapability.MEMORY,
+            ],
+            system_message="You are a helpful assistant for workflow testing.",
         )
 
         # Act
@@ -607,17 +652,22 @@ class TestAgentIntegration:
         # Step 2: Execute task
         task = {
             "message": "Hello, can you help me?",
-            "conversation_id": "integration-test-conv"
+            "conversation_id": "integration-test-conv",
         }
 
         result = await self.executor.execute_task(agent, task)
 
         # Step 3: Verify conversation history
-        history = agent.get_conversation_history("integration-test-conv")
+        history = agent.get_conversation_history(
+            "integration-test-conv"
+        )
 
         # Assert
         assert agent.profile.id == "workflow-agent"
-        assert result["content"] == "Hello! I'm ready to help you with your questions."
+        assert (
+            result["content"]
+            == "Hello! I'm ready to help you with your questions."
+        )
         assert len(history) == 1
         assert history[0].user_message == "Hello, can you help me?"
 
@@ -640,7 +690,7 @@ class TestAgentIntegration:
             id="general-agent",
             name="General Assistant",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE]
+            capabilities=[AgentCapability.NATURAL_LANGUAGE],
         )
 
         code_profile = AgentProfile(
@@ -648,34 +698,46 @@ class TestAgentIntegration:
             name="Code Assistant",
             type=AgentType.SPECIALIZED,
             capabilities=[AgentCapability.CODE_GENERATION],
-            specialization="programming"
+            specialization="programming",
         )
 
-        general_agent = await self.manager.create_agent(general_profile, mock_llm1)
-        code_agent = await self.manager.create_agent(code_profile, mock_llm2)
+        general_agent = await self.manager.create_agent(
+            general_profile, mock_llm1
+        )
+        code_agent = await self.manager.create_agent(
+            code_profile, mock_llm2
+        )
 
         # Act
         # Route different types of questions to appropriate agents
         general_task = {
             "message": "What's the weather like?",
-            "conversation_id": "multi-conv-1"
+            "conversation_id": "multi-conv-1",
         }
 
         code_task = {
             "message": "Write a hello function in Python",
-            "conversation_id": "multi-conv-2"
+            "conversation_id": "multi-conv-2",
         }
 
-        general_result = await self.executor.execute_task(general_agent, general_task)
-        code_result = await self.executor.execute_task(code_agent, code_task)
+        general_result = await self.executor.execute_task(
+            general_agent, general_task
+        )
+        code_result = await self.executor.execute_task(
+            code_agent, code_task
+        )
 
         # Assert
         assert "general questions" in general_result["content"]
         assert "def hello" in code_result["content"]
 
         # Verify each agent handled their specialized task
-        general_history = general_agent.get_conversation_history("multi-conv-1")
-        code_history = code_agent.get_conversation_history("multi-conv-2")
+        general_history = general_agent.get_conversation_history(
+            "multi-conv-1"
+        )
+        code_history = code_agent.get_conversation_history(
+            "multi-conv-2"
+        )
 
         assert len(general_history) == 1
         assert len(code_history) == 1
@@ -693,7 +755,7 @@ class TestAgentIntegration:
             id="perf-agent",
             name="Performance Agent",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE]
+            capabilities=[AgentCapability.NATURAL_LANGUAGE],
         )
 
         agent = await self.manager.create_agent(profile, mock_llm)
@@ -703,7 +765,7 @@ class TestAgentIntegration:
         tasks = [
             {
                 "message": f"Test message {i}",
-                "conversation_id": f"perf-conv-{i}"
+                "conversation_id": f"perf-conv-{i}",
             }
             for i in range(5)
         ]
@@ -726,14 +788,14 @@ class TestAgentIntegration:
         # First call fails, second succeeds
         unreliable_llm.ainvoke.side_effect = [
             Exception("Temporary LLM failure"),
-            MagicMock(content="Recovery successful")
+            MagicMock(content="Recovery successful"),
         ]
 
         profile = AgentProfile(
             id="recovery-agent",
             name="Recovery Agent",
             type=AgentType.CONVERSATIONAL,
-            capabilities=[AgentCapability.NATURAL_LANGUAGE]
+            capabilities=[AgentCapability.NATURAL_LANGUAGE],
         )
 
         agent = await self.manager.create_agent(profile, unreliable_llm)
@@ -741,7 +803,7 @@ class TestAgentIntegration:
         # Act
         task = {
             "message": "Test error recovery",
-            "conversation_id": "recovery-conv"
+            "conversation_id": "recovery-conv",
         }
 
         # First attempt should fail

@@ -59,13 +59,17 @@ class LLMService:
         async for session in get_session():
             return session
 
-    async def _create_provider_instance(self, provider, model_def) -> BaseChatModel | None:
+    async def _create_provider_instance(
+        self, provider, model_def
+    ) -> BaseChatModel | None:
         """Create a provider instance based on registry data."""
         try:
             # Get API key from environment - registry doesn't store sensitive data
             api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
             if provider.api_key_required and not api_key:
-                logger.warning(f"No API key found for provider {provider.name}")
+                logger.warning(
+                    f"No API key found for provider {provider.name}"
+                )
                 return None
 
             config = model_def.default_config or {}
@@ -76,7 +80,8 @@ class LLMService:
                     base_url=provider.base_url,
                     model=model_def.model_name,
                     temperature=config.get('temperature', 0.7),
-                    max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
+                    max_tokens=model_def.max_tokens
+                    or config.get('max_tokens', 4096),
                 )
 
             elif provider.provider_type == ProviderType.ANTHROPIC:
@@ -84,15 +89,20 @@ class LLMService:
                     api_key=api_key or "dummy",
                     model=model_def.model_name,
                     temperature=config.get('temperature', 0.7),
-                    max_tokens=model_def.max_tokens or config.get('max_tokens', 4096),
+                    max_tokens=model_def.max_tokens
+                    or config.get('max_tokens', 4096),
                 )
 
             else:
-                logger.warning(f"Unsupported provider type: {provider.provider_type}")
+                logger.warning(
+                    f"Unsupported provider type: {provider.provider_type}"
+                )
                 return None
 
         except Exception as e:
-            logger.error(f"Failed to create provider instance for {provider.name}: {e}")
+            logger.error(
+                f"Failed to create provider instance for {provider.name}: {e}"
+            )
             return None
 
     async def get_provider(self, provider_name: str) -> BaseChatModel:
@@ -118,10 +128,14 @@ class LLMService:
         # Get provider by name
         provider = await registry.get_provider_by_name(provider_name)
         if not provider or not provider.is_active:
-            raise LLMProviderError(f"Provider '{provider_name}' not found or inactive")
+            raise LLMProviderError(
+                f"Provider '{provider_name}' not found or inactive"
+            )
 
         # Get default LLM model for this provider
-        models, _ = await registry.list_models(provider.id, ModelType.LLM)
+        models, _ = await registry.list_models(
+            provider.id, ModelType.LLM
+        )
         default_model = None
         for model in models:
             if model.is_default and model.is_active:
@@ -136,16 +150,24 @@ class LLMService:
                     break
 
         if not default_model:
-            raise LLMProviderError(f"No active LLM model found for provider '{provider_name}'")
+            raise LLMProviderError(
+                f"No active LLM model found for provider '{provider_name}'"
+            )
 
         # Create provider instance
-        instance = await self._create_provider_instance(provider, default_model)
+        instance = await self._create_provider_instance(
+            provider, default_model
+        )
         if not instance:
-            raise LLMProviderError(f"Failed to create instance for provider '{provider_name}'")
+            raise LLMProviderError(
+                f"Failed to create instance for provider '{provider_name}'"
+            )
 
         # Cache the instance
         self._providers[provider_name] = instance
-        logger.info(f"Initialized LLM provider: {provider_name} with model: {default_model.model_name}")
+        logger.info(
+            f"Initialized LLM provider: {provider_name} with model: {default_model.model_name}"
+        )
 
         return instance
 
@@ -173,7 +195,9 @@ class LLMService:
 
         Note: Providers are now loaded dynamically from model registry.
         """
-        logger.info("LLM providers will be loaded dynamically from model registry")
+        logger.info(
+            "LLM providers will be loaded dynamically from model registry"
+        )
 
     async def create_provider_from_profile(
         self, profile: "Profile"
@@ -193,23 +217,34 @@ class LLMService:
         session = await self._get_session()
         registry = get_model_registry()(session)
 
-        provider = await registry.get_provider_by_name(profile.llm_provider)
+        provider = await registry.get_provider_by_name(
+            profile.llm_provider
+        )
         if not provider:
-            raise LLMProviderError(f"Provider '{profile.llm_provider}' not found in registry")
+            raise LLMProviderError(
+                f"Provider '{profile.llm_provider}' not found in registry"
+            )
 
         # Get the specific model from the profile or default
         model_def = None
         if profile.llm_model:
             # Find model by name
-            models, _ = await registry.list_models(provider.id, ModelType.LLM)
+            models, _ = await registry.list_models(
+                provider.id, ModelType.LLM
+            )
             for model in models:
-                if model.model_name == profile.llm_model and model.is_active:
+                if (
+                    model.model_name == profile.llm_model
+                    and model.is_active
+                ):
                     model_def = model
                     break
 
         if not model_def:
             # Get default model for provider
-            models, _ = await registry.list_models(provider.id, ModelType.LLM)
+            models, _ = await registry.list_models(
+                provider.id, ModelType.LLM
+            )
             for model in models:
                 if model.is_default and model.is_active:
                     model_def = model
@@ -223,14 +258,18 @@ class LLMService:
                         break
 
         if not model_def:
-            raise LLMProviderError(f"No suitable model found for provider '{profile.llm_provider}'")
+            raise LLMProviderError(
+                f"No suitable model found for provider '{profile.llm_provider}'"
+            )
 
         # Create provider instance with profile overrides
         try:
             if provider.provider_type == ProviderType.OPENAI:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
                 if provider.api_key_required and not api_key:
-                    raise LLMProviderError(f"No API key found for provider {provider.name}")
+                    raise LLMProviderError(
+                        f"No API key found for provider {provider.name}"
+                    )
 
                 # Only create provider if we have an API key or if it's not required
                 if api_key or not provider.api_key_required:
@@ -248,11 +287,15 @@ class LLMService:
                         logit_bias=profile.logit_bias,
                     )
                 else:
-                    raise LLMProviderError(f"Cannot create OpenAI provider {provider.name}: API key required but not provided")
+                    raise LLMProviderError(
+                        f"Cannot create OpenAI provider {provider.name}: API key required but not provided"
+                    )
             elif provider.provider_type == ProviderType.ANTHROPIC:
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
                 if provider.api_key_required and not api_key:
-                    raise LLMProviderError(f"No API key found for provider {provider.name}")
+                    raise LLMProviderError(
+                        f"No API key found for provider {provider.name}"
+                    )
 
                 # Only create provider if we have an API key or if it's not required
                 if api_key or not provider.api_key_required:
@@ -265,12 +308,18 @@ class LLMService:
                         stop_sequences=profile.stop_sequences,
                     )
                 else:
-                    raise LLMProviderError(f"Cannot create Anthropic provider {provider.name}: API key required but not provided")
+                    raise LLMProviderError(
+                        f"Cannot create Anthropic provider {provider.name}: API key required but not provided"
+                    )
             else:
-                raise LLMProviderError(f"Unsupported provider type: {provider.provider_type}")
+                raise LLMProviderError(
+                    f"Unsupported provider type: {provider.provider_type}"
+                )
 
         except Exception as e:
-            raise LLMProviderError(f"Failed to create provider from profile: {e}") from e
+            raise LLMProviderError(
+                f"Failed to create provider from profile: {e}"
+            ) from e
 
     def convert_conversation_to_messages(
         self, conversation: "Conversation", messages: list[Any]
@@ -297,13 +346,9 @@ class LLMService:
             role_value = getattr(message, "role", None)
             content = getattr(message, "content", "")
             if role_value == "user":
-                langchain_messages.append(
-                    HumanMessage(content=content)
-                )
+                langchain_messages.append(HumanMessage(content=content))
             elif role_value == "assistant":
-                langchain_messages.append(
-                    AIMessage(content=content)
-                )
+                langchain_messages.append(AIMessage(content=content))
             elif role_value == "system":
                 langchain_messages.append(
                     SystemMessage(content=content)
@@ -318,7 +363,7 @@ class LLMService:
         model: str,
         max_retries: int = 1,
         track_cost: bool = False,
-        **kwargs
+        **kwargs,
     ) -> dict[str, Any]:
         """Generate response using specified provider and model.
 
@@ -340,7 +385,9 @@ class LLMService:
             content = msg.get("content", "")
 
             if role == "system":
-                langchain_messages.append(SystemMessage(content=content))
+                langchain_messages.append(
+                    SystemMessage(content=content)
+                )
             elif role == "assistant":
                 langchain_messages.append(AIMessage(content=content))
             else:  # user or any other role
@@ -357,7 +404,7 @@ class LLMService:
                     api_key=api_key,
                     model=model,
                     temperature=kwargs.get("temperature", 0.7),
-                    max_tokens=kwargs.get("max_tokens", 1000)
+                    max_tokens=kwargs.get("max_tokens", 1000),
                 )
             elif provider.lower() == "anthropic":
                 api_key = os.getenv("ANTHROPIC_API_KEY", "dummy")
@@ -365,47 +412,72 @@ class LLMService:
                     api_key=api_key,
                     model=model,
                     temperature=kwargs.get("temperature", 0.7),
-                    max_tokens=kwargs.get("max_tokens", 1000)
+                    max_tokens=kwargs.get("max_tokens", 1000),
                 )
             else:
-                raise LLMProviderError(f"Unsupported provider: {provider}")
+                raise LLMProviderError(
+                    f"Unsupported provider: {provider}"
+                )
 
         # Generate response with retries
         last_exception = None
         for attempt in range(max_retries):
             try:
-                response = await provider_instance.ainvoke(langchain_messages)
+                response = await provider_instance.ainvoke(
+                    langchain_messages
+                )
 
                 result = {
                     "content": response.content,
-                    "role": "assistant"
+                    "role": "assistant",
                 }
 
                 # Add usage info if available
-                if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                if (
+                    hasattr(response, 'usage_metadata')
+                    and response.usage_metadata
+                ):
                     result["usage"] = {
-                        "input_tokens": response.usage_metadata.get("input_tokens", 0),
-                        "output_tokens": response.usage_metadata.get("output_tokens", 0),
-                        "total_tokens": response.usage_metadata.get("total_tokens", 0)
+                        "input_tokens": response.usage_metadata.get(
+                            "input_tokens", 0
+                        ),
+                        "output_tokens": response.usage_metadata.get(
+                            "output_tokens", 0
+                        ),
+                        "total_tokens": response.usage_metadata.get(
+                            "total_tokens", 0
+                        ),
                     }
 
                 if track_cost:
                     # Add cost calculation if needed
-                    result["cost"] = self._calculate_cost(result.get("usage", {}), provider, model)
+                    result["cost"] = self._calculate_cost(
+                        result.get("usage", {}), provider, model
+                    )
 
                 return result
 
             except Exception as e:
                 last_exception = e
                 if attempt < max_retries - 1:
-                    logger.warning(f"Attempt {attempt + 1} failed, retrying: {e}")
-                    await asyncio.sleep(0.5 * (attempt + 1))  # Exponential backoff
+                    logger.warning(
+                        f"Attempt {attempt + 1} failed, retrying: {e}"
+                    )
+                    await asyncio.sleep(
+                        0.5 * (attempt + 1)
+                    )  # Exponential backoff
                 else:
-                    logger.error(f"All {max_retries} attempts failed: {e}")
+                    logger.error(
+                        f"All {max_retries} attempts failed: {e}"
+                    )
 
-        raise LLMProviderError(f"Failed to generate response after {max_retries} attempts: {last_exception}")
+        raise LLMProviderError(
+            f"Failed to generate response after {max_retries} attempts: {last_exception}"
+        )
 
-    def _calculate_cost(self, usage: dict, provider: str, model: str) -> dict:
+    def _calculate_cost(
+        self, usage: dict, provider: str, model: str
+    ) -> dict:
         """Calculate approximate cost based on usage."""
         # Simplified cost calculation - would need real pricing data
         input_tokens = usage.get("input_tokens", 0)
@@ -428,7 +500,7 @@ class LLMService:
             "input_cost": input_cost,
             "output_cost": output_cost,
             "total_cost": input_cost + output_cost,
-            "currency": "USD"
+            "currency": "USD",
         }
 
     async def generate_response(
@@ -573,7 +645,9 @@ class LLMService:
 
         return active_providers
 
-    async def get_provider_info(self, provider_name: str) -> dict[str, Any]:
+    async def get_provider_info(
+        self, provider_name: str
+    ) -> dict[str, Any]:
         """Get information about a provider.
 
         Args:
@@ -587,10 +661,14 @@ class LLMService:
 
         provider = await registry.get_provider_by_name(provider_name)
         if not provider:
-            raise LLMProviderError(f"Provider '{provider_name}' not found") from None
+            raise LLMProviderError(
+                f"Provider '{provider_name}' not found"
+            ) from None
 
         # Get models for this provider
-        models, _ = await registry.list_models(provider.id, ModelType.LLM)
+        models, _ = await registry.list_models(
+            provider.id, ModelType.LLM
+        )
         active_models = [m for m in models if m.is_active]
 
         return {
@@ -754,7 +832,7 @@ class LLMService:
         primary_provider: str,
         fallback_provider: str,
         model: str,
-        **kwargs
+        **kwargs,
     ) -> dict[str, Any]:
         """Generate response with fallback provider.
 
@@ -769,17 +847,25 @@ class LLMService:
             Response with provider_used field
         """
         try:
-            result = await self.generate(messages, primary_provider, model, **kwargs)
+            result = await self.generate(
+                messages, primary_provider, model, **kwargs
+            )
             result["provider_used"] = primary_provider
             return result
         except Exception as e:
-            logger.warning(f"Primary provider {primary_provider} failed: {e}, trying fallback")
+            logger.warning(
+                f"Primary provider {primary_provider} failed: {e}, trying fallback"
+            )
             try:
-                result = await self.generate(messages, fallback_provider, model, **kwargs)
+                result = await self.generate(
+                    messages, fallback_provider, model, **kwargs
+                )
                 result["provider_used"] = fallback_provider
                 return result
             except Exception as fallback_error:
-                raise LLMProviderError(f"Both providers failed. Primary: {e}, Fallback: {fallback_error}")
+                raise LLMProviderError(
+                    f"Both providers failed. Primary: {e}, Fallback: {fallback_error}"
+                )
 
     async def generate_with_context(
         self,
@@ -787,7 +873,7 @@ class LLMService:
         conversation_id: str,
         provider: str,
         model: str,
-        **kwargs
+        **kwargs,
     ) -> dict[str, Any]:
         """Generate response with conversation context.
 
@@ -803,7 +889,9 @@ class LLMService:
         """
         # In a real implementation, this would load context from the conversation
         # For now, just pass through to generate
-        result = await self.generate(messages, provider, model, **kwargs)
+        result = await self.generate(
+            messages, provider, model, **kwargs
+        )
         result["conversation_id"] = conversation_id
         return result
 
@@ -812,7 +900,7 @@ class LLMService:
         messages: list[dict],
         providers: list[str],
         model: str,
-        **kwargs
+        **kwargs,
     ) -> dict[str, Any]:
         """Generate response with load balancing across providers.
 
@@ -828,8 +916,11 @@ class LLMService:
         # Simple round-robin load balancing
         # In production, this would use more sophisticated logic
         import random
+
         provider = random.choice(providers)
 
-        result = await self.generate(messages, provider, model, **kwargs)
+        result = await self.generate(
+            messages, provider, model, **kwargs
+        )
         result["provider_used"] = provider
         return result

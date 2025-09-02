@@ -25,5 +25,5 @@ __all__ = [
     "agent_manager",
     "orchestrator",
     "workflow_manager",
-    "vector_store_manager"
+    "vector_store_manager",
 ]

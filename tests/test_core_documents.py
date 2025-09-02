@@ -47,7 +47,7 @@ class TestDocumentService:
             title="Test Document",
             content="This is test content",
             document_type=DocumentType.TEXT,
-            metadata={"source": "test"}
+            metadata={"source": "test"},
         )
 
         mock_document = MagicMock()
@@ -62,7 +62,11 @@ class TestDocumentService:
             mock_doc_class.return_value = mock_document
 
             # Act
-            created_document = await self.document_service.create_document(document_data)
+            created_document = (
+                await self.document_service.create_document(
+                    document_data
+                )
+            )
 
             # Assert
             assert created_document.id == "doc-123"
@@ -111,8 +115,7 @@ class TestDocumentService:
         # Arrange
         document_id = "doc-123"
         update_data = DocumentUpdate(
-            title="Updated Title",
-            content="Updated content"
+            title="Updated Title", content="Updated content"
         )
 
         mock_document = MagicMock()
@@ -125,7 +128,9 @@ class TestDocumentService:
         self.mock_session.commit.return_value = AsyncMock()
 
         # Act
-        updated_document = await self.document_service.update_document(document_id, update_data)
+        updated_document = await self.document_service.update_document(
+            document_id, update_data
+        )
 
         # Assert
         assert updated_document.title == "Updated Title"
@@ -146,7 +151,9 @@ class TestDocumentService:
         self.mock_session.commit = AsyncMock()
 
         # Act
-        result = await self.document_service.delete_document(document_id)
+        result = await self.document_service.delete_document(
+            document_id
+        )
 
         # Assert
         assert result is True
@@ -164,16 +171,26 @@ class TestDocumentService:
 
         user_id = "user-123"
 
-        with patch.object(self.document_service, '_save_file') as mock_save_file, \
-             patch.object(self.document_service, '_extract_metadata') as mock_extract_metadata, \
-             patch.object(self.document_service, 'create_document') as mock_create_document:
+        with (
+            patch.object(
+                self.document_service, '_save_file'
+            ) as mock_save_file,
+            patch.object(
+                self.document_service, '_extract_metadata'
+            ) as mock_extract_metadata,
+            patch.object(
+                self.document_service, 'create_document'
+            ) as mock_create_document,
+        ):
 
             mock_save_file.return_value = "/uploads/test.pdf"
             mock_extract_metadata.return_value = {"pages": 10}
             mock_create_document.return_value = MagicMock(id="doc-123")
 
             # Act
-            document = await self.document_service.upload_file(mock_file, user_id)
+            document = await self.document_service.upload_file(
+                mock_file, user_id
+            )
 
             # Assert
             assert document.id == "doc-123"
@@ -188,20 +205,24 @@ class TestDocumentService:
         search_request = DocumentSearchRequest(
             query="test query",
             document_type=DocumentType.TEXT,
-            limit=10
+            limit=10,
         )
 
         mock_documents = [
             MagicMock(id="doc-1", title="Document 1"),
-            MagicMock(id="doc-2", title="Document 2")
+            MagicMock(id="doc-2", title="Document 2"),
         ]
 
         mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = mock_documents
+        mock_result.scalars.return_value.all.return_value = (
+            mock_documents
+        )
         self.mock_session.execute.return_value = mock_result
 
         # Act
-        results = await self.document_service.search_documents(search_request)
+        results = await self.document_service.search_documents(
+            search_request
+        )
 
         # Assert
         assert len(results) == 2
@@ -213,20 +234,21 @@ class TestDocumentService:
         """Test listing documents with pagination."""
         # Arrange
         list_request = DocumentListRequest(
-            page=1,
-            size=10,
-            sort_by="created_at",
-            sort_order="desc"
+            page=1, size=10, sort_by="created_at", sort_order="desc"
         )
 
         mock_documents = [MagicMock(id=f"doc-{i}") for i in range(10)]
 
         mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = mock_documents
+        mock_result.scalars.return_value.all.return_value = (
+            mock_documents
+        )
         self.mock_session.execute.return_value = mock_result
 
         # Act
-        results = await self.document_service.list_documents(list_request)
+        results = await self.document_service.list_documents(
+            list_request
+        )
 
         # Assert
         assert len(results) == 10
@@ -239,7 +261,9 @@ class TestDocumentService:
         expected_hash = hashlib.sha256(content).hexdigest()
 
         # Act
-        calculated_hash = self.document_service._calculate_file_hash(content)
+        calculated_hash = self.document_service._calculate_file_hash(
+            content
+        )
 
         # Assert
         assert calculated_hash == expected_hash
@@ -252,10 +276,16 @@ class TestDocumentService:
 
         # Act & Assert
         for file_type in valid_types:
-            assert self.document_service._validate_file_type(file_type) is True
+            assert (
+                self.document_service._validate_file_type(file_type)
+                is True
+            )
 
         for file_type in invalid_types:
-            assert self.document_service._validate_file_type(file_type) is False
+            assert (
+                self.document_service._validate_file_type(file_type)
+                is False
+            )
 
     def test_extract_file_metadata(self):
         """Test extracting file metadata."""
@@ -263,14 +293,18 @@ class TestDocumentService:
         file_path = "/test/document.pdf"
         content = b"PDF content"
 
-        with patch('os.path.getsize') as mock_getsize, \
-             patch('os.path.getmtime') as mock_getmtime:
+        with (
+            patch('os.path.getsize') as mock_getsize,
+            patch('os.path.getmtime') as mock_getmtime,
+        ):
 
             mock_getsize.return_value = 1024
             mock_getmtime.return_value = 1640995200  # 2022-01-01
 
             # Act
-            metadata = self.document_service._extract_metadata(file_path, content)
+            metadata = self.document_service._extract_metadata(
+                file_path, content
+            )
 
             # Assert
             assert metadata["file_size"] == 1024
@@ -312,7 +346,9 @@ class TestDocumentProcessor:
         document.file_path = "/test/document.pdf"
         document.document_type = DocumentType.PDF
 
-        with patch('chatter.core.documents.extract_pdf_text') as mock_extract:
+        with patch(
+            'chatter.core.documents.extract_pdf_text'
+        ) as mock_extract:
             mock_extract.return_value = "Extracted PDF text content"
 
             # Act
@@ -349,8 +385,12 @@ class TestDocumentProcessor:
         document.document_type = DocumentType.PDF
         document.file_path = "/nonexistent/file.pdf"
 
-        with patch('chatter.core.documents.extract_pdf_text') as mock_extract:
-            mock_extract.side_effect = Exception("PDF extraction failed")
+        with patch(
+            'chatter.core.documents.extract_pdf_text'
+        ) as mock_extract:
+            mock_extract.side_effect = Exception(
+                "PDF extraction failed"
+            )
 
             # Act & Assert
             with pytest.raises(DocumentProcessingError):
@@ -363,7 +403,9 @@ class TestDocumentProcessor:
         strategy = ChunkingStrategy.SENTENCES
 
         # Act
-        chunks = self.processor.chunk_text(text, strategy, max_chunk_size=2)
+        chunks = self.processor.chunk_text(
+            text, strategy, max_chunk_size=2
+        )
 
         # Assert
         assert len(chunks) >= 2
@@ -372,7 +414,9 @@ class TestDocumentProcessor:
     def test_chunk_text_by_paragraphs(self):
         """Test chunking text by paragraphs."""
         # Arrange
-        text = "First paragraph.\n\nSecond paragraph.\n\nThird paragraph."
+        text = (
+            "First paragraph.\n\nSecond paragraph.\n\nThird paragraph."
+        )
         strategy = ChunkingStrategy.PARAGRAPHS
 
         # Act
@@ -390,7 +434,9 @@ class TestDocumentProcessor:
         strategy = ChunkingStrategy.FIXED_SIZE
 
         # Act
-        chunks = self.processor.chunk_text(text, strategy, max_chunk_size=200)
+        chunks = self.processor.chunk_text(
+            text, strategy, max_chunk_size=200
+        )
 
         # Assert
         assert len(chunks) == 5  # 1000 / 200
@@ -438,8 +484,12 @@ class TestDocumentSearchEngine:
         query = "machine learning"
 
         mock_documents = [
-            MagicMock(id="doc-1", title="ML Guide", relevance_score=0.95),
-            MagicMock(id="doc-2", title="AI Basics", relevance_score=0.80)
+            MagicMock(
+                id="doc-1", title="ML Guide", relevance_score=0.95
+            ),
+            MagicMock(
+                id="doc-2", title="AI Basics", relevance_score=0.80
+            ),
         ]
 
         mock_result = MagicMock()
@@ -451,7 +501,9 @@ class TestDocumentSearchEngine:
 
         # Assert
         assert len(results) == 2
-        assert results[0].relevance_score > results[1].relevance_score  # Sorted by relevance
+        assert (
+            results[0].relevance_score > results[1].relevance_score
+        )  # Sorted by relevance
 
     @pytest.mark.asyncio
     async def test_semantic_search(self):
@@ -461,12 +513,22 @@ class TestDocumentSearchEngine:
 
         mock_embeddings = [0.1, 0.2, 0.3]
         mock_documents = [
-            MagicMock(id="doc-1", title="AI Overview", similarity_score=0.85),
-            MagicMock(id="doc-2", title="ML Tutorial", similarity_score=0.75)
+            MagicMock(
+                id="doc-1", title="AI Overview", similarity_score=0.85
+            ),
+            MagicMock(
+                id="doc-2", title="ML Tutorial", similarity_score=0.75
+            ),
         ]
 
-        with patch.object(self.search_engine, '_get_query_embeddings') as mock_embeddings_func, \
-             patch.object(self.search_engine, '_vector_similarity_search') as mock_vector_search:
+        with (
+            patch.object(
+                self.search_engine, '_get_query_embeddings'
+            ) as mock_embeddings_func,
+            patch.object(
+                self.search_engine, '_vector_similarity_search'
+            ) as mock_vector_search,
+        ):
 
             mock_embeddings_func.return_value = mock_embeddings
             mock_vector_search.return_value = mock_documents
@@ -488,17 +550,23 @@ class TestDocumentSearchEngine:
         # Mock full-text results
         fulltext_results = [
             MagicMock(id="doc-1", title="Neural Networks", score=0.9),
-            MagicMock(id="doc-3", title="Deep Learning", score=0.7)
+            MagicMock(id="doc-3", title="Deep Learning", score=0.7),
         ]
 
         # Mock semantic results
         semantic_results = [
             MagicMock(id="doc-1", title="Neural Networks", score=0.85),
-            MagicMock(id="doc-2", title="AI Fundamentals", score=0.8)
+            MagicMock(id="doc-2", title="AI Fundamentals", score=0.8),
         ]
 
-        with patch.object(self.search_engine, 'full_text_search') as mock_fulltext, \
-             patch.object(self.search_engine, 'semantic_search') as mock_semantic:
+        with (
+            patch.object(
+                self.search_engine, 'full_text_search'
+            ) as mock_fulltext,
+            patch.object(
+                self.search_engine, 'semantic_search'
+            ) as mock_semantic,
+        ):
 
             mock_fulltext.return_value = fulltext_results
             mock_semantic.return_value = semantic_results
@@ -521,7 +589,7 @@ class TestDocumentSearchEngine:
         filters = {
             "document_type": DocumentType.PDF,
             "created_after": datetime(2024, 1, 1),
-            "tags": ["important", "review"]
+            "tags": ["important", "review"],
         }
 
         mock_result = MagicMock()
@@ -529,7 +597,9 @@ class TestDocumentSearchEngine:
         self.mock_session.execute.return_value = mock_result
 
         # Act
-        results = await self.search_engine.search_with_filters(query, filters)
+        results = await self.search_engine.search_with_filters(
+            query, filters
+        )
 
         # Assert
         assert isinstance(results, list)
@@ -542,7 +612,9 @@ class TestDocumentSearchEngine:
         document_text = "This document is about machine learning algorithms and artificial intelligence."
 
         # Act
-        score = self.search_engine._calculate_relevance_score(query_terms, document_text)
+        score = self.search_engine._calculate_relevance_score(
+            query_terms, document_text
+        )
 
         # Assert
         assert 0.0 <= score <= 1.0
@@ -574,7 +646,9 @@ class TestDocumentValidator:
     def test_validate_document_content(self):
         """Test validating document content."""
         # Arrange
-        valid_content = "This is valid document content with sufficient length."
+        valid_content = (
+            "This is valid document content with sufficient length."
+        )
         invalid_content = ""
 
         # Act & Assert
@@ -599,10 +673,15 @@ class TestDocumentValidator:
 
         # Act & Assert
         for filename in valid_files:
-            assert self.validator.validate_file_extension(filename) is True
+            assert (
+                self.validator.validate_file_extension(filename) is True
+            )
 
         for filename in invalid_files:
-            assert self.validator.validate_file_extension(filename) is False
+            assert (
+                self.validator.validate_file_extension(filename)
+                is False
+            )
 
     def test_scan_for_malicious_content(self):
         """Test scanning for malicious content."""
@@ -610,7 +689,10 @@ class TestDocumentValidator:
         safe_content = "This is safe document content."
 
         # Act & Assert
-        assert self.validator.scan_for_malicious_content(safe_content) is True
+        assert (
+            self.validator.scan_for_malicious_content(safe_content)
+            is True
+        )
         # Note: In a real implementation, this might return False for suspicious content
 
     def test_validate_document_structure(self):
@@ -619,20 +701,24 @@ class TestDocumentValidator:
         valid_document = {
             "title": "Valid Document",
             "content": "Valid content",
-            "type": DocumentType.TEXT
+            "type": DocumentType.TEXT,
         }
 
         invalid_document = {
             "title": "",  # Empty title
-            "content": "Valid content"
+            "content": "Valid content",
             # Missing type
         }
 
         # Act & Assert
-        validation_result = self.validator.validate_document_structure(valid_document)
+        validation_result = self.validator.validate_document_structure(
+            valid_document
+        )
         assert validation_result.is_valid is True
 
-        validation_result = self.validator.validate_document_structure(invalid_document)
+        validation_result = self.validator.validate_document_structure(
+            invalid_document
+        )
         assert validation_result.is_valid is False
         assert len(validation_result.errors) > 0
 
@@ -655,13 +741,23 @@ class TestDocumentIntegration:
         mock_file = MagicMock(spec=UploadFile)
         mock_file.filename = "test_document.txt"
         mock_file.content_type = "text/plain"
-        mock_file.read = AsyncMock(return_value=b"This is test document content for integration testing.")
+        mock_file.read = AsyncMock(
+            return_value=b"This is test document content for integration testing."
+        )
 
         user_id = "user-123"
 
-        with patch.object(self.document_service, '_save_file') as mock_save, \
-             patch.object(self.document_service, 'create_document') as mock_create, \
-             patch.object(self.processor, 'process_document') as mock_process:
+        with (
+            patch.object(
+                self.document_service, '_save_file'
+            ) as mock_save,
+            patch.object(
+                self.document_service, 'create_document'
+            ) as mock_create,
+            patch.object(
+                self.processor, 'process_document'
+            ) as mock_process,
+        ):
 
             mock_save.return_value = "/uploads/test_document.txt"
 
@@ -672,20 +768,28 @@ class TestDocumentIntegration:
 
             mock_process.return_value = {
                 "status": "completed",
-                "chunks": ["chunk1", "chunk2"]
+                "chunks": ["chunk1", "chunk2"],
             }
 
             # Act
             # Step 1: Upload document
-            uploaded_doc = await self.document_service.upload_file(mock_file, user_id)
+            uploaded_doc = await self.document_service.upload_file(
+                mock_file, user_id
+            )
 
             # Step 2: Process document
-            processing_result = await self.processor.process_document(uploaded_doc)
+            processing_result = await self.processor.process_document(
+                uploaded_doc
+            )
 
             # Step 3: Search for document (mock the search)
-            with patch.object(self.search_engine, 'full_text_search') as mock_search:
+            with patch.object(
+                self.search_engine, 'full_text_search'
+            ) as mock_search:
                 mock_search.return_value = [uploaded_doc]
-                search_results = await self.search_engine.full_text_search("test")
+                search_results = (
+                    await self.search_engine.full_text_search("test")
+                )
 
             # Assert
             assert uploaded_doc.id == "doc-123"
@@ -706,12 +810,16 @@ class TestDocumentIntegration:
             documents.append(doc)
 
         # Act
-        tasks = [self.processor.process_document(doc) for doc in documents]
+        tasks = [
+            self.processor.process_document(doc) for doc in documents
+        ]
         results = await asyncio.gather(*tasks)
 
         # Assert
         assert len(results) == 5
-        assert all(result["status"] == "completed" for result in results)
+        assert all(
+            result["status"] == "completed" for result in results
+        )
 
     @pytest.mark.asyncio
     async def test_document_search_performance(self):
@@ -722,12 +830,14 @@ class TestDocumentIntegration:
             "artificial intelligence",
             "natural language processing",
             "computer vision",
-            "deep learning"
+            "deep learning",
         ]
 
         mock_results = [MagicMock(id=f"doc-{i}") for i in range(10)]
 
-        with patch.object(self.search_engine, 'full_text_search') as mock_search:
+        with patch.object(
+            self.search_engine, 'full_text_search'
+        ) as mock_search:
             mock_search.return_value = mock_results
 
             # Act
@@ -754,13 +864,13 @@ class TestDocumentIntegration:
         document_data = DocumentCreate(
             title="Error Test Document",
             content="Test content",
-            document_type=DocumentType.TEXT
+            document_type=DocumentType.TEXT,
         )
 
         # Simulate database error on first attempt
         self.mock_session.commit.side_effect = [
             Exception("Database error"),
-            None  # Success on retry
+            None,  # Success on retry
         ]
 
         # Act & Assert
@@ -780,7 +890,9 @@ class TestDocumentIntegration:
             mock_doc_class.return_value = mock_document
 
             # Retry should succeed
-            created_doc = await self.document_service.create_document(document_data)
+            created_doc = await self.document_service.create_document(
+                document_data
+            )
             assert created_doc.id == "doc-123"
 
     @pytest.mark.asyncio
@@ -793,15 +905,21 @@ class TestDocumentIntegration:
         suspicious_file = MagicMock(spec=UploadFile)
         suspicious_file.filename = "suspicious_document.txt"
         suspicious_file.content_type = "text/plain"
-        suspicious_file.read = AsyncMock(return_value=b"Click here: http://suspicious-link.com")
+        suspicious_file.read = AsyncMock(
+            return_value=b"Click here: http://suspicious-link.com"
+        )
 
         # Act
         content = await suspicious_file.read()
         content_str = content.decode('utf-8')
 
         # Validate file
-        is_safe_extension = validator.validate_file_extension(suspicious_file.filename)
-        is_safe_content = validator.scan_for_malicious_content(content_str)
+        is_safe_extension = validator.validate_file_extension(
+            suspicious_file.filename
+        )
+        is_safe_content = validator.scan_for_malicious_content(
+            content_str
+        )
 
         # Assert
         assert is_safe_extension is True  # .txt is allowed

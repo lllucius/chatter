@@ -34,7 +34,11 @@ async def get_data_manager() -> DataManager:
     return data_manager
 
 
-@router.post("/export", response_model=ExportDataResponse, status_code=status.HTTP_202_ACCEPTED)
+@router.post(
+    "/export",
+    response_model=ExportDataResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
 async def export_data(
     export_request: ExportDataRequest,
     current_user: User = Depends(get_current_user),
@@ -42,7 +46,9 @@ async def export_data(
 ) -> ExportDataResponse:
     """Export data in specified format."""
     try:
-        export_id = await data_manager.export_data(export_request, created_by=current_user.id)
+        export_id = await data_manager.export_data(
+            export_request, created_by=current_user.id
+        )
 
         # Get export status
         export_info = await data_manager.get_export_status(export_id)
@@ -53,16 +59,23 @@ async def export_data(
             download_url=export_info.get("download_url"),
             file_size=export_info.get("file_size"),
             record_count=export_info.get("record_count"),
-            created_at=export_info.get("created_at") or datetime.now(UTC),
+            created_at=export_info.get("created_at")
+            or datetime.now(UTC),
             completed_at=export_info.get("completed_at"),
             expires_at=export_info.get("expires_at"),
         )
     except Exception as e:
         logger.error("Failed to start data export", error=str(e))
-        raise InternalServerProblem(detail="Failed to start data export") from e
+        raise InternalServerProblem(
+            detail="Failed to start data export"
+        ) from e
 
 
-@router.post("/backup", response_model=BackupResponse, status_code=status.HTTP_202_ACCEPTED)
+@router.post(
+    "/backup",
+    response_model=BackupResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
 async def create_backup(
     backup_request: BackupRequest,
     current_user: User = Depends(get_current_user),
@@ -70,30 +83,41 @@ async def create_backup(
 ) -> BackupResponse:
     """Create a data backup."""
     try:
-        backup_id = await data_manager.create_backup(backup_request, created_by=current_user.id)
+        backup_id = await data_manager.create_backup(
+            backup_request, created_by=current_user.id
+        )
 
         # Get backup info
         backup_info = await data_manager.get_backup_info(backup_id)
 
         return BackupResponse(
             id=backup_id,
-            name=backup_info.get("name", backup_request.name or f"Backup-{backup_id[:8]}"),
+            name=backup_info.get(
+                "name", backup_request.name or f"Backup-{backup_id[:8]}"
+            ),
             description=backup_info.get("description"),
             backup_type=backup_request.backup_type,
             status=backup_info.get("status", "pending"),
             file_size=backup_info.get("file_size"),
             compressed_size=backup_info.get("compressed_size"),
             record_count=backup_info.get("record_count"),
-            created_at=backup_info.get("created_at") or datetime.now(UTC),
+            created_at=backup_info.get("created_at")
+            or datetime.now(UTC),
             completed_at=backup_info.get("completed_at"),
             expires_at=backup_info.get("expires_at"),
-            encrypted=backup_info.get("encrypted", backup_request.encrypt),
-            compressed=backup_info.get("compressed", backup_request.compress),
+            encrypted=backup_info.get(
+                "encrypted", backup_request.encrypt
+            ),
+            compressed=backup_info.get(
+                "compressed", backup_request.compress
+            ),
             metadata=backup_info.get("metadata", {}),
         )
     except Exception as e:
         logger.error("Failed to create backup", error=str(e))
-        raise InternalServerProblem(detail="Failed to create backup") from e
+        raise InternalServerProblem(
+            detail="Failed to create backup"
+        ) from e
 
 
 @router.get("/backups", response_model=BackupListResponse)
@@ -116,12 +140,14 @@ async def list_backups(
                     id=backup.get("id") or "unknown",
                     name=backup.get("name") or "Unknown Backup",
                     description=backup.get("description"),
-                    backup_type=backup.get("backup_type") or BackupType.FULL,
+                    backup_type=backup.get("backup_type")
+                    or BackupType.FULL,
                     status=backup.get("status") or "unknown",
                     file_size=backup.get("file_size"),
                     compressed_size=backup.get("compressed_size"),
                     record_count=backup.get("record_count"),
-                    created_at=backup.get("created_at") or datetime.now(UTC),
+                    created_at=backup.get("created_at")
+                    or datetime.now(UTC),
                     completed_at=backup.get("completed_at"),
                     expires_at=backup.get("expires_at"),
                     encrypted=backup.get("encrypted", False),
@@ -130,14 +156,22 @@ async def list_backups(
                 )
             )
 
-        return BackupListResponse(backups=backup_responses, total=len(backup_responses))
+        return BackupListResponse(
+            backups=backup_responses, total=len(backup_responses)
+        )
 
     except Exception as e:
         logger.error("Failed to list backups", error=str(e))
-        raise InternalServerProblem(detail="Failed to list backups") from e
+        raise InternalServerProblem(
+            detail="Failed to list backups"
+        ) from e
 
 
-@router.post("/restore", response_model=RestoreResponse, status_code=status.HTTP_202_ACCEPTED)
+@router.post(
+    "/restore",
+    response_model=RestoreResponse,
+    status_code=status.HTTP_202_ACCEPTED,
+)
 async def restore_from_backup(
     restore_request: RestoreRequest,
     current_user: User = Depends(get_current_user),
@@ -145,7 +179,9 @@ async def restore_from_backup(
 ) -> RestoreResponse:
     """Restore data from a backup."""
     try:
-        restore_id = await data_manager.restore_from_backup(restore_request, created_by=current_user.id)
+        restore_id = await data_manager.restore_from_backup(
+            restore_request, created_by=current_user.id
+        )
 
         # Get restore status
         restore_info = await data_manager.get_restore_status(restore_id)
@@ -156,13 +192,16 @@ async def restore_from_backup(
             status=restore_info.get("status", "pending"),
             progress=restore_info.get("progress", 0),
             records_restored=restore_info.get("records_restored", 0),
-            started_at=restore_info.get("started_at") or datetime.now(UTC),
+            started_at=restore_info.get("started_at")
+            or datetime.now(UTC),
             completed_at=restore_info.get("completed_at"),
             error_message=restore_info.get("error_message"),
         )
     except Exception as e:
         logger.error("Failed to start restore operation", error=str(e))
-        raise InternalServerProblem(detail="Failed to start restore operation") from e
+        raise InternalServerProblem(
+            detail="Failed to start restore operation"
+        ) from e
 
 
 @router.get("/stats", response_model=StorageStatsResponse)
@@ -185,16 +224,24 @@ async def get_storage_stats(
             total_backups=stats.get("total_backups", 0),
             storage_by_type=stats.get("storage_by_type", {}),
             storage_by_user=stats.get("storage_by_user", {}),
-            growth_rate_mb_per_day=stats.get("growth_rate_mb_per_day", 0.0),
-            projected_size_30_days=stats.get("projected_size_30_days", 0),
+            growth_rate_mb_per_day=stats.get(
+                "growth_rate_mb_per_day", 0.0
+            ),
+            projected_size_30_days=stats.get(
+                "projected_size_30_days", 0
+            ),
             last_updated=stats.get("last_updated") or datetime.now(UTC),
         )
     except Exception as e:
         logger.error("Failed to get storage stats", error=str(e))
-        raise InternalServerProblem(detail="Failed to get storage stats") from e
+        raise InternalServerProblem(
+            detail="Failed to get storage stats"
+        ) from e
 
 
-@router.post("/bulk/delete-documents", response_model=BulkDeleteResponse)
+@router.post(
+    "/bulk/delete-documents", response_model=BulkDeleteResponse
+)
 async def bulk_delete_documents(
     document_ids: list[str],
     current_user: User = Depends(get_current_user),
@@ -202,7 +249,9 @@ async def bulk_delete_documents(
 ) -> BulkDeleteResponse:
     """Bulk delete documents."""
     try:
-        results = await data_manager.bulk_delete_documents(document_ids, current_user.id)
+        results = await data_manager.bulk_delete_documents(
+            document_ids, current_user.id
+        )
 
         return BulkDeleteResponse(
             total_requested=len(document_ids),
@@ -212,10 +261,14 @@ async def bulk_delete_documents(
         )
     except Exception as e:
         logger.error("Failed to bulk delete documents", error=str(e))
-        raise InternalServerProblem(detail="Failed to bulk delete documents") from e
+        raise InternalServerProblem(
+            detail="Failed to bulk delete documents"
+        ) from e
 
 
-@router.post("/bulk/delete-conversations", response_model=BulkDeleteResponse)
+@router.post(
+    "/bulk/delete-conversations", response_model=BulkDeleteResponse
+)
 async def bulk_delete_conversations(
     conversation_ids: list[str],
     current_user: User = Depends(get_current_user),
@@ -223,7 +276,9 @@ async def bulk_delete_conversations(
 ) -> BulkDeleteResponse:
     """Bulk delete conversations."""
     try:
-        results = await data_manager.bulk_delete_conversations(conversation_ids, current_user.id)
+        results = await data_manager.bulk_delete_conversations(
+            conversation_ids, current_user.id
+        )
 
         return BulkDeleteResponse(
             total_requested=len(conversation_ids),
@@ -232,8 +287,12 @@ async def bulk_delete_conversations(
             errors=results.get("errors", []),
         )
     except Exception as e:
-        logger.error("Failed to bulk delete conversations", error=str(e))
-        raise InternalServerProblem(detail="Failed to bulk delete conversations") from e
+        logger.error(
+            "Failed to bulk delete conversations", error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to bulk delete conversations"
+        ) from e
 
 
 @router.post("/bulk/delete-prompts", response_model=BulkDeleteResponse)
@@ -244,7 +303,9 @@ async def bulk_delete_prompts(
 ) -> BulkDeleteResponse:
     """Bulk delete prompts."""
     try:
-        results = await data_manager.bulk_delete_prompts(prompt_ids, current_user.id)
+        results = await data_manager.bulk_delete_prompts(
+            prompt_ids, current_user.id
+        )
 
         return BulkDeleteResponse(
             total_requested=len(prompt_ids),
@@ -254,4 +315,6 @@ async def bulk_delete_prompts(
         )
     except Exception as e:
         logger.error("Failed to bulk delete prompts", error=str(e))
-        raise InternalServerProblem(detail="Failed to bulk delete prompts") from e
+        raise InternalServerProblem(
+            detail="Failed to bulk delete prompts"
+        ) from e

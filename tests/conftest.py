@@ -1,13 +1,12 @@
 """Test configuration and fixtures for Chatter application."""
 
 import asyncio
-import sys
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-
 # Note: Removed module mocking as all dependencies are properly installed
+
 
 # Async event loop configuration for tests
 @pytest.fixture(scope="session")
@@ -22,10 +21,10 @@ def event_loop():
 async def job_queue():
     """Create a job queue instance for testing and ensure it's cleaned up."""
     from chatter.services.job_queue import AdvancedJobQueue
-    
+
     queue = AdvancedJobQueue(max_workers=2)
     yield queue
-    
+
     # Ensure cleanup to prevent hanging
     if queue.running:
         await queue.stop()
@@ -36,10 +35,11 @@ async def job_queue():
 async def cleanup_global_services():
     """Ensure global services are stopped after tests to prevent hanging."""
     yield
-    
+
     # Stop global job queue if it was started during tests
     try:
         from chatter.services.job_queue import job_queue
+
         if job_queue.running:
             await job_queue.stop()
     except Exception:
@@ -93,9 +93,9 @@ def sample_chat_data():
                 "id": "msg-1",
                 "role": "user",
                 "content": "Hello, world!",
-                "timestamp": "2024-01-01T00:00:00Z"
+                "timestamp": "2024-01-01T00:00:00Z",
             }
-        ]
+        ],
     }
 
 
@@ -107,7 +107,7 @@ def sample_agent_data():
         "name": "Test Agent",
         "description": "A test agent for unit testing",
         "type": "conversational",
-        "config": {"temperature": 0.7}
+        "config": {"temperature": 0.7},
     }
 
 
@@ -119,7 +119,7 @@ def sample_conversation_data():
         "title": "Test Conversation",
         "description": "A test conversation",
         "status": "active",
-        "user_id": "test-user-id"
+        "user_id": "test-user-id",
     }
 
 
@@ -133,8 +133,8 @@ def sample_document_data():
         "metadata": {
             "source": "test",
             "category": "testing",
-            "tags": ["test", "document"]
-        }
+            "tags": ["test", "document"],
+        },
     }
 
 
@@ -143,7 +143,7 @@ def sample_document_data():
 def test_user():
     """Create a test user instance."""
     from chatter.models.user import User
-    
+
     user = User(
         email="test@example.com",
         username="testuser",
@@ -157,7 +157,7 @@ def test_user():
 def test_conversation(test_user):
     """Create a test conversation instance."""
     from chatter.models.conversation import Conversation
-    
+
     conversation = Conversation(
         user_id=test_user.id,
         title="Test Conversation",
@@ -170,7 +170,7 @@ def test_conversation(test_user):
 def test_document(test_user):
     """Create a test document instance."""
     from chatter.models.document import Document, DocumentType
-    
+
     document = Document(
         owner_id=test_user.id,
         filename="test.txt",

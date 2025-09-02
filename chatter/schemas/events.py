@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 class EventType(str, Enum):
     """Types of real-time events."""
+
     # Backup events
     BACKUP_STARTED = "backup.started"
     BACKUP_COMPLETED = "backup.completed"
@@ -65,10 +66,13 @@ class EventType(str, Enum):
 
 class Event(BaseModel):
     """Real-time event data."""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     type: EventType
     data: dict[str, Any]
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
     user_id: str | None = None  # If event is user-specific
     metadata: dict[str, Any] = Field(default_factory=dict)
 
@@ -80,14 +84,18 @@ class EventResponse(BaseModel):
     type: EventType = Field(..., description="Event type")
     data: dict[str, Any] = Field(..., description="Event data")
     timestamp: datetime = Field(..., description="Event timestamp")
-    user_id: str | None = Field(None, description="User ID (if user-specific event)")
+    user_id: str | None = Field(
+        None, description="User ID (if user-specific event)"
+    )
     metadata: dict[str, Any] = Field(..., description="Event metadata")
 
 
 class ConnectionEstablishedEvent(BaseModel):
     """Initial connection event data."""
 
-    type: str = Field("connection.established", description="Event type")
+    type: str = Field(
+        "connection.established", description="Event type"
+    )
     data: dict[str, Any] = Field(..., description="Connection data")
     timestamp: str = Field(..., description="Connection timestamp")
 
@@ -108,16 +116,26 @@ class TestEventResponse(BaseModel):
 class SSEStatsResponse(BaseModel):
     """Response schema for SSE service statistics."""
 
-    total_connections: int = Field(..., description="Total active connections")
-    your_connections: int = Field(..., description="Your active connections")
+    total_connections: int = Field(
+        ..., description="Total active connections"
+    )
+    your_connections: int = Field(
+        ..., description="Your active connections"
+    )
 
 
 class AdminSSEStatsResponse(BaseModel):
     """Response schema for admin SSE service statistics."""
 
-    total_connections: int = Field(..., description="Total active connections")
-    user_connections: int = Field(..., description="Number of users with connections")
-    connections_by_user: dict[str, int] = Field(..., description="Connections count per user")
+    total_connections: int = Field(
+        ..., description="Total active connections"
+    )
+    user_connections: int = Field(
+        ..., description="Number of users with connections"
+    )
+    connections_by_user: dict[str, int] = Field(
+        ..., description="Connections count per user"
+    )
 
 
 class BackupEvent(BaseModel):
@@ -125,10 +143,16 @@ class BackupEvent(BaseModel):
 
     backup_id: str = Field(..., description="Backup operation ID")
     status: str = Field(..., description="Backup status")
-    progress: float | None = Field(None, description="Progress percentage")
+    progress: float | None = Field(
+        None, description="Progress percentage"
+    )
     message: str | None = Field(None, description="Status message")
-    backup_path: str | None = Field(None, description="Backup file path")
-    error: str | None = Field(None, description="Error message if failed")
+    backup_path: str | None = Field(
+        None, description="Backup file path"
+    )
+    error: str | None = Field(
+        None, description="Error message if failed"
+    )
 
 
 class JobEvent(BaseModel):
@@ -137,8 +161,12 @@ class JobEvent(BaseModel):
     job_id: str = Field(..., description="Job ID")
     job_name: str = Field(..., description="Job name")
     status: str = Field(..., description="Job status")
-    result: dict[str, Any] | None = Field(None, description="Job result")
-    error: str | None = Field(None, description="Error message if failed")
+    result: dict[str, Any] | None = Field(
+        None, description="Job result"
+    )
+    error: str | None = Field(
+        None, description="Error message if failed"
+    )
 
 
 class ToolServerEvent(BaseModel):
@@ -148,8 +176,12 @@ class ToolServerEvent(BaseModel):
     server_name: str = Field(..., description="Tool server name")
     status: str = Field(..., description="Server status")
     health_status: str | None = Field(None, description="Health status")
-    details: dict[str, Any] | None = Field(None, description="Additional details")
-    error: str | None = Field(None, description="Error message if failed")
+    details: dict[str, Any] | None = Field(
+        None, description="Additional details"
+    )
+    error: str | None = Field(
+        None, description="Error message if failed"
+    )
 
 
 class DocumentEvent(BaseModel):
@@ -158,9 +190,15 @@ class DocumentEvent(BaseModel):
     document_id: str = Field(..., description="Document ID")
     filename: str | None = Field(None, description="Document filename")
     status: str = Field(..., description="Document processing status")
-    progress: float | None = Field(None, description="Processing progress")
-    result: dict[str, Any] | None = Field(None, description="Processing result")
-    error: str | None = Field(None, description="Error message if failed")
+    progress: float | None = Field(
+        None, description="Processing progress"
+    )
+    result: dict[str, Any] | None = Field(
+        None, description="Processing result"
+    )
+    error: str | None = Field(
+        None, description="Error message if failed"
+    )
 
 
 class SystemEvent(BaseModel):
@@ -168,4 +206,6 @@ class SystemEvent(BaseModel):
 
     message: str = Field(..., description="System message")
     status: str | None = Field(None, description="System status")
-    details: dict[str, Any] | None = Field(None, description="Additional details")
+    details: dict[str, Any] | None = Field(
+        None, description="Additional details"
+    )

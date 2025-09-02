@@ -393,9 +393,9 @@ class PromptService:
             result = {
                 "rendered_content": rendered_content,
                 "validation_result": validation_result,
-                "estimated_tokens": int(estimated_tokens)
-                if estimated_tokens
-                else None,
+                "estimated_tokens": (
+                    int(estimated_tokens) if estimated_tokens else None
+                ),
                 "test_duration_ms": test_duration_ms,
             }
 

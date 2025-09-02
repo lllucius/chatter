@@ -40,14 +40,20 @@ router = APIRouter()
 @router.get("/providers", response_model=ProviderList)
 async def list_providers(
     page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(20, ge=1, le=100, description="Items per page"),
-    active_only: bool = Query(True, description="Show only active providers"),
+    per_page: int = Query(
+        20, ge=1, le=100, description="Items per page"
+    ),
+    active_only: bool = Query(
+        True, description="Show only active providers"
+    ),
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
     """List all providers."""
     service = ModelRegistryService(session)
-    params = ListParams(page=page, per_page=per_page, active_only=active_only)
+    params = ListParams(
+        page=page, per_page=per_page, active_only=active_only
+    )
 
     providers, total = await service.list_providers(params)
 
@@ -55,7 +61,7 @@ async def list_providers(
         providers=providers,  # Can use sequence directly
         total=total,
         page=page,
-        per_page=per_page
+        per_page=per_page,
     )
 
 
@@ -72,13 +78,17 @@ async def get_provider(
     if not provider:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Provider not found"
+            detail="Provider not found",
         )
 
     return provider
 
 
-@router.post("/providers", response_model=Provider, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/providers",
+    response_model=Provider,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_provider(
     provider_data: ProviderCreate,
     session: AsyncSession = Depends(get_session),
@@ -92,7 +102,7 @@ async def create_provider(
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Provider with this name already exists"
+            detail="Provider with this name already exists",
         )
 
     provider = await service.create_provider(provider_data)
@@ -100,7 +110,7 @@ async def create_provider(
         "Created provider",
         provider_id=provider.id,
         provider_name=provider.name,
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
     return provider
@@ -120,20 +130,22 @@ async def update_provider(
     if not provider:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Provider not found"
+            detail="Provider not found",
         )
 
     logger.info(
         "Updated provider",
         provider_id=provider.id,
         provider_name=provider.name,
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
     return provider
 
 
-@router.delete("/providers/{provider_id}", response_model=ProviderDeleteResponse)
+@router.delete(
+    "/providers/{provider_id}", response_model=ProviderDeleteResponse
+)
 async def delete_provider(
     provider_id: str,
     session: AsyncSession = Depends(get_session),
@@ -147,25 +159,30 @@ async def delete_provider(
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Provider not found"
+                detail="Provider not found",
             )
 
         logger.info(
             "Deleted provider and its dependencies",
             provider_id=provider_id,
-            user_id=current_user.id
+            user_id=current_user.id,
         )
 
-        return ProviderDeleteResponse(message="Provider and its dependent models/embedding spaces deleted successfully")
+        return ProviderDeleteResponse(
+            message="Provider and its dependent models/embedding spaces deleted successfully"
+        )
     except IntegrityError as e:
         await session.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot delete provider due to existing dependencies"
+            detail="Cannot delete provider due to existing dependencies",
         ) from e
 
 
-@router.post("/providers/{provider_id}/set-default", response_model=ProviderDefaultResponse)
+@router.post(
+    "/providers/{provider_id}/set-default",
+    response_model=ProviderDefaultResponse,
+)
 async def set_default_provider(
     provider_id: str,
     default_data: DefaultProvider,
@@ -174,46 +191,57 @@ async def set_default_provider(
 ) -> ProviderDefaultResponse:
     """Set a provider as default for a model type."""
     service = ModelRegistryService(session)
-    success = await service.set_default_provider(provider_id, default_data.model_type)
+    success = await service.set_default_provider(
+        provider_id, default_data.model_type
+    )
 
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Provider not found"
+            detail="Provider not found",
         )
 
     logger.info(
         "Set default provider",
         provider_id=provider_id,
         model_type=default_data.model_type,
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
-    return ProviderDefaultResponse(message="Default provider set successfully")
+    return ProviderDefaultResponse(
+        message="Default provider set successfully"
+    )
 
 
 # Model endpoints
 @router.get("/models", response_model=ModelDefList)
 async def list_models(
     provider_id: str = Query(None, description="Filter by provider ID"),
-    model_type: ModelType = Query(None, description="Filter by model type"),
+    model_type: ModelType = Query(
+        None, description="Filter by model type"
+    ),
     page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(20, ge=1, le=100, description="Items per page"),
-    active_only: bool = Query(True, description="Show only active models"),
+    per_page: int = Query(
+        20, ge=1, le=100, description="Items per page"
+    ),
+    active_only: bool = Query(
+        True, description="Show only active models"
+    ),
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
     """List all model definitions."""
     service = ModelRegistryService(session)
-    params = ListParams(page=page, per_page=per_page, active_only=active_only)
+    params = ListParams(
+        page=page, per_page=per_page, active_only=active_only
+    )
 
-    models, total = await service.list_models(provider_id, model_type, params)
+    models, total = await service.list_models(
+        provider_id, model_type, params
+    )
 
     return ModelDefList(
-        models=models,
-        total=total,
-        page=page,
-        per_page=per_page
+        models=models, total=total, page=page, per_page=per_page
     )
 
 
@@ -230,13 +258,17 @@ async def get_model(
     if not model:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found"
+            detail="Model not found",
         )
 
     return model
 
 
-@router.post("/models", response_model=ModelDefWithProvider, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/models",
+    response_model=ModelDefWithProvider,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_model(
     model_data: ModelDefCreate,
     session: AsyncSession = Depends(get_session),
@@ -246,11 +278,13 @@ async def create_model(
     service = ModelRegistryService(session)
 
     # Check if model name already exists for this provider
-    existing = await service.get_model_by_name(model_data.provider_id, model_data.name)
+    existing = await service.get_model_by_name(
+        model_data.provider_id, model_data.name
+    )
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Model with this name already exists for this provider"
+            detail="Model with this name already exists for this provider",
         )
 
     model = await service.create_model(model_data)
@@ -258,7 +292,7 @@ async def create_model(
     if not model:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create model"
+            detail="Failed to create model",
         )
 
     # Refresh to get provider relationship
@@ -267,7 +301,7 @@ async def create_model(
     if not model:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve created model"
+            detail="Failed to retrieve created model",
         )
 
     logger.info(
@@ -275,7 +309,7 @@ async def create_model(
         model_id=model.id,
         model_name=model.name,
         provider_id=model.provider_id,
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
     return model
@@ -295,7 +329,7 @@ async def update_model(
     if not model:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found"
+            detail="Model not found",
         )
 
     # Refresh to get provider relationship
@@ -304,14 +338,14 @@ async def update_model(
     if not model:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve updated model"
+            detail="Failed to retrieve updated model",
         )
 
     logger.info(
         "Updated model",
         model_id=model.id,
         model_name=model.name,
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
     return model
@@ -331,25 +365,30 @@ async def delete_model(
         if not deleted:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Model not found"
+                detail="Model not found",
             )
 
         logger.info(
             "Deleted model and its dependencies",
             model_id=model_id,
-            user_id=current_user.id
+            user_id=current_user.id,
         )
 
-        return ModelDeleteResponse(message="Model and its dependent embedding spaces deleted successfully")
+        return ModelDeleteResponse(
+            message="Model and its dependent embedding spaces deleted successfully"
+        )
     except IntegrityError as e:
         await session.rollback()
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Cannot delete model due to existing dependencies"
+            detail="Cannot delete model due to existing dependencies",
         ) from e
 
 
-@router.post("/models/{model_id}/set-default", response_model=ModelDefaultResponse)
+@router.post(
+    "/models/{model_id}/set-default",
+    response_model=ModelDefaultResponse,
+)
 async def set_default_model(
     model_id: str,
     session: AsyncSession = Depends(get_session),
@@ -362,16 +401,16 @@ async def set_default_model(
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found"
+            detail="Model not found",
         )
 
     logger.info(
-        "Set default model",
-        model_id=model_id,
-        user_id=current_user.id
+        "Set default model", model_id=model_id, user_id=current_user.id
     )
 
-    return ModelDefaultResponse(message="Default model set successfully")
+    return ModelDefaultResponse(
+        message="Default model set successfully"
+    )
 
 
 # Embedding space endpoints
@@ -379,26 +418,34 @@ async def set_default_model(
 async def list_embedding_spaces(
     model_id: str = Query(None, description="Filter by model ID"),
     page: int = Query(1, ge=1, description="Page number"),
-    per_page: int = Query(20, ge=1, le=100, description="Items per page"),
-    active_only: bool = Query(True, description="Show only active spaces"),
+    per_page: int = Query(
+        20, ge=1, le=100, description="Items per page"
+    ),
+    active_only: bool = Query(
+        True, description="Show only active spaces"
+    ),
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
 ):
     """List all embedding spaces."""
     service = ModelRegistryService(session)
-    params = ListParams(page=page, per_page=per_page, active_only=active_only)
+    params = ListParams(
+        page=page, per_page=per_page, active_only=active_only
+    )
 
-    spaces, total = await service.list_embedding_spaces(model_id, params)
+    spaces, total = await service.list_embedding_spaces(
+        model_id, params
+    )
 
     return EmbeddingSpaceList(
-        spaces=spaces,
-        total=total,
-        page=page,
-        per_page=per_page
+        spaces=spaces, total=total, page=page, per_page=per_page
     )
 
 
-@router.get("/embedding-spaces/{space_id}", response_model=EmbeddingSpaceWithModel)
+@router.get(
+    "/embedding-spaces/{space_id}",
+    response_model=EmbeddingSpaceWithModel,
+)
 async def get_embedding_space(
     space_id: str,
     session: AsyncSession = Depends(get_session),
@@ -411,13 +458,17 @@ async def get_embedding_space(
     if not space:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Embedding space not found"
+            detail="Embedding space not found",
         )
 
     return space
 
 
-@router.post("/embedding-spaces", response_model=EmbeddingSpaceWithModel, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/embedding-spaces",
+    response_model=EmbeddingSpaceWithModel,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_embedding_space(
     space_data: EmbeddingSpaceCreate,
     session: AsyncSession = Depends(get_session),
@@ -427,19 +478,23 @@ async def create_embedding_space(
     service = ModelRegistryService(session)
 
     # Check if space name already exists
-    existing = await service.get_embedding_space_by_name(space_data.name)
+    existing = await service.get_embedding_space_by_name(
+        space_data.name
+    )
     if existing:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Embedding space with this name already exists"
+            detail="Embedding space with this name already exists",
         )
 
     # Check if table name already exists
-    existing_table = await service.get_embedding_space_by_table_name(space_data.table_name)
+    existing_table = await service.get_embedding_space_by_table_name(
+        space_data.table_name
+    )
     if existing_table:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Embedding space with this table name already exists"
+            detail="Embedding space with this table name already exists",
         )
 
     # Get user ID before any potential rollback
@@ -451,7 +506,7 @@ async def create_embedding_space(
         if not space:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create embedding space"
+                detail="Failed to create embedding space",
             )
 
         # Refresh to get full relationships
@@ -460,7 +515,7 @@ async def create_embedding_space(
         if not space:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to retrieve created embedding space"
+                detail="Failed to retrieve created embedding space",
             )
 
         logger.info(
@@ -469,7 +524,7 @@ async def create_embedding_space(
             space_name=space.name,
             table_name=space.table_name,
             model_id=space.model_id,
-            user_id=user_id
+            user_id=user_id,
         )
 
         return space
@@ -478,15 +533,18 @@ async def create_embedding_space(
             "Failed to create embedding space",
             space_name=space_data.name,
             error=str(e),
-            user_id=user_id
+            user_id=user_id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to create embedding space: {str(e)}"
+            detail=f"Failed to create embedding space: {str(e)}",
         )
 
 
-@router.put("/embedding-spaces/{space_id}", response_model=EmbeddingSpaceWithModel)
+@router.put(
+    "/embedding-spaces/{space_id}",
+    response_model=EmbeddingSpaceWithModel,
+)
 async def update_embedding_space(
     space_id: str,
     space_data: EmbeddingSpaceUpdate,
@@ -500,7 +558,7 @@ async def update_embedding_space(
     if not space:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Embedding space not found"
+            detail="Embedding space not found",
         )
 
     # Refresh to get full relationships
@@ -509,20 +567,23 @@ async def update_embedding_space(
     if not space:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve updated embedding space"
+            detail="Failed to retrieve updated embedding space",
         )
 
     logger.info(
         "Updated embedding space",
         space_id=space.id,
         space_name=space.name,
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
     return space
 
 
-@router.delete("/embedding-spaces/{space_id}", response_model=EmbeddingSpaceDeleteResponse)
+@router.delete(
+    "/embedding-spaces/{space_id}",
+    response_model=EmbeddingSpaceDeleteResponse,
+)
 async def delete_embedding_space(
     space_id: str,
     session: AsyncSession = Depends(get_session),
@@ -535,19 +596,24 @@ async def delete_embedding_space(
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Embedding space not found"
+            detail="Embedding space not found",
         )
 
     logger.info(
         "Deleted embedding space",
         space_id=space_id,
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
-    return EmbeddingSpaceDeleteResponse(message="Embedding space deleted successfully")
+    return EmbeddingSpaceDeleteResponse(
+        message="Embedding space deleted successfully"
+    )
 
 
-@router.post("/embedding-spaces/{space_id}/set-default", response_model=EmbeddingSpaceDefaultResponse)
+@router.post(
+    "/embedding-spaces/{space_id}/set-default",
+    response_model=EmbeddingSpaceDefaultResponse,
+)
 async def set_default_embedding_space(
     space_id: str,
     session: AsyncSession = Depends(get_session),
@@ -560,16 +626,18 @@ async def set_default_embedding_space(
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Embedding space not found"
+            detail="Embedding space not found",
         )
 
     logger.info(
         "Set default embedding space",
         space_id=space_id,
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
-    return EmbeddingSpaceDefaultResponse(message="Default embedding space set successfully")
+    return EmbeddingSpaceDefaultResponse(
+        message="Default embedding space set successfully"
+    )
 
 
 # Default lookup endpoints
@@ -586,13 +654,15 @@ async def get_default_provider(
     if not provider:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No default provider found for {model_type}"
+            detail=f"No default provider found for {model_type}",
         )
 
     return provider
 
 
-@router.get("/defaults/model/{model_type}", response_model=ModelDefWithProvider)
+@router.get(
+    "/defaults/model/{model_type}", response_model=ModelDefWithProvider
+)
 async def get_default_model(
     model_type: ModelType,
     session: AsyncSession = Depends(get_session),
@@ -605,13 +675,15 @@ async def get_default_model(
     if not model:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No default model found for {model_type}"
+            detail=f"No default model found for {model_type}",
         )
 
     return model
 
 
-@router.get("/defaults/embedding-space", response_model=EmbeddingSpaceWithModel)
+@router.get(
+    "/defaults/embedding-space", response_model=EmbeddingSpaceWithModel
+)
 async def get_default_embedding_space(
     session: AsyncSession = Depends(get_session),
     current_user: User = Depends(get_current_user),
@@ -623,7 +695,7 @@ async def get_default_embedding_space(
     if not space:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No default embedding space found"
+            detail="No default embedding space found",
         )
 
     return space

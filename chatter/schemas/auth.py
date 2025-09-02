@@ -51,7 +51,9 @@ class UserCreate(UserBase):
 class UserUpdate(BaseModel):
     """Schema for user profile updates."""
 
-    email: EmailStr | None = Field(None, description="User email address")
+    email: EmailStr | None = Field(
+        None, description="User email address"
+    )
     full_name: str | None = Field(
         None, max_length=255, description="Full name"
     )
@@ -101,7 +103,9 @@ class UserResponse(UserBase):
 class UserLogin(BaseModel):
     """Schema for user login."""
 
-    email: EmailStr | None = Field(None, description="User email address")
+    email: EmailStr | None = Field(
+        None, description="User email address"
+    )
     username: str | None = Field(
         None, min_length=3, max_length=50, description="Username"
     )
@@ -112,7 +116,9 @@ class UserLogin(BaseModel):
     def validate_email_or_username(self):
         """Ensure either email or username is provided."""
         if not self.email and not self.username:
-            raise ValueError('Either email or username must be provided')
+            raise ValueError(
+                'Either email or username must be provided'
+            )
         return self
 
 
@@ -197,16 +203,33 @@ class UserPreferences(BaseModel):
     language: str = Field("en", description="Preferred language")
     timezone: str = Field("UTC", description="Preferred timezone")
     theme: str = Field("light", description="UI theme preference")
-    notifications_enabled: bool = Field(True, description="Enable notifications")
-    email_notifications: bool = Field(True, description="Enable email notifications")
+    notifications_enabled: bool = Field(
+        True, description="Enable notifications"
+    )
+    email_notifications: bool = Field(
+        True, description="Enable email notifications"
+    )
 
     @field_validator('language')
     @classmethod
     def validate_language(cls, v):
         """Validate language code."""
-        valid_languages = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ko']
+        valid_languages = [
+            'en',
+            'es',
+            'fr',
+            'de',
+            'it',
+            'pt',
+            'ru',
+            'zh',
+            'ja',
+            'ko',
+        ]
         if v not in valid_languages:
-            raise ValueError(f'Language must be one of: {valid_languages}')
+            raise ValueError(
+                f'Language must be one of: {valid_languages}'
+            )
         return v
 
     @field_validator('timezone')
@@ -218,12 +241,17 @@ class UserPreferences(BaseModel):
             raise ValueError('Invalid timezone')
         return v
 
+    # Remove duplicate UserRegistration class and clean up
 
-# Remove duplicate UserRegistration class and clean up
-
-    theme: str = Field(default="light", description="UI theme preference")
-    language: str = Field(default="en", description="Language preference")
-    timezone: str = Field(default="UTC", description="Timezone preference")
+    theme: str = Field(
+        default="light", description="UI theme preference"
+    )
+    language: str = Field(
+        default="en", description="Language preference"
+    )
+    timezone: str = Field(
+        default="UTC", description="Timezone preference"
+    )
     email_notifications: bool = Field(
         default=True, description="Email notifications enabled"
     )

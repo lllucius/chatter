@@ -27,7 +27,7 @@ class TestAuthService:
         user_data = {
             "email": "test@example.com",
             "username": "testuser",
-            "password": "securepassword123"
+            "password": "securepassword123",
         }
 
         expected_user = User(
@@ -35,27 +35,37 @@ class TestAuthService:
             email=user_data["email"],
             username=user_data["username"],
             is_active=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.utcnow(),
         )
 
-        with patch.object(self.auth_service, '_check_user_exists') as mock_check:
+        with patch.object(
+            self.auth_service, '_check_user_exists'
+        ) as mock_check:
             mock_check.return_value = False
 
-            with patch.object(self.auth_service, '_hash_password') as mock_hash:
+            with patch.object(
+                self.auth_service, '_hash_password'
+            ) as mock_hash:
                 mock_hash.return_value = "hashed_password"
 
-                with patch.object(self.auth_service, '_create_user_record') as mock_create:
+                with patch.object(
+                    self.auth_service, '_create_user_record'
+                ) as mock_create:
                     mock_create.return_value = expected_user
 
                     # Act
-                    result = await self.auth_service.register_user(**user_data)
+                    result = await self.auth_service.register_user(
+                        **user_data
+                    )
 
                     # Assert
                     assert result.email == user_data["email"]
                     assert result.username == user_data["username"]
                     assert result.is_active is True
                     mock_check.assert_called_once()
-                    mock_hash.assert_called_once_with(user_data["password"])
+                    mock_hash.assert_called_once_with(
+                        user_data["password"]
+                    )
 
     @pytest.mark.asyncio
     async def test_register_user_duplicate_email(self):
@@ -64,14 +74,17 @@ class TestAuthService:
         user_data = {
             "email": "existing@example.com",
             "username": "testuser",
-            "password": "securepassword123"
+            "password": "securepassword123",
         }
 
-        with patch.object(self.auth_service, '_check_user_exists') as mock_check:
+        with patch.object(
+            self.auth_service, '_check_user_exists'
+        ) as mock_check:
             mock_check.return_value = True
 
             # Act & Assert
             from chatter.core.exceptions import ConflictError
+
             with pytest.raises(ConflictError) as exc_info:
                 await self.auth_service.register_user(**user_data)
 
@@ -83,7 +96,7 @@ class TestAuthService:
         # Arrange
         login_data = {
             "email": "test@example.com",
-            "password": "correctpassword"
+            "password": "correctpassword",
         }
 
         mock_user = User(
@@ -91,32 +104,45 @@ class TestAuthService:
             email=login_data["email"],
             username="testuser",
             password_hash="hashed_password",
-            is_active=True
+            is_active=True,
         )
 
         expected_token_response = {
             "access_token": "jwt_access_token",
             "token_type": "bearer",
             "expires_in": 3600,
-            "refresh_token": "jwt_refresh_token"
+            "refresh_token": "jwt_refresh_token",
         }
 
-        with patch.object(self.auth_service, '_get_user_by_email') as mock_get_user:
+        with patch.object(
+            self.auth_service, '_get_user_by_email'
+        ) as mock_get_user:
             mock_get_user.return_value = mock_user
 
-            with patch.object(self.auth_service, '_verify_password') as mock_verify:
+            with patch.object(
+                self.auth_service, '_verify_password'
+            ) as mock_verify:
                 mock_verify.return_value = True
 
-                with patch.object(self.auth_service, '_generate_tokens') as mock_tokens:
+                with patch.object(
+                    self.auth_service, '_generate_tokens'
+                ) as mock_tokens:
                     mock_tokens.return_value = expected_token_response
 
                     # Act
-                    result = await self.auth_service.authenticate_user(**login_data)
+                    result = await self.auth_service.authenticate_user(
+                        **login_data
+                    )
 
                     # Assert
-                    assert result["access_token"] == expected_token_response["access_token"]
+                    assert (
+                        result["access_token"]
+                        == expected_token_response["access_token"]
+                    )
                     assert result["token_type"] == "bearer"
-                    mock_verify.assert_called_once_with(login_data["password"], "hashed_password")
+                    mock_verify.assert_called_once_with(
+                        login_data["password"], "hashed_password"
+                    )
 
     @pytest.mark.asyncio
     async def test_authenticate_user_invalid_email(self):
@@ -124,14 +150,17 @@ class TestAuthService:
         # Arrange
         login_data = {
             "email": "nonexistent@example.com",
-            "password": "somepassword"
+            "password": "somepassword",
         }
 
-        with patch.object(self.auth_service, '_get_user_by_email') as mock_get_user:
+        with patch.object(
+            self.auth_service, '_get_user_by_email'
+        ) as mock_get_user:
             mock_get_user.return_value = None
 
             # Act & Assert
             from chatter.core.exceptions import AuthenticationError
+
             with pytest.raises(AuthenticationError) as exc_info:
                 await self.auth_service.authenticate_user(**login_data)
 
@@ -143,7 +172,7 @@ class TestAuthService:
         # Arrange
         login_data = {
             "email": "test@example.com",
-            "password": "wrongpassword"
+            "password": "wrongpassword",
         }
 
         mock_user = User(
@@ -151,19 +180,26 @@ class TestAuthService:
             email=login_data["email"],
             username="testuser",
             password_hash="hashed_password",
-            is_active=True
+            is_active=True,
         )
 
-        with patch.object(self.auth_service, '_get_user_by_email') as mock_get_user:
+        with patch.object(
+            self.auth_service, '_get_user_by_email'
+        ) as mock_get_user:
             mock_get_user.return_value = mock_user
 
-            with patch.object(self.auth_service, '_verify_password') as mock_verify:
+            with patch.object(
+                self.auth_service, '_verify_password'
+            ) as mock_verify:
                 mock_verify.return_value = False
 
                 # Act & Assert
                 from chatter.core.exceptions import AuthenticationError
+
                 with pytest.raises(AuthenticationError) as exc_info:
-                    await self.auth_service.authenticate_user(**login_data)
+                    await self.auth_service.authenticate_user(
+                        **login_data
+                    )
 
                 assert "Invalid credentials" in str(exc_info.value)
 
@@ -173,7 +209,7 @@ class TestAuthService:
         # Arrange
         login_data = {
             "email": "inactive@example.com",
-            "password": "correctpassword"
+            "password": "correctpassword",
         }
 
         mock_user = User(
@@ -181,19 +217,26 @@ class TestAuthService:
             email=login_data["email"],
             username="inactiveuser",
             password_hash="hashed_password",
-            is_active=False
+            is_active=False,
         )
 
-        with patch.object(self.auth_service, '_get_user_by_email') as mock_get_user:
+        with patch.object(
+            self.auth_service, '_get_user_by_email'
+        ) as mock_get_user:
             mock_get_user.return_value = mock_user
 
-            with patch.object(self.auth_service, '_verify_password') as mock_verify:
+            with patch.object(
+                self.auth_service, '_verify_password'
+            ) as mock_verify:
                 mock_verify.return_value = True
 
                 # Act & Assert
                 from chatter.core.exceptions import AuthenticationError
+
                 with pytest.raises(AuthenticationError) as exc_info:
-                    await self.auth_service.authenticate_user(**login_data)
+                    await self.auth_service.authenticate_user(
+                        **login_data
+                    )
 
                 assert "account is deactivated" in str(exc_info.value)
 
@@ -207,26 +250,35 @@ class TestAuthService:
             id="refresh-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         expected_token_response = {
             "access_token": "new_access_token",
             "token_type": "bearer",
-            "expires_in": 3600
+            "expires_in": 3600,
         }
 
-        with patch.object(self.auth_service, '_validate_refresh_token') as mock_validate:
+        with patch.object(
+            self.auth_service, '_validate_refresh_token'
+        ) as mock_validate:
             mock_validate.return_value = mock_user
 
-            with patch.object(self.auth_service, '_generate_access_token') as mock_generate:
+            with patch.object(
+                self.auth_service, '_generate_access_token'
+            ) as mock_generate:
                 mock_generate.return_value = expected_token_response
 
                 # Act
-                result = await self.auth_service.refresh_token(refresh_token)
+                result = await self.auth_service.refresh_token(
+                    refresh_token
+                )
 
                 # Assert
-                assert result["access_token"] == expected_token_response["access_token"]
+                assert (
+                    result["access_token"]
+                    == expected_token_response["access_token"]
+                )
                 mock_validate.assert_called_once_with(refresh_token)
 
     @pytest.mark.asyncio
@@ -235,11 +287,14 @@ class TestAuthService:
         # Arrange
         invalid_token = "invalid_refresh_token"
 
-        with patch.object(self.auth_service, '_validate_refresh_token') as mock_validate:
+        with patch.object(
+            self.auth_service, '_validate_refresh_token'
+        ) as mock_validate:
             mock_validate.return_value = None
 
             # Act & Assert
             from chatter.core.exceptions import AuthenticationError
+
             with pytest.raises(AuthenticationError) as exc_info:
                 await self.auth_service.refresh_token(invalid_token)
 
@@ -255,17 +310,23 @@ class TestAuthService:
             id="current-user-id",
             email="current@example.com",
             username="currentuser",
-            is_active=True
+            is_active=True,
         )
 
-        with patch.object(self.auth_service, '_validate_access_token') as mock_validate:
+        with patch.object(
+            self.auth_service, '_validate_access_token'
+        ) as mock_validate:
             mock_validate.return_value = "current-user-id"
 
-            with patch.object(self.auth_service, '_get_user_by_id') as mock_get_user:
+            with patch.object(
+                self.auth_service, '_get_user_by_id'
+            ) as mock_get_user:
                 mock_get_user.return_value = mock_user
 
                 # Act
-                result = await self.auth_service.get_current_user(access_token)
+                result = await self.auth_service.get_current_user(
+                    access_token
+                )
 
                 # Assert
                 assert result.id == mock_user.id
@@ -278,11 +339,14 @@ class TestAuthService:
         # Arrange
         invalid_token = "invalid_access_token"
 
-        with patch.object(self.auth_service, '_validate_access_token') as mock_validate:
+        with patch.object(
+            self.auth_service, '_validate_access_token'
+        ) as mock_validate:
             mock_validate.return_value = None
 
             # Act & Assert
             from chatter.core.exceptions import AuthenticationError
+
             with pytest.raises(AuthenticationError) as exc_info:
                 await self.auth_service.get_current_user(invalid_token)
 
@@ -295,31 +359,37 @@ class TestAuthService:
         user_id = "update-user-id"
         update_data = {
             "username": "newusername",
-            "email": "new@example.com"
+            "email": "new@example.com",
         }
 
         mock_user = User(
             id=user_id,
             email="old@example.com",
             username="oldusername",
-            is_active=True
+            is_active=True,
         )
 
         updated_user = User(
             id=user_id,
             email=update_data["email"],
             username=update_data["username"],
-            is_active=True
+            is_active=True,
         )
 
-        with patch.object(self.auth_service, '_get_user_by_id') as mock_get_user:
+        with patch.object(
+            self.auth_service, '_get_user_by_id'
+        ) as mock_get_user:
             mock_get_user.return_value = mock_user
 
-            with patch.object(self.auth_service, '_update_user_record') as mock_update:
+            with patch.object(
+                self.auth_service, '_update_user_record'
+            ) as mock_update:
                 mock_update.return_value = updated_user
 
                 # Act
-                result = await self.auth_service.update_user(user_id, **update_data)
+                result = await self.auth_service.update_user(
+                    user_id, **update_data
+                )
 
                 # Assert
                 assert result.email == update_data["email"]
@@ -338,29 +408,41 @@ class TestAuthService:
             email="test@example.com",
             username="testuser",
             password_hash="old_hashed_password",
-            is_active=True
+            is_active=True,
         )
 
-        with patch.object(self.auth_service, '_get_user_by_id') as mock_get_user:
+        with patch.object(
+            self.auth_service, '_get_user_by_id'
+        ) as mock_get_user:
             mock_get_user.return_value = mock_user
 
-            with patch.object(self.auth_service, '_verify_password') as mock_verify:
+            with patch.object(
+                self.auth_service, '_verify_password'
+            ) as mock_verify:
                 mock_verify.return_value = True
 
-                with patch.object(self.auth_service, '_hash_password') as mock_hash:
+                with patch.object(
+                    self.auth_service, '_hash_password'
+                ) as mock_hash:
                     mock_hash.return_value = "new_hashed_password"
 
-                    with patch.object(self.auth_service, '_update_user_password') as mock_update:
+                    with patch.object(
+                        self.auth_service, '_update_user_password'
+                    ) as mock_update:
                         mock_update.return_value = True
 
                         # Act
-                        result = await self.auth_service.change_password(
-                            user_id, current_password, new_password
+                        result = (
+                            await self.auth_service.change_password(
+                                user_id, current_password, new_password
+                            )
                         )
 
                         # Assert
                         assert result is True
-                        mock_verify.assert_called_once_with(current_password, "old_hashed_password")
+                        mock_verify.assert_called_once_with(
+                            current_password, "old_hashed_password"
+                        )
                         mock_hash.assert_called_once_with(new_password)
 
     @pytest.mark.asyncio
@@ -376,17 +458,22 @@ class TestAuthService:
             email="test@example.com",
             username="testuser",
             password_hash="hashed_password",
-            is_active=True
+            is_active=True,
         )
 
-        with patch.object(self.auth_service, '_get_user_by_id') as mock_get_user:
+        with patch.object(
+            self.auth_service, '_get_user_by_id'
+        ) as mock_get_user:
             mock_get_user.return_value = mock_user
 
-            with patch.object(self.auth_service, '_verify_password') as mock_verify:
+            with patch.object(
+                self.auth_service, '_verify_password'
+            ) as mock_verify:
                 mock_verify.return_value = False
 
                 # Act & Assert
                 from chatter.core.exceptions import AuthenticationError
+
                 with pytest.raises(AuthenticationError) as exc_info:
                     await self.auth_service.change_password(
                         user_id, current_password, new_password
@@ -401,11 +488,15 @@ class TestAuthService:
         user_id = "logout-user-id"
         access_token = "valid_access_token"
 
-        with patch.object(self.auth_service, '_invalidate_token') as mock_invalidate:
+        with patch.object(
+            self.auth_service, '_invalidate_token'
+        ) as mock_invalidate:
             mock_invalidate.return_value = True
 
             # Act
-            result = await self.auth_service.logout_user(user_id, access_token)
+            result = await self.auth_service.logout_user(
+                user_id, access_token
+            )
 
             # Assert
             assert result is True
@@ -423,14 +514,18 @@ class TestAuthService:
             "name": key_name,
             "key": "ak_1234567890abcdef",
             "user_id": user_id,
-            "created_at": datetime.utcnow()
+            "created_at": datetime.utcnow(),
         }
 
-        with patch.object(self.auth_service, '_generate_api_key') as mock_generate:
+        with patch.object(
+            self.auth_service, '_generate_api_key'
+        ) as mock_generate:
             mock_generate.return_value = expected_api_key
 
             # Act
-            result = await self.auth_service.create_api_key(user_id, key_name)
+            result = await self.auth_service.create_api_key(
+                user_id, key_name
+            )
 
             # Assert
             assert result["name"] == key_name
@@ -447,10 +542,12 @@ class TestAuthService:
             id="api-key-user-id",
             email="api@example.com",
             username="apiuser",
-            is_active=True
+            is_active=True,
         )
 
-        with patch.object(self.auth_service, '_get_user_by_api_key') as mock_get_user:
+        with patch.object(
+            self.auth_service, '_get_user_by_api_key'
+        ) as mock_get_user:
             mock_get_user.return_value = mock_user
 
             # Act
@@ -466,13 +563,18 @@ class TestAuthService:
         # Arrange
         invalid_api_key = "ak_invalid_key"
 
-        with patch.object(self.auth_service, '_get_user_by_api_key') as mock_get_user:
+        with patch.object(
+            self.auth_service, '_get_user_by_api_key'
+        ) as mock_get_user:
             mock_get_user.return_value = None
 
             # Act & Assert
             from chatter.core.exceptions import AuthenticationError
+
             with pytest.raises(AuthenticationError) as exc_info:
-                await self.auth_service.validate_api_key(invalid_api_key)
+                await self.auth_service.validate_api_key(
+                    invalid_api_key
+                )
 
             assert "Invalid API key" in str(exc_info.value)
 
@@ -493,69 +595,101 @@ class TestAuthServiceIntegration:
         user_data = {
             "email": "integration@example.com",
             "username": "integrationuser",
-            "password": "securepassword123"
+            "password": "securepassword123",
         }
 
         # Mock all the required methods for registration
-        with patch.object(self.auth_service, '_check_user_exists') as mock_check:
+        with patch.object(
+            self.auth_service, '_check_user_exists'
+        ) as mock_check:
             mock_check.return_value = False
 
-            with patch.object(self.auth_service, '_hash_password') as mock_hash:
+            with patch.object(
+                self.auth_service, '_hash_password'
+            ) as mock_hash:
                 mock_hash.return_value = "hashed_password"
 
-                with patch.object(self.auth_service, '_create_user_record') as mock_create:
+                with patch.object(
+                    self.auth_service, '_create_user_record'
+                ) as mock_create:
                     registered_user = User(
                         id="integration-user-id",
                         email=user_data["email"],
                         username=user_data["username"],
                         password_hash="hashed_password",
-                        is_active=True
+                        is_active=True,
                     )
                     mock_create.return_value = registered_user
 
                     # Register user
-                    user = await self.auth_service.register_user(**user_data)
+                    user = await self.auth_service.register_user(
+                        **user_data
+                    )
                     assert user.email == user_data["email"]
 
                     # Mock authentication
-                    with patch.object(self.auth_service, '_get_user_by_email') as mock_get_user:
+                    with patch.object(
+                        self.auth_service, '_get_user_by_email'
+                    ) as mock_get_user:
                         mock_get_user.return_value = registered_user
 
-                        with patch.object(self.auth_service, '_verify_password') as mock_verify:
+                        with patch.object(
+                            self.auth_service, '_verify_password'
+                        ) as mock_verify:
                             mock_verify.return_value = True
 
-                            with patch.object(self.auth_service, '_generate_tokens') as mock_tokens:
+                            with patch.object(
+                                self.auth_service, '_generate_tokens'
+                            ) as mock_tokens:
                                 token_response = {
                                     "access_token": "integration_access_token",
                                     "token_type": "bearer",
                                     "expires_in": 3600,
-                                    "refresh_token": "integration_refresh_token"
+                                    "refresh_token": "integration_refresh_token",
                                 }
-                                mock_tokens.return_value = token_response
+                                mock_tokens.return_value = (
+                                    token_response
+                                )
 
                                 # Authenticate user
                                 tokens = await self.auth_service.authenticate_user(
                                     email=user_data["email"],
-                                    password=user_data["password"]
+                                    password=user_data["password"],
                                 )
 
                                 assert "access_token" in tokens
                                 assert tokens["token_type"] == "bearer"
 
                                 # Mock token validation for getting current user
-                                with patch.object(self.auth_service, '_validate_access_token') as mock_validate:
-                                    mock_validate.return_value = registered_user.id
+                                with patch.object(
+                                    self.auth_service,
+                                    '_validate_access_token',
+                                ) as mock_validate:
+                                    mock_validate.return_value = (
+                                        registered_user.id
+                                    )
 
-                                    with patch.object(self.auth_service, '_get_user_by_id') as mock_get_by_id:
-                                        mock_get_by_id.return_value = registered_user
+                                    with patch.object(
+                                        self.auth_service,
+                                        '_get_user_by_id',
+                                    ) as mock_get_by_id:
+                                        mock_get_by_id.return_value = (
+                                            registered_user
+                                        )
 
                                         # Get current user
                                         current_user = await self.auth_service.get_current_user(
                                             tokens["access_token"]
                                         )
 
-                                        assert current_user.id == registered_user.id
-                                        assert current_user.email == user_data["email"]
+                                        assert (
+                                            current_user.id
+                                            == registered_user.id
+                                        )
+                                        assert (
+                                            current_user.email
+                                            == user_data["email"]
+                                        )
 
     @pytest.mark.asyncio
     async def test_concurrent_user_operations(self):
@@ -565,25 +699,31 @@ class TestAuthServiceIntegration:
             {
                 "email": f"user{i}@example.com",
                 "username": f"user{i}",
-                "password": "password123"
+                "password": "password123",
             }
             for i in range(3)
         ]
 
         # Mock the required methods
-        with patch.object(self.auth_service, '_check_user_exists') as mock_check:
+        with patch.object(
+            self.auth_service, '_check_user_exists'
+        ) as mock_check:
             mock_check.return_value = False
 
-            with patch.object(self.auth_service, '_hash_password') as mock_hash:
+            with patch.object(
+                self.auth_service, '_hash_password'
+            ) as mock_hash:
                 mock_hash.return_value = "hashed_password"
 
-                with patch.object(self.auth_service, '_create_user_record') as mock_create:
+                with patch.object(
+                    self.auth_service, '_create_user_record'
+                ) as mock_create:
                     mock_create.side_effect = [
                         User(
                             id=f"user-{i}-id",
                             email=data["email"],
                             username=data["username"],
-                            is_active=True
+                            is_active=True,
                         )
                         for i, data in enumerate(user_data_list)
                     ]
@@ -634,16 +774,23 @@ class TestAuthServiceHelpers:
         # Act
         with patch('chatter.core.auth.pwd_context') as mock_pwd_context:
             mock_pwd_context.verify.return_value = True
-            result = self.auth_service._verify_password(password, hashed_password)
+            result = self.auth_service._verify_password(
+                password, hashed_password
+            )
 
             # Assert
             assert result is True
-            mock_pwd_context.verify.assert_called_once_with(password, hashed_password)
+            mock_pwd_context.verify.assert_called_once_with(
+                password, hashed_password
+            )
 
     def test_jwt_token_generation(self):
         """Test JWT token generation."""
         # Arrange
-        user_data = {"user_id": "test-user-id", "email": "test@example.com"}
+        user_data = {
+            "user_id": "test-user-id",
+            "email": "test@example.com",
+        }
 
         # Act
         with patch('chatter.core.auth.jwt.encode') as mock_encode:
@@ -658,7 +805,10 @@ class TestAuthServiceHelpers:
         """Test JWT token validation."""
         # Arrange
         token = "valid_jwt_token"
-        expected_payload = {"user_id": "test-user-id", "exp": 1234567890}
+        expected_payload = {
+            "user_id": "test-user-id",
+            "exp": 1234567890,
+        }
 
         # Act
         with patch('chatter.core.auth.jwt.decode') as mock_decode:
@@ -674,7 +824,9 @@ class TestAuthServiceHelpers:
         # Arrange
 
         # Act
-        with patch('chatter.core.auth.secrets.token_urlsafe') as mock_token:
+        with patch(
+            'chatter.core.auth.secrets.token_urlsafe'
+        ) as mock_token:
             mock_token.return_value = "random_token"
             api_key = self.auth_service._generate_api_key_string()
 

@@ -62,6 +62,7 @@ class BaseSchema(BaseModel):
 
     class Config:
         """Pydantic configuration."""
+
         from_attributes = True
         use_enum_values = True
 
@@ -97,7 +98,9 @@ class ErrorResponse(BaseModel):
 
     error: str = Field(..., description="Error message")
     code: str = Field(..., description="Error code")
-    details: dict[str, Any] | None = Field(None, description="Error details")
+    details: dict[str, Any] | None = Field(
+        None, description="Error details"
+    )
 
 
 class SuccessResponse(BaseModel):
@@ -105,14 +108,18 @@ class SuccessResponse(BaseModel):
 
     success: bool = Field(True, description="Success indicator")
     message: str = Field(..., description="Success message")
-    data: dict[str, Any] | None = Field(None, description="Response data")
+    data: dict[str, Any] | None = Field(
+        None, description="Response data"
+    )
 
 
 class TimestampMixin(BaseModel):
     """Mixin for models with timestamp fields."""
 
     created_at: datetime = Field(..., description="Creation timestamp")
-    updated_at: datetime = Field(..., description="Last update timestamp")
+    updated_at: datetime = Field(
+        ..., description="Last update timestamp"
+    )
 
 
 class SortOrder(str, Enum):
@@ -127,10 +134,18 @@ class FilterParams(BaseModel):
 
     search: str | None = Field(None, description="Search query")
     tags: list[str] | None = Field(None, description="Filter by tags")
-    created_after: datetime | None = Field(None, description="Created after date")
-    start_date: datetime | None = Field(None, description="Start date for filtering")
-    end_date: datetime | None = Field(None, description="End date for filtering")
-    created_before: datetime | None = Field(None, description="Created before date")
+    created_after: datetime | None = Field(
+        None, description="Created after date"
+    )
+    start_date: datetime | None = Field(
+        None, description="Start date for filtering"
+    )
+    end_date: datetime | None = Field(
+        None, description="End date for filtering"
+    )
+    created_before: datetime | None = Field(
+        None, description="Created before date"
+    )
     """Base schema for delete requests."""
 
     pass

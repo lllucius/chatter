@@ -26,7 +26,7 @@ router = APIRouter()
 
 
 async def get_analytics_service(
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> AnalyticsService:
     """Get analytics service instance."""
     return AnalyticsService(session)
@@ -34,9 +34,15 @@ async def get_analytics_service(
 
 @router.get("/conversations", response_model=ConversationStatsResponse)
 async def get_conversation_stats(
-    start_date: datetime | None = Query(None, description="Start date for analytics"),
-    end_date: datetime | None = Query(None, description="End date for analytics"),
-    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
+    period: str = Query(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    ),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -57,6 +63,7 @@ async def get_conversation_stats(
     try:
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+
         time_range = AnalyticsTimeRange(
             start_date=start_date,
             end_date=end_date,
@@ -97,9 +104,15 @@ async def get_conversation_stats(
 
 @router.get("/usage", response_model=UsageMetricsResponse)
 async def get_usage_metrics(
-    start_date: datetime | None = Query(None, description="Start date for analytics"),
-    end_date: datetime | None = Query(None, description="End date for analytics"),
-    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
+    period: str = Query(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    ),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -120,6 +133,7 @@ async def get_usage_metrics(
     try:
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+
         time_range = AnalyticsTimeRange(
             start_date=start_date,
             end_date=end_date,
@@ -163,9 +177,15 @@ async def get_usage_metrics(
 
 @router.get("/performance", response_model=PerformanceMetricsResponse)
 async def get_performance_metrics(
-    start_date: datetime | None = Query(None, description="Start date for analytics"),
-    end_date: datetime | None = Query(None, description="End date for analytics"),
-    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
+    period: str = Query(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    ),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -184,6 +204,7 @@ async def get_performance_metrics(
     try:
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+
         time_range = AnalyticsTimeRange(
             start_date=start_date,
             end_date=end_date,
@@ -238,9 +259,15 @@ async def get_performance_metrics(
 
 @router.get("/documents", response_model=DocumentAnalyticsResponse)
 async def get_document_analytics(
-    start_date: datetime | None = Query(None, description="Start date for analytics"),
-    end_date: datetime | None = Query(None, description="End date for analytics"),
-    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
+    period: str = Query(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    ),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -259,6 +286,7 @@ async def get_document_analytics(
     try:
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+
         time_range = AnalyticsTimeRange(
             start_date=start_date,
             end_date=end_date,
@@ -368,9 +396,15 @@ async def get_system_analytics(
 
 @router.get("/dashboard", response_model=DashboardResponse)
 async def get_dashboard(
-    start_date: datetime | None = Query(None, description="Start date for analytics"),
-    end_date: datetime | None = Query(None, description="End date for analytics"),
-    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
+    period: str = Query(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    ),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -389,6 +423,7 @@ async def get_dashboard(
     try:
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+
         time_range = AnalyticsTimeRange(
             start_date=start_date,
             end_date=end_date,
@@ -430,9 +465,15 @@ async def get_dashboard(
 
 @router.get("/toolservers")
 async def get_tool_server_analytics(
-    start_date: datetime | None = Query(None, description="Start date for analytics"),
-    end_date: datetime | None = Query(None, description="End date for analytics"),
-    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
+    period: str = Query(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    ),
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
         get_analytics_service
@@ -451,6 +492,7 @@ async def get_tool_server_analytics(
     try:
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+
         time_range = AnalyticsTimeRange(
             start_date=start_date,
             end_date=end_date,
@@ -473,11 +515,19 @@ async def get_tool_server_analytics(
 @router.get("/users/{user_id}", response_model=dict)
 async def get_user_analytics(
     user_id: str,
-    start_date: datetime | None = Query(None, description="Start date for analytics"),
-    end_date: datetime | None = Query(None, description="End date for analytics"),
-    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
+    period: str = Query(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    ),
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service),
+    analytics_service: AnalyticsService = Depends(
+        get_analytics_service
+    ),
 ) -> dict[str, Any]:
     """Get per-user analytics.
 
@@ -495,6 +545,7 @@ async def get_user_analytics(
     try:
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+
         time_range = AnalyticsTimeRange(
             start_date=start_date,
             end_date=end_date,
@@ -514,13 +565,25 @@ async def get_user_analytics(
 
 @router.post("/export")
 async def export_analytics(
-    format: str = Query("json", description="Export format (json, csv, xlsx)"),
-    metrics: list[str] = Query(..., description="List of metrics to export"),
-    start_date: datetime | None = Query(None, description="Start date for analytics"),
-    end_date: datetime | None = Query(None, description="End date for analytics"),
-    period: str = Query("7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"),
+    format: str = Query(
+        "json", description="Export format (json, csv, xlsx)"
+    ),
+    metrics: list[str] = Query(
+        ..., description="List of metrics to export"
+    ),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
+    period: str = Query(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    ),
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service),
+    analytics_service: AnalyticsService = Depends(
+        get_analytics_service
+    ),
 ):
     """Export analytics reports.
 
@@ -542,6 +605,7 @@ async def export_analytics(
 
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+
         time_range = AnalyticsTimeRange(
             start_date=start_date,
             end_date=end_date,
@@ -556,7 +620,7 @@ async def export_analytics(
         export_data = await analytics_service.export_analytics(
             format,
             date_range,
-            {"user_id": current_user.id, "metrics": metrics}
+            {"user_id": current_user.id, "metrics": metrics},
         )
 
         if format == "json":
@@ -565,13 +629,17 @@ async def export_analytics(
             return StreamingResponse(
                 export_data,
                 media_type="text/csv",
-                headers={"Content-Disposition": "attachment; filename=analytics.csv"}
+                headers={
+                    "Content-Disposition": "attachment; filename=analytics.csv"
+                },
             )
         else:
             return StreamingResponse(
                 export_data,
                 media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                headers={"Content-Disposition": "attachment; filename=analytics.xlsx"}
+                headers={
+                    "Content-Disposition": "attachment; filename=analytics.xlsx"
+                },
             )
 
     except Exception as e:

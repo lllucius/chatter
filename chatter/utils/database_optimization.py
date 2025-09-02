@@ -26,7 +26,7 @@ class QueryOptimizer:
         include_messages: bool = True,
         include_user: bool = True,
         include_profile: bool = True,
-        message_limit: int | None = None
+        message_limit: int | None = None,
     ) -> Select[tuple[Conversation]]:
         """Optimize conversation query with eager loading.
 
@@ -51,7 +51,9 @@ class QueryOptimizer:
         if include_messages:
             if message_limit:
                 # For limited messages, we need a subquery approach
-                message_options = selectinload(Conversation.messages).options(
+                message_options = selectinload(
+                    Conversation.messages
+                ).options(
                     # Order by created_at desc to get most recent messages
                     # Note: This requires a separate optimization in the service layer
                 )
@@ -66,7 +68,7 @@ class QueryOptimizer:
     def optimize_message_query(
         query: Select[tuple[Message]],
         include_conversation: bool = True,
-        include_user: bool = False
+        include_user: bool = False,
     ) -> Select[tuple[Message]]:
         """Optimize message query with eager loading.
 
@@ -83,7 +85,9 @@ class QueryOptimizer:
 
             if include_user:
                 query = query.options(
-                    joinedload(Message.conversation).joinedload(Conversation.user)
+                    joinedload(Message.conversation).joinedload(
+                        Conversation.user
+                    )
                 )
 
         return query
@@ -92,7 +96,7 @@ class QueryOptimizer:
     def optimize_user_query(
         query: Select[tuple[User]],
         include_conversations: bool = False,
-        include_profiles: bool = True
+        include_profiles: bool = True,
     ) -> Select[tuple[User]]:
         """Optimize user query with eager loading.
 
@@ -117,7 +121,7 @@ class QueryOptimizer:
     def optimize_document_query(
         query: Select[tuple[Document]],
         include_user: bool = True,
-        include_chunks: bool = False
+        include_chunks: bool = False,
     ) -> Select[tuple[Document]]:
         """Optimize document query with eager loading.
 
@@ -150,7 +154,7 @@ class ConversationQueryService:
         self,
         conversation_id: str,
         message_limit: int = 50,
-        user_id: str | None = None
+        user_id: str | None = None,
     ) -> Conversation | None:
         """Get conversation with most recent messages using optimized query.
 
@@ -163,16 +167,20 @@ class ConversationQueryService:
             Conversation with recent messages or None
         """
         # First, get the conversation with user and profile
-        conv_query = select(Conversation).where(Conversation.id == conversation_id)
+        conv_query = select(Conversation).where(
+            Conversation.id == conversation_id
+        )
 
         if user_id:
-            conv_query = conv_query.where(Conversation.user_id == user_id)
+            conv_query = conv_query.where(
+                Conversation.user_id == user_id
+            )
 
         conv_query = QueryOptimizer.optimize_conversation_query(
             conv_query,
             include_messages=False,  # We'll load messages separately
             include_user=True,
-            include_profile=True
+            include_profile=True,
         )
 
         result = await self.session.execute(conv_query)
@@ -205,7 +213,7 @@ class ConversationQueryService:
         user_id: str,
         limit: int = 20,
         offset: int = 0,
-        include_recent_message: bool = True
+        include_recent_message: bool = True,
     ) -> Sequence[Conversation]:
         """Get conversations for user with optimization.
 
@@ -220,10 +228,12 @@ class ConversationQueryService:
         """
         query = (
             select(Conversation)
-            .where(and_(
-                Conversation.user_id == user_id,
-                Conversation.status != "deleted"
-            ))
+            .where(
+                and_(
+                    Conversation.user_id == user_id,
+                    Conversation.status != "deleted",
+                )
+            )
             .order_by(Conversation.updated_at.desc())
             .limit(limit)
             .offset(offset)
@@ -235,15 +245,15 @@ class ConversationQueryService:
             query = QueryOptimizer.optimize_conversation_query(
                 query,
                 include_messages=False,  # We'll handle this specially
-                include_user=False,      # User is known
-                include_profile=True
+                include_user=False,  # User is known
+                include_profile=True,
             )
         else:
             query = QueryOptimizer.optimize_conversation_query(
                 query,
                 include_messages=False,
                 include_user=False,
-                include_profile=True
+                include_profile=True,
             )
 
         result = await self.session.execute(query)
@@ -257,12 +267,19 @@ class ConversationQueryService:
             recent_messages_query = (
                 select(Message)
                 .where(Message.conversation_id.in_(conv_ids))
-                .order_by(Message.conversation_id, Message.created_at.desc())
+                .order_by(
+                    Message.conversation_id, Message.created_at.desc()
+                )
                 .distinct(Message.conversation_id)
             )
 
-            recent_messages_result = await self.session.execute(recent_messages_query)
-            recent_messages = {msg.conversation_id: msg for msg in recent_messages_result.scalars().all()}
+            recent_messages_result = await self.session.execute(
+                recent_messages_query
+            )
+            recent_messages = {
+                msg.conversation_id: msg
+                for msg in recent_messages_result.scalars().all()
+            }
 
             # Assign recent messages to conversations
             for conv in conversations:
@@ -274,10 +291,7 @@ class ConversationQueryService:
         return conversations
 
     async def search_conversations(
-        self,
-        user_id: str,
-        search_term: str,
-        limit: int = 20
+        self, user_id: str, search_term: str, limit: int = 20
     ) -> Sequence[Conversation]:
         """Search conversations by title or content with optimization.
 
@@ -292,15 +306,21 @@ class ConversationQueryService:
         # Search in conversation title or message content
         query = (
             select(Conversation)
-            .join(Message, Message.conversation_id == Conversation.id, isouter=True)
-            .where(and_(
-                Conversation.user_id == user_id,
-                Conversation.status != "deleted",
-                or_(
-                    Conversation.title.ilike(f"%{search_term}%"),
-                    Message.content.ilike(f"%{search_term}%")
+            .join(
+                Message,
+                Message.conversation_id == Conversation.id,
+                isouter=True,
+            )
+            .where(
+                and_(
+                    Conversation.user_id == user_id,
+                    Conversation.status != "deleted",
+                    or_(
+                        Conversation.title.ilike(f"%{search_term}%"),
+                        Message.content.ilike(f"%{search_term}%"),
+                    ),
                 )
-            ))
+            )
             .distinct()
             .order_by(Conversation.updated_at.desc())
             .limit(limit)
@@ -310,7 +330,7 @@ class ConversationQueryService:
             query,
             include_messages=False,
             include_user=False,
-            include_profile=True
+            include_profile=True,
         )
 
         result = await self.session.execute(query)
@@ -323,7 +343,7 @@ async def get_conversation_optimized(
     conversation_id: str,
     user_id: str | None = None,
     include_messages: bool = True,
-    message_limit: int | None = None
+    message_limit: int | None = None,
 ) -> Conversation | None:
     """Get conversation with optimized loading.
 
@@ -344,7 +364,9 @@ async def get_conversation_optimized(
             conversation_id, message_limit, user_id
         )
     else:
-        query = select(Conversation).where(Conversation.id == conversation_id)
+        query = select(Conversation).where(
+            Conversation.id == conversation_id
+        )
 
         if user_id:
             query = query.where(Conversation.user_id == user_id)
@@ -353,7 +375,7 @@ async def get_conversation_optimized(
             query,
             include_messages=include_messages,
             include_user=True,
-            include_profile=True
+            include_profile=True,
         )
 
         result = await session.execute(query)
@@ -364,7 +386,7 @@ async def get_user_conversations_optimized(
     session: AsyncSession,
     user_id: str,
     limit: int = 20,
-    offset: int = 0
+    offset: int = 0,
 ) -> Sequence[Conversation]:
     """Get user conversations with optimization.
 

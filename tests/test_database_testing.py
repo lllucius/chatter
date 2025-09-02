@@ -1,11 +1,10 @@
 """Database testing utilities and migration validation."""
 
-import pytest
-import tempfile
-import os
 import asyncio
-from typing import List, Dict, Any
+import os
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 @pytest.mark.integration
@@ -15,34 +14,40 @@ class TestDatabaseMigrations:
     def test_migration_scripts_exist(self):
         """Test that migration scripts are present and properly structured."""
         alembic_dir = "alembic/versions"
-        
+
         if not os.path.exists(alembic_dir):
             pytest.skip("Alembic migrations directory not found")
-        
-        migration_files = [f for f in os.listdir(alembic_dir) if f.endswith(".py")]
-        
+
+        migration_files = [
+            f for f in os.listdir(alembic_dir) if f.endswith(".py")
+        ]
+
         # Should have at least one migration file
         assert len(migration_files) > 0, "No migration files found"
-        
+
         # Check migration file naming convention
         for migration_file in migration_files:
             # Alembic files should follow pattern: {revision}_{description}.py
-            assert "_" in migration_file, f"Invalid migration filename: {migration_file}"
+            assert (
+                "_" in migration_file
+            ), f"Invalid migration filename: {migration_file}"
 
     @pytest.mark.asyncio
     async def test_database_connection_pool(self):
         """Test database connection pooling behavior."""
         # Mock database connection pooling
-        with patch('chatter.utils.database.get_session') as mock_get_session:
+        with patch(
+            'chatter.utils.database.get_session'
+        ) as mock_get_session:
             mock_session = AsyncMock()
             mock_get_session.return_value = mock_session
-            
+
             # Test multiple concurrent connections
             sessions = []
             for i in range(10):
                 session = await mock_get_session()
                 sessions.append(session)
-            
+
             # Should handle multiple sessions
             assert len(sessions) == 10
             assert all(session == mock_session for session in sessions)
@@ -52,7 +57,7 @@ class TestDatabaseMigrations:
         # This would test that critical indexes exist
         # In a real implementation, this would connect to the database
         # and verify index existence
-        
+
         expected_indexes = [
             ("conversations", "user_id"),
             ("conversations", "created_at"),
@@ -62,18 +67,24 @@ class TestDatabaseMigrations:
             ("documents", "created_at"),
             ("users", "email"),
         ]
-        
+
         # Mock database introspection
         with patch('sqlalchemy.inspect') as mock_inspect:
             mock_inspector = MagicMock()
             mock_inspect.return_value = mock_inspector
-            
+
             # Mock existing indexes
             mock_inspector.get_indexes.return_value = [
-                {"name": "idx_conversations_user_id", "column_names": ["user_id"]},
-                {"name": "idx_messages_conversation_id", "column_names": ["conversation_id"]},
+                {
+                    "name": "idx_conversations_user_id",
+                    "column_names": ["user_id"],
+                },
+                {
+                    "name": "idx_messages_conversation_id",
+                    "column_names": ["conversation_id"],
+                },
             ]
-            
+
             # Verify mock indexes exist
             indexes = mock_inspector.get_indexes("conversations")
             assert len(indexes) >= 1, "Should have indexes defined"
@@ -81,20 +92,24 @@ class TestDatabaseMigrations:
     @pytest.mark.asyncio
     async def test_database_transaction_rollback(self):
         """Test database transaction rollback behavior."""
-        with patch('chatter.utils.database.get_session') as mock_get_session:
+        with patch(
+            'chatter.utils.database.get_session'
+        ) as mock_get_session:
             mock_session = AsyncMock()
             mock_get_session.return_value = mock_session
-            
+
             # Test transaction rollback on error
-            mock_session.commit.side_effect = Exception("Database error")
-            
+            mock_session.commit.side_effect = Exception(
+                "Database error"
+            )
+
             session = await mock_get_session()
-            
+
             try:
                 await session.commit()
             except Exception:
                 await session.rollback()
-            
+
             # Rollback should be called on error
             mock_session.rollback.assert_called_once()
 
@@ -103,23 +118,27 @@ class TestDatabaseMigrations:
         # Mock schema validation
         expected_tables = [
             "users",
-            "conversations", 
+            "conversations",
             "messages",
             "documents",
             "agents",
-            "workflows"
+            "workflows",
         ]
-        
+
         with patch('sqlalchemy.inspect') as mock_inspect:
             mock_inspector = MagicMock()
             mock_inspect.return_value = mock_inspector
-            mock_inspector.get_table_names.return_value = expected_tables
-            
+            mock_inspector.get_table_names.return_value = (
+                expected_tables
+            )
+
             # Verify tables exist
             tables = mock_inspector.get_table_names()
-            
+
             for table in expected_tables:
-                assert table in tables, f"Required table missing: {table}"
+                assert (
+                    table in tables
+                ), f"Required table missing: {table}"
 
 
 @pytest.mark.integration
@@ -129,94 +148,108 @@ class TestDatabasePerformance:
     @pytest.mark.asyncio
     async def test_query_performance(self):
         """Test database query performance."""
-        with patch('chatter.utils.database.get_session') as mock_get_session:
+        with patch(
+            'chatter.utils.database.get_session'
+        ) as mock_get_session:
             mock_session = AsyncMock()
             mock_get_session.return_value = mock_session
-            
+
             # Mock query execution time
             import time
-            
+
             async def mock_execute(*args, **kwargs):
                 # Simulate query execution time
                 await asyncio.sleep(0.01)  # 10ms
                 return MagicMock()
-            
-            mock_session.execute = mock_execute
-            
-            session = await mock_get_session()
-            
-            start_time = time.time()
-            await session.execute("SELECT * FROM conversations LIMIT 10")
-            end_time = time.time()
-            
-            query_time = end_time - start_time
-            
-            # Query should complete quickly
-            assert query_time < 1.0, f"Query took too long: {query_time:.3f}s"
 
-    @pytest.mark.asyncio  
+            mock_session.execute = mock_execute
+
+            session = await mock_get_session()
+
+            start_time = time.time()
+            await session.execute(
+                "SELECT * FROM conversations LIMIT 10"
+            )
+            end_time = time.time()
+
+            query_time = end_time - start_time
+
+            # Query should complete quickly
+            assert (
+                query_time < 1.0
+            ), f"Query took too long: {query_time:.3f}s"
+
+    @pytest.mark.asyncio
     async def test_connection_leak_detection(self):
         """Test for database connection leaks."""
         connection_count = 0
-        
+
         def mock_connect():
             nonlocal connection_count
             connection_count += 1
             mock_conn = MagicMock()
             mock_conn.close = lambda: None
             return mock_conn
-        
+
         with patch('sqlalchemy.create_engine') as mock_engine:
             mock_engine.return_value.connect = mock_connect
-            
+
             # Simulate multiple operations
             for i in range(10):
                 conn = mock_connect()
                 # Simulate work without closing connection
                 pass
-            
+
             # In a real test, we would verify connections are properly closed
             assert connection_count == 10, "Connection count tracking"
 
     def test_database_backup_validation(self):
         """Test database backup and restore procedures."""
         # Mock backup validation
-        backup_files = [
-            "backup_20240101.sql",
-            "backup_20240102.sql"
-        ]
-        
+        backup_files = ["backup_20240101.sql", "backup_20240102.sql"]
+
         with patch('os.listdir') as mock_listdir:
             mock_listdir.return_value = backup_files
-            
+
             # Verify backup files exist
             files = mock_listdir("backups/")
-            backup_count = len([f for f in files if f.startswith("backup_")])
-            
+            backup_count = len(
+                [f for f in files if f.startswith("backup_")]
+            )
+
             assert backup_count >= 1, "Should have backup files"
 
     @pytest.mark.asyncio
     async def test_bulk_operation_performance(self):
         """Test performance of bulk database operations."""
-        with patch('chatter.utils.database.get_session') as mock_get_session:
+        with patch(
+            'chatter.utils.database.get_session'
+        ) as mock_get_session:
             mock_session = AsyncMock()
             mock_get_session.return_value = mock_session
-            
+
             # Mock bulk insert
-            records = [{"id": i, "data": f"record_{i}"} for i in range(1000)]
-            
+            records = [
+                {"id": i, "data": f"record_{i}"} for i in range(1000)
+            ]
+
             import time
+
             start_time = time.time()
-            
+
             # Simulate bulk insert
             mock_session.bulk_insert_mappings = AsyncMock()
-            await mock_session.bulk_insert_mappings("test_table", records)
-            
+            await mock_session.bulk_insert_mappings(
+                "test_table", records
+            )
+
             end_time = time.time()
             bulk_time = end_time - start_time
-            
+
             # Bulk operations should be efficient
-            assert bulk_time < 2.0, f"Bulk insert took too long: {bulk_time:.3f}s"
+            assert (
+                bulk_time < 2.0
+            ), f"Bulk insert took too long: {bulk_time:.3f}s"
 
 
 @pytest.mark.integration
@@ -226,20 +259,21 @@ class TestDataIntegrity:
     @pytest.mark.asyncio
     async def test_foreign_key_constraints(self):
         """Test foreign key constraint enforcement."""
-        with patch('chatter.utils.database.get_session') as mock_get_session:
+        with patch(
+            'chatter.utils.database.get_session'
+        ) as mock_get_session:
             mock_session = AsyncMock()
             mock_get_session.return_value = mock_session
-            
+
             # Mock foreign key violation
             from sqlalchemy.exc import IntegrityError
+
             mock_session.commit.side_effect = IntegrityError(
-                "Foreign key constraint failed", 
-                None, 
-                None
+                "Foreign key constraint failed", None, None
             )
-            
+
             session = await mock_get_session()
-            
+
             # Should raise integrity error for invalid foreign key
             with pytest.raises(IntegrityError):
                 await session.commit()
@@ -247,20 +281,21 @@ class TestDataIntegrity:
     @pytest.mark.asyncio
     async def test_unique_constraint_enforcement(self):
         """Test unique constraint enforcement."""
-        with patch('chatter.utils.database.get_session') as mock_get_session:
+        with patch(
+            'chatter.utils.database.get_session'
+        ) as mock_get_session:
             mock_session = AsyncMock()
             mock_get_session.return_value = mock_session
-            
+
             # Mock unique constraint violation
             from sqlalchemy.exc import IntegrityError
+
             mock_session.commit.side_effect = IntegrityError(
-                "Unique constraint failed",
-                None,
-                None
+                "Unique constraint failed", None, None
             )
-            
+
             session = await mock_get_session()
-            
+
             # Should raise integrity error for duplicate values
             with pytest.raises(IntegrityError):
                 await session.commit()
@@ -271,43 +306,55 @@ class TestDataIntegrity:
         validation_rules = {
             "email": r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
             "password": r"^.{8,}$",  # At least 8 characters
-            "phone": r"^\+?1?\d{9,15}$"
+            "phone": r"^\+?1?\d{9,15}$",
         }
-        
+
         test_data = {
             "email": ["valid@example.com", "invalid-email"],
             "password": ["valid_password123", "short"],
-            "phone": ["+1234567890", "invalid-phone"]
+            "phone": ["+1234567890", "invalid-phone"],
         }
-        
+
         import re
-        
+
         for field, pattern in validation_rules.items():
             valid_value, invalid_value = test_data[field]
-            
+
             # Valid value should match pattern
-            assert re.match(pattern, valid_value), f"Valid {field} should match pattern"
-            
+            assert re.match(
+                pattern, valid_value
+            ), f"Valid {field} should match pattern"
+
             # Invalid value should not match pattern
-            assert not re.match(pattern, invalid_value), f"Invalid {field} should not match pattern"
+            assert not re.match(
+                pattern, invalid_value
+            ), f"Invalid {field} should not match pattern"
 
     @pytest.mark.asyncio
     async def test_cascading_deletes(self):
         """Test cascading delete behavior."""
-        with patch('chatter.utils.database.get_session') as mock_get_session:
+        with patch(
+            'chatter.utils.database.get_session'
+        ) as mock_get_session:
             mock_session = AsyncMock()
             mock_get_session.return_value = mock_session
-            
+
             # Mock cascading delete
-            mock_session.execute.return_value.rowcount = 5  # 5 related records deleted
-            
+            mock_session.execute.return_value.rowcount = (
+                5  # 5 related records deleted
+            )
+
             session = await mock_get_session()
-            
+
             # Simulate deleting a user (should cascade to related records)
-            result = await session.execute("DELETE FROM users WHERE id = 1")
-            
+            result = await session.execute(
+                "DELETE FROM users WHERE id = 1"
+            )
+
             # Should delete related records
-            assert result.rowcount > 0, "Cascading delete should affect multiple records"
+            assert (
+                result.rowcount > 0
+            ), "Cascading delete should affect multiple records"
 
 
 @pytest.mark.integration
@@ -320,14 +367,16 @@ class TestDatabaseSecurity:
         with patch('sqlalchemy.text') as mock_text:
             mock_query = MagicMock()
             mock_text.return_value = mock_query
-            
+
             # Test parameterized query construction
             from sqlalchemy import text
-            
+
             query = text("SELECT * FROM users WHERE email = :email")
-            
+
             # Should use parameterized queries, not string concatenation
-            assert ":email" in str(query), "Should use parameterized queries"
+            assert ":email" in str(
+                query
+            ), "Should use parameterized queries"
 
     def test_database_connection_encryption(self):
         """Test database connection encryption."""
@@ -335,15 +384,19 @@ class TestDatabaseSecurity:
         with patch('sqlalchemy.create_engine') as mock_create_engine:
             mock_engine = MagicMock()
             mock_create_engine.return_value = mock_engine
-            
+
             # Simulate creating engine with SSL
             from sqlalchemy import create_engine
-            
+
             # Should use SSL for database connections in production
-            engine = create_engine("postgresql://user:pass@host/db?sslmode=require")
-            
+            engine = create_engine(
+                "postgresql://user:pass@host/db?sslmode=require"
+            )
+
             # Verify SSL mode is configured
-            assert "sslmode=require" in str(engine.url), "Should use SSL for database connections"
+            assert "sslmode=require" in str(
+                engine.url
+            ), "Should use SSL for database connections"
 
     def test_database_user_permissions(self):
         """Test database user permission restrictions."""
@@ -353,21 +406,30 @@ class TestDatabaseSecurity:
             "ALTER TABLE",
             "CREATE TABLE",
             "GRANT",
-            "REVOKE"
+            "REVOKE",
         ]
-        
+
         # Application database user should not have admin privileges
         with patch('sqlalchemy.inspect') as mock_inspect:
             mock_inspector = MagicMock()
             mock_inspect.return_value = mock_inspector
-            
+
             # Mock user permissions (should be restricted)
-            mock_inspector.get_table_names.return_value = ["users", "conversations"]
-            
+            mock_inspector.get_table_names.return_value = [
+                "users",
+                "conversations",
+            ]
+
             # Application should only access allowed tables
             tables = mock_inspector.get_table_names()
-            
+
             # Should not have access to system tables
-            system_tables = ["pg_user", "information_schema", "pg_database"]
+            system_tables = [
+                "pg_user",
+                "information_schema",
+                "pg_database",
+            ]
             for sys_table in system_tables:
-                assert sys_table not in tables, f"Should not access system table: {sys_table}"
+                assert (
+                    sys_table not in tables
+                ), f"Should not access system table: {sys_table}"

@@ -38,7 +38,9 @@ class BaseAgent(ABC):
         self.profile = profile
         self.llm = llm
         self.tools: dict[str, BaseTool] = {}
-        self.conversation_history: dict[str, list[AgentInteraction]] = {}
+        self.conversation_history: dict[str, list[AgentInteraction]] = (
+            {}
+        )
         self.performance_metrics: dict[str, Any] = {
             "total_interactions": 0,
             "average_confidence": 0.0,
@@ -84,7 +86,9 @@ class BaseAgent(ABC):
         self.tools[tool.name] = tool
         if tool.name not in self.profile.available_tools:
             self.profile.available_tools.append(tool.name)
-        logger.info(f"Added tool {tool.name} to agent {self.profile.name}")
+        logger.info(
+            f"Added tool {tool.name} to agent {self.profile.name}"
+        )
 
     async def remove_tool(self, tool_name: str) -> bool:
         """Remove a tool from the agent's toolkit.
@@ -99,7 +103,9 @@ class BaseAgent(ABC):
             del self.tools[tool_name]
             if tool_name in self.profile.available_tools:
                 self.profile.available_tools.remove(tool_name)
-            logger.info(f"Removed tool {tool_name} from agent {self.profile.name}")
+            logger.info(
+                f"Removed tool {tool_name} from agent {self.profile.name}"
+            )
             return True
         return False
 
@@ -171,9 +177,15 @@ class BaseAgent(ABC):
             List of recent interactions
         """
         history = self.conversation_history.get(conversation_id, [])
-        return history[-max_interactions:] if len(history) > max_interactions else history
+        return (
+            history[-max_interactions:]
+            if len(history) > max_interactions
+            else history
+        )
 
-    async def _update_metrics(self, interaction: AgentInteraction) -> None:
+    async def _update_metrics(
+        self, interaction: AgentInteraction
+    ) -> None:
         """Update performance metrics based on interaction.
 
         Args:
@@ -186,17 +198,23 @@ class BaseAgent(ABC):
 
         # Update average confidence
         total_confidence = (
-            metrics["average_confidence"] * (metrics["total_interactions"] - 1)
+            metrics["average_confidence"]
+            * (metrics["total_interactions"] - 1)
             + interaction.confidence_score
         )
-        metrics["average_confidence"] = total_confidence / metrics["total_interactions"]
+        metrics["average_confidence"] = (
+            total_confidence / metrics["total_interactions"]
+        )
 
         # Update average response time
         total_response_time = (
-            metrics["average_response_time"] * (metrics["total_interactions"] - 1)
+            metrics["average_response_time"]
+            * (metrics["total_interactions"] - 1)
             + interaction.response_time
         )
-        metrics["average_response_time"] = total_response_time / metrics["total_interactions"]
+        metrics["average_response_time"] = (
+            total_response_time / metrics["total_interactions"]
+        )
 
     async def learn_from_feedback(
         self, interaction_id: str, feedback_score: float
@@ -221,7 +239,9 @@ class BaseAgent(ABC):
                 break
 
         if not interaction:
-            logger.warning(f"Interaction {interaction_id} not found for feedback")
+            logger.warning(
+                f"Interaction {interaction_id} not found for feedback"
+            )
             return
 
         # Update interaction with feedback
@@ -229,19 +249,28 @@ class BaseAgent(ABC):
 
         # Update performance metrics
         total_feedback = sum(
-            inter.feedback_score for conv_history in self.conversation_history.values()
-            for inter in conv_history if inter.feedback_score is not None
+            inter.feedback_score
+            for conv_history in self.conversation_history.values()
+            for inter in conv_history
+            if inter.feedback_score is not None
         )
         feedback_count = sum(
-            1 for conv_history in self.conversation_history.values()
-            for inter in conv_history if inter.feedback_score is not None
+            1
+            for conv_history in self.conversation_history.values()
+            for inter in conv_history
+            if inter.feedback_score is not None
         )
 
         if feedback_count > 0:
-            self.performance_metrics["feedback_score"] = total_feedback / feedback_count
+            self.performance_metrics["feedback_score"] = (
+                total_feedback / feedback_count
+            )
 
         # Adapt behavior based on feedback
-        if self.profile.learning_enabled and feedback_score < self.profile.adaptation_threshold:
+        if (
+            self.profile.learning_enabled
+            and feedback_score < self.profile.adaptation_threshold
+        ):
             await self._adapt_behavior(interaction, feedback_score)
 
         logger.info(
@@ -262,10 +291,14 @@ class BaseAgent(ABC):
         # Simple adaptation: adjust temperature based on feedback
         if feedback_score < 0.5:
             # Poor feedback, reduce temperature for more deterministic responses
-            self.profile.temperature = max(0.1, self.profile.temperature - 0.1)
+            self.profile.temperature = max(
+                0.1, self.profile.temperature - 0.1
+            )
         elif feedback_score > 0.8:
             # Good feedback, slightly increase temperature for more creativity
-            self.profile.temperature = min(1.0, self.profile.temperature + 0.05)
+            self.profile.temperature = min(
+                1.0, self.profile.temperature + 0.05
+            )
 
         logger.info(
             f"Adapted behavior for agent {self.profile.name}",
@@ -288,26 +321,42 @@ class ConversationalAgent(BaseAgent):
 
         try:
             # Get conversation context
-            recent_interactions = await self.get_conversation_context(conversation_id)
+            recent_interactions = await self.get_conversation_context(
+                conversation_id
+            )
 
             # Build message history
-            messages: list[BaseMessage] = [SystemMessage(content=self.profile.system_message)]
+            messages: list[BaseMessage] = [
+                SystemMessage(content=self.profile.system_message)
+            ]
 
             # Add recent conversation history
             for interaction in recent_interactions:
-                messages.append(HumanMessage(content=interaction.user_message))
-                messages.append(SystemMessage(content=interaction.agent_response))
+                messages.append(
+                    HumanMessage(content=interaction.user_message)
+                )
+                messages.append(
+                    SystemMessage(content=interaction.agent_response)
+                )
 
             # Add current message
             messages.append(HumanMessage(content=message))
 
             # Generate response
             response = await self.llm.ainvoke(messages)
-            response_text = str(response.content) if hasattr(response, 'content') else str(response)
+            response_text = (
+                str(response.content)
+                if hasattr(response, 'content')
+                else str(response)
+            )
 
             # Calculate response time and confidence
-            response_time = (datetime.now(UTC) - start_time).total_seconds()
-            confidence_score = 0.8  # Default confidence for conversational agents
+            response_time = (
+                datetime.now(UTC) - start_time
+            ).total_seconds()
+            confidence_score = (
+                0.8  # Default confidence for conversational agents
+            )
 
             # Record interaction
             await self.record_interaction(
@@ -358,7 +407,11 @@ class TaskOrientedAgent(BaseAgent):
             # Create conversation state
             state: ConversationState = {
                 "messages": [HumanMessage(content=message)],
-                "user_id": context.get("user_id", "unknown") if context else "unknown",
+                "user_id": (
+                    context.get("user_id", "unknown")
+                    if context
+                    else "unknown"
+                ),
                 "conversation_id": conversation_id,
                 "retrieval_context": None,
                 "tool_calls": [],
@@ -389,10 +442,15 @@ class TaskOrientedAgent(BaseAgent):
                 )
 
             if result and "tool_calls" in result:
-                tools_used = [call.get("name", "unknown") for call in result["tool_calls"]]
+                tools_used = [
+                    call.get("name", "unknown")
+                    for call in result["tool_calls"]
+                ]
 
             # Calculate response time and confidence
-            response_time = (datetime.now(UTC) - start_time).total_seconds()
+            response_time = (
+                datetime.now(UTC) - start_time
+            ).total_seconds()
             confidence_score = 0.9 if tools_used else 0.7
 
             # Record interaction
@@ -438,10 +496,12 @@ class AgentManager:
             AgentType.SPECIALIST: SpecializedAgent,
             # Add more agent types as needed
         }
-        
+
         # Register agent types in the registry
         for agent_type, agent_class in self.agent_classes.items():
-            self.registry.register_agent_type(agent_type.value, agent_class)
+            self.registry.register_agent_type(
+                agent_type.value, agent_class
+            )
 
     async def create_agent(
         self,
@@ -536,7 +596,7 @@ class AgentManager:
         total = len(profiles)
 
         # Apply pagination
-        paginated_profiles = profiles[offset:offset + limit]
+        paginated_profiles = profiles[offset : offset + limit]
 
         return paginated_profiles, total
 
@@ -582,7 +642,9 @@ class AgentManager:
         if agent.profile.status != AgentStatus.ACTIVE:
             return "Agent is currently unavailable."
 
-        return await agent.process_message(message, conversation_id, context)
+        return await agent.process_message(
+            message, conversation_id, context
+        )
 
     async def route_message(
         self,
@@ -604,13 +666,15 @@ class AgentManager:
         """
         # Find suitable agents
         suitable_agents = [
-            agent for agent in self.agents.values()
+            agent
+            for agent in self.agents.values()
             if agent.profile.status == AgentStatus.ACTIVE
         ]
 
         if preferred_agent_type:
             suitable_agents = [
-                agent for agent in suitable_agents
+                agent
+                for agent in suitable_agents
                 if agent.profile.type == preferred_agent_type
             ]
 
@@ -621,7 +685,9 @@ class AgentManager:
         # In a real implementation, you might want more sophisticated routing logic
         agent = suitable_agents[0]
 
-        return await agent.process_message(message, conversation_id, context)
+        return await agent.process_message(
+            message, conversation_id, context
+        )
 
     async def get_agent_stats(self) -> dict[str, Any]:
         """Get statistics about all agents.
@@ -631,7 +697,8 @@ class AgentManager:
         """
         total_agents = len(self.agents)
         active_agents = sum(
-            1 for agent in self.agents.values()
+            1
+            for agent in self.agents.values()
             if agent.profile.status == AgentStatus.ACTIVE
         )
 
@@ -661,9 +728,11 @@ class AgentRegistry:
         self.agent_types: dict[str, type[BaseAgent]] = {}
         self.agent_instances: dict[str, BaseAgent] = {}
 
-    def register_agent_type(self, name: str, agent_class: type[BaseAgent]) -> None:
+    def register_agent_type(
+        self, name: str, agent_class: type[BaseAgent]
+    ) -> None:
         """Register an agent type.
-        
+
         Args:
             name: Name of the agent type
             agent_class: Agent class to register
@@ -672,10 +741,10 @@ class AgentRegistry:
 
     def get_agent_type(self, name: str) -> type[BaseAgent] | None:
         """Get an agent type by name.
-        
+
         Args:
             name: Name of the agent type
-            
+
         Returns:
             Agent class or None if not found
         """
@@ -683,7 +752,7 @@ class AgentRegistry:
 
     def list_agent_types(self) -> list[str]:
         """List all registered agent types.
-        
+
         Returns:
             List of agent type names
         """
@@ -701,15 +770,15 @@ class AgentExecutor:
         self,
         agent: BaseAgent,
         task: str,
-        context: dict[str, Any] | None = None
+        context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Execute a task with an agent.
-        
+
         Args:
             agent: The agent to execute the task
             task: Task description
             context: Optional context for the task
-            
+
         Returns:
             Task execution result
         """
@@ -718,7 +787,7 @@ class AgentExecutor:
             "agent": agent,
             "task": task,
             "context": context or {},
-            "status": "running"
+            "status": "running",
         }
 
         try:
@@ -729,7 +798,7 @@ class AgentExecutor:
             return {
                 "task_id": task_id,
                 "status": "completed",
-                "result": result
+                "result": result,
             }
         except Exception as e:
             self.active_tasks[task_id]["status"] = "failed"
@@ -738,10 +807,10 @@ class AgentExecutor:
 
     def get_task_status(self, task_id: str) -> dict[str, Any] | None:
         """Get the status of a task.
-        
+
         Args:
             task_id: ID of the task
-            
+
         Returns:
             Task status or None if not found
         """
@@ -753,13 +822,15 @@ class SpecializedAgent(BaseAgent):
 
     def __init__(self, profile: AgentProfile, llm: BaseChatModel):
         """Initialize the specialized agent.
-        
+
         Args:
             profile: Agent profile and configuration
             llm: Language model instance
         """
         super().__init__(profile, llm)
-        self.specialization = getattr(profile, 'specialization', 'general')
+        self.specialization = getattr(
+            profile, 'specialization', 'general'
+        )
         self.domain_knowledge: dict[str, Any] = {}
 
     async def process_message(
@@ -769,86 +840,91 @@ class SpecializedAgent(BaseAgent):
         context: dict[str, Any] | None = None,
     ) -> str:
         """Process a message with specialized domain knowledge.
-        
+
         Args:
             message: Input message to process
             conversation_id: Conversation identifier
             context: Additional context for processing
-            
+
         Returns:
             Agent response
         """
         context = context or {}
-        
+
         # Add specialized context
         specialized_context = {
             **context,
             "specialization": self.specialization,
-            "domain_knowledge": self.domain_knowledge
+            "domain_knowledge": self.domain_knowledge,
         }
-        
+
         # Build specialized system message
         system_message = SystemMessage(
             content=f"{self.profile.system_message}\n"
-                   f"You are specialized in: {self.specialization}"
+            f"You are specialized in: {self.specialization}"
         )
-        
+
         # Create messages for processing
-        messages = [
-            system_message,
-            HumanMessage(content=message)
-        ]
-        
+        messages = [system_message, HumanMessage(content=message)]
+
         try:
             # Process with LLM
             response = await self.llm.ainvoke(messages)
-            
+
             # Calculate confidence based on specialization match
-            confidence = self._calculate_specialized_confidence(message, specialized_context)
-            
+            confidence = self._calculate_specialized_confidence(
+                message, specialized_context
+            )
+
             # Record interaction
             await self.record_interaction(
                 conversation_id=conversation_id,
                 user_message=message,
-                agent_response=str(response.content) if hasattr(response, 'content') else str(response),
+                agent_response=(
+                    str(response.content)
+                    if hasattr(response, 'content')
+                    else str(response)
+                ),
                 tools_used=[],
                 confidence_score=confidence,
                 response_time=1.0,  # Default response time
             )
-            
-            return str(response.content) if hasattr(response, 'content') else str(response)
-            
+
+            return (
+                str(response.content)
+                if hasattr(response, 'content')
+                else str(response)
+            )
+
         except Exception as e:
             logger.error(f"Error processing message: {e}")
             return "I apologize, but I encountered an error processing your request."
-    
+
     def _calculate_specialized_confidence(
-        self, 
-        message: str, 
-        context: dict[str, Any]
+        self, message: str, context: dict[str, Any]
     ) -> float:
         """Calculate confidence score based on specialization match.
-        
+
         Args:
             message: Input message
             context: Processing context
-            
+
         Returns:
             Confidence score between 0.0 and 1.0
         """
         # Simple specialization-based confidence calculation
         base_confidence = 0.7
-        
+
         # Boost confidence if message matches specialization
         if self.specialization.lower() in message.lower():
             base_confidence += 0.2
-            
+
         # Cap at 1.0
         return min(base_confidence, 1.0)
 
     async def get_capabilities(self) -> list[AgentCapability]:
         """Get specialized agent capabilities.
-        
+
         Returns:
             List of agent capabilities based on specialization
         """
@@ -856,9 +932,13 @@ class SpecializedAgent(BaseAgent):
             AgentCapability.NATURAL_LANGUAGE,
             AgentCapability.ANALYTICAL,
         ]
-        
+
         # Add capabilities based on specialization
-        if self.specialization.lower() in ["programming", "code", "software"]:
+        if self.specialization.lower() in [
+            "programming",
+            "code",
+            "software",
+        ]:
             base_capabilities.append(AgentCapability.CODE_GENERATION)
             base_capabilities.append(AgentCapability.TOOL_USE)
         elif self.specialization.lower() in ["research", "analysis"]:
@@ -868,7 +948,7 @@ class SpecializedAgent(BaseAgent):
             base_capabilities.append(AgentCapability.CREATIVE)
         elif self.specialization.lower() in ["support", "help"]:
             base_capabilities.append(AgentCapability.SUPPORT)
-        
+
         # Remove duplicates
         return list(set(base_capabilities))
 

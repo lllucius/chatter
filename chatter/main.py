@@ -56,9 +56,11 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 method=request.method,
                 url=str(request.url),
                 headers=dict(request.headers),
-                body=request_body.decode("utf-8", errors="ignore")
-                if request_body
-                else None,
+                body=(
+                    request_body.decode("utf-8", errors="ignore")
+                    if request_body
+                    else None
+                ),
             )
 
         response = await call_next(request)
@@ -71,7 +73,9 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         is_error = response.status_code >= 400
 
         # Get correlation ID for metrics
-        correlation_id = response.headers.get('x-correlation-id', 'unknown')
+        correlation_id = response.headers.get(
+            'x-correlation-id', 'unknown'
+        )
 
         # Check if request was rate limited
         rate_limited = response.status_code == 429
@@ -79,16 +83,19 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         # Record metrics
         try:
             from chatter.utils.monitoring import record_request_metrics
+
             record_request_metrics(
                 method=request.method,
                 path=request.url.path,
                 status_code=response.status_code,
                 response_time_ms=duration_ms,
                 correlation_id=correlation_id,
-                rate_limited=rate_limited
+                rate_limited=rate_limited,
             )
         except Exception as e:
-            logger.warning("Failed to record request metrics", error=str(e))
+            logger.warning(
+                "Failed to record request metrics", error=str(e)
+            )
 
         # For error responses, always log detailed information regardless of debug setting
         if is_error:
@@ -114,16 +121,16 @@ class LoggingMiddleware(BaseHTTPMiddleware):
                 duration_ms=duration_ms,
                 correlation_id=correlation_id,
                 request_headers=dict(request.headers),
-                request_body=request_body.decode(
-                    "utf-8", errors="ignore"
-                )
-                if request_body
-                else None,
+                request_body=(
+                    request_body.decode("utf-8", errors="ignore")
+                    if request_body
+                    else None
+                ),
                 response_headers=json.dumps(
                     dict(response.headers), indent=4
                 ),
                 response_body=response_body,
-                rate_limited=rate_limited
+                rate_limited=rate_limited,
             )
         elif settings.debug_http_requests:
             # Normal debug logging for non-error responses
@@ -162,6 +169,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         from chatter.utils.config_validator import (
             validate_startup_configuration,
         )
+
         validate_startup_configuration()
         logger.info("Configuration validation passed")
     except Exception as e:
@@ -169,7 +177,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         if settings.is_production:
             raise
         else:
-            logger.warning("Continuing startup despite configuration issues (development mode)")
+            logger.warning(
+                "Continuing startup despite configuration issues (development mode)"
+            )
 
     # Initialize database
     await init_database()
@@ -273,7 +283,9 @@ def create_app() -> FastAPI:
         docs_url="/docs" if settings.is_development else None,
         redoc_url="/redoc" if settings.is_development else None,
         openapi_version="3.0.3",
-        openapi_url="/openapi.json" if settings.is_development else None
+        openapi_url=(
+            "/openapi.json" if settings.is_development else None
+        ),
     )
 
     # Add security middleware
@@ -286,12 +298,12 @@ def create_app() -> FastAPI:
             response.headers["X-Content-Type-Options"] = "nosniff"
             response.headers["X-Frame-Options"] = "DENY"
             response.headers["X-XSS-Protection"] = "1; mode=block"
-            response.headers[
-                "Strict-Transport-Security"
-            ] = "max-age=31536000; includeSubDomains"
-            response.headers[
-                "Referrer-Policy"
-            ] = "strict-origin-when-cross-origin"
+            response.headers["Strict-Transport-Security"] = (
+                "max-age=31536000; includeSubDomains"
+            )
+            response.headers["Referrer-Policy"] = (
+                "strict-origin-when-cross-origin"
+            )
             return response
 
     # Add CORS middleware
@@ -306,7 +318,8 @@ def create_app() -> FastAPI:
     # Add trusted host middleware
     if settings.trusted_hosts_for_env:
         app.add_middleware(
-            TrustedHostMiddleware, allowed_hosts=settings.trusted_hosts_for_env
+            TrustedHostMiddleware,
+            allowed_hosts=settings.trusted_hosts_for_env,
         )
 
     # Add compression middleware
@@ -314,13 +327,17 @@ def create_app() -> FastAPI:
 
     # Add correlation ID middleware (before logging)
     from chatter.utils.correlation import CorrelationIdMiddleware
+
     app.add_middleware(CorrelationIdMiddleware)
 
     # Add rate limiting middleware
     from chatter.utils.rate_limit import RateLimitMiddleware
-    app.add_middleware(RateLimitMiddleware,
-                       requests_per_minute=100,
-                       requests_per_hour=2000)
+
+    app.add_middleware(
+        RateLimitMiddleware,
+        requests_per_minute=100,
+        requests_per_hour=2000,
+    )
 
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
@@ -491,54 +508,76 @@ def create_app() -> FastAPI:
 
     # Mount static files for the web interface
     import os
-    static_dir = os.path.join(os.path.dirname(__file__), "../frontend/build")
+
+    static_dir = os.path.join(
+        os.path.dirname(__file__), "../frontend/build"
+    )
     if os.path.exists(static_dir):
         try:
             static_files_dir = os.path.join(static_dir, "static")
             if os.path.exists(static_files_dir):
-                app.mount("/static", StaticFiles(directory=static_files_dir), name="static")
+                app.mount(
+                    "/static",
+                    StaticFiles(directory=static_files_dir),
+                    name="static",
+                )
 
                 # Serve React app for all non-API routes
                 @app.get("/{full_path:path}")
                 async def serve_react_app(full_path: str):
                     # Don't intercept API routes, docs, or health checks
-                    if (full_path.startswith("api/") or
-                            full_path.startswith("health") or
-                            full_path.startswith("docs") or
-                            full_path.startswith("redoc") or
-                            full_path.startswith("openapi.json")):
+                    if (
+                        full_path.startswith("api/")
+                        or full_path.startswith("health")
+                        or full_path.startswith("docs")
+                        or full_path.startswith("redoc")
+                        or full_path.startswith("openapi.json")
+                    ):
                         return {"error": "Not found"}
 
                     from fastapi.responses import FileResponse
+
                     index_file = os.path.join(static_dir, "index.html")
                     if os.path.exists(index_file):
                         return FileResponse(index_file)
                     else:
                         return {"error": "Frontend not available"}
 
-                logger.info("Frontend static files mounted successfully")
+                logger.info(
+                    "Frontend static files mounted successfully"
+                )
             else:
-                logger.warning("Frontend static directory not found, skipping mount")
+                logger.warning(
+                    "Frontend static directory not found, skipping mount"
+                )
         except Exception as e:
             logger.warning(f"Failed to mount static files: {e}")
     else:
-        logger.debug("Frontend build directory not found, skipping frontend setup")
+        logger.debug(
+            "Frontend build directory not found, skipping frontend setup"
+        )
 
     # Setup enhanced documentation
     try:
         from chatter.utils.documentation import setup_enhanced_docs
+
         setup_enhanced_docs(app)
         logger.info("Enhanced API documentation configured")
     except Exception as e:
-        logger.warning("Failed to setup enhanced documentation", error=str(e))
+        logger.warning(
+            "Failed to setup enhanced documentation", error=str(e)
+        )
 
     @app.get("/")
     async def root():
         """Root endpoint."""
         # If frontend is available, serve it; otherwise return API info
-        static_dir = os.path.join(os.path.dirname(__file__), "../frontend/build")
+        static_dir = os.path.join(
+            os.path.dirname(__file__), "../frontend/build"
+        )
         if os.path.exists(static_dir):
             from fastapi.responses import FileResponse
+
             index_file = os.path.join(static_dir, "index.html")
             return FileResponse(index_file)
         else:

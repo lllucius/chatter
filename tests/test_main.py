@@ -1,20 +1,21 @@
 """Tests for main FastAPI application."""
 
 import asyncio
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
+from fastapi import HTTPException, Request
 from fastapi.testclient import TestClient
-from fastapi import Request, HTTPException
 
 from chatter.main import (
-    app,
     LoggingMiddleware,
+    app,
     create_app,
 )
 from chatter.utils.rate_limit import RateLimitMiddleware
 
 
-@pytest.mark.unit 
+@pytest.mark.unit
 class TestAppCreation:
     """Test FastAPI application creation."""
 
@@ -53,7 +54,10 @@ class TestAppCreation:
 
         # Assert
         # Check that required middleware is present
-        middleware_types = [type(middleware).__name__ for middleware, _ in test_app.user_middleware]
+        middleware_types = [
+            type(middleware).__name__
+            for middleware, _ in test_app.user_middleware
+        ]
         assert "CORSMiddleware" in middleware_types
         assert "GZipMiddleware" in middleware_types
         assert "TrustedHostMiddleware" in middleware_types
@@ -65,7 +69,7 @@ class TestAppCreation:
 
         # Assert
         routes = [route.path for route in test_app.routes]
-        
+
         # Check for core routes
         assert any("/healthz" in route for route in routes)
         assert any("/api/v1" in route for route in routes)
@@ -79,7 +83,10 @@ class TestAppCreation:
         assert len(test_app.exception_handlers) > 0
         # Should have handlers for common exceptions
         exception_types = list(test_app.exception_handlers.keys())
-        assert HTTPException in exception_types or Exception in exception_types
+        assert (
+            HTTPException in exception_types
+            or Exception in exception_types
+        )
 
 
 @pytest.mark.unit
@@ -104,7 +111,7 @@ class TestLoggingMiddleware:
         response = Mock()
         response.status_code = 200
         response.headers = {}
-        
+
         call_next = AsyncMock(return_value=response)
 
         # Act
@@ -128,7 +135,7 @@ class TestLoggingMiddleware:
         response = Mock()
         response.status_code = 201
         response.headers = {}
-        
+
         call_next = AsyncMock(return_value=response)
 
         # Act
@@ -155,10 +162,10 @@ class TestLoggingMiddleware:
         # Act & Assert
         with pytest.raises(Exception) as exc_info:
             await self.middleware.dispatch(request, call_next)
-        
+
         assert str(exc_info.value) == "Test error"
 
-    @pytest.mark.asyncio 
+    @pytest.mark.asyncio
     async def test_logging_middleware_timing(self):
         """Test that logging middleware measures request timing."""
         # Arrange
@@ -207,10 +214,10 @@ class TestRateLimitMiddleware:
         response = Mock()
         response.status_code = 200
         response.headers = {}
-        
+
         call_next = AsyncMock(return_value=response)
 
-        # Mock time for consistent rate limiting behavior  
+        # Mock time for consistent rate limiting behavior
         with patch('chatter.utils.rate_limit.time.time') as mock_time:
             mock_time.return_value = 1000000
 
@@ -234,13 +241,18 @@ class TestRateLimitMiddleware:
         call_next = AsyncMock()
 
         # Create a rate limiter that's already at the limit
-        rate_limiter = RateLimitMiddleware(app=Mock(), requests_per_minute=1, requests_per_hour=1)
-        
+        rate_limiter = RateLimitMiddleware(
+            app=Mock(), requests_per_minute=1, requests_per_hour=1
+        )
+
         # Pre-populate with requests to trigger rate limiting
         with patch('chatter.utils.rate_limit.time.time') as mock_time:
             mock_time.return_value = 1000000
-            rate_limiter.request_history["127.0.0.1"] = [1000000, 1000000]  # Already at limit
-            
+            rate_limiter.request_history["127.0.0.1"] = [
+                1000000,
+                1000000,
+            ]  # Already at limit
+
             # Act & Assert - should not raise exception but might add rate limit headers
             try:
                 result = await rate_limiter.dispatch(request, call_next)
@@ -263,7 +275,7 @@ class TestRateLimitMiddleware:
         response = Mock()
         response.status_code = 200
         response.headers = {}
-        
+
         call_next = AsyncMock(return_value=response)
 
         # Mock time for consistent behavior
@@ -288,11 +300,11 @@ class TestHealthEndpoint:
         """Test health status when all systems are healthy."""
         # Arrange
         from chatter.api.health import health_check_endpoint
-        
+
         with patch('chatter.api.health.settings') as mock_settings:
             mock_settings.app_version = "1.0.0"
             mock_settings.environment = "test"
-            
+
             # Act
             response = await health_check_endpoint()
 
@@ -307,11 +319,13 @@ class TestHealthEndpoint:
         """Test readiness check when database is healthy."""
         # Arrange
         from chatter.api.health import readiness_check
-        
-        with patch('chatter.api.health.health_check') as mock_health_check:
+
+        with patch(
+            'chatter.api.health.health_check'
+        ) as mock_health_check:
             mock_health_check.return_value = True
             mock_session = AsyncMock()
-            
+
             # Act
             response = await readiness_check(session=mock_session)
 
@@ -319,16 +333,18 @@ class TestHealthEndpoint:
         assert response.status == "ready"
         assert response.checks["database"]["status"] == "healthy"
 
-    @pytest.mark.asyncio 
+    @pytest.mark.asyncio
     async def test_readiness_check_database_unhealthy(self):
         """Test readiness check when database is unhealthy."""
         # Arrange
         from chatter.api.health import readiness_check
-        
-        with patch('chatter.api.health.health_check') as mock_health_check:
+
+        with patch(
+            'chatter.api.health.health_check'
+        ) as mock_health_check:
             mock_health_check.return_value = False
             mock_session = AsyncMock()
-            
+
             # Act
             response = await readiness_check(session=mock_session)
 
@@ -349,7 +365,10 @@ class TestAppIntegration:
         # Act & Assert
         # Test that app starts up properly
         response = client.get("/healthz")
-        assert response.status_code in [200, 503]  # Might be degraded in test environment
+        assert response.status_code in [
+            200,
+            503,
+        ]  # Might be degraded in test environment
 
     def test_app_cors_configuration(self):
         """Test CORS configuration."""
@@ -357,14 +376,20 @@ class TestAppIntegration:
         client = TestClient(app)
 
         # Act
-        response = client.options("/api/v1/health", headers={
-            "Origin": "http://localhost:3000",
-            "Access-Control-Request-Method": "GET"
-        })
+        response = client.options(
+            "/api/v1/health",
+            headers={
+                "Origin": "http://localhost:3000",
+                "Access-Control-Request-Method": "GET",
+            },
+        )
 
         # Assert
         # Should handle CORS preflight request
-        assert response.status_code in [200, 404]  # Depends on route configuration
+        assert response.status_code in [
+            200,
+            404,
+        ]  # Depends on route configuration
 
     def test_app_error_handling(self):
         """Test application error handling."""
@@ -385,9 +410,9 @@ class TestAppIntegration:
         client = TestClient(app)
 
         # Act
-        response = client.get("/healthz", headers={
-            "Accept-Encoding": "gzip"
-        })
+        response = client.get(
+            "/healthz", headers={"Accept-Encoding": "gzip"}
+        )
 
         # Assert
         assert response.status_code in [200, 503]
@@ -410,7 +435,7 @@ class TestAppIntegration:
         """Test application lifespan events."""
         # This test would check that startup and shutdown events are properly handled
         # In a real test environment, we'd verify database connections, cache initialization, etc.
-        
+
         # Arrange
         with patch('chatter.main.init_database') as mock_init_db:
             with patch('chatter.main.close_database') as mock_close_db:
@@ -433,7 +458,10 @@ class TestAppIntegration:
 
         # Assert
         # Should serve OpenAPI documentation
-        assert response.status_code in [200, 404]  # Might be disabled in production
+        assert response.status_code in [
+            200,
+            404,
+        ]  # Might be disabled in production
 
     def test_app_metrics_endpoint(self):
         """Test metrics endpoint if available."""
@@ -459,4 +487,10 @@ class TestAppIntegration:
         assert response.status_code in [200, 503]
         # Should have correlation ID in headers
         headers = response.headers
-        assert any("correlation" in key.lower() or "request" in key.lower() for key in headers.keys()) or True
+        assert (
+            any(
+                "correlation" in key.lower() or "request" in key.lower()
+                for key in headers.keys()
+            )
+            or True
+        )

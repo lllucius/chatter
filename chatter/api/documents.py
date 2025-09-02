@@ -48,7 +48,7 @@ router = APIRouter()
 
 
 async def get_document_service(
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> DocumentService:
     """Get document service instance."""
     return DocumentService(session)
@@ -118,7 +118,9 @@ async def upload_document(
         document = await document_service.create_document(
             current_user.id, file, document_data
         )
-        print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+        print(
+            "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+        )
 
         return DocumentResponse.model_validate(document)
 
@@ -131,20 +133,40 @@ async def upload_document(
         ) from None
 
 
-@router.get("", response_model=DocumentListResponse, responses={
-    401: {"description": "Unauthorized - Invalid or missing authentication token"},
-    403: {"description": "Forbidden - User lacks permission to access documents"},
-    422: {"description": "Validation Error"},
-})
+@router.get(
+    "",
+    response_model=DocumentListResponse,
+    responses={
+        401: {
+            "description": "Unauthorized - Invalid or missing authentication token"
+        },
+        403: {
+            "description": "Forbidden - User lacks permission to access documents"
+        },
+        422: {"description": "Validation Error"},
+    },
+)
 async def list_documents(
-    status: DocumentStatus | None = Query(None, description="Filter by status"),
-    document_type: DocumentType | None = Query(None, description="Filter by document type"),
+    status: DocumentStatus | None = Query(
+        None, description="Filter by status"
+    ),
+    document_type: DocumentType | None = Query(
+        None, description="Filter by document type"
+    ),
     tags: list[str] | None = Query(None, description="Filter by tags"),
-    owner_id: str | None = Query(None, description="Filter by owner (admin only)"),
-    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    owner_id: str | None = Query(
+        None, description="Filter by owner (admin only)"
+    ),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maximum number of results"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of results to skip"
+    ),
     sort_by: str = Query("created_at", description="Sort field"),
-    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
+    sort_order: str = Query(
+        "desc", pattern="^(asc|desc)$", description="Sort order"
+    ),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentListResponse:
@@ -168,6 +190,7 @@ async def list_documents(
     try:
         # Create request object from query parameters
         from chatter.schemas.document import DocumentListRequest
+
         merged_request = DocumentListRequest(
             status=status,
             document_type=document_type,
@@ -201,12 +224,20 @@ async def list_documents(
         ) from None
 
 
-@router.get("/{document_id}", response_model=DocumentResponse, responses={
-    401: {"description": "Unauthorized - Invalid or missing authentication token"},
-    403: {"description": "Forbidden - User lacks permission to access this document"},
-    404: {"description": "Not Found - Document does not exist"},
-    422: {"description": "Validation Error"},
-})
+@router.get(
+    "/{document_id}",
+    response_model=DocumentResponse,
+    responses={
+        401: {
+            "description": "Unauthorized - Invalid or missing authentication token"
+        },
+        403: {
+            "description": "Forbidden - User lacks permission to access this document"
+        },
+        404: {"description": "Not Found - Document does not exist"},
+        422: {"description": "Validation Error"},
+    },
+)
 async def get_document(
     document_id: str,
     current_user: User = Depends(get_current_user),
@@ -326,7 +357,9 @@ async def delete_document(
                 resource_id=document_id,
             ) from None
 
-        return DocumentDeleteResponse(message="Document deleted successfully")
+        return DocumentDeleteResponse(
+            message="Document deleted successfully"
+        )
 
     except ProblemException:
         raise
@@ -395,8 +428,12 @@ async def search_documents(
 )
 async def get_document_chunks(
     document_id: str,
-    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maximum number of results"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of results to skip"
+    ),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentChunksResponse:
@@ -559,7 +596,10 @@ async def download_document(
                 resource_id=document_id,
             ) from None
 
-        if not document.file_path or not Path(document.file_path).exists():
+        if (
+            not document.file_path
+            or not Path(document.file_path).exists()
+        ):
             raise NotFoundProblem(
                 detail="Document file not found",
                 resource_type="document",
@@ -567,10 +607,11 @@ async def download_document(
             ) from None
 
         from fastapi.responses import FileResponse
+
         return FileResponse(
             path=document.file_path,
             filename=f"document_{document_id}",
-            media_type='application/octet-stream'
+            media_type='application/octet-stream',
         )
 
     except ProblemException:
@@ -586,7 +627,10 @@ async def download_document(
         ) from None
 
 
-@router.post("/{document_id}/reprocess", response_model=DocumentProcessingResponse)
+@router.post(
+    "/{document_id}/reprocess",
+    response_model=DocumentProcessingResponse,
+)
 async def reprocess_document(
     document_id: str,
     current_user: User = Depends(get_current_user),

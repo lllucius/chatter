@@ -1,6 +1,5 @@
 """Tests for profile management service."""
 
-from datetime import UTC, datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -37,21 +36,34 @@ class TestProfileService:
             profile_type=ProfileType.CONVERSATIONAL,
             llm_provider="openai",
             llm_model="gpt-4",
-            temperature=0.7
+            temperature=0.7,
         )
 
         # Mock no existing profile with same name
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = None
-        self.service.llm_service.list_available_providers.return_value = ["openai", "anthropic"]
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            None
+        )
+        self.service.llm_service.list_available_providers.return_value = [
+            "openai",
+            "anthropic",
+        ]
 
         # Mock profile creation
-        mock_profile = Profile(id="profile-id", owner_id=user_id, **profile_data.model_dump())
+        mock_profile = Profile(
+            id="profile-id",
+            owner_id=user_id,
+            **profile_data.model_dump(),
+        )
         self.mock_session.refresh = AsyncMock()
 
         # Act
-        with patch.object(Profile, '__init__', return_value=None) as mock_init:
+        with patch.object(
+            Profile, '__init__', return_value=None
+        ) as mock_init:
             mock_init.return_value = None
-            result = await self.service.create_profile(user_id, profile_data)
+            result = await self.service.create_profile(
+                user_id, profile_data
+            )
 
         # Assert
         self.mock_session.add.assert_called_once()
@@ -66,15 +78,21 @@ class TestProfileService:
         profile_data = ProfileCreate(
             name="Existing Profile",
             llm_provider="openai",
-            llm_model="gpt-4"
+            llm_model="gpt-4",
         )
 
         # Mock existing profile with same name
-        existing_profile = Profile(id="existing-id", name="Existing Profile")
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = existing_profile
+        existing_profile = Profile(
+            id="existing-id", name="Existing Profile"
+        )
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            existing_profile
+        )
 
         # Act & Assert
-        with pytest.raises(ProfileError, match="Profile with this name already exists"):
+        with pytest.raises(
+            ProfileError, match="Profile with this name already exists"
+        ):
             await self.service.create_profile(user_id, profile_data)
 
     @pytest.mark.asyncio
@@ -85,20 +103,31 @@ class TestProfileService:
         profile_data = ProfileCreate(
             name="Test Profile",
             llm_provider="unavailable_provider",
-            llm_model="test-model"
+            llm_model="test-model",
         )
 
         # Mock no existing profile
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = None
-        self.service.llm_service.list_available_providers.return_value = ["openai", "anthropic"]
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            None
+        )
+        self.service.llm_service.list_available_providers.return_value = [
+            "openai",
+            "anthropic",
+        ]
 
         # Mock profile creation (should still succeed with warning)
-        mock_profile = Profile(id="profile-id", owner_id=user_id, **profile_data.model_dump())
+        mock_profile = Profile(
+            id="profile-id",
+            owner_id=user_id,
+            **profile_data.model_dump(),
+        )
         self.mock_session.refresh = AsyncMock()
 
         # Act
         with patch.object(Profile, '__init__', return_value=None):
-            result = await self.service.create_profile(user_id, profile_data)
+            result = await self.service.create_profile(
+                user_id, profile_data
+            )
 
         # Assert - Profile should still be created despite unavailable provider
         self.mock_session.add.assert_called_once()
@@ -110,8 +139,12 @@ class TestProfileService:
         # Arrange
         profile_id = "profile-id"
         user_id = "user-id"
-        mock_profile = Profile(id=profile_id, owner_id=user_id, name="Test Profile")
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = mock_profile
+        mock_profile = Profile(
+            id=profile_id, owner_id=user_id, name="Test Profile"
+        )
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            mock_profile
+        )
 
         # Act
         result = await self.service.get_profile(profile_id, user_id)
@@ -127,12 +160,14 @@ class TestProfileService:
         profile_id = "profile-id"
         user_id = "user-id"
         mock_profile = Profile(
-            id=profile_id, 
-            owner_id="other-user", 
+            id=profile_id,
+            owner_id="other-user",
             name="Public Profile",
-            is_public=True
+            is_public=True,
         )
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = mock_profile
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            mock_profile
+        )
 
         # Act
         result = await self.service.get_profile(profile_id, user_id)
@@ -146,7 +181,9 @@ class TestProfileService:
         # Arrange
         profile_id = "profile-id"
         user_id = "user-id"
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = None
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            None
+        )
 
         # Act
         result = await self.service.get_profile(profile_id, user_id)
@@ -167,22 +204,26 @@ class TestProfileService:
             sort_by="created_at",
             sort_order="desc",
             limit=10,
-            offset=0
+            offset=0,
         )
 
         mock_profiles = [
             Profile(id="profile-1", name="Profile 1"),
-            Profile(id="profile-2", name="Profile 2")
+            Profile(id="profile-2", name="Profile 2"),
         ]
-        
+
         # Mock query execution
         self.mock_session.execute.side_effect = [
             MagicMock(scalar=lambda: 2),  # Count query
-            MagicMock(scalars=lambda: MagicMock(all=lambda: mock_profiles))  # Main query
+            MagicMock(
+                scalars=lambda: MagicMock(all=lambda: mock_profiles)
+            ),  # Main query
         ]
 
         # Act
-        profiles, total_count = await self.service.list_profiles(user_id, list_request)
+        profiles, total_count = await self.service.list_profiles(
+            user_id, list_request
+        )
 
         # Assert
         assert len(profiles) == 2
@@ -196,26 +237,31 @@ class TestProfileService:
         profile_id = "profile-id"
         user_id = "user-id"
         update_data = ProfileUpdate(
-            name="Updated Profile",
-            temperature=0.8
+            name="Updated Profile", temperature=0.8
         )
 
         mock_profile = Profile(
-            id=profile_id, 
-            owner_id=user_id, 
+            id=profile_id,
+            owner_id=user_id,
             name="Original Profile",
-            temperature=0.7
+            temperature=0.7,
         )
-        
+
         # Mock profile retrieval and name conflict check
         self.mock_session.execute.side_effect = [
-            MagicMock(scalar_one_or_none=lambda: mock_profile),  # Get profile
-            MagicMock(scalar_one_or_none=lambda: None)  # No name conflict
+            MagicMock(
+                scalar_one_or_none=lambda: mock_profile
+            ),  # Get profile
+            MagicMock(
+                scalar_one_or_none=lambda: None
+            ),  # No name conflict
         ]
         self.mock_session.refresh = AsyncMock()
 
         # Act
-        result = await self.service.update_profile(profile_id, user_id, update_data)
+        result = await self.service.update_profile(
+            profile_id, user_id, update_data
+        )
 
         # Assert
         assert result == mock_profile
@@ -233,10 +279,14 @@ class TestProfileService:
         update_data = ProfileUpdate(name="Updated Profile")
 
         # Mock no profile found (access denied)
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = None
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            None
+        )
 
         # Act
-        result = await self.service.update_profile(profile_id, user_id, update_data)
+        result = await self.service.update_profile(
+            profile_id, user_id, update_data
+        )
 
         # Assert
         assert result is None
@@ -249,17 +299,29 @@ class TestProfileService:
         user_id = "user-id"
         update_data = ProfileUpdate(name="Conflicting Name")
 
-        mock_profile = Profile(id=profile_id, owner_id=user_id, name="Original")
-        existing_profile = Profile(id="other-id", name="Conflicting Name")
-        
+        mock_profile = Profile(
+            id=profile_id, owner_id=user_id, name="Original"
+        )
+        existing_profile = Profile(
+            id="other-id", name="Conflicting Name"
+        )
+
         self.mock_session.execute.side_effect = [
-            MagicMock(scalar_one_or_none=lambda: mock_profile),  # Get profile
-            MagicMock(scalar_one_or_none=lambda: existing_profile)  # Name conflict
+            MagicMock(
+                scalar_one_or_none=lambda: mock_profile
+            ),  # Get profile
+            MagicMock(
+                scalar_one_or_none=lambda: existing_profile
+            ),  # Name conflict
         ]
 
         # Act & Assert
-        with pytest.raises(ProfileError, match="Profile with this name already exists"):
-            await self.service.update_profile(profile_id, user_id, update_data)
+        with pytest.raises(
+            ProfileError, match="Profile with this name already exists"
+        ):
+            await self.service.update_profile(
+                profile_id, user_id, update_data
+            )
 
     @pytest.mark.asyncio
     async def test_delete_profile_success(self):
@@ -268,8 +330,10 @@ class TestProfileService:
         profile_id = "profile-id"
         user_id = "user-id"
         mock_profile = Profile(id=profile_id, owner_id=user_id)
-        
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = mock_profile
+
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            mock_profile
+        )
 
         # Act
         result = await self.service.delete_profile(profile_id, user_id)
@@ -285,7 +349,9 @@ class TestProfileService:
         # Arrange
         profile_id = "profile-id"
         user_id = "user-id"
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = None
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            None
+        )
 
         # Act
         result = await self.service.delete_profile(profile_id, user_id)
@@ -303,7 +369,7 @@ class TestProfileService:
         test_request = ProfileTestRequest(
             test_message="Hello, test!",
             include_retrieval=False,
-            include_tools=False
+            include_tools=False,
         )
 
         mock_profile = Profile(
@@ -312,20 +378,29 @@ class TestProfileService:
             system_prompt="You are helpful.",
             usage_count=0,
             total_tokens_used=0,
-            total_cost=0
+            total_cost=0,
         )
-        mock_profile.get_generation_config = MagicMock(return_value={"temperature": 0.7})
+        mock_profile.get_generation_config = MagicMock(
+            return_value={"temperature": 0.7}
+        )
 
         # Mock service methods
         self.service.get_profile = AsyncMock(return_value=mock_profile)
-        self.service.llm_service.create_provider_from_profile = MagicMock(return_value="mock_provider")
+        self.service.llm_service.create_provider_from_profile = (
+            MagicMock(return_value="mock_provider")
+        )
         self.service.llm_service.generate_response = AsyncMock(
-            return_value=("Test response", {"total_tokens": 50, "cost": 0.01})
+            return_value=(
+                "Test response",
+                {"total_tokens": 50, "cost": 0.01},
+            )
         )
         self.mock_session.refresh = AsyncMock()
 
         # Act
-        result = await self.service.test_profile(profile_id, user_id, test_request)
+        result = await self.service.test_profile(
+            profile_id, user_id, test_request
+        )
 
         # Assert
         assert result["profile_id"] == profile_id
@@ -333,7 +408,7 @@ class TestProfileService:
         assert result["response"] == "Test response"
         assert result["usage_info"]["total_tokens"] == 50
         assert "response_time_ms" in result
-        
+
         # Check profile stats updated
         assert mock_profile.usage_count == 1
         assert mock_profile.total_tokens_used == 50
@@ -352,7 +427,9 @@ class TestProfileService:
 
         # Act & Assert
         with pytest.raises(ProfileError, match="Profile not found"):
-            await self.service.test_profile(profile_id, user_id, test_request)
+            await self.service.test_profile(
+                profile_id, user_id, test_request
+            )
 
     @pytest.mark.asyncio
     async def test_test_profile_provider_creation_failed(self):
@@ -364,11 +441,17 @@ class TestProfileService:
 
         mock_profile = Profile(id=profile_id, owner_id=user_id)
         self.service.get_profile = AsyncMock(return_value=mock_profile)
-        self.service.llm_service.create_provider_from_profile = MagicMock(return_value=None)
+        self.service.llm_service.create_provider_from_profile = (
+            MagicMock(return_value=None)
+        )
 
         # Act & Assert
-        with pytest.raises(ProfileError, match="Failed to create LLM provider"):
-            await self.service.test_profile(profile_id, user_id, test_request)
+        with pytest.raises(
+            ProfileError, match="Failed to create LLM provider"
+        ):
+            await self.service.test_profile(
+                profile_id, user_id, test_request
+            )
 
     @pytest.mark.asyncio
     async def test_clone_profile_success(self):
@@ -388,16 +471,22 @@ class TestProfileService:
             llm_model="gpt-4",
             temperature=0.7,
             tags=["original"],
-            extra_metadata={"key": "value"}
+            extra_metadata={"key": "value"},
         )
 
         # Mock getting source profile and checking name conflicts
-        self.service.get_profile = AsyncMock(return_value=source_profile)
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = None  # No name conflict
+        self.service.get_profile = AsyncMock(
+            return_value=source_profile
+        )
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            None  # No name conflict
+        )
 
         # Mock create_profile
         cloned_profile = Profile(id="cloned-id", name=new_name)
-        self.service.create_profile = AsyncMock(return_value=cloned_profile)
+        self.service.create_profile = AsyncMock(
+            return_value=cloned_profile
+        )
 
         # Act
         result = await self.service.clone_profile(
@@ -407,7 +496,7 @@ class TestProfileService:
         # Assert
         assert result == cloned_profile
         self.service.create_profile.assert_called_once()
-        
+
         # Check the create_profile call arguments
         call_args = self.service.create_profile.call_args
         assert call_args[0][0] == user_id  # user_id
@@ -415,7 +504,9 @@ class TestProfileService:
         assert profile_data.name == new_name
         assert profile_data.description == description
         assert profile_data.profile_type == source_profile.profile_type
-        assert profile_data.is_public is False  # Cloned profiles are private
+        assert (
+            profile_data.is_public is False
+        )  # Cloned profiles are private
 
     @pytest.mark.asyncio
     async def test_clone_profile_not_found(self):
@@ -428,8 +519,12 @@ class TestProfileService:
         self.service.get_profile = AsyncMock(return_value=None)
 
         # Act & Assert
-        with pytest.raises(ProfileError, match="Source profile not found"):
-            await self.service.clone_profile(profile_id, user_id, new_name)
+        with pytest.raises(
+            ProfileError, match="Source profile not found"
+        ):
+            await self.service.clone_profile(
+                profile_id, user_id, new_name
+            )
 
     @pytest.mark.asyncio
     async def test_clone_profile_name_conflict(self):
@@ -442,12 +537,20 @@ class TestProfileService:
         source_profile = Profile(id=profile_id, name="Source")
         existing_profile = Profile(id="existing-id", name=new_name)
 
-        self.service.get_profile = AsyncMock(return_value=source_profile)
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = existing_profile
+        self.service.get_profile = AsyncMock(
+            return_value=source_profile
+        )
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            existing_profile
+        )
 
         # Act & Assert
-        with pytest.raises(ProfileError, match="Profile with this name already exists"):
-            await self.service.clone_profile(profile_id, user_id, new_name)
+        with pytest.raises(
+            ProfileError, match="Profile with this name already exists"
+        ):
+            await self.service.clone_profile(
+                profile_id, user_id, new_name
+            )
 
     @pytest.mark.asyncio
     async def test_get_profile_stats(self):
@@ -456,23 +559,36 @@ class TestProfileService:
         user_id = "user-id"
 
         # Mock type counts
-        type_count_results = [2, 1, 0]  # CONVERSATIONAL: 2, ANALYTICAL: 1, CREATIVE: 0
-        self.mock_session.execute.side_effect = (
-            [MagicMock(scalar=lambda: count) for count in type_count_results] +
-            [
-                MagicMock(all=lambda: [("openai", 2), ("anthropic", 1)]),  # Provider counts
-                MagicMock(scalars=lambda: MagicMock(all=lambda: [])),  # Most used profiles
-                MagicMock(scalars=lambda: MagicMock(all=lambda: [])),  # Recent profiles
-                MagicMock(first=lambda: (10, 1000, 5.0))  # Usage totals
-            ]
-        )
+        type_count_results = [
+            2,
+            1,
+            0,
+        ]  # CONVERSATIONAL: 2, ANALYTICAL: 1, CREATIVE: 0
+        self.mock_session.execute.side_effect = [
+            MagicMock(scalar=lambda: count)
+            for count in type_count_results
+        ] + [
+            MagicMock(
+                all=lambda: [("openai", 2), ("anthropic", 1)]
+            ),  # Provider counts
+            MagicMock(
+                scalars=lambda: MagicMock(all=lambda: [])
+            ),  # Most used profiles
+            MagicMock(
+                scalars=lambda: MagicMock(all=lambda: [])
+            ),  # Recent profiles
+            MagicMock(first=lambda: (10, 1000, 5.0)),  # Usage totals
+        ]
 
         # Act
         stats = await self.service.get_profile_stats(user_id)
 
         # Assert
         assert stats["total_profiles"] == 3
-        assert stats["profiles_by_type"][ProfileType.CONVERSATIONAL.value] == 2
+        assert (
+            stats["profiles_by_type"][ProfileType.CONVERSATIONAL.value]
+            == 2
+        )
         assert stats["profiles_by_provider"]["openai"] == 2
         assert stats["usage_stats"]["total_usage_count"] == 10
         assert stats["usage_stats"]["total_tokens_used"] == 1000
@@ -483,10 +599,17 @@ class TestProfileService:
         """Test getting available LLM providers."""
         # Arrange
         providers = ["openai", "anthropic", "cohere"]
-        provider_info = {"models": ["gpt-4", "gpt-3.5-turbo"], "supports_streaming": True}
-        
-        self.service.llm_service.list_available_providers.return_value = providers
-        self.service.llm_service.get_provider_info.return_value = provider_info
+        provider_info = {
+            "models": ["gpt-4", "gpt-3.5-turbo"],
+            "supports_streaming": True,
+        }
+
+        self.service.llm_service.list_available_providers.return_value = (
+            providers
+        )
+        self.service.llm_service.get_provider_info.return_value = (
+            provider_info
+        )
 
         with patch('chatter.core.profiles.settings') as mock_settings:
             mock_settings.default_llm_provider = "openai"
@@ -519,21 +642,29 @@ class TestProfileServiceIntegration:
             name="Lifecycle Test Profile",
             profile_type=ProfileType.CONVERSATIONAL,
             llm_provider="openai",
-            llm_model="gpt-4"
+            llm_model="gpt-4",
         )
 
         # Mock all required service calls
-        mock_profile = Profile(id="profile-id", **profile_data.model_dump())
-        
+        mock_profile = Profile(
+            id="profile-id", **profile_data.model_dump()
+        )
+
         # Setup mocks for create
-        self.mock_session.execute.return_value.scalar_one_or_none.return_value = None
+        self.mock_session.execute.return_value.scalar_one_or_none.return_value = (
+            None
+        )
         self.service.llm_service = MagicMock()
-        self.service.llm_service.list_available_providers.return_value = ["openai"]
+        self.service.llm_service.list_available_providers.return_value = [
+            "openai"
+        ]
         self.mock_session.refresh = AsyncMock()
 
         # Create profile
         with patch.object(Profile, '__init__', return_value=None):
-            created_profile = await self.service.create_profile(user_id, profile_data)
+            created_profile = await self.service.create_profile(
+                user_id, profile_data
+            )
 
         # Verify creation calls
         self.mock_session.add.assert_called_once()

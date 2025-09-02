@@ -64,7 +64,9 @@ class CacheService:
             return
 
         if self._connection_attempts >= settings.redis_connect_retries:
-            logger.warning(f"Max Redis connection attempts ({settings.redis_connect_retries}) reached, disabling cache")
+            logger.warning(
+                f"Max Redis connection attempts ({settings.redis_connect_retries}) reached, disabling cache"
+            )
             self._enabled = False
             return
 
@@ -75,12 +77,14 @@ class CacheService:
                 decode_responses=True,
                 socket_connect_timeout=settings.redis_connect_timeout,
                 socket_timeout=settings.redis_connect_timeout,
-                retry_on_timeout=True
+                retry_on_timeout=True,
             )
             # Test connection
             await self.redis.ping()
             self._connected = True
-            self._connection_attempts = 0  # Reset on successful connection
+            self._connection_attempts = (
+                0  # Reset on successful connection
+            )
             logger.info("Connected to Redis cache")
         except Exception as e:
             self._connection_attempts += 1
@@ -90,9 +94,14 @@ class CacheService:
             self._connected = False
 
             # If max retries reached, disable caching
-            if self._connection_attempts >= settings.redis_connect_retries:
+            if (
+                self._connection_attempts
+                >= settings.redis_connect_retries
+            ):
                 self._enabled = False
-                logger.warning("Redis connection failed permanently, caching disabled")
+                logger.warning(
+                    "Redis connection failed permanently, caching disabled"
+                )
 
     async def disconnect(self) -> None:
         """Disconnect from Redis server."""
@@ -129,10 +138,7 @@ class CacheService:
             return None
 
     async def set(
-        self,
-        key: str,
-        value: Any,
-        expire: timedelta | None = None
+        self, key: str, value: Any, expire: timedelta | None = None
     ) -> bool:
         """Set value in cache.
 
@@ -229,7 +235,7 @@ class CacheService:
             "enabled": self._enabled,
             "connected": self._connected,
             "connection_attempts": self._connection_attempts,
-            "status": "healthy" if self.is_connected() else "unhealthy"
+            "status": "healthy" if self.is_connected() else "unhealthy",
         }
 
         if self._enabled and self.redis:
@@ -303,7 +309,7 @@ class CacheService:
                 "connected": False,
                 "memory_usage": 0,
                 "keys_count": 0,
-                "hit_rate": 0.0
+                "hit_rate": 0.0,
             }
 
         try:
@@ -313,7 +319,7 @@ class CacheService:
                 "memory_usage": info.get("used_memory", 0),
                 "keys_count": await self.redis.dbsize(),
                 "hit_rate": float(info.get("keyspace_hit_rate", 0)),
-                "uptime": info.get("uptime_in_seconds", 0)
+                "uptime": info.get("uptime_in_seconds", 0),
             }
         except Exception as e:
             logger.error(f"Failed to get cache statistics: {e}")
@@ -330,7 +336,10 @@ class CacheService:
         """
         try:
             if not self.is_connected():
-                if self.fallback_to_memory and self._memory_cache is not None:
+                if (
+                    self.fallback_to_memory
+                    and self._memory_cache is not None
+                ):
                     self._memory_cache.update(data)
                     return True
                 return False

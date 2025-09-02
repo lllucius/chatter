@@ -24,14 +24,18 @@ class TestProfileEndpoints:
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         self.mock_session = AsyncMock()
 
         # Override dependencies
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
-        app.dependency_overrides[get_session] = lambda: self.mock_session
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
+        app.dependency_overrides[get_session] = (
+            lambda: self.mock_session
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -47,12 +51,9 @@ class TestProfileEndpoints:
             "system_message": "You are a helpful assistant.",
             "temperature": 0.7,
             "max_tokens": 1000,
-            "model_settings": {
-                "provider": "openai",
-                "model": "gpt-4"
-            },
+            "model_settings": {"provider": "openai", "model": "gpt-4"},
             "is_active": True,
-            "is_public": False
+            "is_public": False,
         }
 
         mock_created_profile = {
@@ -63,18 +64,17 @@ class TestProfileEndpoints:
             "system_message": "You are a helpful assistant.",
             "temperature": 0.7,
             "max_tokens": 1000,
-            "model_settings": {
-                "provider": "openai",
-                "model": "gpt-4"
-            },
+            "model_settings": {"provider": "openai", "model": "gpt-4"},
             "is_active": True,
             "is_public": False,
             "user_id": self.mock_user.id,
             "created_at": "2024-01-01T00:00:00Z",
-            "updated_at": "2024-01-01T00:00:00Z"
+            "updated_at": "2024-01-01T00:00:00Z",
         }
 
-        with patch.object(ProfileService, 'create_profile') as mock_create:
+        with patch.object(
+            ProfileService, 'create_profile'
+        ) as mock_create:
             mock_create.return_value = mock_created_profile
 
             # Act
@@ -95,14 +95,18 @@ class TestProfileEndpoints:
         invalid_profile_data = {
             "name": "",  # Empty name should fail validation
             "profile_type": "invalid_type",
-            "temperature": 2.0  # Should be between 0 and 1
+            "temperature": 2.0,  # Should be between 0 and 1
         }
 
         # Act
-        response = self.client.post("/profiles/", json=invalid_profile_data)
+        response = self.client.post(
+            "/profiles/", json=invalid_profile_data
+        )
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     def test_list_profiles_success(self):
         """Test successful profile listing."""
@@ -115,7 +119,7 @@ class TestProfileEndpoints:
                 "profile_type": "ai_assistant",
                 "is_active": True,
                 "is_public": False,
-                "user_id": self.mock_user.id
+                "user_id": self.mock_user.id,
             },
             {
                 "id": "profile-2",
@@ -124,8 +128,8 @@ class TestProfileEndpoints:
                 "profile_type": "workflow",
                 "is_active": True,
                 "is_public": True,
-                "user_id": "other-user-id"
-            }
+                "user_id": "other-user-id",
+            },
         ]
         mock_total = 2
 
@@ -153,7 +157,7 @@ class TestProfileEndpoints:
                 "name": "Active Profile",
                 "profile_type": "ai_assistant",
                 "is_active": True,
-                "is_public": True
+                "is_public": True,
             }
         ]
 
@@ -190,7 +194,7 @@ class TestProfileEndpoints:
             "temperature": 0.7,
             "model_settings": {"provider": "openai"},
             "user_id": self.mock_user.id,
-            "is_active": True
+            "is_active": True,
         }
 
         with patch.object(ProfileService, 'get_profile') as mock_get:
@@ -229,7 +233,7 @@ class TestProfileEndpoints:
             "description": "Updated description",
             "temperature": 0.8,
             "max_tokens": 2000,
-            "is_active": False
+            "is_active": False,
         }
 
         mock_updated_profile = {
@@ -239,14 +243,18 @@ class TestProfileEndpoints:
             "temperature": 0.8,
             "max_tokens": 2000,
             "is_active": False,
-            "user_id": self.mock_user.id
+            "user_id": self.mock_user.id,
         }
 
-        with patch.object(ProfileService, 'update_profile') as mock_update:
+        with patch.object(
+            ProfileService, 'update_profile'
+        ) as mock_update:
             mock_update.return_value = mock_updated_profile
 
             # Act
-            response = self.client.put(f"/profiles/{profile_id}", json=update_data)
+            response = self.client.put(
+                f"/profiles/{profile_id}", json=update_data
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -261,14 +269,18 @@ class TestProfileEndpoints:
         profile_id = "profile-delete-123"
         delete_request = {
             "confirm_deletion": True,
-            "delete_associated_data": False
+            "delete_associated_data": False,
         }
 
-        with patch.object(ProfileService, 'delete_profile') as mock_delete:
+        with patch.object(
+            ProfileService, 'delete_profile'
+        ) as mock_delete:
             mock_delete.return_value = True
 
             # Act
-            response = self.client.delete(f"/profiles/{profile_id}", json=delete_request)
+            response = self.client.delete(
+                f"/profiles/{profile_id}", json=delete_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -280,12 +292,12 @@ class TestProfileEndpoints:
         """Test profile deletion without confirmation."""
         # Arrange
         profile_id = "profile-delete-456"
-        delete_request = {
-            "confirm_deletion": False
-        }
+        delete_request = {"confirm_deletion": False}
 
         # Act
-        response = self.client.delete(f"/profiles/{profile_id}", json=delete_request)
+        response = self.client.delete(
+            f"/profiles/{profile_id}", json=delete_request
+        )
 
         # Assert
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -297,10 +309,7 @@ class TestProfileEndpoints:
         profile_id = "profile-test-123"
         test_request = {
             "test_input": "Hello, how are you?",
-            "test_settings": {
-                "temperature": 0.5,
-                "max_tokens": 500
-            }
+            "test_settings": {"temperature": 0.5, "max_tokens": 500},
         }
 
         mock_test_result = {
@@ -308,16 +317,18 @@ class TestProfileEndpoints:
             "metadata": {
                 "tokens_used": 25,
                 "response_time": 1.2,
-                "model_used": "gpt-4"
+                "model_used": "gpt-4",
             },
-            "success": True
+            "success": True,
         }
 
         with patch.object(ProfileService, 'test_profile') as mock_test:
             mock_test.return_value = mock_test_result
 
             # Act
-            response = self.client.post(f"/profiles/{profile_id}/test", json=test_request)
+            response = self.client.post(
+                f"/profiles/{profile_id}/test", json=test_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -334,7 +345,7 @@ class TestProfileEndpoints:
             "new_name": "Cloned Profile",
             "new_description": "A cloned profile",
             "copy_settings": True,
-            "make_private": True
+            "make_private": True,
         }
 
         mock_cloned_profile = {
@@ -345,14 +356,18 @@ class TestProfileEndpoints:
             "system_message": "You are helpful.",
             "is_public": False,
             "user_id": self.mock_user.id,
-            "cloned_from": profile_id
+            "cloned_from": profile_id,
         }
 
-        with patch.object(ProfileService, 'clone_profile') as mock_clone:
+        with patch.object(
+            ProfileService, 'clone_profile'
+        ) as mock_clone:
             mock_clone.return_value = mock_cloned_profile
 
             # Act
-            response = self.client.post(f"/profiles/{profile_id}/clone", json=clone_request)
+            response = self.client.post(
+                f"/profiles/{profile_id}/clone", json=clone_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_201_CREATED
@@ -373,20 +388,22 @@ class TestProfileEndpoints:
             "profiles_by_type": {
                 "ai_assistant": 10,
                 "workflow": 3,
-                "custom": 2
+                "custom": 2,
             },
             "usage_stats": {
                 "total_uses": 250,
                 "avg_uses_per_profile": 16.7,
-                "most_used_profile_id": "profile-popular-123"
+                "most_used_profile_id": "profile-popular-123",
             },
             "recent_activity": {
                 "profiles_created_last_week": 3,
-                "profiles_updated_last_week": 8
-            }
+                "profiles_updated_last_week": 8,
+            },
         }
 
-        with patch.object(ProfileService, 'get_profile_stats') as mock_stats_fn:
+        with patch.object(
+            ProfileService, 'get_profile_stats'
+        ) as mock_stats_fn:
             mock_stats_fn.return_value = mock_stats
 
             # Act
@@ -409,21 +426,21 @@ class TestProfileEndpoints:
                     "id": "openai",
                     "name": "OpenAI",
                     "models": ["gpt-4", "gpt-3.5-turbo"],
-                    "is_available": True
+                    "is_available": True,
                 },
                 {
                     "id": "anthropic",
                     "name": "Anthropic",
                     "models": ["claude-3-opus", "claude-3-sonnet"],
-                    "is_available": True
-                }
+                    "is_available": True,
+                },
             ],
             "embedding_providers": [
                 {
                     "id": "openai-embeddings",
                     "name": "OpenAI Embeddings",
                     "models": ["text-embedding-ada-002"],
-                    "is_available": True
+                    "is_available": True,
                 }
             ],
             "tool_providers": [
@@ -431,12 +448,14 @@ class TestProfileEndpoints:
                     "id": "local-tools",
                     "name": "Local Tools",
                     "tools": ["calculator", "web_search"],
-                    "is_available": True
+                    "is_available": True,
                 }
-            ]
+            ],
         }
 
-        with patch.object(ProfileService, 'get_available_providers') as mock_providers_fn:
+        with patch.object(
+            ProfileService, 'get_available_providers'
+        ) as mock_providers_fn:
             mock_providers_fn.return_value = mock_providers
 
             # Act
@@ -462,13 +481,17 @@ class TestProfileValidation:
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         self.mock_session = AsyncMock()
 
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
-        app.dependency_overrides[get_session] = lambda: self.mock_session
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
+        app.dependency_overrides[get_session] = (
+            lambda: self.mock_session
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -480,16 +503,20 @@ class TestProfileValidation:
         profile_data = {
             "name": "Invalid Temp Profile",
             "profile_type": "ai_assistant",
-            "temperature": 2.5  # Should be between 0 and 1
+            "temperature": 2.5,  # Should be between 0 and 1
         }
 
         # Act
         response = self.client.post("/profiles/", json=profile_data)
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
         errors = response.json()["detail"]
-        temp_error = next((e for e in errors if "temperature" in e["loc"]), None)
+        temp_error = next(
+            (e for e in errors if "temperature" in e["loc"]), None
+        )
         assert temp_error is not None
 
     def test_create_profile_invalid_max_tokens(self):
@@ -498,14 +525,16 @@ class TestProfileValidation:
         profile_data = {
             "name": "Invalid Tokens Profile",
             "profile_type": "ai_assistant",
-            "max_tokens": -1  # Should be positive
+            "max_tokens": -1,  # Should be positive
         }
 
         # Act
         response = self.client.post("/profiles/", json=profile_data)
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     def test_create_profile_missing_required_fields(self):
         """Test profile creation missing required fields."""
@@ -519,7 +548,9 @@ class TestProfileValidation:
         response = self.client.post("/profiles/", json=profile_data)
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
         errors = response.json()["detail"]
         assert len(errors) >= 2  # At least name and profile_type errors
 
@@ -535,13 +566,17 @@ class TestProfileIntegration:
             id="integration-user-id",
             email="integration@example.com",
             username="integrationuser",
-            is_active=True
+            is_active=True,
         )
 
         self.mock_session = AsyncMock()
 
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
-        app.dependency_overrides[get_session] = lambda: self.mock_session
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
+        app.dependency_overrides[get_session] = (
+            lambda: self.mock_session
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -555,95 +590,120 @@ class TestProfileIntegration:
             "description": "Testing profile lifecycle",
             "profile_type": "ai_assistant",
             "system_message": "You are a test assistant.",
-            "temperature": 0.7
+            "temperature": 0.7,
         }
 
         mock_created_profile = {
             "id": "lifecycle-profile-123",
             "name": "Lifecycle Test Profile",
             "description": "Testing profile lifecycle",
-            "user_id": self.mock_user.id
+            "user_id": self.mock_user.id,
         }
 
-        with patch.object(ProfileService, 'create_profile') as mock_create:
+        with patch.object(
+            ProfileService, 'create_profile'
+        ) as mock_create:
             mock_create.return_value = mock_created_profile
 
-            create_response = self.client.post("/profiles/", json=profile_data)
-            assert create_response.status_code == status.HTTP_201_CREATED
+            create_response = self.client.post(
+                "/profiles/", json=profile_data
+            )
+            assert (
+                create_response.status_code == status.HTTP_201_CREATED
+            )
             profile_id = create_response.json()["id"]
 
         # Step 2: Update profile
         update_data = {
             "name": "Updated Lifecycle Profile",
-            "temperature": 0.8
+            "temperature": 0.8,
         }
 
         mock_updated_profile = {
             "id": profile_id,
             "name": "Updated Lifecycle Profile",
-            "temperature": 0.8
+            "temperature": 0.8,
         }
 
-        with patch.object(ProfileService, 'update_profile') as mock_update:
+        with patch.object(
+            ProfileService, 'update_profile'
+        ) as mock_update:
             mock_update.return_value = mock_updated_profile
 
-            update_response = self.client.put(f"/profiles/{profile_id}", json=update_data)
+            update_response = self.client.put(
+                f"/profiles/{profile_id}", json=update_data
+            )
             assert update_response.status_code == status.HTTP_200_OK
-            assert update_response.json()["name"] == "Updated Lifecycle Profile"
+            assert (
+                update_response.json()["name"]
+                == "Updated Lifecycle Profile"
+            )
 
         # Step 3: Test profile
         test_request = {
             "test_input": "Hello, test",
-            "test_settings": {"temperature": 0.5}
+            "test_settings": {"temperature": 0.5},
         }
 
         mock_test_result = {
             "response": "Hello! This is a test response.",
             "success": True,
-            "metadata": {"tokens_used": 10}
+            "metadata": {"tokens_used": 10},
         }
 
         with patch.object(ProfileService, 'test_profile') as mock_test:
             mock_test.return_value = mock_test_result
 
-            test_response = self.client.post(f"/profiles/{profile_id}/test", json=test_request)
+            test_response = self.client.post(
+                f"/profiles/{profile_id}/test", json=test_request
+            )
             assert test_response.status_code == status.HTTP_200_OK
             assert test_response.json()["success"] is True
 
         # Step 4: Clone profile
         clone_request = {
             "new_name": "Cloned Lifecycle Profile",
-            "copy_settings": True
+            "copy_settings": True,
         }
 
         mock_cloned_profile = {
             "id": "cloned-profile-456",
             "name": "Cloned Lifecycle Profile",
-            "cloned_from": profile_id
+            "cloned_from": profile_id,
         }
 
-        with patch.object(ProfileService, 'clone_profile') as mock_clone:
+        with patch.object(
+            ProfileService, 'clone_profile'
+        ) as mock_clone:
             mock_clone.return_value = mock_cloned_profile
 
-            clone_response = self.client.post(f"/profiles/{profile_id}/clone", json=clone_request)
+            clone_response = self.client.post(
+                f"/profiles/{profile_id}/clone", json=clone_request
+            )
             assert clone_response.status_code == status.HTTP_201_CREATED
             cloned_id = clone_response.json()["id"]
 
         # Step 5: Delete profiles
-        delete_request = {
-            "confirm_deletion": True
-        }
+        delete_request = {"confirm_deletion": True}
 
-        with patch.object(ProfileService, 'delete_profile') as mock_delete:
+        with patch.object(
+            ProfileService, 'delete_profile'
+        ) as mock_delete:
             mock_delete.return_value = True
 
             # Delete original
-            delete_response = self.client.delete(f"/profiles/{profile_id}", json=delete_request)
+            delete_response = self.client.delete(
+                f"/profiles/{profile_id}", json=delete_request
+            )
             assert delete_response.status_code == status.HTTP_200_OK
 
             # Delete cloned
-            delete_clone_response = self.client.delete(f"/profiles/{cloned_id}", json=delete_request)
-            assert delete_clone_response.status_code == status.HTTP_200_OK
+            delete_clone_response = self.client.delete(
+                f"/profiles/{cloned_id}", json=delete_request
+            )
+            assert (
+                delete_clone_response.status_code == status.HTTP_200_OK
+            )
 
     def test_profile_sharing_workflow(self):
         """Test profile sharing and public access workflow."""
@@ -651,37 +711,43 @@ class TestProfileIntegration:
         private_profile_data = {
             "name": "Private Profile",
             "profile_type": "ai_assistant",
-            "is_public": False
+            "is_public": False,
         }
 
         mock_private_profile = {
             "id": "private-profile-123",
             "name": "Private Profile",
             "is_public": False,
-            "user_id": self.mock_user.id
+            "user_id": self.mock_user.id,
         }
 
-        with patch.object(ProfileService, 'create_profile') as mock_create:
+        with patch.object(
+            ProfileService, 'create_profile'
+        ) as mock_create:
             mock_create.return_value = mock_private_profile
 
-            create_response = self.client.post("/profiles/", json=private_profile_data)
+            create_response = self.client.post(
+                "/profiles/", json=private_profile_data
+            )
             profile_id = create_response.json()["id"]
 
         # Step 2: Make profile public
-        update_data = {
-            "is_public": True
-        }
+        update_data = {"is_public": True}
 
         mock_public_profile = {
             "id": profile_id,
             "name": "Private Profile",
-            "is_public": True
+            "is_public": True,
         }
 
-        with patch.object(ProfileService, 'update_profile') as mock_update:
+        with patch.object(
+            ProfileService, 'update_profile'
+        ) as mock_update:
             mock_update.return_value = mock_public_profile
 
-            update_response = self.client.put(f"/profiles/{profile_id}", json=update_data)
+            update_response = self.client.put(
+                f"/profiles/{profile_id}", json=update_data
+            )
             assert update_response.status_code == status.HTTP_200_OK
             assert update_response.json()["is_public"] is True
 
@@ -705,33 +771,36 @@ class TestProfileIntegration:
         profiles_data = [
             {"name": "Profile 1", "profile_type": "ai_assistant"},
             {"name": "Profile 2", "profile_type": "workflow"},
-            {"name": "Profile 3", "profile_type": "ai_assistant"}
+            {"name": "Profile 3", "profile_type": "ai_assistant"},
         ]
 
         for i, profile_data in enumerate(profiles_data):
             mock_profile = {
                 "id": f"stats-profile-{i+1}",
                 "name": profile_data["name"],
-                "profile_type": profile_data["profile_type"]
+                "profile_type": profile_data["profile_type"],
             }
 
-            with patch.object(ProfileService, 'create_profile') as mock_create:
+            with patch.object(
+                ProfileService, 'create_profile'
+            ) as mock_create:
                 mock_create.return_value = mock_profile
 
-                response = self.client.post("/profiles/", json=profile_data)
+                response = self.client.post(
+                    "/profiles/", json=profile_data
+                )
                 assert response.status_code == status.HTTP_201_CREATED
 
         # Check updated stats
         mock_stats = {
             "total_profiles": 3,
             "active_profiles": 3,
-            "profiles_by_type": {
-                "ai_assistant": 2,
-                "workflow": 1
-            }
+            "profiles_by_type": {"ai_assistant": 2, "workflow": 1},
         }
 
-        with patch.object(ProfileService, 'get_profile_stats') as mock_stats_fn:
+        with patch.object(
+            ProfileService, 'get_profile_stats'
+        ) as mock_stats_fn:
             mock_stats_fn.return_value = mock_stats
 
             stats_response = self.client.get("/profiles/stats/overview")

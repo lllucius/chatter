@@ -1,13 +1,12 @@
 """Tests for security utilities."""
 
-import re
 from unittest.mock import patch
 
 import pytest
 
 from chatter.utils.security import (
-    SENSITIVE_PATTERNS,
     SECRET_KEYS,
+    SENSITIVE_PATTERNS,
     generate_api_key_hash,
     hash_api_key,
     hash_password,
@@ -49,7 +48,9 @@ class TestPasswordHandling:
         hash2 = hash_password(password)
 
         # Assert
-        assert hash1 != hash2  # Different salts should produce different hashes
+        assert (
+            hash1 != hash2
+        )  # Different salts should produce different hashes
 
     def test_verify_password_correct(self):
         """Test password verification with correct password."""
@@ -350,7 +351,9 @@ class TestSensitiveDataSanitization:
 
         # Assert
         assert "user:password" not in sanitized
-        assert "postgres://[MASKED]@localhost:5432/database" == sanitized
+        assert (
+            "postgres://[MASKED]@localhost:5432/database" == sanitized
+        )
 
     def test_sanitize_url_no_credentials(self):
         """Test sanitizing URLs without credentials."""
@@ -407,7 +410,7 @@ class TestLogDataSanitization:
             "api_key": "secret123",
             "password": "mypassword",
             "email": "user@example.com",
-            "normal_field": "normal_value"
+            "normal_field": "normal_value",
         }
 
         # Act
@@ -428,7 +431,7 @@ class TestLogDataSanitization:
             "normal string",
             "api_key=secret123",
             {"password": "hidden"},
-            123
+            123,
         ]
 
         # Act
@@ -462,13 +465,11 @@ class TestLogDataSanitization:
             "config": {
                 "database": {
                     "password": "dbpass123",
-                    "host": "localhost"
+                    "host": "localhost",
                 },
-                "api_key": "secret456"
+                "api_key": "secret456",
             },
-            "metadata": {
-                "version": "1.0"
-            }
+            "metadata": {"version": "1.0"},
         }
 
         # Act
@@ -482,6 +483,7 @@ class TestLogDataSanitization:
 
     def test_sanitize_log_data_object_with_dict(self):
         """Test sanitizing objects with __dict__ attribute."""
+
         # Arrange
         class TestObject:
             def __init__(self):
@@ -501,7 +503,15 @@ class TestLogDataSanitization:
         """Test sanitization respects max depth limit."""
         # Arrange
         # Create deeply nested structure
-        data = {"level1": {"level2": {"level3": {"level4": {"level5": {"api_key": "secret"}}}}}}
+        data = {
+            "level1": {
+                "level2": {
+                    "level3": {
+                        "level4": {"level5": {"api_key": "secret"}}
+                    }
+                }
+            }
+        }
 
         # Act
         sanitized = sanitize_log_data(data, max_depth=3)
@@ -555,7 +565,7 @@ class TestSensitivePatterns:
             'api_key="abc123"',
             'apikey: def456',
             'access_token = "ghi789"',
-            'secret-key="jkl012"'
+            'secret-key="jkl012"',
         ]
 
         # Act & Assert
@@ -569,7 +579,7 @@ class TestSensitivePatterns:
         test_strings = [
             'password="mypass123"',
             'passwd: secretword',
-            'pwd = "hidden123"'
+            'pwd = "hidden123"',
         ]
 
         # Act & Assert
@@ -592,7 +602,7 @@ class TestSensitivePatterns:
         test_emails = [
             "user@example.com",
             "test.email+tag@domain.org",
-            "simple@test.co.uk"
+            "simple@test.co.uk",
         ]
 
         # Act & Assert
@@ -638,26 +648,23 @@ class TestSecurityIntegration:
             "request": {
                 "headers": {
                     "authorization": "Bearer abc123def456",
-                    "user-agent": "MyApp/1.0"
+                    "user-agent": "MyApp/1.0",
                 },
                 "body": {
                     "user_email": "user@company.com",
                     "api_key": "secret_key_123456",
                     "preferences": {
                         "theme": "dark",
-                        "password": "userpass123"
-                    }
-                }
+                        "password": "userpass123",
+                    },
+                },
             },
-            "response": {
-                "status": 200,
-                "data": "Success"
-            },
+            "response": {"status": 200, "data": "Success"},
             "metadata": [
                 "Normal log entry",
                 "jwt_token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test.signature",
-                {"database_url": "postgres://user:pass@localhost/db"}
-            ]
+                {"database_url": "postgres://user:pass@localhost/db"},
+            ],
         }
 
         # Act
@@ -665,19 +672,24 @@ class TestSecurityIntegration:
 
         # Assert
         sanitized_str = str(sanitized)
-        
+
         # Verify sensitive data is masked
         assert "abc123def456" not in sanitized_str
         assert "secret_key_123456" not in sanitized_str
         assert "userpass123" not in sanitized_str
         assert "user:pass" not in sanitized_str
-        
+
         # Verify non-sensitive data is preserved
-        assert sanitized["request"]["headers"]["user-agent"] == "MyApp/1.0"
-        assert sanitized["request"]["body"]["preferences"]["theme"] == "dark"
+        assert (
+            sanitized["request"]["headers"]["user-agent"] == "MyApp/1.0"
+        )
+        assert (
+            sanitized["request"]["body"]["preferences"]["theme"]
+            == "dark"
+        )
         assert sanitized["response"]["status"] == 200
         assert sanitized["response"]["data"] == "Success"
-        
+
         # Verify email is properly masked
         assert "user@[MASKED]" in sanitized_str
 

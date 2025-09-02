@@ -20,7 +20,7 @@ from chatter.schemas.profile import (
     ProfileTestResponse,
     ProfileUpdate,
 )
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,
@@ -34,7 +34,7 @@ router = APIRouter()
 
 
 async def get_profile_service(
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> ProfileService:
     """Get profile service instance."""
     return ProfileService(session)

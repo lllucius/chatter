@@ -283,8 +283,8 @@ class TestAuthServiceUnit:
         assert user.username == user_data.username
         assert user.email == user_data.email
         assert user.full_name == user_data.full_name
-        assert user.hashed_password is not None
-        assert user.hashed_password != user_data.password  # Should be hashed
+        assert user.password_hash is not None
+        assert user.password_hash != user_data.password  # Should be hashed
         
     @pytest.mark.unit
     async def test_authenticate_user(self, db_session: AsyncSession):
@@ -354,7 +354,7 @@ class TestAuthServiceUnit:
             username="testuser",
             email="test@example.com",
             full_name="Test User",
-            hashed_password="hashed_password",
+            password_hash="hashed_password",
         )
         
         tokens = auth_service.create_tokens(user)

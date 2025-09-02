@@ -207,6 +207,8 @@ ignore_missing_imports = true
 load-plugins = "pylint_pydantic"
 
 [tool.pytest.ini_options]
+faulthandler_timeout = 5
+timeout = 10
 testpaths = [
     "tests",
 ]

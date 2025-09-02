@@ -895,3 +895,99 @@ class TestDocumentProcessingServiceIntegration:
         texts = call_args[0]  # First argument should be list of texts
         assert isinstance(texts, list)
         assert len(texts) > 1  # Should have multiple chunks
+
+
+@pytest.mark.integration
+class TestDocumentProcessingServiceRealDatabase:
+    """Integration tests for DocumentProcessingService with real database."""
+
+    @pytest.mark.asyncio
+    async def test_document_creation_with_real_database(self, test_db_session):
+        """Test document creation and retrieval with real database."""
+        from chatter.models.document import Document, DocumentType
+        from chatter.models.user import User
+        
+        # Create a test user first
+        test_user = User(
+            email="doctest@example.com",
+            username="doctestuser",
+            hashed_password="hashed_password_here",
+            full_name="Doc Test User",
+        )
+        test_db_session.add(test_user)
+        await test_db_session.commit()
+        await test_db_session.refresh(test_user)
+        
+        # Create a test document
+        test_document = Document(
+            owner_id=test_user.id,
+            filename="test_document.txt",
+            original_filename="test_document.txt",
+            file_size=1024,
+            file_hash="testhash123",
+            mime_type="text/plain",
+            document_type=DocumentType.TEXT,
+            title="Test Document",
+            content="This is a test document content for processing.",
+        )
+        
+        test_db_session.add(test_document)
+        await test_db_session.commit()
+        await test_db_session.refresh(test_document)
+        
+        # Verify document was created
+        assert test_document.id is not None
+        assert test_document.owner_id == test_user.id
+        assert test_document.title == "Test Document"
+        assert test_document.content == "This is a test document content for processing."
+
+    @pytest.mark.asyncio
+    async def test_document_relationships_with_real_database(self, test_db_session):
+        """Test document relationships with user using real database."""
+        from chatter.models.document import Document, DocumentType
+        from chatter.models.user import User
+        from sqlalchemy import text
+        
+        # Create a test user
+        test_user = User(
+            email="reltest@example.com",
+            username="reltestuser",
+            hashed_password="hashed_password_here",
+            full_name="Rel Test User",
+        )
+        test_db_session.add(test_user)
+        await test_db_session.commit()
+        await test_db_session.refresh(test_user)
+        
+        # Create multiple documents for this user
+        documents = []
+        for i in range(3):
+            doc = Document(
+                owner_id=test_user.id,
+                filename=f"test_doc_{i}.txt",
+                original_filename=f"test_doc_{i}.txt",
+                file_size=512 + i * 100,
+                file_hash=f"testhash{i}",
+                mime_type="text/plain",
+                document_type=DocumentType.TEXT,
+                title=f"Test Document {i}",
+                content=f"Content for document {i}",
+            )
+            documents.append(doc)
+            test_db_session.add(doc)
+        
+        await test_db_session.commit()
+        
+        # Verify all documents were created and associated with the user
+        result = await test_db_session.execute(
+            text("SELECT COUNT(*) FROM documents WHERE owner_id = :user_id"),
+            {"user_id": test_user.id}
+        )
+        doc_count = result.scalar()
+        assert doc_count == 3, "Should have 3 documents for the user"
+        
+        # Verify document details
+        for i, doc in enumerate(documents):
+            assert doc.id is not None
+            assert doc.owner_id == test_user.id
+            assert doc.title == f"Test Document {i}"

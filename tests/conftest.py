@@ -5,7 +5,6 @@ import os
 from typing import AsyncGenerator, Generator
 
 import pytest
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from chatter.utils.database import Base, get_session_generator
@@ -95,10 +94,11 @@ async def db_setup(db_engine):
 @pytest.fixture
 async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     """
-    Provide a database session with clean state per test.
+    Provide a database session with transaction rollback per test.
     
-    For in-memory SQLite, we simply create a fresh session for each test.
-    Foreign key constraints are disabled for SQLite to avoid circular dependency issues.
+    This fixture creates a new database session for each test and ensures
+    that all changes are rolled back after the test completes. This provides
+    test isolation - each test starts with a clean database state.
     
     Args:
         db_engine: The database engine
@@ -115,23 +115,14 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     )
     
     async with session_maker() as session:
-        # For SQLite, disable foreign key constraints to avoid circular dependency issues
-        if "sqlite" in str(db_engine.url):
-            await session.execute(text("PRAGMA foreign_keys=OFF"))
-            await session.commit()
+        # Begin a transaction for the test
+        await session.begin()
         
         try:
             yield session
         finally:
-            # Clean up: delete all data from all tables to ensure test isolation
-            if "sqlite" in str(db_engine.url):
-                # Get all table names and clear them
-                for table in reversed(Base.metadata.sorted_tables):
-                    await session.execute(text(f"DELETE FROM {table.name}"))
-                await session.commit()
-            
-            # Close the session to clean up
-            await session.close()
+            # Always rollback the transaction
+            await session.rollback()
 
 
 @pytest.fixture

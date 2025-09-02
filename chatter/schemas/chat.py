@@ -17,7 +17,7 @@ class MessageBase(BaseModel):
     """Base message schema."""
 
     role: MessageRole = Field(..., description="Message role")
-    content: str = Field(..., description="Message content")
+    content: str = Field(..., min_length=1, description="Message content")
 
 
 class MessageCreate(MessageBase):
@@ -51,6 +51,7 @@ class MessageResponse(MessageBase):
         None, description="Response time in milliseconds"
     )
     cost: float | None = Field(None, description="Cost of the message")
+    finish_reason: str | None = Field(None, description="Reason for completion")
     created_at: datetime = Field(..., description="Creation timestamp")
 
     class Config:
@@ -226,6 +227,9 @@ class ChatRequest(BaseModel):
     max_tokens: int | None = Field(
         None, ge=1, le=8192, description="Max tokens override"
     )
+    context_limit: int | None = Field(
+        None, ge=1, description="Context limit override"
+    )
     enable_retrieval: bool | None = Field(
         None, description="Enable retrieval override"
     )
@@ -268,6 +272,9 @@ class StreamingChatChunk(BaseModel):
 class ConversationSearchRequest(ListRequestBase):
     """Schema for conversation search."""
 
+    limit: int = Field(50, ge=1, le=100, description="Maximum number of results")
+    offset: int = Field(0, ge=0, description="Number of results to skip")
+    search: str | None = Field(None, description="Search query")
     query: str | None = Field(None, description="Search query")
     status: ConversationStatus | None = Field(
         None, description="Filter by status"

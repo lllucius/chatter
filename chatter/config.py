@@ -507,3 +507,15 @@ except Exception:
 
     os.environ.setdefault('DATABASE_URL', 'sqlite+aiosqlite:///test.db')
     settings = Settings()
+
+
+# Global settings instance cache
+_settings_instance: Settings | None = None
+
+
+def get_settings() -> Settings:
+    """Get settings instance using singleton pattern."""
+    global _settings_instance
+    if _settings_instance is None:
+        _settings_instance = settings
+    return _settings_instance

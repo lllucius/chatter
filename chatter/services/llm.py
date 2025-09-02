@@ -17,7 +17,7 @@ from langchain_openai import ChatOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.models.registry import ModelType, ProviderType
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_maker
 from chatter.utils.logging import get_logger
 
 # Use TYPE_CHECKING to avoid circular imports at runtime
@@ -56,8 +56,8 @@ class LLMService:
         """Get database session."""
         if self._session:
             return self._session
-        async for session in get_session():
-            return session
+        session_maker = get_session_maker()
+        return session_maker()
 
     async def _create_provider_instance(
         self, provider, model_def

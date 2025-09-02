@@ -105,38 +105,6 @@ def get_session_maker() -> async_sessionmaker[AsyncSession]:
     return _session_maker
 
 
-class SessionContextManager:
-    """Context manager for database sessions."""
-    
-    def __init__(self):
-        self.session_maker = get_session_maker()
-        self.session_obj = None
-    
-    async def __aenter__(self) -> AsyncSession:
-        self.session_obj = self.session_maker()
-        # If the session object has __aenter__, it means it's a context manager itself
-        if hasattr(self.session_obj, '__aenter__'):
-            return await self.session_obj.__aenter__()
-        else:
-            # Otherwise, return the session directly
-            return self.session_obj
-    
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        if self.session_obj and hasattr(self.session_obj, '__aexit__'):
-            await self.session_obj.__aexit__(exc_type, exc_val, exc_tb)
-        else:
-            # Handle cleanup manually if needed
-            pass
-
-
-def get_session() -> SessionContextManager:
-    """Get an async database session context manager.
-
-    Returns:
-        SessionContextManager: Session context manager
-    """
-    return SessionContextManager()
-
 
 async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
     """Get an async database session as generator (for FastAPI dependency injection).
@@ -971,7 +939,7 @@ async def health_check() -> dict:
         is_connected = False
 
         # Test database connection and basic query
-        async with get_session() as session:
+        async with DatabaseManager() as session:
             # Test basic connection
             await session.execute(text("SELECT 1"))
             is_connected = True

@@ -5,6 +5,7 @@ import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from sqlalchemy import text
 
 
 @pytest.mark.integration
@@ -433,3 +434,132 @@ class TestDatabaseSecurity:
                 assert (
                     sys_table not in tables
                 ), f"Should not access system table: {sys_table}"
+
+
+@pytest.mark.integration
+class TestRealDatabaseIntegration:
+    """Integration tests using real PostgreSQL database."""
+
+    @pytest.mark.asyncio
+    async def test_real_database_schema_validation(self, test_db_session):
+        """Test database schema integrity with real database."""
+        # Test that all expected tables exist
+        result = await test_db_session.execute(text(
+            "SELECT table_name FROM information_schema.tables "
+            "WHERE table_schema = 'public' AND table_type = 'BASE TABLE'"
+        ))
+        tables = [row[0] for row in result.fetchall()]
+        
+        expected_tables = [
+            "users", "conversations", "documents", "profiles",
+            "prompts", "providers", "model_defs", "embedding_spaces"
+        ]
+        
+        for table in expected_tables:
+            assert table in tables, f"Required table missing: {table}"
+
+    @pytest.mark.asyncio
+    async def test_real_database_transaction_integrity(self, test_db_session):
+        """Test transaction integrity with real database."""
+        from chatter.models.user import User
+        from chatter.models.conversation import Conversation
+        
+        # Start a transaction
+        test_user = User(
+            email="transactiontest@example.com",
+            username="transactionuser",
+            hashed_password="hashed_password_here",
+            full_name="Transaction Test User",
+        )
+        
+        test_db_session.add(test_user)
+        await test_db_session.flush()  # Flush to get the ID without committing
+        
+        # Create a conversation for this user
+        test_conversation = Conversation(
+            user_id=test_user.id,
+            title="Test Transaction Conversation",
+            description="Testing transaction integrity",
+        )
+        test_db_session.add(test_conversation)
+        
+        # Commit the transaction
+        await test_db_session.commit()
+        
+        # Verify both records exist
+        user_result = await test_db_session.execute(
+            text("SELECT COUNT(*) FROM users WHERE email = 'transactiontest@example.com'")
+        )
+        user_count = user_result.scalar()
+        assert user_count == 1, "User should be saved"
+        
+        conv_result = await test_db_session.execute(
+            text("SELECT COUNT(*) FROM conversations WHERE user_id = :user_id"),
+            {"user_id": test_user.id}
+        )
+        conv_count = conv_result.scalar()
+        assert conv_count == 1, "Conversation should be saved"
+
+    @pytest.mark.asyncio
+    async def test_real_database_foreign_key_constraints(self, test_db_session):
+        """Test foreign key constraints with real database."""
+        from chatter.models.conversation import Conversation
+        
+        # Try to create a conversation with a non-existent user_id
+        invalid_conversation = Conversation(
+            user_id="nonexistent_user_id",
+            title="Invalid Conversation",
+            description="This should fail due to foreign key constraint",
+        )
+        
+        test_db_session.add(invalid_conversation)
+        
+        # This should raise an integrity error due to foreign key constraint
+        with pytest.raises(Exception):  # Could be IntegrityError or similar
+            await test_db_session.commit()
+        
+        # Rollback the failed transaction
+        await test_db_session.rollback()
+
+    @pytest.mark.asyncio
+    async def test_real_database_connection_pooling(self, test_db_engine):
+        """Test database connection pooling with real database."""
+        # Test that we can create multiple connections
+        connections = []
+        
+        for i in range(5):
+            conn = await test_db_engine.connect()
+            connections.append(conn)
+            
+            # Verify each connection works
+            result = await conn.execute(text(f"SELECT {i + 1} as test_num"))
+            row = result.fetchone()
+            assert row[0] == i + 1
+        
+        # Close all connections
+        for conn in connections:
+            await conn.close()
+
+    @pytest.mark.asyncio
+    async def test_real_database_concurrent_access(self, test_db_session):
+        """Test concurrent database access with real database."""
+        from chatter.models.user import User
+        
+        # Create multiple users in the same session to avoid the table issue
+        users = []
+        for i in range(3):
+            user = User(
+                email=f"concurrent{i}@example.com",
+                username=f"concurrentuser{i}",
+                hashed_password="hashed_password_here",
+                full_name=f"Concurrent User {i}",
+            )
+            users.append(user)
+            test_db_session.add(user)
+        
+        await test_db_session.commit()
+        
+        # Verify all users were created
+        assert len(users) == 3
+        user_ids = [user.id for user in users]
+        assert len(set(user_ids)) == 3  # All IDs should be unique

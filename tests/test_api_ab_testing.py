@@ -38,12 +38,27 @@ class TestABTestingEndpoints:
         test_data = {
             "name": "Chat Model Comparison",
             "description": "Compare GPT-4 vs Claude performance",
+            "test_type": "model",
+            "allocation_strategy": "equal",
             "variants": [
-                {"name": "GPT-4", "config": {"model": "gpt-4"}},
-                {"name": "Claude", "config": {"model": "claude-3"}}
+                {
+                    "name": "GPT-4", 
+                    "description": "GPT-4 model variant",
+                    "configuration": {"model": "gpt-4"},
+                    "weight": 1.0
+                },
+                {
+                    "name": "Claude", 
+                    "description": "Claude model variant",
+                    "configuration": {"model": "claude-3"},
+                    "weight": 1.0
+                }
             ],
             "metrics": ["response_time", "user_satisfaction"],
-            "traffic_split": {"GPT-4": 0.5, "Claude": 0.5}
+            "duration_days": 7,
+            "min_sample_size": 100,
+            "confidence_level": 0.95,
+            "traffic_percentage": 100.0
         }
 
         mock_test = {

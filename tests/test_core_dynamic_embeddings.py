@@ -388,14 +388,16 @@ class TestEmbeddingModelManagerIntegration:
         assert table_exists is False
 
 
-@pytest.mark.integration
-class TestDynamicEmbeddingServiceIntegration:
-    """Integration tests for DynamicEmbeddingService with real database."""
+@pytest.mark.unit
+class TestDynamicEmbeddingService:
+    """Test DynamicEmbeddingService functionality."""
 
     def setup_method(self):
         """Set up test fixtures."""
-        # Real database session will be injected via test_db_session fixture
-        pass
+        self.mock_session = AsyncMock()
+        self.embedding_service = DynamicEmbeddingService(
+            self.mock_session
+        )
 
     @pytest.mark.asyncio
     async def test_store_embeddings(self):

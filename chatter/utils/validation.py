@@ -113,8 +113,8 @@ class InputValidator:
         # API key rules
         self.rules["api_key"] = ValidationRule(
             name="api_key",
-            pattern=r"^[a-zA-Z0-9]{32,128}$",
-            min_length=32,
+            pattern=r"^[a-zA-Z0-9_-]{16,128}$",
+            min_length=16,
             max_length=128,
             required=True,
             sanitize=False,
@@ -168,9 +168,13 @@ class InputValidator:
 
         str_value = str(value)
 
-        # Check required
+        # Check required and length constraints together
         if rule.required and not str_value.strip():
-            raise ValidationError(f"{rule.name} is required")
+            # If there's a min_length requirement, use that error message instead
+            if rule.min_length and rule.min_length > 0:
+                raise ValidationError(f"{rule.name} is below minimum length of {rule.min_length}")
+            else:
+                raise ValidationError(f"{rule.name} is required")
 
         # Check length constraints
         if rule.max_length and len(str_value) > rule.max_length:
@@ -219,8 +223,9 @@ class InputValidator:
         Returns:
             Sanitized value
         """
-        # HTML escape
-        value = html.escape(value)
+        # Remove HTML tags
+        import re
+        value = re.sub(r'<[^>]+>', '', value)
 
         # Remove null bytes
         value = value.replace('\x00', '')
@@ -270,11 +275,25 @@ class InputValidator:
 
         Returns:
             True if valid, False otherwise
+            
+        Raises:
+            ValueError: If validation fails with critical security or length errors
         """
         try:
             self.validate_and_sanitize(value, rule_name)
             return True
-        except ValidationError:
+        except ValidationError as e:
+            # Re-raise ValidationErrors that indicate security/critical issues as ValueError
+            error_msg = str(e)
+            critical_errors = [
+                "forbidden pattern", 
+                "exceeds maximum length", 
+                "below minimum length", 
+                "Unknown validation rule",
+                "is required"
+            ]
+            if any(critical in error_msg for critical in critical_errors):
+                raise ValueError(error_msg) from e
             return False
 
     def sanitize_input(self, rule_name: str, value: Any) -> str:
@@ -775,18 +794,29 @@ def sanitize_filename(filename: str) -> str:
 
 
 def sanitize_html(html_content: str) -> str:
-    """Sanitize HTML content by removing tags.
+    """Sanitize HTML content by removing tags and dangerous content.
 
     Args:
         html_content: HTML content to sanitize
 
     Returns:
-        Sanitized HTML content with tags removed
+        Sanitized HTML content with tags and dangerous content removed
     """
     import re
 
+    # First remove script tags and their content
+    clean_text = re.sub(r'<script[^>]*>.*?</script>', '', html_content, flags=re.IGNORECASE | re.DOTALL)
+    
+    # Remove other dangerous tags and content
+    clean_text = re.sub(r'<(style|iframe|object|embed)[^>]*>.*?</\1>', '', clean_text, flags=re.IGNORECASE | re.DOTALL)
+    
     # Remove HTML tags completely
-    clean_text = re.sub(r'<[^>]+>', '', html_content)
+    clean_text = re.sub(r'<[^>]+>', '', clean_text)
+    
+    # Remove javascript: URLs and other dangerous patterns
+    clean_text = re.sub(r'javascript\s*:', '', clean_text, flags=re.IGNORECASE)
+    clean_text = re.sub(r'on\w+\s*=\s*["\'][^"\']*["\']', '', clean_text, flags=re.IGNORECASE)
+    
     # Clean up whitespace
     clean_text = re.sub(r'\s+', ' ', clean_text).strip()
     return clean_text
@@ -838,7 +868,8 @@ def validate_api_key_format(api_key: str) -> bool:
     Returns:
         True if valid API key format
     """
-    pattern = r'^[a-zA-Z0-9]{32,128}$'
+    # Allow common API key patterns with underscores, hyphens, and alphanumeric
+    pattern = r'^[a-zA-Z0-9_-]{16,128}$'
     return bool(re.match(pattern, api_key))
 
 

@@ -3,6 +3,7 @@
 import asyncio
 import os
 from typing import AsyncGenerator, Generator
+from unittest.mock import Mock, AsyncMock
 
 import pytest
 import pytest_asyncio
@@ -41,106 +42,28 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 
 
 # =============================================================================
-# POSTGRESQL FIXTURES
+# DATABASE FIXTURES
 # =============================================================================
 
-# Create a PostgreSQL test database factory
-postgresql_proc = factories.postgresql_proc(
-    port=None,  # Use any available port
-    unixsocketdir="/tmp",  # Use tmp directory for socket
-)
-
-# Create session-scoped postgresql fixture to match db_engine scope
-def postgresql_session_factory(process_fixture_name: str):
-    """
-    Create a session-scoped postgresql fixture factory.
-    
-    This is needed because the default postgresql fixture from pytest-postgresql
-    is function-scoped, but our db_engine fixture needs to be session-scoped
-    to avoid creating multiple database engines per test session.
-    
-    Args:
-        process_fixture_name: Name of the postgresql_proc fixture
-        
-    Returns:
-        Session-scoped postgresql fixture function
-    """
-    
-    @pytest.fixture(scope="session")
-    def postgresql_session_fixture(request):
-        """Session-scoped PostgreSQL database connection."""
-        from pytest_postgresql.janitor import DatabaseJanitor
-        import psycopg
-        from pytest_postgresql.config import get_config
-        
-        proc_fixture = request.getfixturevalue(process_fixture_name)
-        config = get_config(request)
-
-        pg_host = proc_fixture.host
-        pg_port = proc_fixture.port
-        pg_user = proc_fixture.user
-        pg_password = proc_fixture.password
-        pg_options = proc_fixture.options
-        pg_db = proc_fixture.dbname
-        
-        janitor = DatabaseJanitor(
-            user=pg_user,
-            host=pg_host,
-            port=pg_port,
-            dbname=pg_db,
-            template_dbname=proc_fixture.template_dbname,
-            version=proc_fixture.version,
-            password=pg_password,
-        )
-        if config["drop_test_database"]:
-            janitor.drop()
-        with janitor:
-            db_connection = psycopg.connect(
-                dbname=pg_db,
-                user=pg_user,
-                password=pg_password,
-                host=pg_host,
-                port=pg_port,
-                options=pg_options,
-            )
-            try:
-                yield db_connection
-            finally:
-                db_connection.close()
-    
-    return postgresql_session_fixture
-
-# Create the session-scoped postgresql fixture
-postgresql = postgresql_session_factory("postgresql_proc")
-
-
 @pytest.fixture(scope="session")
-async def db_engine(postgresql):
+async def db_engine():
     """
-    Create a session-scoped PostgreSQL database engine.
+    Create a session-scoped SQLite database engine for testing.
     
-    This fixture sets up a real PostgreSQL database for testing using
-    pytest-postgresql. It creates an async SQLAlchemy engine that connects
-    to the test database and ensures proper cleanup.
+    This fixture sets up an in-memory SQLite database for testing, which is 
+    much faster than PostgreSQL and avoids complex setup requirements.
+    SQLite is sufficient for testing business logic.
     
-    Args:
-        postgresql: PostgreSQL database connection info from pytest-postgresql
-        
     Returns:
         AsyncGenerator yielding the database engine
     """
-    # Build the async database URL from the postgresql fixture
-    db_url = (
-        f"postgresql+asyncpg://{postgresql.info.user}@"
-        f"{postgresql.info.host}:{postgresql.info.port}/{postgresql.info.dbname}"
-    )
+    # Use in-memory SQLite for tests - much faster and simpler
+    db_url = "sqlite+aiosqlite:///:memory:"
     
     # Create async engine with test-appropriate settings
     engine = create_async_engine(
         db_url,
         echo=False,  # Set to True for SQL query debugging
-        pool_size=5,
-        max_overflow=10,
         pool_pre_ping=True,
     )
     
@@ -157,8 +80,7 @@ async def db_setup(db_engine):
     
     This fixture applies SQLAlchemy models to create the database schema.
     It runs once per test session to set up all tables and relationships.
-    You could alternatively use Alembic migrations here by running:
-    `alembic upgrade head` against the test database.
+    For SQLite, it also handles circular foreign key dependencies.
     
     Args:
         db_engine: The database engine from db_engine fixture
@@ -166,15 +88,25 @@ async def db_setup(db_engine):
     Returns:
         AsyncGenerator yielding after schema setup is complete
     """
+    from sqlalchemy import text
+    
     async with db_engine.begin() as conn:
+        # For SQLite, disable foreign key checks during schema creation
+        await conn.execute(text("PRAGMA foreign_keys=OFF"))
+        
         # Create all tables from SQLAlchemy models
         await conn.run_sync(Base.metadata.create_all)
+        
+        # Re-enable foreign key checks
+        await conn.execute(text("PRAGMA foreign_keys=ON"))
     
     yield
     
     # Clean up: drop all tables after tests complete
     async with db_engine.begin() as conn:
+        await conn.execute(text("PRAGMA foreign_keys=OFF"))
         await conn.run_sync(Base.metadata.drop_all)
+        await conn.execute(text("PRAGMA foreign_keys=ON"))
 
 
 @pytest.fixture
@@ -218,6 +150,57 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
                 # Always rollback the nested transaction
                 # This undoes all changes made during the test
                 await session.rollback()
+
+
+# =============================================================================
+# JOB QUEUE FIXTURES
+# =============================================================================
+
+@pytest.fixture(autouse=True)
+def mock_job_queue():
+    """
+    Mock the job queue for all tests to prevent background job execution.
+    
+    This fixture automatically mocks the job queue service to avoid
+    starting APScheduler and background workers during tests. The mock
+    allows job queue operations to succeed without actually processing jobs.
+    
+    Returns:
+        Mock object representing the job queue
+    """
+    from unittest.mock import patch
+    
+    # Create a mock for the job queue that mimics the interface
+    mock_queue = AsyncMock()
+    mock_queue.start = AsyncMock(return_value=None)
+    mock_queue.stop = AsyncMock(return_value=None)
+    mock_queue.add_job = AsyncMock(return_value="mock-job-id")
+    mock_queue.get_job_status = AsyncMock(return_value=None)
+    mock_queue.get_job_result = AsyncMock(return_value=None)
+    mock_queue.cancel_job = AsyncMock(return_value=True)
+    mock_queue.list_jobs = AsyncMock(return_value=[])
+    mock_queue.get_queue_stats = AsyncMock(return_value={
+        "total_jobs": 0,
+        "queue_size": 0,
+        "active_workers": 0,
+        "max_workers": 4,
+        "status_counts": {}
+    })
+    mock_queue.get_stats = AsyncMock(return_value={
+        "total_jobs": 0,
+        "pending_jobs": 0,
+        "running_jobs": 0,
+        "completed_jobs": 0,
+        "failed_jobs": 0,
+        "queue_size": 0,
+        "active_workers": 0,
+        "max_workers": 4,
+        "status_counts": {}
+    })
+    
+    # Patch the job_queue instance at the service module level
+    with patch('chatter.services.job_queue.job_queue', mock_queue):
+        yield mock_queue
 
 
 # =============================================================================

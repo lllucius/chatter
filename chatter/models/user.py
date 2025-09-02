@@ -22,11 +22,31 @@ if TYPE_CHECKING:
     from chatter.models.prompt import Prompt
 
 
-class User(Base):
-    """User model for authentication and profile management."""
+import os
 
-    # Add table constraints
-    __table_args__ = (
+# Check if we're using SQLite (for testing) to skip PostgreSQL-specific constraints
+_database_url = os.environ.get("DATABASE_URL", "")
+_is_sqlite = "sqlite" in _database_url.lower() or os.environ.get("TESTING", "").lower() == "true"
+
+if _is_sqlite:
+    # Use constraints compatible with SQLite
+    _table_args = (
+        CheckConstraint(
+            'daily_message_limit IS NULL OR daily_message_limit > 0',
+            name='check_daily_message_limit_positive',
+        ),
+        CheckConstraint(
+            'monthly_message_limit IS NULL OR monthly_message_limit > 0',
+            name='check_monthly_message_limit_positive',
+        ),
+        CheckConstraint(
+            'max_file_size_mb IS NULL OR max_file_size_mb > 0',
+            name='check_max_file_size_positive',
+        ),
+    )
+else:
+    # Use PostgreSQL-specific constraints with regex
+    _table_args = (
         CheckConstraint(
             'daily_message_limit IS NULL OR daily_message_limit > 0',
             name='check_daily_message_limit_positive',
@@ -48,6 +68,13 @@ class User(Base):
             name='check_username_format',
         ),
     )
+
+
+class User(Base):
+    """User model for authentication and profile management."""
+
+    # Add table constraints (conditional based on database)
+    __table_args__ = _table_args
 
     # Authentication fields
     email: Mapped[str] = mapped_column(

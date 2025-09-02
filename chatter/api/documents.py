@@ -113,13 +113,9 @@ async def upload_document(
             is_public=is_public,
         )
 
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         # Create document
         document = await document_service.create_document(
             current_user.id, file, document_data
-        )
-        print(
-            "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
         )
 
         return DocumentResponse.model_validate(document)

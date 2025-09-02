@@ -32,6 +32,24 @@ class TestAuthEndpoints:
         """Clean up after tests."""
         app.dependency_overrides.clear()
 
+    def _create_mock_user(self, **kwargs):
+        """Helper to create a mock user with required fields."""
+        from datetime import datetime
+        
+        defaults = {
+            "id": "test-user-id",
+            "email": "test@example.com",
+            "username": "testuser",
+            "hashed_password": "hashed_password",
+            "is_active": True,
+            "is_verified": False,
+            "is_superuser": False,
+            "created_at": datetime.now(),
+            "updated_at": datetime.now(),
+        }
+        defaults.update(kwargs)
+        return User(**defaults)
+
     def test_register_user_success(self):
         """Test successful user registration."""
         # Arrange
@@ -41,14 +59,18 @@ class TestAuthEndpoints:
             "password": "securepassword123",
         }
 
-        mock_user = User(
-            id="test-user-id",
+        mock_user = self._create_mock_user(
             email=user_data["email"],
-            username=user_data["username"],
-            is_active=True,
+            username=user_data["username"]
         )
 
-        self.mock_auth_service.register_user.return_value = mock_user
+        self.mock_auth_service.create_user.return_value = mock_user
+        self.mock_auth_service.create_tokens.return_value = {
+            "access_token": "test_access_token",
+            "refresh_token": "test_refresh_token",
+            "token_type": "bearer",
+            "expires_in": 3600
+        }
 
         # Act
         response = self.client.post(
@@ -58,9 +80,11 @@ class TestAuthEndpoints:
         # Assert
         assert response.status_code == status.HTTP_201_CREATED
         response_data = response.json()
-        assert response_data["email"] == user_data["email"]
-        assert response_data["username"] == user_data["username"]
-        assert "password" not in response_data
+        assert response_data["user"]["email"] == user_data["email"]
+        assert response_data["user"]["username"] == user_data["username"]
+        assert "password" not in response_data["user"]
+        assert response_data["access_token"] == "test_access_token"
+        assert response_data["token_type"] == "bearer"
 
     def test_register_user_duplicate_email(self):
         """Test user registration with duplicate email."""
@@ -71,10 +95,10 @@ class TestAuthEndpoints:
             "password": "securepassword123",
         }
 
-        from chatter.core.exceptions import ConflictError
+        from chatter.core.auth import UserAlreadyExistsError
 
-        self.mock_auth_service.register_user.side_effect = (
-            ConflictError("Email already exists")
+        self.mock_auth_service.create_user.side_effect = (
+            UserAlreadyExistsError("Email already exists")
         )
 
         # Act
@@ -167,7 +191,7 @@ class TestAuthEndpoints:
             "expires_in": 3600,
         }
 
-        self.mock_auth_service.refresh_token.return_value = (
+        self.mock_auth_service.refresh_access_token.return_value = (
             mock_token_response
         )
 
@@ -185,7 +209,7 @@ class TestAuthEndpoints:
         """Test successful logout."""
         # Arrange
         headers = {"Authorization": "Bearer valid-token"}
-        self.mock_auth_service.logout_user.return_value = True
+        self.mock_auth_service.revoke_token.return_value = True
 
         # Mock get_current_user dependency
         mock_user = User(

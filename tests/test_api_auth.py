@@ -136,6 +136,8 @@ class TestAuthEndpoints:
             "password": "securepassword123",
         }
 
+        mock_user = self._create_mock_user()
+        
         mock_token_response = {
             "access_token": "mock-access-token",
             "token_type": "bearer",
@@ -143,9 +145,8 @@ class TestAuthEndpoints:
             "refresh_token": "mock-refresh-token",
         }
 
-        self.mock_auth_service.authenticate_user.return_value = (
-            mock_token_response
-        )
+        self.mock_auth_service.authenticate_user.return_value = mock_user
+        self.mock_auth_service.create_tokens.return_value = mock_token_response
 
         # Act
         response = self.client.post(
@@ -166,11 +167,7 @@ class TestAuthEndpoints:
             "password": "wrongpassword",
         }
 
-        from chatter.core.exceptions import AuthenticationError
-
-        self.mock_auth_service.authenticate_user.side_effect = (
-            AuthenticationError("Invalid credentials")
-        )
+        self.mock_auth_service.authenticate_user.return_value = None
 
         # Act
         response = self.client.post(
@@ -189,6 +186,7 @@ class TestAuthEndpoints:
             "access_token": "new-access-token",
             "token_type": "bearer",
             "expires_in": 3600,
+            "refresh_token": "new-refresh-token",
         }
 
         self.mock_auth_service.refresh_access_token.return_value = (
@@ -212,11 +210,7 @@ class TestAuthEndpoints:
         self.mock_auth_service.revoke_token.return_value = True
 
         # Mock get_current_user dependency
-        mock_user = User(
-            id="test-user-id",
-            email="test@example.com",
-            username="testuser",
-        )
+        mock_user = self._create_mock_user()
         app.dependency_overrides[get_current_user] = lambda: mock_user
 
         # Act
@@ -227,18 +221,13 @@ class TestAuthEndpoints:
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
-        assert response_data["message"] == "Successfully logged out"
+        assert response_data["message"] == "Logged out successfully"
 
     def test_get_user_profile_success(self):
         """Test getting current user profile."""
         # Arrange
         headers = {"Authorization": "Bearer valid-token"}
-        mock_user = User(
-            id="test-user-id",
-            email="test@example.com",
-            username="testuser",
-            is_active=True,
-        )
+        mock_user = self._create_mock_user()
         app.dependency_overrides[get_current_user] = lambda: mock_user
 
         # Act
@@ -259,15 +248,10 @@ class TestAuthEndpoints:
             "email": "new@example.com",
         }
 
-        mock_user = User(
-            id="test-user-id",
-            email="test@example.com",
-            username="testuser",
-        )
-        updated_user = User(
-            id="test-user-id",
+        mock_user = self._create_mock_user()
+        updated_user = self._create_mock_user(
             email="new@example.com",
-            username="newusername",
+            username="newusername"
         )
 
         app.dependency_overrides[get_current_user] = lambda: mock_user
@@ -293,11 +277,7 @@ class TestAuthEndpoints:
             "new_password": "newpassword123",
         }
 
-        mock_user = User(
-            id="test-user-id",
-            email="test@example.com",
-            username="testuser",
-        )
+        mock_user = self._create_mock_user()
         app.dependency_overrides[get_current_user] = lambda: mock_user
         self.mock_auth_service.change_password.return_value = True
 
@@ -324,17 +304,13 @@ class TestAuthEndpoints:
             "new_password": "newpassword123",
         }
 
-        mock_user = User(
-            id="test-user-id",
-            email="test@example.com",
-            username="testuser",
-        )
+        mock_user = self._create_mock_user()
         app.dependency_overrides[get_current_user] = lambda: mock_user
 
-        from chatter.core.exceptions import AuthenticationError
+        from chatter.utils.problem import AuthenticationProblem
 
         self.mock_auth_service.change_password.side_effect = (
-            AuthenticationError("Invalid current password")
+            AuthenticationProblem("Invalid current password")
         )
 
         # Act
@@ -356,6 +332,24 @@ class TestAuthIntegration:
         """Set up test fixtures."""
         self.client = TestClient(app)
 
+    def _create_mock_user(self, **kwargs):
+        """Helper to create a mock user with required fields."""
+        from datetime import datetime
+        
+        defaults = {
+            "id": "test-user-id",
+            "email": "test@example.com",
+            "username": "testuser",
+            "hashed_password": "hashed_password",
+            "is_active": True,
+            "is_verified": False,
+            "is_superuser": False,
+            "created_at": datetime.now(),
+            "updated_at": datetime.now(),
+        }
+        defaults.update(kwargs)
+        return User(**defaults)
+
     def test_full_auth_flow(self):
         """Test complete authentication flow."""
         # This would require a test database setup
@@ -374,14 +368,19 @@ class TestAuthIntegration:
             "password": "securepassword123",
         }
 
-        mock_user = User(
+        mock_user = self._create_mock_user(
             id="integration-user-id",
             email=user_data["email"],
-            username=user_data["username"],
-            is_active=True,
+            username=user_data["username"]
         )
 
-        mock_auth_service.register_user.return_value = mock_user
+        mock_auth_service.create_user.return_value = mock_user
+        mock_auth_service.create_tokens.return_value = {
+            "access_token": "integration-access-token",
+            "token_type": "bearer", 
+            "expires_in": 3600,
+            "refresh_token": "integration-refresh-token",
+        }
 
         # Test registration
         response = self.client.post(
@@ -389,17 +388,8 @@ class TestAuthIntegration:
         )
         assert response.status_code == status.HTTP_201_CREATED
 
-        # Mock login
-        mock_token_response = {
-            "access_token": "integration-access-token",
-            "token_type": "bearer",
-            "expires_in": 3600,
-            "refresh_token": "integration-refresh-token",
-        }
-
-        mock_auth_service.authenticate_user.return_value = (
-            mock_token_response
-        )
+        # Mock login - same user and tokens for login
+        mock_auth_service.authenticate_user.return_value = mock_user
 
         # Test login
         login_data = {

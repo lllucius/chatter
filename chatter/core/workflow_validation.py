@@ -790,6 +790,7 @@ class ParameterValidator:
             'gpt-4',
             'gpt-4-turbo',
             'gpt-4o',
+            'claude-3',
             'claude-3-haiku',
             'claude-3-sonnet',
             'claude-3-opus',
@@ -798,6 +799,7 @@ class ParameterValidator:
             'gemini-1.5-pro',
             'command-r',
             'command-r-plus',
+            'llama-2',
         ]
 
         # Check if model matches any known pattern
@@ -876,21 +878,22 @@ class SchemaValidator:
         return ValidationResult()
 
     def validate_workflow_output_schema(
-        self, output: dict
+        self, output: dict, schema: dict | None = None
     ) -> ValidationResult:
         """Validate workflow output against expected schema."""
-        # Define expected workflow output schema
-        schema = {
-            "type": "object",
-            "properties": {
-                "result": {"type": "string"},
-                "status": {"type": "string"},
-                "metadata": {"type": "object"},
-                "execution_time": {"type": "number"},
-                "step_results": {"type": "array"},
-            },
-            "required": ["result", "status"],
-        }
+        # Use provided schema or default schema
+        if schema is None:
+            schema = {
+                "type": "object",
+                "properties": {
+                    "result": {"type": "string"},
+                    "status": {"type": "string"},
+                    "metadata": {"type": "object"},
+                    "execution_time": {"type": "number"},
+                    "step_results": {"type": "array"},
+                },
+                "required": ["result", "status"],
+            }
 
         return self.validate_json_schema(output, schema)
 

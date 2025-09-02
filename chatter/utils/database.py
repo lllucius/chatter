@@ -102,8 +102,41 @@ def get_session_maker() -> async_sessionmaker[AsyncSession]:
     return _session_maker
 
 
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
-    """Get an async database session.
+class SessionContextManager:
+    """Context manager for database sessions."""
+    
+    def __init__(self):
+        self.session_maker = get_session_maker()
+        self.session_obj = None
+    
+    async def __aenter__(self) -> AsyncSession:
+        self.session_obj = self.session_maker()
+        # If the session object has __aenter__, it means it's a context manager itself
+        if hasattr(self.session_obj, '__aenter__'):
+            return await self.session_obj.__aenter__()
+        else:
+            # Otherwise, return the session directly
+            return self.session_obj
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        if self.session_obj and hasattr(self.session_obj, '__aexit__'):
+            await self.session_obj.__aexit__(exc_type, exc_val, exc_tb)
+        else:
+            # Handle cleanup manually if needed
+            pass
+
+
+def get_session() -> SessionContextManager:
+    """Get an async database session context manager.
+
+    Returns:
+        SessionContextManager: Session context manager
+    """
+    return SessionContextManager()
+
+
+async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
+    """Get an async database session as generator (for FastAPI dependency injection).
 
     This is typically used as a dependency in FastAPI endpoints.
 
@@ -820,6 +853,12 @@ class DatabaseManager:
     def __init__(self) -> None:
         """Initialize database session context."""
         self.session: AsyncSession | None = None
+        self.active_sessions: dict = {}
+
+    @property
+    def engine(self) -> AsyncEngine:
+        """Get the database engine."""
+        return get_engine()
 
     async def __aenter__(self) -> AsyncSession:
         """Enter async context and create session."""
@@ -835,6 +874,71 @@ class DatabaseManager:
             else:
                 await self.session.commit()
             await self.session.close()
+
+    async def get_pool_stats(self) -> dict:
+        """Get connection pool statistics."""
+        engine = self.engine
+        pool = engine.pool
+        return {
+            "pool_size": pool.size(),
+            "checked_out": pool.checkedout(),
+            "checked_in": pool.checkedin(),
+            "available": pool.checkedin(),
+        }
+
+    async def _attempt_connection(self):
+        """Attempt to establish a database connection."""
+        engine = self.engine
+        async with engine.begin() as conn:
+            return conn
+
+    async def get_connection_with_retry(self, max_retries: int = 3):
+        """Get connection with retry mechanism."""
+        for attempt in range(max_retries):
+            try:
+                return await self._attempt_connection()
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    raise e
+                await asyncio.sleep(0.1 * (2 ** attempt))
+
+    async def get_connection_with_timeout(self, timeout_seconds: int = 30):
+        """Get connection with timeout."""
+        return await asyncio.wait_for(
+            self._attempt_connection(), 
+            timeout=timeout_seconds
+        )
+
+    async def transaction(self, session: AsyncSession):
+        """Context manager for database transactions."""
+        class TransactionContext:
+            def __init__(self, session):
+                self.session = session
+
+            async def __aenter__(self):
+                await self.session.begin()
+                return self.session
+
+            async def __aexit__(self, exc_type, exc_val, exc_tb):
+                if exc_type:
+                    await self.session.rollback()
+                else:
+                    await self.session.commit()
+
+        return TransactionContext(session)
+
+    async def detect_connection_leaks(self, max_age_seconds: int = 1800):
+        """Detect connection leaks based on session age."""
+        import time
+        current_time = time.time()
+        leaked_sessions = []
+        
+        for session_id, session_info in self.active_sessions.items():
+            session_age = current_time - session_info.get('created_at', current_time)
+            if session_age > max_age_seconds:
+                leaked_sessions.append(session_info)
+        
+        return leaked_sessions
 
 
 # Alias for backward compatibility

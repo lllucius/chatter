@@ -505,5 +505,5 @@ except Exception:
     # For testing/development when DATABASE_URL is not set
     import os
 
-    os.environ.setdefault('DATABASE_URL', 'sqlite:///test.db')
+    os.environ.setdefault('DATABASE_URL', 'sqlite+aiosqlite:///test.db')
     settings = Settings()

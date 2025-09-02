@@ -198,6 +198,10 @@ cython_debug/
 .ruff_cache/
 
 # PyPI configuration file
+
+# Test databases
+test.db
+*.db
 .pypirc
 
 # Cursor

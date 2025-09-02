@@ -44,7 +44,7 @@ except ImportError:
 from chatter.config import settings
 from chatter.core.model_registry import ModelRegistryService
 from chatter.models.registry import ModelType, ProviderType
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_maker
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -157,8 +157,8 @@ class EmbeddingService:
         """Get database session."""
         if self._session:
             return self._session
-        async for session in get_session():
-            return session
+        session_maker = get_session_maker()
+        return session_maker()
 
     async def _create_embedding_provider_instance(
         self, provider, model_def

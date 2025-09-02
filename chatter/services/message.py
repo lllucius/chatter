@@ -32,7 +32,7 @@ class MessageService:
         user_id: str,
         limit: int | None = None,
         offset: int = 0,
-        include_system: bool = True
+        include_system: bool = True,
     ) -> Sequence[Message]:
         """Get messages for a conversation with access control.
 
@@ -54,8 +54,11 @@ class MessageService:
             from chatter.services.conversation import (
                 ConversationService,
             )
+
             conv_service = ConversationService(self.session)
-            await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
+            await conv_service.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
 
             # Build query for messages
             query = (
@@ -82,19 +85,21 @@ class MessageService:
                 user_id=user_id,
                 message_count=len(messages),
                 limit=limit,
-                offset=offset
+                offset=offset,
             )
 
             return messages
 
         except NotFoundError:
-            raise AuthorizationError("Access denied to conversation messages")
+            raise AuthorizationError(
+                "Access denied to conversation messages"
+            )
         except Exception as e:
             logger.error(
                 "Failed to get conversation messages",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise
 
@@ -108,7 +113,7 @@ class MessageService:
         input_tokens: int | None = None,
         output_tokens: int | None = None,
         cost: float | None = None,
-        provider: str | None = None
+        provider: str | None = None,
     ) -> Message:
         """Add a new message to a conversation.
 
@@ -135,6 +140,7 @@ class MessageService:
             from chatter.services.conversation import (
                 ConversationService,
             )
+
             conv_service = ConversationService(self.session)
             conversation = await conv_service.get_conversation(
                 conversation_id, user_id, include_messages=False
@@ -166,7 +172,7 @@ class MessageService:
                 message_id=message.id,
                 role=role.value,
                 user_id=user_id,
-                content_length=len(content)
+                content_length=len(content),
             )
 
             return message
@@ -179,7 +185,7 @@ class MessageService:
                 conversation_id=conversation_id,
                 user_id=user_id,
                 role=role.value if role else None,
-                error=str(e)
+                error=str(e),
             )
             raise ValidationError(f"Failed to add message: {e}")
 
@@ -202,14 +208,17 @@ class MessageService:
             from chatter.services.conversation import (
                 ConversationService,
             )
+
             conv_service = ConversationService(self.session)
-            await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
+            await conv_service.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
 
             # Find and delete the message
             query = select(Message).where(
                 and_(
                     Message.id == message_id,
-                    Message.conversation_id == conversation_id
+                    Message.conversation_id == conversation_id,
                 )
             )
 
@@ -220,7 +229,7 @@ class MessageService:
                 raise NotFoundError(
                     "Message not found",
                     resource_type="message",
-                    resource_id=message_id
+                    resource_id=message_id,
                 )
 
             await self.session.delete(message)
@@ -230,7 +239,7 @@ class MessageService:
                 "Deleted message",
                 conversation_id=conversation_id,
                 message_id=message_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
         except (NotFoundError, AuthorizationError):
@@ -241,7 +250,7 @@ class MessageService:
                 conversation_id=conversation_id,
                 message_id=message_id,
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise
 
@@ -250,7 +259,7 @@ class MessageService:
         conversation_id: str,
         user_id: str,
         limit: int = 10,
-        include_system: bool = False
+        include_system: bool = False,
     ) -> Sequence[Message]:
         """Get recent messages from a conversation.
 
@@ -271,8 +280,11 @@ class MessageService:
             from chatter.services.conversation import (
                 ConversationService,
             )
+
             conv_service = ConversationService(self.session)
-            await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
+            await conv_service.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
 
             # Get recent messages
             query = (
@@ -295,7 +307,7 @@ class MessageService:
                 "Retrieved recent messages",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                count=len(messages)
+                count=len(messages),
             )
 
             return messages
@@ -307,7 +319,7 @@ class MessageService:
                 "Failed to get recent messages",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise
 
@@ -316,7 +328,7 @@ class MessageService:
         conversation_id: str,
         user_id: str,
         search_term: str,
-        limit: int = 20
+        limit: int = 20,
     ) -> Sequence[Message]:
         """Search messages within a conversation.
 
@@ -337,16 +349,21 @@ class MessageService:
             from chatter.services.conversation import (
                 ConversationService,
             )
+
             conv_service = ConversationService(self.session)
-            await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
+            await conv_service.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
 
             # Search messages
             query = (
                 select(Message)
-                .where(and_(
-                    Message.conversation_id == conversation_id,
-                    Message.content.ilike(f"%{search_term}%")
-                ))
+                .where(
+                    and_(
+                        Message.conversation_id == conversation_id,
+                        Message.content.ilike(f"%{search_term}%"),
+                    )
+                )
                 .order_by(desc(Message.created_at))
                 .limit(limit)
             )
@@ -359,7 +376,7 @@ class MessageService:
                 conversation_id=conversation_id,
                 user_id=user_id,
                 search_term=search_term,
-                results_count=len(messages)
+                results_count=len(messages),
             )
 
             return messages
@@ -372,7 +389,7 @@ class MessageService:
                 conversation_id=conversation_id,
                 user_id=user_id,
                 search_term=search_term,
-                error=str(e)
+                error=str(e),
             )
             raise
 
@@ -396,8 +413,11 @@ class MessageService:
             from chatter.services.conversation import (
                 ConversationService,
             )
+
             conv_service = ConversationService(self.session)
-            await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
+            await conv_service.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
 
             # Get all messages for statistics
             messages = await self.get_conversation_messages(
@@ -435,15 +455,23 @@ class MessageService:
                 "total_tokens": total_tokens,
                 "total_cost": total_cost,
                 "providers_used": list(providers_used),
-                "avg_tokens_per_message": total_tokens / total_messages if total_messages > 0 else 0,
-                "avg_cost_per_message": total_cost / total_messages if total_messages > 0 else 0.0
+                "avg_tokens_per_message": (
+                    total_tokens / total_messages
+                    if total_messages > 0
+                    else 0
+                ),
+                "avg_cost_per_message": (
+                    total_cost / total_messages
+                    if total_messages > 0
+                    else 0.0
+                ),
             }
 
             logger.debug(
                 "Calculated message statistics",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                stats=stats
+                stats=stats,
             )
 
             return stats
@@ -455,15 +483,12 @@ class MessageService:
                 "Failed to get message statistics",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise
 
     async def bulk_delete_messages(
-        self,
-        conversation_id: str,
-        user_id: str,
-        message_ids: list[str]
+        self, conversation_id: str, user_id: str, message_ids: list[str]
     ) -> int:
         """Delete multiple messages from a conversation.
 
@@ -483,14 +508,17 @@ class MessageService:
             from chatter.services.conversation import (
                 ConversationService,
             )
+
             conv_service = ConversationService(self.session)
-            await conv_service.get_conversation(conversation_id, user_id, include_messages=False)
+            await conv_service.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
 
             # Find messages to delete
             query = select(Message).where(
                 and_(
                     Message.conversation_id == conversation_id,
-                    Message.id.in_(message_ids)
+                    Message.id.in_(message_ids),
                 )
             )
 
@@ -510,7 +538,7 @@ class MessageService:
                 conversation_id=conversation_id,
                 user_id=user_id,
                 requested_count=len(message_ids),
-                deleted_count=deleted_count
+                deleted_count=deleted_count,
             )
 
             return deleted_count
@@ -523,6 +551,6 @@ class MessageService:
                 conversation_id=conversation_id,
                 user_id=user_id,
                 message_count=len(message_ids),
-                error=str(e)
+                error=str(e),
             )
             raise

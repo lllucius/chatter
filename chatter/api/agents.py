@@ -34,10 +34,15 @@ async def get_agent_manager() -> AgentManager:
         AgentManager instance
     """
     from chatter.core.agents import agent_manager
+
     return agent_manager
 
 
-@router.post("/", response_model=AgentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=AgentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_agent(
     agent_data: AgentCreateRequest,
     current_user: User = Depends(get_current_user),
@@ -84,13 +89,17 @@ async def create_agent(
         # Get the created agent
         agent = await agent_manager.get_agent(agent_id)
         if not agent:
-            raise InternalServerProblem(detail="Failed to retrieve created agent")
+            raise InternalServerProblem(
+                detail="Failed to retrieve created agent"
+            )
 
         return AgentResponse.model_validate(agent.profile.model_dump())
 
     except Exception as e:
         logger.error("Failed to create agent", error=str(e))
-        raise InternalServerProblem(detail="Failed to create agent") from e
+        raise InternalServerProblem(
+            detail="Failed to create agent"
+        ) from e
 
 
 @router.get("/", response_model=AgentListResponse)
@@ -129,7 +138,10 @@ async def list_agents(
             agents = filtered_agents
             total = len(agents)  # Update total after tag filtering
 
-        agent_responses = [AgentResponse.model_validate(agent.model_dump()) for agent in agents]
+        agent_responses = [
+            AgentResponse.model_validate(agent.model_dump())
+            for agent in agents
+        ]
 
         # Calculate pagination info
         current_page = (offset // limit) + 1
@@ -140,12 +152,14 @@ async def list_agents(
             total=total,
             page=current_page,
             per_page=limit,
-            total_pages=total_pages
+            total_pages=total_pages,
         )
 
     except Exception as e:
         logger.error("Failed to list agents", error=str(e))
-        raise InternalServerProblem(detail="Failed to list agents") from e
+        raise InternalServerProblem(
+            detail="Failed to list agents"
+        ) from e
 
 
 @router.get("/{agent_id}", response_model=AgentResponse)
@@ -176,7 +190,9 @@ async def get_agent(
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to get agent", agent_id=agent_id, error=str(e))
+        logger.error(
+            "Failed to get agent", agent_id=agent_id, error=str(e)
+        )
         raise InternalServerProblem(detail="Failed to get agent") from e
 
 
@@ -220,8 +236,12 @@ async def update_agent(
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to update agent", agent_id=agent_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to update agent") from e
+        logger.error(
+            "Failed to update agent", agent_id=agent_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to update agent"
+        ) from e
 
 
 @router.delete("/{agent_id}", response_model=AgentDeleteResponse)
@@ -248,17 +268,23 @@ async def delete_agent(
 
         return AgentDeleteResponse(
             success=True,
-            message=f"Agent {agent_id} deleted successfully"
+            message=f"Agent {agent_id} deleted successfully",
         )
 
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to delete agent", agent_id=agent_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to delete agent") from e
+        logger.error(
+            "Failed to delete agent", agent_id=agent_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to delete agent"
+        ) from e
 
 
-@router.post("/{agent_id}/interact", response_model=AgentInteractResponse)
+@router.post(
+    "/{agent_id}/interact", response_model=AgentInteractResponse
+)
 async def interact_with_agent(
     agent_id: str,
     interaction_data: AgentInteractRequest,
@@ -285,7 +311,9 @@ async def interact_with_agent(
         )
 
         if response is None:
-            raise NotFoundProblem(detail=f"Agent {agent_id} not found or unable to respond")
+            raise NotFoundProblem(
+                detail=f"Agent {agent_id} not found or unable to respond"
+            )
 
         # For now, return a basic response structure
         # In a real implementation, the agent manager would return full interaction details
@@ -304,8 +332,14 @@ async def interact_with_agent(
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to interact with agent", agent_id=agent_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to interact with agent") from e
+        logger.error(
+            "Failed to interact with agent",
+            agent_id=agent_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to interact with agent"
+        ) from e
 
 
 @router.get("/stats/overview", response_model=AgentStatsResponse)
@@ -328,4 +362,6 @@ async def get_agent_stats(
 
     except Exception as e:
         logger.error("Failed to get agent stats", error=str(e))
-        raise InternalServerProblem(detail="Failed to get agent stats") from e
+        raise InternalServerProblem(
+            detail="Failed to get agent stats"
+        ) from e

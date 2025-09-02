@@ -1,28 +1,26 @@
 """Tests for RFC 9457 Problem Details utilities."""
 
-import pytest
 from unittest.mock import Mock, patch
-from fastapi import Request, status
+
+import pytest
+from fastapi import Request
 from fastapi.responses import JSONResponse
 
+from chatter.schemas.utilities import ProblemDetail
 from chatter.utils.problem import (
-    ProblemException,
-    ValidationProblem,
+    RateLimitProblem,  # Changed from TooManyRequestsProblem
+)
+from chatter.utils.problem import (
     AuthenticationProblem,
     AuthorizationProblem,
-    NotFoundProblem,
     ConflictProblem,
     InternalServerProblem,
+    NotFoundProblem,
+    ProblemException,
     ServiceUnavailableProblem,
-    RateLimitProblem,  # Changed from TooManyRequestsProblem
-    BadRequestProblem,
-    UnauthorizedProblem,
-    ForbiddenProblem,
-    ProblemDetailResponse,
+    ValidationProblem,
     create_problem_response,
-    create_problem_detail,
 )
-from chatter.schemas.utilities import ProblemDetail
 
 
 @pytest.mark.unit
@@ -35,7 +33,7 @@ class TestProblemException:
         exception = ProblemException(
             status_code=400,
             title="Bad Request",
-            detail="The request was invalid"
+            detail="The request was invalid",
         )
 
         # Assert
@@ -51,19 +49,22 @@ class TestProblemException:
         # Arrange & Act
         with patch('chatter.utils.problem.settings') as mock_settings:
             mock_settings.api_base_url = "https://api.example.com"
-            
+
             exception = ProblemException(
                 status_code=422,
                 title="Validation Error",
                 detail="Field validation failed",
-                type_suffix="validation-error"
+                type_suffix="validation-error",
             )
 
         # Assert
         assert exception.status_code == 422
         assert exception.title == "Validation Error"
         assert exception.type_suffix == "validation-error"
-        assert exception.type_uri == "https://api.example.com/problems/validation-error"
+        assert (
+            exception.type_uri
+            == "https://api.example.com/problems/validation-error"
+        )
 
     def test_problem_exception_with_instance(self):
         """Test ProblemException with instance URI."""
@@ -72,7 +73,7 @@ class TestProblemException:
             status_code=404,
             title="Not Found",
             detail="User not found",
-            instance="/users/123"
+            instance="/users/123",
         )
 
         # Assert
@@ -88,12 +89,15 @@ class TestProblemException:
             title="Validation Error",
             detail="Field validation failed",
             errors=["field1 is required", "field2 is invalid"],
-            code="VALIDATION_FAILED"
+            code="VALIDATION_FAILED",
         )
 
         # Assert
         assert exception.status_code == 422
-        assert exception.extra_fields["errors"] == ["field1 is required", "field2 is invalid"]
+        assert exception.extra_fields["errors"] == [
+            "field1 is required",
+            "field2 is invalid",
+        ]
         assert exception.extra_fields["code"] == "VALIDATION_FAILED"
 
     def test_problem_exception_to_problem_detail(self):
@@ -101,14 +105,14 @@ class TestProblemException:
         # Arrange
         with patch('chatter.utils.problem.settings') as mock_settings:
             mock_settings.api_base_url = "https://api.example.com"
-            
+
             exception = ProblemException(
                 status_code=400,
                 title="Bad Request",
                 detail="Invalid input",
                 type_suffix="bad-request",
                 instance="/api/test",
-                custom_field="custom_value"
+                custom_field="custom_value",
             )
 
         # Act
@@ -119,7 +123,10 @@ class TestProblemException:
         assert problem_detail.status == 400
         assert problem_detail.title == "Bad Request"
         assert problem_detail.detail == "Invalid input"
-        assert problem_detail.type == "https://api.example.com/problems/bad-request"
+        assert (
+            problem_detail.type
+            == "https://api.example.com/problems/bad-request"
+        )
         assert problem_detail.instance == "/api/test"
 
 
@@ -132,21 +139,21 @@ class TestSpecificProblemExceptions:
         # Arrange & Act
         exception = ValidationProblem(
             detail="Email is required",
-            errors=["email field is missing"]
+            errors=["email field is missing"],
         )
 
         # Assert
         assert exception.status_code == 422
         assert exception.title == "Validation Error"
         assert exception.detail == "Email is required"
-        assert exception.extra_fields["errors"] == ["email field is missing"]
+        assert exception.extra_fields["errors"] == [
+            "email field is missing"
+        ]
 
     def test_authentication_problem(self):
         """Test AuthenticationProblem."""
         # Arrange & Act
-        exception = AuthenticationProblem(
-            detail="Invalid credentials"
-        )
+        exception = AuthenticationProblem(detail="Invalid credentials")
 
         # Assert
         assert exception.status_code == 401
@@ -171,7 +178,7 @@ class TestSpecificProblemExceptions:
         exception = NotFoundProblem(
             detail="User with ID 123 not found",
             resource="user",
-            resource_id="123"
+            resource_id="123",
         )
 
         # Assert
@@ -186,7 +193,7 @@ class TestSpecificProblemExceptions:
         # Arrange & Act
         exception = ConflictProblem(
             detail="Username already exists",
-            conflicting_field="username"
+            conflicting_field="username",
         )
 
         # Assert
@@ -211,8 +218,7 @@ class TestSpecificProblemExceptions:
         """Test ServiceUnavailableProblem."""
         # Arrange & Act
         exception = ServiceUnavailableProblem(
-            detail="Service temporarily unavailable",
-            retry_after=60
+            detail="Service temporarily unavailable", retry_after=60
         )
 
         # Assert
@@ -228,7 +234,7 @@ class TestSpecificProblemExceptions:
             detail="Rate limit exceeded",
             retry_after=120,
             limit=100,
-            window="hour"
+            window="hour",
         )
 
         # Assert
@@ -252,7 +258,7 @@ class TestProblemUtilities:
             title="Bad Request",
             status=400,
             detail="Invalid input",
-            instance="/api/test"
+            instance="/api/test",
         )
 
         # Act
@@ -261,7 +267,10 @@ class TestProblemUtilities:
         # Assert
         assert isinstance(response, JSONResponse)
         assert response.status_code == 400
-        assert response.headers["content-type"] == "application/problem+json"
+        assert (
+            response.headers["content-type"]
+            == "application/problem+json"
+        )
 
     def test_create_problem_response_with_extra_headers(self):
         """Test creating problem response with extra headers."""
@@ -270,17 +279,22 @@ class TestProblemUtilities:
             type="https://api.example.com/problems/rate-limit",
             title="Too Many Requests",
             status=429,
-            detail="Rate limit exceeded"
+            detail="Rate limit exceeded",
         )
         headers = {"Retry-After": "60"}
 
         # Act
-        response = create_problem_response(problem_detail, headers=headers)
+        response = create_problem_response(
+            problem_detail, headers=headers
+        )
 
         # Assert
         assert isinstance(response, JSONResponse)
         assert response.status_code == 429
-        assert response.headers["content-type"] == "application/problem+json"
+        assert (
+            response.headers["content-type"]
+            == "application/problem+json"
+        )
         assert response.headers["Retry-After"] == "60"
 
     def test_problem_exception_to_response(self):
@@ -288,10 +302,12 @@ class TestProblemUtilities:
         # Arrange
         request = Mock(spec=Request)
         request.url.path = "/api/test"
-        
+
         exception = ValidationProblem(
             detail="Validation failed",
-            validation_errors=[{"field": "name", "message": "required"}]
+            validation_errors=[
+                {"field": "name", "message": "required"}
+            ],
         )
 
         # Act
@@ -300,7 +316,10 @@ class TestProblemUtilities:
         # Assert
         assert isinstance(response, JSONResponse)
         assert response.status_code == 422
-        assert response.headers["content-type"] == "application/problem+json"
+        assert (
+            response.headers["content-type"]
+            == "application/problem+json"
+        )
 
 
 @pytest.mark.integration
@@ -324,7 +343,7 @@ class TestProblemIntegration:
         # Arrange
         exception = ValidationProblem(
             detail="Field validation failed",
-            errors=["email is required", "password too short"]
+            errors=["email is required", "password too short"],
         )
 
         # Act
@@ -343,27 +362,27 @@ class TestProblemIntegration:
         """Test problem response headers."""
         # Arrange
         exception = RateLimitProblem(
-            detail="Rate limit exceeded",
-            retry_after=60
+            detail="Rate limit exceeded", retry_after=60
         )
         problem_detail = exception.to_problem_detail()
 
         # Act
         response = create_problem_response(
-            problem_detail,
-            headers={"Retry-After": "60"}
+            problem_detail, headers={"Retry-After": "60"}
         )
 
         # Assert
-        assert response.headers["content-type"] == "application/problem+json"
+        assert (
+            response.headers["content-type"]
+            == "application/problem+json"
+        )
         assert response.headers["Retry-After"] == "60"
 
     def test_problem_with_correlation_id(self):
         """Test problem with correlation ID."""
         # Arrange
         exception = InternalServerProblem(
-            detail="Database error",
-            correlation_id="abc-123-def"
+            detail="Database error", correlation_id="abc-123-def"
         )
 
         # Act
@@ -382,9 +401,9 @@ class TestProblemIntegration:
                 detail="User registration failed",
                 errors=[
                     "Email is required",
-                    "Password must be at least 8 characters"
+                    "Password must be at least 8 characters",
                 ],
-                invalid_fields=["email", "password"]
+                invalid_fields=["email", "password"],
             )
         except ProblemException as e:
             # Act
@@ -393,8 +412,11 @@ class TestProblemIntegration:
 
         # Assert
         assert response.status_code == 422
-        assert response.headers["content-type"] == "application/problem+json"
-        
+        assert (
+            response.headers["content-type"]
+            == "application/problem+json"
+        )
+
         # Verify response body structure
         response_body = response.body
         assert b"Validation Error" in response_body

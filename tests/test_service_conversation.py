@@ -20,7 +20,7 @@ class TestConversationService:
         """Set up test fixtures."""
         self.mock_session = AsyncMock(spec=AsyncSession)
         self.service = ConversationService(self.mock_session)
-        
+
         # Mock the query service
         self.service.query_service = MagicMock()
 
@@ -35,19 +35,23 @@ class TestConversationService:
             temperature=0.8,
             max_tokens=2000,
             workflow_config={"type": "basic"},
-            metadata={"source": "test"}
+            metadata={"source": "test"},
         )
 
         mock_conversation = Conversation(
             id=str(uuid4()),
             title=conversation_data.title,
             user_id=user_id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
-        self.mock_session.refresh = AsyncMock(side_effect=lambda x: setattr(x, 'id', mock_conversation.id))
+        self.mock_session.refresh = AsyncMock(
+            side_effect=lambda x: setattr(x, 'id', mock_conversation.id)
+        )
 
         # Act
-        result = await self.service.create_conversation(user_id, conversation_data)
+        result = await self.service.create_conversation(
+            user_id, conversation_data
+        )
 
         # Assert
         self.mock_session.add.assert_called_once()
@@ -67,18 +71,20 @@ class TestConversationService:
             id=str(uuid4()),
             title=title,
             user_id=user_id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
-        self.mock_session.refresh = AsyncMock(side_effect=lambda x: setattr(x, 'id', mock_conversation.id))
+        self.mock_session.refresh = AsyncMock(
+            side_effect=lambda x: setattr(x, 'id', mock_conversation.id)
+        )
 
         # Act
         result = await self.service.create_conversation(
-            user_id, 
-            title=title, 
+            user_id,
+            title=title,
             model=model,
             profile_id=profile_id,
             temperature=0.7,
-            max_tokens=1500
+            max_tokens=1500,
         )
 
         # Assert
@@ -94,7 +100,9 @@ class TestConversationService:
 
         # Act & Assert
         with pytest.raises(ValidationError, match="Title is required"):
-            await self.service.create_conversation(user_id, model="gpt-4")
+            await self.service.create_conversation(
+                user_id, model="gpt-4"
+            )
 
     @pytest.mark.asyncio
     async def test_create_conversation_missing_model(self):
@@ -104,7 +112,9 @@ class TestConversationService:
 
         # Act & Assert
         with pytest.raises(ValidationError, match="Model is required"):
-            await self.service.create_conversation(user_id, title="Test")
+            await self.service.create_conversation(
+                user_id, title="Test"
+            )
 
     @pytest.mark.asyncio
     async def test_create_conversation_invalid_user_id(self):
@@ -113,11 +123,11 @@ class TestConversationService:
         invalid_user_id = "not-a-uuid"
 
         # Act & Assert
-        with pytest.raises(ValidationError, match="Invalid user ID format"):
+        with pytest.raises(
+            ValidationError, match="Invalid user ID format"
+        ):
             await self.service.create_conversation(
-                invalid_user_id, 
-                title="Test", 
-                model="gpt-4"
+                invalid_user_id, title="Test", model="gpt-4"
             )
 
     @pytest.mark.asyncio
@@ -129,14 +139,18 @@ class TestConversationService:
         mock_conversation = Conversation(
             id=conversation_id,
             title="Test Conversation",
-            user_id=user_id
+            user_id=user_id,
         )
 
-        with patch('chatter.services.conversation.get_conversation_optimized') as mock_get:
+        with patch(
+            'chatter.services.conversation.get_conversation_optimized'
+        ) as mock_get:
             mock_get.return_value = mock_conversation
 
             # Act
-            result = await self.service.get_conversation(conversation_id, user_id)
+            result = await self.service.get_conversation(
+                conversation_id, user_id
+            )
 
             # Assert
             assert result == mock_conversation
@@ -144,7 +158,7 @@ class TestConversationService:
                 self.mock_session,
                 conversation_id,
                 user_id,
-                include_messages=True
+                include_messages=True,
             )
 
     @pytest.mark.asyncio
@@ -154,12 +168,18 @@ class TestConversationService:
         conversation_id = str(uuid4())
         user_id = str(uuid4())
 
-        with patch('chatter.services.conversation.get_conversation_optimized') as mock_get:
+        with patch(
+            'chatter.services.conversation.get_conversation_optimized'
+        ) as mock_get:
             mock_get.return_value = None
 
             # Act & Assert
-            with pytest.raises(NotFoundError, match="Conversation not found"):
-                await self.service.get_conversation(conversation_id, user_id)
+            with pytest.raises(
+                NotFoundError, match="Conversation not found"
+            ):
+                await self.service.get_conversation(
+                    conversation_id, user_id
+                )
 
     @pytest.mark.asyncio
     async def test_get_conversation_without_messages(self):
@@ -167,9 +187,13 @@ class TestConversationService:
         # Arrange
         conversation_id = str(uuid4())
         user_id = str(uuid4())
-        mock_conversation = Conversation(id=conversation_id, user_id=user_id)
+        mock_conversation = Conversation(
+            id=conversation_id, user_id=user_id
+        )
 
-        with patch('chatter.services.conversation.get_conversation_optimized') as mock_get:
+        with patch(
+            'chatter.services.conversation.get_conversation_optimized'
+        ) as mock_get:
             mock_get.return_value = mock_conversation
 
             # Act
@@ -183,7 +207,7 @@ class TestConversationService:
                 self.mock_session,
                 conversation_id,
                 user_id,
-                include_messages=False
+                include_messages=False,
             )
 
     @pytest.mark.asyncio
@@ -192,11 +216,17 @@ class TestConversationService:
         # Arrange
         user_id = str(uuid4())
         mock_conversations = [
-            Conversation(id=str(uuid4()), title="Conv 1", user_id=user_id),
-            Conversation(id=str(uuid4()), title="Conv 2", user_id=user_id)
+            Conversation(
+                id=str(uuid4()), title="Conv 1", user_id=user_id
+            ),
+            Conversation(
+                id=str(uuid4()), title="Conv 2", user_id=user_id
+            ),
         ]
 
-        with patch('chatter.services.conversation.get_user_conversations_optimized') as mock_list:
+        with patch(
+            'chatter.services.conversation.get_user_conversations_optimized'
+        ) as mock_list:
             mock_list.return_value = mock_conversations
 
             # Act
@@ -217,16 +247,18 @@ class TestConversationService:
         user_id = str(uuid4())
         mock_conversations = []
 
-        with patch('chatter.services.conversation.get_user_conversations_optimized') as mock_list:
+        with patch(
+            'chatter.services.conversation.get_user_conversations_optimized'
+        ) as mock_list:
             mock_list.return_value = mock_conversations
 
             # Act
             result = await self.service.list_conversations(
-                user_id, 
-                limit=50, 
+                user_id,
+                limit=50,
                 offset=20,
                 sort_field="title",
-                sort_order="asc"
+                sort_order="asc",
             )
 
             # Assert
@@ -245,7 +277,7 @@ class TestConversationService:
             title="Updated Title",
             temperature=0.9,
             max_tokens=2500,
-            metadata={"updated": True}
+            metadata={"updated": True},
         )
 
         mock_conversation = Conversation(
@@ -254,11 +286,13 @@ class TestConversationService:
             user_id=user_id,
             temperature=0.7,
             max_tokens=1000,
-            metadata={"original": True}
+            metadata={"original": True},
         )
 
         # Mock get_conversation
-        self.service.get_conversation = AsyncMock(return_value=mock_conversation)
+        self.service.get_conversation = AsyncMock(
+            return_value=mock_conversation
+        )
 
         # Act
         result = await self.service.update_conversation(
@@ -284,11 +318,13 @@ class TestConversationService:
             id=conversation_id,
             title="Original Title",
             user_id=user_id,
-            temperature=0.7
+            temperature=0.7,
         )
 
         # Mock get_conversation
-        self.service.get_conversation = AsyncMock(return_value=mock_conversation)
+        self.service.get_conversation = AsyncMock(
+            return_value=mock_conversation
+        )
 
         # Act
         result = await self.service.update_conversation(
@@ -296,7 +332,7 @@ class TestConversationService:
             user_id,
             title="Updated with params",
             temperature=0.8,
-            status=ConversationStatus.ARCHIVED
+            status=ConversationStatus.ARCHIVED,
         )
 
         # Assert
@@ -313,7 +349,9 @@ class TestConversationService:
         update_data = ConversationUpdate(title="Updated")
 
         # Mock get_conversation to raise NotFoundError
-        self.service.get_conversation = AsyncMock(side_effect=NotFoundError("Not found"))
+        self.service.get_conversation = AsyncMock(
+            side_effect=NotFoundError("Not found")
+        )
 
         # Act & Assert
         with pytest.raises(NotFoundError):
@@ -332,11 +370,13 @@ class TestConversationService:
             id=conversation_id,
             title="To Delete",
             user_id=user_id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
         # Mock get_conversation
-        self.service.get_conversation = AsyncMock(return_value=mock_conversation)
+        self.service.get_conversation = AsyncMock(
+            return_value=mock_conversation
+        )
 
         # Act
         await self.service.delete_conversation(conversation_id, user_id)
@@ -353,11 +393,15 @@ class TestConversationService:
         user_id = str(uuid4())
 
         # Mock get_conversation to raise NotFoundError
-        self.service.get_conversation = AsyncMock(side_effect=NotFoundError("Not found"))
+        self.service.get_conversation = AsyncMock(
+            side_effect=NotFoundError("Not found")
+        )
 
         # Act & Assert
         with pytest.raises(NotFoundError):
-            await self.service.delete_conversation(conversation_id, user_id)
+            await self.service.delete_conversation(
+                conversation_id, user_id
+            )
 
     @pytest.mark.asyncio
     async def test_search_conversations(self):
@@ -366,7 +410,11 @@ class TestConversationService:
         user_id = str(uuid4())
         search_term = "test query"
         mock_conversations = [
-            Conversation(id=str(uuid4()), title="Test conversation", user_id=user_id)
+            Conversation(
+                id=str(uuid4()),
+                title="Test conversation",
+                user_id=user_id,
+            )
         ]
 
         self.service.query_service.search_conversations = AsyncMock(
@@ -397,7 +445,9 @@ class TestConversationService:
 
         # Act & Assert
         with pytest.raises(Exception, match="Search failed"):
-            await self.service.search_conversations(user_id, search_term)
+            await self.service.search_conversations(
+                user_id, search_term
+            )
 
     @pytest.mark.asyncio
     async def test_get_conversation_stats(self):
@@ -407,20 +457,20 @@ class TestConversationService:
         user_id = str(uuid4())
 
         mock_conversation = Conversation(
-            id=conversation_id,
-            user_id=user_id,
-            title="Stats Test"
+            id=conversation_id, user_id=user_id, title="Stats Test"
         )
 
         # Mock get_conversation
-        self.service.get_conversation = AsyncMock(return_value=mock_conversation)
+        self.service.get_conversation = AsyncMock(
+            return_value=mock_conversation
+        )
 
         # Mock query service stats method (if it exists)
         mock_stats = {
             "message_count": 10,
             "total_tokens": 5000,
             "created_at": "2024-01-01T00:00:00Z",
-            "last_message_at": "2024-01-01T12:00:00Z"
+            "last_message_at": "2024-01-01T12:00:00Z",
         }
         self.service.query_service.get_conversation_stats = AsyncMock(
             return_value=mock_stats
@@ -430,7 +480,9 @@ class TestConversationService:
         # Note: This method signature would need to be completed in the actual service
         # For now, just test that we can call it
         try:
-            result = await self.service.get_conversation_stats(conversation_id, user_id)
+            result = await self.service.get_conversation_stats(
+                conversation_id, user_id
+            )
         except AttributeError:
             # Method might not be fully implemented yet
             pass
@@ -453,7 +505,7 @@ class TestConversationServiceIntegration:
         conversation_data = ConversationCreate(
             title="Lifecycle Test Conversation",
             temperature=0.7,
-            max_tokens=1000
+            max_tokens=1000,
         )
 
         # Mock database operations
@@ -464,7 +516,7 @@ class TestConversationServiceIntegration:
             user_id=user_id,
             temperature=conversation_data.temperature,
             max_tokens=conversation_data.max_tokens,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
         # Setup mocks for create
@@ -482,25 +534,35 @@ class TestConversationServiceIntegration:
         self.mock_session.flush.assert_called()
 
         # Mock get_conversation for subsequent operations
-        with patch('chatter.services.conversation.get_conversation_optimized') as mock_get:
+        with patch(
+            'chatter.services.conversation.get_conversation_optimized'
+        ) as mock_get:
             mock_get.return_value = mock_conversation
 
             # Get conversation
-            retrieved_conversation = await self.service.get_conversation(
-                conversation_id, user_id
+            retrieved_conversation = (
+                await self.service.get_conversation(
+                    conversation_id, user_id
+                )
             )
             assert retrieved_conversation == mock_conversation
 
             # Update conversation
             update_data = ConversationUpdate(title="Updated Title")
-            updated_conversation = await self.service.update_conversation(
-                conversation_id, user_id, update_data
+            updated_conversation = (
+                await self.service.update_conversation(
+                    conversation_id, user_id, update_data
+                )
             )
             assert updated_conversation.title == "Updated Title"
 
             # Delete conversation
-            await self.service.delete_conversation(conversation_id, user_id)
-            assert mock_conversation.status == ConversationStatus.DELETED
+            await self.service.delete_conversation(
+                conversation_id, user_id
+            )
+            assert (
+                mock_conversation.status == ConversationStatus.DELETED
+            )
 
     @pytest.mark.asyncio
     async def test_conversation_search_and_list_workflow(self):
@@ -508,26 +570,45 @@ class TestConversationServiceIntegration:
         # Arrange
         user_id = str(uuid4())
         conversations = [
-            Conversation(id=str(uuid4()), title="Chat about AI", user_id=user_id),
-            Conversation(id=str(uuid4()), title="Recipe discussion", user_id=user_id),
-            Conversation(id=str(uuid4()), title="AI programming help", user_id=user_id)
+            Conversation(
+                id=str(uuid4()), title="Chat about AI", user_id=user_id
+            ),
+            Conversation(
+                id=str(uuid4()),
+                title="Recipe discussion",
+                user_id=user_id,
+            ),
+            Conversation(
+                id=str(uuid4()),
+                title="AI programming help",
+                user_id=user_id,
+            ),
         ]
 
         # Mock list conversations
-        with patch('chatter.services.conversation.get_user_conversations_optimized') as mock_list:
+        with patch(
+            'chatter.services.conversation.get_user_conversations_optimized'
+        ) as mock_list:
             mock_list.return_value = conversations
 
             # List all conversations
-            all_conversations = await self.service.list_conversations(user_id)
+            all_conversations = await self.service.list_conversations(
+                user_id
+            )
             assert len(all_conversations) == 3
 
         # Mock search conversations
         self.service.query_service.search_conversations = AsyncMock(
-            return_value=[conversations[0], conversations[2]]  # AI-related conversations
+            return_value=[
+                conversations[0],
+                conversations[2],
+            ]  # AI-related conversations
         )
 
         # Search for AI-related conversations
-        ai_conversations = await self.service.search_conversations(user_id, "AI")
+        ai_conversations = await self.service.search_conversations(
+            user_id, "AI"
+        )
         assert len(ai_conversations) == 2
         assert "AI" in ai_conversations[0].title
         assert "AI" in ai_conversations[1].title
@@ -542,7 +623,9 @@ class TestConversationServiceIntegration:
         # Test database error during creation
         self.mock_session.add.side_effect = Exception("Database error")
 
-        with pytest.raises(ValidationError, match="Failed to create conversation"):
+        with pytest.raises(
+            ValidationError, match="Failed to create conversation"
+        ):
             await self.service.create_conversation(
                 user_id, title="Test", model="gpt-4"
             )
@@ -551,18 +634,28 @@ class TestConversationServiceIntegration:
         self.mock_session.add.side_effect = None
 
         # Test access control for update
-        with patch('chatter.services.conversation.get_conversation_optimized') as mock_get:
+        with patch(
+            'chatter.services.conversation.get_conversation_optimized'
+        ) as mock_get:
             mock_get.return_value = None  # Simulate access denied
 
             with pytest.raises(NotFoundError):
-                await self.service.get_conversation(conversation_id, user_id)
+                await self.service.get_conversation(
+                    conversation_id, user_id
+                )
 
         # Test update error
-        mock_conversation = Conversation(id=conversation_id, user_id=user_id)
-        self.service.get_conversation = AsyncMock(return_value=mock_conversation)
+        mock_conversation = Conversation(
+            id=conversation_id, user_id=user_id
+        )
+        self.service.get_conversation = AsyncMock(
+            return_value=mock_conversation
+        )
         self.mock_session.flush.side_effect = Exception("Update failed")
 
-        with pytest.raises(ValidationError, match="Failed to update conversation"):
+        with pytest.raises(
+            ValidationError, match="Failed to update conversation"
+        ):
             await self.service.update_conversation(
                 conversation_id, user_id, title="New Title"
             )
@@ -573,17 +666,16 @@ class TestConversationServiceIntegration:
         # Arrange
         user_id = str(uuid4())
         initial_metadata = {"source": "api", "version": "1.0"}
-        
+
         conversation_data = ConversationCreate(
-            title="Metadata Test",
-            metadata=initial_metadata
+            title="Metadata Test", metadata=initial_metadata
         )
 
         mock_conversation = Conversation(
             id=str(uuid4()),
             title="Metadata Test",
             user_id=user_id,
-            metadata=initial_metadata
+            metadata=initial_metadata,
         )
 
         self.mock_session.refresh = AsyncMock()
@@ -594,11 +686,13 @@ class TestConversationServiceIntegration:
         )
 
         # Update metadata
-        self.service.get_conversation = AsyncMock(return_value=mock_conversation)
-        
+        self.service.get_conversation = AsyncMock(
+            return_value=mock_conversation
+        )
+
         update_metadata = {"updated": True, "tags": ["test"]}
         update_data = ConversationUpdate(metadata=update_metadata)
-        
+
         updated_conversation = await self.service.update_conversation(
             mock_conversation.id, user_id, update_data
         )
@@ -606,8 +700,8 @@ class TestConversationServiceIntegration:
         # Verify metadata was merged
         expected_metadata = {
             "source": "api",
-            "version": "1.0", 
+            "version": "1.0",
             "updated": True,
-            "tags": ["test"]
+            "tags": ["test"],
         }
         assert updated_conversation.metadata == expected_metadata

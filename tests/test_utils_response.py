@@ -23,7 +23,7 @@ class TestResponseMetadata:
         """Test ResponseMetadata with default values."""
         # Act
         metadata = ResponseMetadata()
-        
+
         # Assert
         assert isinstance(metadata.timestamp, datetime)
         assert metadata.correlation_id is None
@@ -37,15 +37,15 @@ class TestResponseMetadata:
         test_correlation_id = "test-correlation-123"
         test_version = "v2.0"
         test_request_id = "req-456"
-        
+
         # Act
         metadata = ResponseMetadata(
             timestamp=test_timestamp,
             correlation_id=test_correlation_id,
             version=test_version,
-            request_id=test_request_id
+            request_id=test_request_id,
         )
-        
+
         # Assert
         assert metadata.timestamp == test_timestamp
         assert metadata.correlation_id == test_correlation_id
@@ -56,10 +56,10 @@ class TestResponseMetadata:
         """Test that ResponseMetadata can be serialized."""
         # Arrange
         metadata = ResponseMetadata(correlation_id="test-123")
-        
+
         # Act
         serialized = metadata.model_dump()
-        
+
         # Assert
         assert isinstance(serialized, dict)
         assert "timestamp" in serialized
@@ -76,7 +76,7 @@ class TestStandardResponse:
         """Test basic StandardResponse creation."""
         # Act
         response = StandardResponse(success=True)
-        
+
         # Assert
         assert response.success is True
         assert response.data is None
@@ -90,15 +90,15 @@ class TestStandardResponse:
         test_data = {"key": "value", "number": 123}
         test_message = "Operation successful"
         test_errors = ["warning 1", "warning 2"]
-        
+
         # Act
         response = StandardResponse(
             success=True,
             data=test_data,
             message=test_message,
-            errors=test_errors
+            errors=test_errors,
         )
-        
+
         # Assert
         assert response.success is True
         assert response.data == test_data
@@ -106,43 +106,55 @@ class TestStandardResponse:
         assert response.errors == test_errors
 
     @patch('chatter.utils.response.get_correlation_id')
-    def test_standard_response_correlation_id_injection(self, mock_get_correlation_id):
+    def test_standard_response_correlation_id_injection(
+        self, mock_get_correlation_id
+    ):
         """Test that correlation ID is automatically injected."""
         # Arrange
         mock_get_correlation_id.return_value = "auto-correlation-123"
-        
+
         # Act
         response = StandardResponse(success=True)
-        
+
         # Assert
-        assert response.metadata.correlation_id == "auto-correlation-123"
+        assert (
+            response.metadata.correlation_id == "auto-correlation-123"
+        )
         mock_get_correlation_id.assert_called_once()
 
     @patch('chatter.utils.response.get_correlation_id')
-    def test_standard_response_existing_correlation_id_preserved(self, mock_get_correlation_id):
+    def test_standard_response_existing_correlation_id_preserved(
+        self, mock_get_correlation_id
+    ):
         """Test that existing correlation ID is not overwritten."""
         # Arrange
         mock_get_correlation_id.return_value = "auto-correlation-123"
         existing_correlation_id = "existing-correlation-456"
-        metadata = ResponseMetadata(correlation_id=existing_correlation_id)
-        
+        metadata = ResponseMetadata(
+            correlation_id=existing_correlation_id
+        )
+
         # Act
         response = StandardResponse(success=True, metadata=metadata)
-        
+
         # Assert
-        assert response.metadata.correlation_id == existing_correlation_id
+        assert (
+            response.metadata.correlation_id == existing_correlation_id
+        )
         # get_correlation_id should not be called since we have existing ID
         mock_get_correlation_id.assert_not_called()
 
     @patch('chatter.utils.response.get_correlation_id')
-    def test_standard_response_no_correlation_id_from_context(self, mock_get_correlation_id):
+    def test_standard_response_no_correlation_id_from_context(
+        self, mock_get_correlation_id
+    ):
         """Test behavior when no correlation ID is available from context."""
         # Arrange
         mock_get_correlation_id.return_value = None
-        
+
         # Act
         response = StandardResponse(success=True)
-        
+
         # Assert
         assert response.metadata.correlation_id is None
         mock_get_correlation_id.assert_called_once()
@@ -151,14 +163,12 @@ class TestStandardResponse:
         """Test that StandardResponse can be serialized."""
         # Arrange
         response = StandardResponse(
-            success=True,
-            data={"test": "data"},
-            message="Test message"
+            success=True, data={"test": "data"}, message="Test message"
         )
-        
+
         # Act
         serialized = response.model_dump()
-        
+
         # Assert
         assert isinstance(serialized, dict)
         assert serialized["success"] is True
@@ -178,15 +188,14 @@ class TestPaginatedResponse:
             "page": 1,
             "per_page": 10,
             "total": 100,
-            "pages": 10
+            "pages": 10,
         }
-        
+
         # Act
         response = PaginatedResponse(
-            success=True,
-            pagination=pagination_data
+            success=True, pagination=pagination_data
         )
-        
+
         # Assert
         assert response.success is True
         assert response.pagination == pagination_data
@@ -196,7 +205,7 @@ class TestPaginatedResponse:
         """Test that PaginatedResponse inherits from StandardResponse."""
         # Act
         response = PaginatedResponse(success=True)
-        
+
         # Assert
         assert isinstance(response, StandardResponse)
         assert hasattr(response, 'pagination')
@@ -207,12 +216,12 @@ class TestPaginatedResponse:
         response = PaginatedResponse(
             success=True,
             data=[1, 2, 3],
-            pagination={"page": 1, "total": 3}
+            pagination={"page": 1, "total": 3},
         )
-        
+
         # Act
         serialized = response.model_dump()
-        
+
         # Assert
         assert isinstance(serialized, dict)
         assert "pagination" in serialized
@@ -227,7 +236,7 @@ class TestResponseFunctions:
         """Test basic success response creation."""
         # Act
         response = create_success_response()
-        
+
         # Assert
         assert isinstance(response, StandardResponse)
         assert response.success is True
@@ -239,10 +248,12 @@ class TestResponseFunctions:
         # Arrange
         test_data = {"result": "success", "count": 5}
         test_message = "Data retrieved successfully"
-        
+
         # Act
-        response = create_success_response(data=test_data, message=test_message)
-        
+        response = create_success_response(
+            data=test_data, message=test_message
+        )
+
         # Assert
         assert isinstance(response, StandardResponse)
         assert response.success is True
@@ -258,16 +269,16 @@ class TestResponseFunctions:
             "page": 2,
             "per_page": 5,
             "total": 25,
-            "pages": 5
+            "pages": 5,
         }
-        
+
         # Act
         response = create_success_response(
             data=test_data,
             message=test_message,
-            pagination=pagination_data
+            pagination=pagination_data,
         )
-        
+
         # Assert
         assert isinstance(response, PaginatedResponse)
         assert response.success is True
@@ -279,10 +290,10 @@ class TestResponseFunctions:
         """Test basic error response creation."""
         # Arrange
         error_message = "Something went wrong"
-        
+
         # Act
         response = create_error_response(message=error_message)
-        
+
         # Assert
         assert isinstance(response, StandardResponse)
         assert response.success is False
@@ -294,16 +305,19 @@ class TestResponseFunctions:
         """Test error response with detailed errors."""
         # Arrange
         error_message = "Validation failed"
-        error_details = ["Field 'name' is required", "Field 'email' is invalid"]
-        error_data = {"field_errors": {"name": "required", "email": "invalid"}}
-        
+        error_details = [
+            "Field 'name' is required",
+            "Field 'email' is invalid",
+        ]
+        error_data = {
+            "field_errors": {"name": "required", "email": "invalid"}
+        }
+
         # Act
         response = create_error_response(
-            message=error_message,
-            errors=error_details,
-            data=error_data
+            message=error_message, errors=error_details, data=error_data
         )
-        
+
         # Assert
         assert isinstance(response, StandardResponse)
         assert response.success is False
@@ -314,8 +328,10 @@ class TestResponseFunctions:
     def test_create_error_response_none_errors(self):
         """Test error response when errors list is None."""
         # Act
-        response = create_error_response(message="Error occurred", errors=None)
-        
+        response = create_error_response(
+            message="Error occurred", errors=None
+        )
+
         # Assert
         assert response.errors == []
 
@@ -323,10 +339,10 @@ class TestResponseFunctions:
         """Test basic response wrapping."""
         # Arrange
         existing_data = {"existing": "data", "values": [1, 2, 3]}
-        
+
         # Act
         response = wrap_response(existing_data)
-        
+
         # Assert
         assert isinstance(response, StandardResponse)
         assert response.success is True
@@ -338,10 +354,10 @@ class TestResponseFunctions:
         # Arrange
         existing_data = "simple string data"
         wrap_message = "Data successfully wrapped"
-        
+
         # Act
         response = wrap_response(existing_data, message=wrap_message)
-        
+
         # Assert
         assert isinstance(response, StandardResponse)
         assert response.success is True
@@ -358,13 +374,13 @@ class TestResponseFunctions:
             {"dict": "data"},
             None,
             True,
-            ["mixed", 123, {"nested": "dict"}]
+            ["mixed", 123, {"nested": "dict"}],
         ]
-        
+
         for test_data in test_cases:
             # Act
             response = wrap_response(test_data)
-            
+
             # Assert
             assert isinstance(response, StandardResponse)
             assert response.success is True
@@ -379,32 +395,40 @@ class TestResponseIntegration:
     def test_response_creation_workflow(self, mock_get_correlation_id):
         """Test complete response creation workflow."""
         # Arrange
-        mock_get_correlation_id.return_value = "workflow-correlation-789"
-        
+        mock_get_correlation_id.return_value = (
+            "workflow-correlation-789"
+        )
+
         # Act - Create different types of responses
         success_response = create_success_response(
-            data={"workflow": "test"},
-            message="Workflow completed"
+            data={"workflow": "test"}, message="Workflow completed"
         )
-        
+
         error_response = create_error_response(
             message="Workflow failed",
-            errors=["Step 1 failed", "Step 2 failed"]
+            errors=["Step 1 failed", "Step 2 failed"],
         )
-        
+
         paginated_response = create_success_response(
-            data=[1, 2, 3],
-            pagination={"page": 1, "total": 3}
+            data=[1, 2, 3], pagination={"page": 1, "total": 3}
         )
-        
+
         wrapped_response = wrap_response({"legacy": "data"})
-        
+
         # Assert
-        responses = [success_response, error_response, paginated_response, wrapped_response]
-        
+        responses = [
+            success_response,
+            error_response,
+            paginated_response,
+            wrapped_response,
+        ]
+
         for response in responses:
             assert hasattr(response, 'metadata')
-            assert response.metadata.correlation_id == "workflow-correlation-789"
+            assert (
+                response.metadata.correlation_id
+                == "workflow-correlation-789"
+            )
             # All responses should be serializable
             serialized = response.model_dump()
             assert isinstance(serialized, dict)
@@ -417,9 +441,9 @@ class TestResponseIntegration:
             PaginatedResponse(success=True),
             create_success_response(),
             create_error_response("error"),
-            wrap_response("data")
+            wrap_response("data"),
         ]
-        
+
         # Assert
         for response in responses:
             assert hasattr(response, 'metadata')
@@ -432,17 +456,16 @@ class TestResponseIntegration:
     def test_response_json_serialization(self):
         """Test that responses can be converted to JSON-compatible formats."""
         import json
-        
+
         # Arrange
         response = create_success_response(
-            data={"test": "json", "number": 42},
-            message="JSON test"
+            data={"test": "json", "number": 42}, message="JSON test"
         )
-        
+
         # Act
         response_dict = response.model_dump()
         json_string = json.dumps(response_dict, default=str)
-        
+
         # Assert
         assert isinstance(json_string, str)
         parsed = json.loads(json_string)
@@ -458,11 +481,8 @@ class TestResponseEdgeCases:
     def test_response_with_empty_strings(self):
         """Test response creation with empty strings."""
         # Act
-        response = create_success_response(
-            data="",
-            message=""
-        )
-        
+        response = create_success_response(data="", message="")
+
         # Assert
         assert response.success is True
         assert response.data == ""
@@ -471,11 +491,14 @@ class TestResponseEdgeCases:
     def test_response_with_large_data(self):
         """Test response with large data structures."""
         # Arrange
-        large_data = {"items": list(range(1000)), "metadata": {"size": "large"}}
-        
+        large_data = {
+            "items": list(range(1000)),
+            "metadata": {"size": "large"},
+        }
+
         # Act
         response = create_success_response(data=large_data)
-        
+
         # Assert
         assert response.success is True
         assert len(response.data["items"]) == 1000
@@ -485,7 +508,7 @@ class TestResponseEdgeCases:
         """Test error response with explicitly empty errors list."""
         # Act
         response = create_error_response(message="Error", errors=[])
-        
+
         # Assert
         assert response.success is False
         assert response.errors == []
@@ -494,10 +517,9 @@ class TestResponseEdgeCases:
         """Test that None pagination returns StandardResponse."""
         # Act
         response = create_success_response(
-            data={"test": "data"},
-            pagination=None
+            data={"test": "data"}, pagination=None
         )
-        
+
         # Assert
         assert isinstance(response, StandardResponse)
         assert not isinstance(response, PaginatedResponse)
@@ -506,20 +528,23 @@ class TestResponseEdgeCases:
         """Test that empty dict pagination returns StandardResponse."""
         # Act
         response = create_success_response(
-            data={"test": "data"},
-            pagination={}
+            data={"test": "data"}, pagination={}
         )
-        
+
         # Assert
         assert isinstance(response, StandardResponse)
         assert not isinstance(response, PaginatedResponse)
 
     @patch('chatter.utils.response.get_correlation_id')
-    def test_correlation_id_exception_handling(self, mock_get_correlation_id):
+    def test_correlation_id_exception_handling(
+        self, mock_get_correlation_id
+    ):
         """Test behavior when get_correlation_id raises an exception."""
         # Arrange
-        mock_get_correlation_id.side_effect = Exception("Correlation ID error")
-        
+        mock_get_correlation_id.side_effect = Exception(
+            "Correlation ID error"
+        )
+
         # Act & Assert - Exception should propagate since no error handling in current implementation
         with pytest.raises(Exception, match="Correlation ID error"):
             StandardResponse(success=True)

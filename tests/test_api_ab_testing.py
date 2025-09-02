@@ -23,10 +23,12 @@ class TestABTestingEndpoints:
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -38,30 +40,45 @@ class TestABTestingEndpoints:
         test_data = {
             "name": "Chat Model Comparison",
             "description": "Compare GPT-4 vs Claude performance",
+            "test_type": "model",
+            "allocation_strategy": "equal",
             "variants": [
-                {"name": "GPT-4", "config": {"model": "gpt-4"}},
-                {"name": "Claude", "config": {"model": "claude-3"}}
+                {
+                    "name": "GPT-4",
+                    "description": "GPT-4 model variant",
+                    "configuration": {"model": "gpt-4"},
+                    "weight": 1.0,
+                },
+                {
+                    "name": "Claude",
+                    "description": "Claude model variant",
+                    "configuration": {"model": "claude-3"},
+                    "weight": 1.0,
+                },
             ],
             "metrics": ["response_time", "user_satisfaction"],
-            "traffic_split": {"GPT-4": 0.5, "Claude": 0.5}
+            "duration_days": 7,
+            "min_sample_size": 100,
+            "confidence_level": 0.95,
+            "traffic_percentage": 100.0,
         }
 
         mock_test = {
             "id": "test-123",
             "name": test_data["name"],
             "status": "draft",
-            "created_by": self.mock_user.id
+            "created_by": self.mock_user.id,
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.create_test') as mock_create:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.create_test'
+        ) as mock_create:
             mock_create.return_value = mock_test
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.post(
-                "/api/v1/ab-tests/",
-                json=test_data,
-                headers=headers
+                "/api/v1/ab-tests/", json=test_data, headers=headers
             )
 
             # Assert
@@ -77,17 +94,18 @@ class TestABTestingEndpoints:
             "name": "Invalid Test",
             "variants": [
                 {"name": "Variant A", "config": {}},
-                {"name": "Variant B", "config": {}}
+                {"name": "Variant B", "config": {}},
             ],
-            "traffic_split": {"Variant A": 0.7, "Variant B": 0.4}  # Sums to 1.1
+            "traffic_split": {
+                "Variant A": 0.7,
+                "Variant B": 0.4,
+            },  # Sums to 1.1
         }
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
         response = self.client.post(
-            "/api/v1/ab-tests/",
-            json=test_data,
-            headers=headers
+            "/api/v1/ab-tests/", json=test_data, headers=headers
         )
 
         # Assert
@@ -98,15 +116,19 @@ class TestABTestingEndpoints:
         # Arrange
         mock_tests = [
             {"id": "test-1", "name": "Test 1", "status": "active"},
-            {"id": "test-2", "name": "Test 2", "status": "completed"}
+            {"id": "test-2", "name": "Test 2", "status": "completed"},
         ]
 
-        with patch('chatter.services.ab_testing.ABTestManager.get_user_tests') as mock_get:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.get_user_tests'
+        ) as mock_get:
             mock_get.return_value = mock_tests
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.get("/api/v1/ab-tests/", headers=headers)
+            response = self.client.get(
+                "/api/v1/ab-tests/", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -123,16 +145,20 @@ class TestABTestingEndpoints:
             "status": "active",
             "variants": [
                 {"name": "GPT-4", "config": {"model": "gpt-4"}},
-                {"name": "Claude", "config": {"model": "claude-3"}}
-            ]
+                {"name": "Claude", "config": {"model": "claude-3"}},
+            ],
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.get_test') as mock_get:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.get_test'
+        ) as mock_get:
             mock_get.return_value = mock_test
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.get(f"/api/v1/ab-tests/{test_id}", headers=headers)
+            response = self.client.get(
+                f"/api/v1/ab-tests/{test_id}", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -146,15 +172,19 @@ class TestABTestingEndpoints:
         mock_test = {
             "id": test_id,
             "status": "active",
-            "start_date": datetime.utcnow().isoformat()
+            "start_date": datetime.utcnow().isoformat(),
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.start_test') as mock_start:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.start_test'
+        ) as mock_start:
             mock_start.return_value = mock_test
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.post(f"/api/v1/ab-tests/{test_id}/start", headers=headers)
+            response = self.client.post(
+                f"/api/v1/ab-tests/{test_id}/start", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -165,17 +195,18 @@ class TestABTestingEndpoints:
         """Test pausing an A/B test."""
         # Arrange
         test_id = "test-123"
-        mock_test = {
-            "id": test_id,
-            "status": "paused"
-        }
+        mock_test = {"id": test_id, "status": "paused"}
 
-        with patch('chatter.services.ab_testing.ABTestManager.pause_test') as mock_pause:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.pause_test'
+        ) as mock_pause:
             mock_pause.return_value = mock_test
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.post(f"/api/v1/ab-tests/{test_id}/pause", headers=headers)
+            response = self.client.post(
+                f"/api/v1/ab-tests/{test_id}/pause", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -189,15 +220,19 @@ class TestABTestingEndpoints:
         mock_test = {
             "id": test_id,
             "status": "completed",
-            "end_date": datetime.utcnow().isoformat()
+            "end_date": datetime.utcnow().isoformat(),
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.end_test') as mock_end:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.end_test'
+        ) as mock_end:
             mock_end.return_value = mock_test
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.post(f"/api/v1/ab-tests/{test_id}/end", headers=headers)
+            response = self.client.post(
+                f"/api/v1/ab-tests/{test_id}/end", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -214,24 +249,34 @@ class TestABTestingEndpoints:
                 "GPT-4": {
                     "participants": 500,
                     "conversion_rate": 0.85,
-                    "metrics": {"response_time": 1.2, "satisfaction": 4.2}
+                    "metrics": {
+                        "response_time": 1.2,
+                        "satisfaction": 4.2,
+                    },
                 },
                 "Claude": {
                     "participants": 500,
                     "conversion_rate": 0.82,
-                    "metrics": {"response_time": 0.9, "satisfaction": 4.1}
-                }
+                    "metrics": {
+                        "response_time": 0.9,
+                        "satisfaction": 4.1,
+                    },
+                },
             },
             "statistical_significance": True,
-            "winner": "GPT-4"
+            "winner": "GPT-4",
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.get_test_results') as mock_results_func:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.get_test_results'
+        ) as mock_results_func:
             mock_results_func.return_value = mock_results
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.get(f"/api/v1/ab-tests/{test_id}/results", headers=headers)
+            response = self.client.get(
+                f"/api/v1/ab-tests/{test_id}/results", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -250,17 +295,29 @@ class TestABTestingEndpoints:
             "conversion_rate": 0.835,
             "confidence_level": 0.95,
             "daily_metrics": [
-                {"date": "2024-01-01", "participants": 100, "conversions": 85},
-                {"date": "2024-01-02", "participants": 120, "conversions": 98}
-            ]
+                {
+                    "date": "2024-01-01",
+                    "participants": 100,
+                    "conversions": 85,
+                },
+                {
+                    "date": "2024-01-02",
+                    "participants": 120,
+                    "conversions": 98,
+                },
+            ],
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.get_test_metrics') as mock_metrics_func:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.get_test_metrics'
+        ) as mock_metrics_func:
             mock_metrics_func.return_value = mock_metrics
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.get(f"/api/v1/ab-tests/{test_id}/metrics", headers=headers)
+            response = self.client.get(
+                f"/api/v1/ab-tests/{test_id}/metrics", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -277,15 +334,23 @@ class TestABTestingEndpoints:
             "data_quality_score": 0.92,
             "variant_balance": {"GPT-4": 0.51, "Claude": 0.49},
             "effect_size": 0.15,
-            "power_analysis": {"current_power": 0.85, "required_power": 0.8}
+            "power_analysis": {
+                "current_power": 0.85,
+                "required_power": 0.8,
+            },
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.get_test_performance') as mock_perf:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.get_test_performance'
+        ) as mock_perf:
             mock_perf.return_value = mock_performance
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.get(f"/api/v1/ab-tests/{test_id}/performance", headers=headers)
+            response = self.client.get(
+                f"/api/v1/ab-tests/{test_id}/performance",
+                headers=headers,
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -299,16 +364,18 @@ class TestABTestingEndpoints:
         update_data = {
             "name": "Updated Test Name",
             "description": "Updated description",
-            "traffic_split": {"GPT-4": 0.6, "Claude": 0.4}
+            "traffic_split": {"GPT-4": 0.6, "Claude": 0.4},
         }
 
         mock_updated_test = {
             "id": test_id,
             "name": update_data["name"],
-            "description": update_data["description"]
+            "description": update_data["description"],
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.update_test') as mock_update:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.update_test'
+        ) as mock_update:
             mock_update.return_value = mock_updated_test
 
             # Act
@@ -316,7 +383,7 @@ class TestABTestingEndpoints:
             response = self.client.put(
                 f"/api/v1/ab-tests/{test_id}",
                 json=update_data,
-                headers=headers
+                headers=headers,
             )
 
             # Assert
@@ -329,17 +396,24 @@ class TestABTestingEndpoints:
         # Arrange
         test_id = "test-123"
 
-        with patch('chatter.services.ab_testing.ABTestManager.delete_test') as mock_delete:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.delete_test'
+        ) as mock_delete:
             mock_delete.return_value = True
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.delete(f"/api/v1/ab-tests/{test_id}", headers=headers)
+            response = self.client.delete(
+                f"/api/v1/ab-tests/{test_id}", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
             response_data = response.json()
-            assert response_data["message"] == "A/B test deleted successfully"
+            assert (
+                response_data["message"]
+                == "A/B test deleted successfully"
+            )
 
     def test_complete_ab_test_success(self):
         """Test completing an A/B test with final analysis."""
@@ -348,7 +422,7 @@ class TestABTestingEndpoints:
         completion_data = {
             "winner_variant": "GPT-4",
             "implement_winner": True,
-            "notes": "GPT-4 showed significantly better performance"
+            "notes": "GPT-4 showed significantly better performance",
         }
 
         mock_completion = {
@@ -357,11 +431,13 @@ class TestABTestingEndpoints:
             "final_results": {
                 "winner": "GPT-4",
                 "confidence": 0.95,
-                "effect_size": 0.12
-            }
+                "effect_size": 0.12,
+            },
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.complete_test') as mock_complete:
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.complete_test'
+        ) as mock_complete:
             mock_complete.return_value = mock_completion
 
             # Act
@@ -369,7 +445,7 @@ class TestABTestingEndpoints:
             response = self.client.post(
                 f"/api/v1/ab-tests/{test_id}/complete",
                 json=completion_data,
-                headers=headers
+                headers=headers,
             )
 
             # Assert
@@ -388,10 +464,12 @@ class TestABTestingIntegration:
         self.mock_user = User(
             id="integration-user-id",
             email="integration@example.com",
-            username="integrationuser"
+            username="integrationuser",
         )
 
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -407,45 +485,77 @@ class TestABTestingIntegration:
             "description": "Full lifecycle test",
             "variants": [
                 {"name": "Control", "config": {"model": "gpt-3.5"}},
-                {"name": "Treatment", "config": {"model": "gpt-4"}}
+                {"name": "Treatment", "config": {"model": "gpt-4"}},
             ],
             "metrics": ["response_time", "accuracy"],
-            "traffic_split": {"Control": 0.5, "Treatment": 0.5}
+            "traffic_split": {"Control": 0.5, "Treatment": 0.5},
         }
 
-        with patch('chatter.services.ab_testing.ABTestManager.create_test') as mock_create:
-            mock_create.return_value = {"id": "integration-test-id", **test_data, "status": "draft"}
+        with patch(
+            'chatter.services.ab_testing.ABTestManager.create_test'
+        ) as mock_create:
+            mock_create.return_value = {
+                "id": "integration-test-id",
+                **test_data,
+                "status": "draft",
+            }
 
             # Create
-            create_response = self.client.post("/api/v1/ab-tests/", json=test_data, headers=headers)
-            assert create_response.status_code == status.HTTP_201_CREATED
+            create_response = self.client.post(
+                "/api/v1/ab-tests/", json=test_data, headers=headers
+            )
+            assert (
+                create_response.status_code == status.HTTP_201_CREATED
+            )
             test_id = create_response.json()["id"]
 
             # Start test
-            with patch('chatter.services.ab_testing.ABTestManager.start_test') as mock_start:
-                mock_start.return_value = {"id": test_id, "status": "active"}
+            with patch(
+                'chatter.services.ab_testing.ABTestManager.start_test'
+            ) as mock_start:
+                mock_start.return_value = {
+                    "id": test_id,
+                    "status": "active",
+                }
 
-                start_response = self.client.post(f"/api/v1/ab-tests/{test_id}/start", headers=headers)
+                start_response = self.client.post(
+                    f"/api/v1/ab-tests/{test_id}/start", headers=headers
+                )
                 assert start_response.status_code == status.HTTP_200_OK
 
                 # Get metrics
-                with patch('chatter.services.ab_testing.ABTestManager.get_test_metrics') as mock_metrics:
-                    mock_metrics.return_value = {"total_participants": 100}
+                with patch(
+                    'chatter.services.ab_testing.ABTestManager.get_test_metrics'
+                ) as mock_metrics:
+                    mock_metrics.return_value = {
+                        "total_participants": 100
+                    }
 
-                    metrics_response = self.client.get(f"/api/v1/ab-tests/{test_id}/metrics", headers=headers)
-                    assert metrics_response.status_code == status.HTTP_200_OK
+                    metrics_response = self.client.get(
+                        f"/api/v1/ab-tests/{test_id}/metrics",
+                        headers=headers,
+                    )
+                    assert (
+                        metrics_response.status_code
+                        == status.HTTP_200_OK
+                    )
 
                     # Complete test
-                    with patch('chatter.services.ab_testing.ABTestManager.complete_test') as mock_complete:
+                    with patch(
+                        'chatter.services.ab_testing.ABTestManager.complete_test'
+                    ) as mock_complete:
                         mock_complete.return_value = {
                             "test_id": test_id,
                             "status": "completed",
-                            "final_results": {"winner": "Treatment"}
+                            "final_results": {"winner": "Treatment"},
                         }
 
                         complete_response = self.client.post(
                             f"/api/v1/ab-tests/{test_id}/complete",
                             json={"winner_variant": "Treatment"},
-                            headers=headers
+                            headers=headers,
                         )
-                        assert complete_response.status_code == status.HTTP_200_OK
+                        assert (
+                            complete_response.status_code
+                            == status.HTTP_200_OK
+                        )

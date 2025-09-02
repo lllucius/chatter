@@ -7,7 +7,12 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
+from chatter.models.conversation import (
+    Conversation,
+    ConversationStatus,
+    Message,
+    MessageRole,
+)
 from chatter.models.user import User
 from chatter.services.chat import ChatService
 
@@ -20,18 +25,21 @@ class TestChatService:
         """Set up test fixtures."""
         self.mock_session = AsyncMock(spec=AsyncSession)
         self.mock_llm_service = AsyncMock()
-        self.chat_service = ChatService(self.mock_session, self.mock_llm_service)
+        self.chat_service = ChatService(
+            self.mock_session, self.mock_llm_service
+        )
 
         # Mock user
         self.mock_user = User(
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         # Mock agent using MagicMock instead of instantiating abstract class
         from unittest.mock import MagicMock
+
         self.mock_agent = MagicMock()
         self.mock_agent.id = "test-agent-id"
         self.mock_agent.name = "Test Agent"
@@ -45,7 +53,7 @@ class TestChatService:
         conversation_data = {
             "title": "Test Conversation",
             "description": "A test conversation",
-            "profile_id": "test-profile-id"
+            "profile_id": "test-profile-id",
         }
 
         expected_conversation = Conversation(
@@ -54,18 +62,24 @@ class TestChatService:
             description=conversation_data["description"],
             user_id=self.mock_user.id,
             profile_id=conversation_data["profile_id"],
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
-        with patch.object(self.chat_service.conversation_service, 'create_conversation') as mock_create:
+        with patch.object(
+            self.chat_service.conversation_service,
+            'create_conversation',
+        ) as mock_create:
             mock_create.return_value = expected_conversation
 
             # Act
             from chatter.schemas.chat import ConversationCreate
-            conversation_schema = ConversationCreate(**conversation_data)
+
+            conversation_schema = ConversationCreate(
+                **conversation_data
+            )
             result = await self.chat_service.create_conversation(
                 user_id=self.mock_user.id,
-                conversation_data=conversation_schema
+                conversation_data=conversation_schema,
             )
 
             # Assert
@@ -83,17 +97,19 @@ class TestChatService:
                 id="conv-1",
                 title="Conversation 1",
                 user_id=self.mock_user.id,
-                status=ConversationStatus.ACTIVE
+                status=ConversationStatus.ACTIVE,
             ),
             Conversation(
                 id="conv-2",
                 title="Conversation 2",
                 user_id=self.mock_user.id,
-                status=ConversationStatus.ARCHIVED
-            )
+                status=ConversationStatus.ARCHIVED,
+            ),
         ]
 
-        with patch.object(self.chat_service, '_fetch_user_conversations') as mock_fetch:
+        with patch.object(
+            self.chat_service, '_fetch_user_conversations'
+        ) as mock_fetch:
             mock_fetch.return_value = mock_conversations
 
             # Act
@@ -115,16 +131,18 @@ class TestChatService:
             id=conversation_id,
             title="Test Conversation",
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
-        with patch.object(self.chat_service, '_fetch_conversation_by_id') as mock_fetch:
+        with patch.object(
+            self.chat_service, '_fetch_conversation_by_id'
+        ) as mock_fetch:
             mock_fetch.return_value = mock_conversation
 
             # Act
             result = await self.chat_service.get_conversation(
                 conversation_id=conversation_id,
-                user_id=self.mock_user.id
+                user_id=self.mock_user.id,
             )
 
             # Assert
@@ -137,15 +155,18 @@ class TestChatService:
         # Arrange
         conversation_id = "non-existent-id"
 
-        with patch.object(self.chat_service, '_fetch_conversation_by_id') as mock_fetch:
+        with patch.object(
+            self.chat_service, '_fetch_conversation_by_id'
+        ) as mock_fetch:
             mock_fetch.return_value = None
 
             # Act & Assert
             from chatter.core.exceptions import NotFoundError
+
             with pytest.raises(NotFoundError):
                 await self.chat_service.get_conversation(
                     conversation_id=conversation_id,
-                    user_id=self.mock_user.id
+                    user_id=self.mock_user.id,
                 )
 
     @pytest.mark.asyncio
@@ -159,7 +180,7 @@ class TestChatService:
             id=conversation_id,
             title="Test Conversation",
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
         expected_user_message = Message(
@@ -167,7 +188,7 @@ class TestChatService:
             conversation_id=conversation_id,
             role=MessageRole.USER,
             content=message_content,
-            user_id=self.mock_user.id
+            user_id=self.mock_user.id,
         )
 
         expected_assistant_message = Message(
@@ -175,30 +196,45 @@ class TestChatService:
             conversation_id=conversation_id,
             role=MessageRole.ASSISTANT,
             content="Hello! How can I help you?",
-            user_id=None
+            user_id=None,
         )
 
-        with patch.object(self.chat_service, 'get_conversation') as mock_get_conv:
+        with patch.object(
+            self.chat_service, 'get_conversation'
+        ) as mock_get_conv:
             mock_get_conv.return_value = mock_conversation
 
-            with patch.object(self.chat_service, '_create_user_message') as mock_create_user_msg:
-                mock_create_user_msg.return_value = expected_user_message
+            with patch.object(
+                self.chat_service, '_create_user_message'
+            ) as mock_create_user_msg:
+                mock_create_user_msg.return_value = (
+                    expected_user_message
+                )
 
-                with patch.object(self.chat_service, '_generate_assistant_response') as mock_generate:
-                    mock_generate.return_value = expected_assistant_message
+                with patch.object(
+                    self.chat_service, '_generate_assistant_response'
+                ) as mock_generate:
+                    mock_generate.return_value = (
+                        expected_assistant_message
+                    )
 
                     # Act
-                    user_msg, assistant_msg = await self.chat_service.send_message(
-                        conversation_id=conversation_id,
-                        content=message_content,
-                        user_id=self.mock_user.id
+                    user_msg, assistant_msg = (
+                        await self.chat_service.send_message(
+                            conversation_id=conversation_id,
+                            content=message_content,
+                            user_id=self.mock_user.id,
+                        )
                     )
 
                     # Assert
                     assert user_msg.content == message_content
                     assert user_msg.role == MessageRole.USER
                     assert assistant_msg.role == MessageRole.ASSISTANT
-                    assert assistant_msg.content == "Hello! How can I help you?"
+                    assert (
+                        assistant_msg.content
+                        == "Hello! How can I help you?"
+                    )
 
     @pytest.mark.asyncio
     async def test_send_message_to_inactive_conversation(self):
@@ -210,19 +246,22 @@ class TestChatService:
             id=conversation_id,
             title="Inactive Conversation",
             user_id=self.mock_user.id,
-            status=ConversationStatus.ARCHIVED
+            status=ConversationStatus.ARCHIVED,
         )
 
-        with patch.object(self.chat_service, 'get_conversation') as mock_get_conv:
+        with patch.object(
+            self.chat_service, 'get_conversation'
+        ) as mock_get_conv:
             mock_get_conv.return_value = mock_conversation
 
             # Act & Assert
             from chatter.core.exceptions import ConflictError
+
             with pytest.raises(ConflictError):
                 await self.chat_service.send_message(
                     conversation_id=conversation_id,
                     content="Test message",
-                    user_id=self.mock_user.id
+                    user_id=self.mock_user.id,
                 )
 
     @pytest.mark.asyncio
@@ -238,7 +277,7 @@ class TestChatService:
                 role=MessageRole.USER,
                 content="Hello",
                 user_id=self.mock_user.id,
-                created_at=datetime(2024, 1, 1, 10, 0, 0)
+                created_at=datetime(2024, 1, 1, 10, 0, 0),
             ),
             Message(
                 id="msg-2",
@@ -246,17 +285,19 @@ class TestChatService:
                 role=MessageRole.ASSISTANT,
                 content="Hi there!",
                 user_id=None,
-                created_at=datetime(2024, 1, 1, 10, 0, 5)
-            )
+                created_at=datetime(2024, 1, 1, 10, 0, 5),
+            ),
         ]
 
-        with patch.object(self.chat_service, '_fetch_conversation_messages') as mock_fetch:
+        with patch.object(
+            self.chat_service, '_fetch_conversation_messages'
+        ) as mock_fetch:
             mock_fetch.return_value = mock_messages
 
             # Act
             result = await self.chat_service.get_conversation_messages(
                 conversation_id=conversation_id,
-                user_id=self.mock_user.id
+                user_id=self.mock_user.id,
             )
 
             # Assert
@@ -271,7 +312,7 @@ class TestChatService:
         conversation_id = "test-conv-id"
         update_data = {
             "title": "Updated Title",
-            "description": "Updated description"
+            "description": "Updated description",
         }
 
         mock_conversation = Conversation(
@@ -279,7 +320,7 @@ class TestChatService:
             title="Original Title",
             description="Original description",
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
         updated_conversation = Conversation(
@@ -287,20 +328,24 @@ class TestChatService:
             title=update_data["title"],
             description=update_data["description"],
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
-        with patch.object(self.chat_service, 'get_conversation') as mock_get:
+        with patch.object(
+            self.chat_service, 'get_conversation'
+        ) as mock_get:
             mock_get.return_value = mock_conversation
 
-            with patch.object(self.chat_service, '_update_conversation_record') as mock_update:
+            with patch.object(
+                self.chat_service, '_update_conversation_record'
+            ) as mock_update:
                 mock_update.return_value = updated_conversation
 
                 # Act
                 result = await self.chat_service.update_conversation(
                     conversation_id=conversation_id,
                     user_id=self.mock_user.id,
-                    **update_data
+                    **update_data,
                 )
 
                 # Assert
@@ -317,19 +362,23 @@ class TestChatService:
             id=conversation_id,
             title="Test Conversation",
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
-        with patch.object(self.chat_service, 'get_conversation') as mock_get:
+        with patch.object(
+            self.chat_service, 'get_conversation'
+        ) as mock_get:
             mock_get.return_value = mock_conversation
 
-            with patch.object(self.chat_service, '_delete_conversation_record') as mock_delete:
+            with patch.object(
+                self.chat_service, '_delete_conversation_record'
+            ) as mock_delete:
                 mock_delete.return_value = True
 
                 # Act
                 result = await self.chat_service.delete_conversation(
                     conversation_id=conversation_id,
-                    user_id=self.mock_user.id
+                    user_id=self.mock_user.id,
                 )
 
                 # Assert
@@ -348,20 +397,24 @@ class TestChatService:
             conversation_id=conversation_id,
             role=MessageRole.USER,
             content="Test message",
-            user_id=self.mock_user.id
+            user_id=self.mock_user.id,
         )
 
-        with patch.object(self.chat_service, '_fetch_message_by_id') as mock_fetch:
+        with patch.object(
+            self.chat_service, '_fetch_message_by_id'
+        ) as mock_fetch:
             mock_fetch.return_value = mock_message
 
-            with patch.object(self.chat_service, '_delete_message_record') as mock_delete:
+            with patch.object(
+                self.chat_service, '_delete_message_record'
+            ) as mock_delete:
                 mock_delete.return_value = True
 
                 # Act
                 result = await self.chat_service.delete_message(
                     conversation_id=conversation_id,
                     message_id=message_id,
-                    user_id=self.mock_user.id
+                    user_id=self.mock_user.id,
                 )
 
                 # Assert
@@ -380,13 +433,12 @@ class TestChatService:
             "message": "I'd be happy to help with weather information!",
             "conversation_id": conversation_id,
             "message_id": "response-msg-id",
-            "metadata": {
-                "agent_used": agent_id,
-                "tokens_used": 25
-            }
+            "metadata": {"agent_used": agent_id, "tokens_used": 25},
         }
 
-        with patch.object(self.chat_service, '_process_agent_chat') as mock_process:
+        with patch.object(
+            self.chat_service, '_process_agent_chat'
+        ) as mock_process:
             mock_process.return_value = expected_response
 
             # Act
@@ -394,7 +446,7 @@ class TestChatService:
                 message=message,
                 conversation_id=conversation_id,
                 agent_id=agent_id,
-                user_id=self.mock_user.id
+                user_id=self.mock_user.id,
             )
 
             # Assert
@@ -412,17 +464,18 @@ class TestChatService:
                 id="conv-1",
                 title="Weather Discussion",
                 user_id=self.mock_user.id,
-                status=ConversationStatus.ACTIVE
+                status=ConversationStatus.ACTIVE,
             )
         ]
 
-        with patch.object(self.chat_service, '_search_conversations_by_query') as mock_search:
+        with patch.object(
+            self.chat_service, '_search_conversations_by_query'
+        ) as mock_search:
             mock_search.return_value = matching_conversations
 
             # Act
             result = await self.chat_service.search_conversations(
-                user_id=self.mock_user.id,
-                query=search_query
+                user_id=self.mock_user.id, query=search_query
             )
 
             # Assert
@@ -439,24 +492,22 @@ class TestChatService:
                 "description": "Perform mathematical calculations",
                 "parameters": {
                     "type": "object",
-                    "properties": {
-                        "expression": {"type": "string"}
-                    }
-                }
+                    "properties": {"expression": {"type": "string"}},
+                },
             },
             {
                 "name": "web_search",
                 "description": "Search the web for information",
                 "parameters": {
                     "type": "object",
-                    "properties": {
-                        "query": {"type": "string"}
-                    }
-                }
-            }
+                    "properties": {"query": {"type": "string"}},
+                },
+            },
         ]
 
-        with patch.object(self.chat_service, '_fetch_available_tools') as mock_fetch:
+        with patch.object(
+            self.chat_service, '_fetch_available_tools'
+        ) as mock_fetch:
             mock_fetch.return_value = expected_tools
 
             # Act
@@ -476,11 +527,13 @@ class TestChatService:
                 "id": "data-analysis",
                 "name": "Data Analysis Workflow",
                 "description": "Analyze datasets and generate insights",
-                "category": "analytics"
+                "category": "analytics",
             }
         ]
 
-        with patch.object(self.chat_service, '_fetch_workflow_templates') as mock_fetch:
+        with patch.object(
+            self.chat_service, '_fetch_workflow_templates'
+        ) as mock_fetch:
             mock_fetch.return_value = expected_templates
 
             # Act
@@ -499,10 +552,12 @@ class TestChatService:
             "total_messages": 256,
             "average_response_time": 1.2,
             "most_used_agent": "general-assistant",
-            "success_rate": 0.98
+            "success_rate": 0.98,
         }
 
-        with patch.object(self.chat_service, '_calculate_performance_stats') as mock_calc:
+        with patch.object(
+            self.chat_service, '_calculate_performance_stats'
+        ) as mock_calc:
             mock_calc.return_value = expected_stats
 
             # Act
@@ -523,12 +578,14 @@ class TestChatServiceIntegration:
         """Set up test fixtures."""
         self.mock_session = AsyncMock(spec=AsyncSession)
         self.mock_llm_service = AsyncMock()
-        self.chat_service = ChatService(self.mock_session, self.mock_llm_service)
+        self.chat_service = ChatService(
+            self.mock_session, self.mock_llm_service
+        )
 
         self.mock_user = User(
             id="integration-user-id",
             email="integration@example.com",
-            username="integrationuser"
+            username="integrationuser",
         )
 
     @pytest.mark.asyncio
@@ -542,60 +599,76 @@ class TestChatServiceIntegration:
             id=conversation_id,
             title="Integration Test Conversation",
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
-        with patch.object(self.chat_service, '_create_conversation_record') as mock_create_conv:
+        with patch.object(
+            self.chat_service, '_create_conversation_record'
+        ) as mock_create_conv:
             mock_create_conv.return_value = mock_conversation
 
             # Create conversation
             conversation = await self.chat_service.create_conversation(
                 user_id=self.mock_user.id,
-                title="Integration Test Conversation"
+                title="Integration Test Conversation",
             )
 
             assert conversation.title == "Integration Test Conversation"
 
             # Mock message sending
-            with patch.object(self.chat_service, 'get_conversation') as mock_get_conv:
+            with patch.object(
+                self.chat_service, 'get_conversation'
+            ) as mock_get_conv:
                 mock_get_conv.return_value = mock_conversation
 
-                with patch.object(self.chat_service, '_create_user_message') as mock_create_msg:
+                with patch.object(
+                    self.chat_service, '_create_user_message'
+                ) as mock_create_msg:
                     mock_create_msg.return_value = Message(
                         id="integration-user-msg",
                         conversation_id=conversation_id,
                         role=MessageRole.USER,
                         content="Hello integration!",
-                        user_id=self.mock_user.id
+                        user_id=self.mock_user.id,
                     )
 
-                    with patch.object(self.chat_service, '_generate_assistant_response') as mock_generate:
+                    with patch.object(
+                        self.chat_service,
+                        '_generate_assistant_response',
+                    ) as mock_generate:
                         mock_generate.return_value = Message(
                             id="integration-assistant-msg",
                             conversation_id=conversation_id,
                             role=MessageRole.ASSISTANT,
                             content="Hello! Integration test response.",
-                            user_id=None
+                            user_id=None,
                         )
 
                         # Send message
-                        user_msg, assistant_msg = await self.chat_service.send_message(
-                            conversation_id=conversation_id,
-                            content="Hello integration!",
-                            user_id=self.mock_user.id
+                        user_msg, assistant_msg = (
+                            await self.chat_service.send_message(
+                                conversation_id=conversation_id,
+                                content="Hello integration!",
+                                user_id=self.mock_user.id,
+                            )
                         )
 
                         assert user_msg.content == "Hello integration!"
-                        assert assistant_msg.role == MessageRole.ASSISTANT
+                        assert (
+                            assistant_msg.role == MessageRole.ASSISTANT
+                        )
 
                         # Mock conversation deletion
-                        with patch.object(self.chat_service, '_delete_conversation_record') as mock_delete:
+                        with patch.object(
+                            self.chat_service,
+                            '_delete_conversation_record',
+                        ) as mock_delete:
                             mock_delete.return_value = True
 
                             # Delete conversation
                             deleted = await self.chat_service.delete_conversation(
                                 conversation_id=conversation_id,
-                                user_id=self.mock_user.id
+                                user_id=self.mock_user.id,
                             )
 
                             assert deleted is True
@@ -609,28 +682,42 @@ class TestChatServiceIntegration:
             id=conversation_id,
             title="Concurrent Test",
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
         # Mock the required methods
-        with patch.object(self.chat_service, 'get_conversation') as mock_get_conv:
+        with patch.object(
+            self.chat_service, 'get_conversation'
+        ) as mock_get_conv:
             mock_get_conv.return_value = mock_conversation
 
-            with patch.object(self.chat_service, '_create_user_message') as mock_create_msg:
-                with patch.object(self.chat_service, '_generate_assistant_response') as mock_generate:
+            with patch.object(
+                self.chat_service, '_create_user_message'
+            ) as mock_create_msg:
+                with patch.object(
+                    self.chat_service, '_generate_assistant_response'
+                ) as mock_generate:
 
                     # Setup side effects for multiple calls
                     mock_create_msg.side_effect = [
-                        Message(id=f"user-msg-{i}", conversation_id=conversation_id,
-                               role=MessageRole.USER, content=f"Message {i}",
-                               user_id=self.mock_user.id)
+                        Message(
+                            id=f"user-msg-{i}",
+                            conversation_id=conversation_id,
+                            role=MessageRole.USER,
+                            content=f"Message {i}",
+                            user_id=self.mock_user.id,
+                        )
                         for i in range(3)
                     ]
 
                     mock_generate.side_effect = [
-                        Message(id=f"assistant-msg-{i}", conversation_id=conversation_id,
-                               role=MessageRole.ASSISTANT, content=f"Response {i}",
-                               user_id=None)
+                        Message(
+                            id=f"assistant-msg-{i}",
+                            conversation_id=conversation_id,
+                            role=MessageRole.ASSISTANT,
+                            content=f"Response {i}",
+                            user_id=None,
+                        )
                         for i in range(3)
                     ]
 
@@ -639,7 +726,7 @@ class TestChatServiceIntegration:
                         self.chat_service.send_message(
                             conversation_id=conversation_id,
                             content=f"Concurrent message {i}",
-                            user_id=self.mock_user.id
+                            user_id=self.mock_user.id,
                         )
                         for i in range(3)
                     ]
@@ -650,7 +737,9 @@ class TestChatServiceIntegration:
                     assert len(results) == 3
                     for user_msg, assistant_msg in results:
                         assert user_msg.role == MessageRole.USER
-                        assert assistant_msg.role == MessageRole.ASSISTANT
+                        assert (
+                            assistant_msg.role == MessageRole.ASSISTANT
+                        )
 
 
 @pytest.mark.unit
@@ -661,26 +750,31 @@ class TestChatServiceErrorHandling:
         """Set up test fixtures."""
         self.mock_session = AsyncMock(spec=AsyncSession)
         self.mock_llm_service = AsyncMock()
-        self.chat_service = ChatService(self.mock_session, self.mock_llm_service)
+        self.chat_service = ChatService(
+            self.mock_session, self.mock_llm_service
+        )
 
         self.mock_user = User(
             id="test-user-id",
             email="test@example.com",
-            username="testuser"
+            username="testuser",
         )
 
     @pytest.mark.asyncio
     async def test_handle_database_connection_error(self):
         """Test handling database connection errors."""
         # Arrange
-        with patch.object(self.chat_service, '_create_conversation_record') as mock_create:
-            mock_create.side_effect = Exception("Database connection failed")
+        with patch.object(
+            self.chat_service, '_create_conversation_record'
+        ) as mock_create:
+            mock_create.side_effect = Exception(
+                "Database connection failed"
+            )
 
             # Act & Assert
             with pytest.raises(Exception) as exc_info:
                 await self.chat_service.create_conversation(
-                    user_id=self.mock_user.id,
-                    title="Test Conversation"
+                    user_id=self.mock_user.id, title="Test Conversation"
                 )
 
             assert "Database connection failed" in str(exc_info.value)
@@ -694,30 +788,40 @@ class TestChatServiceErrorHandling:
             id=conversation_id,
             title="Test Conversation",
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
-        with patch.object(self.chat_service, 'get_conversation') as mock_get_conv:
+        with patch.object(
+            self.chat_service, 'get_conversation'
+        ) as mock_get_conv:
             mock_get_conv.return_value = mock_conversation
 
-            with patch.object(self.chat_service, '_create_user_message') as mock_create_msg:
+            with patch.object(
+                self.chat_service, '_create_user_message'
+            ) as mock_create_msg:
                 mock_create_msg.return_value = Message(
                     id="user-msg-id",
                     conversation_id=conversation_id,
                     role=MessageRole.USER,
                     content="Test message",
-                    user_id=self.mock_user.id
+                    user_id=self.mock_user.id,
                 )
 
-                with patch.object(self.chat_service, '_generate_assistant_response') as mock_generate:
-                    mock_generate.side_effect = Exception("LLM service unavailable")
+                with patch.object(
+                    self.chat_service, '_generate_assistant_response'
+                ) as mock_generate:
+                    mock_generate.side_effect = Exception(
+                        "LLM service unavailable"
+                    )
 
                     # Act & Assert
                     with pytest.raises(Exception) as exc_info:
                         await self.chat_service.send_message(
                             conversation_id=conversation_id,
                             content="Test message",
-                            user_id=self.mock_user.id
+                            user_id=self.mock_user.id,
                         )
 
-                    assert "LLM service unavailable" in str(exc_info.value)
+                    assert "LLM service unavailable" in str(
+                        exc_info.value
+                    )

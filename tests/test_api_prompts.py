@@ -24,14 +24,18 @@ class TestPromptEndpoints:
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         self.mock_session = AsyncMock()
 
         # Override dependencies
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
-        app.dependency_overrides[get_session] = lambda: self.mock_session
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
+        app.dependency_overrides[get_session] = (
+            lambda: self.mock_session
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -50,7 +54,7 @@ class TestPromptEndpoints:
             "tags": ["test", "api"],
             "is_active": True,
             "is_public": False,
-            "version": "1.0.0"
+            "version": "1.0.0",
         }
 
         mock_created_prompt = {
@@ -67,10 +71,12 @@ class TestPromptEndpoints:
             "version": "1.0.0",
             "user_id": self.mock_user.id,
             "created_at": "2024-01-01T00:00:00Z",
-            "updated_at": "2024-01-01T00:00:00Z"
+            "updated_at": "2024-01-01T00:00:00Z",
         }
 
-        with patch.object(PromptService, 'create_prompt') as mock_create:
+        with patch.object(
+            PromptService, 'create_prompt'
+        ) as mock_create:
             mock_create.return_value = mock_created_prompt
 
             # Act
@@ -93,14 +99,18 @@ class TestPromptEndpoints:
             "name": "",  # Empty name should fail validation
             "content": "",  # Empty content should fail validation
             "prompt_type": "invalid_type",
-            "category": "invalid_category"
+            "category": "invalid_category",
         }
 
         # Act
-        response = self.client.post("/prompts/", json=invalid_prompt_data)
+        response = self.client.post(
+            "/prompts/", json=invalid_prompt_data
+        )
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     def test_list_prompts_success(self):
         """Test successful prompt listing."""
@@ -116,7 +126,7 @@ class TestPromptEndpoints:
                 "is_active": True,
                 "is_public": False,
                 "user_id": self.mock_user.id,
-                "tags": ["test"]
+                "tags": ["test"],
             },
             {
                 "id": "prompt-2",
@@ -129,8 +139,8 @@ class TestPromptEndpoints:
                 "is_public": True,
                 "user_id": "other-user-id",
                 "tags": ["qa", "brief"],
-                "variables": ["question"]
-            }
+                "variables": ["question"],
+            },
         ]
         mock_total = 2
 
@@ -161,7 +171,7 @@ class TestPromptEndpoints:
                 "category": "qa",
                 "is_active": True,
                 "is_public": True,
-                "tags": ["qa"]
+                "tags": ["qa"],
             }
         ]
 
@@ -196,7 +206,7 @@ class TestPromptEndpoints:
             "tags": ["test", "helpful"],
             "user_id": self.mock_user.id,
             "is_active": True,
-            "version": "1.0.0"
+            "version": "1.0.0",
         }
 
         with patch.object(PromptService, 'get_prompt') as mock_get:
@@ -238,7 +248,7 @@ class TestPromptEndpoints:
             "variables": ["new_variable"],
             "tags": ["updated", "test"],
             "is_active": False,
-            "version": "1.1.0"
+            "version": "1.1.0",
         }
 
         mock_updated_prompt = {
@@ -250,14 +260,18 @@ class TestPromptEndpoints:
             "tags": ["updated", "test"],
             "is_active": False,
             "version": "1.1.0",
-            "user_id": self.mock_user.id
+            "user_id": self.mock_user.id,
         }
 
-        with patch.object(PromptService, 'update_prompt') as mock_update:
+        with patch.object(
+            PromptService, 'update_prompt'
+        ) as mock_update:
             mock_update.return_value = mock_updated_prompt
 
             # Act
-            response = self.client.put(f"/prompts/{prompt_id}", json=update_data)
+            response = self.client.put(
+                f"/prompts/{prompt_id}", json=update_data
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -273,14 +287,18 @@ class TestPromptEndpoints:
         prompt_id = "prompt-delete-123"
         delete_request = {
             "confirm_deletion": True,
-            "delete_versions": False
+            "delete_versions": False,
         }
 
-        with patch.object(PromptService, 'delete_prompt') as mock_delete:
+        with patch.object(
+            PromptService, 'delete_prompt'
+        ) as mock_delete:
             mock_delete.return_value = True
 
             # Act
-            response = self.client.delete(f"/prompts/{prompt_id}", json=delete_request)
+            response = self.client.delete(
+                f"/prompts/{prompt_id}", json=delete_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -292,12 +310,12 @@ class TestPromptEndpoints:
         """Test prompt deletion without confirmation."""
         # Arrange
         prompt_id = "prompt-delete-456"
-        delete_request = {
-            "confirm_deletion": False
-        }
+        delete_request = {"confirm_deletion": False}
 
         # Act
-        response = self.client.delete(f"/prompts/{prompt_id}", json=delete_request)
+        response = self.client.delete(
+            f"/prompts/{prompt_id}", json=delete_request
+        )
 
         # Assert
         assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -310,12 +328,9 @@ class TestPromptEndpoints:
         test_request = {
             "variables": {
                 "user_input": "What is the weather like?",
-                "context": "sunny day"
+                "context": "sunny day",
             },
-            "test_settings": {
-                "temperature": 0.5,
-                "max_tokens": 100
-            }
+            "test_settings": {"temperature": 0.5, "max_tokens": 100},
         }
 
         mock_test_result = {
@@ -327,18 +342,20 @@ class TestPromptEndpoints:
                 "model_used": "gpt-3.5-turbo",
                 "variables_resolved": {
                     "user_input": "What is the weather like?",
-                    "context": "sunny day"
-                }
+                    "context": "sunny day",
+                },
             },
             "success": True,
-            "validation_errors": []
+            "validation_errors": [],
         }
 
         with patch.object(PromptService, 'test_prompt') as mock_test:
             mock_test.return_value = mock_test_result
 
             # Act
-            response = self.client.post(f"/prompts/{prompt_id}/test", json=test_request)
+            response = self.client.post(
+                f"/prompts/{prompt_id}/test", json=test_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -365,16 +382,18 @@ class TestPromptEndpoints:
             "success": False,
             "validation_errors": [
                 "Required variable 'user_input' not provided",
-                "Variable 'context' is missing"
+                "Variable 'context' is missing",
             ],
-            "metadata": {}
+            "metadata": {},
         }
 
         with patch.object(PromptService, 'test_prompt') as mock_test:
             mock_test.return_value = mock_test_result
 
             # Act
-            response = self.client.post(f"/prompts/{prompt_id}/test", json=test_request)
+            response = self.client.post(
+                f"/prompts/{prompt_id}/test", json=test_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -392,7 +411,7 @@ class TestPromptEndpoints:
             "new_description": "A cloned prompt",
             "copy_tags": True,
             "make_private": True,
-            "new_version": "1.0.0-clone"
+            "new_version": "1.0.0-clone",
         }
 
         mock_cloned_prompt = {
@@ -407,14 +426,16 @@ class TestPromptEndpoints:
             "version": "1.0.0-clone",
             "user_id": self.mock_user.id,
             "cloned_from": prompt_id,
-            "variables": ["user_input"]
+            "variables": ["user_input"],
         }
 
         with patch.object(PromptService, 'clone_prompt') as mock_clone:
             mock_clone.return_value = mock_cloned_prompt
 
             # Act
-            response = self.client.post(f"/prompts/{prompt_id}/clone", json=clone_request)
+            response = self.client.post(
+                f"/prompts/{prompt_id}/clone", json=clone_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_201_CREATED
@@ -437,35 +458,37 @@ class TestPromptEndpoints:
                 "system_message": 12,
                 "user_message": 8,
                 "assistant_message": 3,
-                "function_call": 2
+                "function_call": 2,
             },
             "prompts_by_category": {
                 "general": 8,
                 "qa": 6,
                 "creative": 4,
                 "technical": 4,
-                "custom": 3
+                "custom": 3,
             },
             "usage_stats": {
                 "total_uses": 500,
                 "avg_uses_per_prompt": 20.0,
-                "most_used_prompt_id": "prompt-popular-123"
+                "most_used_prompt_id": "prompt-popular-123",
             },
             "tag_stats": {
                 "most_common_tags": [
                     {"tag": "helpful", "count": 10},
                     {"tag": "qa", "count": 8},
-                    {"tag": "creative", "count": 6}
+                    {"tag": "creative", "count": 6},
                 ]
             },
             "recent_activity": {
                 "prompts_created_last_week": 5,
                 "prompts_updated_last_week": 12,
-                "prompts_tested_last_week": 35
-            }
+                "prompts_tested_last_week": 35,
+            },
         }
 
-        with patch.object(PromptService, 'get_prompt_stats') as mock_stats_fn:
+        with patch.object(
+            PromptService, 'get_prompt_stats'
+        ) as mock_stats_fn:
             mock_stats_fn.return_value = mock_stats
 
             # Act
@@ -493,13 +516,17 @@ class TestPromptValidation:
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         self.mock_session = AsyncMock()
 
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
-        app.dependency_overrides[get_session] = lambda: self.mock_session
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
+        app.dependency_overrides[get_session] = (
+            lambda: self.mock_session
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -512,14 +539,18 @@ class TestPromptValidation:
             "name": "Invalid Variables Prompt",
             "content": "Hello {invalid variable name}",  # Spaces in variable names
             "prompt_type": "system_message",
-            "variables": ["invalid variable name"]  # Should not contain spaces
+            "variables": [
+                "invalid variable name"
+            ],  # Should not contain spaces
         }
 
         # Act
         response = self.client.post("/prompts/", json=prompt_data)
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     def test_create_prompt_mismatched_variables(self):
         """Test prompt creation where variables don't match content placeholders."""
@@ -528,12 +559,19 @@ class TestPromptValidation:
             "name": "Mismatched Variables Prompt",
             "content": "Hello {name}, how is {weather}?",
             "prompt_type": "user_message",
-            "variables": ["name", "location"]  # 'weather' missing, 'location' extra
+            "variables": [
+                "name",
+                "location",
+            ],  # 'weather' missing, 'location' extra
         }
 
         # This might be caught by service validation rather than request validation
-        with patch.object(PromptService, 'create_prompt') as mock_create:
-            mock_create.side_effect = PromptError("Variables mismatch with content placeholders")
+        with patch.object(
+            PromptService, 'create_prompt'
+        ) as mock_create:
+            mock_create.side_effect = PromptError(
+                "Variables mismatch with content placeholders"
+            )
 
             # Act
             response = self.client.post("/prompts/", json=prompt_data)
@@ -547,14 +585,16 @@ class TestPromptValidation:
         prompt_data = {
             "name": "Empty Content Prompt",
             "content": "",  # Empty content
-            "prompt_type": "system_message"
+            "prompt_type": "system_message",
         }
 
         # Act
         response = self.client.post("/prompts/", json=prompt_data)
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     def test_create_prompt_invalid_version_format(self):
         """Test prompt creation with invalid version format."""
@@ -563,14 +603,16 @@ class TestPromptValidation:
             "name": "Invalid Version Prompt",
             "content": "Hello world",
             "prompt_type": "system_message",
-            "version": "not-a-version"  # Invalid semantic version
+            "version": "not-a-version",  # Invalid semantic version
         }
 
         # Act
         response = self.client.post("/prompts/", json=prompt_data)
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
 
 @pytest.mark.integration
@@ -584,13 +626,17 @@ class TestPromptIntegration:
             id="integration-user-id",
             email="integration@example.com",
             username="integrationuser",
-            is_active=True
+            is_active=True,
         )
 
         self.mock_session = AsyncMock()
 
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
-        app.dependency_overrides[get_session] = lambda: self.mock_session
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
+        app.dependency_overrides[get_session] = (
+            lambda: self.mock_session
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -607,7 +653,7 @@ class TestPromptIntegration:
             "category": "general",
             "variables": ["role", "question"],
             "tags": ["test", "lifecycle"],
-            "version": "1.0.0"
+            "version": "1.0.0",
         }
 
         mock_created_prompt = {
@@ -616,14 +662,20 @@ class TestPromptIntegration:
             "content": "You are {role}. Answer this: {question}",
             "variables": ["role", "question"],
             "version": "1.0.0",
-            "user_id": self.mock_user.id
+            "user_id": self.mock_user.id,
         }
 
-        with patch.object(PromptService, 'create_prompt') as mock_create:
+        with patch.object(
+            PromptService, 'create_prompt'
+        ) as mock_create:
             mock_create.return_value = mock_created_prompt
 
-            create_response = self.client.post("/prompts/", json=prompt_data)
-            assert create_response.status_code == status.HTTP_201_CREATED
+            create_response = self.client.post(
+                "/prompts/", json=prompt_data
+            )
+            assert (
+                create_response.status_code == status.HTTP_201_CREATED
+            )
             prompt_id = create_response.json()["id"]
 
         # Step 2: Update prompt
@@ -631,7 +683,7 @@ class TestPromptIntegration:
             "name": "Updated Lifecycle Prompt",
             "content": "You are {role}. Please answer: {question} with {style}",
             "variables": ["role", "question", "style"],
-            "version": "1.1.0"
+            "version": "1.1.0",
         }
 
         mock_updated_prompt = {
@@ -639,13 +691,17 @@ class TestPromptIntegration:
             "name": "Updated Lifecycle Prompt",
             "content": "You are {role}. Please answer: {question} with {style}",
             "variables": ["role", "question", "style"],
-            "version": "1.1.0"
+            "version": "1.1.0",
         }
 
-        with patch.object(PromptService, 'update_prompt') as mock_update:
+        with patch.object(
+            PromptService, 'update_prompt'
+        ) as mock_update:
             mock_update.return_value = mock_updated_prompt
 
-            update_response = self.client.put(f"/prompts/{prompt_id}", json=update_data)
+            update_response = self.client.put(
+                f"/prompts/{prompt_id}", json=update_data
+            )
             assert update_response.status_code == status.HTTP_200_OK
             assert update_response.json()["version"] == "1.1.0"
             assert len(update_response.json()["variables"]) == 3
@@ -655,9 +711,9 @@ class TestPromptIntegration:
             "variables": {
                 "role": "helpful assistant",
                 "question": "What is AI?",
-                "style": "simple terms"
+                "style": "simple terms",
             },
-            "test_settings": {"temperature": 0.7}
+            "test_settings": {"temperature": 0.7},
         }
 
         mock_test_result = {
@@ -665,22 +721,27 @@ class TestPromptIntegration:
             "response": "AI is computer technology that can think and learn like humans.",
             "success": True,
             "metadata": {"tokens_used": 15},
-            "validation_errors": []
+            "validation_errors": [],
         }
 
         with patch.object(PromptService, 'test_prompt') as mock_test:
             mock_test.return_value = mock_test_result
 
-            test_response = self.client.post(f"/prompts/{prompt_id}/test", json=test_request)
+            test_response = self.client.post(
+                f"/prompts/{prompt_id}/test", json=test_request
+            )
             assert test_response.status_code == status.HTTP_200_OK
             assert test_response.json()["success"] is True
-            assert "helpful assistant" in test_response.json()["rendered_prompt"]
+            assert (
+                "helpful assistant"
+                in test_response.json()["rendered_prompt"]
+            )
 
         # Step 4: Clone prompt
         clone_request = {
             "new_name": "Cloned Lifecycle Prompt",
             "copy_tags": True,
-            "new_version": "1.0.0-clone"
+            "new_version": "1.0.0-clone",
         }
 
         mock_cloned_prompt = {
@@ -688,31 +749,39 @@ class TestPromptIntegration:
             "name": "Cloned Lifecycle Prompt",
             "version": "1.0.0-clone",
             "cloned_from": prompt_id,
-            "variables": ["role", "question", "style"]
+            "variables": ["role", "question", "style"],
         }
 
         with patch.object(PromptService, 'clone_prompt') as mock_clone:
             mock_clone.return_value = mock_cloned_prompt
 
-            clone_response = self.client.post(f"/prompts/{prompt_id}/clone", json=clone_request)
+            clone_response = self.client.post(
+                f"/prompts/{prompt_id}/clone", json=clone_request
+            )
             assert clone_response.status_code == status.HTTP_201_CREATED
             cloned_id = clone_response.json()["id"]
 
         # Step 5: Delete prompts
-        delete_request = {
-            "confirm_deletion": True
-        }
+        delete_request = {"confirm_deletion": True}
 
-        with patch.object(PromptService, 'delete_prompt') as mock_delete:
+        with patch.object(
+            PromptService, 'delete_prompt'
+        ) as mock_delete:
             mock_delete.return_value = True
 
             # Delete original
-            delete_response = self.client.delete(f"/prompts/{prompt_id}", json=delete_request)
+            delete_response = self.client.delete(
+                f"/prompts/{prompt_id}", json=delete_request
+            )
             assert delete_response.status_code == status.HTTP_200_OK
 
             # Delete cloned
-            delete_clone_response = self.client.delete(f"/prompts/{cloned_id}", json=delete_request)
-            assert delete_clone_response.status_code == status.HTTP_200_OK
+            delete_clone_response = self.client.delete(
+                f"/prompts/{cloned_id}", json=delete_request
+            )
+            assert (
+                delete_clone_response.status_code == status.HTTP_200_OK
+            )
 
     def test_prompt_template_library_workflow(self):
         """Test building and using a prompt template library."""
@@ -725,7 +794,7 @@ class TestPromptIntegration:
                 "category": "qa",
                 "variables": ["question"],
                 "tags": ["qa", "assistant"],
-                "is_public": True
+                "is_public": True,
             },
             {
                 "name": "Creative Writing Prompt",
@@ -734,7 +803,7 @@ class TestPromptIntegration:
                 "category": "creative",
                 "variables": ["genre", "topic", "style"],
                 "tags": ["creative", "writing"],
-                "is_public": True
+                "is_public": True,
             },
             {
                 "name": "Code Review Prompt",
@@ -743,8 +812,8 @@ class TestPromptIntegration:
                 "category": "technical",
                 "variables": ["language", "criteria", "code"],
                 "tags": ["code", "review", "technical"],
-                "is_public": False
-            }
+                "is_public": False,
+            },
         ]
 
         created_prompts = []
@@ -754,57 +823,84 @@ class TestPromptIntegration:
                 "name": prompt_data["name"],
                 "category": prompt_data["category"],
                 "is_public": prompt_data["is_public"],
-                "variables": prompt_data["variables"]
+                "variables": prompt_data["variables"],
             }
 
-            with patch.object(PromptService, 'create_prompt') as mock_create:
+            with patch.object(
+                PromptService, 'create_prompt'
+            ) as mock_create:
                 mock_create.return_value = mock_prompt
 
-                response = self.client.post("/prompts/", json=prompt_data)
+                response = self.client.post(
+                    "/prompts/", json=prompt_data
+                )
                 assert response.status_code == status.HTTP_201_CREATED
                 created_prompts.append(response.json())
 
         # Step 2: List prompts by category
         for category in ["qa", "creative", "technical"]:
-            category_prompts = [p for p in created_prompts if p.get("category") == category]
+            category_prompts = [
+                p
+                for p in created_prompts
+                if p.get("category") == category
+            ]
 
-            with patch.object(PromptService, 'list_prompts') as mock_list:
-                mock_list.return_value = (category_prompts, len(category_prompts))
+            with patch.object(
+                PromptService, 'list_prompts'
+            ) as mock_list:
+                mock_list.return_value = (
+                    category_prompts,
+                    len(category_prompts),
+                )
 
-                response = self.client.get(f"/prompts?category={category}")
+                response = self.client.get(
+                    f"/prompts?category={category}"
+                )
                 assert response.status_code == status.HTTP_200_OK
                 data = response.json()
-                assert all(p["category"] == category for p in data["prompts"])
+                assert all(
+                    p["category"] == category for p in data["prompts"]
+                )
 
         # Step 3: Test each prompt with sample variables
         test_cases = [
             {
                 "prompt_id": "template-prompt-1",
-                "variables": {"question": "What is Python?"}
+                "variables": {"question": "What is Python?"},
             },
             {
                 "prompt_id": "template-prompt-2",
-                "variables": {"genre": "sci-fi", "topic": "time travel", "style": "noir"}
+                "variables": {
+                    "genre": "sci-fi",
+                    "topic": "time travel",
+                    "style": "noir",
+                },
             },
             {
                 "prompt_id": "template-prompt-3",
-                "variables": {"language": "Python", "criteria": "performance", "code": "def slow_func(): pass"}
-            }
+                "variables": {
+                    "language": "Python",
+                    "criteria": "performance",
+                    "code": "def slow_func(): pass",
+                },
+            },
         ]
 
         for test_case in test_cases:
             mock_test_result = {
                 "rendered_prompt": f"Rendered prompt for {test_case['prompt_id']}",
                 "success": True,
-                "validation_errors": []
+                "validation_errors": [],
             }
 
-            with patch.object(PromptService, 'test_prompt') as mock_test:
+            with patch.object(
+                PromptService, 'test_prompt'
+            ) as mock_test:
                 mock_test.return_value = mock_test_result
 
                 response = self.client.post(
                     f"/prompts/{test_case['prompt_id']}/test",
-                    json={"variables": test_case["variables"]}
+                    json={"variables": test_case["variables"]},
                 )
                 assert response.status_code == status.HTTP_200_OK
                 assert response.json()["success"] is True
@@ -817,20 +913,24 @@ class TestPromptIntegration:
             "content": "Simple prompt: {input}",
             "prompt_type": "user_message",
             "variables": ["input"],
-            "version": "1.0.0"
+            "version": "1.0.0",
         }
 
         mock_v1_prompt = {
             "id": "evolving-prompt-123",
             "name": "Evolving Prompt",
             "version": "1.0.0",
-            "variables": ["input"]
+            "variables": ["input"],
         }
 
-        with patch.object(PromptService, 'create_prompt') as mock_create:
+        with patch.object(
+            PromptService, 'create_prompt'
+        ) as mock_create:
             mock_create.return_value = mock_v1_prompt
 
-            v1_response = self.client.post("/prompts/", json=initial_prompt)
+            v1_response = self.client.post(
+                "/prompts/", json=initial_prompt
+            )
             prompt_id = v1_response.json()["id"]
 
         # Step 2: Update to version 2.0.0 with more complexity
@@ -838,7 +938,7 @@ class TestPromptIntegration:
             "content": "Enhanced prompt: {input} with context: {context}",
             "variables": ["input", "context"],
             "version": "2.0.0",
-            "description": "Added context parameter"
+            "description": "Added context parameter",
         }
 
         mock_v2_prompt = {
@@ -846,13 +946,17 @@ class TestPromptIntegration:
             "name": "Evolving Prompt",
             "version": "2.0.0",
             "variables": ["input", "context"],
-            "description": "Added context parameter"
+            "description": "Added context parameter",
         }
 
-        with patch.object(PromptService, 'update_prompt') as mock_update:
+        with patch.object(
+            PromptService, 'update_prompt'
+        ) as mock_update:
             mock_update.return_value = mock_v2_prompt
 
-            v2_response = self.client.put(f"/prompts/{prompt_id}", json=v2_update)
+            v2_response = self.client.put(
+                f"/prompts/{prompt_id}", json=v2_update
+            )
             assert v2_response.status_code == status.HTTP_200_OK
             assert v2_response.json()["version"] == "2.0.0"
             assert len(v2_response.json()["variables"]) == 2
@@ -861,19 +965,23 @@ class TestPromptIntegration:
         branch_clone = {
             "new_name": "Evolving Prompt - Experimental Branch",
             "new_version": "2.1.0-experimental",
-            "copy_tags": True
+            "copy_tags": True,
         }
 
         mock_branch_prompt = {
             "id": "branch-prompt-456",
             "name": "Evolving Prompt - Experimental Branch",
             "version": "2.1.0-experimental",
-            "cloned_from": prompt_id
+            "cloned_from": prompt_id,
         }
 
         with patch.object(PromptService, 'clone_prompt') as mock_clone:
             mock_clone.return_value = mock_branch_prompt
 
-            branch_response = self.client.post(f"/prompts/{prompt_id}/clone", json=branch_clone)
-            assert branch_response.status_code == status.HTTP_201_CREATED
+            branch_response = self.client.post(
+                f"/prompts/{prompt_id}/clone", json=branch_clone
+            )
+            assert (
+                branch_response.status_code == status.HTTP_201_CREATED
+            )
             assert "experimental" in branch_response.json()["version"]

@@ -11,15 +11,18 @@ try:
 except ImportError:
     # Fallback classes when langchain is not available
     class Document:
-        def __init__(self, page_content: str = "", metadata: dict = None):
+        def __init__(
+            self, page_content: str = "", metadata: dict = None
+        ):
             self.page_content = page_content
             self.metadata = metadata or {}
-    
+
     class Embeddings:
         pass
-    
+
     class PGVector:
         pass
+
 
 from chatter.config import settings
 from chatter.utils.logging import get_logger
@@ -29,8 +32,10 @@ logger = get_logger(__name__)
 
 class VectorSearchResult:
     """Result from vector search operation."""
-    
-    def __init__(self, id: str, score: float, document=None, vector=None):
+
+    def __init__(
+        self, id: str, score: float, document=None, vector=None
+    ):
         """Initialize search result."""
         self.id = id
         self.score = score
@@ -195,7 +200,9 @@ class PGVectorStore(AbstractVectorStore):
     ) -> list[str]:
         """Add documents to PGVector."""
         try:
-            assert self._store is not None, "PGVector store not initialized"
+            assert (
+                self._store is not None
+            ), "PGVector store not initialized"
             if embeddings:
                 return await asyncio.to_thread(
                     self._store.add_embeddings,
@@ -210,7 +217,9 @@ class PGVectorStore(AbstractVectorStore):
                     ids,
                 )
             else:
-                assert self._store is not None, "PGVector store not initialized"
+                assert (
+                    self._store is not None
+                ), "PGVector store not initialized"
                 return await asyncio.to_thread(
                     self._store.add_documents, documents, ids
                 )
@@ -312,14 +321,16 @@ class PGVectorStore(AbstractVectorStore):
                 start_date, end_date = date_range
                 combined_filter["created_at"] = {
                     "$gte": start_date,
-                    "$lte": end_date
+                    "$lte": end_date,
                 }
 
             if content_type:
                 combined_filter["content_type"] = content_type
 
             if semantic_filter:
-                combined_filter["semantic_tags"] = {"$contains": semantic_filter}
+                combined_filter["semantic_tags"] = {
+                    "$contains": semantic_filter
+                }
 
             # If no query provided, use metadata-only search
             if not query:
@@ -333,7 +344,8 @@ class PGVectorStore(AbstractVectorStore):
                 )
                 # Filter by similarity threshold and limit results
                 filtered_docs = [
-                    (doc, score) for doc, score in docs_with_scores
+                    (doc, score)
+                    for doc, score in docs_with_scores
                     if score >= similarity_threshold
                 ]
                 return filtered_docs[:k]
@@ -348,13 +360,16 @@ class PGVectorStore(AbstractVectorStore):
                 )
                 # Filter by similarity threshold
                 return [
-                    (doc, score) for doc, score in docs_with_scores
+                    (doc, score)
+                    for doc, score in docs_with_scores
                     if score >= similarity_threshold
                 ]
 
         except Exception as e:
             logger.error("Advanced search failed", error=str(e))
-            raise VectorStoreError(f"Advanced search failed: {str(e)}") from e
+            raise VectorStoreError(
+                f"Advanced search failed: {str(e)}"
+            ) from e
 
     async def get_document_metadata(
         self, doc_id: str
@@ -366,7 +381,7 @@ class PGVectorStore(AbstractVectorStore):
                 self._store.similarity_search,
                 "",  # Empty query, rely on filter
                 k=1,
-                filter={"id": doc_id}
+                filter={"id": doc_id},
             )
 
             if results:
@@ -388,14 +403,16 @@ class PGVectorStore(AbstractVectorStore):
                 self._store.similarity_search,
                 "",  # Empty query, rely on filter
                 k=limit,
-                filter=metadata_query
+                filter=metadata_query,
             )
 
             return [doc.metadata for doc in results]
 
         except Exception as e:
             logger.error("Query metadata failed", error=str(e))
-            raise VectorStoreError(f"Query metadata failed: {str(e)}") from e
+            raise VectorStoreError(
+                f"Query metadata failed: {str(e)}"
+            ) from e
 
     async def get_similar_documents_by_metadata(
         self,
@@ -412,7 +429,12 @@ class PGVectorStore(AbstractVectorStore):
 
             # Match on specific important metadata fields
             for key, value in reference_metadata.items():
-                if key in ["content_type", "source", "category", "tags"]:
+                if key in [
+                    "content_type",
+                    "source",
+                    "category",
+                    "tags",
+                ]:
                     metadata_filter[key] = value
 
             if exclude_ids:
@@ -422,14 +444,18 @@ class PGVectorStore(AbstractVectorStore):
                 self._store.similarity_search,
                 "",  # Empty query, rely on filter
                 k=k,
-                filter=metadata_filter
+                filter=metadata_filter,
             )
 
             return results
 
         except Exception as e:
-            logger.error("Get similar documents by metadata failed", error=str(e))
-            raise VectorStoreError(f"Similar metadata search failed: {str(e)}") from e
+            logger.error(
+                "Get similar documents by metadata failed", error=str(e)
+            )
+            raise VectorStoreError(
+                f"Similar metadata search failed: {str(e)}"
+            ) from e
 
     def as_retriever(self, **kwargs) -> Any:
         """Get retriever interface."""

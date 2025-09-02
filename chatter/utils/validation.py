@@ -17,6 +17,7 @@ logger = get_logger(__name__)
 
 class ValidationError(Exception):
     """Custom validation error for input validation."""
+
     pass
 
 
@@ -139,9 +140,7 @@ class InputValidator:
         self.rules[rule.name] = rule
         logger.info(f"Added validation rule: {rule.name}")
 
-    def validate_and_sanitize(
-        self, value: Any, rule_name: str
-    ) -> str:
+    def validate_and_sanitize(self, value: Any, rule_name: str) -> str:
         """Validate and sanitize input value.
 
         Args:
@@ -155,7 +154,9 @@ class InputValidator:
             ValidationError: If validation fails
         """
         if rule_name not in self.rules:
-            raise ValidationError(f"Unknown validation rule: {rule_name}")
+            raise ValidationError(
+                f"Unknown validation rule: {rule_name}"
+            )
 
         rule = self.rules[rule_name]
 
@@ -173,25 +174,35 @@ class InputValidator:
 
         # Check length constraints
         if rule.max_length and len(str_value) > rule.max_length:
-            raise ValidationError(f"{rule.name} exceeds maximum length of {rule.max_length}")
+            raise ValidationError(
+                f"{rule.name} exceeds maximum length of {rule.max_length}"
+            )
 
         if rule.min_length and len(str_value) < rule.min_length:
-            raise ValidationError(f"{rule.name} is below minimum length of {rule.min_length}")
+            raise ValidationError(
+                f"{rule.name} is below minimum length of {rule.min_length}"
+            )
 
         # Check pattern
         if rule.pattern and not re.match(rule.pattern, str_value):
-            raise ValidationError(f"{rule.name} does not match required pattern")
+            raise ValidationError(
+                f"{rule.name} does not match required pattern"
+            )
 
         # Check allowed characters
         if rule.allowed_chars:
             for char in str_value:
                 if char not in rule.allowed_chars:
-                    raise ValidationError(f"{rule.name} contains invalid character: {char}")
+                    raise ValidationError(
+                        f"{rule.name} contains invalid character: {char}"
+                    )
 
         # Check forbidden patterns
         for pattern in rule.forbidden_patterns:
             if re.search(pattern, str_value, re.IGNORECASE):
-                raise ValidationError(f"{rule.name} contains forbidden pattern")
+                raise ValidationError(
+                    f"{rule.name} contains forbidden pattern"
+                )
 
         # Sanitize if needed
         if rule.sanitize:
@@ -242,7 +253,9 @@ class InputValidator:
         for field_name, rule_name in field_rules.items():
             value = data.get(field_name)
             try:
-                validated_data[field_name] = self.validate_and_sanitize(value, rule_name)
+                validated_data[field_name] = self.validate_and_sanitize(
+                    value, rule_name
+                )
             except ValidationError as e:
                 raise ValidationError(f"Field '{field_name}': {str(e)}")
 
@@ -250,11 +263,11 @@ class InputValidator:
 
     def validate_input(self, rule_name: str, value: Any) -> bool:
         """Validate input value and return boolean result.
-        
+
         Args:
             rule_name: Name of validation rule to apply
             value: Value to validate
-            
+
         Returns:
             True if valid, False otherwise
         """
@@ -266,11 +279,11 @@ class InputValidator:
 
     def sanitize_input(self, rule_name: str, value: Any) -> str:
         """Sanitize input value using specified rule.
-        
+
         Args:
             rule_name: Name of validation rule to apply
             value: Value to sanitize
-            
+
         Returns:
             Sanitized value
         """
@@ -278,7 +291,9 @@ class InputValidator:
             return self.validate_and_sanitize(value, rule_name)
         except ValidationError:
             # If validation fails, still return sanitized value
-            return self._sanitize_value(str(value) if value is not None else "")
+            return self._sanitize_value(
+                str(value) if value is not None else ""
+            )
 
 
 class RateLimitValidator:
@@ -292,7 +307,7 @@ class RateLimitValidator:
         self,
         identifier: str,
         max_requests: int | None = None,
-        window_seconds: int | None = None
+        window_seconds: int | None = None,
     ) -> bool:
         """Check if request is within rate limits.
 
@@ -308,6 +323,7 @@ class RateLimitValidator:
         window_seconds = window_seconds or settings.rate_limit_window
 
         import time
+
         current_time = time.time()
 
         # Initialize if new identifier
@@ -316,7 +332,8 @@ class RateLimitValidator:
 
         # Clean old requests outside window
         self.request_counts[identifier] = [
-            req_time for req_time in self.request_counts[identifier]
+            req_time
+            for req_time in self.request_counts[identifier]
             if current_time - req_time < window_seconds
         ]
 
@@ -428,7 +445,8 @@ security_validator = SecurityValidator()
 
 
 async def validate_request_middleware(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
 ) -> Response:
     """Middleware to validate incoming requests.
 
@@ -451,7 +469,7 @@ async def validate_request_middleware(
         logger.warning(f"Rate limit exceeded for client: {client_id}")
         raise HTTPException(
             status_code=429,
-            detail="Rate limit exceeded. Please try again later."
+            detail="Rate limit exceeded. Please try again later.",
         )
 
     # Validate request body if present
@@ -484,7 +502,7 @@ async def validate_request_middleware(
             )
             raise HTTPException(
                 status_code=400,
-                detail=f"Request validation failed: {str(e)}"
+                detail=f"Request validation failed: {str(e)}",
             )
         except Exception as e:
             logger.error(
@@ -503,7 +521,9 @@ async def validate_request_middleware(
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Strict-Transport-Security"] = (
+        "max-age=31536000; includeSubDomains"
+    )
 
     return response
 
@@ -599,7 +619,9 @@ def validate_password(password: str) -> bool:
     has_upper = any(c.isupper() for c in password)
     has_lower = any(c.islower() for c in password)
     has_digit = any(c.isdigit() for c in password)
-    has_special = any(c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password)
+    has_special = any(
+        c in "!@#$%^&*()_+-=[]{}|;:,.<>?" for c in password
+    )
 
     return has_upper and has_lower and has_digit and has_special
 
@@ -658,7 +680,9 @@ def validate_file_size(size: int, max_size_mb: int = 10) -> bool:
     return 0 <= size <= max_size_bytes
 
 
-def validate_file_type(filename: str, allowed_types: list[str] | None = None) -> bool:
+def validate_file_type(
+    filename: str, allowed_types: list[str] | None = None
+) -> bool:
     """Validate file type by extension.
 
     Args:
@@ -669,9 +693,18 @@ def validate_file_type(filename: str, allowed_types: list[str] | None = None) ->
         True if file type is allowed
     """
     if allowed_types is None:
-        allowed_types = ['.txt', '.pdf', '.doc', '.docx', '.png', '.jpg', '.jpeg']
+        allowed_types = [
+            '.txt',
+            '.pdf',
+            '.doc',
+            '.docx',
+            '.png',
+            '.jpg',
+            '.jpeg',
+        ]
 
     import os
+
     _, ext = os.path.splitext(filename.lower())
     return ext in allowed_types
 
@@ -691,13 +724,21 @@ def validate_json_schema(data: dict, schema: dict) -> bool:
         for field, field_type in schema.get('properties', {}).items():
             if field in data:
                 expected_type = field_type.get('type')
-                if expected_type == 'string' and not isinstance(data[field], str):
+                if expected_type == 'string' and not isinstance(
+                    data[field], str
+                ):
                     return False
-                elif expected_type == 'integer' and not isinstance(data[field], int):
+                elif expected_type == 'integer' and not isinstance(
+                    data[field], int
+                ):
                     return False
-                elif expected_type == 'number' and not isinstance(data[field], int | float):
+                elif expected_type == 'number' and not isinstance(
+                    data[field], int | float
+                ):
                     return False
-                elif expected_type == 'boolean' and not isinstance(data[field], bool):
+                elif expected_type == 'boolean' and not isinstance(
+                    data[field], bool
+                ):
                     return False
         return True
     except Exception:
@@ -715,6 +756,7 @@ def sanitize_filename(filename: str) -> str:
     """
     # Remove path components
     import os
+
     filename = os.path.basename(filename)
 
     # Replace unsafe characters
@@ -742,6 +784,7 @@ def sanitize_html(html_content: str) -> str:
         Sanitized HTML content with tags removed
     """
     import re
+
     # Remove HTML tags completely
     clean_text = re.sub(r'<[^>]+>', '', html_content)
     # Clean up whitespace
@@ -751,10 +794,10 @@ def sanitize_html(html_content: str) -> str:
 
 def validate_email_format(email: str) -> bool:
     """Validate email address format.
-    
+
     Args:
         email: Email address to validate
-        
+
     Returns:
         True if valid email format
     """
@@ -763,10 +806,10 @@ def validate_email_format(email: str) -> bool:
 
 def validate_username_format(username: str) -> bool:
     """Validate username format.
-    
+
     Args:
         username: Username to validate
-        
+
     Returns:
         True if valid username format
     """
@@ -776,10 +819,10 @@ def validate_username_format(username: str) -> bool:
 
 def validate_url_format(url: str) -> bool:
     """Validate URL format.
-    
+
     Args:
         url: URL to validate
-        
+
     Returns:
         True if valid URL format
     """
@@ -788,10 +831,10 @@ def validate_url_format(url: str) -> bool:
 
 def validate_api_key_format(api_key: str) -> bool:
     """Validate API key format.
-    
+
     Args:
         api_key: API key to validate
-        
+
     Returns:
         True if valid API key format
     """
@@ -800,20 +843,20 @@ def validate_api_key_format(api_key: str) -> bool:
 
 
 def validate_json_structure(
-    data: dict[str, Any], 
-    required_fields: list[str], 
-    allowed_fields: list[str]
+    data: dict[str, Any],
+    required_fields: list[str],
+    allowed_fields: list[str],
 ) -> bool:
     """Validate JSON structure.
-    
+
     Args:
         data: Data to validate
         required_fields: List of required field names
         allowed_fields: List of allowed field names
-        
+
     Returns:
         True if structure is valid
-        
+
     Raises:
         ValueError: If validation fails
     """
@@ -821,12 +864,12 @@ def validate_json_structure(
     for field in required_fields:
         if field not in data:
             raise ValueError(f"Missing required field: {field}")
-    
+
     # Check for unexpected fields
     for field in data:
         if field not in allowed_fields:
             raise ValueError(f"Unexpected field: {field}")
-    
+
     return True
 
 
@@ -846,29 +889,29 @@ def validate_sql_identifier(identifier: str) -> bool:
 
 class ValidationMiddleware:
     """Middleware for request validation and sanitization."""
-    
+
     def __init__(self) -> None:
         """Initialize the validation middleware."""
         self.validator = InputValidator()
-    
+
     async def dispatch(
-        self, 
-        request: Request, 
-        call_next: Callable[[Request], Awaitable[Response]]
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
         """Process request through validation middleware.
-        
+
         Args:
             request: The incoming request
             call_next: The next handler in the chain
-            
+
         Returns:
             Response from the handler or error response
         """
         # Skip validation for GET requests
         if request.method == "GET":
             return await call_next(request)
-        
+
         # For POST/PUT/PATCH requests, validate JSON if present
         if request.method in ["POST", "PUT", "PATCH"]:
             try:
@@ -882,8 +925,8 @@ class ValidationMiddleware:
                 return Response(
                     content='{"error": "Invalid request format"}',
                     status_code=422,
-                    media_type="application/json"
+                    media_type="application/json",
                 )
-        
+
         # Call the next handler
         return await call_next(request)

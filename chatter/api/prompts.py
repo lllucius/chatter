@@ -33,7 +33,7 @@ router = APIRouter()
 
 
 async def get_prompt_service(
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> PromptService:
     """Get prompt service instance."""
     return PromptService(session)
@@ -76,15 +76,29 @@ async def create_prompt(
 
 @router.get("", response_model=PromptListResponse)
 async def list_prompts(
-    prompt_type: PromptType | None = Query(None, description="Filter by prompt type"),
-    category: PromptCategory | None = Query(None, description="Filter by category"),
+    prompt_type: PromptType | None = Query(
+        None, description="Filter by prompt type"
+    ),
+    category: PromptCategory | None = Query(
+        None, description="Filter by category"
+    ),
     tags: list[str] | None = Query(None, description="Filter by tags"),
-    is_public: bool | None = Query(None, description="Filter by public status"),
-    is_chain: bool | None = Query(None, description="Filter by chain status"),
-    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    is_public: bool | None = Query(
+        None, description="Filter by public status"
+    ),
+    is_chain: bool | None = Query(
+        None, description="Filter by chain status"
+    ),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maximum number of results"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of results to skip"
+    ),
     sort_by: str = Query("created_at", description="Sort field"),
-    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
+    sort_order: str = Query(
+        "desc", pattern="^(asc|desc)$", description="Sort order"
+    ),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service),
 ) -> PromptListResponse:
@@ -109,6 +123,7 @@ async def list_prompts(
     try:
         # Create request object from query parameters
         from chatter.schemas.prompt import PromptListRequest
+
         merged_request = PromptListRequest(
             prompt_type=prompt_type,
             category=category,

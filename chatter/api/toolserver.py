@@ -48,7 +48,7 @@ router = APIRouter()
 
 
 async def get_tool_server_service(
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> ToolServerService:
     """Get tool server service instance.
 
@@ -62,7 +62,7 @@ async def get_tool_server_service(
 
 
 async def get_tool_access_service(
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> ToolAccessService:
     """Get tool access service instance.
 
@@ -267,9 +267,11 @@ async def start_tool_server(
         success = await service.start_server(server_id)
         return ToolServerOperationResponse(
             success=success,
-            message="Server started successfully"
-            if success
-            else "Failed to start server",
+            message=(
+                "Server started successfully"
+                if success
+                else "Failed to start server"
+            ),
         )
     except ToolServerServiceError as e:
         raise BadRequestProblem(detail=str(e)) from e
@@ -307,9 +309,11 @@ async def stop_tool_server(
         success = await service.stop_server(server_id)
         return ToolServerOperationResponse(
             success=success,
-            message="Server stopped successfully"
-            if success
-            else "Failed to stop server",
+            message=(
+                "Server stopped successfully"
+                if success
+                else "Failed to stop server"
+            ),
         )
     except ToolServerServiceError as e:
         raise BadRequestProblem(detail=str(e)) from e
@@ -347,9 +351,11 @@ async def restart_tool_server(
         success = await service.restart_server(server_id)
         return ToolServerOperationResponse(
             success=success,
-            message="Server restarted successfully"
-            if success
-            else "Failed to restart server",
+            message=(
+                "Server restarted successfully"
+                if success
+                else "Failed to restart server"
+            ),
         )
     except ToolServerServiceError as e:
         raise BadRequestProblem(detail=str(e)) from e
@@ -387,9 +393,11 @@ async def enable_tool_server(
         success = await service.enable_server(server_id)
         return ToolServerOperationResponse(
             success=success,
-            message="Server enabled successfully"
-            if success
-            else "Failed to enable server",
+            message=(
+                "Server enabled successfully"
+                if success
+                else "Failed to enable server"
+            ),
         )
     except ToolServerServiceError as e:
         raise BadRequestProblem(detail=str(e)) from e
@@ -427,9 +435,11 @@ async def disable_tool_server(
         success = await service.disable_server(server_id)
         return ToolServerOperationResponse(
             success=success,
-            message="Server disabled successfully"
-            if success
-            else "Failed to disable server",
+            message=(
+                "Server disabled successfully"
+                if success
+                else "Failed to disable server"
+            ),
         )
     except ToolServerServiceError as e:
         raise BadRequestProblem(detail=str(e)) from e
@@ -515,9 +525,11 @@ async def enable_tool(
         success = await service.enable_tool(tool_id)
         return ToolOperationResponse(
             success=success,
-            message="Tool enabled successfully"
-            if success
-            else "Tool not found",
+            message=(
+                "Tool enabled successfully"
+                if success
+                else "Tool not found"
+            ),
         )
     except Exception as e:
         logger.error(
@@ -550,9 +562,11 @@ async def disable_tool(
         success = await service.disable_tool(tool_id)
         return ToolOperationResponse(
             success=success,
-            message="Tool disabled successfully"
-            if success
-            else "Tool not found",
+            message=(
+                "Tool disabled successfully"
+                if success
+                else "Tool not found"
+            ),
         )
     except Exception as e:
         logger.error(
@@ -733,7 +747,9 @@ async def bulk_server_operation(
 @router.get("/tools/all", response_model=list[dict[str, Any]])
 async def list_all_tools(
     current_user: User = Depends(get_current_user),
-    tool_server_service: ToolServerService = Depends(get_tool_server_service),
+    tool_server_service: ToolServerService = Depends(
+        get_tool_server_service
+    ),
 ) -> list[dict[str, Any]]:
     """List all tools across all servers.
 
@@ -755,11 +771,15 @@ async def list_all_tools(
         ) from None
 
 
-@router.post("/servers/{server_id}/test-connectivity", response_model=dict)
+@router.post(
+    "/servers/{server_id}/test-connectivity", response_model=dict
+)
 async def test_server_connectivity(
     server_id: str,
     current_user: User = Depends(get_current_user),
-    tool_server_service: ToolServerService = Depends(get_tool_server_service),
+    tool_server_service: ToolServerService = Depends(
+        get_tool_server_service
+    ),
 ) -> dict[str, Any]:
     """Test connectivity to an external MCP server.
 
@@ -787,7 +807,7 @@ async def test_server_connectivity(
         logger.error(
             "Failed to test server connectivity",
             server_id=server_id,
-            error=str(e)
+            error=str(e),
         )
         raise InternalServerProblem(
             detail="Failed to test server connectivity"
@@ -801,7 +821,9 @@ async def test_server_connectivity(
 async def grant_tool_permission(
     permission_data: ToolPermissionCreate,
     current_user: User = Depends(get_current_user),
-    access_service: ToolAccessService = Depends(get_tool_access_service),
+    access_service: ToolAccessService = Depends(
+        get_tool_access_service
+    ),
 ) -> ToolPermissionResponse:
     """Grant tool permission to a user.
 
@@ -824,12 +846,17 @@ async def grant_tool_permission(
         ) from None
 
 
-@router.put("/permissions/{permission_id}", response_model=ToolPermissionResponse)
+@router.put(
+    "/permissions/{permission_id}",
+    response_model=ToolPermissionResponse,
+)
 async def update_tool_permission(
     permission_id: str,
     update_data: ToolPermissionUpdate,
     current_user: User = Depends(get_current_user),
-    access_service: ToolAccessService = Depends(get_tool_access_service),
+    access_service: ToolAccessService = Depends(
+        get_tool_access_service
+    ),
 ) -> ToolPermissionResponse:
     """Update tool permission.
 
@@ -857,7 +884,9 @@ async def update_tool_permission(
 async def revoke_tool_permission(
     permission_id: str,
     current_user: User = Depends(get_current_user),
-    access_service: ToolAccessService = Depends(get_tool_access_service),
+    access_service: ToolAccessService = Depends(
+        get_tool_access_service
+    ),
 ) -> dict[str, Any]:
     """Revoke tool permission.
 
@@ -870,10 +899,13 @@ async def revoke_tool_permission(
         Success message
     """
     try:
-        success = await access_service.revoke_tool_permission(permission_id)
+        success = await access_service.revoke_tool_permission(
+            permission_id
+        )
         if not success:
             raise NotFoundProblem(
-                detail="Permission not found", resource_type="tool_permission"
+                detail="Permission not found",
+                resource_type="tool_permission",
             )
         return {"message": "Permission revoked successfully"}
     except Exception as e:
@@ -883,11 +915,16 @@ async def revoke_tool_permission(
         ) from None
 
 
-@router.get("/users/{user_id}/permissions", response_model=list[ToolPermissionResponse])
+@router.get(
+    "/users/{user_id}/permissions",
+    response_model=list[ToolPermissionResponse],
+)
 async def get_user_permissions(
     user_id: str,
     current_user: User = Depends(get_current_user),
-    access_service: ToolAccessService = Depends(get_tool_access_service),
+    access_service: ToolAccessService = Depends(
+        get_tool_access_service
+    ),
 ) -> list[ToolPermissionResponse]:
     """Get all permissions for a user.
 
@@ -912,7 +949,9 @@ async def get_user_permissions(
 async def create_role_access_rule(
     rule_data: RoleToolAccessCreate,
     current_user: User = Depends(get_current_user),
-    access_service: ToolAccessService = Depends(get_tool_access_service),
+    access_service: ToolAccessService = Depends(
+        get_tool_access_service
+    ),
 ) -> RoleToolAccessResponse:
     """Create role-based access rule.
 
@@ -939,7 +978,9 @@ async def create_role_access_rule(
 async def get_role_access_rules(
     role: str | None = None,
     current_user: User = Depends(get_current_user),
-    access_service: ToolAccessService = Depends(get_tool_access_service),
+    access_service: ToolAccessService = Depends(
+        get_tool_access_service
+    ),
 ) -> list[RoleToolAccessResponse]:
     """Get role-based access rules.
 
@@ -953,6 +994,7 @@ async def get_role_access_rules(
     """
     try:
         from chatter.models.toolserver import UserRole
+
         user_role = UserRole(role) if role else None
         return await access_service.get_role_access_rules(user_role)
     except Exception as e:
@@ -966,7 +1008,9 @@ async def get_role_access_rules(
 async def check_tool_access(
     check_data: UserToolAccessCheck,
     current_user: User = Depends(get_current_user),
-    access_service: ToolAccessService = Depends(get_tool_access_service),
+    access_service: ToolAccessService = Depends(
+        get_tool_access_service
+    ),
 ) -> ToolAccessResult:
     """Check if user has access to a tool.
 
@@ -1010,11 +1054,12 @@ async def refresh_server_tools(
             raise NotFoundProblem(
                 detail="Server not found",
                 resource_type="tool_server",
-                resource_id=server_id
+                resource_id=server_id,
             )
 
         # Refresh tools from remote server
         from chatter.services.mcp import mcp_service
+
         success = await mcp_service.refresh_server_tools(server.name)
 
         if success:
@@ -1034,7 +1079,11 @@ async def refresh_server_tools(
 
         return {
             "success": success,
-            "message": "Tools refreshed successfully" if success else "Failed to refresh tools"
+            "message": (
+                "Tools refreshed successfully"
+                if success
+                else "Failed to refresh tools"
+            ),
         }
 
     except Exception as e:

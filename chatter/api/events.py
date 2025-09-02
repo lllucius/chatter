@@ -18,12 +18,17 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 
-@router.get("/stream", responses={
-    200: {
-        "content": {"text/event-stream": {"schema": {"type": "string"}}},
-        "description": "Server-Sent Events stream for real-time updates"
-    }
-})
+@router.get(
+    "/stream",
+    responses={
+        200: {
+            "content": {
+                "text/event-stream": {"schema": {"type": "string"}}
+            },
+            "description": "Server-Sent Events stream for real-time updates",
+        }
+    },
+)
 async def events_stream(
     request: Request,
     current_user: User = Depends(get_current_user),
@@ -41,11 +46,16 @@ async def events_stream(
     async def generate_events():
         """Generate SSE formatted events."""
         # Create connection for this user
-        connection_id = sse_service.create_connection(user_id=current_user.id)
+        connection_id = sse_service.create_connection(
+            user_id=current_user.id
+        )
         connection = sse_service.get_connection(connection_id)
 
         if not connection:
-            logger.error("Failed to create SSE connection", user_id=current_user.id)
+            logger.error(
+                "Failed to create SSE connection",
+                user_id=current_user.id,
+            )
             return
 
         try:
@@ -64,8 +74,10 @@ async def events_stream(
             # Stream events as they arrive
             async for event in connection.get_events():
                 # Skip keepalive events for the client unless explicitly requested
-                if (event.type == EventType.SYSTEM_STATUS and
-                        event.data.get("keepalive", False)):
+                if (
+                    event.type == EventType.SYSTEM_STATUS
+                    and event.data.get("keepalive", False)
+                ):
                     yield ": keepalive\n\n"  # SSE comment format for keepalive
                     continue
 
@@ -86,7 +98,7 @@ async def events_stream(
                 "Error in SSE stream",
                 connection_id=connection_id,
                 user_id=current_user.id,
-                error=str(e)
+                error=str(e),
             )
             error_event = {
                 "type": "error",
@@ -106,16 +118,21 @@ async def events_stream(
             "Connection": "keep-alive",
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "Cache-Control",
-        }
+        },
     )
 
 
-@router.get("/admin/stream", responses={
-    200: {
-        "content": {"text/event-stream": {"schema": {"type": "string"}}},
-        "description": "Admin SSE stream for all system events"
-    }
-})
+@router.get(
+    "/admin/stream",
+    responses={
+        200: {
+            "content": {
+                "text/event-stream": {"schema": {"type": "string"}}
+            },
+            "description": "Admin SSE stream for all system events",
+        }
+    },
+)
 async def admin_events_stream(
     request: Request,
     current_user: User = Depends(get_current_user),
@@ -139,6 +156,7 @@ async def admin_events_stream(
         is_admin = await auth_service.is_admin(current_user.id)
         if not is_admin:
             from chatter.utils.problem import AuthorizationProblem
+
             raise AuthorizationProblem(
                 detail="Admin privileges required for system event stream"
             )
@@ -150,7 +168,10 @@ async def admin_events_stream(
         connection = sse_service.get_connection(connection_id)
 
         if not connection:
-            logger.error("Failed to create admin SSE connection", user_id=current_user.id)
+            logger.error(
+                "Failed to create admin SSE connection",
+                user_id=current_user.id,
+            )
             return
 
         try:
@@ -169,8 +190,10 @@ async def admin_events_stream(
             # Stream all system events
             async for event in connection.get_events():
                 # Skip keepalive events for admin stream too
-                if (event.type == EventType.SYSTEM_STATUS and
-                        event.data.get("keepalive", False)):
+                if (
+                    event.type == EventType.SYSTEM_STATUS
+                    and event.data.get("keepalive", False)
+                ):
                     yield ": admin-keepalive\n\n"
                     continue
 
@@ -192,7 +215,7 @@ async def admin_events_stream(
                 "Error in admin SSE stream",
                 connection_id=connection_id,
                 admin_user_id=current_user.id,
-                error=str(e)
+                error=str(e),
             )
             error_event = {
                 "type": "error",
@@ -212,7 +235,7 @@ async def admin_events_stream(
             "Connection": "keep-alive",
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "Cache-Control",
-        }
+        },
     )
 
 
@@ -238,17 +261,19 @@ async def get_sse_stats(
         is_admin = await auth_service.is_admin(current_user.id)
         if not is_admin:
             from chatter.utils.problem import AuthorizationProblem
+
             raise AuthorizationProblem(
                 detail="Admin privileges required for detailed system statistics"
             )
-
 
     stats = sse_service.get_stats()
 
     # For non-admin users, only show basic stats
     return SSEStatsResponse(
         total_connections=stats["total_connections"],
-        your_connections=len(stats["connections_by_user"].get(current_user.id, [])),
+        your_connections=len(
+            stats["connections_by_user"].get(current_user.id, [])
+        ),
     )
 
 
@@ -271,12 +296,11 @@ async def trigger_test_event(
             "test": True,
             "triggered_by": current_user.id,
         },
-        user_id=current_user.id
+        user_id=current_user.id,
     )
 
     return TestEventResponse(
-        message="Test event triggered successfully",
-        event_id=event_id
+        message="Test event triggered successfully", event_id=event_id
     )
 
 
@@ -302,6 +326,7 @@ async def trigger_broadcast_test(
         is_admin = await auth_service.is_admin(current_user.id)
         if not is_admin:
             from chatter.utils.problem import AuthorizationProblem
+
             raise AuthorizationProblem(
                 detail="Admin privileges required for system broadcast events"
             )
@@ -313,10 +338,10 @@ async def trigger_broadcast_test(
             "broadcast": True,
             "triggered_by": current_user.id,
         },
-        user_id=None  # Broadcast to all users
+        user_id=None,  # Broadcast to all users
     )
 
     return TestEventResponse(
         message="Broadcast test event triggered successfully",
-        event_id=event_id
+        event_id=event_id,
     )

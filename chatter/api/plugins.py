@@ -32,10 +32,15 @@ async def get_plugin_manager() -> PluginManager:
         PluginManager instance
     """
     from chatter.services.plugins import plugin_manager
+
     return plugin_manager
 
 
-@router.post("/install", response_model=PluginResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/install",
+    response_model=PluginResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def install_plugin(
     install_data: PluginInstallRequest,
     current_user: User = Depends(get_current_user),
@@ -59,7 +64,9 @@ async def install_plugin(
 
         plugin_instance = plugin_manager.plugins.get(plugin_id)
         if not plugin_instance:
-            raise InternalServerProblem(detail="Failed to retrieve installed plugin")
+            raise InternalServerProblem(
+                detail="Failed to retrieve installed plugin"
+            )
 
         return PluginResponse(
             id=plugin_instance.id,
@@ -70,7 +77,10 @@ async def install_plugin(
             plugin_type=plugin_instance.manifest.plugin_type,
             status=plugin_instance.status,
             entry_point=plugin_instance.manifest.entry_point,
-            capabilities=[cap.model_dump() for cap in plugin_instance.manifest.capabilities],
+            capabilities=[
+                cap.model_dump()
+                for cap in plugin_instance.manifest.capabilities
+            ],
             dependencies=plugin_instance.manifest.dependencies,
             permissions=plugin_instance.manifest.permissions,
             enabled=plugin_instance.enabled,
@@ -82,7 +92,9 @@ async def install_plugin(
 
     except Exception as e:
         logger.error("Failed to install plugin", error=str(e))
-        raise InternalServerProblem(detail="Failed to install plugin") from e
+        raise InternalServerProblem(
+            detail="Failed to install plugin"
+        ) from e
 
 
 @router.get("/", response_model=PluginListResponse)
@@ -106,43 +118,55 @@ async def list_plugins(
 
         # Apply filters
         if request.plugin_type is not None:
-            plugins = [p for p in plugins if p.manifest.plugin_type == request.plugin_type]
+            plugins = [
+                p
+                for p in plugins
+                if p.manifest.plugin_type == request.plugin_type
+            ]
 
         if request.status is not None:
             plugins = [p for p in plugins if p.status == request.status]
 
         if request.enabled is not None:
-            plugins = [p for p in plugins if p.enabled == request.enabled]
+            plugins = [
+                p for p in plugins if p.enabled == request.enabled
+            ]
 
         plugin_responses = []
         for plugin in plugins:
-            plugin_responses.append(PluginResponse(
-                id=plugin.id,
-                name=plugin.manifest.name,
-                version=plugin.manifest.version,
-                description=plugin.manifest.description,
-                author=plugin.manifest.author,
-                plugin_type=plugin.manifest.plugin_type,
-                status=plugin.status,
-                entry_point=plugin.manifest.entry_point,
-                capabilities=[cap.model_dump() for cap in plugin.manifest.capabilities],
-                dependencies=plugin.manifest.dependencies,
-                permissions=plugin.manifest.permissions,
-                enabled=plugin.enabled,
-                error_message=plugin.error_message,
-                installed_at=plugin.installed_at,
-                updated_at=plugin.updated_at,
-                metadata=plugin.metadata,
-            ))
+            plugin_responses.append(
+                PluginResponse(
+                    id=plugin.id,
+                    name=plugin.manifest.name,
+                    version=plugin.manifest.version,
+                    description=plugin.manifest.description,
+                    author=plugin.manifest.author,
+                    plugin_type=plugin.manifest.plugin_type,
+                    status=plugin.status,
+                    entry_point=plugin.manifest.entry_point,
+                    capabilities=[
+                        cap.model_dump()
+                        for cap in plugin.manifest.capabilities
+                    ],
+                    dependencies=plugin.manifest.dependencies,
+                    permissions=plugin.manifest.permissions,
+                    enabled=plugin.enabled,
+                    error_message=plugin.error_message,
+                    installed_at=plugin.installed_at,
+                    updated_at=plugin.updated_at,
+                    metadata=plugin.metadata,
+                )
+            )
 
         return PluginListResponse(
-            plugins=plugin_responses,
-            total=len(plugin_responses)
+            plugins=plugin_responses, total=len(plugin_responses)
         )
 
     except Exception as e:
         logger.error("Failed to list plugins", error=str(e))
-        raise InternalServerProblem(detail="Failed to list plugins") from e
+        raise InternalServerProblem(
+            detail="Failed to list plugins"
+        ) from e
 
 
 @router.get("/{plugin_id}", response_model=PluginResponse)
@@ -164,7 +188,9 @@ async def get_plugin(
     try:
         plugin = plugin_manager.plugins.get(plugin_id)
         if not plugin:
-            raise NotFoundProblem(detail=f"Plugin {plugin_id} not found")
+            raise NotFoundProblem(
+                detail=f"Plugin {plugin_id} not found"
+            )
 
         return PluginResponse(
             id=plugin.id,
@@ -175,7 +201,9 @@ async def get_plugin(
             plugin_type=plugin.manifest.plugin_type,
             status=plugin.status,
             entry_point=plugin.manifest.entry_point,
-            capabilities=[cap.model_dump() for cap in plugin.manifest.capabilities],
+            capabilities=[
+                cap.model_dump() for cap in plugin.manifest.capabilities
+            ],
             dependencies=plugin.manifest.dependencies,
             permissions=plugin.manifest.permissions,
             enabled=plugin.enabled,
@@ -188,8 +216,12 @@ async def get_plugin(
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to get plugin", plugin_id=plugin_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to get plugin") from e
+        logger.error(
+            "Failed to get plugin", plugin_id=plugin_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to get plugin"
+        ) from e
 
 
 @router.put("/{plugin_id}", response_model=PluginResponse)
@@ -213,14 +245,19 @@ async def update_plugin(
     try:
         plugin = plugin_manager.plugins.get(plugin_id)
         if not plugin:
-            raise NotFoundProblem(detail=f"Plugin {plugin_id} not found")
+            raise NotFoundProblem(
+                detail=f"Plugin {plugin_id} not found"
+            )
 
         # Update plugin configuration
         if update_data.configuration is not None:
             plugin.configuration.update(update_data.configuration)
 
         # Handle enable/disable
-        if update_data.enabled is not None and update_data.enabled != plugin.enabled:
+        if (
+            update_data.enabled is not None
+            and update_data.enabled != plugin.enabled
+        ):
             if update_data.enabled:
                 await plugin_manager.enable_plugin(plugin_id)
             else:
@@ -228,6 +265,7 @@ async def update_plugin(
 
         # Update timestamp
         from datetime import UTC, datetime
+
         plugin.updated_at = datetime.now(UTC)
 
         return PluginResponse(
@@ -239,7 +277,9 @@ async def update_plugin(
             plugin_type=plugin.manifest.plugin_type,
             status=plugin.status,
             entry_point=plugin.manifest.entry_point,
-            capabilities=[cap.model_dump() for cap in plugin.manifest.capabilities],
+            capabilities=[
+                cap.model_dump() for cap in plugin.manifest.capabilities
+            ],
             dependencies=plugin.manifest.dependencies,
             permissions=plugin.manifest.permissions,
             enabled=plugin.enabled,
@@ -252,8 +292,12 @@ async def update_plugin(
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to update plugin", plugin_id=plugin_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to update plugin") from e
+        logger.error(
+            "Failed to update plugin", plugin_id=plugin_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to update plugin"
+        ) from e
 
 
 @router.delete("/{plugin_id}", response_model=PluginDeleteResponse)
@@ -276,18 +320,26 @@ async def uninstall_plugin(
         success = await plugin_manager.uninstall_plugin(plugin_id)
 
         if not success:
-            raise NotFoundProblem(detail=f"Plugin {plugin_id} not found")
+            raise NotFoundProblem(
+                detail=f"Plugin {plugin_id} not found"
+            )
 
         return PluginDeleteResponse(
             success=True,
-            message=f"Plugin {plugin_id} uninstalled successfully"
+            message=f"Plugin {plugin_id} uninstalled successfully",
         )
 
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to uninstall plugin", plugin_id=plugin_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to uninstall plugin") from e
+        logger.error(
+            "Failed to uninstall plugin",
+            plugin_id=plugin_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to uninstall plugin"
+        ) from e
 
 
 @router.post("/{plugin_id}/enable", response_model=PluginActionResponse)
@@ -310,22 +362,30 @@ async def enable_plugin(
         success = await plugin_manager.enable_plugin(plugin_id)
 
         if not success:
-            raise BadRequestProblem(detail="Failed to enable plugin - check plugin status and dependencies")
+            raise BadRequestProblem(
+                detail="Failed to enable plugin - check plugin status and dependencies"
+            )
 
         return PluginActionResponse(
             success=True,
             message=f"Plugin {plugin_id} enabled successfully",
-            plugin_id=plugin_id
+            plugin_id=plugin_id,
         )
 
     except BadRequestProblem:
         raise
     except Exception as e:
-        logger.error("Failed to enable plugin", plugin_id=plugin_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to enable plugin") from e
+        logger.error(
+            "Failed to enable plugin", plugin_id=plugin_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to enable plugin"
+        ) from e
 
 
-@router.post("/{plugin_id}/disable", response_model=PluginActionResponse)
+@router.post(
+    "/{plugin_id}/disable", response_model=PluginActionResponse
+)
 async def disable_plugin(
     plugin_id: str,
     current_user: User = Depends(get_current_user),
@@ -350,11 +410,17 @@ async def disable_plugin(
         return PluginActionResponse(
             success=True,
             message=f"Plugin {plugin_id} disabled successfully",
-            plugin_id=plugin_id
+            plugin_id=plugin_id,
         )
 
     except BadRequestProblem:
         raise
     except Exception as e:
-        logger.error("Failed to disable plugin", plugin_id=plugin_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to disable plugin") from e
+        logger.error(
+            "Failed to disable plugin",
+            plugin_id=plugin_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to disable plugin"
+        ) from e

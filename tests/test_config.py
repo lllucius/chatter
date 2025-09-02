@@ -1,8 +1,9 @@
 """Tests for application configuration."""
 
-import pytest
-from unittest.mock import patch, MagicMock
 import os
+from unittest.mock import patch
+
+import pytest
 
 from chatter.config import Settings, settings
 
@@ -18,7 +19,10 @@ class TestSettings:
 
         # Assert
         assert settings.app_name == "Chatter API"
-        assert settings.app_description == "Advanced AI Chatbot Backend API Platform"
+        assert (
+            settings.app_description
+            == "Advanced AI Chatbot Backend API Platform"
+        )
         assert settings.app_version == "0.1.0"
         assert settings.environment == "development"
         assert settings.debug is False
@@ -358,7 +362,9 @@ class TestSettingsUtilities:
             settings = Settings()
 
         # Act
-        data = settings.model_dump(exclude={"secret_key", "jwt_secret_key", "openai_api_key"})
+        data = settings.model_dump(
+            exclude={"secret_key", "jwt_secret_key", "openai_api_key"}
+        )
 
         # Assert
         assert "secret_key" not in data
@@ -371,7 +377,7 @@ class TestSettingsUtilities:
         # This test would require creating a temporary .env file
         # For now, just verify the settings class accepts model_config
         settings = Settings()
-        
+
         # Check that the settings class has proper configuration
         assert hasattr(settings, 'model_config')
         config = settings.model_config
@@ -412,7 +418,10 @@ class TestSettingsIntegration:
         # Assert
         # Check that environment variables are properly loaded
         # Note: The exact behavior depends on the actual field names in Settings
-        assert settings.app_name in ["Integration Test App", "Chatter API"]
+        assert settings.app_name in [
+            "Integration Test App",
+            "Chatter API",
+        ]
         assert isinstance(settings.debug, bool)
         assert isinstance(settings.log_level, str)
 
@@ -421,7 +430,7 @@ class TestSettingsIntegration:
         # This test would check for field validators that depend on other fields
         # For example, if debug=True requires a specific log level
         settings = Settings()
-        
+
         # Verify that settings are internally consistent
         assert isinstance(settings.debug, bool)
         assert isinstance(settings.environment, str)

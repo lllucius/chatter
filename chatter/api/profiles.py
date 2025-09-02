@@ -34,7 +34,7 @@ router = APIRouter()
 
 
 async def get_profile_service(
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> ProfileService:
     """Get profile service instance."""
     return ProfileService(session)
@@ -77,14 +77,26 @@ async def create_profile(
 
 @router.get("", response_model=ProfileListResponse)
 async def list_profiles(
-    profile_type: ProfileType | None = Query(None, description="Filter by profile type"),
-    llm_provider: str | None = Query(None, description="Filter by LLM provider"),
+    profile_type: ProfileType | None = Query(
+        None, description="Filter by profile type"
+    ),
+    llm_provider: str | None = Query(
+        None, description="Filter by LLM provider"
+    ),
     tags: list[str] | None = Query(None, description="Filter by tags"),
-    is_public: bool | None = Query(None, description="Filter by public status"),
-    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    is_public: bool | None = Query(
+        None, description="Filter by public status"
+    ),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maximum number of results"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of results to skip"
+    ),
     sort_by: str = Query("created_at", description="Sort field"),
-    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
+    sort_order: str = Query(
+        "desc", pattern="^(asc|desc)$", description="Sort order"
+    ),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> ProfileListResponse:
@@ -108,6 +120,7 @@ async def list_profiles(
     try:
         # Create request object from query parameters
         from chatter.schemas.profile import ProfileListRequest
+
         merged_request = ProfileListRequest(
             profile_type=profile_type,
             llm_provider=llm_provider,

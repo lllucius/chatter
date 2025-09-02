@@ -1,6 +1,5 @@
 """Configuration management for Chatter application."""
 
-
 # Using pydantic v2
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -78,8 +77,7 @@ class Settings(BaseSettings):
 
     # Security
     trusted_hosts: str | list[str] = Field(
-        default=["localhost", "127.0.0.1"],
-        description="Trusted hosts"
+        default=["localhost", "127.0.0.1"], description="Trusted hosts"
     )
     force_https: bool = Field(
         default=False, description="Force HTTPS redirect"
@@ -123,11 +121,10 @@ class Settings(BaseSettings):
     )
     redis_url: str = Field(
         default="redis://localhost:6379/0",
-        description="Redis URL for caching"
+        description="Redis URL for caching",
     )
     test_redis_url: str = Field(
-        default="redis://localhost:6379/1",
-        description="Test Redis URL"
+        default="redis://localhost:6379/1", description="Test Redis URL"
     )
     cache_ttl: int = Field(
         default=3600, description="Default cache TTL in seconds"
@@ -172,7 +169,8 @@ class Settings(BaseSettings):
 
     # Enable dimensional reduction for embeddings
     embedding_reduction_enabled: bool = Field(
-        default=False, description="Enable dimensional reduction for embeddings"
+        default=False,
+        description="Enable dimensional reduction for embeddings",
     )
 
     # Target dimension after reduction
@@ -192,7 +190,8 @@ class Settings(BaseSettings):
 
     # Whether to L2-normalize vectors after reduction
     embedding_reduction_normalize: bool = Field(
-        default=True, description="Normalize vectors after dimensional reduction"
+        default=True,
+        description="Normalize vectors after dimensional reduction",
     )
 
     # =============================================================================
@@ -404,7 +403,10 @@ class Settings(BaseSettings):
                 )
 
             # Validate secret key strength in production
-            if secret_key == "your-secret-key-here" or len(secret_key) < 32:
+            if (
+                secret_key == "your-secret-key-here"
+                or len(secret_key) < 32
+            ):
                 raise ValueError(
                     "SECRET_KEY must be a strong secret (32+ characters) in production"
                 )
@@ -423,7 +425,7 @@ class Settings(BaseSettings):
             "chatter:chatter_password",
             "user:password",
             "postgres:postgres",
-            "root:root"
+            "root:root",
         ]
         for pattern in weak_patterns:
             if pattern in v:
@@ -470,7 +472,11 @@ class Settings(BaseSettings):
         In development/testing: More permissive to include common development patterns
         In production: Use the configured trusted_hosts as-is for security
         """
-        base_hosts = self.trusted_hosts if isinstance(self.trusted_hosts, list) else [self.trusted_hosts]
+        base_hosts = (
+            self.trusted_hosts
+            if isinstance(self.trusted_hosts, list)
+            else [self.trusted_hosts]
+        )
 
         if self.is_development or self.is_testing:
             # Add common development patterns if not already present
@@ -481,7 +487,7 @@ class Settings(BaseSettings):
                 "testserver",  # Add testserver for pytest TestClient
                 f"localhost:{self.port}",
                 f"127.0.0.1:{self.port}",
-                f"0.0.0.0:{self.port}"
+                f"0.0.0.0:{self.port}",
             ]
 
             # Combine and deduplicate
@@ -498,5 +504,6 @@ try:
 except Exception:
     # For testing/development when DATABASE_URL is not set
     import os
+
     os.environ.setdefault('DATABASE_URL', 'sqlite:///test.db')
     settings = Settings()

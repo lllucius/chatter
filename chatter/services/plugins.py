@@ -15,7 +15,9 @@ except ImportError:
     # Fallback for when langchain_core is not available
     class BaseTool:
         """Fallback BaseTool class."""
+
         pass
+
 
 from chatter.config import settings
 from chatter.schemas.plugins import (
@@ -33,6 +35,7 @@ logger = get_logger(__name__)
 
 class PluginError(Exception):
     """Plugin operation error."""
+
     pass
 
 
@@ -95,7 +98,9 @@ class BasePlugin(ABC):
         """
         return {}
 
-    async def validate_configuration(self, config: dict[str, Any]) -> bool:
+    async def validate_configuration(
+        self, config: dict[str, Any]
+    ) -> bool:
         """Validate plugin configuration.
 
         Args:
@@ -166,7 +171,9 @@ class PluginManager:
         self.plugins: dict[str, PluginInstance] = {}
         self.loaded_plugins: dict[str, BasePlugin] = {}
         self.plugin_registry: dict[str, type[BasePlugin]] = {}
-        self.plugins_directory = Path(settings.document_storage_path) / "plugins"
+        self.plugins_directory = (
+            Path(settings.document_storage_path) / "plugins"
+        )
         self._ensure_directories()
 
     def _ensure_directories(self) -> None:
@@ -193,12 +200,16 @@ class PluginManager:
         plugin_path = Path(plugin_path)
 
         if not plugin_path.exists():
-            raise ValueError(f"Plugin path does not exist: {plugin_path}")
+            raise ValueError(
+                f"Plugin path does not exist: {plugin_path}"
+            )
 
         # Load plugin manifest
         manifest_path = plugin_path / "manifest.json"
         if not manifest_path.exists():
-            raise ValueError(f"Plugin manifest not found: {manifest_path}")
+            raise ValueError(
+                f"Plugin manifest not found: {manifest_path}"
+            )
 
         try:
             with open(manifest_path) as f:
@@ -211,7 +222,9 @@ class PluginManager:
         # Check if plugin already installed
         for plugin_instance in self.plugins.values():
             if plugin_instance.manifest.name == manifest.name:
-                raise ValueError(f"Plugin '{manifest.name}' is already installed")
+                raise ValueError(
+                    f"Plugin '{manifest.name}' is already installed"
+                )
 
         # Validate plugin
         await self._validate_plugin(plugin_path, manifest)
@@ -220,9 +233,11 @@ class PluginManager:
         plugin_install_path = self.plugins_directory / manifest.name
         if plugin_install_path.exists():
             import shutil
+
             shutil.rmtree(plugin_install_path)
 
         import shutil
+
         shutil.copytree(plugin_path, plugin_install_path)
 
         # Create plugin instance
@@ -266,6 +281,7 @@ class PluginManager:
         installation_path = Path(plugin_instance.installation_path)
         if installation_path.exists():
             import shutil
+
             shutil.rmtree(installation_path)
 
         # Remove from registry
@@ -297,7 +313,9 @@ class PluginManager:
 
         try:
             # Load plugin module
-            plugin_class = await self._load_plugin_class(plugin_instance)
+            plugin_class = await self._load_plugin_class(
+                plugin_instance
+            )
 
             # Create plugin instance
             plugin = plugin_class(plugin_instance.configuration)
@@ -398,7 +416,11 @@ class PluginManager:
         plugins = list(self.plugins.values())
 
         if plugin_type:
-            plugins = [p for p in plugins if p.manifest.plugin_type == plugin_type]
+            plugins = [
+                p
+                for p in plugins
+                if p.manifest.plugin_type == plugin_type
+            ]
 
         if status:
             plugins = [p for p in plugins if p.status == status]
@@ -419,7 +441,9 @@ class PluginManager:
         """
         return self.plugins.get(plugin_id)
 
-    async def get_loaded_plugin(self, plugin_id: str) -> BasePlugin | None:
+    async def get_loaded_plugin(
+        self, plugin_id: str
+    ) -> BasePlugin | None:
         """Get loaded plugin instance.
 
         Args:
@@ -471,7 +495,9 @@ class PluginManager:
         # Validate configuration if plugin is loaded
         loaded_plugin = self.loaded_plugins.get(plugin_id)
         if loaded_plugin:
-            if not await loaded_plugin.validate_configuration(configuration):
+            if not await loaded_plugin.validate_configuration(
+                configuration
+            ):
                 return False
 
         # Apply configuration
@@ -522,7 +548,9 @@ class PluginManager:
         # Check entry point exists
         entry_point_path = plugin_path / manifest.entry_point
         if not entry_point_path.exists():
-            raise ValueError(f"Entry point not found: {manifest.entry_point}")
+            raise ValueError(
+                f"Entry point not found: {manifest.entry_point}"
+            )
 
         # Validate Python version requirement
         # This is a simplified check - in production you'd use packaging.version
@@ -535,7 +563,9 @@ class PluginManager:
                 # Check if system supports this permission
                 pass  # Placeholder for permission validation
 
-    async def _load_plugin_class(self, plugin_instance: PluginInstance) -> type[BasePlugin]:
+    async def _load_plugin_class(
+        self, plugin_instance: PluginInstance
+    ) -> type[BasePlugin]:
         """Load plugin class from file.
 
         Args:
@@ -553,12 +583,13 @@ class PluginManager:
 
         # Load module dynamically
         spec = importlib.util.spec_from_file_location(
-            f"plugin_{manifest.name}",
-            entry_point_path
+            f"plugin_{manifest.name}", entry_point_path
         )
 
         if not spec or not spec.loader:
-            raise ImportError(f"Cannot load plugin module: {manifest.entry_point}")
+            raise ImportError(
+                f"Cannot load plugin module: {manifest.entry_point}"
+            )
 
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
@@ -566,18 +597,24 @@ class PluginManager:
         # Find plugin class
         plugin_class = None
         for _name, obj in inspect.getmembers(module):
-            if (inspect.isclass(obj) and
-                issubclass(obj, BasePlugin) and
-                obj != BasePlugin):
+            if (
+                inspect.isclass(obj)
+                and issubclass(obj, BasePlugin)
+                and obj != BasePlugin
+            ):
                 plugin_class = obj
                 break
 
         if not plugin_class:
-            raise ImportError(f"No plugin class found in {manifest.entry_point}")
+            raise ImportError(
+                f"No plugin class found in {manifest.entry_point}"
+            )
 
         return plugin_class
 
-    async def discover_plugins(self, search_paths: list[str] | None = None) -> list[str]:
+    async def discover_plugins(
+        self, search_paths: list[str] | None = None
+    ) -> list[str]:
         """Discover available plugins in search paths.
 
         Args:
@@ -612,14 +649,17 @@ class PluginManager:
         """
         total_plugins = len(self.plugins)
         active_plugins = sum(
-            1 for p in self.plugins.values()
+            1
+            for p in self.plugins.values()
             if p.status == PluginStatus.ACTIVE
         )
 
         plugin_types = {}
         for plugin in self.plugins.values():
             plugin_type = plugin.manifest.plugin_type.value
-            plugin_types[plugin_type] = plugin_types.get(plugin_type, 0) + 1
+            plugin_types[plugin_type] = (
+                plugin_types.get(plugin_type, 0) + 1
+            )
 
         return {
             "total_plugins": total_plugins,
@@ -700,7 +740,9 @@ class ExampleIntegrationPlugin(IntegrationPlugin):
 
 # Register example plugins
 plugin_manager.plugin_registry["example_tool"] = ExampleToolPlugin
-plugin_manager.plugin_registry["example_integration"] = ExampleIntegrationPlugin
+plugin_manager.plugin_registry["example_integration"] = (
+    ExampleIntegrationPlugin
+)
 
 
 # Job handlers for plugin operations
@@ -710,7 +752,8 @@ async def plugin_health_check_job() -> dict[str, Any]:
 
     # Report any unhealthy plugins
     unhealthy_plugins = [
-        plugin_id for plugin_id, health in results.items()
+        plugin_id
+        for plugin_id, health in results.items()
         if not health.get("healthy", False)
     ]
 
@@ -729,7 +772,9 @@ async def plugin_health_check_job() -> dict[str, Any]:
 
 
 # Register plugin job handlers
-job_queue.register_handler("plugin_health_check", plugin_health_check_job)
+job_queue.register_handler(
+    "plugin_health_check", plugin_health_check_job
+)
 
 
 # Helper functions for plugin management

@@ -15,6 +15,7 @@ logger = get_logger(__name__)
 
 class PermissionLevel(Enum):
     """Permission levels for tool access."""
+
     NONE = "none"
     READ = "read"
     WRITE = "write"
@@ -30,7 +31,7 @@ class ToolPermission:
         permission_level: PermissionLevel,
         allowed_methods: set[str] | None = None,
         rate_limit: int | None = None,
-        expiry: datetime | None = None
+        expiry: datetime | None = None,
     ):
         """Initialize tool permission.
 
@@ -70,7 +71,11 @@ class ToolPermission:
         if self.permission_level == PermissionLevel.NONE:
             return False
 
-        if method and self.allowed_methods and method not in self.allowed_methods:
+        if (
+            method
+            and self.allowed_methods
+            and method not in self.allowed_methods
+        ):
             return False
 
         return True
@@ -126,7 +131,7 @@ class UserPermissions:
             "Added tool permission",
             user_id=self.user_id,
             tool_name=permission.tool_name,
-            permission_level=permission.permission_level.value
+            permission_level=permission.permission_level.value,
         )
 
     def remove_tool_permission(self, tool_name: str) -> bool:
@@ -145,15 +150,13 @@ class UserPermissions:
             logger.info(
                 "Removed tool permission",
                 user_id=self.user_id,
-                tool_name=tool_name
+                tool_name=tool_name,
             )
             return True
         return False
 
     def can_use_tool(
-        self,
-        tool_name: str,
-        method: str | None = None
+        self, tool_name: str, method: str | None = None
     ) -> bool:
         """Check if user can use a specific tool.
 
@@ -176,9 +179,7 @@ class UserPermissions:
         return permission.can_execute(method)
 
     def record_tool_usage(
-        self,
-        tool_name: str,
-        method: str | None = None
+        self, tool_name: str, method: str | None = None
     ) -> bool:
         """Record tool usage and check rate limits.
 
@@ -206,7 +207,7 @@ class AuditLogEntry:
         workflow_id: str,
         workflow_type: str,
         details: dict[str, Any],
-        timestamp: datetime | None = None
+        timestamp: datetime | None = None,
     ):
         """Initialize audit log entry.
 
@@ -235,7 +236,7 @@ class AuditLogEntry:
             "workflow_id": self.workflow_id,
             "workflow_type": self.workflow_type,
             "details": self.details,
-            "timestamp": self.timestamp.isoformat()
+            "timestamp": self.timestamp.isoformat(),
         }
 
 
@@ -255,14 +256,16 @@ class WorkflowSecurityManager:
     def setup_default_filters(self) -> None:
         """Setup default content filters."""
         # Add common sensitive patterns
-        self.blocked_patterns.update({
-            "password",
-            "api_key",
-            "secret_key",
-            "private_key",
-            "token",
-            "credential"
-        })
+        self.blocked_patterns.update(
+            {
+                "password",
+                "api_key",
+                "secret_key",
+                "private_key",
+                "token",
+                "credential",
+            }
+        )
 
     def get_user_permissions(self, user_id: str) -> UserPermissions:
         """Get permissions for a user, creating if not exists.
@@ -285,7 +288,7 @@ class WorkflowSecurityManager:
         permission_level: PermissionLevel,
         allowed_methods: set[str] | None = None,
         rate_limit: int | None = None,
-        expiry: datetime | None = None
+        expiry: datetime | None = None,
     ) -> None:
         """Grant tool permission to a user.
 
@@ -304,7 +307,7 @@ class WorkflowSecurityManager:
             permission_level=permission_level,
             allowed_methods=allowed_methods,
             rate_limit=rate_limit,
-            expiry=expiry
+            expiry=expiry,
         )
 
         user_perms.add_tool_permission(permission)
@@ -319,11 +322,13 @@ class WorkflowSecurityManager:
                 "tool_name": tool_name,
                 "permission_level": permission_level.value,
                 "rate_limit": rate_limit,
-                "expiry": expiry.isoformat() if expiry else None
-            }
+                "expiry": expiry.isoformat() if expiry else None,
+            },
         )
 
-    def revoke_tool_permission(self, user_id: str, tool_name: str) -> bool:
+    def revoke_tool_permission(
+        self, user_id: str, tool_name: str
+    ) -> bool:
         """Revoke tool permission from a user.
 
         Args:
@@ -342,7 +347,7 @@ class WorkflowSecurityManager:
                 user_id,
                 "",
                 "security",
-                {"tool_name": tool_name}
+                {"tool_name": tool_name},
             )
 
         return success
@@ -354,7 +359,7 @@ class WorkflowSecurityManager:
         workflow_type: str,
         tool_name: str,
         method: str | None = None,
-        parameters: dict[str, Any] | None = None
+        parameters: dict[str, Any] | None = None,
     ) -> bool:
         """Authorize tool execution for a user.
 
@@ -381,8 +386,8 @@ class WorkflowSecurityManager:
                 {
                     "tool_name": tool_name,
                     "method": method,
-                    "reason": "insufficient_permissions"
-                }
+                    "reason": "insufficient_permissions",
+                },
             )
             return False
 
@@ -396,8 +401,8 @@ class WorkflowSecurityManager:
                 {
                     "tool_name": tool_name,
                     "method": method,
-                    "reason": "rate_limit_exceeded"
-                }
+                    "reason": "rate_limit_exceeded",
+                },
             )
             return False
 
@@ -411,8 +416,8 @@ class WorkflowSecurityManager:
                 {
                     "tool_name": tool_name,
                     "method": method,
-                    "reason": "sensitive_content_detected"
-                }
+                    "reason": "sensitive_content_detected",
+                },
             )
             return False
 
@@ -422,10 +427,7 @@ class WorkflowSecurityManager:
             user_id,
             workflow_id,
             workflow_type,
-            {
-                "tool_name": tool_name,
-                "method": method
-            }
+            {"tool_name": tool_name, "method": method},
         )
 
         return True
@@ -446,7 +448,9 @@ class WorkflowSecurityManager:
         else:
             data_str = str(data).lower()
 
-        return any(pattern in data_str for pattern in self.blocked_patterns)
+        return any(
+            pattern in data_str for pattern in self.blocked_patterns
+        )
 
     def log_event(
         self,
@@ -454,7 +458,7 @@ class WorkflowSecurityManager:
         user_id: str,
         workflow_id: str,
         workflow_type: str,
-        details: dict[str, Any]
+        details: dict[str, Any],
     ) -> None:
         """Log a security event.
 
@@ -470,7 +474,7 @@ class WorkflowSecurityManager:
             user_id=user_id,
             workflow_id=workflow_id,
             workflow_type=workflow_type,
-            details=details
+            details=details,
         )
 
         self.audit_log.append(entry)
@@ -483,7 +487,7 @@ class WorkflowSecurityManager:
             "Security event logged",
             event_type=event_type,
             user_id=user_id,
-            workflow_id=workflow_id
+            workflow_id=workflow_id,
         )
 
     def get_audit_log(
@@ -491,7 +495,7 @@ class WorkflowSecurityManager:
         user_id: str | None = None,
         event_type: str | None = None,
         hours: int = 24,
-        limit: int = 100
+        limit: int = 100,
     ) -> list[dict[str, Any]]:
         """Get audit log entries.
 
@@ -507,7 +511,8 @@ class WorkflowSecurityManager:
         cutoff_time = datetime.now().timestamp() - (hours * 3600)
 
         filtered_entries = [
-            entry for entry in reversed(self.audit_log)
+            entry
+            for entry in reversed(self.audit_log)
             if entry.timestamp.timestamp() > cutoff_time
             and (not user_id or entry.user_id == user_id)
             and (not event_type or entry.event_type == event_type)
@@ -527,7 +532,8 @@ class WorkflowSecurityManager:
         cutoff_time = datetime.now().timestamp() - (hours * 3600)
 
         recent_entries = [
-            entry for entry in self.audit_log
+            entry
+            for entry in self.audit_log
             if entry.timestamp.timestamp() > cutoff_time
         ]
 
@@ -537,7 +543,7 @@ class WorkflowSecurityManager:
                 "denied_attempts": 0,
                 "authorized_executions": 0,
                 "top_users": [],
-                "top_events": []
+                "top_events": [],
             }
 
         # Count events by type
@@ -545,26 +551,43 @@ class WorkflowSecurityManager:
         user_counts: dict[str, int] = {}
 
         for entry in recent_entries:
-            event_counts[entry.event_type] = event_counts.get(entry.event_type, 0) + 1
-            user_counts[entry.user_id] = user_counts.get(entry.user_id, 0) + 1
+            event_counts[entry.event_type] = (
+                event_counts.get(entry.event_type, 0) + 1
+            )
+            user_counts[entry.user_id] = (
+                user_counts.get(entry.user_id, 0) + 1
+            )
 
         denied_attempts = sum(
-            count for event, count in event_counts.items()
+            count
+            for event, count in event_counts.items()
             if "denied" in event
         )
 
-        authorized_executions = event_counts.get("tool_execution_authorized", 0)
+        authorized_executions = event_counts.get(
+            "tool_execution_authorized", 0
+        )
 
         # Top users and events
-        top_users = sorted(user_counts.items(), key=lambda x: x[1], reverse=True)[:5]
-        top_events = sorted(event_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        top_users = sorted(
+            user_counts.items(), key=lambda x: x[1], reverse=True
+        )[:5]
+        top_events = sorted(
+            event_counts.items(), key=lambda x: x[1], reverse=True
+        )[:5]
 
         return {
             "total_events": len(recent_entries),
             "denied_attempts": denied_attempts,
             "authorized_executions": authorized_executions,
-            "top_users": [{"user_id": uid, "count": count} for uid, count in top_users],
-            "top_events": [{"event_type": event, "count": count} for event, count in top_events]
+            "top_users": [
+                {"user_id": uid, "count": count}
+                for uid, count in top_users
+            ],
+            "top_events": [
+                {"event_type": event, "count": count}
+                for event, count in top_events
+            ],
         }
 
 

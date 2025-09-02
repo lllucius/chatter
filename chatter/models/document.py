@@ -10,12 +10,14 @@ from sqlalchemy import (
     JSON,
     Boolean,
     DateTime,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
     Text,
 )
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -201,9 +203,11 @@ class Document(Base):
             "title": self.title,
             "description": self.description,
             "status": self.status.value,
-            "processing_started_at": self.processing_started_at.isoformat()
-            if self.processing_started_at
-            else None,
+            "processing_started_at": (
+                self.processing_started_at.isoformat()
+                if self.processing_started_at
+                else None
+            ),
             "processing_completed_at": (
                 self.processing_completed_at.isoformat()
                 if self.processing_completed_at
@@ -220,15 +224,17 @@ class Document(Base):
             "is_public": self.is_public,
             "view_count": self.view_count,
             "search_count": self.search_count,
-            "last_accessed_at": self.last_accessed_at.isoformat()
-            if self.last_accessed_at
-            else None,
-            "created_at": self.created_at.isoformat()
-            if self.created_at
-            else None,
-            "updated_at": self.updated_at.isoformat()
-            if self.updated_at
-            else None,
+            "last_accessed_at": (
+                self.last_accessed_at.isoformat()
+                if self.last_accessed_at
+                else None
+            ),
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
         }
 
 
@@ -268,12 +274,15 @@ class DocumentChunk(Base):
 
     # Embedding metadata - tracks which models have been applied
     embedding_models: Mapped[list[str] | None] = mapped_column(
-        "embedding_models", JSON, nullable=True,
-        comment="List of embedding model names that have been applied to this chunk"
+        "embedding_models",
+        JSON,
+        nullable=True,
+        comment="List of embedding model names that have been applied to this chunk",
     )
     primary_embedding_model: Mapped[str | None] = mapped_column(
-        String(100), nullable=True,
-        comment="Primary embedding model for this chunk"
+        String(100),
+        nullable=True,
+        comment="Primary embedding model for this chunk",
     )
     embedding_provider: Mapped[str | None] = mapped_column(
         String(50), nullable=True
@@ -304,9 +313,13 @@ class DocumentChunk(Base):
     @property
     def has_dynamic_embeddings(self) -> bool:
         """Check if chunk has embeddings in dynamic tables."""
-        return bool(self.embedding_models and len(self.embedding_models) > 0)
+        return bool(
+            self.embedding_models and len(self.embedding_models) > 0
+        )
 
-    def add_embedding_model(self, model_name: str, set_as_primary: bool = False) -> None:
+    def add_embedding_model(
+        self, model_name: str, set_as_primary: bool = False
+    ) -> None:
         """Add an embedding model to the list of applied models.
 
         Args:
@@ -328,13 +341,18 @@ class DocumentChunk(Base):
         Args:
             model_name: Name of the embedding model to remove
         """
-        if self.embedding_models and model_name in self.embedding_models:
+        if (
+            self.embedding_models
+            and model_name in self.embedding_models
+        ):
             self.embedding_models.remove(model_name)
 
             # Update primary if it was the removed model
             if self.primary_embedding_model == model_name:
                 self.primary_embedding_model = (
-                    self.embedding_models[0] if self.embedding_models else None
+                    self.embedding_models[0]
+                    if self.embedding_models
+                    else None
                 )
 
     def to_dict(self) -> dict[str, Any]:
@@ -352,14 +370,16 @@ class DocumentChunk(Base):
             "embedding_models": self.embedding_models,
             "primary_embedding_model": self.primary_embedding_model,
             "embedding_provider": self.embedding_provider,
-            "embedding_created_at": self.embedding_created_at.isoformat()
-            if self.embedding_created_at
-            else None,
+            "embedding_created_at": (
+                self.embedding_created_at.isoformat()
+                if self.embedding_created_at
+                else None
+            ),
             "content_hash": self.content_hash,
-            "created_at": self.created_at.isoformat()
-            if self.created_at
-            else None,
-            "updated_at": self.updated_at.isoformat()
-            if self.updated_at
-            else None,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
         }

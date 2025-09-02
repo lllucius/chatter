@@ -40,8 +40,12 @@ class TestWorkflowCache:
         config = {"temperature": 0.7, "max_tokens": 1000}
 
         # Act
-        key1 = self.cache._generate_cache_key(provider, workflow_type, config)
-        key2 = self.cache._generate_cache_key(provider, workflow_type, config)
+        key1 = self.cache._generate_cache_key(
+            provider, workflow_type, config
+        )
+        key2 = self.cache._generate_cache_key(
+            provider, workflow_type, config
+        )
 
         # Assert
         assert key1 == key2
@@ -57,8 +61,12 @@ class TestWorkflowCache:
         config2 = {"temperature": 0.8}
 
         # Act
-        key1 = self.cache._generate_cache_key(provider, workflow_type, config1)
-        key2 = self.cache._generate_cache_key(provider, workflow_type, config2)
+        key1 = self.cache._generate_cache_key(
+            provider, workflow_type, config1
+        )
+        key2 = self.cache._generate_cache_key(
+            provider, workflow_type, config2
+        )
 
         # Assert
         assert key1 != key2
@@ -72,8 +80,12 @@ class TestWorkflowCache:
         config2 = {"max_tokens": 1000, "temperature": 0.7}
 
         # Act
-        key1 = self.cache._generate_cache_key(provider, workflow_type, config1)
-        key2 = self.cache._generate_cache_key(provider, workflow_type, config2)
+        key1 = self.cache._generate_cache_key(
+            provider, workflow_type, config1
+        )
+        key2 = self.cache._generate_cache_key(
+            provider, workflow_type, config2
+        )
 
         # Assert
         assert key1 == key2
@@ -112,7 +124,9 @@ class TestWorkflowCache:
         configs = [{"temp": i * 0.1} for i in range(4)]
 
         # Act - Fill cache beyond max size
-        for i, (config, workflow) in enumerate(zip(configs, workflows, strict=False)):
+        for i, (config, workflow) in enumerate(
+            zip(configs, workflows, strict=False)
+        ):
             self.cache.put("openai", "full", config, workflow)
             if i < 3:  # First 3 should fit
                 assert len(self.cache.cache) == i + 1
@@ -121,10 +135,18 @@ class TestWorkflowCache:
 
         # Assert - Least recently used item should be evicted
         # First item should be evicted, others should remain
-        assert self.cache.get("openai", "full", configs[0]) is None  # Evicted
-        assert self.cache.get("openai", "full", configs[1]) == workflows[1]
-        assert self.cache.get("openai", "full", configs[2]) == workflows[2]
-        assert self.cache.get("openai", "full", configs[3]) == workflows[3]
+        assert (
+            self.cache.get("openai", "full", configs[0]) is None
+        )  # Evicted
+        assert (
+            self.cache.get("openai", "full", configs[1]) == workflows[1]
+        )
+        assert (
+            self.cache.get("openai", "full", configs[2]) == workflows[2]
+        )
+        assert (
+            self.cache.get("openai", "full", configs[3]) == workflows[3]
+        )
 
     def test_cache_access_time_update(self):
         """Test that cache access updates access time."""
@@ -137,7 +159,9 @@ class TestWorkflowCache:
         self.cache.put(provider, workflow_type, config, mock_workflow)
 
         # Get initial access time
-        cache_key = self.cache._generate_cache_key(provider, workflow_type, config)
+        cache_key = self.cache._generate_cache_key(
+            provider, workflow_type, config
+        )
         initial_time = self.cache.access_times[cache_key]
 
         # Wait a bit and access again
@@ -205,7 +229,7 @@ class TestLazyToolLoader:
         tool_config = {
             "module": "tools.calculator",
             "class": "Calculator",
-            "init_params": {"precision": 10}
+            "init_params": {"precision": 10},
         }
 
         # Act
@@ -223,7 +247,7 @@ class TestLazyToolLoader:
         tool_config = {
             "module": "tools.calculator",
             "class": "Calculator",
-            "init_params": {}
+            "init_params": {},
         }
         mock_tool = MagicMock()
 
@@ -270,7 +294,9 @@ class TestLazyToolLoader:
         # Arrange
         self.loader.register_tool("tool1", {"module": "mod1"})
         self.loader.register_tool("tool2", {"module": "mod2"})
-        self.loader.loaded_tools["tool3"] = MagicMock()  # Already loaded
+        self.loader.loaded_tools["tool3"] = (
+            MagicMock()
+        )  # Already loaded
 
         # Act
         available = self.loader.get_available_tools()
@@ -286,8 +312,12 @@ class TestLazyToolLoader:
         tools_to_preload = ["tool1", "tool2"]
         mock_tools = [MagicMock(), MagicMock()]
 
-        self.loader.register_tool("tool1", {"module": "mod1", "class": "Tool1"})
-        self.loader.register_tool("tool2", {"module": "mod2", "class": "Tool2"})
+        self.loader.register_tool(
+            "tool1", {"module": "mod1", "class": "Tool1"}
+        )
+        self.loader.register_tool(
+            "tool2", {"module": "mod2", "class": "Tool2"}
+        )
 
         with patch.object(self.loader, 'get_tool') as mock_get_tool:
             mock_get_tool.side_effect = mock_tools
@@ -326,8 +356,12 @@ class TestPerformanceMonitor:
 
         # Assert
         assert workflow_id in self.monitor.active_workflows
-        assert "start_time" in self.monitor.active_workflows[workflow_id]
-        assert "memory_start" in self.monitor.active_workflows[workflow_id]
+        assert (
+            "start_time" in self.monitor.active_workflows[workflow_id]
+        )
+        assert (
+            "memory_start" in self.monitor.active_workflows[workflow_id]
+        )
 
     def test_stop_monitoring_workflow(self):
         """Test stopping workflow monitoring."""
@@ -406,14 +440,21 @@ class TestPerformanceMonitor:
             self.monitor.execution_times[workflow_id] = [exec_time]
 
         # Add an anomalous slow execution
-        self.monitor.execution_times["slow-workflow"] = [1.0]  # 10x slower
+        self.monitor.execution_times["slow-workflow"] = [
+            1.0
+        ]  # 10x slower
 
         # Act
-        anomalies = self.monitor.detect_anomalies(threshold_multiplier=3.0)
+        anomalies = self.monitor.detect_anomalies(
+            threshold_multiplier=3.0
+        )
 
         # Assert
         assert len(anomalies) > 0
-        assert any("slow-workflow" in anomaly["workflow_id"] for anomaly in anomalies)
+        assert any(
+            "slow-workflow" in anomaly["workflow_id"]
+            for anomaly in anomalies
+        )
 
 
 @pytest.mark.unit
@@ -438,7 +479,7 @@ class TestWorkflowOptimizer:
             "workflow_type": "full",
             "enable_memory": True,
             "max_tool_calls": 10,
-            "tools": ["calculator", "search", "web_browser"]
+            "tools": ["calculator", "search", "web_browser"],
         }
 
         # Mock performance data
@@ -446,7 +487,7 @@ class TestWorkflowOptimizer:
             "execution_time": 5.2,
             "memory_usage": 150.5,
             "tool_usage": {"calculator": 3, "search": 2},
-            "cache_hit_rate": 0.6
+            "cache_hit_rate": 0.6,
         }
 
         # Act
@@ -469,15 +510,27 @@ class TestWorkflowOptimizer:
             "enable_memory": True,
             "memory_window": 200,  # Very large
             "max_tool_calls": 50,  # Very high
-            "temperature": 0.9,    # High randomness
-            "tools": ["tool1", "tool2", "tool3", "tool4", "tool5"]  # Many tools
+            "temperature": 0.9,  # High randomness
+            "tools": [
+                "tool1",
+                "tool2",
+                "tool3",
+                "tool4",
+                "tool5",
+            ],  # Many tools
         }
 
         performance_data = {
             "execution_time": 30.0,  # Slow
-            "memory_usage": 500.0,   # High memory
-            "tool_usage": {"tool1": 1, "tool2": 0, "tool3": 0, "tool4": 0, "tool5": 0},
-            "cache_hit_rate": 0.1    # Low cache hit
+            "memory_usage": 500.0,  # High memory
+            "tool_usage": {
+                "tool1": 1,
+                "tool2": 0,
+                "tool3": 0,
+                "tool4": 0,
+                "tool5": 0,
+            },
+            "cache_hit_rate": 0.1,  # Low cache hit
         }
 
         # Act
@@ -489,11 +542,15 @@ class TestWorkflowOptimizer:
         assert len(suggestions) > 0
 
         # Should suggest reducing memory window
-        memory_suggestions = [s for s in suggestions if "memory" in s.lower()]
+        memory_suggestions = [
+            s for s in suggestions if "memory" in s.lower()
+        ]
         assert len(memory_suggestions) > 0
 
         # Should suggest removing unused tools
-        tool_suggestions = [s for s in suggestions if "tool" in s.lower()]
+        tool_suggestions = [
+            s for s in suggestions if "tool" in s.lower()
+        ]
         assert len(tool_suggestions) > 0
 
     def test_optimize_workflow_config(self):
@@ -505,13 +562,17 @@ class TestWorkflowOptimizer:
             "memory_window": 100,
             "max_tool_calls": 20,
             "temperature": 0.8,
-            "tools": ["useful_tool", "unused_tool1", "unused_tool2"]
+            "tools": ["useful_tool", "unused_tool1", "unused_tool2"],
         }
 
         usage_stats = {
-            "tool_usage": {"useful_tool": 50, "unused_tool1": 1, "unused_tool2": 0},
+            "tool_usage": {
+                "useful_tool": 50,
+                "unused_tool1": 1,
+                "unused_tool2": 0,
+            },
             "avg_memory_used": 30,  # Using much less than allocated
-            "avg_tool_calls": 5     # Using much less than max
+            "avg_tool_calls": 5,  # Using much less than max
         }
 
         # Act
@@ -521,14 +582,22 @@ class TestWorkflowOptimizer:
 
         # Assert
         # Should reduce memory window based on actual usage
-        assert optimized_config["memory_window"] < original_config["memory_window"]
+        assert (
+            optimized_config["memory_window"]
+            < original_config["memory_window"]
+        )
 
         # Should reduce max_tool_calls based on actual usage
-        assert optimized_config["max_tool_calls"] < original_config["max_tool_calls"]
+        assert (
+            optimized_config["max_tool_calls"]
+            < original_config["max_tool_calls"]
+        )
 
         # Should keep useful tools, remove unused ones
         assert "useful_tool" in optimized_config["tools"]
-        assert len(optimized_config["tools"]) < len(original_config["tools"])
+        assert len(optimized_config["tools"]) < len(
+            original_config["tools"]
+        )
 
     def test_benchmark_workflow_variants(self):
         """Test benchmarking different workflow variants."""
@@ -536,13 +605,13 @@ class TestWorkflowOptimizer:
         base_config = {
             "workflow_type": "full",
             "enable_memory": True,
-            "memory_window": 50
+            "memory_window": 50,
         }
 
         variants = [
             {"memory_window": 25},
             {"memory_window": 50},
-            {"memory_window": 100}
+            {"memory_window": 100},
         ]
 
         # Mock execution function
@@ -552,13 +621,16 @@ class TestWorkflowOptimizer:
             return {
                 "execution_time": execution_time,
                 "memory_usage": config["memory_window"] * 2.0,
-                "result": "success"
+                "result": "success",
             }
 
         # Act
         async def run_benchmark():
             return await self.optimizer.benchmark_workflow_variants(
-                base_config, variants, mock_execute_workflow, iterations=1
+                base_config,
+                variants,
+                mock_execute_workflow,
+                iterations=1,
             )
 
         # Run async test
@@ -592,6 +664,7 @@ class TestBatchProcessor:
     @pytest.mark.asyncio
     async def test_add_item_to_batch(self):
         """Test adding items to batch processor."""
+
         # Arrange
         async def mock_process_batch(items):
             return [f"processed_{item}" for item in items]
@@ -687,7 +760,7 @@ class TestWorkflowPerformanceIntegration:
             "enable_memory": True,
             "memory_window": 100,
             "max_tool_calls": 10,
-            "tools": ["calculator", "search"]
+            "tools": ["calculator", "search"],
         }
 
         mock_workflow = MagicMock()
@@ -712,8 +785,12 @@ class TestWorkflowPerformanceIntegration:
         metrics = monitor.stop_monitoring(workflow_id)
 
         # Step 4: Analyze and optimize
-        analysis = optimizer.analyze_workflow_performance(base_config, metrics)
-        suggestions = optimizer.suggest_optimizations(base_config, metrics)
+        analysis = optimizer.analyze_workflow_performance(
+            base_config, metrics
+        )
+        suggestions = optimizer.suggest_optimizations(
+            base_config, metrics
+        )
 
         # Assert
         assert analysis["performance_score"] >= 0.0
@@ -736,7 +813,7 @@ class TestWorkflowPerformanceIntegration:
             config = {
                 "workflow_type": "full",
                 "temperature": i * 0.05,  # Different configs
-                "max_tokens": 1000 + i * 100
+                "max_tokens": 1000 + i * 100,
             }
             workflow_configs.append(config)
 

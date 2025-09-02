@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field
 
 class ValidationRule(BaseModel):
     """Input validation rule definition."""
+
     name: str
     pattern: str | None = None
     max_length: int | None = None
@@ -44,6 +45,7 @@ class ProblemDetail(BaseModel):
 
 class APIVersion(str, Enum):
     """Supported API versions."""
+
     V1 = "v1"
     V2 = "v2"
     # Future versions can be added here
@@ -51,12 +53,14 @@ class APIVersion(str, Enum):
 
 class VersionStatus(str, Enum):
     """API version status."""
+
     ACTIVE = "active"
     SUNSET = "sunset"
 
 
 class EndpointChange(str, Enum):
     """Types of endpoint changes between versions."""
+
     ADDED = "added"
     MODIFIED = "modified"
     REMOVED = "removed"
@@ -64,6 +68,7 @@ class EndpointChange(str, Enum):
 
 class VersionInfo(BaseModel):
     """API version information."""
+
     version: APIVersion
     status: VersionStatus
     release_date: str
@@ -76,6 +81,7 @@ class VersionInfo(BaseModel):
 
 class EndpointVersioning(BaseModel):
     """Endpoint versioning information."""
+
     path: str
     method: str
     introduced_in: APIVersion

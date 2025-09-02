@@ -34,7 +34,7 @@ security = HTTPBearer()
 
 
 async def get_auth_service(
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> AuthService:
     """Get authentication service instance.
 
@@ -147,7 +147,7 @@ async def refresh_token(
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ) -> UserResponse:
     """Get current user information.
 
@@ -290,7 +290,10 @@ async def logout(
     return LogoutResponse(message="Logged out successfully")
 
 
-@router.post("/password-reset/request", response_model=PasswordResetRequestResponse)
+@router.post(
+    "/password-reset/request",
+    response_model=PasswordResetRequestResponse,
+)
 async def request_password_reset(
     email: str,
     auth_service: AuthService = Depends(get_auth_service),
@@ -305,10 +308,15 @@ async def request_password_reset(
         Success message
     """
     await auth_service.request_password_reset(email)
-    return PasswordResetRequestResponse(message="Password reset email sent if account exists")
+    return PasswordResetRequestResponse(
+        message="Password reset email sent if account exists"
+    )
 
 
-@router.post("/password-reset/confirm", response_model=PasswordResetConfirmResponse)
+@router.post(
+    "/password-reset/confirm",
+    response_model=PasswordResetConfirmResponse,
+)
 async def confirm_password_reset(
     token: str,
     new_password: str,
@@ -325,7 +333,9 @@ async def confirm_password_reset(
         Success message
     """
     await auth_service.confirm_password_reset(token, new_password)
-    return PasswordResetConfirmResponse(message="Password reset successfully")
+    return PasswordResetConfirmResponse(
+        message="Password reset successfully"
+    )
 
 
 @router.delete("/account", response_model=AccountDeactivateResponse)

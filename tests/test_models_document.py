@@ -1,8 +1,8 @@
 """Tests for document models."""
 
-import pytest
 from datetime import datetime
-from sqlalchemy.exc import IntegrityError
+
+import pytest
 
 from chatter.models.document import (
     Document,
@@ -93,22 +93,25 @@ class TestDocumentModel:
             extra_metadata={
                 "author": "John Doe",
                 "subject": "Test Subject",
-                "keywords": ["test", "document"]
-            }
+                "keywords": ["test", "document"],
+            },
         )
 
         # Assert
         assert document.tags == ["research", "important", "2023"]
         assert document.extra_metadata["author"] == "John Doe"
         assert document.extra_metadata["subject"] == "Test Subject"
-        assert document.extra_metadata["keywords"] == ["test", "document"]
+        assert document.extra_metadata["keywords"] == [
+            "test",
+            "document",
+        ]
 
     def test_document_processing_timestamps(self, test_user: User):
         """Test document with processing timestamps."""
         # Arrange
         start_time = datetime(2023, 1, 1, 12, 0, 0)
         end_time = datetime(2023, 1, 1, 12, 2, 30)
-        
+
         # Act
         document = Document(
             owner_id=test_user.id,
@@ -141,7 +144,7 @@ class TestDocumentModel:
             document_type=DocumentType.PDF,
             version=1,
         )
-        
+
         child_doc = Document(
             owner_id=test_user.id,
             filename="child.pdf",
@@ -173,7 +176,7 @@ class TestDocumentModel:
             document_type=DocumentType.TEXT,
             status=DocumentStatus.PROCESSED,
         )
-        
+
         # Pending document
         pending_doc = Document(
             owner_id=test_user.id,
@@ -211,12 +214,14 @@ class TestDocumentModel:
             view_count=5,
             search_count=3,
         )
-        
+
         # Mock timestamps
         document.created_at = datetime(2023, 1, 1, 12, 0, 0)
         document.updated_at = datetime(2023, 1, 1, 12, 30, 0)
         document.processing_started_at = datetime(2023, 1, 1, 12, 1, 0)
-        document.processing_completed_at = datetime(2023, 1, 1, 12, 2, 0)
+        document.processing_completed_at = datetime(
+            2023, 1, 1, 12, 2, 0
+        )
         document.last_accessed_at = datetime(2023, 1, 1, 12, 15, 0)
 
         # Act
@@ -311,21 +316,27 @@ class TestDocumentChunkModel:
         """Test chunk with embedding metadata."""
         # Arrange
         embedding_time = datetime(2023, 1, 1, 12, 0, 0)
-        
+
         # Act
         chunk = DocumentChunk(
             document_id=test_document.id,
             content="Embedded content",
             chunk_index=0,
             content_hash="embed123",
-            embedding_models=["openai-ada-002", "sentence-transformers"],
+            embedding_models=[
+                "openai-ada-002",
+                "sentence-transformers",
+            ],
             primary_embedding_model="openai-ada-002",
             embedding_provider="openai",
             embedding_created_at=embedding_time,
         )
 
         # Assert
-        assert chunk.embedding_models == ["openai-ada-002", "sentence-transformers"]
+        assert chunk.embedding_models == [
+            "openai-ada-002",
+            "sentence-transformers",
+        ]
         assert chunk.primary_embedding_model == "openai-ada-002"
         assert chunk.embedding_provider == "openai"
         assert chunk.embedding_created_at == embedding_time
@@ -348,7 +359,9 @@ class TestDocumentChunkModel:
 
         chunk.add_embedding_model("model2")
         assert chunk.embedding_models == ["model1", "model2"]
-        assert chunk.primary_embedding_model == "model1"  # Still primary
+        assert (
+            chunk.primary_embedding_model == "model1"
+        )  # Still primary
 
         chunk.add_embedding_model("model3", set_as_primary=True)
         assert chunk.embedding_models == ["model1", "model2", "model3"]
@@ -380,8 +393,8 @@ class TestDocumentChunkModel:
             extra_metadata={
                 "section": "introduction",
                 "page": 1,
-                "confidence": 0.95
-            }
+                "confidence": 0.95,
+            },
         )
 
         # Assert
@@ -400,7 +413,7 @@ class TestDocumentChunkModel:
             content_hash="props1",
             embedding_models=["model1"],
         )
-        
+
         # Chunk without embeddings
         chunk_without_embeddings = DocumentChunk(
             document_id=test_document.id,
@@ -428,9 +441,9 @@ class TestDocumentChunkModel:
             embedding_models=["model1"],
             primary_embedding_model="model1",
             embedding_provider="openai",
-            extra_metadata={"key": "value"}
+            extra_metadata={"key": "value"},
         )
-        
+
         # Mock timestamps
         chunk.created_at = datetime(2023, 1, 1, 12, 0, 0)
         chunk.updated_at = datetime(2023, 1, 1, 12, 5, 0)
@@ -475,7 +488,10 @@ class TestDocumentChunkModel:
         assert chunk.id in repr_str
         assert test_document.id in repr_str
         assert "index=5" in repr_str
-        assert "This is a very long chunk content that should be..." in repr_str
+        assert (
+            "This is a very long chunk content that should be..."
+            in repr_str
+        )
 
     def test_document_status_enum(self):
         """Test document status enumeration."""
@@ -504,7 +520,9 @@ class TestDocumentChunkModel:
 class TestDocumentModelIntegration:
     """Integration tests for document models."""
 
-    def test_document_chunk_relationship(self, test_user: User, test_session):
+    def test_document_chunk_relationship(
+        self, test_user: User, test_session
+    ):
         """Test document-chunk relationship."""
         # Arrange
         document = Document(
@@ -532,7 +550,7 @@ class TestDocumentModelIntegration:
             chunk_index=1,
             content_hash="chunk2",
         )
-        
+
         test_session.add_all([chunk1, chunk2])
         test_session.commit()
 
@@ -546,7 +564,9 @@ class TestDocumentModelIntegration:
         assert document.chunks[0].document == document
         assert document.chunks[1].document == document
 
-    def test_document_user_relationship(self, test_user: User, test_session):
+    def test_document_user_relationship(
+        self, test_user: User, test_session
+    ):
         """Test document-user relationship."""
         # Arrange & Act
         document = Document(
@@ -569,7 +589,9 @@ class TestDocumentModelIntegration:
         assert document.owner == test_user
         assert document in test_user.documents
 
-    def test_document_version_relationship(self, test_user: User, test_session):
+    def test_document_version_relationship(
+        self, test_user: User, test_session
+    ):
         """Test document parent-child relationship."""
         # Arrange
         parent = Document(

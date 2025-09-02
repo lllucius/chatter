@@ -41,7 +41,12 @@ class ConversationService:
         self.query_service = ConversationQueryService(session)
 
     async def create_conversation(
-        self, user_id: str, conversation_data: ConversationCreateSchema = None, title: str = None, model: str = None, **kwargs
+        self,
+        user_id: str,
+        conversation_data: ConversationCreateSchema = None,
+        title: str = None,
+        model: str = None,
+        **kwargs,
     ) -> Conversation:
         """Create a new conversation.
 
@@ -70,6 +75,7 @@ class ConversationService:
                 # Validate user_id format
                 try:
                     from uuid import UUID
+
                     UUID(user_id)
                 except ValueError:
                     raise ValueError("Invalid user ID format")
@@ -105,7 +111,7 @@ class ConversationService:
                 "Created conversation",
                 conversation_id=conversation.id,
                 user_id=user_id,
-                title=conversation.title
+                title=conversation.title,
             )
 
             return conversation
@@ -114,12 +120,15 @@ class ConversationService:
             logger.error(
                 "Failed to create conversation",
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise ValidationError(f"Failed to create conversation: {e}")
 
     async def get_conversation(
-        self, conversation_id: str, user_id: str, include_messages: bool = True
+        self,
+        conversation_id: str,
+        user_id: str,
+        include_messages: bool = True,
     ) -> Conversation:
         """Get conversation by ID with access control.
 
@@ -138,20 +147,25 @@ class ConversationService:
             self.session,
             conversation_id,
             user_id,
-            include_messages=include_messages
+            include_messages=include_messages,
         )
 
         if not conversation:
             raise NotFoundError(
                 "Conversation not found or not accessible",
                 resource_type="conversation",
-                resource_id=conversation_id
+                resource_id=conversation_id,
             )
 
         return conversation
 
     async def list_conversations(
-        self, user_id: str, limit: int = 20, offset: int = 0, sort_field: str = "updated_at", sort_order: str = "desc"
+        self,
+        user_id: str,
+        limit: int = 20,
+        offset: int = 0,
+        sort_field: str = "updated_at",
+        sort_order: str = "desc",
     ) -> Sequence[Conversation]:
         """List conversations for a user.
 
@@ -177,7 +191,7 @@ class ConversationService:
                 limit=limit,
                 offset=offset,
                 sort_field=sort_field,
-                sort_order=sort_order
+                sort_order=sort_order,
             )
 
             return conversations
@@ -186,12 +200,17 @@ class ConversationService:
             logger.error(
                 "Failed to list conversations",
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise
 
     async def update_conversation(
-        self, conversation_id: str, user_id: str, update_data: ConversationUpdateSchema = None, title: str = None, **kwargs
+        self,
+        conversation_id: str,
+        user_id: str,
+        update_data: ConversationUpdateSchema = None,
+        title: str = None,
+        **kwargs,
     ) -> Conversation:
         """Update conversation.
 
@@ -218,29 +237,41 @@ class ConversationService:
             # Support both styles
             if update_data is None:
                 # Create update object from parameters
-                update_data = type('UpdateData', (), {
-                    'title': title,
-                    'status': kwargs.get('status'),
-                    'temperature': kwargs.get('temperature'),
-                    'max_tokens': kwargs.get('max_tokens'),
-                    'metadata': kwargs.get('metadata')
-                })()
+                update_data = type(
+                    'UpdateData',
+                    (),
+                    {
+                        'title': title,
+                        'status': kwargs.get('status'),
+                        'temperature': kwargs.get('temperature'),
+                        'max_tokens': kwargs.get('max_tokens'),
+                        'metadata': kwargs.get('metadata'),
+                    },
+                )()
 
             # Update fields if provided
             if update_data.title is not None:
                 conversation.title = update_data.title
 
-            if hasattr(update_data, 'status') and update_data.status is not None:
+            if (
+                hasattr(update_data, 'status')
+                and update_data.status is not None
+            ):
                 conversation.status = update_data.status
 
-            if hasattr(update_data, 'temperature') and update_data.temperature is not None:
+            if (
+                hasattr(update_data, 'temperature')
+                and update_data.temperature is not None
+            ):
                 conversation.temperature = update_data.temperature
 
             if update_data.max_tokens is not None:
                 conversation.max_tokens = update_data.max_tokens
 
             if update_data.workflow_config is not None:
-                conversation.workflow_config = update_data.workflow_config
+                conversation.workflow_config = (
+                    update_data.workflow_config
+                )
 
             if update_data.metadata is not None:
                 # Merge metadata
@@ -256,7 +287,9 @@ class ConversationService:
                 "Updated conversation",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                updated_fields=update_data.model_dump(exclude_unset=True)
+                updated_fields=update_data.model_dump(
+                    exclude_unset=True
+                ),
             )
 
             return conversation
@@ -268,11 +301,13 @@ class ConversationService:
                 "Failed to update conversation",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise ValidationError(f"Failed to update conversation: {e}")
 
-    async def delete_conversation(self, conversation_id: str, user_id: str) -> None:
+    async def delete_conversation(
+        self, conversation_id: str, user_id: str
+    ) -> None:
         """Delete conversation (soft delete by setting status).
 
         Args:
@@ -294,7 +329,7 @@ class ConversationService:
             logger.info(
                 "Deleted conversation",
                 conversation_id=conversation_id,
-                user_id=user_id
+                user_id=user_id,
             )
 
         except NotFoundError:
@@ -304,12 +339,16 @@ class ConversationService:
                 "Failed to delete conversation",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise
 
     async def search_conversations(
-        self, user_id: str, search_term: str, limit: int = 20, offset: int = 0
+        self,
+        user_id: str,
+        search_term: str,
+        limit: int = 20,
+        offset: int = 0,
     ) -> Sequence[Conversation]:
         """Search conversations by title or content.
 
@@ -323,8 +362,10 @@ class ConversationService:
             List of matching conversations
         """
         try:
-            conversations = await self.query_service.search_conversations(
-                user_id, search_term, limit
+            conversations = (
+                await self.query_service.search_conversations(
+                    user_id, search_term, limit
+                )
             )
 
             logger.debug(
@@ -333,7 +374,7 @@ class ConversationService:
                 search_term=search_term,
                 results_count=len(conversations),
                 offset=offset,
-                limit=limit
+                limit=limit,
             )
 
             return conversations
@@ -343,11 +384,13 @@ class ConversationService:
                 "Failed to search conversations",
                 user_id=user_id,
                 search_term=search_term,
-                error=str(e)
+                error=str(e),
             )
             raise
 
-    async def get_conversation_stats(self, conversation_id: str, user_id: str) -> dict[str, Any]:
+    async def get_conversation_stats(
+        self, conversation_id: str, user_id: str
+    ) -> dict[str, Any]:
         """Get statistics for a conversation.
 
         Args:
@@ -366,8 +409,14 @@ class ConversationService:
             )
 
             total_messages = len(conversation.messages)
-            user_messages = sum(1 for msg in conversation.messages if msg.role == "user")
-            assistant_messages = sum(1 for msg in conversation.messages if msg.role == "assistant")
+            user_messages = sum(
+                1 for msg in conversation.messages if msg.role == "user"
+            )
+            assistant_messages = sum(
+                1
+                for msg in conversation.messages
+                if msg.role == "assistant"
+            )
 
             total_tokens = sum(
                 (msg.input_tokens or 0) + (msg.output_tokens or 0)
@@ -389,7 +438,7 @@ class ConversationService:
                 "Retrieved conversation stats",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                stats=stats
+                stats=stats,
             )
 
             return stats
@@ -401,7 +450,7 @@ class ConversationService:
                 "Failed to get conversation stats",
                 conversation_id=conversation_id,
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise
 
@@ -426,11 +475,14 @@ class ConversationService:
             # Find old active conversations
             query = (
                 select(Conversation)
-                .where(and_(
-                    Conversation.user_id == user_id,
-                    Conversation.status == ConversationStatus.ACTIVE,
-                    Conversation.updated_at < cutoff_date
-                ))
+                .where(
+                    and_(
+                        Conversation.user_id == user_id,
+                        Conversation.status
+                        == ConversationStatus.ACTIVE,
+                        Conversation.updated_at < cutoff_date,
+                    )
+                )
                 .limit(limit)
             )
 
@@ -449,7 +501,7 @@ class ConversationService:
                 "Archived old conversations",
                 user_id=user_id,
                 archived_count=archived_count,
-                days_old=days_old
+                days_old=days_old,
             )
 
             return archived_count
@@ -458,7 +510,7 @@ class ConversationService:
             logger.error(
                 "Failed to archive old conversations",
                 user_id=user_id,
-                error=str(e)
+                error=str(e),
             )
             raise
 
@@ -472,12 +524,11 @@ class ConversationService:
             Number of conversations
         """
         try:
-            query = (
-                select(Conversation)
-                .where(and_(
+            query = select(Conversation).where(
+                and_(
                     Conversation.user_id == user_id,
-                    Conversation.status != ConversationStatus.DELETED
-                ))
+                    Conversation.status != ConversationStatus.DELETED,
+                )
             )
             result = await self.session.execute(query)
             conversations = result.scalars().all()
@@ -486,7 +537,9 @@ class ConversationService:
             logger.error(f"Failed to get conversation count: {e}")
             return 0
 
-    async def archive_conversation(self, conversation_id: str, user_id: str) -> bool:
+    async def archive_conversation(
+        self, conversation_id: str, user_id: str
+    ) -> bool:
         """Archive a conversation.
 
         Args:
@@ -497,7 +550,9 @@ class ConversationService:
             True if archived successfully
         """
         try:
-            conversation = await self.get_conversation(conversation_id, user_id, include_messages=False)
+            conversation = await self.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
             conversation.status = ConversationStatus.ARCHIVED
             await self.session.flush()
 
@@ -507,7 +562,9 @@ class ConversationService:
             logger.error(f"Failed to archive conversation: {e}")
             return False
 
-    async def unarchive_conversation(self, conversation_id: str, user_id: str) -> bool:
+    async def unarchive_conversation(
+        self, conversation_id: str, user_id: str
+    ) -> bool:
         """Unarchive a conversation.
 
         Args:
@@ -518,7 +575,9 @@ class ConversationService:
             True if unarchived successfully
         """
         try:
-            conversation = await self.get_conversation(conversation_id, user_id, include_messages=False)
+            conversation = await self.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
             conversation.status = ConversationStatus.ACTIVE
             await self.session.flush()
 
@@ -528,7 +587,9 @@ class ConversationService:
             logger.error(f"Failed to unarchive conversation: {e}")
             return False
 
-    async def get_conversation_metadata(self, conversation_id: str, user_id: str) -> dict:
+    async def get_conversation_metadata(
+        self, conversation_id: str, user_id: str
+    ) -> dict:
         """Get conversation metadata.
 
         Args:
@@ -539,20 +600,24 @@ class ConversationService:
             Conversation metadata
         """
         try:
-            conversation = await self.get_conversation(conversation_id, user_id, include_messages=False)
+            conversation = await self.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
             return {
                 'id': conversation.id,
                 'title': conversation.title,
                 'status': conversation.status,
                 'created_at': conversation.created_at,
                 'updated_at': conversation.updated_at,
-                'metadata': conversation.metadata
+                'metadata': conversation.metadata,
             }
         except Exception as e:
             logger.error(f"Failed to get conversation metadata: {e}")
             return {}
 
-    async def bulk_delete_conversations(self, conversation_ids: list[str], user_id: str) -> int:
+    async def bulk_delete_conversations(
+        self, conversation_ids: list[str], user_id: str
+    ) -> int:
         """Delete multiple conversations.
 
         Args:
@@ -568,12 +633,16 @@ class ConversationService:
                 await self.delete_conversation(conv_id, user_id)
                 deleted_count += 1
             except Exception as e:
-                logger.error(f"Failed to delete conversation {conv_id}: {e}")
+                logger.error(
+                    f"Failed to delete conversation {conv_id}: {e}"
+                )
 
         logger.info(f"Bulk deleted {deleted_count} conversations")
         return deleted_count
 
-    async def get_recent_conversations(self, user_id: str, limit: int = 10) -> list[Conversation]:
+    async def get_recent_conversations(
+        self, user_id: str, limit: int = 10
+    ) -> list[Conversation]:
         """Get recent conversations for user.
 
         Args:
@@ -584,7 +653,9 @@ class ConversationService:
             List of recent conversations
         """
         try:
-            conversations = await self.list_conversations(user_id, limit=limit)
+            conversations = await self.list_conversations(
+                user_id, limit=limit
+            )
             return conversations
         except Exception as e:
             logger.error(f"Failed to get recent conversations: {e}")

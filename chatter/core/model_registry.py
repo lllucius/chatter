@@ -36,13 +36,16 @@ logger = get_logger(__name__)
 def get_sync_engine():
     """Create a synchronous engine for table creation operations."""
     # Convert async URL to sync URL
-    sync_url = settings.database_url.replace("+asyncpg", "").replace("+aiopg", "")
+    sync_url = settings.database_url.replace("+asyncpg", "").replace(
+        "+aiopg", ""
+    )
     return create_engine(sync_url)
 
 
 @dataclass
 class ListParams:
     """Parameters for list operations."""
+
     page: int = 1
     per_page: int = 20
     active_only: bool = True
@@ -65,14 +68,18 @@ class ModelRegistryService:
             query = query.where(Provider.is_active)
 
         # Order by default first, then by display name
-        query = query.order_by(Provider.is_default.desc(), Provider.display_name)
+        query = query.order_by(
+            Provider.is_default.desc(), Provider.display_name
+        )
 
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total = await self.session.scalar(count_query)
 
         # Apply pagination
-        query = query.offset((params.page - 1) * params.per_page).limit(params.per_page)
+        query = query.offset((params.page - 1) * params.per_page).limit(
+            params.per_page
+        )
         result = await self.session.execute(query)
         providers = result.scalars().all()
 
@@ -92,7 +99,9 @@ class ModelRegistryService:
         )
         return result.scalar_one_or_none()
 
-    async def create_provider(self, provider_data: ProviderCreate) -> Provider:
+    async def create_provider(
+        self, provider_data: ProviderCreate
+    ) -> Provider:
         """Create a new provider."""
         provider = Provider(**provider_data.model_dump())
         self.session.add(provider)
@@ -127,7 +136,9 @@ class ModelRegistryService:
         # Delete all embedding spaces for all models under this provider
         for model in models:
             await self.session.execute(
-                delete(EmbeddingSpace).where(EmbeddingSpace.model_id == model.id)
+                delete(EmbeddingSpace).where(
+                    EmbeddingSpace.model_id == model.id
+                )
             )
 
         # Delete all models under this provider
@@ -142,11 +153,15 @@ class ModelRegistryService:
         await self.session.commit()
         return result.rowcount > 0
 
-    async def set_default_provider(self, provider_id: str, model_type: ModelType) -> bool:
+    async def set_default_provider(
+        self, provider_id: str, model_type: ModelType
+    ) -> bool:
         """Set a provider as default for a model type."""
         # First, unset current default
         await self.session.execute(
-            update(Provider).where(Provider.is_default).values(is_default=False)
+            update(Provider)
+            .where(Provider.is_default)
+            .values(is_default=False)
         )
 
         # Set new default
@@ -163,10 +178,12 @@ class ModelRegistryService:
         self,
         provider_id: str | None = None,
         model_type: ModelType | None = None,
-        params: ListParams = ListParams()
+        params: ListParams = ListParams(),
     ) -> tuple[Sequence[ModelDef], int]:
         """List model definitions with pagination."""
-        query = select(ModelDef).options(selectinload(ModelDef.provider))
+        query = select(ModelDef).options(
+            selectinload(ModelDef.provider)
+        )
 
         if provider_id:
             query = query.where(ModelDef.provider_id == provider_id)
@@ -178,14 +195,18 @@ class ModelRegistryService:
             query = query.where(ModelDef.is_active)
 
         # Order by default first, then by display name
-        query = query.order_by(ModelDef.is_default.desc(), ModelDef.display_name)
+        query = query.order_by(
+            ModelDef.is_default.desc(), ModelDef.display_name
+        )
 
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total = await self.session.scalar(count_query)
 
         # Apply pagination
-        query = query.offset((params.page - 1) * params.per_page).limit(params.per_page)
+        query = query.offset((params.page - 1) * params.per_page).limit(
+            params.per_page
+        )
         result = await self.session.execute(query)
         models = result.scalars().all()
 
@@ -200,16 +221,23 @@ class ModelRegistryService:
         )
         return result.scalar_one_or_none()
 
-    async def get_model_by_name(self, provider_id: str, name: str) -> ModelDef | None:
+    async def get_model_by_name(
+        self, provider_id: str, name: str
+    ) -> ModelDef | None:
         """Get model definition by provider and name."""
         result = await self.session.execute(
             select(ModelDef)
             .options(selectinload(ModelDef.provider))
-            .where(ModelDef.provider_id == provider_id, ModelDef.name == name)
+            .where(
+                ModelDef.provider_id == provider_id,
+                ModelDef.name == name,
+            )
         )
         return result.scalar_one_or_none()
 
-    async def create_model(self, model_data: ModelDefCreate) -> ModelDef:
+    async def create_model(
+        self, model_data: ModelDefCreate
+    ) -> ModelDef:
         """Create a new model definition."""
         model = ModelDef(**model_data.model_dump())
         self.session.add(model)
@@ -237,7 +265,9 @@ class ModelRegistryService:
         """Delete a model definition and its dependent embedding spaces."""
         # First delete all embedding spaces that depend on this model
         await self.session.execute(
-            delete(EmbeddingSpace).where(EmbeddingSpace.model_id == model_id)
+            delete(EmbeddingSpace).where(
+                EmbeddingSpace.model_id == model_id
+            )
         )
 
         # Then delete the model
@@ -256,7 +286,10 @@ class ModelRegistryService:
         # First, unset current default for this model type
         await self.session.execute(
             update(ModelDef)
-            .where(ModelDef.model_type == model.model_type, ModelDef.is_default)
+            .where(
+                ModelDef.model_type == model.model_type,
+                ModelDef.is_default,
+            )
             .values(is_default=False)
         )
 
@@ -273,11 +306,13 @@ class ModelRegistryService:
     async def list_embedding_spaces(
         self,
         model_id: str | None = None,
-        params: ListParams = ListParams()
+        params: ListParams = ListParams(),
     ) -> tuple[Sequence[EmbeddingSpace], int]:
         """List embedding spaces with pagination."""
         query = select(EmbeddingSpace).options(
-            selectinload(EmbeddingSpace.model).selectinload(ModelDef.provider)
+            selectinload(EmbeddingSpace.model).selectinload(
+                ModelDef.provider
+            )
         )
 
         if model_id:
@@ -287,49 +322,68 @@ class ModelRegistryService:
             query = query.where(EmbeddingSpace.is_active)
 
         # Order by default first, then by display name
-        query = query.order_by(EmbeddingSpace.is_default.desc(), EmbeddingSpace.display_name)
+        query = query.order_by(
+            EmbeddingSpace.is_default.desc(),
+            EmbeddingSpace.display_name,
+        )
 
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total = await self.session.scalar(count_query)
 
         # Apply pagination
-        query = query.offset((params.page - 1) * params.per_page).limit(params.per_page)
+        query = query.offset((params.page - 1) * params.per_page).limit(
+            params.per_page
+        )
         result = await self.session.execute(query)
         spaces = result.scalars().all()
 
         return spaces, total or 0
 
-    async def get_embedding_space(self, space_id: str) -> EmbeddingSpace | None:
+    async def get_embedding_space(
+        self, space_id: str
+    ) -> EmbeddingSpace | None:
         """Get embedding space by ID."""
         result = await self.session.execute(
             select(EmbeddingSpace)
             .options(
-                selectinload(EmbeddingSpace.model).selectinload(ModelDef.provider)
+                selectinload(EmbeddingSpace.model).selectinload(
+                    ModelDef.provider
+                )
             )
             .where(EmbeddingSpace.id == space_id)
         )
         return result.scalar_one_or_none()
 
-    async def get_embedding_space_by_name(self, name: str) -> EmbeddingSpace | None:
+    async def get_embedding_space_by_name(
+        self, name: str
+    ) -> EmbeddingSpace | None:
         """Get embedding space by name."""
         result = await self.session.execute(
             select(EmbeddingSpace)
             .options(
-                selectinload(EmbeddingSpace.model).selectinload(ModelDef.provider)
+                selectinload(EmbeddingSpace.model).selectinload(
+                    ModelDef.provider
+                )
             )
             .where(EmbeddingSpace.name == name)
         )
         return result.scalar_one_or_none()
 
-    async def get_embedding_space_by_table_name(self, table_name: str) -> EmbeddingSpace | None:
+    async def get_embedding_space_by_table_name(
+        self, table_name: str
+    ) -> EmbeddingSpace | None:
         """Get embedding space by table name."""
         result = await self.session.execute(
-            select(EmbeddingSpace).where(EmbeddingSpace.table_name == table_name)
+            select(EmbeddingSpace).where(
+                EmbeddingSpace.table_name == table_name
+            )
         )
         return result.scalar_one_or_none()
 
-    async def create_embedding_space(self, space_data: EmbeddingSpaceCreate) -> EmbeddingSpace:
+    async def create_embedding_space(
+        self, space_data: EmbeddingSpaceCreate
+    ) -> EmbeddingSpace:
         """Create a new embedding space with backing table and index."""
         # Create the space record
         space = EmbeddingSpace(**space_data.model_dump())
@@ -348,7 +402,7 @@ class ModelRegistryService:
                 space_id=space.id,
                 space_name=space.name,
                 table_name=space.table_name,
-                dimensions=space.effective_dimensions
+                dimensions=space.effective_dimensions,
             )
 
             return space
@@ -357,20 +411,20 @@ class ModelRegistryService:
             logger.error(
                 "Failed to create embedding space",
                 space_name=space.name,
-                error=str(e)
+                error=str(e),
             )
             raise
 
-    async def _create_embedding_table(self, space: EmbeddingSpace) -> None:
+    async def _create_embedding_table(
+        self, space: EmbeddingSpace
+    ) -> None:
         """Create the physical embedding table and index."""
         # Get sync engine for table creation
         sync_engine = get_sync_engine()
 
         # Create the dynamic model and table
         model_class = get_embedding_model(
-            space.table_name,
-            space.effective_dimensions,
-            sync_engine
+            space.table_name, space.effective_dimensions, sync_engine
         )
 
         # Configure index parameters
@@ -435,15 +489,20 @@ class ModelRegistryService:
         return result.rowcount > 0
 
     # Default lookups
-    async def get_default_provider(self, model_type: ModelType) -> Provider | None:
+    async def get_default_provider(
+        self, model_type: ModelType
+    ) -> Provider | None:
         """Get the default provider for a model type."""
         result = await self.session.execute(
-            select(Provider)
-            .where(Provider.is_default, Provider.is_active)
+            select(Provider).where(
+                Provider.is_default, Provider.is_active
+            )
         )
         return result.scalar_one_or_none()
 
-    async def get_default_model(self, model_type: ModelType) -> ModelDef | None:
+    async def get_default_model(
+        self, model_type: ModelType
+    ) -> ModelDef | None:
         """Get the default model for a type."""
         result = await self.session.execute(
             select(ModelDef)
@@ -451,21 +510,22 @@ class ModelRegistryService:
             .where(
                 ModelDef.model_type == model_type,
                 ModelDef.is_default,
-                ModelDef.is_active
+                ModelDef.is_active,
             )
         )
         return result.scalar_one_or_none()
 
-    async def get_default_embedding_space(self) -> EmbeddingSpace | None:
+    async def get_default_embedding_space(
+        self,
+    ) -> EmbeddingSpace | None:
         """Get the default embedding space."""
         result = await self.session.execute(
             select(EmbeddingSpace)
             .options(
-                selectinload(EmbeddingSpace.model).selectinload(ModelDef.provider)
+                selectinload(EmbeddingSpace.model).selectinload(
+                    ModelDef.provider
+                )
             )
-            .where(
-                EmbeddingSpace.is_default,
-                EmbeddingSpace.is_active
-            )
+            .where(EmbeddingSpace.is_default, EmbeddingSpace.is_active)
         )
         return result.scalar_one_or_none()

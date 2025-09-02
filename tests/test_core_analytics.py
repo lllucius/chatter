@@ -40,26 +40,32 @@ class TestAnalyticsService:
         # Mock database queries
         mock_conversations = [
             MagicMock(id="conv-1", created_at=datetime.now(UTC)),
-            MagicMock(id="conv-2", created_at=datetime.now(UTC))
+            MagicMock(id="conv-2", created_at=datetime.now(UTC)),
         ]
         mock_messages = [
             MagicMock(role=MessageRole.USER),
             MagicMock(role=MessageRole.ASSISTANT),
             MagicMock(role=MessageRole.USER),
-            MagicMock(role=MessageRole.ASSISTANT)
+            MagicMock(role=MessageRole.ASSISTANT),
         ]
 
         # Mock query results
-        self.mock_session.execute.return_value.scalars.return_value.all.return_value = mock_conversations
+        self.mock_session.execute.return_value.scalars.return_value.all.return_value = (
+            mock_conversations
+        )
         self.mock_session.execute.return_value.scalar.side_effect = [
             len(mock_conversations),  # total_conversations
-            len(mock_messages),       # total_messages
-            len([m for m in mock_messages if m.role == MessageRole.USER]),  # user_messages
-            15.5  # avg_conversation_length
+            len(mock_messages),  # total_messages
+            len(
+                [m for m in mock_messages if m.role == MessageRole.USER]
+            ),  # user_messages
+            15.5,  # avg_conversation_length
         ]
 
         # Act
-        stats = await self.analytics_service.get_conversation_stats(user_id)
+        stats = await self.analytics_service.get_conversation_stats(
+            user_id
+        )
 
         # Assert
         assert stats["total_conversations"] == 2
@@ -77,14 +83,16 @@ class TestAnalyticsService:
 
         # Mock filtered results
         self.mock_session.execute.return_value.scalar.side_effect = [
-            5,   # conversations in last 7 days
+            5,  # conversations in last 7 days
             25,  # messages in last 7 days
             12,  # user messages in last 7 days
-            8.3  # avg conversation length
+            8.3,  # avg conversation length
         ]
 
         # Act
-        stats = await self.analytics_service.get_conversation_stats(user_id, time_range)
+        stats = await self.analytics_service.get_conversation_stats(
+            user_id, time_range
+        )
 
         # Assert
         assert stats["total_conversations"] == 5
@@ -102,13 +110,19 @@ class TestAnalyticsService:
         mock_session_data = [
             {"hour": 9, "activity_count": 15},
             {"hour": 14, "activity_count": 22},
-            {"hour": 20, "activity_count": 8}
+            {"hour": 20, "activity_count": 8},
         ]
 
-        self.mock_session.execute.return_value.all.return_value = mock_session_data
+        self.mock_session.execute.return_value.all.return_value = (
+            mock_session_data
+        )
 
         # Act
-        behavior_stats = await self.analytics_service.get_user_behavior_stats(user_id)
+        behavior_stats = (
+            await self.analytics_service.get_user_behavior_stats(
+                user_id
+            )
+        )
 
         # Assert
         assert "hourly_activity" in behavior_stats
@@ -125,14 +139,16 @@ class TestAnalyticsService:
         # Mock performance data
         self.mock_session.execute.return_value.scalar.side_effect = [
             1250.5,  # avg_response_time
-            0.025,   # error_rate
-            45.2,    # requests_per_minute
-            150.0,   # avg_memory_usage
-            35.5     # avg_cpu_usage
+            0.025,  # error_rate
+            45.2,  # requests_per_minute
+            150.0,  # avg_memory_usage
+            35.5,  # avg_cpu_usage
         ]
 
         # Act
-        metrics = await self.analytics_service.get_performance_metrics(time_range)
+        metrics = await self.analytics_service.get_performance_metrics(
+            time_range
+        )
 
         # Assert
         assert metrics["avg_response_time"] == 1250.5
@@ -151,13 +167,19 @@ class TestAnalyticsService:
         mock_documents = [
             MagicMock(status=DocumentStatus.PROCESSED, access_count=15),
             MagicMock(status=DocumentStatus.PROCESSED, access_count=8),
-            MagicMock(status=DocumentStatus.FAILED, access_count=0)
+            MagicMock(status=DocumentStatus.FAILED, access_count=0),
         ]
 
-        self.mock_session.execute.return_value.scalars.return_value.all.return_value = mock_documents
+        self.mock_session.execute.return_value.scalars.return_value.all.return_value = (
+            mock_documents
+        )
 
         # Act
-        doc_stats = await self.analytics_service.get_document_usage_stats(time_range)
+        doc_stats = (
+            await self.analytics_service.get_document_usage_stats(
+                time_range
+            )
+        )
 
         # Assert
         assert doc_stats["total_documents"] == 3
@@ -173,16 +195,26 @@ class TestAnalyticsService:
         time_range = AnalyticsTimeRange.LAST_30_DAYS
 
         # Mock various stats
-        with patch.object(self.analytics_service, 'get_conversation_stats') as mock_conv_stats, \
-             patch.object(self.analytics_service, 'get_user_behavior_stats') as mock_behavior_stats, \
-             patch.object(self.analytics_service, 'get_performance_metrics') as mock_perf_metrics:
+        with (
+            patch.object(
+                self.analytics_service, 'get_conversation_stats'
+            ) as mock_conv_stats,
+            patch.object(
+                self.analytics_service, 'get_user_behavior_stats'
+            ) as mock_behavior_stats,
+            patch.object(
+                self.analytics_service, 'get_performance_metrics'
+            ) as mock_perf_metrics,
+        ):
 
             mock_conv_stats.return_value = {"total_conversations": 50}
             mock_behavior_stats.return_value = {"peak_hours": [9, 14]}
             mock_perf_metrics.return_value = {"avg_response_time": 1200}
 
             # Act
-            report = await self.analytics_service.generate_usage_report(user_id, time_range)
+            report = await self.analytics_service.generate_usage_report(
+                user_id, time_range
+            )
 
             # Assert
             assert "conversation_stats" in report
@@ -198,12 +230,14 @@ class TestAnalyticsService:
             AnalyticsTimeRange.LAST_24_HOURS,
             AnalyticsTimeRange.LAST_7_DAYS,
             AnalyticsTimeRange.LAST_30_DAYS,
-            AnalyticsTimeRange.LAST_90_DAYS
+            AnalyticsTimeRange.LAST_90_DAYS,
         ]
 
         # Act & Assert
         for time_range in time_ranges:
-            filter_condition = self.analytics_service._build_time_filter(time_range)
+            filter_condition = (
+                self.analytics_service._build_time_filter(time_range)
+            )
             # Should return a valid SQL condition or None
             assert filter_condition is not None or time_range is None
 
@@ -212,7 +246,9 @@ class TestAnalyticsService:
         """Test error handling during statistics collection."""
         # Arrange
         user_id = "user-123"
-        self.mock_session.execute.side_effect = Exception("Database error")
+        self.mock_session.execute.side_effect = Exception(
+            "Database error"
+        )
 
         # Act & Assert
         with pytest.raises(Exception):
@@ -234,11 +270,13 @@ class TestConversationAnalyzer:
             {"messages": ["msg1", "msg2", "msg3"]},
             {"messages": ["msg1", "msg2"]},
             {"messages": ["msg1", "msg2", "msg3", "msg4", "msg5"]},
-            {"messages": ["msg1"]}
+            {"messages": ["msg1"]},
         ]
 
         # Act
-        analysis = self.analyzer.analyze_conversation_length(conversations)
+        analysis = self.analyzer.analyze_conversation_length(
+            conversations
+        )
 
         # Assert
         assert analysis["avg_length"] == 2.75
@@ -253,7 +291,7 @@ class TestConversationAnalyzer:
             {"content": "I need help with Python programming"},
             {"content": "Can you help me debug this code?"},
             {"content": "What's the weather like today?"},
-            {"content": "How do I write a function in Python?"}
+            {"content": "How do I write a function in Python?"},
         ]
 
         # Act
@@ -263,8 +301,10 @@ class TestConversationAnalyzer:
         assert "topics" in topics
         assert "topic_distribution" in topics
         # Should identify programming as a major topic
-        assert any("programming" in topic.lower() or "code" in topic.lower()
-                  for topic in topics["topics"])
+        assert any(
+            "programming" in topic.lower() or "code" in topic.lower()
+            for topic in topics["topics"]
+        )
 
     def test_calculate_engagement_score(self):
         """Test calculating conversation engagement score."""
@@ -274,11 +314,13 @@ class TestConversationAnalyzer:
             "response_time_avg": 2.5,
             "user_questions": 8,
             "follow_up_questions": 3,
-            "conversation_duration": 1800  # 30 minutes
+            "conversation_duration": 1800,  # 30 minutes
         }
 
         # Act
-        engagement_score = self.analyzer.calculate_engagement_score(conversation_data)
+        engagement_score = self.analyzer.calculate_engagement_score(
+            conversation_data
+        )
 
         # Assert
         assert 0.0 <= engagement_score <= 1.0
@@ -292,24 +334,26 @@ class TestConversationAnalyzer:
                 "start_time": "09:00",
                 "topic": "programming",
                 "length": 10,
-                "satisfaction": 0.8
+                "satisfaction": 0.8,
             },
             {
                 "start_time": "14:30",
                 "topic": "general",
                 "length": 5,
-                "satisfaction": 0.6
+                "satisfaction": 0.6,
             },
             {
                 "start_time": "09:15",
                 "topic": "programming",
                 "length": 12,
-                "satisfaction": 0.9
-            }
+                "satisfaction": 0.9,
+            },
         ]
 
         # Act
-        patterns = self.analyzer.identify_conversation_patterns(conversations)
+        patterns = self.analyzer.identify_conversation_patterns(
+            conversations
+        )
 
         # Assert
         assert "time_patterns" in patterns
@@ -320,13 +364,24 @@ class TestConversationAnalyzer:
         """Test analyzing sentiment trends in conversations."""
         # Arrange
         messages = [
-            {"content": "I'm really frustrated with this issue", "timestamp": "2024-01-01T09:00:00Z"},
-            {"content": "Thank you, that's very helpful!", "timestamp": "2024-01-01T09:15:00Z"},
-            {"content": "This is exactly what I needed", "timestamp": "2024-01-01T09:30:00Z"}
+            {
+                "content": "I'm really frustrated with this issue",
+                "timestamp": "2024-01-01T09:00:00Z",
+            },
+            {
+                "content": "Thank you, that's very helpful!",
+                "timestamp": "2024-01-01T09:15:00Z",
+            },
+            {
+                "content": "This is exactly what I needed",
+                "timestamp": "2024-01-01T09:30:00Z",
+            },
         ]
 
         # Act
-        sentiment_trends = self.analyzer.analyze_sentiment_trends(messages)
+        sentiment_trends = self.analyzer.analyze_sentiment_trends(
+            messages
+        )
 
         # Assert
         assert "overall_sentiment" in sentiment_trends
@@ -350,7 +405,7 @@ class TestUserBehaviorAnalyzer:
             {"timestamp": "2024-01-01T09:15:00Z", "type": "message"},
             {"timestamp": "2024-01-01T14:30:00Z", "type": "message"},
             {"timestamp": "2024-01-01T14:45:00Z", "type": "message"},
-            {"timestamp": "2024-01-01T20:00:00Z", "type": "message"}
+            {"timestamp": "2024-01-01T20:00:00Z", "type": "message"},
         ]
 
         # Act
@@ -369,11 +424,13 @@ class TestUserBehaviorAnalyzer:
             "total_messages": 150,
             "avg_session_duration": 15.5,
             "return_frequency": 0.8,
-            "feature_usage": {"chat": 120, "documents": 30}
+            "feature_usage": {"chat": 120, "documents": 30},
         }
 
         # Act
-        engagement = self.analyzer.calculate_user_engagement_metrics(user_data)
+        engagement = self.analyzer.calculate_user_engagement_metrics(
+            user_data
+        )
 
         # Assert
         assert "engagement_score" in engagement
@@ -385,10 +442,30 @@ class TestUserBehaviorAnalyzer:
         """Test identifying user behavior segments."""
         # Arrange
         users = [
-            {"id": "user1", "activity_level": "high", "engagement": 0.9, "feature_usage": 15},
-            {"id": "user2", "activity_level": "low", "engagement": 0.3, "feature_usage": 3},
-            {"id": "user3", "activity_level": "medium", "engagement": 0.6, "feature_usage": 8},
-            {"id": "user4", "activity_level": "high", "engagement": 0.8, "feature_usage": 12}
+            {
+                "id": "user1",
+                "activity_level": "high",
+                "engagement": 0.9,
+                "feature_usage": 15,
+            },
+            {
+                "id": "user2",
+                "activity_level": "low",
+                "engagement": 0.3,
+                "feature_usage": 3,
+            },
+            {
+                "id": "user3",
+                "activity_level": "medium",
+                "engagement": 0.6,
+                "feature_usage": 8,
+            },
+            {
+                "id": "user4",
+                "activity_level": "high",
+                "engagement": 0.8,
+                "feature_usage": 12,
+            },
         ]
 
         # Act
@@ -408,7 +485,7 @@ class TestUserBehaviorAnalyzer:
             "activity_decline_rate": 0.3,
             "engagement_score": 0.2,
             "support_tickets": 3,
-            "feature_adoption_rate": 0.1
+            "feature_adoption_rate": 0.1,
         }
 
         # Act
@@ -432,7 +509,18 @@ class TestPerformanceAnalyzer:
     def test_analyze_response_times(self):
         """Test analyzing system response times."""
         # Arrange
-        response_times = [1.2, 0.8, 2.1, 1.5, 0.9, 3.2, 1.1, 1.8, 0.7, 2.5]
+        response_times = [
+            1.2,
+            0.8,
+            2.1,
+            1.5,
+            0.9,
+            3.2,
+            1.1,
+            1.8,
+            0.7,
+            2.5,
+        ]
 
         # Act
         analysis = self.analyzer.analyze_response_times(response_times)
@@ -448,10 +536,26 @@ class TestPerformanceAnalyzer:
         """Test analyzing error patterns."""
         # Arrange
         errors = [
-            {"type": "timeout", "timestamp": "2024-01-01T09:00:00Z", "severity": "high"},
-            {"type": "timeout", "timestamp": "2024-01-01T09:15:00Z", "severity": "high"},
-            {"type": "validation", "timestamp": "2024-01-01T10:00:00Z", "severity": "medium"},
-            {"type": "database", "timestamp": "2024-01-01T11:00:00Z", "severity": "high"}
+            {
+                "type": "timeout",
+                "timestamp": "2024-01-01T09:00:00Z",
+                "severity": "high",
+            },
+            {
+                "type": "timeout",
+                "timestamp": "2024-01-01T09:15:00Z",
+                "severity": "high",
+            },
+            {
+                "type": "validation",
+                "timestamp": "2024-01-01T10:00:00Z",
+                "severity": "medium",
+            },
+            {
+                "type": "database",
+                "timestamp": "2024-01-01T11:00:00Z",
+                "severity": "high",
+            },
         ]
 
         # Act
@@ -472,11 +576,13 @@ class TestPerformanceAnalyzer:
             "uptime": 0.999,
             "cpu_usage": 0.65,
             "memory_usage": 0.75,
-            "disk_usage": 0.80
+            "disk_usage": 0.80,
         }
 
         # Act
-        health_score = self.analyzer.calculate_system_health_score(metrics)
+        health_score = self.analyzer.calculate_system_health_score(
+            metrics
+        )
 
         # Assert
         assert 0.0 <= health_score <= 1.0
@@ -490,17 +596,22 @@ class TestPerformanceAnalyzer:
             "llm_response_time": 8.2,
             "network_latency": 0.1,
             "cache_hit_rate": 0.3,
-            "concurrent_requests": 150
+            "concurrent_requests": 150,
         }
 
         # Act
-        bottlenecks = self.analyzer.identify_performance_bottlenecks(performance_data)
+        bottlenecks = self.analyzer.identify_performance_bottlenecks(
+            performance_data
+        )
 
         # Assert
         assert "bottlenecks" in bottlenecks
         assert "recommendations" in bottlenecks
         # Should identify LLM response time as a bottleneck
-        assert any("llm" in bottleneck.lower() for bottleneck in bottlenecks["bottlenecks"])
+        assert any(
+            "llm" in bottleneck.lower()
+            for bottleneck in bottlenecks["bottlenecks"]
+        )
 
 
 @pytest.mark.unit
@@ -519,7 +630,7 @@ class TestTrendAnalyzer:
             {"date": "2024-01-02", "users": 110, "messages": 550},
             {"date": "2024-01-03", "users": 120, "messages": 600},
             {"date": "2024-01-04", "users": 115, "messages": 575},
-            {"date": "2024-01-05", "users": 125, "messages": 625}
+            {"date": "2024-01-05", "users": 125, "messages": 625},
         ]
 
         # Act
@@ -538,11 +649,13 @@ class TestTrendAnalyzer:
             {"period": "2024-01-02", "value": 105},
             {"period": "2024-01-03", "value": 110},
             {"period": "2024-01-04", "value": 108},
-            {"period": "2024-01-05", "value": 115}
+            {"period": "2024-01-05", "value": 115},
         ]
 
         # Act
-        forecast = self.analyzer.forecast_future_usage(historical_data, periods=3)
+        forecast = self.analyzer.forecast_future_usage(
+            historical_data, periods=3
+        )
 
         # Assert
         assert "forecast" in forecast
@@ -552,10 +665,23 @@ class TestTrendAnalyzer:
     def test_detect_anomalies(self):
         """Test detecting anomalies in usage patterns."""
         # Arrange
-        data_points = [100, 105, 110, 108, 115, 112, 500, 118, 120, 115]  # 500 is anomaly
+        data_points = [
+            100,
+            105,
+            110,
+            108,
+            115,
+            112,
+            500,
+            118,
+            120,
+            115,
+        ]  # 500 is anomaly
 
         # Act
-        anomalies = self.analyzer.detect_anomalies(data_points, threshold=2.0)
+        anomalies = self.analyzer.detect_anomalies(
+            data_points, threshold=2.0
+        )
 
         # Assert
         assert "anomalies" in anomalies
@@ -602,33 +728,52 @@ class TestAnalyticsIntegration:
 
         # Mock database responses
         self.mock_session.execute.return_value.scalar.side_effect = [
-            25,   # total_conversations
+            25,  # total_conversations
             150,  # total_messages
-            75,   # user_messages
-            6.0   # avg_conversation_length
+            75,  # user_messages
+            6.0,  # avg_conversation_length
         ]
 
         # Act
         # Step 1: Get basic conversation stats
-        conv_stats = await self.analytics_service.get_conversation_stats(user_id, time_range)
+        conv_stats = (
+            await self.analytics_service.get_conversation_stats(
+                user_id, time_range
+            )
+        )
 
         # Step 2: Analyze conversation patterns
         mock_conversations = [
-            {"messages": ["msg1", "msg2", "msg3"], "topic": "technical"},
-            {"messages": ["msg1", "msg2"], "topic": "general"}
+            {
+                "messages": ["msg1", "msg2", "msg3"],
+                "topic": "technical",
+            },
+            {"messages": ["msg1", "msg2"], "topic": "general"},
         ]
-        conversation_analysis = self.conversation_analyzer.analyze_conversation_length(mock_conversations)
+        conversation_analysis = (
+            self.conversation_analyzer.analyze_conversation_length(
+                mock_conversations
+            )
+        )
 
         # Step 3: Analyze user behavior
         mock_activities = [
             {"timestamp": "2024-01-01T09:00:00Z", "type": "message"},
-            {"timestamp": "2024-01-01T14:00:00Z", "type": "message"}
+            {"timestamp": "2024-01-01T14:00:00Z", "type": "message"},
         ]
-        behavior_patterns = self.user_analyzer.analyze_activity_patterns(mock_activities)
+        behavior_patterns = (
+            self.user_analyzer.analyze_activity_patterns(
+                mock_activities
+            )
+        )
 
         # Step 4: Analyze performance
         mock_response_times = [1.2, 1.5, 0.8, 2.1, 1.0]
-        performance_analysis = self.performance_analyzer.analyze_response_times(mock_response_times)
+        performance_analysis = (
+            self.performance_analyzer.analyze_response_times(
+                mock_response_times
+            )
+        )
 
         # Assert
         assert conv_stats["total_conversations"] == 25
@@ -641,9 +786,21 @@ class TestAnalyticsIntegration:
         """Test real-time analytics processing."""
         # Arrange
         events = [
-            {"type": "message_sent", "user_id": "user1", "timestamp": datetime.now(UTC)},
-            {"type": "conversation_started", "user_id": "user2", "timestamp": datetime.now(UTC)},
-            {"type": "error_occurred", "error_type": "timeout", "timestamp": datetime.now(UTC)}
+            {
+                "type": "message_sent",
+                "user_id": "user1",
+                "timestamp": datetime.now(UTC),
+            },
+            {
+                "type": "conversation_started",
+                "user_id": "user2",
+                "timestamp": datetime.now(UTC),
+            },
+            {
+                "type": "error_occurred",
+                "error_type": "timeout",
+                "timestamp": datetime.now(UTC),
+            },
         ]
 
         # Mock real-time processing
@@ -655,13 +812,15 @@ class TestAnalyticsIntegration:
             processed_event = {
                 "original": event,
                 "processed_at": datetime.now(UTC),
-                "metrics_updated": True
+                "metrics_updated": True,
             }
             processed_events.append(processed_event)
 
         # Assert
         assert len(processed_events) == 3
-        assert all(event["metrics_updated"] for event in processed_events)
+        assert all(
+            event["metrics_updated"] for event in processed_events
+        )
 
     @pytest.mark.asyncio
     async def test_analytics_dashboard_data_aggregation(self):
@@ -672,7 +831,7 @@ class TestAnalyticsIntegration:
             "active_users",
             "response_time",
             "error_rate",
-            "user_satisfaction"
+            "user_satisfaction",
         ]
 
         # Mock widget data
@@ -681,10 +840,18 @@ class TestAnalyticsIntegration:
         # Act
         for widget in dashboard_widgets:
             if widget == "conversation_count":
-                self.mock_session.execute.return_value.scalar.return_value = 150
-                widget_data[widget] = await self.analytics_service.get_conversation_count()
+                self.mock_session.execute.return_value.scalar.return_value = (
+                    150
+                )
+                widget_data[widget] = (
+                    await self.analytics_service.get_conversation_count()
+                )
             elif widget == "response_time":
-                widget_data[widget] = self.performance_analyzer.analyze_response_times([1.2, 1.5, 0.8])
+                widget_data[widget] = (
+                    self.performance_analyzer.analyze_response_times(
+                        [1.2, 1.5, 0.8]
+                    )
+                )
             # Add more widget data as needed
 
         # Assert
@@ -699,26 +866,38 @@ class TestAnalyticsIntegration:
         report_config = {
             "user_id": "test-user",
             "time_range": AnalyticsTimeRange.LAST_7_DAYS,
-            "include_sections": ["conversations", "performance", "trends"]
+            "include_sections": [
+                "conversations",
+                "performance",
+                "trends",
+            ],
         }
 
         # Mock report data
-        with patch.object(self.analytics_service, 'get_conversation_stats') as mock_conv, \
-             patch.object(self.analytics_service, 'get_performance_metrics') as mock_perf:
+        with (
+            patch.object(
+                self.analytics_service, 'get_conversation_stats'
+            ) as mock_conv,
+            patch.object(
+                self.analytics_service, 'get_performance_metrics'
+            ) as mock_perf,
+        ):
 
             mock_conv.return_value = {"total_conversations": 10}
             mock_perf.return_value = {"avg_response_time": 1.5}
 
             # Act
             report = await self.analytics_service.generate_usage_report(
-                report_config["user_id"],
-                report_config["time_range"]
+                report_config["user_id"], report_config["time_range"]
             )
 
             # Assert
             assert "conversation_stats" in report
             assert "performance_metrics" in report
-            assert report["conversation_stats"]["total_conversations"] == 10
+            assert (
+                report["conversation_stats"]["total_conversations"]
+                == 10
+            )
 
     @pytest.mark.asyncio
     async def test_analytics_performance_under_load(self):
@@ -734,7 +913,10 @@ class TestAnalyticsIntegration:
         # Act
         start_time = datetime.now()
 
-        tasks = [mock_analytics_request() for _ in range(num_concurrent_requests)]
+        tasks = [
+            mock_analytics_request()
+            for _ in range(num_concurrent_requests)
+        ]
         results = await asyncio.gather(*tasks)
 
         end_time = datetime.now()

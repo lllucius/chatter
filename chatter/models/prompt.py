@@ -9,13 +9,15 @@ from sqlalchemy import (
     JSON,
     Boolean,
     DateTime,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
     String,
     Text,
 )
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -306,8 +308,13 @@ class Prompt(Base):
                 # Validate each variable against the schema
                 for var_name, var_value in kwargs.items():
                     # Check if there's a schema for this variable
-                    if "properties" in self.input_schema and var_name in self.input_schema["properties"]:
-                        var_schema = self.input_schema["properties"][var_name]
+                    if (
+                        "properties" in self.input_schema
+                        and var_name in self.input_schema["properties"]
+                    ):
+                        var_schema = self.input_schema["properties"][
+                            var_name
+                        ]
 
                         try:
                             jsonschema.validate(var_value, var_schema)
@@ -322,14 +329,21 @@ class Prompt(Base):
                             )
 
                 # Validate the complete input against the full schema if it's a complete object schema
-                if "type" in self.input_schema and self.input_schema["type"] == "object":
+                if (
+                    "type" in self.input_schema
+                    and self.input_schema["type"] == "object"
+                ):
                     try:
                         jsonschema.validate(kwargs, self.input_schema)
                     except jsonschema.ValidationError as ve:
                         result["valid"] = False
-                        result["errors"].append(f"Input validation failed: {ve.message}")
+                        result["errors"].append(
+                            f"Input validation failed: {ve.message}"
+                        )
                     except jsonschema.SchemaError as se:
-                        result["warnings"].append(f"Invalid input schema: {se.message}")
+                        result["warnings"].append(
+                            f"Invalid input schema: {se.message}"
+                        )
 
             except ImportError:
                 result["warnings"].append(
@@ -387,9 +401,11 @@ class Prompt(Base):
             "usage_count": self.usage_count,
             "success_rate": self.success_rate,
             "avg_response_time_ms": self.avg_response_time_ms,
-            "last_used_at": self.last_used_at.isoformat()
-            if self.last_used_at
-            else None,
+            "last_used_at": (
+                self.last_used_at.isoformat()
+                if self.last_used_at
+                else None
+            ),
             "total_tokens_used": self.total_tokens_used,
             "total_cost": self.total_cost,
             "avg_tokens_per_use": self.avg_tokens_per_use,
@@ -398,10 +414,10 @@ class Prompt(Base):
             "content_hash": self.content_hash,
             "estimated_tokens": self.estimated_tokens,
             "language": self.language,
-            "created_at": self.created_at.isoformat()
-            if self.created_at
-            else None,
-            "updated_at": self.updated_at.isoformat()
-            if self.updated_at
-            else None,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
         }

@@ -1,7 +1,7 @@
 """Tests for correlation ID utilities."""
 
 import uuid
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from starlette.requests import Request
@@ -70,11 +70,11 @@ class TestCorrelationIdFunctions:
         # This test verifies the ContextVar behavior
         # Arrange
         test_id = "test-id"
-        
+
         # Act
         set_correlation_id(test_id)
         id_before = get_correlation_id()
-        
+
         # Reset context
         correlation_id_var.set(None)
         id_after = get_correlation_id()
@@ -101,18 +101,22 @@ class TestCorrelationIdMiddleware:
         test_correlation_id = "existing-correlation-id"
         mock_request = MagicMock(spec=Request)
         mock_request.headers = {"x-correlation-id": test_correlation_id}
-        
+
         mock_response = MagicMock(spec=Response)
         mock_response.headers = {}
-        
+
         async def mock_call_next(request):
             return mock_response
-        
+
         # Act
-        response = await self.middleware.dispatch(mock_request, mock_call_next)
-        
+        response = await self.middleware.dispatch(
+            mock_request, mock_call_next
+        )
+
         # Assert
-        assert response.headers['x-correlation-id'] == test_correlation_id
+        assert (
+            response.headers['x-correlation-id'] == test_correlation_id
+        )
         assert get_correlation_id() == test_correlation_id
 
     @pytest.mark.asyncio
@@ -121,21 +125,27 @@ class TestCorrelationIdMiddleware:
         # Arrange
         mock_request = MagicMock(spec=Request)
         mock_request.headers = {}
-        
+
         mock_response = MagicMock(spec=Response)
         mock_response.headers = {}
-        
+
         async def mock_call_next(request):
             return mock_response
-        
-        with patch('chatter.utils.correlation.generate_correlation_id') as mock_generate:
+
+        with patch(
+            'chatter.utils.correlation.generate_correlation_id'
+        ) as mock_generate:
             mock_generate.return_value = "generated-id"
-            
+
             # Act
-            response = await self.middleware.dispatch(mock_request, mock_call_next)
-            
+            response = await self.middleware.dispatch(
+                mock_request, mock_call_next
+            )
+
             # Assert
-            assert response.headers['x-correlation-id'] == "generated-id"
+            assert (
+                response.headers['x-correlation-id'] == "generated-id"
+            )
             assert get_correlation_id() == "generated-id"
             mock_generate.assert_called_once()
 
@@ -144,22 +154,30 @@ class TestCorrelationIdMiddleware:
         """Test middleware when empty correlation ID is provided."""
         # Arrange
         mock_request = MagicMock(spec=Request)
-        mock_request.headers = {"x-correlation-id": "   "}  # Empty/whitespace
-        
+        mock_request.headers = {
+            "x-correlation-id": "   "
+        }  # Empty/whitespace
+
         mock_response = MagicMock(spec=Response)
         mock_response.headers = {}
-        
+
         async def mock_call_next(request):
             return mock_response
-        
-        with patch('chatter.utils.correlation.generate_correlation_id') as mock_generate:
+
+        with patch(
+            'chatter.utils.correlation.generate_correlation_id'
+        ) as mock_generate:
             mock_generate.return_value = "generated-id"
-            
+
             # Act
-            response = await self.middleware.dispatch(mock_request, mock_call_next)
-            
+            response = await self.middleware.dispatch(
+                mock_request, mock_call_next
+            )
+
             # Assert
-            assert response.headers['x-correlation-id'] == "generated-id"
+            assert (
+                response.headers['x-correlation-id'] == "generated-id"
+            )
             assert get_correlation_id() == "generated-id"
             mock_generate.assert_called_once()
 
@@ -171,18 +189,22 @@ class TestCorrelationIdMiddleware:
         mock_request = MagicMock(spec=Request)
         # Simulate headers with different cases
         mock_request.headers = {"X-CORRELATION-ID": test_correlation_id}
-        
+
         mock_response = MagicMock(spec=Response)
         mock_response.headers = {}
-        
+
         async def mock_call_next(request):
             return mock_response
-        
+
         # Act
-        response = await self.middleware.dispatch(mock_request, mock_call_next)
-        
+        response = await self.middleware.dispatch(
+            mock_request, mock_call_next
+        )
+
         # Assert
-        assert response.headers['x-correlation-id'] == test_correlation_id
+        assert (
+            response.headers['x-correlation-id'] == test_correlation_id
+        )
         assert get_correlation_id() == test_correlation_id
 
     @pytest.mark.asyncio
@@ -195,21 +217,25 @@ class TestCorrelationIdMiddleware:
         headers_items = [
             ("content-type", "application/json"),
             ("x-correlation-id", test_correlation_id),
-            ("authorization", "Bearer token")
+            ("authorization", "Bearer token"),
         ]
         mock_request.headers.items.return_value = headers_items
-        
+
         mock_response = MagicMock(spec=Response)
         mock_response.headers = {}
-        
+
         async def mock_call_next(request):
             return mock_response
-        
+
         # Act
-        response = await self.middleware.dispatch(mock_request, mock_call_next)
-        
+        response = await self.middleware.dispatch(
+            mock_request, mock_call_next
+        )
+
         # Assert
-        assert response.headers['x-correlation-id'] == test_correlation_id
+        assert (
+            response.headers['x-correlation-id'] == test_correlation_id
+        )
         assert get_correlation_id() == test_correlation_id
 
 
@@ -227,27 +253,32 @@ class TestCorrelationIdIntegration:
         # Arrange
         app = MagicMock()
         middleware = CorrelationIdMiddleware(app)
-        
+
         mock_request = MagicMock(spec=Request)
         mock_request.headers = {}
-        
+
         mock_response = MagicMock(spec=Response)
         mock_response.headers = {}
-        
+
         # Track correlation ID during request processing
         captured_correlation_id = None
-        
+
         async def mock_call_next(request):
             nonlocal captured_correlation_id
             captured_correlation_id = get_correlation_id()
             return mock_response
-        
+
         # Act
-        response = await middleware.dispatch(mock_request, mock_call_next)
-        
+        response = await middleware.dispatch(
+            mock_request, mock_call_next
+        )
+
         # Assert
         assert captured_correlation_id is not None
-        assert response.headers['x-correlation-id'] == captured_correlation_id
+        assert (
+            response.headers['x-correlation-id']
+            == captured_correlation_id
+        )
         # Correlation ID should still be accessible after middleware
         assert get_correlation_id() == captured_correlation_id
 
@@ -255,14 +286,14 @@ class TestCorrelationIdIntegration:
         """Test context variable behavior across function calls."""
         # Arrange
         test_id = "context-test-id"
-        
+
         def nested_function():
             return get_correlation_id()
-        
+
         # Act
         set_correlation_id(test_id)
         nested_result = nested_function()
-        
+
         # Assert
         assert nested_result == test_id
         assert get_correlation_id() == test_id
@@ -280,10 +311,10 @@ class TestCorrelationIdEdgeCases:
         """Test setting correlation ID to None."""
         # Arrange
         set_correlation_id("test")
-        
+
         # Act
         set_correlation_id(None)
-        
+
         # Assert
         assert get_correlation_id() is None
 
@@ -291,7 +322,7 @@ class TestCorrelationIdEdgeCases:
         """Test that generated UUIDs have correct format."""
         # Act
         correlation_id = generate_correlation_id()
-        
+
         # Assert - Should be valid UUID4 format
         assert len(correlation_id) == 36
         assert correlation_id.count('-') == 4
@@ -305,20 +336,22 @@ class TestCorrelationIdEdgeCases:
         # Arrange
         app = MagicMock()
         middleware = CorrelationIdMiddleware(app)
-        
+
         mock_request = MagicMock(spec=Request)
         mock_request.headers = {"x-correlation-id": "test-id"}
-        
+
         original_response = MagicMock(spec=Response)
         original_response.headers = {"content-type": "application/json"}
         original_response.body = b'{"test": "data"}'
-        
+
         async def mock_call_next(request):
             return original_response
-        
+
         # Act
-        response = await middleware.dispatch(mock_request, mock_call_next)
-        
+        response = await middleware.dispatch(
+            mock_request, mock_call_next
+        )
+
         # Assert
         assert response is original_response
         assert response.headers['x-correlation-id'] == "test-id"

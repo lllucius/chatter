@@ -10,10 +10,14 @@ from fastapi.testclient import TestClient
 from chatter.api.auth import get_current_user
 from chatter.api.chat import get_chat_service
 from chatter.main import app
-from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
+from chatter.models.conversation import (
+    Conversation,
+    ConversationStatus,
+    Message,
+    MessageRole,
+)
 from chatter.models.user import User
 from chatter.services.chat import ChatService
-from chatter.services.llm import LLMService
 
 
 @pytest.mark.unit
@@ -28,12 +32,16 @@ class TestChatEndpoints:
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         # Override dependencies
-        app.dependency_overrides[get_chat_service] = lambda: self.mock_chat_service
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
+        app.dependency_overrides[get_chat_service] = (
+            lambda: self.mock_chat_service
+        )
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -44,7 +52,7 @@ class TestChatEndpoints:
         # Arrange
         conversation_data = {
             "title": "Test Conversation",
-            "description": "A test conversation"
+            "description": "A test conversation",
         }
 
         mock_conversation = Conversation(
@@ -52,24 +60,28 @@ class TestChatEndpoints:
             title=conversation_data["title"],
             description=conversation_data["description"],
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
-        self.mock_chat_service.create_conversation.return_value = mock_conversation
+        self.mock_chat_service.create_conversation.return_value = (
+            mock_conversation
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
         response = self.client.post(
             "/api/v1/chat/conversations",
             json=conversation_data,
-            headers=headers
+            headers=headers,
         )
 
         # Assert
         assert response.status_code == status.HTTP_201_CREATED
         response_data = response.json()
         assert response_data["title"] == conversation_data["title"]
-        assert response_data["status"] == ConversationStatus.ACTIVE.value
+        assert (
+            response_data["status"] == ConversationStatus.ACTIVE.value
+        )
 
     def test_get_conversations_success(self):
         """Test retrieving user conversations."""
@@ -79,27 +91,34 @@ class TestChatEndpoints:
                 id="conv-1",
                 title="Conversation 1",
                 user_id=self.mock_user.id,
-                status=ConversationStatus.ACTIVE
+                status=ConversationStatus.ACTIVE,
             ),
             Conversation(
                 id="conv-2",
                 title="Conversation 2",
                 user_id=self.mock_user.id,
-                status=ConversationStatus.ARCHIVED
-            )
+                status=ConversationStatus.ARCHIVED,
+            ),
         ]
 
-        self.mock_chat_service.get_user_conversations.return_value = mock_conversations
+        self.mock_chat_service.get_user_conversations.return_value = (
+            mock_conversations
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.get("/api/v1/chat/conversations", headers=headers)
+        response = self.client.get(
+            "/api/v1/chat/conversations", headers=headers
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
         assert len(response_data["conversations"]) == 2
-        assert response_data["conversations"][0]["title"] == "Conversation 1"
+        assert (
+            response_data["conversations"][0]["title"]
+            == "Conversation 1"
+        )
 
     def test_get_conversation_by_id_success(self):
         """Test retrieving specific conversation."""
@@ -109,7 +128,7 @@ class TestChatEndpoints:
             id=conversation_id,
             title="Test Conversation",
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
         mock_messages = [
@@ -118,23 +137,30 @@ class TestChatEndpoints:
                 conversation_id=conversation_id,
                 role=MessageRole.USER,
                 content="Hello, world!",
-                user_id=self.mock_user.id
+                user_id=self.mock_user.id,
             ),
             Message(
                 id="msg-2",
                 conversation_id=conversation_id,
                 role=MessageRole.ASSISTANT,
                 content="Hello! How can I help you?",
-                user_id=None
-            )
+                user_id=None,
+            ),
         ]
 
-        self.mock_chat_service.get_conversation.return_value = mock_conversation
-        self.mock_chat_service.get_conversation_messages.return_value = mock_messages
+        self.mock_chat_service.get_conversation.return_value = (
+            mock_conversation
+        )
+        self.mock_chat_service.get_conversation_messages.return_value = (
+            mock_messages
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.get(f"/api/v1/chat/conversations/{conversation_id}", headers=headers)
+        response = self.client.get(
+            f"/api/v1/chat/conversations/{conversation_id}",
+            headers=headers,
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -148,11 +174,17 @@ class TestChatEndpoints:
         conversation_id = "non-existent-id"
 
         from chatter.core.exceptions import NotFoundError
-        self.mock_chat_service.get_conversation.side_effect = NotFoundError("Conversation not found")
+
+        self.mock_chat_service.get_conversation.side_effect = (
+            NotFoundError("Conversation not found")
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.get(f"/api/v1/chat/conversations/{conversation_id}", headers=headers)
+        response = self.client.get(
+            f"/api/v1/chat/conversations/{conversation_id}",
+            headers=headers,
+        )
 
         # Assert
         assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -163,7 +195,7 @@ class TestChatEndpoints:
         conversation_id = "test-conv-id"
         message_data = {
             "content": "Hello, AI assistant!",
-            "role": "user"
+            "role": "user",
         }
 
         mock_user_message = Message(
@@ -171,7 +203,7 @@ class TestChatEndpoints:
             conversation_id=conversation_id,
             role=MessageRole.USER,
             content=message_data["content"],
-            user_id=self.mock_user.id
+            user_id=self.mock_user.id,
         )
 
         mock_assistant_message = Message(
@@ -179,24 +211,33 @@ class TestChatEndpoints:
             conversation_id=conversation_id,
             role=MessageRole.ASSISTANT,
             content="Hello! How can I help you today?",
-            user_id=None
+            user_id=None,
         )
 
-        self.mock_chat_service.send_message.return_value = (mock_user_message, mock_assistant_message)
+        self.mock_chat_service.send_message.return_value = (
+            mock_user_message,
+            mock_assistant_message,
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
         response = self.client.post(
             f"/api/v1/chat/conversations/{conversation_id}/messages",
             json=message_data,
-            headers=headers
+            headers=headers,
         )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
-        assert response_data["user_message"]["content"] == message_data["content"]
-        assert response_data["assistant_message"]["role"] == MessageRole.ASSISTANT.value
+        assert (
+            response_data["user_message"]["content"]
+            == message_data["content"]
+        )
+        assert (
+            response_data["assistant_message"]["role"]
+            == MessageRole.ASSISTANT.value
+        )
 
     def test_chat_with_agent_success(self):
         """Test chat endpoint with agent."""
@@ -205,7 +246,7 @@ class TestChatEndpoints:
             "message": "What's the weather like?",
             "conversation_id": "test-conv-id",
             "agent_id": "weather-agent",
-            "stream": False
+            "stream": False,
         }
 
         mock_response = {
@@ -214,21 +255,28 @@ class TestChatEndpoints:
             "message_id": "response-msg-id",
             "metadata": {
                 "agent_used": chat_data["agent_id"],
-                "tokens_used": 25
-            }
+                "tokens_used": 25,
+            },
         }
 
-        self.mock_chat_service.chat_with_agent.return_value = mock_response
+        self.mock_chat_service.chat_with_agent.return_value = (
+            mock_response
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.post("/api/v1/chat", json=chat_data, headers=headers)
+        response = self.client.post(
+            "/api/v1/chat", json=chat_data, headers=headers
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
         assert response_data["message"] == mock_response["message"]
-        assert response_data["conversation_id"] == chat_data["conversation_id"]
+        assert (
+            response_data["conversation_id"]
+            == chat_data["conversation_id"]
+        )
 
     def test_chat_streaming_response(self):
         """Test streaming chat response."""
@@ -236,30 +284,49 @@ class TestChatEndpoints:
         chat_data = {
             "message": "Tell me a story",
             "conversation_id": "test-conv-id",
-            "stream": True
+            "stream": True,
         }
 
         # Mock streaming response
         async def mock_stream():
             chunks = [
-                {"type": "start", "data": {"message_id": "stream-msg-id"}},
-                {"type": "content", "data": {"content": "Once upon a time"}},
-                {"type": "content", "data": {"content": " there was a"}},
-                {"type": "content", "data": {"content": " brave knight."}},
-                {"type": "end", "data": {"tokens_used": 15}}
+                {
+                    "type": "start",
+                    "data": {"message_id": "stream-msg-id"},
+                },
+                {
+                    "type": "content",
+                    "data": {"content": "Once upon a time"},
+                },
+                {
+                    "type": "content",
+                    "data": {"content": " there was a"},
+                },
+                {
+                    "type": "content",
+                    "data": {"content": " brave knight."},
+                },
+                {"type": "end", "data": {"tokens_used": 15}},
             ]
             for chunk in chunks:
                 yield f"data: {json.dumps(chunk)}\n\n"
 
-        self.mock_chat_service.chat_with_agent_stream.return_value = mock_stream()
+        self.mock_chat_service.chat_with_agent_stream.return_value = (
+            mock_stream()
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.post("/api/v1/chat", json=chat_data, headers=headers)
+        response = self.client.post(
+            "/api/v1/chat", json=chat_data, headers=headers
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
-        assert response.headers["content-type"] == "text/plain; charset=utf-8"
+        assert (
+            response.headers["content-type"]
+            == "text/plain; charset=utf-8"
+        )
 
     def test_update_conversation_success(self):
         """Test updating conversation details."""
@@ -267,7 +334,7 @@ class TestChatEndpoints:
         conversation_id = "test-conv-id"
         update_data = {
             "title": "Updated Conversation Title",
-            "description": "Updated description"
+            "description": "Updated description",
         }
 
         mock_updated_conversation = Conversation(
@@ -275,24 +342,28 @@ class TestChatEndpoints:
             title=update_data["title"],
             description=update_data["description"],
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
-        self.mock_chat_service.update_conversation.return_value = mock_updated_conversation
+        self.mock_chat_service.update_conversation.return_value = (
+            mock_updated_conversation
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
         response = self.client.put(
             f"/api/v1/chat/conversations/{conversation_id}",
             json=update_data,
-            headers=headers
+            headers=headers,
         )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
         assert response_data["title"] == update_data["title"]
-        assert response_data["description"] == update_data["description"]
+        assert (
+            response_data["description"] == update_data["description"]
+        )
 
     def test_delete_conversation_success(self):
         """Test deleting a conversation."""
@@ -302,12 +373,18 @@ class TestChatEndpoints:
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.delete(f"/api/v1/chat/conversations/{conversation_id}", headers=headers)
+        response = self.client.delete(
+            f"/api/v1/chat/conversations/{conversation_id}",
+            headers=headers,
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
-        assert response_data["message"] == "Conversation deleted successfully"
+        assert (
+            response_data["message"]
+            == "Conversation deleted successfully"
+        )
 
     def test_delete_message_success(self):
         """Test deleting a message."""
@@ -320,13 +397,15 @@ class TestChatEndpoints:
         headers = {"Authorization": "Bearer test-token"}
         response = self.client.delete(
             f"/api/v1/chat/conversations/{conversation_id}/messages/{message_id}",
-            headers=headers
+            headers=headers,
         )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
-        assert response_data["message"] == "Message deleted successfully"
+        assert (
+            response_data["message"] == "Message deleted successfully"
+        )
 
     def test_get_available_tools_success(self):
         """Test retrieving available tools."""
@@ -338,9 +417,12 @@ class TestChatEndpoints:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "expression": {"type": "string", "description": "Mathematical expression"}
-                    }
-                }
+                        "expression": {
+                            "type": "string",
+                            "description": "Mathematical expression",
+                        }
+                    },
+                },
             },
             {
                 "name": "web_search",
@@ -348,17 +430,24 @@ class TestChatEndpoints:
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "query": {"type": "string", "description": "Search query"}
-                    }
-                }
-            }
+                        "query": {
+                            "type": "string",
+                            "description": "Search query",
+                        }
+                    },
+                },
+            },
         ]
 
-        self.mock_chat_service.get_available_tools.return_value = mock_tools
+        self.mock_chat_service.get_available_tools.return_value = (
+            mock_tools
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.get("/api/v1/chat/tools", headers=headers)
+        response = self.client.get(
+            "/api/v1/chat/tools", headers=headers
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -375,21 +464,29 @@ class TestChatEndpoints:
                 id="conv-1",
                 title="Weather Discussion",
                 user_id=self.mock_user.id,
-                status=ConversationStatus.ACTIVE
+                status=ConversationStatus.ACTIVE,
             )
         ]
 
-        self.mock_chat_service.search_conversations.return_value = mock_conversations
+        self.mock_chat_service.search_conversations.return_value = (
+            mock_conversations
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.get(f"/api/v1/chat/conversations/search?q={search_query}", headers=headers)
+        response = self.client.get(
+            f"/api/v1/chat/conversations/search?q={search_query}",
+            headers=headers,
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
         assert len(response_data["conversations"]) == 1
-        assert "weather" in response_data["conversations"][0]["title"].lower()
+        assert (
+            "weather"
+            in response_data["conversations"][0]["title"].lower()
+        )
 
     def test_get_workflow_templates_success(self):
         """Test retrieving workflow templates."""
@@ -399,27 +496,34 @@ class TestChatEndpoints:
                 "id": "data-analysis",
                 "name": "Data Analysis Workflow",
                 "description": "Analyze datasets and generate insights",
-                "category": "analytics"
+                "category": "analytics",
             },
             {
                 "id": "content-creation",
                 "name": "Content Creation Workflow",
                 "description": "Generate and refine content",
-                "category": "writing"
-            }
+                "category": "writing",
+            },
         ]
 
-        self.mock_chat_service.get_workflow_templates.return_value = mock_templates
+        self.mock_chat_service.get_workflow_templates.return_value = (
+            mock_templates
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.get("/api/v1/chat/workflow-templates", headers=headers)
+        response = self.client.get(
+            "/api/v1/chat/workflow-templates", headers=headers
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
         response_data = response.json()
         assert len(response_data["templates"]) == 2
-        assert response_data["templates"][0]["name"] == "Data Analysis Workflow"
+        assert (
+            response_data["templates"][0]["name"]
+            == "Data Analysis Workflow"
+        )
 
     def test_get_performance_stats_success(self):
         """Test retrieving chat performance statistics."""
@@ -429,14 +533,18 @@ class TestChatEndpoints:
             "total_messages": 256,
             "average_response_time": 1.2,
             "most_used_agent": "general-assistant",
-            "success_rate": 0.98
+            "success_rate": 0.98,
         }
 
-        self.mock_chat_service.get_performance_stats.return_value = mock_stats
+        self.mock_chat_service.get_performance_stats.return_value = (
+            mock_stats
+        )
 
         # Act
         headers = {"Authorization": "Bearer test-token"}
-        response = self.client.get("/api/v1/chat/stats", headers=headers)
+        response = self.client.get(
+            "/api/v1/chat/stats", headers=headers
+        )
 
         # Assert
         assert response.status_code == status.HTTP_200_OK
@@ -456,13 +564,17 @@ class TestChatIntegration:
             id="integration-user-id",
             email="integration@example.com",
             username="integrationuser",
-            is_active=True
+            is_active=True,
         )
 
         # Mock dependencies
         self.mock_chat_service = AsyncMock(spec=ChatService)
-        app.dependency_overrides[get_chat_service] = lambda: self.mock_chat_service
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
+        app.dependency_overrides[get_chat_service] = (
+            lambda: self.mock_chat_service
+        )
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -473,7 +585,7 @@ class TestChatIntegration:
         # Create conversation
         conversation_data = {
             "title": "Integration Test Conversation",
-            "description": "Testing full conversation flow"
+            "description": "Testing full conversation flow",
         }
 
         mock_conversation = Conversation(
@@ -481,10 +593,12 @@ class TestChatIntegration:
             title=conversation_data["title"],
             description=conversation_data["description"],
             user_id=self.mock_user.id,
-            status=ConversationStatus.ACTIVE
+            status=ConversationStatus.ACTIVE,
         )
 
-        self.mock_chat_service.create_conversation.return_value = mock_conversation
+        self.mock_chat_service.create_conversation.return_value = (
+            mock_conversation
+        )
 
         headers = {"Authorization": "Bearer integration-token"}
 
@@ -492,7 +606,7 @@ class TestChatIntegration:
         response = self.client.post(
             "/api/v1/chat/conversations",
             json=conversation_data,
-            headers=headers
+            headers=headers,
         )
 
         assert response.status_code == status.HTTP_201_CREATED
@@ -500,14 +614,17 @@ class TestChatIntegration:
         conversation_id = conv_data["id"]
 
         # Test sending message
-        message_data = {"content": "Hello integration test!", "role": "user"}
+        message_data = {
+            "content": "Hello integration test!",
+            "role": "user",
+        }
 
         mock_user_message = Message(
             id="integration-user-msg",
             conversation_id=conversation_id,
             role=MessageRole.USER,
             content=message_data["content"],
-            user_id=self.mock_user.id
+            user_id=self.mock_user.id,
         )
 
         mock_assistant_message = Message(
@@ -515,27 +632,40 @@ class TestChatIntegration:
             conversation_id=conversation_id,
             role=MessageRole.ASSISTANT,
             content="Hello! This is an integration test response.",
-            user_id=None
+            user_id=None,
         )
 
-        self.mock_chat_service.send_message.return_value = (mock_user_message, mock_assistant_message)
+        self.mock_chat_service.send_message.return_value = (
+            mock_user_message,
+            mock_assistant_message,
+        )
 
         response = self.client.post(
             f"/api/v1/chat/conversations/{conversation_id}/messages",
             json=message_data,
-            headers=headers
+            headers=headers,
         )
 
         assert response.status_code == status.HTTP_200_OK
         message_response = response.json()
-        assert message_response["user_message"]["content"] == message_data["content"]
+        assert (
+            message_response["user_message"]["content"]
+            == message_data["content"]
+        )
 
         # Test retrieving conversation with messages
         mock_messages = [mock_user_message, mock_assistant_message]
-        self.mock_chat_service.get_conversation.return_value = mock_conversation
-        self.mock_chat_service.get_conversation_messages.return_value = mock_messages
+        self.mock_chat_service.get_conversation.return_value = (
+            mock_conversation
+        )
+        self.mock_chat_service.get_conversation_messages.return_value = (
+            mock_messages
+        )
 
-        response = self.client.get(f"/api/v1/chat/conversations/{conversation_id}", headers=headers)
+        response = self.client.get(
+            f"/api/v1/chat/conversations/{conversation_id}",
+            headers=headers,
+        )
 
         assert response.status_code == status.HTTP_200_OK
         conv_with_messages = response.json()

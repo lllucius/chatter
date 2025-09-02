@@ -16,7 +16,7 @@ class ConditionalWorkflowConfig:
     def __init__(
         self,
         conditions: dict[str, Any],
-        workflow_configs: dict[str, dict[str, Any]]
+        workflow_configs: dict[str, dict[str, Any]],
     ):
         """Initialize conditional workflow configuration.
 
@@ -27,7 +27,9 @@ class ConditionalWorkflowConfig:
         self.conditions = conditions
         self.workflow_configs = workflow_configs
 
-    def evaluate_conditions(self, context: dict[str, Any]) -> str | None:
+    def evaluate_conditions(
+        self, context: dict[str, Any]
+    ) -> str | None:
         """Evaluate conditions against context to determine workflow.
 
         Args:
@@ -42,9 +44,16 @@ class ConditionalWorkflowConfig:
             # Simple equality check - can be extended for more complex logic
             if isinstance(condition_value, dict):
                 # Handle range conditions
-                if "min" in condition_value and "max" in condition_value:
-                    if (context_value is not None and
-                            condition_value["min"] <= context_value <= condition_value["max"]):
+                if (
+                    "min" in condition_value
+                    and "max" in condition_value
+                ):
+                    if (
+                        context_value is not None
+                        and condition_value["min"]
+                        <= context_value
+                        <= condition_value["max"]
+                    ):
                         return condition_name
                 # Handle list membership
                 elif "in" in condition_value:
@@ -63,7 +72,7 @@ class CompositeWorkflowConfig:
     def __init__(
         self,
         workflows: list[dict[str, Any]],
-        execution_strategy: ExecutionStrategy = "sequential"
+        execution_strategy: ExecutionStrategy = "sequential",
     ):
         """Initialize composite workflow configuration.
 
@@ -81,7 +90,9 @@ class AdvancedWorkflowManager:
 
     def __init__(self):
         """Initialize advanced workflow manager."""
-        self.conditional_configs: dict[str, ConditionalWorkflowConfig] = {}
+        self.conditional_configs: dict[
+            str, ConditionalWorkflowConfig
+        ] = {}
         self.composite_configs: dict[str, CompositeWorkflowConfig] = {}
 
     async def create_conditional_workflow(
@@ -89,7 +100,7 @@ class AdvancedWorkflowManager:
         llm: Any,
         conditions: dict[str, Any],
         workflow_configs: dict[str, dict[str, Any]],
-        context: dict[str, Any] | None = None
+        context: dict[str, Any] | None = None,
     ) -> Any | None:
         """Create a workflow based on conditions.
 
@@ -110,11 +121,14 @@ class AdvancedWorkflowManager:
         # Evaluate conditions
         selected_config_key = config.evaluate_conditions(eval_context)
 
-        if not selected_config_key or selected_config_key not in workflow_configs:
+        if (
+            not selected_config_key
+            or selected_config_key not in workflow_configs
+        ):
             logger.warning(
                 "No matching condition found for conditional workflow",
                 conditions=conditions,
-                context=eval_context
+                context=eval_context,
             )
             return None
 
@@ -123,7 +137,7 @@ class AdvancedWorkflowManager:
         logger.info(
             "Creating conditional workflow",
             selected_config=selected_config_key,
-            context=eval_context
+            context=eval_context,
         )
 
         # Create workflow with selected configuration
@@ -135,9 +149,11 @@ class AdvancedWorkflowManager:
             workflow = manager.create_workflow(
                 llm=llm,
                 mode=selected_config.get("mode", "plain"),
-                enable_memory=selected_config.get("enable_memory", False),
+                enable_memory=selected_config.get(
+                    "enable_memory", False
+                ),
                 memory_window=selected_config.get("memory_window", 20),
-                system_message=selected_config.get("system_message")
+                system_message=selected_config.get("system_message"),
             )
             return workflow
         except Exception as e:
@@ -147,7 +163,7 @@ class AdvancedWorkflowManager:
     async def create_composite_workflow(
         self,
         workflows: list[Any],
-        execution_strategy: ExecutionStrategy = "sequential"
+        execution_strategy: ExecutionStrategy = "sequential",
     ) -> CompositeWorkflowConfig:
         """Create a composite workflow that combines multiple workflows.
 
@@ -163,15 +179,17 @@ class AdvancedWorkflowManager:
         """
         workflow_configs = []
         for i, workflow in enumerate(workflows):
-            workflow_configs.append({
-                "index": i,
-                "workflow": workflow,
-                "workflow_id": str(uuid4())
-            })
+            workflow_configs.append(
+                {
+                    "index": i,
+                    "workflow": workflow,
+                    "workflow_id": str(uuid4()),
+                }
+            )
 
         config = CompositeWorkflowConfig(
             workflows=workflow_configs,
-            execution_strategy=execution_strategy
+            execution_strategy=execution_strategy,
         )
 
         self.composite_configs[config.workflow_id] = config
@@ -180,7 +198,7 @@ class AdvancedWorkflowManager:
             "Created composite workflow",
             workflow_id=config.workflow_id,
             strategy=execution_strategy,
-            workflow_count=len(workflows)
+            workflow_count=len(workflows),
         )
 
         return config
@@ -188,7 +206,7 @@ class AdvancedWorkflowManager:
     async def execute_composite_workflow(
         self,
         config: CompositeWorkflowConfig,
-        initial_state: dict[str, Any]
+        initial_state: dict[str, Any],
     ) -> list[dict[str, Any]]:
         """Execute a composite workflow.
 
@@ -210,7 +228,7 @@ class AdvancedWorkflowManager:
                 logger.info(
                     "Executing workflow in sequence",
                     composite_id=config.workflow_id,
-                    workflow_index=workflow_config["index"]
+                    workflow_index=workflow_config["index"],
                 )
 
                 try:
@@ -223,7 +241,7 @@ class AdvancedWorkflowManager:
                     result = await manager.run_workflow(
                         workflow=workflow,
                         initial_state=current_state,
-                        thread_id=workflow_config["workflow_id"]
+                        thread_id=workflow_config["workflow_id"],
                     )
                     results.append(result)
 
@@ -236,7 +254,7 @@ class AdvancedWorkflowManager:
                         "Error in composite workflow execution",
                         composite_id=config.workflow_id,
                         workflow_index=workflow_config["index"],
-                        error=str(e)
+                        error=str(e),
                     )
                     results.append({"error": str(e)})
 
@@ -244,7 +262,9 @@ class AdvancedWorkflowManager:
             # Execute all workflows in parallel with same initial state
             import asyncio
 
-            async def execute_single(workflow_config: dict[str, Any]) -> dict[str, Any]:
+            async def execute_single(
+                workflow_config: dict[str, Any],
+            ) -> dict[str, Any]:
                 workflow = workflow_config["workflow"]
                 try:
                     from chatter.core.langgraph import (
@@ -255,36 +275,41 @@ class AdvancedWorkflowManager:
                     return await manager.run_workflow(
                         workflow=workflow,
                         initial_state=initial_state,
-                        thread_id=workflow_config["workflow_id"]
+                        thread_id=workflow_config["workflow_id"],
                     )
                 except Exception as e:
                     logger.error(
                         "Error in parallel workflow execution",
                         composite_id=config.workflow_id,
                         workflow_index=workflow_config["index"],
-                        error=str(e)
+                        error=str(e),
                     )
                     return {"error": str(e)}
 
             logger.info(
                 "Executing workflows in parallel",
                 composite_id=config.workflow_id,
-                workflow_count=len(config.workflows)
+                workflow_count=len(config.workflows),
             )
 
-            results = await asyncio.gather(*[
-                execute_single(wf_config) for wf_config in config.workflows
-            ])
+            results = await asyncio.gather(
+                *[
+                    execute_single(wf_config)
+                    for wf_config in config.workflows
+                ]
+            )
             results = list(results)
 
         else:
-            raise ValueError(f"Unsupported execution strategy: {config.execution_strategy}")
+            raise ValueError(
+                f"Unsupported execution strategy: {config.execution_strategy}"
+            )
 
         logger.info(
             "Completed composite workflow execution",
             composite_id=config.workflow_id,
             strategy=config.execution_strategy,
-            results_count=len(results)
+            results_count=len(results),
         )
 
         return results
@@ -293,7 +318,7 @@ class AdvancedWorkflowManager:
         self,
         config_name: str,
         conditions: dict[str, Any],
-        workflow_configs: dict[str, dict[str, Any]]
+        workflow_configs: dict[str, dict[str, Any]],
     ) -> None:
         """Register a reusable conditional workflow configuration.
 
@@ -302,8 +327,8 @@ class AdvancedWorkflowManager:
             conditions: Dictionary of conditions to evaluate
             workflow_configs: Dictionary mapping condition results to workflow configs
         """
-        self.conditional_configs[config_name] = ConditionalWorkflowConfig(
-            conditions, workflow_configs
+        self.conditional_configs[config_name] = (
+            ConditionalWorkflowConfig(conditions, workflow_configs)
         )
 
         logger.info(
@@ -314,7 +339,7 @@ class AdvancedWorkflowManager:
         self,
         llm: Any,
         template_name: str,
-        context: dict[str, Any] | None = None
+        context: dict[str, Any] | None = None,
     ) -> Any | None:
         """Create workflow from a registered conditional configuration template.
 
@@ -329,7 +354,7 @@ class AdvancedWorkflowManager:
         if template_name not in self.conditional_configs:
             logger.error(
                 "Conditional workflow template not found",
-                template_name=template_name
+                template_name=template_name,
             )
             return None
 
@@ -339,39 +364,44 @@ class AdvancedWorkflowManager:
             llm=llm,
             conditions=config.conditions,
             workflow_configs=config.workflow_configs,
-            context=context
+            context=context,
         )
 
 
 # Example predefined configurations
-def setup_default_conditional_configs(manager: AdvancedWorkflowManager) -> None:
+def setup_default_conditional_configs(
+    manager: AdvancedWorkflowManager,
+) -> None:
     """Setup default conditional workflow configurations."""
 
     # Customer support workflow based on query complexity
     manager.register_conditional_config(
         "customer_support",
         conditions={
-            "query_complexity": {"min": 0.7, "max": 1.0},  # High complexity
+            "query_complexity": {
+                "min": 0.7,
+                "max": 1.0,
+            },  # High complexity
             "query_type": "technical_support",
-            "default": True
+            "default": True,
         },
         workflow_configs={
             "query_complexity": {
                 "mode": "full",
                 "enable_memory": True,
-                "memory_window": 50
+                "memory_window": 50,
             },
             "query_type": {
                 "mode": "tools",
                 "enable_memory": True,
-                "memory_window": 20
+                "memory_window": 20,
             },
             "default": {
                 "mode": "plain",
                 "enable_memory": False,
-                "key": "default"
-            }
-        }
+                "key": "default",
+            },
+        },
     )
 
     # Document analysis workflow based on document type
@@ -380,22 +410,13 @@ def setup_default_conditional_configs(manager: AdvancedWorkflowManager) -> None:
         conditions={
             "document_type": {"in": ["pdf", "docx", "txt"]},
             "has_images": True,
-            "default": True
+            "default": True,
         },
         workflow_configs={
-            "document_type": {
-                "mode": "rag",
-                "enable_memory": False
-            },
-            "has_images": {
-                "mode": "full",
-                "enable_memory": True
-            },
-            "default": {
-                "mode": "plain",
-                "key": "default"
-            }
-        }
+            "document_type": {"mode": "rag", "enable_memory": False},
+            "has_images": {"mode": "full", "enable_memory": True},
+            "default": {"mode": "plain", "key": "default"},
+        },
     )
 
 

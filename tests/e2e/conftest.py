@@ -3,14 +3,16 @@
 import asyncio
 import os
 import sys
-from typing import AsyncGenerator, Generator
+from collections.abc import Generator
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from fastapi.testclient import TestClient
 
 # Add the project root to the path for imports
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+)
 
 
 @pytest.fixture(scope="session")
@@ -24,19 +26,54 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
 @pytest.fixture(scope="session")
 async def app():
     """Create a FastAPI app instance for testing."""
-    try:
-        from chatter.main import app
-        return app
-    except ImportError:
-        # Create a minimal FastAPI app for testing if main app fails to import
-        from fastapi import FastAPI
-        test_app = FastAPI(title="Test Chatter API")
-        
-        @test_app.get("/health")
-        async def health_check():
-            return {"status": "ok", "message": "Test server running"}
-        
-        return test_app
+    # Mock database and configuration for E2E tests
+    import os
+    from unittest.mock import patch
+
+    # Set test environment variables
+    os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///test.db")
+    os.environ.setdefault(
+        "SECRET_KEY",
+        "test-secret-key-for-e2e-tests-only-not-for-production",
+    )
+    os.environ.setdefault("ENVIRONMENT", "test")
+
+    # Mock database operations to prevent actual database connections
+    with (
+        patch('chatter.utils.database.init_database') as mock_init_db,
+        patch('chatter.utils.database.close_database') as mock_close_db,
+        patch(
+            'chatter.services.toolserver.ToolServerService.initialize_builtin_servers'
+        ) as mock_init_servers,
+        patch(
+            'chatter.services.scheduler.start_scheduler'
+        ) as mock_start_scheduler,
+    ):
+
+        mock_init_db.return_value = None
+        mock_close_db.return_value = None
+        mock_init_servers.return_value = None
+        mock_start_scheduler.return_value = None
+
+        try:
+            from chatter.main import create_app
+
+            app = create_app()
+            return app
+        except ImportError:
+            # Create a minimal FastAPI app for testing if main app fails to import
+            from fastapi import FastAPI
+
+            test_app = FastAPI(title="Test Chatter API")
+
+            @test_app.get("/health")
+            async def health_check():
+                return {
+                    "status": "ok",
+                    "message": "Test server running",
+                }
+
+            return test_app
 
 
 @pytest.fixture(scope="session")
@@ -66,7 +103,7 @@ def sample_user_credentials():
         "email": "e2e-test@example.com",
         "password": "SecureTestPassword123!",
         "username": "e2e_test_user",
-        "full_name": "E2E Test User"
+        "full_name": "E2E Test User",
     }
 
 
@@ -80,14 +117,14 @@ def sample_chat_conversation():
             {
                 "role": "user",
                 "content": "Hello, this is an end-to-end test message.",
-                "timestamp": "2024-01-01T10:00:00Z"
+                "timestamp": "2024-01-01T10:00:00Z",
             },
             {
-                "role": "assistant", 
+                "role": "assistant",
                 "content": "Hello! I'm responding in this E2E test scenario.",
-                "timestamp": "2024-01-01T10:00:05Z"
-            }
-        ]
+                "timestamp": "2024-01-01T10:00:05Z",
+            },
+        ],
     }
 
 
@@ -100,12 +137,12 @@ def sample_document_upload():
         "mime_type": "text/plain",
         "metadata": {
             "category": "test",
-            "tags": ["e2e", "testing", "document"]
-        }
+            "tags": ["e2e", "testing", "document"],
+        },
     }
 
 
-@pytest.fixture 
+@pytest.fixture
 def mock_llm_response():
     """Mock LLM response for E2E tests that don't require real API calls."""
     return {
@@ -113,10 +150,10 @@ def mock_llm_response():
         "usage": {
             "prompt_tokens": 25,
             "completion_tokens": 15,
-            "total_tokens": 40
+            "total_tokens": 40,
         },
         "model": "mock-gpt-4",
-        "finish_reason": "stop"
+        "finish_reason": "stop",
     }
 
 
@@ -125,7 +162,7 @@ async def cleanup_test_data():
     """Fixture to ensure test data is cleaned up after E2E tests."""
     # Setup: No initial cleanup needed
     yield
-    
+
     # Teardown: Clean up any test data
     # In a real implementation, this would clean up:
     # - Test users created during E2E tests

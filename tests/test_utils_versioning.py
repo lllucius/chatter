@@ -1,18 +1,23 @@
 """Tests for API versioning utilities."""
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from fastapi import HTTPException, Request
 
+from chatter.schemas.utilities import (
+    APIVersion,
+    VersionInfo,
+    VersionStatus,
+)
 from chatter.utils.versioning import (
     APIVersionManager,
+    VersionedRouter,
     extract_version_from_request,
+    version_manager,
     version_middleware,
     version_route,
-    VersionedRouter,
-    version_manager,
 )
-from chatter.schemas.utilities import APIVersion, VersionInfo, VersionStatus, EndpointVersioning
 
 
 @pytest.mark.unit
@@ -86,7 +91,7 @@ class TestAPIVersionManager:
             status=VersionStatus.ACTIVE,
             release_date="2024-12-01",
             documentation_url="https://api.example.com/docs/v3",
-            new_features=["Feature 1", "Feature 2"]
+            new_features=["Feature 1", "Feature 2"],
         )
 
         # Act
@@ -101,9 +106,7 @@ class TestAPIVersionManager:
         """Test endpoint registration."""
         # Act
         self.manager.register_endpoint(
-            path="/test",
-            method="GET",
-            introduced_in=APIVersion.V1
+            path="/test", method="GET", introduced_in=APIVersion.V1
         )
 
         # Assert
@@ -117,29 +120,52 @@ class TestAPIVersionManager:
         """Test endpoint availability checking."""
         # Arrange
         self.manager.register_endpoint(
-            path="/available",
-            method="GET",
-            introduced_in=APIVersion.V1
+            path="/available", method="GET", introduced_in=APIVersion.V1
         )
-        
+
         self.manager.register_endpoint(
             path="/removed",
             method="POST",
             introduced_in=APIVersion.V1,
-            removed_in=APIVersion.V2
+            removed_in=APIVersion.V2,
         )
 
         # Act & Assert
         # Available endpoint
-        assert self.manager.is_endpoint_available("/available", "GET", APIVersion.V1) is True
-        assert self.manager.is_endpoint_available("/available", "GET", APIVersion.V2) is True
+        assert (
+            self.manager.is_endpoint_available(
+                "/available", "GET", APIVersion.V1
+            )
+            is True
+        )
+        assert (
+            self.manager.is_endpoint_available(
+                "/available", "GET", APIVersion.V2
+            )
+            is True
+        )
 
         # Removed endpoint
-        assert self.manager.is_endpoint_available("/removed", "POST", APIVersion.V1) is True
-        assert self.manager.is_endpoint_available("/removed", "POST", APIVersion.V2) is False
+        assert (
+            self.manager.is_endpoint_available(
+                "/removed", "POST", APIVersion.V1
+            )
+            is True
+        )
+        assert (
+            self.manager.is_endpoint_available(
+                "/removed", "POST", APIVersion.V2
+            )
+            is False
+        )
 
         # Non-existent endpoint
-        assert self.manager.is_endpoint_available("/nonexistent", "GET", APIVersion.V1) is False
+        assert (
+            self.manager.is_endpoint_available(
+                "/nonexistent", "GET", APIVersion.V1
+            )
+            is False
+        )
 
     def test_get_endpoint_status(self):
         """Test getting endpoint status."""
@@ -147,12 +173,22 @@ class TestAPIVersionManager:
         self.manager.register_endpoint(
             path="/status-test",
             method="GET",
-            introduced_in=APIVersion.V1
+            introduced_in=APIVersion.V1,
         )
 
         # Act & Assert
-        assert self.manager.get_endpoint_status("/status-test", "GET", APIVersion.V1) == "active"
-        assert self.manager.get_endpoint_status("/nonexistent", "GET", APIVersion.V1) is None
+        assert (
+            self.manager.get_endpoint_status(
+                "/status-test", "GET", APIVersion.V1
+            )
+            == "active"
+        )
+        assert (
+            self.manager.get_endpoint_status(
+                "/nonexistent", "GET", APIVersion.V1
+            )
+            is None
+        )
 
 
 @pytest.mark.unit
@@ -177,9 +213,7 @@ class TestVersionExtraction:
         # Arrange
         request = Mock(spec=Request)
         request.url.path = "/api/chat"
-        request.headers = {
-            "Accept": "application/vnd.chatter.v1+json"
-        }
+        request.headers = {"Accept": "application/vnd.chatter.v1+json"}
 
         # Act
         version = extract_version_from_request(request)
@@ -192,9 +226,7 @@ class TestVersionExtraction:
         # Arrange
         request = Mock(spec=Request)
         request.url.path = "/api/chat"
-        request.headers = {
-            "API-Version": "v2"
-        }
+        request.headers = {"API-Version": "v2"}
 
         # Act
         version = extract_version_from_request(request)
@@ -269,7 +301,7 @@ class TestVersionMiddleware:
         # Act & Assert
         with pytest.raises(HTTPException) as exc_info:
             await version_middleware(request, call_next)
-        
+
         assert exc_info.value.status_code == 400
         assert "not supported" in exc_info.value.detail
 
@@ -284,11 +316,13 @@ class TestVersionMiddleware:
         call_next = Mock()
 
         # Mock endpoint as unavailable
-        with patch.object(version_manager, 'is_endpoint_available', return_value=False):
+        with patch.object(
+            version_manager, 'is_endpoint_available', return_value=False
+        ):
             # Act & Assert
             with pytest.raises(HTTPException) as exc_info:
                 await version_middleware(request, call_next)
-            
+
             assert exc_info.value.status_code == 404
             assert "not available" in exc_info.value.detail
 
@@ -299,6 +333,7 @@ class TestVersionDecorators:
 
     def test_version_route_decorator(self):
         """Test version route decorator."""
+
         # Arrange & Act
         @version_route(versions=[APIVersion.V1, APIVersion.V2])
         def test_endpoint():
@@ -306,7 +341,10 @@ class TestVersionDecorators:
 
         # Assert
         assert hasattr(test_endpoint, '_api_versions')
-        assert test_endpoint._api_versions == [APIVersion.V1, APIVersion.V2]
+        assert test_endpoint._api_versions == [
+            APIVersion.V1,
+            APIVersion.V2,
+        ]
 
     def test_versioned_router_initialization(self):
         """Test versioned router initialization."""
@@ -321,7 +359,7 @@ class TestVersionDecorators:
         """Test adding routes to versioned router."""
         # Arrange
         router = VersionedRouter(prefix="/test")
-        
+
         def test_endpoint():
             return {"test": "data"}
 
@@ -330,7 +368,7 @@ class TestVersionDecorators:
             path="/endpoint",
             endpoint=test_endpoint,
             methods=["GET"],
-            versions=[APIVersion.V1, APIVersion.V2]
+            versions=[APIVersion.V1, APIVersion.V2],
         )
 
         # Assert
@@ -346,15 +384,17 @@ class TestVersionDecorators:
         """Test getting routes for specific version."""
         # Arrange
         router = VersionedRouter()
-        
+
         def endpoint1():
             return {"endpoint": "1"}
-        
+
         def endpoint2():
             return {"endpoint": "2"}
 
         router.add_route("/ep1", endpoint1, ["GET"], [APIVersion.V1])
-        router.add_route("/ep2", endpoint2, ["GET"], [APIVersion.V1, APIVersion.V2])
+        router.add_route(
+            "/ep2", endpoint2, ["GET"], [APIVersion.V1, APIVersion.V2]
+        )
 
         # Act
         v1_routes = router.get_routes_for_version(APIVersion.V1)
@@ -375,7 +415,7 @@ class TestVersioningIntegration:
         """Test complete versioning workflow."""
         # Arrange
         manager = APIVersionManager()
-        
+
         # Register endpoints
         manager.register_endpoint("/health", "GET", APIVersion.V1)
         manager.register_endpoint("/agents", "GET", APIVersion.V2)
@@ -383,13 +423,33 @@ class TestVersioningIntegration:
         # Act & Assert
         # V1 version checks
         assert manager.is_version_supported(APIVersion.V1) is True
-        assert manager.is_endpoint_available("/health", "GET", APIVersion.V1) is True
-        assert manager.is_endpoint_available("/agents", "GET", APIVersion.V1) is False
+        assert (
+            manager.is_endpoint_available(
+                "/health", "GET", APIVersion.V1
+            )
+            is True
+        )
+        assert (
+            manager.is_endpoint_available(
+                "/agents", "GET", APIVersion.V1
+            )
+            is False
+        )
 
         # V2 version checks
         assert manager.is_version_supported(APIVersion.V2) is True
-        assert manager.is_endpoint_available("/health", "GET", APIVersion.V2) is True
-        assert manager.is_endpoint_available("/agents", "GET", APIVersion.V2) is True
+        assert (
+            manager.is_endpoint_available(
+                "/health", "GET", APIVersion.V2
+            )
+            is True
+        )
+        assert (
+            manager.is_endpoint_available(
+                "/agents", "GET", APIVersion.V2
+            )
+            is True
+        )
 
     def test_version_manager_singleton(self):
         """Test that version manager is a singleton."""
@@ -416,7 +476,9 @@ class TestVersioningIntegration:
         call_next.return_value = response
 
         # Register the endpoint
-        version_manager.register_endpoint("/health", "GET", APIVersion.V1)
+        version_manager.register_endpoint(
+            "/health", "GET", APIVersion.V1
+        )
 
         # Act
         result = await version_middleware(request, call_next)

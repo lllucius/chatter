@@ -14,6 +14,7 @@ from chatter.schemas.common import (
 
 class PluginType(str, Enum):
     """Types of plugins."""
+
     TOOL = "tool"
     WORKFLOW = "workflow"
     INTEGRATION = "integration"
@@ -24,6 +25,7 @@ class PluginType(str, Enum):
 
 class PluginStatus(str, Enum):
     """Plugin status."""
+
     INSTALLED = "installed"
     ACTIVE = "active"
     INACTIVE = "inactive"
@@ -33,6 +35,7 @@ class PluginStatus(str, Enum):
 
 class PluginCapability(BaseModel):
     """Plugin capability definition."""
+
     name: str
     description: str
     required_permissions: list[str] = Field(default_factory=list)
@@ -43,6 +46,7 @@ class PluginCapability(BaseModel):
 
 class PluginManifest(BaseModel):
     """Plugin manifest file structure."""
+
     name: str
     version: str
     description: str
@@ -61,6 +65,7 @@ class PluginManifest(BaseModel):
 
 class PluginInstance(BaseModel):
     """Plugin instance information."""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     manifest: PluginManifest
     status: PluginStatus = PluginStatus.INSTALLED
@@ -68,26 +73,45 @@ class PluginInstance(BaseModel):
     configuration: dict[str, Any] = Field(default_factory=dict)
     enabled_capabilities: list[str] = Field(default_factory=list)
     error_message: str | None = None
-    installed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    last_updated: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    installed_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
+    last_updated: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
     usage_stats: dict[str, Any] = Field(default_factory=dict)
-    enabled: bool = Field(default=True, description="Whether the plugin is enabled")
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC), description="Last update timestamp")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="Additional plugin metadata")
+    enabled: bool = Field(
+        default=True, description="Whether the plugin is enabled"
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        description="Last update timestamp",
+    )
+    metadata: dict[str, Any] = Field(
+        default_factory=dict, description="Additional plugin metadata"
+    )
 
 
 class PluginInstallRequest(BaseModel):
     """Request schema for installing a plugin."""
 
-    plugin_path: str = Field(..., description="Path to plugin file or directory")
-    enable_on_install: bool = Field(True, description="Enable plugin after installation")
+    plugin_path: str = Field(
+        ..., description="Path to plugin file or directory"
+    )
+    enable_on_install: bool = Field(
+        True, description="Enable plugin after installation"
+    )
 
 
 class PluginUpdateRequest(BaseModel):
     """Request schema for updating a plugin."""
 
-    enabled: bool | None = Field(None, description="Enable/disable plugin")
-    configuration: dict[str, Any] | None = Field(None, description="Plugin configuration")
+    enabled: bool | None = Field(
+        None, description="Enable/disable plugin"
+    )
+    configuration: dict[str, Any] | None = Field(
+        None, description="Plugin configuration"
+    )
 
 
 class PluginResponse(BaseModel):
@@ -103,39 +127,63 @@ class PluginResponse(BaseModel):
 
     # Configuration
     entry_point: str = Field(..., description="Plugin entry point")
-    capabilities: list[dict[str, Any]] = Field(..., description="Plugin capabilities")
-    dependencies: list[str] = Field(..., description="Plugin dependencies")
-    permissions: list[str] = Field(..., description="Required permissions")
+    capabilities: list[dict[str, Any]] = Field(
+        ..., description="Plugin capabilities"
+    )
+    dependencies: list[str] = Field(
+        ..., description="Plugin dependencies"
+    )
+    permissions: list[str] = Field(
+        ..., description="Required permissions"
+    )
 
     # Status
     enabled: bool = Field(..., description="Whether plugin is enabled")
-    error_message: str | None = Field(None, description="Error message if any")
+    error_message: str | None = Field(
+        None, description="Error message if any"
+    )
 
     # Metadata
-    installed_at: datetime = Field(..., description="Installation timestamp")
-    updated_at: datetime = Field(..., description="Last update timestamp")
-    metadata: dict[str, Any] = Field(..., description="Additional metadata")
+    installed_at: datetime = Field(
+        ..., description="Installation timestamp"
+    )
+    updated_at: datetime = Field(
+        ..., description="Last update timestamp"
+    )
+    metadata: dict[str, Any] = Field(
+        ..., description="Additional metadata"
+    )
 
 
 class PluginListRequest(ListRequestBase):
     """Request schema for listing plugins."""
 
-    plugin_type: PluginType | None = Field(None, description="Filter by plugin type")
-    status: PluginStatus | None = Field(None, description="Filter by status")
-    enabled: bool | None = Field(None, description="Filter by enabled status")
+    plugin_type: PluginType | None = Field(
+        None, description="Filter by plugin type"
+    )
+    status: PluginStatus | None = Field(
+        None, description="Filter by status"
+    )
+    enabled: bool | None = Field(
+        None, description="Filter by enabled status"
+    )
 
 
 class PluginListResponse(BaseModel):
     """Response schema for plugin list."""
 
-    plugins: list[PluginResponse] = Field(..., description="List of plugins")
+    plugins: list[PluginResponse] = Field(
+        ..., description="List of plugins"
+    )
     total: int = Field(..., description="Total number of plugins")
 
 
 class PluginActionResponse(BaseModel):
     """Response schema for plugin actions."""
 
-    success: bool = Field(..., description="Whether action was successful")
+    success: bool = Field(
+        ..., description="Whether action was successful"
+    )
     message: str = Field(..., description="Action result message")
     plugin_id: str = Field(..., description="Plugin ID")
 
@@ -143,5 +191,7 @@ class PluginActionResponse(BaseModel):
 class PluginDeleteResponse(BaseModel):
     """Response schema for plugin deletion."""
 
-    success: bool = Field(..., description="Whether deletion was successful")
+    success: bool = Field(
+        ..., description="Whether deletion was successful"
+    )
     message: str = Field(..., description="Deletion result message")

@@ -522,12 +522,16 @@ class ProfileService:
                 embedding_provider=source_profile.embedding_provider,
                 embedding_model=source_profile.embedding_model,
                 is_public=False,  # Cloned profiles are private by default
-                tags=source_profile.tags.copy()
-                if source_profile.tags
-                else None,
-                extra_metadata=source_profile.extra_metadata.copy()
-                if source_profile.extra_metadata
-                else None,
+                tags=(
+                    source_profile.tags.copy()
+                    if source_profile.tags
+                    else None
+                ),
+                extra_metadata=(
+                    source_profile.extra_metadata.copy()
+                    if source_profile.extra_metadata
+                    else None
+                ),
             )
 
             # Apply modifications if provided

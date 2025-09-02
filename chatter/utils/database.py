@@ -21,6 +21,7 @@ except ImportError:
         create_async_engine,
     )
     from sqlalchemy.orm import sessionmaker
+
     async_sessionmaker = sessionmaker
 
 from chatter.config import settings
@@ -30,7 +31,6 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 # Import QueryOptimizer from database_optimization for backward compatibility
-from chatter.utils.database_optimization import QueryOptimizer
 
 # Global database engine and session maker
 _engine: AsyncEngine | None = None
@@ -128,7 +128,9 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
                     # If in transaction, let the session cleanup happen naturally
                     session.expunge_all()
         except Exception as e:
-            logger.debug("Session cleanup during generator exit", error=str(e))
+            logger.debug(
+                "Session cleanup during generator exit", error=str(e)
+            )
         raise
     except Exception:
         # On other exceptions, attempt rollback
@@ -180,10 +182,14 @@ async def _create_default_registry_data(session: AsyncSession) -> None:
     existing_provider = result.scalar_one_or_none()
 
     if existing_provider is not None:
-        logger.info("Registry data already exists, skipping default registry initialization")
+        logger.info(
+            "Registry data already exists, skipping default registry initialization"
+        )
         return
 
-    logger.info("Creating default registry data (providers, models, embedding spaces)")
+    logger.info(
+        "Creating default registry data (providers, models, embedding spaces)"
+    )
 
     # Create default OpenAI provider
     openai_provider = Provider(
@@ -204,7 +210,10 @@ async def _create_default_registry_data(session: AsyncSession) -> None:
     await session.commit()
     await session.refresh(openai_provider)
 
-    logger.info("Created default OpenAI provider", provider_id=openai_provider.id)
+    logger.info(
+        "Created default OpenAI provider",
+        provider_id=openai_provider.id,
+    )
 
     # Create default LLM model (GPT-4)
     gpt4_model = ModelDef(
@@ -254,7 +263,7 @@ async def _create_default_registry_data(session: AsyncSession) -> None:
     logger.info(
         "Created default models",
         gpt4_id=gpt4_model.id,
-        embedding_id=embedding_model.id
+        embedding_id=embedding_model.id,
     )
 
     # Create default embedding space
@@ -284,7 +293,7 @@ async def _create_default_registry_data(session: AsyncSession) -> None:
     logger.info(
         "Created default embedding space",
         space_id=default_embedding_space.id,
-        table_name=default_embedding_space.table_name
+        table_name=default_embedding_space.table_name,
     )
 
 
@@ -317,7 +326,12 @@ async def initialize_default_data() -> None:
         import string
 
         # Generate a secure random password
-        admin_password = ''.join(secrets.choice(string.ascii_letters + string.digits + "!@#$%^&*") for _ in range(16))
+        admin_password = ''.join(
+            secrets.choice(
+                string.ascii_letters + string.digits + "!@#$%^&*"
+            )
+            for _ in range(16)
+        )
 
         admin_user = User(
             email="admin@admin.net",

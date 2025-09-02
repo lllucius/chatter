@@ -34,7 +34,9 @@ class ConversationStats(Base):
     )
 
     # Time period
-    date: Mapped[date_type] = mapped_column(Date, nullable=False, index=True)
+    date: Mapped[date_type] = mapped_column(
+        Date, nullable=False, index=True
+    )
 
     # Message statistics
     total_messages: Mapped[int] = mapped_column(
@@ -151,7 +153,9 @@ class DocumentStats(Base):
     )
 
     # Time period
-    date: Mapped[date_type] = mapped_column(Date, nullable=False, index=True)
+    date: Mapped[date_type] = mapped_column(
+        Date, nullable=False, index=True
+    )
 
     # Access statistics
     view_count: Mapped[int] = mapped_column(
@@ -227,7 +231,9 @@ class PromptStats(Base):
     )
 
     # Time period
-    date: Mapped[date_type] = mapped_column(Date, nullable=False, index=True)
+    date: Mapped[date_type] = mapped_column(
+        Date, nullable=False, index=True
+    )
 
     # Usage statistics
     usage_count: Mapped[int] = mapped_column(
@@ -303,7 +309,9 @@ class ProfileStats(Base):
     )
 
     # Time period
-    date: Mapped[date_type] = mapped_column(Date, nullable=False, index=True)
+    date: Mapped[date_type] = mapped_column(
+        Date, nullable=False, index=True
+    )
 
     # Usage statistics
     conversations_started: Mapped[int] = mapped_column(

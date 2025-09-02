@@ -1,6 +1,5 @@
 """Tests for workflow validation utilities."""
 
-
 import pytest
 
 from chatter.core.workflow_validation import (
@@ -143,7 +142,9 @@ class TestInputSanitizer:
         max_length = 5000
 
         # Act
-        sanitized = InputSanitizer.sanitize_text(text, max_length=max_length)
+        sanitized = InputSanitizer.sanitize_text(
+            text, max_length=max_length
+        )
 
         # Assert
         assert len(sanitized) == max_length
@@ -155,7 +156,7 @@ class TestInputSanitizer:
             "q": "search term",
             "limit": "10",
             "offset": "0",
-            "malicious": "'; DROP TABLE users; --"
+            "malicious": "'; DROP TABLE users; --",
         }
 
         # Act
@@ -172,7 +173,7 @@ class TestInputSanitizer:
         safe_paths = [
             "documents/file.txt",
             "uploads/image.jpg",
-            "data/config.json"
+            "data/config.json",
         ]
 
         # Act & Assert
@@ -186,7 +187,7 @@ class TestInputSanitizer:
             "../../../etc/passwd",
             "/etc/shadow",
             "..\\..\\windows\\system32",
-            "uploads/../config/secrets.env"
+            "uploads/../config/secrets.env",
         ]
 
         # Act & Assert
@@ -199,7 +200,7 @@ class TestInputSanitizer:
         user_input = {
             "message": "Hello <script>alert('xss')</script>world",
             "user_id": "user-123",
-            "session_data": {"key": "value\x00\x01"}
+            "session_data": {"key": "value\x00\x01"},
         }
 
         # Act
@@ -232,9 +233,9 @@ class TestWorkflowValidator:
                     "id": "step-1",
                     "name": "Input Step",
                     "type": "input",
-                    "config": {"source": "user_input"}
+                    "config": {"source": "user_input"},
                 }
-            ]
+            ],
         }
 
         # Act
@@ -271,9 +272,9 @@ class TestWorkflowValidator:
                     "id": "step-1",
                     "name": "Invalid Step",
                     "type": "unknown_type",  # Invalid type
-                    "config": {}
+                    "config": {},
                 }
-            ]
+            ],
         }
 
         # Act
@@ -291,13 +292,13 @@ class TestWorkflowValidator:
             "permissions": {
                 "required_role": "admin",
                 "allowed_tools": ["tool1", "tool2"],
-                "restricted_actions": ["delete", "modify"]
-            }
+                "restricted_actions": ["delete", "modify"],
+            },
         }
         user_permissions = {
             "role": "admin",
             "tools": ["tool1", "tool2", "tool3"],
-            "actions": ["read", "write", "execute"]
+            "actions": ["read", "write", "execute"],
         }
 
         # Act
@@ -315,12 +316,12 @@ class TestWorkflowValidator:
             "id": "secure-workflow",
             "permissions": {
                 "required_role": "admin",
-                "allowed_tools": ["tool1", "tool2"]
-            }
+                "allowed_tools": ["tool1", "tool2"],
+            },
         }
         user_permissions = {
             "role": "user",  # Insufficient role
-            "tools": ["tool1"]  # Missing tool2
+            "tools": ["tool1"],  # Missing tool2
         }
 
         # Act
@@ -339,10 +340,14 @@ class TestWorkflowValidator:
             "id": "dependent-workflow",
             "dependencies": {
                 "required_services": ["llm_service", "vector_store"],
-                "optional_services": ["analytics_service"]
-            }
+                "optional_services": ["analytics_service"],
+            },
         }
-        available_services = ["llm_service", "vector_store", "analytics_service"]
+        available_services = [
+            "llm_service",
+            "vector_store",
+            "analytics_service",
+        ]
 
         # Act
         result = self.validator.validate_workflow_dependencies(
@@ -358,8 +363,12 @@ class TestWorkflowValidator:
         workflow_config = {
             "id": "dependent-workflow",
             "dependencies": {
-                "required_services": ["llm_service", "vector_store", "missing_service"]
-            }
+                "required_services": [
+                    "llm_service",
+                    "vector_store",
+                    "missing_service",
+                ]
+            },
         }
         available_services = ["llm_service", "vector_store"]
 
@@ -370,7 +379,9 @@ class TestWorkflowValidator:
 
         # Assert
         assert result.valid is False
-        assert any("missing_service" in error for error in result.errors)
+        assert any(
+            "missing_service" in error for error in result.errors
+        )
 
 
 @pytest.mark.unit
@@ -391,8 +402,8 @@ class TestStepValidator:
             "config": {
                 "model": "gpt-4",
                 "temperature": 0.7,
-                "max_tokens": 1000
-            }
+                "max_tokens": 1000,
+            },
         }
 
         # Act
@@ -407,7 +418,7 @@ class TestStepValidator:
         invalid_step = {
             "name": "Step without ID",
             "type": "llm_call",
-            "config": {}
+            "config": {},
         }
 
         # Act
@@ -427,8 +438,8 @@ class TestStepValidator:
             "config": {
                 "model": "gpt-4",
                 "prompt": "Test prompt",
-                "temperature": 0.5
-            }
+                "temperature": 0.5,
+            },
         }
 
         # Act
@@ -447,7 +458,7 @@ class TestStepValidator:
             "config": {
                 "prompt": "Test prompt"
                 # Missing 'model'
-            }
+            },
         }
 
         # Act
@@ -467,8 +478,8 @@ class TestStepValidator:
             "config": {
                 "condition": "input.value > 10",
                 "true_path": "step-2",
-                "false_path": "step-3"
-            }
+                "false_path": "step-3",
+            },
         }
 
         # Act
@@ -486,8 +497,8 @@ class TestStepValidator:
             "type": "tool_call",
             "config": {
                 "tool_name": "calculator",
-                "parameters": {"operation": "add", "a": 5, "b": 3}
-            }
+                "parameters": {"operation": "add", "a": 5, "b": 3},
+            },
         }
 
         # Act
@@ -548,7 +559,12 @@ class TestParameterValidator:
     def test_validate_model_name_supported(self):
         """Test validating supported model names."""
         # Arrange
-        supported_models = ["gpt-4", "gpt-3.5-turbo", "claude-3", "llama-2"]
+        supported_models = [
+            "gpt-4",
+            "gpt-3.5-turbo",
+            "claude-3",
+            "llama-2",
+        ]
 
         # Act & Assert
         for model in supported_models:
@@ -558,7 +574,12 @@ class TestParameterValidator:
     def test_validate_model_name_unsupported(self):
         """Test validating unsupported model names."""
         # Arrange
-        unsupported_models = ["unknown-model", "", None, "deprecated-model"]
+        unsupported_models = [
+            "unknown-model",
+            "",
+            None,
+            "deprecated-model",
+        ]
 
         # Act & Assert
         for model in unsupported_models:
@@ -581,9 +602,9 @@ class TestSchemaValidator:
             "type": "object",
             "properties": {
                 "name": {"type": "string"},
-                "age": {"type": "number", "minimum": 0}
+                "age": {"type": "number", "minimum": 0},
             },
-            "required": ["name"]
+            "required": ["name"],
         }
         data = {"name": "John", "age": 30}
 
@@ -600,9 +621,9 @@ class TestSchemaValidator:
             "type": "object",
             "properties": {
                 "name": {"type": "string"},
-                "age": {"type": "number", "minimum": 0}
+                "age": {"type": "number", "minimum": 0},
             },
-            "required": ["name"]
+            "required": ["name"],
         }
         data = {"age": -5}  # Missing required 'name', invalid age
 
@@ -620,16 +641,20 @@ class TestSchemaValidator:
             "type": "object",
             "properties": {
                 "result": {"type": "string"},
-                "confidence": {"type": "number", "minimum": 0, "maximum": 1},
-                "metadata": {"type": "object"}
+                "confidence": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                },
+                "metadata": {"type": "object"},
             },
-            "required": ["result"]
+            "required": ["result"],
         }
 
         valid_output = {
             "result": "Task completed successfully",
             "confidence": 0.95,
-            "metadata": {"timestamp": "2024-01-01T00:00:00Z"}
+            "metadata": {"timestamp": "2024-01-01T00:00:00Z"},
         }
 
         # Act
@@ -664,7 +689,10 @@ class TestWorkflowValidationIntegration:
                     "id": "input-step",
                     "name": "Input Processing",
                     "type": "input",
-                    "config": {"source": "user_input", "validation": True}
+                    "config": {
+                        "source": "user_input",
+                        "validation": True,
+                    },
                 },
                 {
                     "id": "llm-step",
@@ -674,8 +702,8 @@ class TestWorkflowValidationIntegration:
                         "model": "gpt-4",
                         "temperature": 0.7,
                         "max_tokens": 1000,
-                        "prompt": "Process the user input"
-                    }
+                        "prompt": "Process the user input",
+                    },
                 },
                 {
                     "id": "condition-step",
@@ -684,18 +712,18 @@ class TestWorkflowValidationIntegration:
                     "config": {
                         "condition": "output.confidence > 0.8",
                         "true_path": "success-step",
-                        "false_path": "retry-step"
-                    }
-                }
+                        "false_path": "retry-step",
+                    },
+                },
             ],
             "permissions": {
                 "required_role": "user",
-                "allowed_tools": ["calculator", "search"]
+                "allowed_tools": ["calculator", "search"],
             },
             "dependencies": {
                 "required_services": ["llm_service"],
-                "optional_services": ["analytics_service"]
-            }
+                "optional_services": ["analytics_service"],
+            },
         }
 
         # Mock available services and user permissions
@@ -703,18 +731,26 @@ class TestWorkflowValidationIntegration:
         user_permissions = {
             "role": "user",
             "tools": ["calculator", "search", "other_tool"],
-            "actions": ["read", "write", "execute"]
+            "actions": ["read", "write", "execute"],
         }
 
         # Act - Validate complete workflow
-        config_result = self.workflow_validator.validate_workflow_config(complete_workflow)
+        config_result = (
+            self.workflow_validator.validate_workflow_config(
+                complete_workflow
+            )
+        )
 
         if config_result.valid:
-            perm_result = self.workflow_validator.validate_workflow_permissions(
-                complete_workflow, user_permissions
+            perm_result = (
+                self.workflow_validator.validate_workflow_permissions(
+                    complete_workflow, user_permissions
+                )
             )
-            dep_result = self.workflow_validator.validate_workflow_dependencies(
-                complete_workflow, available_services
+            dep_result = (
+                self.workflow_validator.validate_workflow_dependencies(
+                    complete_workflow, available_services
+                )
             )
 
             # Validate individual steps
@@ -742,21 +778,29 @@ class TestWorkflowValidationIntegration:
                     "type": "unknown_type",  # Invalid step type
                     "config": {
                         "model": "unsupported-model",  # Invalid model
-                        "temperature": 2.0  # Invalid temperature
-                    }
+                        "temperature": 2.0,  # Invalid temperature
+                    },
                 }
-            ]
+            ],
         }
 
         # Act
-        config_result = self.workflow_validator.validate_workflow_config(invalid_workflow)
+        config_result = (
+            self.workflow_validator.validate_workflow_config(
+                invalid_workflow
+            )
+        )
 
         # Validate the invalid step
-        step_result = self.step_validator.validate_step(invalid_workflow["steps"][0])
+        step_result = self.step_validator.validate_step(
+            invalid_workflow["steps"][0]
+        )
 
         # Validate parameters
         temp_result = self.param_validator.validate_temperature(2.0)
-        model_result = self.param_validator.validate_model_name("unsupported-model")
+        model_result = self.param_validator.validate_model_name(
+            "unsupported-model"
+        )
 
         # Assert - All validations should fail
         assert config_result.valid is False

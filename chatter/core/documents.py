@@ -160,13 +160,15 @@ class DocumentService:
                 from chatter.services.sse_events import (
                     trigger_document_uploaded,
                 )
+
                 await trigger_document_uploaded(
-                    str(document.id),
-                    upload_file.filename,
-                    user_id
+                    str(document.id), upload_file.filename, user_id
                 )
             except Exception as e:
-                logger.warning("Failed to trigger document uploaded event", error=str(e))
+                logger.warning(
+                    "Failed to trigger document uploaded event",
+                    error=str(e),
+                )
 
             # Start background processing
             await self._process_document_async(
@@ -439,8 +441,14 @@ class DocumentService:
                 search_request.query
             )
 
-            provider = usage.get("provider") if isinstance(usage, dict) else None
-            model = usage.get("model") if isinstance(usage, dict) else None
+            provider = (
+                usage.get("provider")
+                if isinstance(usage, dict)
+                else None
+            )
+            model = (
+                usage.get("model") if isinstance(usage, dict) else None
+            )
 
             print("USAGES$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
             # Get accessible document IDs
@@ -496,13 +504,15 @@ class DocumentService:
                 return []
 
             # Perform vector search with dynamic store (parity: returns tuples)
-            similar_chunks = await self.vector_store_service.similarity_search(
-                query_embedding=query_embedding,
-                provider_name=provider or "provider",
-                model_name=model,
-                limit=search_request.limit,
-                score_threshold=search_request.score_threshold,
-                document_ids=accessible_doc_ids,
+            similar_chunks = (
+                await self.vector_store_service.similarity_search(
+                    query_embedding=query_embedding,
+                    provider_name=provider or "provider",
+                    model_name=model,
+                    limit=search_request.limit,
+                    score_threshold=search_request.score_threshold,
+                    document_ids=accessible_doc_ids,
+                )
             )
 
             # Get document information for each chunk
@@ -695,7 +705,9 @@ class DocumentService:
             total_chunks = chunks_result.scalar()
 
             # Vector store embedding stats (from dynamic service)
-            embedding_stats = await self.vector_store_service.get_embedding_stats()
+            embedding_stats = (
+                await self.vector_store_service.get_embedding_stats()
+            )
 
             return {
                 "total_documents": sum(status_counts.values()),
@@ -733,7 +745,7 @@ class DocumentService:
                 args=[document_id, file_content],
                 priority=JobPriority.NORMAL,
                 tags=["document", "processing"],
-                metadata={"document_id": document_id}
+                metadata={"document_id": document_id},
             )
 
             logger.info(
@@ -749,7 +761,9 @@ class DocumentService:
                 error=str(e),
             )
 
-    async def reprocess_document(self, document_id: str, user_id: str) -> bool:
+    async def reprocess_document(
+        self, document_id: str, user_id: str
+    ) -> bool:
         """Reprocess a document."""
         try:
             # Get the document first
@@ -758,8 +772,12 @@ class DocumentService:
                 return False
 
             # Trigger reprocessing (similar to process_document but for existing docs)
-            processing_request = DocumentProcessingRequest(reprocess=True)
-            await self.process_document(document_id, user_id, processing_request)
+            processing_request = DocumentProcessingRequest(
+                reprocess=True
+            )
+            await self.process_document(
+                document_id, user_id, processing_request
+            )
             return True
         except Exception as e:
             logger.error(
@@ -782,7 +800,7 @@ class ChunkingStrategy:
 
     def __init__(self, chunk_size: int = 1000, overlap: int = 100):
         """Initialize the chunking strategy.
-        
+
         Args:
             chunk_size: Size of each chunk in characters
             overlap: Overlap between chunks in characters
@@ -792,10 +810,10 @@ class ChunkingStrategy:
 
     def chunk_text(self, text: str) -> list[str]:
         """Chunk text into smaller pieces.
-        
+
         Args:
             text: Text to chunk
-            
+
         Returns:
             List of text chunks
         """
@@ -804,37 +822,39 @@ class ChunkingStrategy:
 
         chunks = []
         start = 0
-        
+
         while start < len(text):
             end = start + self.chunk_size
             chunk = text[start:end]
             chunks.append(chunk)
             start = end - self.overlap
-            
+
         return chunks
 
-    def chunk_document(self, document: dict[str, Any]) -> list[dict[str, Any]]:
+    def chunk_document(
+        self, document: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Chunk a document into smaller pieces.
-        
+
         Args:
             document: Document to chunk
-            
+
         Returns:
             List of document chunks
         """
         content = document.get("content", "")
         chunks = self.chunk_text(content)
-        
+
         chunked_docs = []
         for i, chunk in enumerate(chunks):
             chunked_doc = {
                 **document,
                 "content": chunk,
                 "chunk_id": i,
-                "total_chunks": len(chunks)
+                "total_chunks": len(chunks),
             }
             chunked_docs.append(chunked_doc)
-            
+
         return chunked_docs
 
 
@@ -845,39 +865,43 @@ class DocumentProcessor:
         """Initialize the document processor."""
         self.processors: dict[str, callable] = {}
 
-    def register_processor(self, file_type: str, processor: callable) -> None:
+    def register_processor(
+        self, file_type: str, processor: callable
+    ) -> None:
         """Register a processor for a file type.
-        
+
         Args:
             file_type: File type extension
             processor: Processor function
         """
         self.processors[file_type] = processor
 
-    async def process_document(self, document: dict[str, Any]) -> dict[str, Any]:
+    async def process_document(
+        self, document: dict[str, Any]
+    ) -> dict[str, Any]:
         """Process a document.
-        
+
         Args:
             document: Document to process
-            
+
         Returns:
             Processed document
         """
         file_type = document.get("file_type", "").lower()
-        
+
         if file_type in self.processors:
             return await self.processors[file_type](document)
-        
+
         # Default processing
         return {
             **document,
             "processed": True,
-            "processed_at": datetime.now(UTC).isoformat()
+            "processed_at": datetime.now(UTC).isoformat(),
         }
 
     def get_supported_types(self) -> list[str]:
         """Get list of supported file types.
-        
+
         Returns:
             List of supported file types
         """
@@ -889,7 +913,7 @@ class DocumentSearchEngine:
 
     def __init__(self, session: AsyncSession | None = None):
         """Initialize the document search engine.
-        
+
         Args:
             session: Optional database session for advanced search
         """
@@ -897,64 +921,64 @@ class DocumentSearchEngine:
         self.indexed_documents: dict[str, dict[str, Any]] = {}
         self.search_index: dict[str, set[str]] = {}
 
-    def index_document(self, document_id: str, document: dict[str, Any]) -> None:
+    def index_document(
+        self, document_id: str, document: dict[str, Any]
+    ) -> None:
         """Index a document for searching.
-        
+
         Args:
             document_id: ID of the document
             document: Document data
         """
         self.indexed_documents[document_id] = document
-        
+
         # Simple keyword indexing
         content = document.get("content", "").lower()
         words = content.split()
-        
+
         for word in words:
             if word not in self.search_index:
                 self.search_index[word] = set()
             self.search_index[word].add(document_id)
 
     async def search(
-        self, 
-        query: str, 
-        limit: int = 10
+        self, query: str, limit: int = 10
     ) -> list[dict[str, Any]]:
         """Search for documents.
-        
+
         Args:
             query: Search query
             limit: Maximum number of results
-            
+
         Returns:
             List of matching documents
         """
         query_words = query.lower().split()
         document_scores: dict[str, int] = {}
-        
+
         for word in query_words:
             if word in self.search_index:
                 for doc_id in self.search_index[word]:
-                    document_scores[doc_id] = document_scores.get(doc_id, 0) + 1
-        
+                    document_scores[doc_id] = (
+                        document_scores.get(doc_id, 0) + 1
+                    )
+
         # Sort by score and return top results
         sorted_docs = sorted(
-            document_scores.items(), 
-            key=lambda x: x[1], 
-            reverse=True
+            document_scores.items(), key=lambda x: x[1], reverse=True
         )
-        
+
         results = []
         for doc_id, score in sorted_docs[:limit]:
             doc = self.indexed_documents[doc_id].copy()
             doc["search_score"] = score
             results.append(doc)
-            
+
         return results
 
     def get_document_count(self) -> int:
         """Get total number of indexed documents.
-        
+
         Returns:
             Number of indexed documents
         """
@@ -968,55 +992,67 @@ class DocumentValidator:
         """Initialize the document validator."""
         self.validation_rules: dict[str, callable] = {}
 
-    def register_validation_rule(self, name: str, rule: callable) -> None:
+    def register_validation_rule(
+        self, name: str, rule: callable
+    ) -> None:
         """Register a validation rule.
-        
+
         Args:
             name: Name of the rule
             rule: Validation function that returns bool
         """
         self.validation_rules[name] = rule
 
-    def validate_document(self, document: dict[str, Any]) -> dict[str, Any]:
+    def validate_document(
+        self, document: dict[str, Any]
+    ) -> dict[str, Any]:
         """Validate a document.
-        
+
         Args:
             document: Document to validate
-            
+
         Returns:
             Validation result
         """
         validation_result = {
             "is_valid": True,
             "errors": [],
-            "warnings": []
+            "warnings": [],
         }
 
         # Basic validation
         if not document.get("content"):
             validation_result["is_valid"] = False
-            validation_result["errors"].append("Document content is empty")
+            validation_result["errors"].append(
+                "Document content is empty"
+            )
 
         if not document.get("title"):
-            validation_result["warnings"].append("Document title is missing")
+            validation_result["warnings"].append(
+                "Document title is missing"
+            )
 
         # Run custom validation rules
         for rule_name, rule_func in self.validation_rules.items():
             try:
                 if not rule_func(document):
                     validation_result["is_valid"] = False
-                    validation_result["errors"].append(f"Validation rule failed: {rule_name}")
+                    validation_result["errors"].append(
+                        f"Validation rule failed: {rule_name}"
+                    )
             except Exception as e:
-                validation_result["warnings"].append(f"Validation rule error: {rule_name} - {e}")
+                validation_result["warnings"].append(
+                    f"Validation rule error: {rule_name} - {e}"
+                )
 
         return validation_result
 
     def is_valid_document(self, document: dict[str, Any]) -> bool:
         """Check if a document is valid.
-        
+
         Args:
             document: Document to check
-            
+
         Returns:
             True if document is valid
         """

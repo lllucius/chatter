@@ -33,7 +33,7 @@ class SSEConnection:
                 logger.error(
                     "Failed to queue event for connection",
                     connection_id=self.connection_id,
-                    error=str(e)
+                    error=str(e),
                 )
 
     async def get_events(self) -> AsyncGenerator[Event, None]:
@@ -41,19 +41,21 @@ class SSEConnection:
         while not self._closed:
             try:
                 # Wait for an event with a timeout to allow periodic checks
-                event = await asyncio.wait_for(self._queue.get(), timeout=30.0)
+                event = await asyncio.wait_for(
+                    self._queue.get(), timeout=30.0
+                )
                 yield event
             except TimeoutError:
                 # Send keepalive/heartbeat
                 yield Event(
                     type=EventType.SYSTEM_STATUS,
-                    data={"status": "connected", "keepalive": True}
+                    data={"status": "connected", "keepalive": True},
                 )
             except Exception as e:
                 logger.error(
                     "Error getting events for connection",
                     connection_id=self.connection_id,
-                    error=str(e)
+                    error=str(e),
                 )
                 break
 
@@ -63,7 +65,7 @@ class SSEConnection:
         logger.info(
             "SSE connection closed",
             connection_id=self.connection_id,
-            user_id=self.user_id
+            user_id=self.user_id,
         )
 
 
@@ -72,13 +74,17 @@ class SSEEventService:
 
     def __init__(self):
         self.connections: dict[str, SSEConnection] = {}
-        self.user_connections: dict[str, set[str]] = {}  # user_id -> connection_ids
+        self.user_connections: dict[str, set[str]] = (
+            {}
+        )  # user_id -> connection_ids
         self._cleanup_task: asyncio.Task | None = None
 
     async def start(self) -> None:
         """Start the SSE service."""
         logger.info("Starting SSE event service")
-        self._cleanup_task = asyncio.create_task(self._cleanup_inactive_connections())
+        self._cleanup_task = asyncio.create_task(
+            self._cleanup_inactive_connections()
+        )
 
     async def stop(self) -> None:
         """Stop the SSE service."""
@@ -112,12 +118,14 @@ class SSEEventService:
             "Created SSE connection",
             connection_id=connection_id,
             user_id=user_id,
-            total_connections=len(self.connections)
+            total_connections=len(self.connections),
         )
 
         return connection_id
 
-    def get_connection(self, connection_id: str) -> SSEConnection | None:
+    def get_connection(
+        self, connection_id: str
+    ) -> SSEConnection | None:
         """Get an SSE connection by ID."""
         return self.connections.get(connection_id)
 
@@ -126,8 +134,13 @@ class SSEEventService:
         connection = self.connections.pop(connection_id, None)
         if connection:
             # Remove from user connections
-            if connection.user_id and connection.user_id in self.user_connections:
-                self.user_connections[connection.user_id].discard(connection_id)
+            if (
+                connection.user_id
+                and connection.user_id in self.user_connections
+            ):
+                self.user_connections[connection.user_id].discard(
+                    connection_id
+                )
                 if not self.user_connections[connection.user_id]:
                     del self.user_connections[connection.user_id]
 
@@ -136,7 +149,7 @@ class SSEEventService:
                 "Closed SSE connection",
                 connection_id=connection_id,
                 user_id=connection.user_id,
-                total_connections=len(self.connections)
+                total_connections=len(self.connections),
             )
 
     async def broadcast_event(self, event: Event) -> None:
@@ -145,7 +158,7 @@ class SSEEventService:
             "Broadcasting event",
             event_type=event.type.value,
             event_id=event.id,
-            user_specific=event.user_id is not None
+            user_specific=event.user_id is not None,
         )
 
         target_connections = []
@@ -153,9 +166,13 @@ class SSEEventService:
         if event.user_id:
             # Send to specific user's connections
             if event.user_id in self.user_connections:
-                for connection_id in self.user_connections[event.user_id]:
+                for connection_id in self.user_connections[
+                    event.user_id
+                ]:
                     if connection_id in self.connections:
-                        target_connections.append(self.connections[connection_id])
+                        target_connections.append(
+                            self.connections[connection_id]
+                        )
         else:
             # Broadcast to all connections
             target_connections = list(self.connections.values())
@@ -167,7 +184,9 @@ class SSEEventService:
 
         if send_tasks:
             try:
-                await asyncio.gather(*send_tasks, return_exceptions=True)
+                await asyncio.gather(
+                    *send_tasks, return_exceptions=True
+                )
             except Exception as e:
                 logger.error("Error broadcasting event", error=str(e))
 
@@ -183,7 +202,7 @@ class SSEEventService:
             type=event_type,
             data=data,
             user_id=user_id,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         await self.broadcast_event(event)
@@ -198,9 +217,14 @@ class SSEEventService:
                 now = datetime.now(UTC)
                 inactive_connections = []
 
-                for connection_id, connection in self.connections.items():
+                for (
+                    connection_id,
+                    connection,
+                ) in self.connections.items():
                     # Consider connections inactive if no activity for 1 hour
-                    if (now - connection.last_activity).total_seconds() > 3600:
+                    if (
+                        now - connection.last_activity
+                    ).total_seconds() > 3600:
                         inactive_connections.append(connection_id)
 
                 for connection_id in inactive_connections:
@@ -209,13 +233,15 @@ class SSEEventService:
                 if inactive_connections:
                     logger.info(
                         "Cleaned up inactive SSE connections",
-                        count=len(inactive_connections)
+                        count=len(inactive_connections),
                     )
 
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error("Error during SSE connection cleanup", error=str(e))
+                logger.error(
+                    "Error during SSE connection cleanup", error=str(e)
+                )
 
     def get_stats(self) -> dict[str, Any]:
         """Get service statistics."""
@@ -225,7 +251,7 @@ class SSEEventService:
             "connections_by_user": {
                 user_id: len(connection_ids)
                 for user_id, connection_ids in self.user_connections.items()
-            }
+            },
         }
 
 
@@ -234,7 +260,9 @@ sse_service = SSEEventService()
 
 
 # Helper functions for common events
-async def trigger_backup_started(backup_id: str, user_id: str | None = None) -> str:
+async def trigger_backup_started(
+    backup_id: str, user_id: str | None = None
+) -> str:
     """Trigger backup started event."""
     return await sse_service.trigger_event(
         EventType.BACKUP_STARTED,
@@ -242,7 +270,7 @@ async def trigger_backup_started(backup_id: str, user_id: str | None = None) -> 
             "backup_id": backup_id,
             "started_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )
 
 
@@ -257,7 +285,7 @@ async def trigger_backup_completed(
             "backup_path": backup_path,
             "completed_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )
 
 
@@ -272,12 +300,15 @@ async def trigger_backup_failed(
             "error": error,
             "failed_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )
 
 
 async def trigger_backup_progress(
-    backup_id: str, progress: float, status: str, user_id: str | None = None
+    backup_id: str,
+    progress: float,
+    status: str,
+    user_id: str | None = None,
 ) -> str:
     """Trigger backup progress event."""
     return await sse_service.trigger_event(
@@ -288,11 +319,13 @@ async def trigger_backup_progress(
             "status": status,
             "updated_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )
 
 
-async def trigger_job_started(job_id: str, job_name: str, user_id: str | None = None) -> str:
+async def trigger_job_started(
+    job_id: str, job_name: str, user_id: str | None = None
+) -> str:
     """Trigger job started event."""
     return await sse_service.trigger_event(
         EventType.JOB_STARTED,
@@ -301,12 +334,15 @@ async def trigger_job_started(job_id: str, job_name: str, user_id: str | None = 
             "job_name": job_name,
             "started_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )
 
 
 async def trigger_job_completed(
-    job_id: str, job_name: str, result: dict[str, Any], user_id: str | None = None
+    job_id: str,
+    job_name: str,
+    result: dict[str, Any],
+    user_id: str | None = None,
 ) -> str:
     """Trigger job completed event."""
     return await sse_service.trigger_event(
@@ -317,7 +353,7 @@ async def trigger_job_completed(
             "result": result,
             "completed_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )
 
 
@@ -333,11 +369,13 @@ async def trigger_job_failed(
             "error": error,
             "failed_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )
 
 
-async def trigger_tool_server_started(server_id: str, server_name: str) -> str:
+async def trigger_tool_server_started(
+    server_id: str, server_name: str
+) -> str:
     """Trigger tool server started event."""
     return await sse_service.trigger_event(
         EventType.TOOL_SERVER_STARTED,
@@ -345,11 +383,13 @@ async def trigger_tool_server_started(server_id: str, server_name: str) -> str:
             "server_id": server_id,
             "server_name": server_name,
             "started_at": datetime.now(UTC).isoformat(),
-        }
+        },
     )
 
 
-async def trigger_tool_server_stopped(server_id: str, server_name: str) -> str:
+async def trigger_tool_server_stopped(
+    server_id: str, server_name: str
+) -> str:
     """Trigger tool server stopped event."""
     return await sse_service.trigger_event(
         EventType.TOOL_SERVER_STOPPED,
@@ -357,12 +397,15 @@ async def trigger_tool_server_stopped(server_id: str, server_name: str) -> str:
             "server_id": server_id,
             "server_name": server_name,
             "stopped_at": datetime.now(UTC).isoformat(),
-        }
+        },
     )
 
 
 async def trigger_tool_server_health_changed(
-    server_id: str, server_name: str, health_status: str, details: dict[str, Any]
+    server_id: str,
+    server_name: str,
+    health_status: str,
+    details: dict[str, Any],
 ) -> str:
     """Trigger tool server health changed event."""
     return await sse_service.trigger_event(
@@ -373,7 +416,7 @@ async def trigger_tool_server_health_changed(
             "health_status": health_status,
             "details": details,
             "checked_at": datetime.now(UTC).isoformat(),
-        }
+        },
     )
 
 
@@ -388,7 +431,7 @@ async def trigger_document_uploaded(
             "filename": filename,
             "uploaded_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )
 
 
@@ -403,7 +446,7 @@ async def trigger_document_processing_completed(
             "result": result,
             "completed_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )
 
 
@@ -418,5 +461,5 @@ async def trigger_document_processing_failed(
             "error": error,
             "failed_at": datetime.now(UTC).isoformat(),
         },
-        user_id=user_id
+        user_id=user_id,
     )

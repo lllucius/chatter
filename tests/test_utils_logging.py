@@ -4,7 +4,6 @@ import logging
 from unittest.mock import MagicMock, patch
 
 import pytest
-import structlog
 
 from chatter.utils.logging import (
     ContextLogger,
@@ -22,7 +21,9 @@ class TestLoggingSetup:
     @patch('chatter.utils.logging.settings')
     @patch('structlog.configure')
     @patch('logging.basicConfig')
-    def test_setup_logging_default_config(self, mock_basic_config, mock_structlog_config, mock_settings):
+    def test_setup_logging_default_config(
+        self, mock_basic_config, mock_structlog_config, mock_settings
+    ):
         """Test default logging setup."""
         # Arrange
         mock_settings.log_json = False
@@ -38,7 +39,7 @@ class TestLoggingSetup:
         # Assert
         mock_structlog_config.assert_called_once()
         mock_basic_config.assert_called_once()
-        
+
         # Check structlog configuration
         config_call = mock_structlog_config.call_args
         assert 'processors' in config_call.kwargs
@@ -50,7 +51,9 @@ class TestLoggingSetup:
     @patch('chatter.utils.logging.settings')
     @patch('structlog.configure')
     @patch('logging.basicConfig')
-    def test_setup_logging_with_json(self, mock_basic_config, mock_structlog_config, mock_settings):
+    def test_setup_logging_with_json(
+        self, mock_basic_config, mock_structlog_config, mock_settings
+    ):
         """Test logging setup with JSON output."""
         # Arrange
         mock_settings.log_json = True
@@ -65,7 +68,7 @@ class TestLoggingSetup:
 
         # Assert
         mock_structlog_config.assert_called_once()
-        
+
         # Check that JSON renderer is used when log_json is True
         config_call = mock_structlog_config.call_args
         processors = config_call.kwargs['processors']
@@ -76,7 +79,13 @@ class TestLoggingSetup:
     @patch('structlog.configure')
     @patch('logging.basicConfig')
     @patch('logging.FileHandler')
-    def test_setup_logging_with_file(self, mock_file_handler, mock_basic_config, mock_structlog_config, mock_settings):
+    def test_setup_logging_with_file(
+        self,
+        mock_file_handler,
+        mock_basic_config,
+        mock_structlog_config,
+        mock_settings,
+    ):
         """Test logging setup with file output."""
         # Arrange
         mock_settings.log_json = False
@@ -94,7 +103,7 @@ class TestLoggingSetup:
         # Assert
         mock_file_handler.assert_called_once_with("/tmp/test.log")
         mock_basic_config.assert_called_once()
-        
+
         # Check that file handler was added
         basic_config_call = mock_basic_config.call_args
         handlers = basic_config_call.kwargs['handlers']
@@ -104,7 +113,13 @@ class TestLoggingSetup:
     @patch('structlog.configure')
     @patch('logging.basicConfig')
     @patch('logging.getLogger')
-    def test_setup_logging_database_debug(self, mock_get_logger, mock_basic_config, mock_structlog_config, mock_settings):
+    def test_setup_logging_database_debug(
+        self,
+        mock_get_logger,
+        mock_basic_config,
+        mock_structlog_config,
+        mock_settings,
+    ):
         """Test logging setup with database debugging enabled."""
         # Arrange
         mock_settings.log_json = False
@@ -128,7 +143,13 @@ class TestLoggingSetup:
     @patch('structlog.configure')
     @patch('logging.basicConfig')
     @patch('logging.getLogger')
-    def test_setup_logging_production_mode(self, mock_get_logger, mock_basic_config, mock_structlog_config, mock_settings):
+    def test_setup_logging_production_mode(
+        self,
+        mock_get_logger,
+        mock_basic_config,
+        mock_structlog_config,
+        mock_settings,
+    ):
         """Test logging setup in production mode."""
         # Arrange
         mock_settings.log_json = True
@@ -139,11 +160,12 @@ class TestLoggingSetup:
         mock_settings.is_production = True
 
         loggers = {}
+
         def get_logger_side_effect(name):
             if name not in loggers:
                 loggers[name] = MagicMock()
             return loggers[name]
-        
+
         mock_get_logger.side_effect = get_logger_side_effect
 
         # Act
@@ -154,9 +176,11 @@ class TestLoggingSetup:
         assert "httpx" in loggers
         assert "openai" in loggers
         assert "anthropic" in loggers
-        
+
         for logger_name in ["httpx", "openai", "anthropic"]:
-            loggers[logger_name].setLevel.assert_called_with(logging.WARNING)
+            loggers[logger_name].setLevel.assert_called_with(
+                logging.WARNING
+            )
 
 
 @pytest.mark.unit
@@ -167,8 +191,11 @@ class TestCorrelationProcessor:
         """Test correlation ID processor when correlation ID exists."""
         # Arrange
         event_dict = {"message": "test"}
-        
-        with patch('chatter.utils.logging.get_correlation_id', return_value="test-correlation-123"):
+
+        with patch(
+            'chatter.utils.logging.get_correlation_id',
+            return_value="test-correlation-123",
+        ):
             # Act
             result = correlation_id_processor(None, "info", event_dict)
 
@@ -180,8 +207,11 @@ class TestCorrelationProcessor:
         """Test correlation ID processor when no correlation ID exists."""
         # Arrange
         event_dict = {"message": "test"}
-        
-        with patch('chatter.utils.logging.get_correlation_id', return_value=None):
+
+        with patch(
+            'chatter.utils.logging.get_correlation_id',
+            return_value=None,
+        ):
             # Act
             result = correlation_id_processor(None, "info", event_dict)
 
@@ -193,8 +223,11 @@ class TestCorrelationProcessor:
         """Test correlation ID processor when correlation module is not available."""
         # Arrange
         event_dict = {"message": "test"}
-        
-        with patch('chatter.utils.logging.get_correlation_id', side_effect=ImportError("Module not found")):
+
+        with patch(
+            'chatter.utils.logging.get_correlation_id',
+            side_effect=ImportError("Module not found"),
+        ):
             # Act
             result = correlation_id_processor(None, "info", event_dict)
 
@@ -248,21 +281,28 @@ class TestContextLogger:
         self.mock_base_logger = MagicMock()
         self.mock_bound_logger = MagicMock()
         self.mock_base_logger.bind.return_value = self.mock_bound_logger
-        
+
         self.context = {"user_id": "123", "session_id": "abc"}
-        self.logger = ContextLogger(self.mock_base_logger, **self.context)
+        self.logger = ContextLogger(
+            self.mock_base_logger, **self.context
+        )
 
     def test_context_logger_initialization(self):
         """Test ContextLogger initialization."""
         # Assert
         assert self.logger._context == self.context
-        self.mock_base_logger.bind.assert_called_once_with(**self.context)
+        self.mock_base_logger.bind.assert_called_once_with(
+            **self.context
+        )
 
     def test_context_logger_bind(self):
         """Test binding additional context."""
         # Arrange
-        new_context = {"operation": "test", "user_id": "456"}  # user_id should override
-        
+        new_context = {
+            "operation": "test",
+            "user_id": "456",
+        }  # user_id should override
+
         # Mock the new bound logger
         new_mock_bound = MagicMock()
         self.mock_base_logger.bind.return_value = new_mock_bound
@@ -281,7 +321,9 @@ class TestContextLogger:
         self.logger.debug("Debug message", extra_field="value")
 
         # Assert
-        self.mock_bound_logger.debug.assert_called_once_with("Debug message", extra_field="value")
+        self.mock_bound_logger.debug.assert_called_once_with(
+            "Debug message", extra_field="value"
+        )
 
     def test_context_logger_info(self):
         """Test info logging."""
@@ -289,7 +331,9 @@ class TestContextLogger:
         self.logger.info("Info message", request_id="req-123")
 
         # Assert
-        self.mock_bound_logger.info.assert_called_once_with("Info message", request_id="req-123")
+        self.mock_bound_logger.info.assert_called_once_with(
+            "Info message", request_id="req-123"
+        )
 
     def test_context_logger_warning(self):
         """Test warning logging."""
@@ -297,7 +341,9 @@ class TestContextLogger:
         self.logger.warning("Warning message")
 
         # Assert
-        self.mock_bound_logger.warning.assert_called_once_with("Warning message")
+        self.mock_bound_logger.warning.assert_called_once_with(
+            "Warning message"
+        )
 
     def test_context_logger_error(self):
         """Test error logging."""
@@ -305,7 +351,9 @@ class TestContextLogger:
         self.logger.error("Error message", error_code="E001")
 
         # Assert
-        self.mock_bound_logger.error.assert_called_once_with("Error message", error_code="E001")
+        self.mock_bound_logger.error.assert_called_once_with(
+            "Error message", error_code="E001"
+        )
 
     def test_context_logger_critical(self):
         """Test critical logging."""
@@ -313,15 +361,21 @@ class TestContextLogger:
         self.logger.critical("Critical message")
 
         # Assert
-        self.mock_bound_logger.critical.assert_called_once_with("Critical message")
+        self.mock_bound_logger.critical.assert_called_once_with(
+            "Critical message"
+        )
 
     def test_context_logger_exception(self):
         """Test exception logging."""
         # Act
-        self.logger.exception("Exception occurred", details="trace info")
+        self.logger.exception(
+            "Exception occurred", details="trace info"
+        )
 
         # Assert
-        self.mock_bound_logger.exception.assert_called_once_with("Exception occurred", details="trace info")
+        self.mock_bound_logger.exception.assert_called_once_with(
+            "Exception occurred", details="trace info"
+        )
 
 
 @pytest.mark.integration
@@ -332,7 +386,7 @@ class TestLoggingIntegration:
         """Test complete logging workflow with setup and usage."""
         # This would be a more comprehensive test in a real scenario
         # For now, just test that basic functionality works together
-        
+
         with patch('chatter.utils.logging.settings') as mock_settings:
             mock_settings.log_json = False
             mock_settings.log_file = None
@@ -349,7 +403,9 @@ class TestLoggingIntegration:
             assert logger is not None
 
             # Get context logger
-            context_logger = get_context_logger("test.context", operation="integration_test")
+            context_logger = get_context_logger(
+                "test.context", operation="integration_test"
+            )
             assert isinstance(context_logger, ContextLogger)
 
     def test_context_logger_chaining(self):
@@ -358,29 +414,40 @@ class TestLoggingIntegration:
         mock_base_logger = MagicMock()
         mock_bound_logger1 = MagicMock()
         mock_bound_logger2 = MagicMock()
-        
+
         # Setup binding chain
         mock_base_logger.bind.return_value = mock_bound_logger1
-        
+
         # Create initial context logger
         logger1 = ContextLogger(mock_base_logger, user_id="123")
-        
+
         # Mock the second binding
         with patch.object(logger1, '_logger', mock_base_logger):
             mock_base_logger.bind.return_value = mock_bound_logger2
-            
+
             # Act - chain additional context
-            logger2 = logger1.bind(operation="test", request_id="req-456")
+            logger2 = logger1.bind(
+                operation="test", request_id="req-456"
+            )
             logger3 = logger2.bind(step="validation")
 
             # Assert
             assert isinstance(logger2, ContextLogger)
             assert isinstance(logger3, ContextLogger)
-            
+
             # Check context accumulation
-            expected_context_2 = {"user_id": "123", "operation": "test", "request_id": "req-456"}
-            expected_context_3 = {"user_id": "123", "operation": "test", "request_id": "req-456", "step": "validation"}
-            
+            expected_context_2 = {
+                "user_id": "123",
+                "operation": "test",
+                "request_id": "req-456",
+            }
+            expected_context_3 = {
+                "user_id": "123",
+                "operation": "test",
+                "request_id": "req-456",
+                "step": "validation",
+            }
+
             assert logger2._context == expected_context_2
             assert logger3._context == expected_context_3
 
@@ -391,7 +458,10 @@ class TestLoggingIntegration:
         correlation_id = "corr-123-test"
 
         # Act
-        with patch('chatter.utils.logging.get_correlation_id', return_value=correlation_id):
+        with patch(
+            'chatter.utils.logging.get_correlation_id',
+            return_value=correlation_id,
+        ):
             result = correlation_id_processor(None, "info", event_dict)
 
         # Assert
@@ -403,7 +473,7 @@ class TestLoggingIntegration:
     def test_different_log_levels(self, mock_settings):
         """Test setup with different log levels."""
         log_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
-        
+
         for level in log_levels:
             mock_settings.log_level = level
             mock_settings.log_json = False
@@ -416,13 +486,15 @@ class TestLoggingIntegration:
             # In a real test, we'd verify the logging level is set correctly
             with patch('logging.basicConfig') as mock_basic_config:
                 setup_logging()
-                
+
                 basic_config_call = mock_basic_config.call_args
                 expected_level = getattr(logging, level)
-                assert basic_config_call.kwargs['level'] == expected_level
+                assert (
+                    basic_config_call.kwargs['level'] == expected_level
+                )
 
 
-@pytest.mark.unit 
+@pytest.mark.unit
 class TestLoggingEdgeCases:
     """Test edge cases and error handling in logging."""
 
@@ -446,7 +518,7 @@ class TestLoggingEdgeCases:
         mock_base_logger = MagicMock()
         mock_bound_logger = MagicMock()
         mock_base_logger.bind.return_value = mock_bound_logger
-        
+
         logger = ContextLogger(mock_base_logger, initial="context")
 
         # Act
@@ -460,10 +532,15 @@ class TestLoggingEdgeCases:
         # Arrange
         event_dict = {"message": "test"}
 
-        with patch('chatter.utils.logging.get_correlation_id', side_effect=Exception("Unexpected error")):
+        with patch(
+            'chatter.utils.logging.get_correlation_id',
+            side_effect=Exception("Unexpected error"),
+        ):
             # Act - should not raise exception
             result = correlation_id_processor(None, "info", event_dict)
 
             # Assert
-            assert result == event_dict  # Should return original dict unchanged
+            assert (
+                result == event_dict
+            )  # Should return original dict unchanged
             assert "correlation_id" not in result

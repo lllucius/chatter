@@ -27,11 +27,13 @@ class TestDataManagementEndpoints:
             id="test-user-id",
             email="test@example.com",
             username="testuser",
-            is_active=True
+            is_active=True,
         )
 
         # Override dependencies
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -45,24 +47,28 @@ class TestDataManagementEndpoints:
             "data_types": ["conversations", "documents"],
             "date_from": "2024-01-01T00:00:00Z",
             "date_to": "2024-12-31T23:59:59Z",
-            "include_metadata": True
+            "include_metadata": True,
         }
 
         mock_export_id = "export-123"
         mock_export_info = {
             "status": "pending",
             "created_at": datetime.now(UTC),
-            "record_count": 100
+            "record_count": 100,
         }
 
         with patch.object(data_manager, 'export_data') as mock_export:
             mock_export.return_value = mock_export_id
 
-            with patch.object(data_manager, 'get_export_status') as mock_status:
+            with patch.object(
+                data_manager, 'get_export_status'
+            ) as mock_status:
                 mock_status.return_value = mock_export_info
 
                 # Act
-                response = self.client.post("/data/export", json=export_request)
+                response = self.client.post(
+                    "/data/export", json=export_request
+                )
 
                 # Assert
                 assert response.status_code == status.HTTP_202_ACCEPTED
@@ -78,14 +84,16 @@ class TestDataManagementEndpoints:
         # Arrange
         export_request = {
             "format": "invalid_format",
-            "data_types": ["conversations"]
+            "data_types": ["conversations"],
         }
 
         # Act
         response = self.client.post("/data/export", json=export_request)
 
         # Assert
-        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        assert (
+            response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        )
 
     def test_create_backup_success(self):
         """Test successful backup creation."""
@@ -97,7 +105,7 @@ class TestDataManagementEndpoints:
             "encrypt": True,
             "compress": True,
             "include_user_data": True,
-            "include_system_data": False
+            "include_system_data": False,
         }
 
         mock_backup_id = "backup-456"
@@ -107,17 +115,21 @@ class TestDataManagementEndpoints:
             "created_at": datetime.now(UTC),
             "record_count": 250,
             "encrypted": True,
-            "compressed": True
+            "compressed": True,
         }
 
         with patch.object(data_manager, 'create_backup') as mock_backup:
             mock_backup.return_value = mock_backup_id
 
-            with patch.object(data_manager, 'get_backup_info') as mock_info:
+            with patch.object(
+                data_manager, 'get_backup_info'
+            ) as mock_info:
                 mock_info.return_value = mock_backup_info
 
                 # Act
-                response = self.client.post("/data/backup", json=backup_request)
+                response = self.client.post(
+                    "/data/backup", json=backup_request
+                )
 
                 # Assert
                 assert response.status_code == status.HTTP_202_ACCEPTED
@@ -134,24 +146,26 @@ class TestDataManagementEndpoints:
     def test_create_backup_minimal_request(self):
         """Test backup creation with minimal required fields."""
         # Arrange
-        backup_request = {
-            "backup_type": "user_data"
-        }
+        backup_request = {"backup_type": "user_data"}
 
         mock_backup_id = "backup-789"
         mock_backup_info = {
             "status": "pending",
-            "created_at": datetime.now(UTC)
+            "created_at": datetime.now(UTC),
         }
 
         with patch.object(data_manager, 'create_backup') as mock_backup:
             mock_backup.return_value = mock_backup_id
 
-            with patch.object(data_manager, 'get_backup_info') as mock_info:
+            with patch.object(
+                data_manager, 'get_backup_info'
+            ) as mock_info:
                 mock_info.return_value = mock_backup_info
 
                 # Act
-                response = self.client.post("/data/backup", json=backup_request)
+                response = self.client.post(
+                    "/data/backup", json=backup_request
+                )
 
                 # Assert
                 assert response.status_code == status.HTTP_202_ACCEPTED
@@ -170,7 +184,7 @@ class TestDataManagementEndpoints:
                 "status": "completed",
                 "created_at": datetime.now(UTC),
                 "file_size": 1024000,
-                "record_count": 100
+                "record_count": 100,
             },
             {
                 "id": "backup-2",
@@ -178,8 +192,8 @@ class TestDataManagementEndpoints:
                 "backup_type": "user_data",
                 "status": "pending",
                 "created_at": datetime.now(UTC),
-                "record_count": 50
-            }
+                "record_count": 50,
+            },
         ]
 
         mock_total = 2
@@ -188,7 +202,9 @@ class TestDataManagementEndpoints:
             mock_list.return_value = (mock_backups, mock_total)
 
             # Act
-            response = self.client.get("/data/backups?page=1&per_page=10")
+            response = self.client.get(
+                "/data/backups?page=1&per_page=10"
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -209,7 +225,7 @@ class TestDataManagementEndpoints:
                 "name": "Full Backup",
                 "backup_type": "full",
                 "status": "completed",
-                "created_at": datetime.now(UTC)
+                "created_at": datetime.now(UTC),
             }
         ]
 
@@ -228,7 +244,9 @@ class TestDataManagementEndpoints:
             assert data["backups"][0]["backup_type"] == "full"
 
             # Verify filter parameters were passed
-            call_args = mock_list.call_args[0][0]  # First argument (BackupListRequest)
+            call_args = mock_list.call_args[0][
+                0
+            ]  # First argument (BackupListRequest)
             assert call_args.backup_type == BackupType.FULL
             assert call_args.status == "completed"
 
@@ -239,24 +257,30 @@ class TestDataManagementEndpoints:
             "backup_id": "backup-restore-123",
             "restore_type": "full",
             "verify_integrity": True,
-            "overwrite_existing": False
+            "overwrite_existing": False,
         }
 
         mock_restore_id = "restore-456"
         mock_restore_info = {
             "status": "pending",
             "created_at": datetime.now(UTC),
-            "estimated_completion": datetime.now(UTC)
+            "estimated_completion": datetime.now(UTC),
         }
 
-        with patch.object(data_manager, 'restore_backup') as mock_restore:
+        with patch.object(
+            data_manager, 'restore_backup'
+        ) as mock_restore:
             mock_restore.return_value = mock_restore_id
 
-            with patch.object(data_manager, 'get_restore_status') as mock_status:
+            with patch.object(
+                data_manager, 'get_restore_status'
+            ) as mock_status:
                 mock_status.return_value = mock_restore_info
 
                 # Act
-                response = self.client.post("/data/restore", json=restore_request)
+                response = self.client.post(
+                    "/data/restore", json=restore_request
+                )
 
                 # Assert
                 assert response.status_code == status.HTTP_202_ACCEPTED
@@ -271,17 +295,19 @@ class TestDataManagementEndpoints:
         # Arrange
         mock_stats = {
             "total_size": 1024000000,  # 1GB
-            "used_size": 512000000,    # 512MB
+            "used_size": 512000000,  # 512MB
             "available_size": 512000000,  # 512MB
             "documents_count": 1500,
             "conversations_count": 300,
             "backups_count": 5,
             "exports_count": 10,
             "last_backup": datetime.now(UTC),
-            "oldest_data": datetime(2024, 1, 1, tzinfo=UTC)
+            "oldest_data": datetime(2024, 1, 1, tzinfo=UTC),
         }
 
-        with patch.object(data_manager, 'get_storage_stats') as mock_stats_fn:
+        with patch.object(
+            data_manager, 'get_storage_stats'
+        ) as mock_stats_fn:
             mock_stats_fn.return_value = mock_stats
 
             # Act
@@ -301,7 +327,7 @@ class TestDataManagementEndpoints:
         # Arrange
         delete_request = {
             "document_ids": ["doc-1", "doc-2", "doc-3"],
-            "confirm_deletion": True
+            "confirm_deletion": True,
         }
 
         mock_result = {
@@ -309,14 +335,18 @@ class TestDataManagementEndpoints:
             "failed_count": 0,
             "deleted_ids": ["doc-1", "doc-2", "doc-3"],
             "failed_ids": [],
-            "total_size_freed": 1048576  # 1MB
+            "total_size_freed": 1048576,  # 1MB
         }
 
-        with patch.object(data_manager, 'bulk_delete_documents') as mock_delete:
+        with patch.object(
+            data_manager, 'bulk_delete_documents'
+        ) as mock_delete:
             mock_delete.return_value = mock_result
 
             # Act
-            response = self.client.post("/data/bulk/delete-documents", json=delete_request)
+            response = self.client.post(
+                "/data/bulk/delete-documents", json=delete_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -332,21 +362,25 @@ class TestDataManagementEndpoints:
         delete_request = {
             "conversation_ids": ["conv-1", "conv-2"],
             "confirm_deletion": True,
-            "delete_associated_data": True
+            "delete_associated_data": True,
         }
 
         mock_result = {
             "deleted_count": 2,
             "failed_count": 0,
             "deleted_ids": ["conv-1", "conv-2"],
-            "failed_ids": []
+            "failed_ids": [],
         }
 
-        with patch.object(data_manager, 'bulk_delete_conversations') as mock_delete:
+        with patch.object(
+            data_manager, 'bulk_delete_conversations'
+        ) as mock_delete:
             mock_delete.return_value = mock_result
 
             # Act
-            response = self.client.post("/data/bulk/delete-conversations", json=delete_request)
+            response = self.client.post(
+                "/data/bulk/delete-conversations", json=delete_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -359,21 +393,25 @@ class TestDataManagementEndpoints:
         # Arrange
         delete_request = {
             "prompt_ids": ["prompt-1", "prompt-2", "prompt-3"],
-            "confirm_deletion": True
+            "confirm_deletion": True,
         }
 
         mock_result = {
             "deleted_count": 2,
             "failed_count": 1,
             "deleted_ids": ["prompt-1", "prompt-2"],
-            "failed_ids": ["prompt-3"]  # Maybe in use
+            "failed_ids": ["prompt-3"],  # Maybe in use
         }
 
-        with patch.object(data_manager, 'bulk_delete_prompts') as mock_delete:
+        with patch.object(
+            data_manager, 'bulk_delete_prompts'
+        ) as mock_delete:
             mock_delete.return_value = mock_result
 
             # Act
-            response = self.client.post("/data/bulk/delete-prompts", json=delete_request)
+            response = self.client.post(
+                "/data/bulk/delete-prompts", json=delete_request
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -395,10 +433,12 @@ class TestDataManagementIntegration:
             id="integration-user-id",
             email="integration@example.com",
             username="integrationuser",
-            is_active=True
+            is_active=True,
         )
 
-        app.dependency_overrides[get_current_user] = lambda: self.mock_user
+        app.dependency_overrides[get_current_user] = (
+            lambda: self.mock_user
+        )
 
     def teardown_method(self):
         """Clean up after tests."""
@@ -417,50 +457,77 @@ class TestDataManagementIntegration:
         with patch.object(data_manager, 'export_data') as mock_export:
             mock_export.return_value = export_id
 
-            with patch.object(data_manager, 'get_export_status') as mock_export_status:
-                mock_export_status.return_value = {"status": "completed"}
+            with patch.object(
+                data_manager, 'get_export_status'
+            ) as mock_export_status:
+                mock_export_status.return_value = {
+                    "status": "completed"
+                }
 
-                export_response = self.client.post("/data/export", json={
-                    "format": "json",
-                    "data_types": ["conversations"]
-                })
-                assert export_response.status_code == status.HTTP_202_ACCEPTED
+                export_response = self.client.post(
+                    "/data/export",
+                    json={
+                        "format": "json",
+                        "data_types": ["conversations"],
+                    },
+                )
+                assert (
+                    export_response.status_code
+                    == status.HTTP_202_ACCEPTED
+                )
 
         # Step 2: Create backup
         with patch.object(data_manager, 'create_backup') as mock_backup:
             mock_backup.return_value = backup_id
 
-            with patch.object(data_manager, 'get_backup_info') as mock_backup_info:
+            with patch.object(
+                data_manager, 'get_backup_info'
+            ) as mock_backup_info:
                 mock_backup_info.return_value = {"status": "completed"}
 
-                backup_response = self.client.post("/data/backup", json={
-                    "backup_type": "full"
-                })
-                assert backup_response.status_code == status.HTTP_202_ACCEPTED
+                backup_response = self.client.post(
+                    "/data/backup", json={"backup_type": "full"}
+                )
+                assert (
+                    backup_response.status_code
+                    == status.HTTP_202_ACCEPTED
+                )
 
         # Step 3: Restore from backup
-        with patch.object(data_manager, 'restore_backup') as mock_restore:
+        with patch.object(
+            data_manager, 'restore_backup'
+        ) as mock_restore:
             mock_restore.return_value = restore_id
 
-            with patch.object(data_manager, 'get_restore_status') as mock_restore_status:
+            with patch.object(
+                data_manager, 'get_restore_status'
+            ) as mock_restore_status:
                 mock_restore_status.return_value = {"status": "pending"}
 
-                restore_response = self.client.post("/data/restore", json={
-                    "backup_id": backup_id,
-                    "restore_type": "full"
-                })
-                assert restore_response.status_code == status.HTTP_202_ACCEPTED
+                restore_response = self.client.post(
+                    "/data/restore",
+                    json={
+                        "backup_id": backup_id,
+                        "restore_type": "full",
+                    },
+                )
+                assert (
+                    restore_response.status_code
+                    == status.HTTP_202_ACCEPTED
+                )
 
     def test_bulk_operations_integration(self):
         """Test integration of bulk operations with stats."""
         # Test bulk delete followed by stats check
 
         # First check initial stats
-        with patch.object(data_manager, 'get_storage_stats') as mock_stats:
+        with patch.object(
+            data_manager, 'get_storage_stats'
+        ) as mock_stats:
             mock_stats.return_value = {
                 "documents_count": 100,
                 "conversations_count": 50,
-                "used_size": 1000000
+                "used_size": 1000000,
             }
 
             stats_response = self.client.get("/data/stats")
@@ -468,25 +535,32 @@ class TestDataManagementIntegration:
             stats_response.json()["documents_count"]
 
         # Perform bulk delete
-        with patch.object(data_manager, 'bulk_delete_documents') as mock_delete:
+        with patch.object(
+            data_manager, 'bulk_delete_documents'
+        ) as mock_delete:
             mock_delete.return_value = {
                 "deleted_count": 10,
                 "failed_count": 0,
-                "total_size_freed": 100000
+                "total_size_freed": 100000,
             }
 
-            delete_response = self.client.post("/data/bulk/delete-documents", json={
-                "document_ids": ["doc-1", "doc-2", "doc-3"],
-                "confirm_deletion": True
-            })
+            delete_response = self.client.post(
+                "/data/bulk/delete-documents",
+                json={
+                    "document_ids": ["doc-1", "doc-2", "doc-3"],
+                    "confirm_deletion": True,
+                },
+            )
             assert delete_response.status_code == status.HTTP_200_OK
 
         # Check updated stats
-        with patch.object(data_manager, 'get_storage_stats') as mock_stats_after:
+        with patch.object(
+            data_manager, 'get_storage_stats'
+        ) as mock_stats_after:
             mock_stats_after.return_value = {
                 "documents_count": 90,  # 10 less
                 "conversations_count": 50,
-                "used_size": 900000  # 100000 less
+                "used_size": 900000,  # 100000 less
             }
 
             updated_stats = self.client.get("/data/stats")

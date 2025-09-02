@@ -23,7 +23,9 @@ class DependencyContainer:
         self._singletons: dict[str, Any] = {}
         self._lazy_loaders: dict[str, Callable[..., Any]] = {}
 
-    def register_singleton(self, service_type: type[T], instance: T) -> None:
+    def register_singleton(
+        self, service_type: type[T], instance: T
+    ) -> None:
         """Register a singleton instance.
 
         Args:
@@ -34,7 +36,9 @@ class DependencyContainer:
         self._singletons[key] = instance
         logger.debug(f"Registered singleton: {key}")
 
-    def register_factory(self, service_type: type[T], factory: Callable[[], T]) -> None:
+    def register_factory(
+        self, service_type: type[T], factory: Callable[[], T]
+    ) -> None:
         """Register a factory function for creating service instances.
 
         Args:
@@ -45,7 +49,9 @@ class DependencyContainer:
         self._factories[key] = factory
         logger.debug(f"Registered factory: {key}")
 
-    def register_lazy_loader(self, service_name: str, loader: callable) -> None:
+    def register_lazy_loader(
+        self, service_name: str, loader: callable
+    ) -> None:
         """Register a lazy loader function to avoid circular imports.
 
         Args:
@@ -95,15 +101,21 @@ class DependencyContainer:
             ValueError: If lazy loader is not registered
         """
         if service_name not in self._lazy_loaders:
-            raise ValueError(f"Lazy loader not registered: {service_name}")
+            raise ValueError(
+                f"Lazy loader not registered: {service_name}"
+            )
 
         # Cache the result after first load
         if service_name not in self._services:
             try:
-                self._services[service_name] = self._lazy_loaders[service_name]()
+                self._services[service_name] = self._lazy_loaders[
+                    service_name
+                ]()
                 logger.debug(f"Lazy loaded service: {service_name}")
             except Exception as e:
-                logger.error(f"Failed to lazy load service {service_name}: {e}")
+                logger.error(
+                    f"Failed to lazy load service {service_name}: {e}"
+                )
                 raise
 
         return self._services[service_name]
@@ -131,58 +143,58 @@ def register_lazy_loaders() -> None:
 
     # Register lazy loaders for commonly problematic circular imports
     container.register_lazy_loader(
-        "builtin_tools",
-        lambda: _lazy_import_builtin_tools()
+        "builtin_tools", lambda: _lazy_import_builtin_tools()
     )
 
     container.register_lazy_loader(
-        "orchestrator",
-        lambda: _lazy_import_orchestrator()
+        "orchestrator", lambda: _lazy_import_orchestrator()
     )
 
     container.register_lazy_loader(
-        "mcp_service",
-        lambda: _lazy_import_mcp_service()
+        "mcp_service", lambda: _lazy_import_mcp_service()
     )
 
     container.register_lazy_loader(
-        "model_registry",
-        lambda: _lazy_import_model_registry()
+        "model_registry", lambda: _lazy_import_model_registry()
     )
 
     container.register_lazy_loader(
-        "workflow_manager",
-        lambda: _lazy_import_workflow_manager()
+        "workflow_manager", lambda: _lazy_import_workflow_manager()
     )
 
 
 def _lazy_import_builtin_tools():
     """Lazy import of BuiltInTools to avoid circular imports."""
     from chatter.services.mcp import BuiltInTools
+
     return BuiltInTools.create_builtin_tools()
 
 
 def _lazy_import_orchestrator():
     """Lazy import of orchestrator to avoid circular imports."""
     from chatter.core.langchain import orchestrator
+
     return orchestrator
 
 
 def _lazy_import_mcp_service():
     """Lazy import of MCP service to avoid circular imports."""
     from chatter.services.mcp import mcp_service
+
     return mcp_service
 
 
 def _lazy_import_model_registry():
     """Lazy import of model registry to avoid circular imports."""
     from chatter.core.model_registry import ModelRegistryService
+
     return ModelRegistryService
 
 
 def _lazy_import_workflow_manager():
     """Lazy import of workflow manager to avoid circular imports."""
     from chatter.core.langgraph import workflow_manager
+
     return workflow_manager
 
 
@@ -225,7 +237,7 @@ class CircularDependencyDetector:
 
     def add_dependency(self, service: str, dependency: str) -> None:
         """Add a dependency relationship.
-        
+
         Args:
             service: Name of the service
             dependency: Name of the dependency
@@ -236,7 +248,7 @@ class CircularDependencyDetector:
 
     def detect_circular_dependencies(self) -> list[list[str]]:
         """Detect circular dependencies.
-        
+
         Returns:
             List of circular dependency chains
         """
@@ -276,7 +288,7 @@ class LazyServiceLoader:
 
     def register_loader(self, name: str, loader: callable) -> None:
         """Register a lazy loader for a service.
-        
+
         Args:
             name: Name of the service
             loader: Callable that returns the service instance
@@ -285,25 +297,27 @@ class LazyServiceLoader:
 
     def get_service(self, name: str) -> Any:
         """Get a service, loading it lazily if needed.
-        
+
         Args:
             name: Name of the service
-            
+
         Returns:
             Service instance
         """
         if name not in self.loaded_services:
             if name not in self.loaders:
-                raise ValueError(f"No loader registered for service: {name}")
+                raise ValueError(
+                    f"No loader registered for service: {name}"
+                )
             self.loaded_services[name] = self.loaders[name]()
         return self.loaded_services[name]
 
     def is_loaded(self, name: str) -> bool:
         """Check if a service is already loaded.
-        
+
         Args:
             name: Name of the service
-            
+
         Returns:
             True if service is loaded
         """
@@ -320,7 +334,7 @@ class ServiceLifecycleManager:
 
     def register_service(self, name: str, service: Any) -> None:
         """Register a service.
-        
+
         Args:
             name: Name of the service
             service: Service instance
@@ -330,7 +344,7 @@ class ServiceLifecycleManager:
 
     def start_service(self, name: str) -> None:
         """Start a service.
-        
+
         Args:
             name: Name of the service
         """
@@ -342,7 +356,7 @@ class ServiceLifecycleManager:
 
     def stop_service(self, name: str) -> None:
         """Stop a service.
-        
+
         Args:
             name: Name of the service
         """
@@ -353,13 +367,10 @@ class ServiceLifecycleManager:
             self._trigger_lifecycle_event(name, "stopped")
 
     def register_lifecycle_handler(
-        self, 
-        service_name: str, 
-        event: str, 
-        handler: callable
+        self, service_name: str, event: str, handler: callable
     ) -> None:
         """Register a lifecycle event handler.
-        
+
         Args:
             service_name: Name of the service
             event: Lifecycle event name
@@ -369,9 +380,11 @@ class ServiceLifecycleManager:
             self.lifecycle_handlers[service_name] = {}
         self.lifecycle_handlers[service_name][event] = handler
 
-    def _trigger_lifecycle_event(self, service_name: str, event: str) -> None:
+    def _trigger_lifecycle_event(
+        self, service_name: str, event: str
+    ) -> None:
         """Trigger a lifecycle event.
-        
+
         Args:
             service_name: Name of the service
             event: Event name
@@ -389,13 +402,13 @@ class ServiceRegistry:
         self.services: dict[str, dict[str, Any]] = {}
 
     def register(
-        self, 
-        name: str, 
-        service: Any, 
-        metadata: dict[str, Any] | None = None
+        self,
+        name: str,
+        service: Any,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         """Register a service.
-        
+
         Args:
             name: Name of the service
             service: Service instance
@@ -404,18 +417,18 @@ class ServiceRegistry:
         self.services[name] = {
             "instance": service,
             "metadata": metadata or {},
-            "registered_at": datetime.now(UTC).isoformat()
+            "registered_at": datetime.now(UTC).isoformat(),
         }
 
     def get(self, name: str) -> Any:
         """Get a service by name.
-        
+
         Args:
             name: Name of the service
-            
+
         Returns:
             Service instance
-            
+
         Raises:
             KeyError: If service is not registered
         """
@@ -425,7 +438,7 @@ class ServiceRegistry:
 
     def unregister(self, name: str) -> None:
         """Unregister a service.
-        
+
         Args:
             name: Name of the service
         """
@@ -434,7 +447,7 @@ class ServiceRegistry:
 
     def list_services(self) -> list[str]:
         """List all registered service names.
-        
+
         Returns:
             List of service names
         """
@@ -442,10 +455,10 @@ class ServiceRegistry:
 
     def get_metadata(self, name: str) -> dict[str, Any]:
         """Get metadata for a service.
-        
+
         Args:
             name: Name of the service
-            
+
         Returns:
             Service metadata
         """

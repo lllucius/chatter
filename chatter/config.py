@@ -96,7 +96,7 @@ class Settings(BaseSettings):
         description="Database URL (required, no default for security)",
     )
     test_database_url: str = Field(
-        default="postgresql+asyncpg://test_user:test_pass@localhost:5432/chatter_test",
+        default="postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test",
         description="Test database URL",
     )
 

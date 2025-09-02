@@ -213,6 +213,6 @@ def test_login_data() -> dict:
 def setup_test_environment():
     """Setup test environment variables."""
     # Set required DATABASE_URL for non-testing environment config loading
-    os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_pass@localhost:5432/chatter_test")
+    os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
     os.environ.setdefault("SECRET_KEY", "test_secret_key_for_testing")
     os.environ.setdefault("ENVIRONMENT", "testing")

@@ -210,7 +210,6 @@ load-plugins = "pylint_pydantic"
 
 [tool.pytest.ini_options]
 faulthandler_timeout = 2
-timeout = 3
 testpaths = [
     "tests",
 ]

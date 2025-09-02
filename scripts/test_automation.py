@@ -54,9 +54,6 @@ def run_integration_tests(verbose: bool = False) -> bool:
     if verbose:
         cmd.append("-v")
     
-    # Integration tests might take longer
-    cmd.extend(["--timeout=300"])
-    
     result = run_command(cmd)
     return result.returncode == 0
 
@@ -69,9 +66,6 @@ def run_e2e_tests(verbose: bool = False) -> bool:
     
     if verbose:
         cmd.append("-v")
-    
-    # E2E tests might need even more time
-    cmd.extend(["--timeout=600"])
     
     result = run_command(cmd)
     return result.returncode == 0

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Optional
+import os
 
 from sqlalchemy import (
     Boolean,
@@ -25,7 +26,7 @@ if TYPE_CHECKING:
 class User(Base):
     """User model for authentication and profile management."""
 
-    # Add table constraints
+    # Add table constraints - conditional based on database type
     __table_args__ = (
         CheckConstraint(
             'daily_message_limit IS NULL OR daily_message_limit > 0',
@@ -39,13 +40,21 @@ class User(Base):
             'max_file_size_mb IS NULL OR max_file_size_mb > 0',
             name='check_max_file_size_positive',
         ),
-        CheckConstraint(
-            "email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'",
-            name='check_email_format',
-        ),
-        CheckConstraint(
-            "username ~ '^[a-zA-Z0-9_-]{3,50}$'",
-            name='check_username_format',
+        # Only add regex constraints for PostgreSQL (skip for SQLite testing)
+        *(
+            (
+                CheckConstraint(
+                    "email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'",
+                    name='check_email_format',
+                ),
+                CheckConstraint(
+                    "username ~ '^[a-zA-Z0-9_-]{3,50}$'",
+                    name='check_username_format',
+                ),
+            )
+            if not (os.environ.get('DATABASE_URL', '').startswith('sqlite') or 
+                   os.environ.get('ENVIRONMENT') == 'testing')
+            else ()
         ),
     )
 

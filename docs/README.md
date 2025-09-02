@@ -256,7 +256,7 @@ python examples/basic_usage.py
 
 ```bash
 # Required for generation
-DATABASE_URL=sqlite+aiosqlite:///test.db
+DATABASE_URL=postgresql+asyncpg://test_user:test_pass@localhost:5432/chatter_test
 ENVIRONMENT=development
 OPENAI_API_KEY=fake-key-for-testing
 

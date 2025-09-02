@@ -31,9 +31,19 @@ async def session_async_fixture():
 # Test 4: Database engine fixture  
 @pytest.fixture(scope="session")
 async def test_db_engine():
-    """Simple database engine fixture."""
-    db_url = "sqlite+aiosqlite:///:memory:"
-    engine = create_async_engine(db_url, echo=False)
+    """Simple database engine fixture using PostgreSQL."""
+    # Lazy import to avoid hanging during test collection
+    from chatter.config import settings
+    
+    # Use PostgreSQL test database
+    db_url = settings.database_url_for_env
+    
+    engine = create_async_engine(
+        db_url, 
+        echo=False,
+        pool_size=5,
+        max_overflow=10,
+    )
     
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

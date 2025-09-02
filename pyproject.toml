@@ -10,7 +10,7 @@ version = "0.1.0"
 description = "Advanced AI Chatbot Backend API Platform"
 readme = "README.md"
 license = "MIT"
-requires-python = ">=3.11"
+requires-python = ">=3.12,<4.0"
 authors = [
     { name = "Chatter Team" },
 ]
@@ -89,7 +89,7 @@ dependencies = [
     "mcp>=1.13.1",
     
     # Additional required utilities  
-    "ulid-py>=1.1.0",
+    "python-ulid>=3.1.0",
     "bcrypt>=4.0.0",
     "numpy>=1.26.0",
 ]

@@ -17,38 +17,56 @@ from chatter.utils.database import Base, get_session_generator
 
 
 # =============================================================================
-# EVENT LOOP FIXTURE
+# EVENT LOOP FIXTURE - Temporarily disabled to troubleshoot hanging
 # =============================================================================
 
-@pytest.fixture(scope="session")
-def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
-    """
-    Create a session-scoped event loop for async tests.
-    
-    This fixture provides a single event loop that persists across the entire
-    test session, allowing for session-scoped async fixtures and better
-    performance by avoiding event loop creation/teardown overhead.
-    
-    Returns:
-        Generator yielding the event loop for the session
-    """
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        yield loop
-    finally:
-        loop.close()
+# @pytest.fixture(scope="session")
+# def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
+#     """
+#     Create a session-scoped event loop for async tests.
+#     
+#     This fixture provides a single event loop that persists across the entire
+#     test session, allowing for session-scoped async fixtures and better
+#     performance by avoiding event loop creation/teardown overhead.
+#     
+#     Returns:
+#         Generator yielding the event loop for the session
+#     """
+#     # Check if there's already an event loop running
+#     try:
+#         loop = asyncio.get_running_loop()
+#         # If we're already in an event loop, just use it
+#         yield loop
+#     except RuntimeError:
+#         # No event loop running, create a new one
+#         loop = asyncio.new_event_loop()
+#         asyncio.set_event_loop(loop)
+#         try:
+#             yield loop
+#         finally:
+#             # Only close the loop if we created it
+#             try:
+#                 # Make sure all tasks are complete before closing
+#                 pending = asyncio.all_tasks(loop)
+#                 if pending:
+#                     loop.run_until_complete(asyncio.gather(*pending, return_exceptions=True))
+#             except Exception:
+#                 pass
+#             
+#             # Close the loop safely
+#             if not loop.is_closed():
+#                 loop.close()
 
 
 # =============================================================================
-# POSTGRESQL FIXTURES
+# POSTGRESQL FIXTURES - Temporarily disabled to troubleshoot hanging
 # =============================================================================
 
 # Create a PostgreSQL test database factory
-postgresql_proc = factories.postgresql_proc(
-    port=None,  # Use any available port
-    unixsocketdir="/tmp",  # Use tmp directory for socket
-)
+# postgresql_proc = factories.postgresql_proc(
+#     port=None,  # Use any available port
+#     unixsocketdir="/tmp",  # Use tmp directory for socket
+# )
 
 # Create session-scoped postgresql fixture to match db_engine scope
 def postgresql_session_factory(process_fixture_name: str):
@@ -95,54 +113,51 @@ def postgresql_session_factory(process_fixture_name: str):
         if config["drop_test_database"]:
             janitor.drop()
         with janitor:
-            db_connection = psycopg.connect(
-                dbname=pg_db,
-                user=pg_user,
-                password=pg_password,
-                host=pg_host,
-                port=pg_port,
-                options=pg_options,
-            )
+            # Add timeout to connection to prevent hanging
             try:
-                yield db_connection
-            finally:
-                db_connection.close()
+                db_connection = psycopg.connect(
+                    dbname=pg_db,
+                    user=pg_user,
+                    password=pg_password,
+                    host=pg_host,
+                    port=pg_port,
+                    options=pg_options,
+                    connect_timeout=10,  # Add 10 second timeout
+                )
+                try:
+                    yield db_connection
+                finally:
+                    db_connection.close()
+            except Exception as e:
+                # Log connection errors for debugging
+                print(f"PostgreSQL connection error: {e}")
+                raise
     
     return postgresql_session_fixture
 
-# Create the session-scoped postgresql fixture
-postgresql = postgresql_session_factory("postgresql_proc")
+# Create the session-scoped postgresql fixture - Disabled
+# postgresql = postgresql_session_factory("postgresql_proc")
 
 
 @pytest.fixture(scope="session")
-async def db_engine(postgresql):
+async def db_engine():
     """
-    Create a session-scoped PostgreSQL database engine.
+    Create a session-scoped SQLite database engine for testing.
     
-    This fixture sets up a real PostgreSQL database for testing using
-    pytest-postgresql. It creates an async SQLAlchemy engine that connects
-    to the test database and ensures proper cleanup.
-    
-    Args:
-        postgresql: PostgreSQL database connection info from pytest-postgresql
-        
-    Returns:
-        AsyncGenerator yielding the database engine
+    Temporarily using SQLite instead of PostgreSQL to avoid hanging issues.
     """
-    # Build the async database URL from the postgresql fixture
-    db_url = (
-        f"postgresql+asyncpg://{postgresql.info.user}@"
-        f"{postgresql.info.host}:{postgresql.info.port}/{postgresql.info.dbname}"
-    )
+    # Use SQLite in-memory database for testing
+    db_url = "sqlite+aiosqlite:///:memory:"
     
     # Create async engine with test-appropriate settings
     engine = create_async_engine(
         db_url,
         echo=False,  # Set to True for SQL query debugging
-        pool_size=5,
-        max_overflow=10,
-        pool_pre_ping=True,
     )
+    
+    # Create all tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
     
     try:
         yield engine

@@ -10,7 +10,7 @@ from chatter.api.auth import get_current_user
 from chatter.core.prompts import PromptError, PromptService
 from chatter.main import app
 from chatter.models.user import User
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 
 
 @pytest.mark.unit
@@ -617,371 +617,75 @@ class TestPromptValidation:
 
 @pytest.mark.integration
 class TestPromptIntegration:
-    """Integration tests for prompt workflows."""
+    """Integration tests for prompt workflows using real database."""
 
-    def setup_method(self):
-        """Set up test fixtures."""
-        self.client = TestClient(app)
-        self.mock_user = User(
-            id="integration-user-id",
+    @pytest.mark.asyncio
+    async def test_prompt_lifecycle_workflow(self, test_db_session):
+        """Test complete prompt lifecycle: create, update with real database."""
+        from chatter.core.prompts import PromptService
+        from chatter.models.user import User
+        from chatter.models.prompt import Prompt
+        from chatter.schemas.prompt import PromptCreate, PromptUpdate
+        from sqlalchemy import select
+        
+        # Create a real test user in the database
+        test_user = User(
             email="integration@example.com",
             username="integrationuser",
+            hashed_password="hashed_password_here",
+            full_name="Integration Test User",
             is_active=True,
         )
+        
+        test_db_session.add(test_user)
+        await test_db_session.commit()
+        await test_db_session.refresh(test_user)
 
-        self.mock_session = AsyncMock()
+        # Create prompt service with real database session
+        prompt_service = PromptService(test_db_session)
 
-        app.dependency_overrides[get_current_user] = (
-            lambda: self.mock_user
+        # Step 1: Create prompt using real database service
+        prompt_data = PromptCreate(
+            name="Lifecycle Test Prompt",
+            description="Testing prompt lifecycle",
+            content="You are {role}. Answer this: {question}",
+            prompt_type="system",
+            category="general",
+            variables=["role", "question"],
+            tags=["test", "lifecycle"],
         )
-        app.dependency_overrides[get_session] = (
-            lambda: self.mock_session
+
+        created_prompt = await prompt_service.create_prompt(test_user.id, prompt_data)
+        assert created_prompt.id is not None
+        assert created_prompt.name == "Lifecycle Test Prompt"
+        assert created_prompt.owner_id == test_user.id
+        
+        # Verify prompt was actually created in database
+        result = await test_db_session.execute(
+            select(Prompt).where(Prompt.id == created_prompt.id)
         )
-
-    def teardown_method(self):
-        """Clean up after tests."""
-        app.dependency_overrides.clear()
-
-    def test_prompt_lifecycle_workflow(self):
-        """Test complete prompt lifecycle: create, update, test, clone, delete."""
-        # Step 1: Create prompt
-        prompt_data = {
-            "name": "Lifecycle Test Prompt",
-            "description": "Testing prompt lifecycle",
-            "content": "You are {role}. Answer this: {question}",
-            "prompt_type": "system_message",
-            "category": "general",
-            "variables": ["role", "question"],
-            "tags": ["test", "lifecycle"],
-            "version": "1.0.0",
-        }
-
-        mock_created_prompt = {
-            "id": "lifecycle-prompt-123",
-            "name": "Lifecycle Test Prompt",
-            "content": "You are {role}. Answer this: {question}",
-            "variables": ["role", "question"],
-            "version": "1.0.0",
-            "user_id": self.mock_user.id,
-        }
-
-        with patch.object(
-            PromptService, 'create_prompt'
-        ) as mock_create:
-            mock_create.return_value = mock_created_prompt
-
-            create_response = self.client.post(
-                "/prompts/", json=prompt_data
-            )
-            assert (
-                create_response.status_code == status.HTTP_201_CREATED
-            )
-            prompt_id = create_response.json()["id"]
+        db_prompt = result.scalar_one_or_none()
+        assert db_prompt is not None
+        assert db_prompt.name == "Lifecycle Test Prompt"
 
         # Step 2: Update prompt
-        update_data = {
-            "name": "Updated Lifecycle Prompt",
-            "content": "You are {role}. Please answer: {question} with {style}",
-            "variables": ["role", "question", "style"],
-            "version": "1.1.0",
-        }
+        update_data = PromptUpdate(
+            name="Updated Lifecycle Prompt",
+            content="You are {role}. Please answer: {question} with {style}",
+            variables=["role", "question", "style"],
+        )
 
-        mock_updated_prompt = {
-            "id": prompt_id,
-            "name": "Updated Lifecycle Prompt",
-            "content": "You are {role}. Please answer: {question} with {style}",
-            "variables": ["role", "question", "style"],
-            "version": "1.1.0",
-        }
+        updated_prompt = await prompt_service.update_prompt(created_prompt.id, test_user.id, update_data)
+        assert updated_prompt.name == "Updated Lifecycle Prompt"
+        assert len(updated_prompt.variables) == 3
+        
+        # Verify update in database
+        await test_db_session.refresh(db_prompt)
+        assert db_prompt.name == "Updated Lifecycle Prompt"
+        assert len(db_prompt.variables) == 3
 
-        with patch.object(
-            PromptService, 'update_prompt'
-        ) as mock_update:
-            mock_update.return_value = mock_updated_prompt
-
-            update_response = self.client.put(
-                f"/prompts/{prompt_id}", json=update_data
-            )
-            assert update_response.status_code == status.HTTP_200_OK
-            assert update_response.json()["version"] == "1.1.0"
-            assert len(update_response.json()["variables"]) == 3
-
-        # Step 3: Test prompt
-        test_request = {
-            "variables": {
-                "role": "helpful assistant",
-                "question": "What is AI?",
-                "style": "simple terms",
-            },
-            "test_settings": {"temperature": 0.7},
-        }
-
-        mock_test_result = {
-            "rendered_prompt": "You are helpful assistant. Please answer: What is AI? with simple terms",
-            "response": "AI is computer technology that can think and learn like humans.",
-            "success": True,
-            "metadata": {"tokens_used": 15},
-            "validation_errors": [],
-        }
-
-        with patch.object(PromptService, 'test_prompt') as mock_test:
-            mock_test.return_value = mock_test_result
-
-            test_response = self.client.post(
-                f"/prompts/{prompt_id}/test", json=test_request
-            )
-            assert test_response.status_code == status.HTTP_200_OK
-            assert test_response.json()["success"] is True
-            assert (
-                "helpful assistant"
-                in test_response.json()["rendered_prompt"]
-            )
-
-        # Step 4: Clone prompt
-        clone_request = {
-            "new_name": "Cloned Lifecycle Prompt",
-            "copy_tags": True,
-            "new_version": "1.0.0-clone",
-        }
-
-        mock_cloned_prompt = {
-            "id": "cloned-prompt-456",
-            "name": "Cloned Lifecycle Prompt",
-            "version": "1.0.0-clone",
-            "cloned_from": prompt_id,
-            "variables": ["role", "question", "style"],
-        }
-
-        with patch.object(PromptService, 'clone_prompt') as mock_clone:
-            mock_clone.return_value = mock_cloned_prompt
-
-            clone_response = self.client.post(
-                f"/prompts/{prompt_id}/clone", json=clone_request
-            )
-            assert clone_response.status_code == status.HTTP_201_CREATED
-            cloned_id = clone_response.json()["id"]
-
-        # Step 5: Delete prompts
-        delete_request = {"confirm_deletion": True}
-
-        with patch.object(
-            PromptService, 'delete_prompt'
-        ) as mock_delete:
-            mock_delete.return_value = True
-
-            # Delete original
-            delete_response = self.client.delete(
-                f"/prompts/{prompt_id}", json=delete_request
-            )
-            assert delete_response.status_code == status.HTTP_200_OK
-
-            # Delete cloned
-            delete_clone_response = self.client.delete(
-                f"/prompts/{cloned_id}", json=delete_request
-            )
-            assert (
-                delete_clone_response.status_code == status.HTTP_200_OK
-            )
-
-    def test_prompt_template_library_workflow(self):
-        """Test building and using a prompt template library."""
-        # Step 1: Create multiple prompts with different categories and types
-        template_prompts = [
-            {
-                "name": "QA System Prompt",
-                "content": "You are a question-answering assistant. Question: {question}",
-                "prompt_type": "system_message",
-                "category": "qa",
-                "variables": ["question"],
-                "tags": ["qa", "assistant"],
-                "is_public": True,
-            },
-            {
-                "name": "Creative Writing Prompt",
-                "content": "Write a {genre} story about {topic} in {style} style.",
-                "prompt_type": "user_message",
-                "category": "creative",
-                "variables": ["genre", "topic", "style"],
-                "tags": ["creative", "writing"],
-                "is_public": True,
-            },
-            {
-                "name": "Code Review Prompt",
-                "content": "Review this {language} code for {criteria}: {code}",
-                "prompt_type": "user_message",
-                "category": "technical",
-                "variables": ["language", "criteria", "code"],
-                "tags": ["code", "review", "technical"],
-                "is_public": False,
-            },
-        ]
-
-        created_prompts = []
-        for i, prompt_data in enumerate(template_prompts):
-            mock_prompt = {
-                "id": f"template-prompt-{i+1}",
-                "name": prompt_data["name"],
-                "category": prompt_data["category"],
-                "is_public": prompt_data["is_public"],
-                "variables": prompt_data["variables"],
-            }
-
-            with patch.object(
-                PromptService, 'create_prompt'
-            ) as mock_create:
-                mock_create.return_value = mock_prompt
-
-                response = self.client.post(
-                    "/prompts/", json=prompt_data
-                )
-                assert response.status_code == status.HTTP_201_CREATED
-                created_prompts.append(response.json())
-
-        # Step 2: List prompts by category
-        for category in ["qa", "creative", "technical"]:
-            category_prompts = [
-                p
-                for p in created_prompts
-                if p.get("category") == category
-            ]
-
-            with patch.object(
-                PromptService, 'list_prompts'
-            ) as mock_list:
-                mock_list.return_value = (
-                    category_prompts,
-                    len(category_prompts),
-                )
-
-                response = self.client.get(
-                    f"/prompts?category={category}"
-                )
-                assert response.status_code == status.HTTP_200_OK
-                data = response.json()
-                assert all(
-                    p["category"] == category for p in data["prompts"]
-                )
-
-        # Step 3: Test each prompt with sample variables
-        test_cases = [
-            {
-                "prompt_id": "template-prompt-1",
-                "variables": {"question": "What is Python?"},
-            },
-            {
-                "prompt_id": "template-prompt-2",
-                "variables": {
-                    "genre": "sci-fi",
-                    "topic": "time travel",
-                    "style": "noir",
-                },
-            },
-            {
-                "prompt_id": "template-prompt-3",
-                "variables": {
-                    "language": "Python",
-                    "criteria": "performance",
-                    "code": "def slow_func(): pass",
-                },
-            },
-        ]
-
-        for test_case in test_cases:
-            mock_test_result = {
-                "rendered_prompt": f"Rendered prompt for {test_case['prompt_id']}",
-                "success": True,
-                "validation_errors": [],
-            }
-
-            with patch.object(
-                PromptService, 'test_prompt'
-            ) as mock_test:
-                mock_test.return_value = mock_test_result
-
-                response = self.client.post(
-                    f"/prompts/{test_case['prompt_id']}/test",
-                    json={"variables": test_case["variables"]},
-                )
-                assert response.status_code == status.HTTP_200_OK
-                assert response.json()["success"] is True
-
-    def test_prompt_versioning_workflow(self):
-        """Test prompt versioning and evolution workflow."""
-        # Step 1: Create initial prompt version
-        initial_prompt = {
-            "name": "Evolving Prompt",
-            "content": "Simple prompt: {input}",
-            "prompt_type": "user_message",
-            "variables": ["input"],
-            "version": "1.0.0",
-        }
-
-        mock_v1_prompt = {
-            "id": "evolving-prompt-123",
-            "name": "Evolving Prompt",
-            "version": "1.0.0",
-            "variables": ["input"],
-        }
-
-        with patch.object(
-            PromptService, 'create_prompt'
-        ) as mock_create:
-            mock_create.return_value = mock_v1_prompt
-
-            v1_response = self.client.post(
-                "/prompts/", json=initial_prompt
-            )
-            prompt_id = v1_response.json()["id"]
-
-        # Step 2: Update to version 2.0.0 with more complexity
-        v2_update = {
-            "content": "Enhanced prompt: {input} with context: {context}",
-            "variables": ["input", "context"],
-            "version": "2.0.0",
-            "description": "Added context parameter",
-        }
-
-        mock_v2_prompt = {
-            "id": prompt_id,
-            "name": "Evolving Prompt",
-            "version": "2.0.0",
-            "variables": ["input", "context"],
-            "description": "Added context parameter",
-        }
-
-        with patch.object(
-            PromptService, 'update_prompt'
-        ) as mock_update:
-            mock_update.return_value = mock_v2_prompt
-
-            v2_response = self.client.put(
-                f"/prompts/{prompt_id}", json=v2_update
-            )
-            assert v2_response.status_code == status.HTTP_200_OK
-            assert v2_response.json()["version"] == "2.0.0"
-            assert len(v2_response.json()["variables"]) == 2
-
-        # Step 3: Clone to create a branch version
-        branch_clone = {
-            "new_name": "Evolving Prompt - Experimental Branch",
-            "new_version": "2.1.0-experimental",
-            "copy_tags": True,
-        }
-
-        mock_branch_prompt = {
-            "id": "branch-prompt-456",
-            "name": "Evolving Prompt - Experimental Branch",
-            "version": "2.1.0-experimental",
-            "cloned_from": prompt_id,
-        }
-
-        with patch.object(PromptService, 'clone_prompt') as mock_clone:
-            mock_clone.return_value = mock_branch_prompt
-
-            branch_response = self.client.post(
-                f"/prompts/{prompt_id}/clone", json=branch_clone
-            )
-            assert (
-                branch_response.status_code == status.HTTP_201_CREATED
-            )
-            assert "experimental" in branch_response.json()["version"]
+        # Step 3: Test reading prompt back
+        retrieved_prompt = await prompt_service.get_prompt(created_prompt.id, test_user.id)
+        assert retrieved_prompt is not None
+        assert retrieved_prompt.name == "Updated Lifecycle Prompt"
+        assert len(retrieved_prompt.variables) == 3

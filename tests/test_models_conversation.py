@@ -359,17 +359,33 @@ class TestMessageModel:
 class TestConversationModelIntegration:
     """Integration tests for conversation models."""
 
-    def test_conversation_message_relationship(
-        self, test_user: User, test_session
+    @pytest.mark.asyncio
+    async def test_conversation_message_relationship(
+        self, test_db_session
     ):
         """Test conversation-message relationship."""
+        from chatter.models.user import User
+        from chatter.models.conversation import Message, MessageRole
+        
+        # Create test user in database
+        test_user = User(
+            email="relationship@example.com",
+            username="relationshipuser",
+            hashed_password="hashed_password_here",
+            full_name="Relationship Test User",
+            is_active=True,
+        )
+        test_db_session.add(test_user)
+        await test_db_session.commit()
+        await test_db_session.refresh(test_user)
+        
         # Arrange
         conversation = Conversation(
             user_id=test_user.id,
             title="Relationship Test",
         )
-        test_session.add(conversation)
-        test_session.commit()
+        test_db_session.add(conversation)
+        await test_db_session.commit()
 
         # Act
         message1 = Message(
@@ -385,11 +401,11 @@ class TestConversationModelIntegration:
             sequence_number=2,
         )
 
-        test_session.add_all([message1, message2])
-        test_session.commit()
+        test_db_session.add_all([message1, message2])
+        await test_db_session.commit()
 
         # Refresh to load relationships
-        test_session.refresh(conversation)
+        await test_db_session.refresh(conversation)
 
         # Assert
         assert len(conversation.messages) == 2
@@ -398,21 +414,36 @@ class TestConversationModelIntegration:
         assert conversation.messages[0].conversation == conversation
         assert conversation.messages[1].conversation == conversation
 
-    def test_conversation_user_relationship(
-        self, test_user: User, test_session
+    @pytest.mark.asyncio  
+    async def test_conversation_user_relationship(
+        self, test_db_session
     ):
         """Test conversation-user relationship."""
+        from chatter.models.user import User
+        
+        # Create test user in database
+        test_user = User(
+            email="userrel@example.com",
+            username="userreluser",
+            hashed_password="hashed_password_here",
+            full_name="User Rel Test User",
+            is_active=True,
+        )
+        test_db_session.add(test_user)
+        await test_db_session.commit()
+        await test_db_session.refresh(test_user)
+        
         # Arrange & Act
         conversation = Conversation(
             user_id=test_user.id,
             title="User Relationship Test",
         )
-        test_session.add(conversation)
-        test_session.commit()
+        test_db_session.add(conversation)
+        await test_db_session.commit()
 
         # Refresh to load relationships
-        test_session.refresh(conversation)
-        test_session.refresh(test_user)
+        await test_db_session.refresh(conversation)
+        await test_db_session.refresh(test_user)
 
         # Assert
         assert conversation.user == test_user

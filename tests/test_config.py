@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from chatter.config import Settings, settings
+from chatter.config import Settings, settings, get_settings
 
 
 @pytest.mark.unit

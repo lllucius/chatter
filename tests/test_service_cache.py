@@ -16,18 +16,14 @@ class TestCacheService:
     def setup_method(self):
         """Set up test fixtures."""
         self.cache_service = CacheService(
-            fallback_to_memory=True,
-            key_prefix="test:"
+            fallback_to_memory=True, key_prefix="test:"
         )
 
     @pytest.mark.asyncio
     async def test_cache_service_initialization(self):
         """Test cache service initialization."""
         # Act
-        cache = CacheService(
-            key_prefix="app:",
-            fallback_to_memory=True
-        )
+        cache = CacheService(key_prefix="app:", fallback_to_memory=True)
 
         # Assert
         assert cache.key_prefix == "app:"
@@ -79,7 +75,7 @@ class TestCacheService:
             mock_redis.set.assert_called_once_with(
                 f"test:{key}",
                 json.dumps(value),
-                ex=int(ttl.total_seconds())
+                ex=int(ttl.total_seconds()),
             )
 
     @pytest.mark.asyncio
@@ -123,12 +119,18 @@ class TestCacheService:
         nonexistent_key = "nonexistent_key"
 
         with patch.object(self.cache_service, 'redis') as mock_redis:
-            mock_redis.exists = AsyncMock(side_effect=[1, 0])  # First exists, second doesn't
+            mock_redis.exists = AsyncMock(
+                side_effect=[1, 0]
+            )  # First exists, second doesn't
             self.cache_service._connected = True
 
             # Act
-            exists_result = await self.cache_service.exists(existing_key)
-            not_exists_result = await self.cache_service.exists(nonexistent_key)
+            exists_result = await self.cache_service.exists(
+                existing_key
+            )
+            not_exists_result = await self.cache_service.exists(
+                nonexistent_key
+            )
 
             # Assert
             assert exists_result is True
@@ -163,7 +165,10 @@ class TestCacheService:
 
         # Assert - Set
         assert result_set is True
-        assert cache._memory_cache[key] == {"value": value, "expires_at": None}
+        assert cache._memory_cache[key] == {
+            "value": value,
+            "expires_at": None,
+        }
 
         # Act - Get from memory fallback
         result_get = await cache.get(key)
@@ -201,7 +206,10 @@ class TestCacheService:
         cache = CacheService()
 
         with patch.object(cache, '_connect_redis') as mock_connect:
-            mock_connect.side_effect = [Exception("Connection failed"), True]
+            mock_connect.side_effect = [
+                Exception("Connection failed"),
+                True,
+            ]
 
             # Act
             await cache._ensure_connected()
@@ -212,6 +220,7 @@ class TestCacheService:
     @pytest.mark.asyncio
     async def test_custom_serializer_deserializer(self):
         """Test custom serialization and deserialization."""
+
         # Arrange
         def custom_serializer(obj):
             return f"CUSTOM:{json.dumps(obj)}"
@@ -224,7 +233,7 @@ class TestCacheService:
         cache = CacheService(
             serializer=custom_serializer,
             deserializer=custom_deserializer,
-            fallback_to_memory=True
+            fallback_to_memory=True,
         )
         cache._connected = False
 
@@ -245,16 +254,18 @@ class TestCacheService:
         items = {
             "key1": "value1",
             "key2": {"nested": "value2"},
-            "key3": [1, 2, 3]
+            "key3": [1, 2, 3],
         }
 
         with patch.object(self.cache_service, 'redis') as mock_redis:
             mock_redis.mset = AsyncMock(return_value=True)
-            mock_redis.mget = AsyncMock(return_value=[
-                json.dumps("value1"),
-                json.dumps({"nested": "value2"}),
-                json.dumps([1, 2, 3])
-            ])
+            mock_redis.mget = AsyncMock(
+                return_value=[
+                    json.dumps("value1"),
+                    json.dumps({"nested": "value2"}),
+                    json.dumps([1, 2, 3]),
+                ]
+            )
             self.cache_service._connected = True
 
             # Act - Batch set
@@ -264,7 +275,9 @@ class TestCacheService:
             assert result_set is True
 
             # Act - Batch get
-            result_get = await self.cache_service.get_many(list(items.keys()))
+            result_get = await self.cache_service.get_many(
+                list(items.keys())
+            )
 
             # Assert - Get
             assert len(result_get) == 3
@@ -276,12 +289,14 @@ class TestCacheService:
         """Test cache statistics collection."""
         # Arrange
         with patch.object(self.cache_service, 'redis') as mock_redis:
-            mock_redis.info = AsyncMock(return_value={
-                "used_memory": 1024000,
-                "keyspace_hits": 1500,
-                "keyspace_misses": 500,
-                "connected_clients": 10
-            })
+            mock_redis.info = AsyncMock(
+                return_value={
+                    "used_memory": 1024000,
+                    "keyspace_hits": 1500,
+                    "keyspace_misses": 500,
+                    "connected_clients": 10,
+                }
+            )
             self.cache_service._connected = True
 
             # Act
@@ -289,7 +304,9 @@ class TestCacheService:
 
             # Assert
             assert stats["hit_ratio"] == 0.75  # 1500 / (1500 + 500)
-            assert stats["memory_usage_mb"] == 1.0  # 1024000 / (1024*1024)
+            assert (
+                stats["memory_usage_mb"] == 1.0
+            )  # 1024000 / (1024*1024)
             assert stats["connected_clients"] == 10
 
     @pytest.mark.asyncio
@@ -311,7 +328,9 @@ class TestCacheService:
             assert keys == matching_keys
 
             # Act - Delete by pattern
-            deleted_count = await self.cache_service.delete_pattern(pattern)
+            deleted_count = await self.cache_service.delete_pattern(
+                pattern
+            )
 
             # Assert - Delete
             assert deleted_count == 2
@@ -355,8 +374,7 @@ class TestCacheServiceIntegration:
     def setup_method(self):
         """Set up test fixtures."""
         self.cache_service = CacheService(
-            key_prefix="integration_test:",
-            fallback_to_memory=True
+            key_prefix="integration_test:", fallback_to_memory=True
         )
 
     @pytest.mark.asyncio
@@ -364,16 +382,24 @@ class TestCacheServiceIntegration:
         """Test complete cache workflow integration."""
         # Arrange
         test_data = {
-            "session:user123": {"user_id": 123, "preferences": {"theme": "dark"}},
+            "session:user123": {
+                "user_id": 123,
+                "preferences": {"theme": "dark"},
+            },
             "config:app": {"feature_flags": {"new_ui": True}},
-            "temp:calculation": {"result": 42, "timestamp": "2024-01-01T00:00:00Z"}
+            "temp:calculation": {
+                "result": 42,
+                "timestamp": "2024-01-01T00:00:00Z",
+            },
         }
 
         with patch.object(self.cache_service, 'redis') as mock_redis:
             mock_redis.set = AsyncMock(return_value=True)
-            mock_redis.get = AsyncMock(side_effect=lambda key: json.dumps(
-                test_data.get(key.replace("integration_test:", ""))
-            ))
+            mock_redis.get = AsyncMock(
+                side_effect=lambda key: json.dumps(
+                    test_data.get(key.replace("integration_test:", ""))
+                )
+            )
             mock_redis.exists = AsyncMock(return_value=1)
             mock_redis.delete = AsyncMock(return_value=1)
             self.cache_service._connected = True

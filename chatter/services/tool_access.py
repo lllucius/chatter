@@ -64,17 +64,24 @@ class ToolAccessService:
             Created permission response
         """
         # Validate that either tool_id or server_id is provided
-        if not permission_data.tool_id and not permission_data.server_id:
-            raise ToolAccessServiceError("Either tool_id or server_id must be provided")
+        if (
+            not permission_data.tool_id
+            and not permission_data.server_id
+        ):
+            raise ToolAccessServiceError(
+                "Either tool_id or server_id must be provided"
+            )
 
         if permission_data.tool_id and permission_data.server_id:
-            raise ToolAccessServiceError("Cannot specify both tool_id and server_id")
+            raise ToolAccessServiceError(
+                "Cannot specify both tool_id and server_id"
+            )
 
         # Check if permission already exists
         existing = await self._get_existing_permission(
             permission_data.user_id,
             permission_data.tool_id,
-            permission_data.server_id
+            permission_data.server_id,
         )
 
         if existing:
@@ -130,9 +137,13 @@ class ToolAccessService:
         if update_data.access_level is not None:
             permission.access_level = update_data.access_level
         if update_data.rate_limit_per_hour is not None:
-            permission.rate_limit_per_hour = update_data.rate_limit_per_hour
+            permission.rate_limit_per_hour = (
+                update_data.rate_limit_per_hour
+            )
         if update_data.rate_limit_per_day is not None:
-            permission.rate_limit_per_day = update_data.rate_limit_per_day
+            permission.rate_limit_per_day = (
+                update_data.rate_limit_per_day
+            )
         if update_data.allowed_hours is not None:
             permission.allowed_hours = update_data.allowed_hours
         if update_data.allowed_days is not None:
@@ -163,7 +174,9 @@ class ToolAccessService:
         await self.session.delete(permission)
         await self.session.commit()
 
-        logger.info("Tool permission revoked", permission_id=permission_id)
+        logger.info(
+            "Tool permission revoked", permission_id=permission_id
+        )
         return True
 
     async def get_user_permissions(
@@ -185,7 +198,8 @@ class ToolAccessService:
         permissions = result.scalars().all()
 
         return [
-            ToolPermissionResponse.model_validate(p) for p in permissions
+            ToolPermissionResponse.model_validate(p)
+            for p in permissions
         ]
 
     # Role-based access methods
@@ -247,7 +261,10 @@ class ToolAccessService:
         result = await self.session.execute(query)
         rules = result.scalars().all()
 
-        return [RoleToolAccessResponse.model_validate(rule) for rule in rules]
+        return [
+            RoleToolAccessResponse.model_validate(rule)
+            for rule in rules
+        ]
 
     # Access checking methods
 
@@ -276,18 +293,30 @@ class ToolAccessService:
             )
 
         # Get tool and server information
-        tool, server = await self._get_tool_and_server(tool_name, server_name)
+        tool, server = await self._get_tool_and_server(
+            tool_name, server_name
+        )
 
         # Check explicit permissions first
-        permission = await self._get_user_tool_permission(user_id, tool, server)
+        permission = await self._get_user_tool_permission(
+            user_id, tool, server
+        )
         if permission:
-            return await self._check_permission_access(permission, tool_name)
+            return await self._check_permission_access(
+                permission, tool_name
+            )
 
         # Check role-based access
-        user_role = getattr(user, 'role', UserRole.USER)  # Default to USER role
-        role_access = await self._get_role_access(user_role, tool_name, server_name)
+        user_role = getattr(
+            user, 'role', UserRole.USER
+        )  # Default to USER role
+        role_access = await self._get_role_access(
+            user_role, tool_name, server_name
+        )
         if role_access:
-            return await self._check_role_access(role_access, user_id, tool_name)
+            return await self._check_role_access(
+                role_access, user_id, tool_name
+            )
 
         # Default deny
         return ToolAccessResult(
@@ -297,7 +326,10 @@ class ToolAccessService:
         )
 
     async def record_tool_usage(
-        self, user_id: str, tool_name: str, server_name: str | None = None
+        self,
+        user_id: str,
+        tool_name: str,
+        server_name: str | None = None,
     ) -> bool:
         """Record tool usage for rate limiting.
 
@@ -310,10 +342,14 @@ class ToolAccessService:
             True if recorded successfully
         """
         # Get tool and server information
-        tool, server = await self._get_tool_and_server(tool_name, server_name)
+        tool, server = await self._get_tool_and_server(
+            tool_name, server_name
+        )
 
         # Update usage for explicit permissions
-        permission = await self._get_user_tool_permission(user_id, tool, server)
+        permission = await self._get_user_tool_permission(
+            user_id, tool, server
+        )
         if permission:
             permission.usage_count += 1
             permission.last_used = datetime.now(UTC)
@@ -325,10 +361,7 @@ class ToolAccessService:
     # Helper methods
 
     async def _get_existing_permission(
-        self,
-        user_id: str,
-        tool_id: str | None,
-        server_id: str | None
+        self, user_id: str, tool_id: str | None, server_id: str | None
     ) -> ToolPermission | None:
         """Get existing permission."""
         query = select(ToolPermission).where(
@@ -343,10 +376,14 @@ class ToolAccessService:
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def _get_permission_by_id(self, permission_id: str) -> ToolPermission | None:
+    async def _get_permission_by_id(
+        self, permission_id: str
+    ) -> ToolPermission | None:
         """Get permission by ID."""
         result = await self.session.execute(
-            select(ToolPermission).where(ToolPermission.id == permission_id)
+            select(ToolPermission).where(
+                ToolPermission.id == permission_id
+            )
         )
         return result.scalar_one_or_none()
 
@@ -391,7 +428,9 @@ class ToolAccessService:
 
             if tool:
                 result = await self.session.execute(
-                    select(ToolServer).where(ToolServer.id == tool.server_id)
+                    select(ToolServer).where(
+                        ToolServer.id == tool.server_id
+                    )
                 )
                 server = result.scalar_one_or_none()
 
@@ -401,7 +440,7 @@ class ToolAccessService:
         self,
         user_id: str,
         tool: ServerTool | None,
-        server: ToolServer | None
+        server: ToolServer | None,
     ) -> ToolPermission | None:
         """Get user permission for specific tool or server."""
         if not tool and not server:
@@ -444,7 +483,9 @@ class ToolAccessService:
         for rule in rules:
             if self._matches_pattern(tool_name, rule.tool_pattern):
                 return rule
-            if server_name and self._matches_pattern(server_name, rule.server_pattern):
+            if server_name and self._matches_pattern(
+                server_name, rule.server_pattern
+            ):
                 return rule
 
         return None
@@ -474,7 +515,9 @@ class ToolAccessService:
             )
 
         # Check time restrictions
-        if not self._check_time_restrictions(permission.allowed_hours, permission.allowed_days):
+        if not self._check_time_restrictions(
+            permission.allowed_hours, permission.allowed_days
+        ):
             return ToolAccessResult(
                 allowed=False,
                 access_level=permission.access_level,
@@ -487,15 +530,21 @@ class ToolAccessService:
             return ToolAccessResult(
                 allowed=False,
                 access_level=permission.access_level,
-                rate_limit_remaining_hour=rate_limit_result["remaining_hour"],
-                rate_limit_remaining_day=rate_limit_result["remaining_day"],
+                rate_limit_remaining_hour=rate_limit_result[
+                    "remaining_hour"
+                ],
+                rate_limit_remaining_day=rate_limit_result[
+                    "remaining_day"
+                ],
                 restriction_reason="Rate limit exceeded",
             )
 
         return ToolAccessResult(
             allowed=True,
             access_level=permission.access_level,
-            rate_limit_remaining_hour=rate_limit_result["remaining_hour"],
+            rate_limit_remaining_hour=rate_limit_result[
+                "remaining_hour"
+            ],
             rate_limit_remaining_day=rate_limit_result["remaining_day"],
             expires_at=permission.expires_at,
         )
@@ -505,7 +554,9 @@ class ToolAccessService:
     ) -> ToolAccessResult:
         """Check access based on role."""
         # Check time restrictions
-        if not self._check_time_restrictions(role_access.allowed_hours, role_access.allowed_days):
+        if not self._check_time_restrictions(
+            role_access.allowed_hours, role_access.allowed_days
+        ):
             return ToolAccessResult(
                 allowed=False,
                 access_level=role_access.access_level,
@@ -520,7 +571,9 @@ class ToolAccessService:
         )
 
     def _check_time_restrictions(
-        self, allowed_hours: list[int] | None, allowed_days: list[int] | None
+        self,
+        allowed_hours: list[int] | None,
+        allowed_days: list[int] | None,
     ) -> bool:
         """Check if current time is within allowed restrictions."""
         now = datetime.now(UTC)
@@ -555,7 +608,9 @@ class ToolAccessService:
             # For now, use the usage_count as approximation
             if permission.last_used and permission.last_used > hour_ago:
                 # Simplified check - in real implementation would need hourly usage tracking
-                result["remaining_hour"] = max(0, permission.rate_limit_per_hour - 1)
+                result["remaining_hour"] = max(
+                    0, permission.rate_limit_per_hour - 1
+                )
                 if result["remaining_hour"] <= 0:
                     result["allowed"] = False
 
@@ -564,7 +619,11 @@ class ToolAccessService:
             day_ago = now - timedelta(days=1)
             # Similar simplification for daily limits
             if permission.last_used and permission.last_used > day_ago:
-                result["remaining_day"] = max(0, permission.rate_limit_per_day - permission.usage_count)
+                result["remaining_day"] = max(
+                    0,
+                    permission.rate_limit_per_day
+                    - permission.usage_count,
+                )
                 if result["remaining_day"] <= 0:
                     result["allowed"] = False
 

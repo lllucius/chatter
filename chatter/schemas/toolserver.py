@@ -19,7 +19,9 @@ class OAuthConfigSchema(BaseModel):
 
     client_id: str = Field(..., description="OAuth client ID")
     client_secret: str = Field(..., description="OAuth client secret")
-    token_url: HttpUrl = Field(..., description="OAuth token endpoint URL")
+    token_url: HttpUrl = Field(
+        ..., description="OAuth token endpoint URL"
+    )
     scope: str | None = Field(None, description="OAuth scope")
 
 
@@ -37,12 +39,13 @@ class ToolServerBase(BaseModel):
         None, description="Server description"
     )
     base_url: HttpUrl | None = Field(
-        None, description="Base URL for the remote server (null for built-in servers)"
+        None,
+        description="Base URL for the remote server (null for built-in servers)",
     )
     transport_type: str = Field(
         "http",
         pattern="^(http|sse|stdio)$",
-        description="Transport type: http, sse, or stdio"
+        description="Transport type: http, sse, or stdio",
     )
     oauth_config: OAuthConfigSchema | None = Field(
         None, description="OAuth configuration if required"
@@ -82,7 +85,9 @@ class ToolServerUpdate(BaseModel):
     display_name: str | None = Field(None, min_length=1, max_length=200)
     description: str | None = Field(None)
     base_url: HttpUrl | None = Field(None)
-    transport_type: str | None = Field(None, pattern="^(http|sse|stdio)$")
+    transport_type: str | None = Field(
+        None, pattern="^(http|sse|stdio)$"
+    )
     oauth_config: OAuthConfigSchema | None = Field(None)
     headers: dict[str, str] | None = Field(None)
     timeout: int | None = Field(None, ge=5, le=300)
@@ -465,21 +470,32 @@ class ToolPermissionBase(BaseModel):
 
     user_id: str = Field(..., description="User ID")
     tool_id: str | None = Field(None, description="Specific tool ID")
-    server_id: str | None = Field(None, description="Server ID (for all tools)")
-    access_level: ToolAccessLevel = Field(..., description="Access level")
-    rate_limit_per_hour: int | None = Field(None, ge=0, description="Hourly rate limit")
-    rate_limit_per_day: int | None = Field(None, ge=0, description="Daily rate limit")
+    server_id: str | None = Field(
+        None, description="Server ID (for all tools)"
+    )
+    access_level: ToolAccessLevel = Field(
+        ..., description="Access level"
+    )
+    rate_limit_per_hour: int | None = Field(
+        None, ge=0, description="Hourly rate limit"
+    )
+    rate_limit_per_day: int | None = Field(
+        None, ge=0, description="Daily rate limit"
+    )
     allowed_hours: list[int] | None = Field(
         None, description="Allowed hours (0-23)"
     )
     allowed_days: list[int] | None = Field(
         None, description="Allowed weekdays (0-6)"
     )
-    expires_at: datetime | None = Field(None, description="Permission expiry")
+    expires_at: datetime | None = Field(
+        None, description="Permission expiry"
+    )
 
 
 class ToolPermissionCreate(ToolPermissionBase):
     """Schema for creating tool permissions."""
+
     pass
 
 
@@ -503,16 +519,24 @@ class ToolPermissionResponse(ToolPermissionBase):
     granted_by: str = Field(..., description="Granter user ID")
     granted_at: datetime = Field(..., description="Grant timestamp")
     usage_count: int = Field(..., description="Usage count")
-    last_used: datetime | None = Field(None, description="Last used timestamp")
+    last_used: datetime | None = Field(
+        None, description="Last used timestamp"
+    )
 
 
 class RoleToolAccessBase(BaseModel):
     """Base schema for role-based tool access."""
 
     role: UserRole = Field(..., description="User role")
-    tool_pattern: str | None = Field(None, description="Tool name pattern")
-    server_pattern: str | None = Field(None, description="Server name pattern")
-    access_level: ToolAccessLevel = Field(..., description="Access level")
+    tool_pattern: str | None = Field(
+        None, description="Tool name pattern"
+    )
+    server_pattern: str | None = Field(
+        None, description="Server name pattern"
+    )
+    access_level: ToolAccessLevel = Field(
+        ..., description="Access level"
+    )
     default_rate_limit_per_hour: int | None = Field(None, ge=0)
     default_rate_limit_per_day: int | None = Field(None, ge=0)
     allowed_hours: list[int] | None = Field(None)
@@ -521,6 +545,7 @@ class RoleToolAccessBase(BaseModel):
 
 class RoleToolAccessCreate(RoleToolAccessBase):
     """Schema for creating role-based tool access."""
+
     pass
 
 
@@ -546,8 +571,18 @@ class ToolAccessResult(BaseModel):
     """Schema for tool access check result."""
 
     allowed: bool = Field(..., description="Whether access is allowed")
-    access_level: ToolAccessLevel = Field(..., description="Access level")
-    rate_limit_remaining_hour: int | None = Field(None, description="Remaining hourly calls")
-    rate_limit_remaining_day: int | None = Field(None, description="Remaining daily calls")
-    restriction_reason: str | None = Field(None, description="Reason if restricted")
-    expires_at: datetime | None = Field(None, description="Permission expiry")
+    access_level: ToolAccessLevel = Field(
+        ..., description="Access level"
+    )
+    rate_limit_remaining_hour: int | None = Field(
+        None, description="Remaining hourly calls"
+    )
+    rate_limit_remaining_day: int | None = Field(
+        None, description="Remaining daily calls"
+    )
+    restriction_reason: str | None = Field(
+        None, description="Reason if restricted"
+    )
+    expires_at: datetime | None = Field(
+        None, description="Permission expiry"
+    )

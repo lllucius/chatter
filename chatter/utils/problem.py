@@ -417,7 +417,7 @@ class ProblemDetailResponse(JSONResponse):
         """
         final_headers = {
             "Content-Type": "application/problem+json",
-            **(headers or {})
+            **(headers or {}),
         }
 
         # Create problem detail dictionary
@@ -427,7 +427,7 @@ class ProblemDetailResponse(JSONResponse):
             detail=detail,
             type_=type_,
             instance=instance,
-            **extra_fields
+            **extra_fields,
         )
 
         super().__init__(

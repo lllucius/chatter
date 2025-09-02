@@ -24,7 +24,9 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 
-@router.post("/", response_model=JobResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=JobResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_job(
     job_data: JobCreateRequest,
     current_user: User = Depends(get_current_user),
@@ -61,7 +63,9 @@ async def create_job(
 
         created_job = job_queue.jobs.get(job_id)
         if not created_job:
-            raise InternalServerProblem(detail="Failed to retrieve created job")
+            raise InternalServerProblem(
+                detail="Failed to retrieve created job"
+            )
 
         return JobResponse(
             id=created_job.id,
@@ -83,7 +87,9 @@ async def create_job(
 
     except Exception as e:
         logger.error("Failed to create job", error=str(e))
-        raise InternalServerProblem(detail="Failed to create job") from e
+        raise InternalServerProblem(
+            detail="Failed to create job"
+        ) from e
 
 
 @router.get("/", response_model=JobListResponse)
@@ -111,31 +117,36 @@ async def list_jobs(
             jobs = [j for j in jobs if j.priority == request.priority]
 
         if request.function_name is not None:
-            jobs = [j for j in jobs if j.function_name == request.function_name]
+            jobs = [
+                j
+                for j in jobs
+                if j.function_name == request.function_name
+            ]
 
         job_responses = []
         for job in jobs:
-            job_responses.append(JobResponse(
-                id=job.id,
-                name=job.name,
-                function_name=job.function_name,
-                priority=job.priority,
-                status=job.status,
-                created_at=job.created_at,
-                started_at=job.started_at,
-                completed_at=job.completed_at,
-                scheduled_at=None,  # Would need to track this
-                retry_count=job.retry_count,
-                max_retries=job.max_retries,
-                error_message=job.error_message,
-                result=job.result,
-                progress=job.progress,
-                progress_message=job.progress_message,
-            ))
+            job_responses.append(
+                JobResponse(
+                    id=job.id,
+                    name=job.name,
+                    function_name=job.function_name,
+                    priority=job.priority,
+                    status=job.status,
+                    created_at=job.created_at,
+                    started_at=job.started_at,
+                    completed_at=job.completed_at,
+                    scheduled_at=None,  # Would need to track this
+                    retry_count=job.retry_count,
+                    max_retries=job.max_retries,
+                    error_message=job.error_message,
+                    result=job.result,
+                    progress=job.progress,
+                    progress_message=job.progress_message,
+                )
+            )
 
         return JobListResponse(
-            jobs=job_responses,
-            total=len(job_responses)
+            jobs=job_responses, total=len(job_responses)
         )
 
     except Exception as e:
@@ -205,19 +216,25 @@ async def cancel_job(
         success = await job_queue.cancel_job(job_id)
 
         if not success:
-            raise BadRequestProblem(detail="Failed to cancel job - check job status")
+            raise BadRequestProblem(
+                detail="Failed to cancel job - check job status"
+            )
 
         return JobActionResponse(
             success=True,
             message=f"Job {job_id} cancelled successfully",
-            job_id=job_id
+            job_id=job_id,
         )
 
     except BadRequestProblem:
         raise
     except Exception as e:
-        logger.error("Failed to cancel job", job_id=job_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to cancel job") from e
+        logger.error(
+            "Failed to cancel job", job_id=job_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to cancel job"
+        ) from e
 
 
 @router.get("/stats/overview", response_model=JobStatsResponse)
@@ -247,4 +264,6 @@ async def get_job_stats(
 
     except Exception as e:
         logger.error("Failed to get job stats", error=str(e))
-        raise InternalServerProblem(detail="Failed to get job stats") from e
+        raise InternalServerProblem(
+            detail="Failed to get job stats"
+        ) from e

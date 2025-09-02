@@ -1,6 +1,5 @@
 """Tests for workflow templates and common use cases."""
 
-
 import pytest
 
 from chatter.core.exceptions import (
@@ -37,7 +36,7 @@ class TestWorkflowTemplate:
             description=description,
             default_params=default_params,
             required_tools=required_tools,
-            required_retrievers=required_retrievers
+            required_retrievers=required_retrievers,
         )
 
         # Assert
@@ -55,7 +54,7 @@ class TestWorkflowTemplate:
             name="minimal_template",
             workflow_type="simple",
             description="Minimal template",
-            default_params={}
+            default_params={},
         )
 
         # Assert
@@ -202,10 +201,7 @@ class TestWorkflowTemplateManager:
         """Test creating workflow configuration from template."""
         # Arrange
         template_name = "customer_support"
-        custom_params = {
-            "memory_window": 30,
-            "user_name": "John Doe"
-        }
+        custom_params = {"memory_window": 30, "user_name": "John Doe"}
 
         # Act
         workflow_config = self.manager.create_workflow_from_template(
@@ -216,7 +212,9 @@ class TestWorkflowTemplateManager:
         assert workflow_config["workflow_type"] == "full"
         assert workflow_config["enable_memory"] is True
         assert workflow_config["memory_window"] == 30  # Custom override
-        assert workflow_config["user_name"] == "John Doe"  # Custom addition
+        assert (
+            workflow_config["user_name"] == "John Doe"
+        )  # Custom addition
 
     def test_create_workflow_from_template_invalid_params(self):
         """Test creating workflow with invalid custom parameters."""
@@ -224,7 +222,7 @@ class TestWorkflowTemplateManager:
         template_name = "customer_support"
         invalid_params = {
             "memory_window": "invalid_value",  # Should be integer
-            "temperature": 2.5  # Should be between 0 and 1
+            "temperature": 2.5,  # Should be between 0 and 1
         }
 
         # Act & Assert
@@ -239,7 +237,12 @@ class TestWorkflowTemplateManager:
         """Test validating template requirements."""
         # Arrange
         template_name = "customer_support"
-        available_tools = ["search_kb", "create_ticket", "escalate", "other_tool"]
+        available_tools = [
+            "search_kb",
+            "create_ticket",
+            "escalate",
+            "other_tool",
+        ]
         available_retrievers = ["support_docs", "faq_docs"]
 
         # Act
@@ -254,7 +257,9 @@ class TestWorkflowTemplateManager:
         """Test validating template with missing required tools."""
         # Arrange
         template_name = "customer_support"
-        available_tools = ["search_kb"]  # Missing create_ticket, escalate
+        available_tools = [
+            "search_kb"
+        ]  # Missing create_ticket, escalate
         available_retrievers = ["support_docs"]
 
         # Act
@@ -270,9 +275,15 @@ class TestWorkflowTemplateManager:
     def test_get_template_suggestions(self):
         """Test getting template suggestions based on use case."""
         # Act
-        support_suggestions = self.manager.get_template_suggestions("customer service")
-        code_suggestions = self.manager.get_template_suggestions("programming help")
-        research_suggestions = self.manager.get_template_suggestions("research project")
+        support_suggestions = self.manager.get_template_suggestions(
+            "customer service"
+        )
+        code_suggestions = self.manager.get_template_suggestions(
+            "programming help"
+        )
+        research_suggestions = self.manager.get_template_suggestions(
+            "research project"
+        )
 
         # Assert
         assert "customer_support" in support_suggestions
@@ -286,11 +297,13 @@ class TestWorkflowTemplateManager:
             "max_memory_window": 200,
             "max_tool_calls": 15,
             "supported_workflow_types": ["full", "tools", "plain"],
-            "available_models": ["gpt-4", "gpt-3.5-turbo"]
+            "available_models": ["gpt-4", "gpt-3.5-turbo"],
         }
 
         # Act
-        compatible_templates = self.manager.get_compatible_templates(system_capabilities)
+        compatible_templates = self.manager.get_compatible_templates(
+            system_capabilities
+        )
 
         # Assert
         assert len(compatible_templates) > 0
@@ -314,7 +327,7 @@ class TestCustomWorkflowBuilder:
             "name": "Premium Support",
             "memory_window": 100,
             "additional_tools": ["premium_escalate"],
-            "custom_system_message": "You are a premium support assistant."
+            "custom_system_message": "You are a premium support assistant.",
         }
 
         # Act
@@ -337,14 +350,16 @@ class TestCustomWorkflowBuilder:
             "default_params": {
                 "enable_memory": True,
                 "memory_window": 75,
-                "system_message": "You are a sales assistant."
+                "system_message": "You are a sales assistant.",
             },
             "required_tools": ["crm_search", "lead_qualify"],
-            "required_retrievers": ["sales_materials"]
+            "required_retrievers": ["sales_materials"],
         }
 
         # Act
-        custom_template = self.builder.build_custom_template(custom_specs)
+        custom_template = self.builder.build_custom_template(
+            custom_specs
+        )
 
         # Assert
         assert custom_template.name == "sales_assistant"
@@ -359,12 +374,12 @@ class TestCustomWorkflowBuilder:
             "enable_memory": True,
             "memory_window": 50,
             "max_tool_calls": 5,
-            "tools": ["tool1", "tool2"]
+            "tools": ["tool1", "tool2"],
         }
         override_config = {
             "memory_window": 100,  # Override
             "temperature": 0.7,  # Add new
-            "tools": ["tool1", "tool3"]  # Override list
+            "tools": ["tool1", "tool3"],  # Override list
         }
 
         # Act
@@ -385,21 +400,20 @@ class TestCustomWorkflowBuilder:
             "name": "valid_template",
             "workflow_type": "tools",
             "description": "A valid custom template",
-            "default_params": {
-                "temperature": 0.5,
-                "max_tokens": 1000
-            }
+            "default_params": {"temperature": 0.5, "max_tokens": 1000},
         }
 
         invalid_spec = {
             "name": "",  # Invalid empty name
             "workflow_type": "invalid_type",  # Invalid type
-            "description": "Invalid template"
+            "description": "Invalid template",
         }
 
         # Act
         valid_result = self.builder.validate_custom_template(valid_spec)
-        invalid_result = self.builder.validate_custom_template(invalid_spec)
+        invalid_result = self.builder.validate_custom_template(
+            invalid_spec
+        )
 
         # Assert
         assert valid_result.valid is True
@@ -421,7 +435,7 @@ class TestTemplateRegistry:
             name="custom_test",
             workflow_type="tools",
             description="Custom test template",
-            default_params={"test_param": "test_value"}
+            default_params={"test_param": "test_value"},
         )
 
         # Act
@@ -439,13 +453,13 @@ class TestTemplateRegistry:
             name="duplicate",
             workflow_type="tools",
             description="First template",
-            default_params={}
+            default_params={},
         )
         template2 = WorkflowTemplate(
             name="duplicate",
             workflow_type="full",
             description="Second template",
-            default_params={}
+            default_params={},
         )
 
         self.registry.register_template(template1)
@@ -463,7 +477,7 @@ class TestTemplateRegistry:
             name="temporary",
             workflow_type="plain",
             description="Temporary template",
-            default_params={}
+            default_params={},
         )
 
         self.registry.register_template(custom_template)
@@ -482,14 +496,17 @@ class TestTemplateRegistry:
             name="updateable",
             workflow_type="tools",
             description="Original description",
-            default_params={"param1": "value1"}
+            default_params={"param1": "value1"},
         )
 
         updated_template = WorkflowTemplate(
             name="updateable",
             workflow_type="full",
             description="Updated description",
-            default_params={"param1": "updated_value", "param2": "value2"}
+            default_params={
+                "param1": "updated_value",
+                "param2": "value2",
+            },
         )
 
         self.registry.register_template(original_template)
@@ -510,14 +527,14 @@ class TestTemplateRegistry:
             name="versioned",
             workflow_type="tools",
             description="Version 1",
-            default_params={"version": "1.0"}
+            default_params={"version": "1.0"},
         )
 
         v2_template = WorkflowTemplate(
             name="versioned",
             workflow_type="full",
             description="Version 2",
-            default_params={"version": "2.0"}
+            default_params={"version": "2.0"},
         )
 
         # Act
@@ -525,9 +542,15 @@ class TestTemplateRegistry:
         self.registry.register_template(v2_template, version="2.0")
 
         # Assert
-        v1_retrieved = self.registry.get_template("versioned", version="1.0")
-        v2_retrieved = self.registry.get_template("versioned", version="2.0")
-        latest_retrieved = self.registry.get_template("versioned")  # Should get latest
+        v1_retrieved = self.registry.get_template(
+            "versioned", version="1.0"
+        )
+        v2_retrieved = self.registry.get_template(
+            "versioned", version="2.0"
+        )
+        latest_retrieved = self.registry.get_template(
+            "versioned"
+        )  # Should get latest
 
         assert v1_retrieved.default_params["version"] == "1.0"
         assert v2_retrieved.default_params["version"] == "2.0"
@@ -547,7 +570,9 @@ class TestWorkflowTemplateIntegration:
     def test_end_to_end_template_usage(self):
         """Test complete template usage workflow."""
         # Step 1: Get template suggestions
-        suggestions = self.manager.get_template_suggestions("customer support")
+        suggestions = self.manager.get_template_suggestions(
+            "customer support"
+        )
         assert "customer_support" in suggestions
 
         # Step 2: Validate template requirements
@@ -563,7 +588,7 @@ class TestWorkflowTemplateIntegration:
         custom_params = {
             "memory_window": 75,
             "agent_name": "SupportBot",
-            "escalation_threshold": 3
+            "escalation_threshold": 3,
         }
 
         workflow_config = self.manager.create_workflow_from_template(
@@ -586,13 +611,15 @@ class TestWorkflowTemplateIntegration:
             "default_params": {
                 "enable_memory": False,
                 "max_tool_calls": 8,
-                "system_message": "Integration test assistant"
+                "system_message": "Integration test assistant",
             },
             "required_tools": ["test_tool"],
-            "required_retrievers": ["test_retriever"]
+            "required_retrievers": ["test_retriever"],
         }
 
-        custom_template = self.builder.build_custom_template(custom_specs)
+        custom_template = self.builder.build_custom_template(
+            custom_specs
+        )
 
         # Step 2: Register custom template
         self.registry.register_template(custom_template)
@@ -602,8 +629,7 @@ class TestWorkflowTemplateIntegration:
         self.manager.registry = self.registry
 
         workflow_config = self.manager.create_workflow_from_template(
-            "integration_test_template",
-            {"temperature": 0.8}
+            "integration_test_template", {"temperature": 0.8}
         )
 
         # Step 4: Verify custom template usage
@@ -622,16 +648,21 @@ class TestWorkflowTemplateIntegration:
             "name": "Enterprise Support",
             "memory_window": 150,
             "max_tool_calls": 10,
-            "additional_tools": ["enterprise_escalate", "priority_routing"],
-            "sla_requirements": {"response_time": 300}  # 5 minutes
+            "additional_tools": [
+                "enterprise_escalate",
+                "priority_routing",
+            ],
+            "sla_requirements": {"response_time": 300},  # 5 minutes
         }
 
         basic_customizations = {
             "name": "Basic Support",
             "memory_window": 25,
             "max_tool_calls": 3,
-            "excluded_tools": ["escalate"],  # Basic users can't escalate
-            "response_style": "friendly_but_concise"
+            "excluded_tools": [
+                "escalate"
+            ],  # Basic users can't escalate
+            "response_style": "friendly_but_concise",
         }
 
         # Step 3: Build customized workflows
@@ -646,7 +677,10 @@ class TestWorkflowTemplateIntegration:
         # Step 4: Verify customizations applied correctly
         assert enterprise_workflow["name"] == "Enterprise Support"
         assert enterprise_workflow["memory_window"] == 150
-        assert "enterprise_escalate" in enterprise_workflow["additional_tools"]
+        assert (
+            "enterprise_escalate"
+            in enterprise_workflow["additional_tools"]
+        )
 
         assert basic_workflow["name"] == "Basic Support"
         assert basic_workflow["memory_window"] == 25
@@ -663,7 +697,7 @@ class TestWorkflowTemplateIntegration:
                 name=f"perf_test_template_{i}",
                 workflow_type="tools",
                 description=f"Performance test template {i}",
-                default_params={"template_id": i}
+                default_params={"template_id": i},
             )
             self.registry.register_template(template)
 
@@ -677,7 +711,9 @@ class TestWorkflowTemplateIntegration:
 
         # Get specific templates
         for i in range(0, template_count, 10):  # Every 10th template
-            template = self.registry.get_template(f"perf_test_template_{i}")
+            template = self.registry.get_template(
+                f"perf_test_template_{i}"
+            )
             assert template is not None
 
         # Search templates

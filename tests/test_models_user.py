@@ -1,14 +1,12 @@
 """Tests for User model."""
 
 from datetime import datetime
-from unittest.mock import MagicMock
 
 import pytest
-from sqlalchemy import Boolean, DateTime, ForeignKey, String, Text
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import Boolean, DateTime, String, Text
 
-from chatter.models.user import User
 from chatter.models.base import Keys
+from chatter.models.user import User
 
 
 @pytest.mark.unit
@@ -70,7 +68,7 @@ class TestUserModel:
         """Test User model column configurations."""
         # Arrange
         table = User.__table__
-        
+
         # Act & Assert - Email column
         email_col = table.columns['email']
         assert isinstance(email_col.type, String)
@@ -124,16 +122,20 @@ class TestUserModel:
         """Test User model foreign key relationships."""
         # Arrange
         table = User.__table__
-        
+
         # Act & Assert - Default profile foreign key
         default_profile_col = table.columns['default_profile_id']
         assert isinstance(default_profile_col.type, String)
         assert default_profile_col.type.length == 26  # ULID length
         assert default_profile_col.nullable is True
         assert default_profile_col.index is True
-        
+
         # Check foreign key constraint
-        fks = [fk for fk in table.foreign_keys if fk.column.table.name == 'profiles']
+        fks = [
+            fk
+            for fk in table.foreign_keys
+            if fk.column.table.name == 'profiles'
+        ]
         assert len(fks) == 1
         assert str(fks[0].target_fullname) == Keys.PROFILES.value
 
@@ -141,7 +143,9 @@ class TestUserModel:
         """Test User model table constraints."""
         # Arrange
         constraints = User.__table__.constraints
-        constraint_names = {c.name for c in constraints if hasattr(c, 'name') and c.name}
+        constraint_names = {
+            c.name for c in constraints if hasattr(c, 'name') and c.name
+        }
 
         # Assert - Check constraints exist
         expected_constraints = {
@@ -149,9 +153,9 @@ class TestUserModel:
             'check_monthly_message_limit_positive',
             'check_max_file_size_positive',
             'check_email_format',
-            'check_username_format'
+            'check_username_format',
         }
-        
+
         for expected in expected_constraints:
             assert expected in constraint_names
 
@@ -187,7 +191,7 @@ class TestUserMethods:
             default_llm_provider="openai",
             daily_message_limit=100,
             monthly_message_limit=3000,
-            max_file_size_mb=10
+            max_file_size_mb=10,
         )
 
     def test_user_repr(self):
@@ -227,7 +231,7 @@ class TestUserMethods:
         mock_created_at = datetime(2024, 1, 1, 12, 0, 0)
         mock_updated_at = datetime(2024, 1, 2, 12, 0, 0)
         mock_last_login = datetime(2024, 1, 3, 12, 0, 0)
-        
+
         self.user.id = "test_user_id_123456789"
         self.user.created_at = mock_created_at
         self.user.updated_at = mock_updated_at
@@ -250,9 +254,9 @@ class TestUserMethods:
             "default_profile_id": None,
             "created_at": "2024-01-01T12:00:00",
             "updated_at": "2024-01-02T12:00:00",
-            "last_login_at": "2024-01-03T12:00:00"
+            "last_login_at": "2024-01-03T12:00:00",
         }
-        
+
         assert user_dict == expected_dict
 
     def test_to_dict_excludes_sensitive_data(self):
@@ -262,10 +266,14 @@ class TestUserMethods:
 
         # Assert - Sensitive fields should not be included
         sensitive_fields = [
-            'hashed_password', 'api_key', 'is_superuser', 
-            'daily_message_limit', 'monthly_message_limit', 'max_file_size_mb'
+            'hashed_password',
+            'api_key',
+            'is_superuser',
+            'daily_message_limit',
+            'monthly_message_limit',
+            'max_file_size_mb',
         ]
-        
+
         for field in sensitive_fields:
             assert field not in user_dict
 
@@ -275,7 +283,7 @@ class TestUserMethods:
         minimal_user = User(
             email="minimal@example.com",
             username="minimal",
-            hashed_password="hash"
+            hashed_password="hash",
         )
         minimal_user.id = "minimal_id_123456789"
 
@@ -303,7 +311,7 @@ class TestUserValidation:
             username="validuser123",
             hashed_password="secure_hash_12345",
             full_name="Valid User",
-            is_active=True
+            is_active=True,
         )
 
         # Assert
@@ -319,7 +327,7 @@ class TestUserValidation:
         user = User(
             email="minimal@example.com",
             username="minimal",
-            hashed_password="hash123"
+            hashed_password="hash123",
         )
 
         # Assert
@@ -361,14 +369,18 @@ class TestUserConstraints:
         """Test email format constraint."""
         # This test would require actual database integration to test constraints
         # For unit testing, we'll test the constraint definition exists
-        
+
         # Arrange
         constraints = User.__table__.constraints
         email_constraint = next(
-            (c for c in constraints if hasattr(c, 'name') and c.name == 'check_email_format'), 
-            None
+            (
+                c
+                for c in constraints
+                if hasattr(c, 'name') and c.name == 'check_email_format'
+            ),
+            None,
         )
-        
+
         # Assert
         assert email_constraint is not None
 
@@ -377,10 +389,15 @@ class TestUserConstraints:
         # Arrange
         constraints = User.__table__.constraints
         username_constraint = next(
-            (c for c in constraints if hasattr(c, 'name') and c.name == 'check_username_format'), 
-            None
+            (
+                c
+                for c in constraints
+                if hasattr(c, 'name')
+                and c.name == 'check_username_format'
+            ),
+            None,
         )
-        
+
         # Assert
         assert username_constraint is not None
 
@@ -388,18 +405,24 @@ class TestUserConstraints:
         """Test message limit constraints exist."""
         # Arrange
         constraints = User.__table__.constraints
-        constraint_names = {c.name for c in constraints if hasattr(c, 'name') and c.name}
-        
+        constraint_names = {
+            c.name for c in constraints if hasattr(c, 'name') and c.name
+        }
+
         # Assert
         assert 'check_daily_message_limit_positive' in constraint_names
-        assert 'check_monthly_message_limit_positive' in constraint_names
+        assert (
+            'check_monthly_message_limit_positive' in constraint_names
+        )
 
     def test_file_size_constraint(self):
         """Test file size constraint exists."""
         # Arrange
         constraints = User.__table__.constraints
-        constraint_names = {c.name for c in constraints if hasattr(c, 'name') and c.name}
-        
+        constraint_names = {
+            c.name for c in constraints if hasattr(c, 'name') and c.name
+        }
+
         # Assert
         assert 'check_max_file_size_positive' in constraint_names
 
@@ -414,7 +437,7 @@ class TestUserModelIntegration:
         user = User(
             email="relationship@example.com",
             username="reluser",
-            hashed_password="hash123"
+            hashed_password="hash123",
         )
 
         # Act & Assert - Test that relationship attributes exist and are lists
@@ -433,7 +456,7 @@ class TestUserModelIntegration:
         user = User(
             email="lifecycle@example.com",
             username="lifecycle",
-            hashed_password="initial_hash"
+            hashed_password="initial_hash",
         )
 
         # Act - Simulate user updates
@@ -461,7 +484,7 @@ class TestUserModelIntegration:
         user = User(
             email="api@example.com",
             username="apiuser",
-            hashed_password="hash123"
+            hashed_password="hash123",
         )
 
         # Act
@@ -483,7 +506,7 @@ class TestUserModelIntegration:
         user = User(
             email="prefs@example.com",
             username="prefsuser",
-            hashed_password="hash123"
+            hashed_password="hash123",
         )
 
         # Act
@@ -512,7 +535,7 @@ class TestUserModelIntegration:
         user = User(
             email="status@example.com",
             username="statususer",
-            hashed_password="hash123"
+            hashed_password="hash123",
         )
 
         # Act - Test status changes
@@ -549,7 +572,7 @@ class TestUserEdgeCases:
             hashed_password="",
             full_name="",
             bio="",
-            avatar_url=""
+            avatar_url="",
         )
 
         # Assert - Object creation should work, but constraints would fail in DB
@@ -577,7 +600,7 @@ class TestUserEdgeCases:
         user = User(
             email="test@example.com",
             username="testuser",
-            hashed_password="hash"
+            hashed_password="hash",
         )
         user.created_at = None
         user.updated_at = None

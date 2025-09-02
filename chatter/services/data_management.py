@@ -10,6 +10,9 @@ import aiofiles
 
 from chatter.config import settings
 from chatter.schemas.data_management import (
+    RestoreRequest,  # only for typing clarity in comments
+)
+from chatter.schemas.data_management import (
     BackupRequest,
     BackupType,
     DataFormat,
@@ -17,7 +20,6 @@ from chatter.schemas.data_management import (
     DataOperationModel,
     ExportDataRequest,
     OperationStatus,
-    RestoreRequest,  # only for typing clarity in comments
 )
 from chatter.schemas.jobs import JobPriority
 from chatter.services.job_queue import job_queue
@@ -32,8 +34,12 @@ class DataManager:
     def __init__(self):
         """Initialize the data manager."""
         self.operations: dict[str, DataOperationModel] = {}
-        self.backup_directory = Path(settings.document_storage_path) / "backups"
-        self.export_directory = Path(settings.document_storage_path) / "exports"
+        self.backup_directory = (
+            Path(settings.document_storage_path) / "backups"
+        )
+        self.export_directory = (
+            Path(settings.document_storage_path) / "exports"
+        )
         self._ensure_directories()
 
     def _ensure_directories(self) -> None:
@@ -41,9 +47,13 @@ class DataManager:
         self.backup_directory.mkdir(parents=True, exist_ok=True)
         self.export_directory.mkdir(parents=True, exist_ok=True)
 
-    async def export_data(self, request: ExportDataRequest, created_by: str) -> str:
+    async def export_data(
+        self, request: ExportDataRequest, created_by: str
+    ) -> str:
         """Create a data export operation from the API request."""
-        export_id = f"export_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S_%f')}"
+        export_id = (
+            f"export_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S_%f')}"
+        )
         expires_at = datetime.now(UTC) + timedelta(days=7)
 
         operation = DataOperationModel(
@@ -77,9 +87,13 @@ class DataManager:
 
         return operation.id
 
-    async def create_backup(self, request: BackupRequest, created_by: str) -> str:
+    async def create_backup(
+        self, request: BackupRequest, created_by: str
+    ) -> str:
         """Create a backup operation from the API request."""
-        backup_id = f"backup_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S_%f')}"
+        backup_id = (
+            f"backup_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S_%f')}"
+        )
 
         operation = DataOperationModel(
             id=backup_id,
@@ -110,9 +124,13 @@ class DataManager:
 
         return operation.id
 
-    async def restore_from_backup(self, request: RestoreRequest, created_by: str) -> str:
+    async def restore_from_backup(
+        self, request: RestoreRequest, created_by: str
+    ) -> str:
         """Create a restore operation from the API request."""
-        restore_id = f"restore_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S_%f')}"
+        restore_id = (
+            f"restore_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S_%f')}"
+        )
 
         operation = DataOperationModel(
             id=restore_id,
@@ -134,7 +152,11 @@ class DataManager:
             metadata=operation.metadata,
         )
 
-        logger.info("Created restore request", operation_id=operation.id, backup_id=request.backup_id)
+        logger.info(
+            "Created restore request",
+            operation_id=operation.id,
+            backup_id=request.backup_id,
+        )
 
         return operation.id
 
@@ -144,8 +166,12 @@ class DataManager:
         if not op or op.operation_type != DataOperation.EXPORT.value:
             return {}
 
-        export_meta = op.metadata.get("export_request", {}) if op.metadata else {}
-        expires_at = op.metadata.get("expires_at") if op.metadata else None
+        export_meta = (
+            op.metadata.get("export_request", {}) if op.metadata else {}
+        )
+        expires_at = (
+            op.metadata.get("expires_at") if op.metadata else None
+        )
 
         file_size = None
         if op.result_path:
@@ -155,7 +181,11 @@ class DataManager:
                 file_size = None
 
         return {
-            "status": op.status.value if isinstance(op.status, OperationStatus) else op.status,
+            "status": (
+                op.status.value
+                if isinstance(op.status, OperationStatus)
+                else op.status
+            ),
             "download_url": None,  # could be set by a download service
             "file_size": file_size,
             "record_count": None,
@@ -171,7 +201,9 @@ class DataManager:
         if not op or op.operation_type != DataOperation.BACKUP.value:
             return {}
 
-        req = op.metadata.get("backup_request", {}) if op.metadata else {}
+        req = (
+            op.metadata.get("backup_request", {}) if op.metadata else {}
+        )
 
         file_size = None
         compressed_size = None
@@ -180,14 +212,22 @@ class DataManager:
                 p = Path(op.result_path)
                 stat = p.stat()
                 file_size = stat.st_size
-                compressed_size = stat.st_size if p.suffix.endswith("gz") or p.suffix == ".zip" else None
+                compressed_size = (
+                    stat.st_size
+                    if p.suffix.endswith("gz") or p.suffix == ".zip"
+                    else None
+                )
             except Exception:
                 pass
 
         return {
             "name": req.get("name") or f"Backup-{backup_id[:8]}",
             "description": req.get("description"),
-            "status": op.status.value if isinstance(op.status, OperationStatus) else op.status,
+            "status": (
+                op.status.value
+                if isinstance(op.status, OperationStatus)
+                else op.status
+            ),
             "file_size": file_size,
             "compressed_size": compressed_size,
             "record_count": None,
@@ -199,14 +239,20 @@ class DataManager:
             "metadata": req,
         }
 
-    async def get_restore_status(self, restore_id: str) -> dict[str, Any]:
+    async def get_restore_status(
+        self, restore_id: str
+    ) -> dict[str, Any]:
         """Return restore operation status."""
         op = self.operations.get(restore_id)
         if not op or op.operation_type != DataOperation.RESTORE.value:
             return {}
 
         return {
-            "status": op.status.value if isinstance(op.status, OperationStatus) else op.status,
+            "status": (
+                op.status.value
+                if isinstance(op.status, OperationStatus)
+                else op.status
+            ),
             "progress": int(op.progress),
             "records_restored": 0,
             "started_at": op.started_at or op.created_at,
@@ -226,12 +272,23 @@ class DataManager:
             if op.operation_type != DataOperation.BACKUP.value:
                 continue
 
-            req = op.metadata.get("backup_request", {}) if op.metadata else {}
+            req = (
+                op.metadata.get("backup_request", {})
+                if op.metadata
+                else {}
+            )
 
             # Apply filters
-            if backup_type is not None and req.get("backup_type") != backup_type.value:
+            if (
+                backup_type is not None
+                and req.get("backup_type") != backup_type.value
+            ):
                 continue
-            op_status = op.status.value if isinstance(op.status, OperationStatus) else op.status
+            op_status = (
+                op.status.value
+                if isinstance(op.status, OperationStatus)
+                else op.status
+            )
             if status is not None and op_status != status:
                 continue
 
@@ -243,7 +300,11 @@ class DataManager:
                     p = Path(op.result_path)
                     stat = p.stat()
                     file_size = stat.st_size
-                    compressed_size = stat.st_size if p.suffix.endswith("gz") or p.suffix == ".zip" else None
+                    compressed_size = (
+                        stat.st_size
+                        if p.suffix.endswith("gz") or p.suffix == ".zip"
+                        else None
+                    )
                 except Exception:
                     pass
 
@@ -252,7 +313,9 @@ class DataManager:
                     "id": op.id,
                     "name": req.get("name", f"Backup-{op.id[:8]}"),
                     "description": req.get("description"),
-                    "backup_type": req.get("backup_type", BackupType.FULL.value),
+                    "backup_type": req.get(
+                        "backup_type", BackupType.FULL.value
+                    ),
                     "status": op_status,
                     "file_size": file_size,
                     "compressed_size": compressed_size,
@@ -269,7 +332,12 @@ class DataManager:
         # Fallback to filesystem if none recorded
         if not backups and self.backup_directory.exists():
             for backup_file in self.backup_directory.iterdir():
-                if backup_file.is_file() and backup_file.suffix in [".tar", ".gz", ".zip", ".tgz"]:
+                if backup_file.is_file() and backup_file.suffix in [
+                    ".tar",
+                    ".gz",
+                    ".zip",
+                    ".tgz",
+                ]:
                     stat = backup_file.stat()
                     info = {
                         "id": backup_file.stem,
@@ -278,19 +346,30 @@ class DataManager:
                         "backup_type": BackupType.FULL.value,
                         "status": "completed",
                         "file_size": stat.st_size,
-                        "compressed_size": stat.st_size
-                        if backup_file.suffix.endswith("gz") or backup_file.suffix == ".zip"
-                        else None,
+                        "compressed_size": (
+                            stat.st_size
+                            if backup_file.suffix.endswith("gz")
+                            or backup_file.suffix == ".zip"
+                            else None
+                        ),
                         "record_count": None,
-                        "created_at": datetime.fromtimestamp(stat.st_ctime, UTC),
-                        "completed_at": datetime.fromtimestamp(stat.st_mtime, UTC),
+                        "created_at": datetime.fromtimestamp(
+                            stat.st_ctime, UTC
+                        ),
+                        "completed_at": datetime.fromtimestamp(
+                            stat.st_mtime, UTC
+                        ),
                         "expires_at": None,
                         "encrypted": False,
-                        "compressed": backup_file.suffix.endswith("gz") or backup_file.suffix == ".zip",
+                        "compressed": backup_file.suffix.endswith("gz")
+                        or backup_file.suffix == ".zip",
                         "metadata": {},
                     }
 
-                    if backup_type is not None and info["backup_type"] != backup_type.value:
+                    if (
+                        backup_type is not None
+                        and info["backup_type"] != backup_type.value
+                    ):
                         continue
                     if status is not None and info["status"] != status:
                         continue
@@ -326,7 +405,9 @@ class DataManager:
 
         database_size = 0
         files_size = 0
-        total_size = database_size + files_size + backups_size + exports_size
+        total_size = (
+            database_size + files_size + backups_size + exports_size
+        )
 
         stats = {
             "total_size": total_size,
@@ -353,7 +434,9 @@ class DataManager:
 
     # Bulk delete operations using core services
 
-    async def bulk_delete_documents(self, document_ids: list[str], user_id: str) -> dict[str, Any]:
+    async def bulk_delete_documents(
+        self, document_ids: list[str], user_id: str
+    ) -> dict[str, Any]:
         """Bulk delete documents using DocumentService."""
         from chatter.core.documents import DocumentService
         from chatter.utils.database import get_session_maker
@@ -368,12 +451,16 @@ class DataManager:
 
             for document_id in document_ids:
                 try:
-                    success = await document_service.delete_document(document_id, user_id)
+                    success = await document_service.delete_document(
+                        document_id, user_id
+                    )
                     if success:
                         success_count += 1
                     else:
                         error_count += 1
-                        errors.append(f"Document {document_id} not found or not owned by user")
+                        errors.append(
+                            f"Document {document_id} not found or not owned by user"
+                        )
                 except Exception as e:
                     error_count += 1
                     errors.append(f"Document {document_id}: {str(e)}")
@@ -381,19 +468,25 @@ class DataManager:
                         "Failed to delete document in bulk operation",
                         document_id=document_id,
                         user_id=user_id,
-                        error=str(e)
+                        error=str(e),
                     )
 
         logger.info(
             "Bulk document deletion completed",
             user_id=user_id,
             success_count=success_count,
-            error_count=error_count
+            error_count=error_count,
         )
 
-        return {"success_count": success_count, "error_count": error_count, "errors": errors}
+        return {
+            "success_count": success_count,
+            "error_count": error_count,
+            "errors": errors,
+        }
 
-    async def bulk_delete_conversations(self, conversation_ids: list[str], user_id: str) -> dict[str, Any]:
+    async def bulk_delete_conversations(
+        self, conversation_ids: list[str], user_id: str
+    ) -> dict[str, Any]:
         """Bulk delete conversations using ChatService."""
         from chatter.services.chat import (
             ChatService,
@@ -412,28 +505,38 @@ class DataManager:
 
             for conversation_id in conversation_ids:
                 try:
-                    await chat_service.delete_conversation(conversation_id, user_id)
+                    await chat_service.delete_conversation(
+                        conversation_id, user_id
+                    )
                     success_count += 1
                 except Exception as e:
                     error_count += 1
-                    errors.append(f"Conversation {conversation_id}: {str(e)}")
+                    errors.append(
+                        f"Conversation {conversation_id}: {str(e)}"
+                    )
                     logger.error(
                         "Failed to delete conversation in bulk operation",
                         conversation_id=conversation_id,
                         user_id=user_id,
-                        error=str(e)
+                        error=str(e),
                     )
 
         logger.info(
             "Bulk conversation deletion completed",
             user_id=user_id,
             success_count=success_count,
-            error_count=error_count
+            error_count=error_count,
         )
 
-        return {"success_count": success_count, "error_count": error_count, "errors": errors}
+        return {
+            "success_count": success_count,
+            "error_count": error_count,
+            "errors": errors,
+        }
 
-    async def bulk_delete_prompts(self, prompt_ids: list[str], user_id: str) -> dict[str, Any]:
+    async def bulk_delete_prompts(
+        self, prompt_ids: list[str], user_id: str
+    ) -> dict[str, Any]:
         """Bulk delete prompts using PromptService."""
         from chatter.core.prompts import PromptService
         from chatter.utils.database import get_session_maker
@@ -448,12 +551,16 @@ class DataManager:
 
             for prompt_id in prompt_ids:
                 try:
-                    success = await prompt_service.delete_prompt(prompt_id, user_id)
+                    success = await prompt_service.delete_prompt(
+                        prompt_id, user_id
+                    )
                     if success:
                         success_count += 1
                     else:
                         error_count += 1
-                        errors.append(f"Prompt {prompt_id} not found or not owned by user")
+                        errors.append(
+                            f"Prompt {prompt_id} not found or not owned by user"
+                        )
                 except Exception as e:
                     error_count += 1
                     errors.append(f"Prompt {prompt_id}: {str(e)}")
@@ -461,17 +568,21 @@ class DataManager:
                         "Failed to delete prompt in bulk operation",
                         prompt_id=prompt_id,
                         user_id=user_id,
-                        error=str(e)
+                        error=str(e),
                     )
 
         logger.info(
             "Bulk prompt deletion completed",
             user_id=user_id,
             success_count=success_count,
-            error_count=error_count
+            error_count=error_count,
         )
 
-        return {"success_count": success_count, "error_count": error_count, "errors": errors}
+        return {
+            "success_count": success_count,
+            "error_count": error_count,
+            "errors": errors,
+        }
 
 
 # Global data manager instance shared across API and job handlers
@@ -489,7 +600,9 @@ async def data_export_job(operation_id: str) -> dict[str, Any]:
     operation.started_at = datetime.now(UTC)
 
     try:
-        export_req = (operation.metadata or {}).get("export_request", {})
+        export_req = (operation.metadata or {}).get(
+            "export_request", {}
+        )
 
         # Simulate export process
         export_data = {
@@ -504,7 +617,9 @@ async def data_export_job(operation_id: str) -> dict[str, Any]:
                 "date_to": export_req.get("date_to"),
             },
             "options": {
-                "include_metadata": export_req.get("include_metadata", True),
+                "include_metadata": export_req.get(
+                    "include_metadata", True
+                ),
                 "compress": export_req.get("compress", True),
                 "encrypt": export_req.get("encrypt", False),
             },
@@ -534,12 +649,20 @@ async def data_export_job(operation_id: str) -> dict[str, Any]:
 
         logger.info("Data export completed", operation_id=operation_id)
 
-        return {"operation_id": operation_id, "export_path": str(export_path), "status": "completed"}
+        return {
+            "operation_id": operation_id,
+            "export_path": str(export_path),
+            "status": "completed",
+        }
 
     except Exception as e:
         operation.status = OperationStatus.FAILED
         operation.error_message = str(e)
-        logger.error("Data export failed", operation_id=operation_id, error=str(e))
+        logger.error(
+            "Data export failed",
+            operation_id=operation_id,
+            error=str(e),
+        )
         raise
 
 
@@ -555,21 +678,36 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
     # Trigger backup started event (best effort)
     try:
         from chatter.services.sse_events import trigger_backup_started
-        await trigger_backup_started(operation_id, user_id=operation.created_by)
+
+        await trigger_backup_started(
+            operation_id, user_id=operation.created_by
+        )
     except Exception as e:
-        logger.warning("Failed to trigger backup started event", error=str(e))
+        logger.warning(
+            "Failed to trigger backup started event", error=str(e)
+        )
 
     try:
-        backup_req = (operation.metadata or {}).get("backup_request", {})
+        backup_req = (operation.metadata or {}).get(
+            "backup_request", {}
+        )
 
         # Progress event - creating archive
         try:
             from chatter.services.sse_events import (
                 trigger_backup_progress,
             )
-            await trigger_backup_progress(operation_id, 25.0, "Creating backup archive", user_id=operation.created_by)
+
+            await trigger_backup_progress(
+                operation_id,
+                25.0,
+                "Creating backup archive",
+                user_id=operation.created_by,
+            )
         except Exception as e:
-            logger.warning("Failed to trigger backup progress event", error=str(e))
+            logger.warning(
+                "Failed to trigger backup progress event", error=str(e)
+            )
 
         # Create backup archive
         compress = bool(backup_req.get("compress", True))
@@ -589,9 +727,17 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
             from chatter.services.sse_events import (
                 trigger_backup_progress,
             )
-            await trigger_backup_progress(operation_id, 75.0, "Finalizing backup", user_id=operation.created_by)
+
+            await trigger_backup_progress(
+                operation_id,
+                75.0,
+                "Finalizing backup",
+                user_id=operation.created_by,
+            )
         except Exception as e:
-            logger.warning("Failed to trigger backup progress event", error=str(e))
+            logger.warning(
+                "Failed to trigger backup progress event", error=str(e)
+            )
 
         # Complete
         operation.status = OperationStatus.COMPLETED
@@ -606,25 +752,46 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
             from chatter.services.sse_events import (
                 trigger_backup_completed,
             )
-            await trigger_backup_completed(operation_id, str(backup_path), user_id=operation.created_by)
-        except Exception as e:
-            logger.warning("Failed to trigger backup completed event", error=str(e))
 
-        return {"operation_id": operation_id, "backup_path": str(backup_path), "status": "completed"}
+            await trigger_backup_completed(
+                operation_id,
+                str(backup_path),
+                user_id=operation.created_by,
+            )
+        except Exception as e:
+            logger.warning(
+                "Failed to trigger backup completed event", error=str(e)
+            )
+
+        return {
+            "operation_id": operation_id,
+            "backup_path": str(backup_path),
+            "status": "completed",
+        }
 
     except Exception as e:
         operation.status = OperationStatus.FAILED
         operation.error_message = str(e)
-        logger.error("Data backup failed", operation_id=operation_id, error=str(e))
+        logger.error(
+            "Data backup failed",
+            operation_id=operation_id,
+            error=str(e),
+        )
 
         # Failed event
         try:
             from chatter.services.sse_events import (
                 trigger_backup_failed,
             )
-            await trigger_backup_failed(operation_id, str(e), user_id=operation.created_by)
+
+            await trigger_backup_failed(
+                operation_id, str(e), user_id=operation.created_by
+            )
         except Exception as event_e:
-            logger.warning("Failed to trigger backup failed event", error=str(event_e))
+            logger.warning(
+                "Failed to trigger backup failed event",
+                error=str(event_e),
+            )
 
         raise
 
@@ -650,7 +817,11 @@ async def data_restore_job(operation_id: str) -> dict[str, Any]:
     except Exception as e:
         operation.status = OperationStatus.FAILED
         operation.error_message = str(e)
-        logger.error("Data restore failed", operation_id=operation_id, error=str(e))
+        logger.error(
+            "Data restore failed",
+            operation_id=operation_id,
+            error=str(e),
+        )
         raise
 
 

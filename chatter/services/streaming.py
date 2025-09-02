@@ -55,7 +55,9 @@ StreamEventType = StreamingEventType
 class StreamingError(Exception):
     """Exception raised during streaming operations."""
 
-    def __init__(self, message: str, event_type: StreamingEventType | None = None):
+    def __init__(
+        self, message: str, event_type: StreamingEventType | None = None
+    ):
         super().__init__(message)
         self.event_type = event_type
 
@@ -72,7 +74,7 @@ class StreamingService:
         self,
         stream_id: str,
         workflow_type: str,
-        correlation_id: str | None = None
+        correlation_id: str | None = None,
     ) -> None:
         """Create a new streaming session.
 
@@ -90,21 +92,21 @@ class StreamingService:
             "start_time": time.time(),
             "token_count": 0,
             "event_count": 0,
-            "last_activity": time.time()
+            "last_activity": time.time(),
         }
 
         self.stream_metrics[stream_id] = {
             "tokens_per_second": 0.0,
             "events_per_second": 0.0,
             "total_duration": 0.0,
-            "error_count": 0
+            "error_count": 0,
         }
 
         logger.info(
             "Created streaming session",
             stream_id=stream_id,
             workflow_type=workflow_type,
-            correlation_id=correlation_id
+            correlation_id=correlation_id,
         )
 
     async def end_stream(self, stream_id: str) -> dict[str, Any]:
@@ -127,8 +129,12 @@ class StreamingService:
         metrics["total_duration"] = total_duration
 
         if total_duration > 0:
-            metrics["tokens_per_second"] = stream_info["token_count"] / total_duration
-            metrics["events_per_second"] = stream_info["event_count"] / total_duration
+            metrics["tokens_per_second"] = (
+                stream_info["token_count"] / total_duration
+            )
+            metrics["events_per_second"] = (
+                stream_info["event_count"] / total_duration
+            )
 
         # Record workflow metrics
         record_workflow_metrics(
@@ -138,7 +144,7 @@ class StreamingService:
             duration_ms=total_duration * 1000,
             success=metrics["error_count"] == 0,
             error_type=None,
-            correlation_id=stream_info["correlation_id"]
+            correlation_id=stream_info["correlation_id"],
         )
 
         logger.info(
@@ -147,7 +153,7 @@ class StreamingService:
             duration_seconds=total_duration,
             token_count=stream_info["token_count"],
             tokens_per_second=metrics["tokens_per_second"],
-            correlation_id=stream_info["correlation_id"]
+            correlation_id=stream_info["correlation_id"],
         )
 
         # Clean up
@@ -162,7 +168,7 @@ class StreamingService:
         self,
         stream_id: str,
         token_generator: AsyncGenerator[str, None],
-        chunk_size: int = 1
+        chunk_size: int = 1,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Stream tokens with configurable chunking.
 
@@ -189,8 +195,9 @@ class StreamingService:
                 stream_info["last_activity"] = time.time()
 
                 # Yield chunk when buffer is full or on sentence boundaries
-                if (len(token_buffer) >= chunk_size or
-                    self._is_sentence_boundary(token)):
+                if len(
+                    token_buffer
+                ) >= chunk_size or self._is_sentence_boundary(token):
 
                     chunk_content = "".join(token_buffer)
                     token_buffer = []
@@ -202,8 +209,8 @@ class StreamingService:
                         metadata={
                             "stream_id": stream_id,
                             "token_count": stream_info["token_count"],
-                            "timestamp": time.time()
-                        }
+                            "timestamp": time.time(),
+                        },
                     )
 
                     stream_info["event_count"] += 1
@@ -218,8 +225,8 @@ class StreamingService:
                     metadata={
                         "stream_id": stream_id,
                         "token_count": stream_info["token_count"],
-                        "final_chunk": True
-                    }
+                        "final_chunk": True,
+                    },
                 )
 
         except Exception as e:
@@ -228,14 +235,14 @@ class StreamingService:
                 "Error in token streaming",
                 stream_id=stream_id,
                 error=str(e),
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
             raise
 
     async def stream_workflow_events(
         self,
         stream_id: str,
-        event_generator: AsyncGenerator[dict[str, Any], None]
+        event_generator: AsyncGenerator[dict[str, Any], None],
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Stream workflow events with processing.
 
@@ -267,8 +274,8 @@ class StreamingService:
                         correlation_id=correlation_id,
                         metadata={
                             "stream_id": stream_id,
-                            "event_index": stream_info["event_count"]
-                        }
+                            "event_index": stream_info["event_count"],
+                        },
                     )
 
                 elif event_type == "tool_call":
@@ -278,8 +285,8 @@ class StreamingService:
                         correlation_id=correlation_id,
                         metadata={
                             "tool_args": event.get("tool_args", {}),
-                            "tool_id": event.get("tool_id")
-                        }
+                            "tool_id": event.get("tool_id"),
+                        },
                     )
 
                 elif event_type == "tool_result":
@@ -290,8 +297,10 @@ class StreamingService:
                         metadata={
                             "tool_name": event.get("tool_name"),
                             "success": event.get("success", True),
-                            "execution_time": event.get("execution_time", 0)
-                        }
+                            "execution_time": event.get(
+                                "execution_time", 0
+                            ),
+                        },
                     )
 
                 elif event_type == "source":
@@ -301,9 +310,11 @@ class StreamingService:
                         correlation_id=correlation_id,
                         metadata={
                             "source_url": event.get("source_url"),
-                            "relevance_score": event.get("relevance_score"),
-                            "source_type": event.get("source_type")
-                        }
+                            "relevance_score": event.get(
+                                "relevance_score"
+                            ),
+                            "source_type": event.get("source_type"),
+                        },
                     )
 
                 elif event_type == "thinking":
@@ -313,8 +324,8 @@ class StreamingService:
                         correlation_id=correlation_id,
                         metadata={
                             "reasoning_step": event.get("step"),
-                            "confidence": event.get("confidence")
-                        }
+                            "confidence": event.get("confidence"),
+                        },
                     )
 
                 elif event_type == "error":
@@ -325,8 +336,10 @@ class StreamingService:
                         correlation_id=correlation_id,
                         metadata={
                             "error_type": event.get("error_type"),
-                            "recoverable": event.get("recoverable", False)
-                        }
+                            "recoverable": event.get(
+                                "recoverable", False
+                            ),
+                        },
                     )
 
                 elif event_type == "complete":
@@ -337,9 +350,11 @@ class StreamingService:
                         metadata={
                             "usage": event.get("usage", {}),
                             "message_id": event.get("message_id"),
-                            "total_tokens": event.get("total_tokens", 0),
-                            "total_cost": event.get("total_cost", 0.0)
-                        }
+                            "total_tokens": event.get(
+                                "total_tokens", 0
+                            ),
+                            "total_cost": event.get("total_cost", 0.0),
+                        },
                     )
 
         except Exception as e:
@@ -348,20 +363,20 @@ class StreamingService:
                 "Error in workflow event streaming",
                 stream_id=stream_id,
                 error=str(e),
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
             yield StreamingChatChunk(
                 type="error",
                 content=f"Streaming error: {str(e)}",
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
 
     async def stream_with_heartbeat(
         self,
         stream_id: str,
         content_generator: AsyncGenerator[StreamingChatChunk, None],
-        heartbeat_interval: float = 30.0
+        heartbeat_interval: float = 30.0,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Stream with periodic heartbeat to keep connection alive.
 
@@ -395,8 +410,9 @@ class StreamingService:
                         metadata={
                             "timestamp": current_time,
                             "stream_id": stream_id,
-                            "uptime": current_time - stream_info["start_time"]
-                        }
+                            "uptime": current_time
+                            - stream_info["start_time"],
+                        },
                     )
                     last_heartbeat = current_time
 
@@ -405,7 +421,7 @@ class StreamingService:
                 "Error in heartbeat streaming",
                 stream_id=stream_id,
                 error=str(e),
-                correlation_id=correlation_id
+                correlation_id=correlation_id,
             )
             raise
 
@@ -413,7 +429,9 @@ class StreamingService:
         """Check if token represents a sentence boundary."""
         return token.strip() in {'.', '!', '?', '\n', '\n\n'}
 
-    async def get_stream_status(self, stream_id: str) -> dict[str, Any] | None:
+    async def get_stream_status(
+        self, stream_id: str
+    ) -> dict[str, Any] | None:
         """Get status of an active stream.
 
         Args:
@@ -439,12 +457,18 @@ class StreamingService:
             "duration_seconds": duration,
             "token_count": stream_info["token_count"],
             "event_count": stream_info["event_count"],
-            "tokens_per_second": stream_info["token_count"] / duration if duration > 0 else 0,
+            "tokens_per_second": (
+                stream_info["token_count"] / duration
+                if duration > 0
+                else 0
+            ),
             "last_activity": stream_info["last_activity"],
-            "error_count": metrics["error_count"]
+            "error_count": metrics["error_count"],
         }
 
-    async def cleanup_inactive_streams(self, timeout_seconds: float = 300.0) -> int:
+    async def cleanup_inactive_streams(
+        self, timeout_seconds: float = 300.0
+    ) -> int:
         """Clean up streams that have been inactive for too long.
 
         Args:
@@ -457,7 +481,10 @@ class StreamingService:
         inactive_streams = []
 
         for stream_id, stream_info in self.active_streams.items():
-            if current_time - stream_info["last_activity"] > timeout_seconds:
+            if (
+                current_time - stream_info["last_activity"]
+                > timeout_seconds
+            ):
                 inactive_streams.append(stream_id)
 
         cleaned_count = 0
@@ -467,7 +494,7 @@ class StreamingService:
             logger.warning(
                 "Cleaned up inactive stream",
                 stream_id=stream_id,
-                inactive_duration=timeout_seconds
+                inactive_duration=timeout_seconds,
             )
 
         return cleaned_count
@@ -479,8 +506,12 @@ class StreamingService:
             Global streaming stats
         """
         active_count = len(self.active_streams)
-        total_tokens = sum(info["token_count"] for info in self.active_streams.values())
-        total_events = sum(info["event_count"] for info in self.active_streams.values())
+        total_tokens = sum(
+            info["token_count"] for info in self.active_streams.values()
+        )
+        total_events = sum(
+            info["event_count"] for info in self.active_streams.values()
+        )
 
         if active_count > 0:
             avg_tokens_per_stream = total_tokens / active_count
@@ -495,9 +526,12 @@ class StreamingService:
             "total_events_streaming": total_events,
             "avg_tokens_per_stream": avg_tokens_per_stream,
             "avg_events_per_stream": avg_events_per_stream,
-            "workflow_types": list({
-                info["workflow_type"] for info in self.active_streams.values()
-            })
+            "workflow_types": list(
+                {
+                    info["workflow_type"]
+                    for info in self.active_streams.values()
+                }
+            ),
         }
 
 
@@ -506,8 +540,7 @@ streaming_service = StreamingService()
 
 
 async def create_stream(
-    workflow_type: str,
-    correlation_id: str | None = None
+    workflow_type: str, correlation_id: str | None = None
 ) -> str:
     """Create a new streaming session.
 
@@ -519,6 +552,7 @@ async def create_stream(
         Stream ID
     """
     import uuid
+
     stream_id = str(uuid.uuid4())
 
     await streaming_service.create_stream(
@@ -532,7 +566,7 @@ async def stream_workflow(
     stream_id: str,
     workflow_generator: AsyncGenerator[dict[str, Any], None],
     enable_heartbeat: bool = True,
-    heartbeat_interval: float = 30.0
+    heartbeat_interval: float = 30.0,
 ) -> AsyncGenerator[StreamingChatChunk, None]:
     """Stream workflow.
 

@@ -29,12 +29,24 @@ class TestEmbeddingModelGeneration:
         # Test cases with different inputs
         test_cases = [
             ("OpenAI", 1536, "openai_1536_embed"),
-            ("sentence-transformers", 384, "sentence_transformers_384_embed"),
-            ("text-embedding-ada-002", 1536, "text_embedding_ada_002_1536_embed"),
+            (
+                "sentence-transformers",
+                384,
+                "sentence_transformers_384_embed",
+            ),
+            (
+                "text-embedding-ada-002",
+                1536,
+                "text_embedding_ada_002_1536_embed",
+            ),
             ("BERT-base", 768, "bert_base_768_embed"),
-            ("123invalid", 512, "_123invalid_512_embed"),  # Starts with number
+            (
+                "123invalid",
+                512,
+                "_123invalid_512_embed",
+            ),  # Starts with number
             ("model with spaces", 256, "model_with_spaces_256_embed"),
-            ("model/with/slashes", 128, "model_with_slashes_128_embed")
+            ("model/with/slashes", 128, "model_with_slashes_128_embed"),
         ]
 
         for input_name, dimension, expected in test_cases:
@@ -148,11 +160,7 @@ class TestEmbeddingModelGeneration:
         embedding_models.clear()
 
         # Create several models
-        models = [
-            ("model_a", 384),
-            ("model_b", 512),
-            ("model_c", 768)
-        ]
+        models = [("model_a", 384), ("model_b", 512), ("model_c", 768)]
 
         for name, dim in models:
             make_embedding_model(name, dim)
@@ -163,7 +171,9 @@ class TestEmbeddingModelGeneration:
         # Assert
         assert len(model_list) == 3
         assert all(isinstance(item, tuple) for item in model_list)
-        assert all(len(item) == 3 for item in model_list)  # (name, dimension, class)
+        assert all(
+            len(item) == 3 for item in model_list
+        )  # (name, dimension, class)
 
     def test_embedding_model_attributes(self):
         """Test that generated embedding models have correct attributes."""
@@ -183,8 +193,12 @@ class TestEmbeddingModelGeneration:
         assert hasattr(model_class, 'chunk_index')
 
         # Check column types
-        assert isinstance(model_class.id.type, type(Column(Integer).type))
-        assert isinstance(model_class.text.type, type(Column(String).type))
+        assert isinstance(
+            model_class.id.type, type(Column(Integer).type)
+        )
+        assert isinstance(
+            model_class.text.type, type(Column(String).type)
+        )
 
 
 @pytest.mark.unit
@@ -208,7 +222,9 @@ class TestEmbeddingModelManager:
         make_embedding_model(model_name, dimension)
 
         # Act
-        result = await self.manager.create_embedding_table(model_name, dimension)
+        result = await self.manager.create_embedding_table(
+            model_name, dimension
+        )
 
         # Assert
         assert result is True
@@ -224,7 +240,9 @@ class TestEmbeddingModelManager:
         _to_name(model_name, dimension)
 
         # Act
-        result = await self.manager.drop_embedding_table(model_name, dimension)
+        result = await self.manager.drop_embedding_table(
+            model_name, dimension
+        )
 
         # Assert
         assert result is True
@@ -279,12 +297,14 @@ class TestEmbeddingModelManager:
         mock_result.fetchall.return_value = [
             ("id", "integer", "primary key"),
             ("text", "text", "not null"),
-            ("embedding", "vector(256)", "not null")
+            ("embedding", "vector(256)", "not null"),
         ]
         self.mock_session.execute.return_value = mock_result
 
         # Act
-        table_info = await self.manager.get_table_info(model_name, dimension)
+        table_info = await self.manager.get_table_info(
+            model_name, dimension
+        )
 
         # Assert
         assert len(table_info) == 3
@@ -303,7 +323,9 @@ class TestEmbeddingModelManager:
         self.mock_session.execute = AsyncMock()
 
         # Act
-        model_class = await self.manager.register_model(model_name, dimension)
+        model_class = await self.manager.register_model(
+            model_name, dimension
+        )
 
         # Assert
         assert model_class is not None
@@ -322,7 +344,9 @@ class TestEmbeddingModelManager:
         make_embedding_model(model_name, dimension)
 
         # Act
-        result = await self.manager.unregister_model(model_name, dimension)
+        result = await self.manager.unregister_model(
+            model_name, dimension
+        )
 
         # Assert
         assert result is True
@@ -338,7 +362,9 @@ class TestDynamicEmbeddingService:
     def setup_method(self):
         """Set up test fixtures."""
         self.mock_session = AsyncMock()
-        self.embedding_service = DynamicEmbeddingService(self.mock_session)
+        self.embedding_service = DynamicEmbeddingService(
+            self.mock_session
+        )
 
     @pytest.mark.asyncio
     async def test_store_embeddings(self):
@@ -348,8 +374,18 @@ class TestDynamicEmbeddingService:
         dimension = 512
 
         embeddings_data = [
-            {"text": "First text", "embedding": [0.1] * dimension, "document_id": "doc-1", "chunk_index": 0},
-            {"text": "Second text", "embedding": [0.2] * dimension, "document_id": "doc-1", "chunk_index": 1}
+            {
+                "text": "First text",
+                "embedding": [0.1] * dimension,
+                "document_id": "doc-1",
+                "chunk_index": 0,
+            },
+            {
+                "text": "Second text",
+                "embedding": [0.2] * dimension,
+                "document_id": "doc-1",
+                "chunk_index": 1,
+            },
         ]
 
         # Create model
@@ -376,12 +412,22 @@ class TestDynamicEmbeddingService:
 
         # Mock retrieved data
         mock_embeddings = [
-            MagicMock(text="Text 1", embedding=[0.1] * dimension, chunk_index=0),
-            MagicMock(text="Text 2", embedding=[0.2] * dimension, chunk_index=1)
+            MagicMock(
+                text="Text 1",
+                embedding=[0.1] * dimension,
+                chunk_index=0,
+            ),
+            MagicMock(
+                text="Text 2",
+                embedding=[0.2] * dimension,
+                chunk_index=1,
+            ),
         ]
 
         mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = mock_embeddings
+        mock_result.scalars.return_value.all.return_value = (
+            mock_embeddings
+        )
         self.mock_session.execute.return_value = mock_result
 
         # Create model
@@ -411,7 +457,7 @@ class TestDynamicEmbeddingService:
         mock_results = [
             MagicMock(text="Similar text 1", similarity=0.95),
             MagicMock(text="Similar text 2", similarity=0.87),
-            MagicMock(text="Similar text 3", similarity=0.82)
+            MagicMock(text="Similar text 3", similarity=0.82),
         ]
 
         mock_result = MagicMock()
@@ -423,13 +469,18 @@ class TestDynamicEmbeddingService:
         make_embedding_model(model_name, dimension)
 
         # Act
-        similar_embeddings = await self.embedding_service.search_similar_embeddings(
-            model_name, dimension, query_embedding, limit
+        similar_embeddings = (
+            await self.embedding_service.search_similar_embeddings(
+                model_name, dimension, query_embedding, limit
+            )
         )
 
         # Assert
         assert len(similar_embeddings) == 3
-        assert similar_embeddings[0].similarity > similar_embeddings[1].similarity
+        assert (
+            similar_embeddings[0].similarity
+            > similar_embeddings[1].similarity
+        )
         self.mock_session.execute.assert_called()
 
     @pytest.mark.asyncio
@@ -463,7 +514,12 @@ class TestDynamicEmbeddingService:
         document_id = "doc-update"
 
         new_embeddings_data = [
-            {"text": "Updated text", "embedding": [0.9] * dimension, "document_id": document_id, "chunk_index": 0}
+            {
+                "text": "Updated text",
+                "embedding": [0.9] * dimension,
+                "document_id": document_id,
+                "chunk_index": 0,
+            }
         ]
 
         # Create model
@@ -492,8 +548,8 @@ class TestDynamicEmbeddingService:
         mock_stats = MagicMock()
         mock_stats.scalar.side_effect = [
             1000,  # total_embeddings
-            50,    # unique_documents
-            20.5   # avg_embeddings_per_document
+            50,  # unique_documents
+            20.5,  # avg_embeddings_per_document
         ]
         self.mock_session.execute.return_value = mock_stats
 
@@ -502,7 +558,9 @@ class TestDynamicEmbeddingService:
         make_embedding_model(model_name, dimension)
 
         # Act
-        stats = await self.embedding_service.get_embedding_stats(model_name, dimension)
+        stats = await self.embedding_service.get_embedding_stats(
+            model_name, dimension
+        )
 
         # Assert
         assert stats["total_embeddings"] == 1000
@@ -518,7 +576,12 @@ class TestDynamicEmbeddingService:
 
         # Wrong dimension embeddings
         wrong_embeddings = [
-            {"text": "Text", "embedding": [0.1] * 256, "document_id": "doc-1", "chunk_index": 0}  # 256 instead of 512
+            {
+                "text": "Text",
+                "embedding": [0.1] * 256,
+                "document_id": "doc-1",
+                "chunk_index": 0,
+            }  # 256 instead of 512
         ]
 
         # Create model
@@ -555,14 +618,31 @@ class TestDynamicEmbeddingIntegration:
         # Test data
         document_id = "doc-integration"
         embeddings_data = [
-            {"text": "Integration test text 1", "embedding": [0.1] * dimension, "document_id": document_id, "chunk_index": 0},
-            {"text": "Integration test text 2", "embedding": [0.2] * dimension, "document_id": document_id, "chunk_index": 1},
-            {"text": "Integration test text 3", "embedding": [0.3] * dimension, "document_id": document_id, "chunk_index": 2}
+            {
+                "text": "Integration test text 1",
+                "embedding": [0.1] * dimension,
+                "document_id": document_id,
+                "chunk_index": 0,
+            },
+            {
+                "text": "Integration test text 2",
+                "embedding": [0.2] * dimension,
+                "document_id": document_id,
+                "chunk_index": 1,
+            },
+            {
+                "text": "Integration test text 3",
+                "embedding": [0.3] * dimension,
+                "document_id": document_id,
+                "chunk_index": 2,
+            },
         ]
 
         # Act
         # Step 1: Register model and create table
-        model_class = await self.manager.register_model(model_name, dimension)
+        model_class = await self.manager.register_model(
+            model_name, dimension
+        )
 
         # Step 2: Store embeddings
         store_result = await self.service.store_embeddings(
@@ -571,11 +651,17 @@ class TestDynamicEmbeddingIntegration:
 
         # Step 3: Retrieve embeddings
         mock_embeddings = [
-            MagicMock(text=data["text"], embedding=data["embedding"], chunk_index=data["chunk_index"])
+            MagicMock(
+                text=data["text"],
+                embedding=data["embedding"],
+                chunk_index=data["chunk_index"],
+            )
             for data in embeddings_data
         ]
         mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = mock_embeddings
+        mock_result.scalars.return_value.all.return_value = (
+            mock_embeddings
+        )
         self.mock_session.execute.return_value = mock_result
 
         retrieved_embeddings = await self.service.retrieve_embeddings(
@@ -590,8 +676,10 @@ class TestDynamicEmbeddingIntegration:
         ]
         self.mock_session.execute.return_value = mock_search_result
 
-        similar_embeddings = await self.service.search_similar_embeddings(
-            model_name, dimension, query_embedding, limit=5
+        similar_embeddings = (
+            await self.service.search_similar_embeddings(
+                model_name, dimension, query_embedding, limit=5
+            )
         )
 
         # Assert
@@ -608,7 +696,7 @@ class TestDynamicEmbeddingIntegration:
         models = [
             ("openai_model", 1536),
             ("sentence_transformers", 384),
-            ("bert_model", 768)
+            ("bert_model", 768),
         ]
 
         # Clear models
@@ -617,7 +705,9 @@ class TestDynamicEmbeddingIntegration:
         # Act
         created_models = []
         for model_name, dimension in models:
-            model_class = await self.manager.register_model(model_name, dimension)
+            model_class = await self.manager.register_model(
+                model_name, dimension
+            )
             created_models.append((model_name, dimension, model_class))
 
         # Verify all models exist
@@ -628,7 +718,9 @@ class TestDynamicEmbeddingIntegration:
         assert len(model_list) == 3
 
         # Each model should have unique table name
-        table_names = [model[2].__tablename__ for model in created_models]
+        table_names = [
+            model[2].__tablename__ for model in created_models
+        ]
         assert len(set(table_names)) == 3  # All unique
 
     @pytest.mark.asyncio
@@ -645,12 +737,14 @@ class TestDynamicEmbeddingIntegration:
         # Generate large dataset
         large_dataset = []
         for i in range(100):
-            large_dataset.append({
-                "text": f"Performance test text {i}",
-                "embedding": [float(i % 10) / 10] * dimension,
-                "document_id": f"doc-{i // 10}",
-                "chunk_index": i % 10
-            })
+            large_dataset.append(
+                {
+                    "text": f"Performance test text {i}",
+                    "embedding": [float(i % 10) / 10] * dimension,
+                    "document_id": f"doc-{i // 10}",
+                    "chunk_index": i % 10,
+                }
+            )
 
         # Act
         start_time = datetime.now()
@@ -683,7 +777,9 @@ class TestDynamicEmbeddingIntegration:
 
         # Act
         # Step 1: Create model
-        model_class = await self.manager.register_model(model_name, dimension)
+        model_class = await self.manager.register_model(
+            model_name, dimension
+        )
         table_name = _to_name(model_name, dimension)
 
         # Verify model is registered
@@ -691,20 +787,35 @@ class TestDynamicEmbeddingIntegration:
 
         # Step 2: Use model for some operations
         test_data = [
-            {"text": "Lifecycle test", "embedding": [0.1] * dimension, "document_id": "doc-lifecycle", "chunk_index": 0}
+            {
+                "text": "Lifecycle test",
+                "embedding": [0.1] * dimension,
+                "document_id": "doc-lifecycle",
+                "chunk_index": 0,
+            }
         ]
-        await self.service.store_embeddings(model_name, dimension, test_data)
+        await self.service.store_embeddings(
+            model_name, dimension, test_data
+        )
 
         # Step 3: Get model info
-        mock_info = [("id", "integer"), ("text", "text"), ("embedding", f"vector({dimension})")]
+        mock_info = [
+            ("id", "integer"),
+            ("text", "text"),
+            ("embedding", f"vector({dimension})"),
+        ]
         mock_result = MagicMock()
         mock_result.fetchall.return_value = mock_info
         self.mock_session.execute.return_value = mock_result
 
-        table_info = await self.manager.get_table_info(model_name, dimension)
+        table_info = await self.manager.get_table_info(
+            model_name, dimension
+        )
 
         # Step 4: Unregister model
-        unregister_result = await self.manager.unregister_model(model_name, dimension)
+        unregister_result = await self.manager.unregister_model(
+            model_name, dimension
+        )
 
         # Assert
         assert model_class is not None
@@ -724,7 +835,9 @@ class TestDynamicEmbeddingIntegration:
 
         # Act & Assert
         # Test model creation with database error
-        self.mock_session.execute.side_effect = Exception("Database connection failed")
+        self.mock_session.execute.side_effect = Exception(
+            "Database connection failed"
+        )
 
         with pytest.raises(Exception):
             await self.manager.register_model(model_name, dimension)
@@ -734,5 +847,7 @@ class TestDynamicEmbeddingIntegration:
         self.mock_session.execute.return_value = MagicMock()
 
         # Should succeed after error recovery
-        model_class = await self.manager.register_model(model_name, dimension)
+        model_class = await self.manager.register_model(
+            model_name, dimension
+        )
         assert model_class is not None

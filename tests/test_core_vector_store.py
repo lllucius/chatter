@@ -1,7 +1,7 @@
 """Tests for vector store core functionality."""
 
 import asyncio
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -21,25 +21,28 @@ class TestVectorStore:
         self.sample_vectors = [
             [0.1, 0.2, 0.3, 0.4],
             [0.5, 0.6, 0.7, 0.8],
-            [0.9, 0.1, 0.2, 0.3]
+            [0.9, 0.1, 0.2, 0.3],
         ]
 
         self.sample_documents = [
             {
                 "id": "doc-1",
                 "content": "This is the first document about AI.",
-                "metadata": {"category": "technology", "source": "web"}
+                "metadata": {"category": "technology", "source": "web"},
             },
             {
                 "id": "doc-2",
                 "content": "Second document discusses machine learning.",
-                "metadata": {"category": "technology", "source": "paper"}
+                "metadata": {
+                    "category": "technology",
+                    "source": "paper",
+                },
             },
             {
                 "id": "doc-3",
                 "content": "Third document covers data science topics.",
-                "metadata": {"category": "science", "source": "book"}
-            }
+                "metadata": {"category": "science", "source": "book"},
+            },
         ]
 
     @pytest.mark.asyncio
@@ -49,14 +52,20 @@ class TestVectorStore:
         vectors = self.sample_vectors
         documents = self.sample_documents
 
-        with patch.object(self.vector_store, '_validate_vectors') as mock_validate:
+        with patch.object(
+            self.vector_store, '_validate_vectors'
+        ) as mock_validate:
             mock_validate.return_value = True
 
-            with patch.object(self.vector_store, '_store_vectors') as mock_store:
+            with patch.object(
+                self.vector_store, '_store_vectors'
+            ) as mock_store:
                 mock_store.return_value = ["vec-1", "vec-2", "vec-3"]
 
                 # Act
-                result = await self.vector_store.add_vectors(vectors, documents)
+                result = await self.vector_store.add_vectors(
+                    vectors, documents
+                )
 
                 # Assert
                 assert len(result) == 3
@@ -70,18 +79,26 @@ class TestVectorStore:
         # Arrange
         mismatched_vectors = [
             [0.1, 0.2, 0.3],  # 3 dimensions
-            [0.5, 0.6, 0.7, 0.8]  # 4 dimensions
+            [0.5, 0.6, 0.7, 0.8],  # 4 dimensions
         ]
         documents = self.sample_documents[:2]
 
-        with patch.object(self.vector_store, '_validate_vectors') as mock_validate:
-            mock_validate.side_effect = ValueError("Vector dimensions must be consistent")
+        with patch.object(
+            self.vector_store, '_validate_vectors'
+        ) as mock_validate:
+            mock_validate.side_effect = ValueError(
+                "Vector dimensions must be consistent"
+            )
 
             # Act & Assert
             with pytest.raises(ValueError) as exc_info:
-                await self.vector_store.add_vectors(mismatched_vectors, documents)
+                await self.vector_store.add_vectors(
+                    mismatched_vectors, documents
+                )
 
-            assert "dimensions must be consistent" in str(exc_info.value)
+            assert "dimensions must be consistent" in str(
+                exc_info.value
+            )
 
     @pytest.mark.asyncio
     async def test_search_vectors_success(self):
@@ -95,25 +112,31 @@ class TestVectorStore:
                 id="doc-1",
                 score=0.95,
                 document=self.sample_documents[0],
-                vector=self.sample_vectors[0]
+                vector=self.sample_vectors[0],
             ),
             VectorSearchResult(
                 id="doc-2",
                 score=0.87,
                 document=self.sample_documents[1],
-                vector=self.sample_vectors[1]
-            )
+                vector=self.sample_vectors[1],
+            ),
         ]
 
-        with patch.object(self.vector_store, '_perform_similarity_search') as mock_search:
+        with patch.object(
+            self.vector_store, '_perform_similarity_search'
+        ) as mock_search:
             mock_search.return_value = expected_results
 
             # Act
-            results = await self.vector_store.search_vectors(query_vector, k=k)
+            results = await self.vector_store.search_vectors(
+                query_vector, k=k
+            )
 
             # Assert
             assert len(results) == 2
-            assert results[0].score >= results[1].score  # Results should be sorted by score
+            assert (
+                results[0].score >= results[1].score
+            )  # Results should be sorted by score
             assert results[0].id == "doc-1"
             mock_search.assert_called_once_with(query_vector, k, None)
 
@@ -130,17 +153,19 @@ class TestVectorStore:
                 id="doc-1",
                 score=0.95,
                 document=self.sample_documents[0],
-                vector=self.sample_vectors[0]
+                vector=self.sample_vectors[0],
             ),
             VectorSearchResult(
                 id="doc-2",
                 score=0.87,
                 document=self.sample_documents[1],
-                vector=self.sample_vectors[1]
-            )
+                vector=self.sample_vectors[1],
+            ),
         ]
 
-        with patch.object(self.vector_store, '_perform_similarity_search') as mock_search:
+        with patch.object(
+            self.vector_store, '_perform_similarity_search'
+        ) as mock_search:
             mock_search.return_value = expected_results
 
             # Act
@@ -152,8 +177,13 @@ class TestVectorStore:
             assert len(results) == 2
             # All results should match the filter
             for result in results:
-                assert result.document["metadata"]["category"] == "technology"
-            mock_search.assert_called_once_with(query_vector, k, filter_criteria)
+                assert (
+                    result.document["metadata"]["category"]
+                    == "technology"
+                )
+            mock_search.assert_called_once_with(
+                query_vector, k, filter_criteria
+            )
 
     @pytest.mark.asyncio
     async def test_search_vectors_empty_results(self):
@@ -161,11 +191,15 @@ class TestVectorStore:
         # Arrange
         query_vector = [0.1, 0.2, 0.3, 0.4]
 
-        with patch.object(self.vector_store, '_perform_similarity_search') as mock_search:
+        with patch.object(
+            self.vector_store, '_perform_similarity_search'
+        ) as mock_search:
             mock_search.return_value = []
 
             # Act
-            results = await self.vector_store.search_vectors(query_vector, k=5)
+            results = await self.vector_store.search_vectors(
+                query_vector, k=5
+            )
 
             # Assert
             assert len(results) == 0
@@ -179,13 +213,17 @@ class TestVectorStore:
         new_document = {
             "id": vector_id,
             "content": "Updated document content about AI.",
-            "metadata": {"category": "technology", "updated": True}
+            "metadata": {"category": "technology", "updated": True},
         }
 
-        with patch.object(self.vector_store, '_check_vector_exists') as mock_check:
+        with patch.object(
+            self.vector_store, '_check_vector_exists'
+        ) as mock_check:
             mock_check.return_value = True
 
-            with patch.object(self.vector_store, '_update_vector_record') as mock_update:
+            with patch.object(
+                self.vector_store, '_update_vector_record'
+            ) as mock_update:
                 mock_update.return_value = True
 
                 # Act
@@ -196,7 +234,9 @@ class TestVectorStore:
                 # Assert
                 assert result is True
                 mock_check.assert_called_once_with(vector_id)
-                mock_update.assert_called_once_with(vector_id, new_vector, new_document)
+                mock_update.assert_called_once_with(
+                    vector_id, new_vector, new_document
+                )
 
     @pytest.mark.asyncio
     async def test_update_vector_not_found(self):
@@ -206,13 +246,18 @@ class TestVectorStore:
         new_vector = [0.2, 0.3, 0.4, 0.5]
         new_document = {"id": vector_id, "content": "New content"}
 
-        with patch.object(self.vector_store, '_check_vector_exists') as mock_check:
+        with patch.object(
+            self.vector_store, '_check_vector_exists'
+        ) as mock_check:
             mock_check.return_value = False
 
             # Act & Assert
             from chatter.core.exceptions import NotFoundError
+
             with pytest.raises(NotFoundError) as exc_info:
-                await self.vector_store.update_vector(vector_id, new_vector, new_document)
+                await self.vector_store.update_vector(
+                    vector_id, new_vector, new_document
+                )
 
             assert "Vector not found" in str(exc_info.value)
 
@@ -222,14 +267,20 @@ class TestVectorStore:
         # Arrange
         vector_id = "doc-1"
 
-        with patch.object(self.vector_store, '_check_vector_exists') as mock_check:
+        with patch.object(
+            self.vector_store, '_check_vector_exists'
+        ) as mock_check:
             mock_check.return_value = True
 
-            with patch.object(self.vector_store, '_delete_vector_record') as mock_delete:
+            with patch.object(
+                self.vector_store, '_delete_vector_record'
+            ) as mock_delete:
                 mock_delete.return_value = True
 
                 # Act
-                result = await self.vector_store.delete_vector(vector_id)
+                result = await self.vector_store.delete_vector(
+                    vector_id
+                )
 
                 # Assert
                 assert result is True
@@ -242,11 +293,14 @@ class TestVectorStore:
         # Arrange
         vector_id = "non-existent-id"
 
-        with patch.object(self.vector_store, '_check_vector_exists') as mock_check:
+        with patch.object(
+            self.vector_store, '_check_vector_exists'
+        ) as mock_check:
             mock_check.return_value = False
 
             # Act & Assert
             from chatter.core.exceptions import NotFoundError
+
             with pytest.raises(NotFoundError) as exc_info:
                 await self.vector_store.delete_vector(vector_id)
 
@@ -260,11 +314,18 @@ class TestVectorStore:
         expected_vector = self.sample_vectors[0]
         expected_document = self.sample_documents[0]
 
-        with patch.object(self.vector_store, '_fetch_vector_by_id') as mock_fetch:
-            mock_fetch.return_value = (expected_vector, expected_document)
+        with patch.object(
+            self.vector_store, '_fetch_vector_by_id'
+        ) as mock_fetch:
+            mock_fetch.return_value = (
+                expected_vector,
+                expected_document,
+            )
 
             # Act
-            vector, document = await self.vector_store.get_vector_by_id(vector_id)
+            vector, document = await self.vector_store.get_vector_by_id(
+                vector_id
+            )
 
             # Assert
             assert vector == expected_vector
@@ -277,11 +338,14 @@ class TestVectorStore:
         # Arrange
         vector_id = "non-existent-id"
 
-        with patch.object(self.vector_store, '_fetch_vector_by_id') as mock_fetch:
+        with patch.object(
+            self.vector_store, '_fetch_vector_by_id'
+        ) as mock_fetch:
             mock_fetch.return_value = (None, None)
 
             # Act & Assert
             from chatter.core.exceptions import NotFoundError
+
             with pytest.raises(NotFoundError) as exc_info:
                 await self.vector_store.get_vector_by_id(vector_id)
 
@@ -294,11 +358,15 @@ class TestVectorStore:
         vectors = self.sample_vectors
         documents = self.sample_documents
 
-        with patch.object(self.vector_store, '_bulk_insert_vectors') as mock_bulk:
+        with patch.object(
+            self.vector_store, '_bulk_insert_vectors'
+        ) as mock_bulk:
             mock_bulk.return_value = ["vec-1", "vec-2", "vec-3"]
 
             # Act
-            result = await self.vector_store.bulk_add_vectors(vectors, documents)
+            result = await self.vector_store.bulk_add_vectors(
+                vectors, documents
+            )
 
             # Assert
             assert len(result) == 3
@@ -314,17 +382,28 @@ class TestVectorStore:
         # Mock results with varying scores
         mock_results = [
             VectorSearchResult(
-                id="doc-1", score=0.95, document=self.sample_documents[0], vector=self.sample_vectors[0]
+                id="doc-1",
+                score=0.95,
+                document=self.sample_documents[0],
+                vector=self.sample_vectors[0],
             ),
             VectorSearchResult(
-                id="doc-2", score=0.85, document=self.sample_documents[1], vector=self.sample_vectors[1]
+                id="doc-2",
+                score=0.85,
+                document=self.sample_documents[1],
+                vector=self.sample_vectors[1],
             ),
             VectorSearchResult(
-                id="doc-3", score=0.92, document=self.sample_documents[2], vector=self.sample_vectors[2]
-            )
+                id="doc-3",
+                score=0.92,
+                document=self.sample_documents[2],
+                vector=self.sample_vectors[2],
+            ),
         ]
 
-        with patch.object(self.vector_store, '_perform_similarity_search') as mock_search:
+        with patch.object(
+            self.vector_store, '_perform_similarity_search'
+        ) as mock_search:
             mock_search.return_value = mock_results
 
             # Act
@@ -343,12 +422,16 @@ class TestVectorStore:
         # Arrange
         new_vector = [0.5, 0.6, 0.7]  # 3 dimensions (mismatch)
 
-        with patch.object(self.vector_store, '_get_vector_dimension') as mock_get_dim:
+        with patch.object(
+            self.vector_store, '_get_vector_dimension'
+        ) as mock_get_dim:
             mock_get_dim.return_value = 4
 
             # Act & Assert
             with pytest.raises(ValueError) as exc_info:
-                await self.vector_store._validate_vector_dimension(new_vector)
+                await self.vector_store._validate_vector_dimension(
+                    new_vector
+                )
 
             assert "dimension mismatch" in str(exc_info.value)
 
@@ -356,14 +439,18 @@ class TestVectorStore:
     async def test_index_optimization(self):
         """Test vector index optimization."""
         # Arrange
-        with patch.object(self.vector_store, '_rebuild_index') as mock_rebuild:
+        with patch.object(
+            self.vector_store, '_rebuild_index'
+        ) as mock_rebuild:
             mock_rebuild.return_value = True
 
-            with patch.object(self.vector_store, '_get_index_stats') as mock_stats:
+            with patch.object(
+                self.vector_store, '_get_index_stats'
+            ) as mock_stats:
                 mock_stats.return_value = {
                     "total_vectors": 1000,
                     "index_size": "50MB",
-                    "last_optimized": "2024-01-01T00:00:00Z"
+                    "last_optimized": "2024-01-01T00:00:00Z",
                 }
 
                 # Act
@@ -382,16 +469,19 @@ class TestVectorStore:
         documents_batch1 = self.sample_documents[:2]
         documents_batch2 = [self.sample_documents[2]]
 
-        with patch.object(self.vector_store, '_store_vectors') as mock_store:
-            mock_store.side_effect = [
-                ["vec-1", "vec-2"],
-                ["vec-3"]
-            ]
+        with patch.object(
+            self.vector_store, '_store_vectors'
+        ) as mock_store:
+            mock_store.side_effect = [["vec-1", "vec-2"], ["vec-3"]]
 
             # Act
             tasks = [
-                self.vector_store.add_vectors(vectors_batch1, documents_batch1),
-                self.vector_store.add_vectors(vectors_batch2, documents_batch2)
+                self.vector_store.add_vectors(
+                    vectors_batch1, documents_batch1
+                ),
+                self.vector_store.add_vectors(
+                    vectors_batch2, documents_batch2
+                ),
             ]
 
             results = await asyncio.gather(*tasks)
@@ -416,57 +506,92 @@ class TestVectorStoreIntegration:
         # Mock all the required backend operations
         vectors = [[0.1, 0.2, 0.3, 0.4], [0.5, 0.6, 0.7, 0.8]]
         documents = [
-            {"id": "doc-1", "content": "First document", "metadata": {"type": "test"}},
-            {"id": "doc-2", "content": "Second document", "metadata": {"type": "test"}}
+            {
+                "id": "doc-1",
+                "content": "First document",
+                "metadata": {"type": "test"},
+            },
+            {
+                "id": "doc-2",
+                "content": "Second document",
+                "metadata": {"type": "test"},
+            },
         ]
 
-        with patch.object(self.vector_store, '_validate_vectors') as mock_validate:
+        with patch.object(
+            self.vector_store, '_validate_vectors'
+        ) as mock_validate:
             mock_validate.return_value = True
 
-            with patch.object(self.vector_store, '_store_vectors') as mock_store:
+            with patch.object(
+                self.vector_store, '_store_vectors'
+            ) as mock_store:
                 mock_store.return_value = ["vec-1", "vec-2"]
 
                 # Add vectors
-                vector_ids = await self.vector_store.add_vectors(vectors, documents)
+                vector_ids = await self.vector_store.add_vectors(
+                    vectors, documents
+                )
                 assert len(vector_ids) == 2
 
                 # Mock search operation
-                with patch.object(self.vector_store, '_perform_similarity_search') as mock_search:
+                with patch.object(
+                    self.vector_store, '_perform_similarity_search'
+                ) as mock_search:
                     search_results = [
                         VectorSearchResult(
-                            id="vec-1", score=0.95, document=documents[0], vector=vectors[0]
+                            id="vec-1",
+                            score=0.95,
+                            document=documents[0],
+                            vector=vectors[0],
                         )
                     ]
                     mock_search.return_value = search_results
 
                     # Search vectors
                     query_vector = [0.1, 0.2, 0.3, 0.4]
-                    results = await self.vector_store.search_vectors(query_vector, k=1)
+                    results = await self.vector_store.search_vectors(
+                        query_vector, k=1
+                    )
                     assert len(results) == 1
                     assert results[0].score == 0.95
 
                     # Mock update operation
-                    with patch.object(self.vector_store, '_check_vector_exists') as mock_check:
+                    with patch.object(
+                        self.vector_store, '_check_vector_exists'
+                    ) as mock_check:
                         mock_check.return_value = True
 
-                        with patch.object(self.vector_store, '_update_vector_record') as mock_update:
+                        with patch.object(
+                            self.vector_store, '_update_vector_record'
+                        ) as mock_update:
                             mock_update.return_value = True
 
                             # Update vector
                             new_vector = [0.2, 0.3, 0.4, 0.5]
-                            new_document = {"id": "doc-1", "content": "Updated content"}
+                            new_document = {
+                                "id": "doc-1",
+                                "content": "Updated content",
+                            }
 
-                            updated = await self.vector_store.update_vector(
-                                "vec-1", new_vector, new_document
+                            updated = (
+                                await self.vector_store.update_vector(
+                                    "vec-1", new_vector, new_document
+                                )
                             )
                             assert updated is True
 
                             # Mock delete operation
-                            with patch.object(self.vector_store, '_delete_vector_record') as mock_delete:
+                            with patch.object(
+                                self.vector_store,
+                                '_delete_vector_record',
+                            ) as mock_delete:
                                 mock_delete.return_value = True
 
                                 # Delete vector
-                                deleted = await self.vector_store.delete_vector("vec-1")
+                                deleted = await self.vector_store.delete_vector(
+                                    "vec-1"
+                                )
                                 assert deleted is True
 
     @pytest.mark.asyncio
@@ -474,18 +599,29 @@ class TestVectorStoreIntegration:
         """Test vector store with large number of vectors."""
         # Simulate large batch operations
         num_vectors = 1000
-        vectors = [[i/1000, (i+1)/1000, (i+2)/1000, (i+3)/1000] for i in range(num_vectors)]
+        vectors = [
+            [i / 1000, (i + 1) / 1000, (i + 2) / 1000, (i + 3) / 1000]
+            for i in range(num_vectors)
+        ]
         documents = [
-            {"id": f"doc-{i}", "content": f"Document {i}", "metadata": {"batch": "large"}}
+            {
+                "id": f"doc-{i}",
+                "content": f"Document {i}",
+                "metadata": {"batch": "large"},
+            }
             for i in range(num_vectors)
         ]
 
-        with patch.object(self.vector_store, '_bulk_insert_vectors') as mock_bulk:
+        with patch.object(
+            self.vector_store, '_bulk_insert_vectors'
+        ) as mock_bulk:
             vector_ids = [f"vec-{i}" for i in range(num_vectors)]
             mock_bulk.return_value = vector_ids
 
             # Act
-            result = await self.vector_store.bulk_add_vectors(vectors, documents)
+            result = await self.vector_store.bulk_add_vectors(
+                vectors, documents
+            )
 
             # Assert
             assert len(result) == num_vectors
@@ -508,12 +644,22 @@ class TestVectorStoreHelpers:
         vector3 = [1.0, 0.0, 0.0]  # Same as vector1
 
         # Act
-        similarity_different = self.vector_store._calculate_cosine_similarity(vector1, vector2)
-        similarity_same = self.vector_store._calculate_cosine_similarity(vector1, vector3)
+        similarity_different = (
+            self.vector_store._calculate_cosine_similarity(
+                vector1, vector2
+            )
+        )
+        similarity_same = (
+            self.vector_store._calculate_cosine_similarity(
+                vector1, vector3
+            )
+        )
 
         # Assert
-        assert abs(similarity_different - 0.0) < 1e-6  # Orthogonal vectors
-        assert abs(similarity_same - 1.0) < 1e-6      # Identical vectors
+        assert (
+            abs(similarity_different - 0.0) < 1e-6
+        )  # Orthogonal vectors
+        assert abs(similarity_same - 1.0) < 1e-6  # Identical vectors
 
     def test_euclidean_distance_calculation(self):
         """Test Euclidean distance calculation."""
@@ -522,7 +668,9 @@ class TestVectorStoreHelpers:
         vector2 = [3.0, 4.0, 0.0]
 
         # Act
-        distance = self.vector_store._calculate_euclidean_distance(vector1, vector2)
+        distance = self.vector_store._calculate_euclidean_distance(
+            vector1, vector2
+        )
 
         # Assert
         assert abs(distance - 5.0) < 1e-6  # 3-4-5 triangle
@@ -546,13 +694,15 @@ class TestVectorStoreHelpers:
         documents = [
             {"metadata": {"category": "tech", "year": 2023}},
             {"metadata": {"category": "science", "year": 2023}},
-            {"metadata": {"category": "tech", "year": 2024}}
+            {"metadata": {"category": "tech", "year": 2024}},
         ]
 
         filter_criteria = {"category": "tech"}
 
         # Act
-        filtered = self.vector_store._apply_metadata_filter(documents, filter_criteria)
+        filtered = self.vector_store._apply_metadata_filter(
+            documents, filter_criteria
+        )
 
         # Assert
         assert len(filtered) == 2
@@ -566,7 +716,9 @@ class TestVectorStoreHelpers:
         batch_size = 10
 
         # Act
-        batches = list(self.vector_store._create_batches(data, batch_size))
+        batches = list(
+            self.vector_store._create_batches(data, batch_size)
+        )
 
         # Assert
         assert len(batches) == 10

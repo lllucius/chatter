@@ -10,10 +10,13 @@ from structlog.stdlib import LoggerFactory
 from chatter.config import settings
 
 
-def correlation_id_processor(logger: Any, method_name: str, event_dict: dict[str, Any]) -> dict[str, Any]:
+def correlation_id_processor(
+    logger: Any, method_name: str, event_dict: dict[str, Any]
+) -> dict[str, Any]:
     """Add correlation ID to log events."""
     try:
         from chatter.utils.correlation import get_correlation_id
+
         correlation_id = get_correlation_id()
         if correlation_id:
             event_dict['correlation_id'] = correlation_id
@@ -42,9 +45,11 @@ def setup_logging() -> None:
             # Exception formatting
             structlog.dev.set_exc_info,
             # JSON processor if JSON logging is enabled
-            structlog.processors.JSONRenderer()
-            if settings.log_json
-            else structlog.dev.ConsoleRenderer(),
+            (
+                structlog.processors.JSONRenderer()
+                if settings.log_json
+                else structlog.dev.ConsoleRenderer()
+            ),
         ],
         wrapper_class=structlog.stdlib.BoundLogger,
         logger_factory=LoggerFactory(),
@@ -53,7 +58,9 @@ def setup_logging() -> None:
     )
 
     # Configure standard library logging
-    handlers: list[logging.Handler] = [logging.StreamHandler(sys.stdout)]
+    handlers: list[logging.Handler] = [
+        logging.StreamHandler(sys.stdout)
+    ]
     if settings.log_file:
         handlers.append(logging.FileHandler(settings.log_file))
 

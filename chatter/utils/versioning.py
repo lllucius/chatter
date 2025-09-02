@@ -76,7 +76,9 @@ class APIVersionManager:
         self.versions[version_info.version] = version_info
         logger.info(f"Added API version {version_info.version}")
 
-    def get_version_info(self, version: APIVersion) -> VersionInfo | None:
+    def get_version_info(
+        self, version: APIVersion
+    ) -> VersionInfo | None:
         """Get information about a specific version.
 
         Args:
@@ -102,7 +104,8 @@ class APIVersionManager:
             List of active versions
         """
         return [
-            info for info in self.versions.values()
+            info
+            for info in self.versions.values()
             if info.status == VersionStatus.ACTIVE
         ]
 
@@ -116,7 +119,10 @@ class APIVersionManager:
             True if supported, False otherwise
         """
         version_info = self.versions.get(version)
-        return version_info is not None and version_info.status != VersionStatus.SUNSET
+        return (
+            version_info is not None
+            and version_info.status != VersionStatus.SUNSET
+        )
 
     def register_endpoint(
         self,
@@ -166,7 +172,10 @@ class APIVersionManager:
             return False
 
         # Check if removed
-        if endpoint.removed_in and endpoint.removed_in.value <= version.value:
+        if (
+            endpoint.removed_in
+            and endpoint.removed_in.value <= version.value
+        ):
             return False
 
         return True
@@ -216,7 +225,9 @@ def extract_version_from_request(request: Request) -> APIVersion:
 
     # Check Accept header for version
     accept_header = request.headers.get("Accept", "")
-    version_match = re.search(r"application/vnd\.chatter\.(v\d+)\+json", accept_header)
+    version_match = re.search(
+        r"application/vnd\.chatter\.(v\d+)\+json", accept_header
+    )
     if version_match:
         version_str = version_match.group(1)
         try:
@@ -236,7 +247,10 @@ def extract_version_from_request(request: Request) -> APIVersion:
     return version_manager.default_version
 
 
-async def version_middleware(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+async def version_middleware(
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
+) -> Response:
     """Middleware to handle API versioning.
 
     Args:
@@ -253,7 +267,7 @@ async def version_middleware(request: Request, call_next: Callable[[Request], Aw
     if not version_manager.is_version_supported(version):
         raise HTTPException(
             status_code=400,
-            detail=f"API version {version.value} is not supported"
+            detail=f"API version {version.value} is not supported",
         )
 
     # Add version to request state
@@ -266,10 +280,12 @@ async def version_middleware(request: Request, call_next: Callable[[Request], Aw
     # Remove version prefix from path for endpoint checking
     clean_path = re.sub(r"/api/v\d+", "", path)
 
-    if not version_manager.is_endpoint_available(clean_path, method, version):
+    if not version_manager.is_endpoint_available(
+        clean_path, method, version
+    ):
         raise HTTPException(
             status_code=404,
-            detail=f"Endpoint not available in API version {version.value}"
+            detail=f"Endpoint not available in API version {version.value}",
         )
 
     # Process request
@@ -277,7 +293,9 @@ async def version_middleware(request: Request, call_next: Callable[[Request], Aw
 
     # Add version headers to response
     response.headers["API-Version"] = version.value
-    response.headers["API-Supported-Versions"] = ",".join([v.value for v in APIVersion])
+    response.headers["API-Supported-Versions"] = ",".join(
+        [v.value for v in APIVersion]
+    )
 
     return response
 
@@ -311,6 +329,7 @@ def version_route(
     Returns:
         Route decorator
     """
+
     def decorator(func: Callable[..., Any]) -> Callable[..., Any]:
         # Add version metadata to function
         func._api_versions = versions  # type: ignore[attr-defined]
@@ -342,7 +361,7 @@ class VersionedRouter:
         endpoint: Callable[..., Any],
         methods: list[str],
         versions: list[APIVersion],
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """Add a versioned route.
 
@@ -362,11 +381,13 @@ class VersionedRouter:
                 path=versioned_path,
                 endpoint=endpoint,
                 methods=methods,
-                **kwargs
+                **kwargs,
             )
             self.routes[version].append(route)
 
-    def get_routes_for_version(self, version: APIVersion) -> list[APIRoute]:
+    def get_routes_for_version(
+        self, version: APIVersion
+    ) -> list[APIRoute]:
         """Get routes for a specific version.
 
         Args:

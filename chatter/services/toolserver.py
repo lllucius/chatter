@@ -83,10 +83,26 @@ class ToolServerService:
                 description=server_data.description,
                 base_url=str(server_data.base_url),
                 transport_type=server_data.transport_type,
-                oauth_client_id=server_data.oauth_config.client_id if server_data.oauth_config else None,
-                oauth_client_secret=server_data.oauth_config.client_secret if server_data.oauth_config else None,
-                oauth_token_url=str(server_data.oauth_config.token_url) if server_data.oauth_config else None,
-                oauth_scope=server_data.oauth_config.scope if server_data.oauth_config else None,
+                oauth_client_id=(
+                    server_data.oauth_config.client_id
+                    if server_data.oauth_config
+                    else None
+                ),
+                oauth_client_secret=(
+                    server_data.oauth_config.client_secret
+                    if server_data.oauth_config
+                    else None
+                ),
+                oauth_token_url=(
+                    str(server_data.oauth_config.token_url)
+                    if server_data.oauth_config
+                    else None
+                ),
+                oauth_scope=(
+                    server_data.oauth_config.scope
+                    if server_data.oauth_config
+                    else None
+                ),
                 headers=server_data.headers,
                 timeout=server_data.timeout,
                 auto_start=server_data.auto_start,
@@ -511,9 +527,7 @@ class ToolServerService:
             List of all available tools across all servers
         """
         result = await self.session.execute(
-            select(ServerTool).options(
-                selectinload(ServerTool.server)
-            )
+            select(ServerTool).options(selectinload(ServerTool.server))
         )
         tools = result.scalars().all()
 
@@ -523,16 +537,30 @@ class ToolServerService:
                 "name": tool.name,
                 "description": tool.description,
                 "server_id": tool.server_id,
-                "server_name": tool.server.name if tool.server else None,
+                "server_name": (
+                    tool.server.name if tool.server else None
+                ),
                 "status": tool.status.value if tool.status else None,
                 "enabled": tool.status == ToolStatus.ENABLED,
                 "total_calls": tool.total_calls,
                 "total_errors": tool.total_errors,
                 "avg_response_time_ms": tool.avg_response_time_ms,
-                "last_called": tool.last_called.isoformat() if tool.last_called else None,
+                "last_called": (
+                    tool.last_called.isoformat()
+                    if tool.last_called
+                    else None
+                ),
                 "last_error": tool.last_error,
-                "created_at": tool.created_at.isoformat() if tool.created_at else None,
-                "updated_at": tool.updated_at.isoformat() if tool.updated_at else None,
+                "created_at": (
+                    tool.created_at.isoformat()
+                    if tool.created_at
+                    else None
+                ),
+                "updated_at": (
+                    tool.updated_at.isoformat()
+                    if tool.updated_at
+                    else None
+                ),
             }
             for tool in tools
         ]
@@ -763,8 +791,14 @@ class ToolServerService:
                     uptime_percentage = 100.0
                 else:
                     # Reduce uptime based on failure rate
-                    failure_ratio = min(server.consecutive_failures / server.max_failures, 1.0)
-                    uptime_percentage = max(0.0, 100.0 * (1.0 - failure_ratio))
+                    failure_ratio = min(
+                        server.consecutive_failures
+                        / server.max_failures,
+                        1.0,
+                    )
+                    uptime_percentage = max(
+                        0.0, 100.0 * (1.0 - failure_ratio)
+                    )
             elif running_time > 300:  # Been running more than 5 minutes
                 # Assume moderate uptime if no recent health check
                 uptime_percentage = 75.0
@@ -847,6 +881,7 @@ class ToolServerService:
                 from chatter.services.sse_events import (
                     trigger_tool_server_health_changed,
                 )
+
                 await trigger_tool_server_health_changed(
                     str(server.id),
                     server.name,
@@ -856,10 +891,13 @@ class ToolServerService:
                         "is_responsive": is_responsive,
                         "tools_count": tools_count,
                         "error_message": error_message,
-                    }
+                    },
                 )
             except Exception as e:
-                logger.warning("Failed to trigger tool server health changed event", error=str(e))
+                logger.warning(
+                    "Failed to trigger tool server health changed event",
+                    error=str(e),
+                )
         else:
             # Use cached data
             is_running = server.name in self.mcp_service.tools_cache
@@ -895,8 +933,13 @@ class ToolServerService:
 
             # Create OAuth config if present
             oauth_config = None
-            if server.oauth_client_id and server.oauth_client_secret and server.oauth_token_url:
+            if (
+                server.oauth_client_id
+                and server.oauth_client_secret
+                and server.oauth_token_url
+            ):
                 from chatter.services.mcp import OAuthConfig
+
                 oauth_config = OAuthConfig(
                     client_id=server.oauth_client_id,
                     client_secret=server.oauth_client_secret,
@@ -906,6 +949,7 @@ class ToolServerService:
 
             # Create remote server config
             from chatter.services.mcp import RemoteMCPServer
+
             remote_server = RemoteMCPServer(
                 name=server.name,
                 base_url=server.base_url,
@@ -917,7 +961,9 @@ class ToolServerService:
             )
 
             # Add to MCP service
-            success = await self.mcp_service.add_remote_server(remote_server)
+            success = await self.mcp_service.add_remote_server(
+                remote_server
+            )
 
             if success:
                 server.status = ServerStatus.ENABLED
@@ -930,15 +976,23 @@ class ToolServerService:
                     from chatter.services.sse_events import (
                         trigger_tool_server_started,
                     )
-                    await trigger_tool_server_started(str(server.id), server.name)
+
+                    await trigger_tool_server_started(
+                        str(server.id), server.name
+                    )
                 except Exception as e:
-                    logger.warning("Failed to trigger tool server started event", error=str(e))
+                    logger.warning(
+                        "Failed to trigger tool server started event",
+                        error=str(e),
+                    )
 
                 # Discover and update tools
                 await self._discover_server_tools(server)
             else:
                 server.status = ServerStatus.ERROR
-                server.last_startup_error = "Failed to connect to remote server"
+                server.last_startup_error = (
+                    "Failed to connect to remote server"
+                )
                 server.consecutive_failures += 1
 
                 # Trigger tool server error event
@@ -947,6 +1001,7 @@ class ToolServerService:
                         EventType,
                         sse_service,
                     )
+
                     await sse_service.trigger_event(
                         EventType.TOOL_SERVER_ERROR,
                         {
@@ -956,7 +1011,9 @@ class ToolServerService:
                         },
                     )
                 except Exception as e:
-                    logger.warning("Failed to trigger error event", error=str(e))
+                    logger.warning(
+                        "Failed to trigger error event", error=str(e)
+                    )
 
             server.updated_at = datetime.now(UTC)
             return success
@@ -973,6 +1030,7 @@ class ToolServerService:
                     EventType,
                     sse_service,
                 )
+
                 await sse_service.trigger_event(
                     EventType.TOOL_SERVER_ERROR,
                     {
@@ -980,10 +1038,13 @@ class ToolServerService:
                         "server_name": server.name,
                         "error": str(e),
                         "consecutive_failures": server.consecutive_failures,
-                    }
+                    },
                 )
             except Exception as event_e:
-                logger.warning("Failed to trigger tool server error event", error=str(event_e))
+                logger.warning(
+                    "Failed to trigger tool server error event",
+                    error=str(event_e),
+                )
 
             # Disable if too many failures
             if server.consecutive_failures >= server.max_failures:
@@ -1013,7 +1074,9 @@ class ToolServerService:
             # Stop the server (only disable remote servers in MCP service)
             success = True
             if not server.is_builtin:
-                success = await self.mcp_service.disable_server(server.name)
+                success = await self.mcp_service.disable_server(
+                    server.name
+                )
 
             server.status = ServerStatus.DISABLED
             server.updated_at = datetime.now(UTC)
@@ -1023,9 +1086,15 @@ class ToolServerService:
                 from chatter.services.sse_events import (
                     trigger_tool_server_stopped,
                 )
-                await trigger_tool_server_stopped(str(server.id), server.name)
+
+                await trigger_tool_server_stopped(
+                    str(server.id), server.name
+                )
             except Exception as e:
-                logger.warning("Failed to trigger tool server stopped event", error=str(e))
+                logger.warning(
+                    "Failed to trigger tool server stopped event",
+                    error=str(e),
+                )
 
             return success
 
@@ -1048,7 +1117,9 @@ class ToolServerService:
         """
         try:
             # Get tools from remote MCP service
-            remote_tools = await self.mcp_service.discover_tools(server.name)
+            remote_tools = await self.mcp_service.discover_tools(
+                server.name
+            )
 
             # Get existing tools from database
             result = await self.session.execute(
@@ -1063,15 +1134,25 @@ class ToolServerService:
             # Update or create tools
             for tool_data in remote_tools:
                 # Handle LangChain BaseTool objects instead of dicts
-                tool_name = tool_data.name if hasattr(tool_data, 'name') else None
+                tool_name = (
+                    tool_data.name
+                    if hasattr(tool_data, 'name')
+                    else None
+                )
                 if not tool_name:
                     continue
 
                 if tool_name in existing_tools:
                     # Update existing tool
                     tool = existing_tools[tool_name]
-                    tool.description = tool_data.description if hasattr(tool_data, 'description') else None
-                    tool.args_schema = getattr(tool_data, 'args_schema', None)
+                    tool.description = (
+                        tool_data.description
+                        if hasattr(tool_data, 'description')
+                        else None
+                    )
+                    tool.args_schema = getattr(
+                        tool_data, 'args_schema', None
+                    )
                     tool.is_available = True
                     tool.updated_at = datetime.now(UTC)
                 else:
@@ -1079,16 +1160,28 @@ class ToolServerService:
                     tool = ServerTool(
                         server_id=server.id,
                         name=tool_name,
-                        display_name=tool_name.replace("_", " ").title(),
-                        description=tool_data.description if hasattr(tool_data, 'description') else None,
-                        args_schema=getattr(tool_data, 'args_schema', None),
+                        display_name=tool_name.replace(
+                            "_", " "
+                        ).title(),
+                        description=(
+                            tool_data.description
+                            if hasattr(tool_data, 'description')
+                            else None
+                        ),
+                        args_schema=getattr(
+                            tool_data, 'args_schema', None
+                        ),
                         status=ToolStatus.ENABLED,
                         is_available=True,
                     )
                     self.session.add(tool)
 
             # Mark tools not found as unavailable
-            found_tool_names = {tool_data.name for tool_data in remote_tools if hasattr(tool_data, 'name') and tool_data.name}
+            found_tool_names = {
+                tool_data.name
+                for tool_data in remote_tools
+                if hasattr(tool_data, 'name') and tool_data.name
+            }
             for tool_name, tool in existing_tools.items():
                 if tool_name not in found_tool_names:
                     tool.is_available = False
@@ -1188,7 +1281,7 @@ class ToolServerService:
                 return {
                     "success": False,
                     "error": "Server not found",
-                    "status": "not_found"
+                    "status": "not_found",
                 }
 
             # Test connection based on server type
@@ -1215,7 +1308,7 @@ class ToolServerService:
             return {
                 "success": False,
                 "error": str(e),
-                "status": "error"
+                "status": "error",
             }
 
     async def discover_server_tools(self, server: ToolServer) -> None:

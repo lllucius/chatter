@@ -78,12 +78,20 @@ class DocumentProcessingService:
             document = result.scalar_one_or_none()
 
             if not document:
-                logger.error("Document not found", document_id=document_id)
+                logger.error(
+                    "Document not found", document_id=document_id
+                )
                 return False
 
             # Already processed?
-            if document.status == DocumentStatus.PROCESSED and not force_reprocess:
-                logger.info("Document already processed", document_id=document_id)
+            if (
+                document.status == DocumentStatus.PROCESSED
+                and not force_reprocess
+            ):
+                logger.info(
+                    "Document already processed",
+                    document_id=document_id,
+                )
                 return True
 
             # Update status to processing
@@ -93,7 +101,11 @@ class DocumentProcessingService:
             await self.session.commit()
             await self.session.refresh(document)
 
-            logger.info("Starting document processing", document_id=document_id, filename=document.filename)
+            logger.info(
+                "Starting document processing",
+                document_id=document_id,
+                filename=document.filename,
+            )
 
             # Trigger started event
             try:
@@ -101,6 +113,7 @@ class DocumentProcessingService:
                     EventType,
                     sse_service,
                 )
+
                 await sse_service.trigger_event(
                     EventType.DOCUMENT_PROCESSING_STARTED,
                     {
@@ -108,15 +121,22 @@ class DocumentProcessingService:
                         "filename": document.filename,
                         "started_at": document.processing_started_at.isoformat(),
                     },
-                    user_id=document.owner_id
+                    user_id=document.owner_id,
                 )
             except Exception as e:
-                logger.warning("Failed to trigger document processing started event", error=str(e))
+                logger.warning(
+                    "Failed to trigger document processing started event",
+                    error=str(e),
+                )
 
             # Extract text (offloads heavy work)
-            extracted_text = await self._extract_text(document, file_content)
+            extracted_text = await self._extract_text(
+                document, file_content
+            )
             if not extracted_text:
-                await self._mark_processing_failed(document, "Failed to extract text from document")
+                await self._mark_processing_failed(
+                    document, "Failed to extract text from document"
+                )
                 return False
 
             # Persist extracted text
@@ -127,24 +147,37 @@ class DocumentProcessingService:
             # Create chunks (offloaded splitter)
             chunks = await self._create_chunks(document, extracted_text)
             if not chunks:
-                await self._mark_processing_failed(document, "Failed to create chunks from text")
+                await self._mark_processing_failed(
+                    document, "Failed to create chunks from text"
+                )
                 return False
 
             # Store chunks (async DB)
             chunk_objects = await self._store_chunks(document, chunks)
             if not chunk_objects:
-                await self._mark_processing_failed(document, "Failed to store chunks")
+                await self._mark_processing_failed(
+                    document, "Failed to store chunks"
+                )
                 return False
 
             # Generate embeddings for chunks (async HTTP + async DB; PGVector sync parts are offloaded internally)
-            embedding_success = await self._generate_embeddings(document, chunk_objects)
+            embedding_success = await self._generate_embeddings(
+                document, chunk_objects
+            )
             if not embedding_success:
                 # Check if embedding providers are available
-                if not self.embedding_service.list_available_providers():
-                    await self._mark_processing_failed(document, "No embedding providers available")
+                if (
+                    not self.embedding_service.list_available_providers()
+                ):
+                    await self._mark_processing_failed(
+                        document, "No embedding providers available"
+                    )
                     return False
                 else:
-                    logger.warning("Failed to generate embeddings for some chunks", document_id=document_id)
+                    logger.warning(
+                        "Failed to generate embeddings for some chunks",
+                        document_id=document_id,
+                    )
 
             # Update document status
             document.status = DocumentStatus.PROCESSED
@@ -165,66 +198,100 @@ class DocumentProcessingService:
                 from chatter.services.sse_events import (
                     trigger_document_processing_completed,
                 )
+
                 await trigger_document_processing_completed(
                     document_id,
                     {
                         "chunks_created": len(chunk_objects),
                         "text_length": len(extracted_text),
-                        "processing_time": (document.processing_completed_at - document.processing_started_at).total_seconds(),
+                        "processing_time": (
+                            document.processing_completed_at
+                            - document.processing_started_at
+                        ).total_seconds(),
                     },
-                    document.owner_id
+                    document.owner_id,
                 )
             except Exception as e:
-                logger.warning("Failed to trigger document processing completed event", error=str(e))
+                logger.warning(
+                    "Failed to trigger document processing completed event",
+                    error=str(e),
+                )
 
             return True
 
         except Exception as e:
-            logger.error("Document processing failed", document_id=document_id, error=str(e))
+            logger.error(
+                "Document processing failed",
+                document_id=document_id,
+                error=str(e),
+            )
             if document:
-                await self._mark_processing_failed(document, f"Processing error: {str(e)}")
+                await self._mark_processing_failed(
+                    document, f"Processing error: {str(e)}"
+                )
             return False
 
-    async def _extract_text(self, document: Document, file_content: bytes) -> str | None:
+    async def _extract_text(
+        self, document: Document, file_content: bytes
+    ) -> str | None:
         """Extract text from document based on its type."""
         try:
             # Save file temporarily for processing in a thread (avoid blocking loop)
             suffix = f".{document.document_type.value}"
-            temp_file_path = await asyncio.to_thread(self._write_temp_file, suffix, file_content)
+            temp_file_path = await asyncio.to_thread(
+                self._write_temp_file, suffix, file_content
+            )
 
             try:
                 if document.document_type == DocumentType.TEXT:
                     return await self._extract_text_plain(file_content)
                 elif document.document_type == DocumentType.PDF:
-                    return await self._extract_text_pdf(temp_file_path, file_content)
-                elif document.document_type in [DocumentType.DOC, DocumentType.DOCX]:
+                    return await self._extract_text_pdf(
+                        temp_file_path, file_content
+                    )
+                elif document.document_type in [
+                    DocumentType.DOC,
+                    DocumentType.DOCX,
+                ]:
                     return await self._extract_text_docx(temp_file_path)
                 elif document.document_type == DocumentType.HTML:
                     return await self._extract_text_html(file_content)
                 elif document.document_type == DocumentType.MARKDOWN:
-                    return await self._extract_text_markdown(file_content)
+                    return await self._extract_text_markdown(
+                        file_content
+                    )
                 elif document.document_type == DocumentType.JSON:
                     return await self._extract_text_json(file_content)
                 else:
                     # Try using unstructured for unknown formats
                     if UNSTRUCTURED_AVAILABLE:
-                        return await self._extract_text_unstructured(temp_file_path)
+                        return await self._extract_text_unstructured(
+                            temp_file_path
+                        )
                     return None
             finally:
                 # Clean up temporary file (in a thread)
                 try:
-                    await asyncio.to_thread(self._unlink_file, temp_file_path)
+                    await asyncio.to_thread(
+                        self._unlink_file, temp_file_path
+                    )
                 except Exception:
                     pass
 
         except Exception as e:
-            logger.error("Text extraction failed", document_id=document.id, error=str(e))
+            logger.error(
+                "Text extraction failed",
+                document_id=document.id,
+                error=str(e),
+            )
             return None
 
     # -------- blocking helpers offloaded to threads --------
 
     def _write_temp_file(self, suffix: str, data: bytes) -> str:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=suffix
+        ) as temp_file:
             temp_file.write(data)
             return temp_file.name
 
@@ -252,44 +319,100 @@ class DocumentProcessingService:
                     return joined
             except Exception as e:
                 # fall back to unstructured
-                logger.warning("PyPDF extraction failed, trying unstructured", error=str(e))
+                logger.warning(
+                    "PyPDF extraction failed, trying unstructured",
+                    error=str(e),
+                )
         # Fallback to unstructured
         if UNSTRUCTURED_AVAILABLE:
             elements = partition_pdf(filename=file_path)
-            return "\n".join([element.text for element in elements if hasattr(element, "text")])
+            return "\n".join(
+                [
+                    element.text
+                    for element in elements
+                    if hasattr(element, "text")
+                ]
+            )
         return None
 
     def _extract_text_docx_sync(self, file_path: str) -> str | None:
         if UNSTRUCTURED_AVAILABLE:
             elements = partition_docx(filename=file_path)
-            return "\n".join([element.text for element in elements if hasattr(element, "text")])
+            return "\n".join(
+                [
+                    element.text
+                    for element in elements
+                    if hasattr(element, "text")
+                ]
+            )
         return None
 
     def _extract_text_html_sync(self, html_text: str) -> str | None:
         if UNSTRUCTURED_AVAILABLE:
             elements = partition_html(text=html_text)
-            return "\n".join([element.text for element in elements if hasattr(element, "text")])
+            return "\n".join(
+                [
+                    element.text
+                    for element in elements
+                    if hasattr(element, "text")
+                ]
+            )
         return None
 
-    def _extract_text_unstructured_sync(self, file_path: str) -> str | None:
+    def _extract_text_unstructured_sync(
+        self, file_path: str
+    ) -> str | None:
         if UNSTRUCTURED_AVAILABLE:
             elements = partition(filename=file_path)
-            return "\n".join([element.text for element in elements if hasattr(element, "text")])
+            return "\n".join(
+                [
+                    element.text
+                    for element in elements
+                    if hasattr(element, "text")
+                ]
+            )
         return None
 
-    def _create_chunks_sync(self, document: Document, text: str) -> list[str]:
+    def _create_chunks_sync(
+        self, document: Document, text: str
+    ) -> list[str]:
         # Choose splitter based on document type and content
         if document.document_type == DocumentType.MARKDOWN:
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=document.chunk_size,
                 chunk_overlap=document.chunk_overlap,
-                separators=["\n# ", "\n## ", "\n### ", "\n\n", "\n", ".", "!", "?", ";", " "],
+                separators=[
+                    "\n# ",
+                    "\n## ",
+                    "\n### ",
+                    "\n\n",
+                    "\n",
+                    ".",
+                    "!",
+                    "?",
+                    ";",
+                    " ",
+                ],
             )
-        elif document.document_type in [DocumentType.HTML, DocumentType.XML]:
+        elif document.document_type in [
+            DocumentType.HTML,
+            DocumentType.XML,
+        ]:
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=document.chunk_size,
                 chunk_overlap=document.chunk_overlap,
-                separators=["\n\n", "\n", "<p>", "<div>", "<br>", ".", "!", "?", ";", " "],
+                separators=[
+                    "\n\n",
+                    "\n",
+                    "<p>",
+                    "<div>",
+                    "<br>",
+                    ".",
+                    "!",
+                    "?",
+                    ";",
+                    " ",
+                ],
             )
         else:
             # Default recursive character splitter
@@ -303,12 +426,18 @@ class DocumentProcessingService:
 
         # Filter out very short chunks
         min_chunk_length = max(50, document.chunk_size // 10)
-        chunks = [chunk.strip() for chunk in chunks if len(chunk.strip()) >= min_chunk_length]
+        chunks = [
+            chunk.strip()
+            for chunk in chunks
+            if len(chunk.strip()) >= min_chunk_length
+        ]
         return chunks
 
     # -------- async wrappers that offload to threads --------
 
-    async def _extract_text_plain(self, file_content: bytes) -> str | None:
+    async def _extract_text_plain(
+        self, file_content: bytes
+    ) -> str | None:
         """Extract text from plain text file."""
         try:
             # Try different encodings (cheap enough to do on loop)
@@ -322,10 +451,14 @@ class DocumentProcessingService:
             logger.error("Plain text extraction failed", error=str(e))
             return None
 
-    async def _extract_text_pdf(self, file_path: str, file_content: bytes) -> str | None:
+    async def _extract_text_pdf(
+        self, file_path: str, file_content: bytes
+    ) -> str | None:
         """Extract text from PDF file (offloaded)."""
         try:
-            return await asyncio.to_thread(self._extract_text_pdf_sync, file_path)
+            return await asyncio.to_thread(
+                self._extract_text_pdf_sync, file_path
+            )
         except Exception as e:
             logger.error("PDF text extraction failed", error=str(e))
             return None
@@ -333,30 +466,42 @@ class DocumentProcessingService:
     async def _extract_text_docx(self, file_path: str) -> str | None:
         """Extract text from DOCX file (offloaded)."""
         try:
-            return await asyncio.to_thread(self._extract_text_docx_sync, file_path)
+            return await asyncio.to_thread(
+                self._extract_text_docx_sync, file_path
+            )
         except Exception as e:
             logger.error("DOCX text extraction failed", error=str(e))
             return None
 
-    async def _extract_text_html(self, file_content: bytes) -> str | None:
+    async def _extract_text_html(
+        self, file_content: bytes
+    ) -> str | None:
         """Extract text from HTML file (offloaded)."""
         try:
             html_text = file_content.decode("utf-8", errors="ignore")
-            return await asyncio.to_thread(self._extract_text_html_sync, html_text)
+            return await asyncio.to_thread(
+                self._extract_text_html_sync, html_text
+            )
         except Exception as e:
             logger.error("HTML text extraction failed", error=str(e))
             return None
 
-    async def _extract_text_markdown(self, file_content: bytes) -> str | None:
+    async def _extract_text_markdown(
+        self, file_content: bytes
+    ) -> str | None:
         """Extract text from Markdown file."""
         try:
             # For markdown, we can just return the text as-is
             return file_content.decode("utf-8", errors="ignore")
         except Exception as e:
-            logger.error("Markdown text extraction failed", error=str(e))
+            logger.error(
+                "Markdown text extraction failed", error=str(e)
+            )
             return None
 
-    async def _extract_text_json(self, file_content: bytes) -> str | None:
+    async def _extract_text_json(
+        self, file_content: bytes
+    ) -> str | None:
         """Extract text from JSON file (offloaded)."""
         try:
             import json
@@ -369,9 +514,15 @@ class DocumentProcessingService:
                         if isinstance(obj, str):
                             return obj
                         elif isinstance(obj, dict):
-                            return " ".join(extract_text_from_json(v) for v in obj.values())
+                            return " ".join(
+                                extract_text_from_json(v)
+                                for v in obj.values()
+                            )
                         elif isinstance(obj, list):
-                            return " ".join(extract_text_from_json(item) for item in obj)
+                            return " ".join(
+                                extract_text_from_json(item)
+                                for item in obj
+                            )
                         else:
                             return str(obj)
 
@@ -379,24 +530,36 @@ class DocumentProcessingService:
                 except Exception:
                     return None
 
-            return await asyncio.to_thread(_parse_json_to_text, file_content)
+            return await asyncio.to_thread(
+                _parse_json_to_text, file_content
+            )
 
         except Exception as e:
             logger.error("JSON text extraction failed", error=str(e))
             return None
 
-    async def _extract_text_unstructured(self, file_path: str) -> str | None:
+    async def _extract_text_unstructured(
+        self, file_path: str
+    ) -> str | None:
         """Extract text using unstructured library (offloaded)."""
         try:
-            return await asyncio.to_thread(self._extract_text_unstructured_sync, file_path)
+            return await asyncio.to_thread(
+                self._extract_text_unstructured_sync, file_path
+            )
         except Exception as e:
-            logger.error("Unstructured text extraction failed", error=str(e))
+            logger.error(
+                "Unstructured text extraction failed", error=str(e)
+            )
             return None
 
-    async def _create_chunks(self, document: Document, text: str) -> list[str]:
+    async def _create_chunks(
+        self, document: Document, text: str
+    ) -> list[str]:
         """Create text chunks from extracted text (offloaded splitter)."""
         try:
-            chunks = await asyncio.to_thread(self._create_chunks_sync, document, text)
+            chunks = await asyncio.to_thread(
+                self._create_chunks_sync, document, text
+            )
             logger.debug(
                 "Text chunks created",
                 document_id=document.id,
@@ -406,10 +569,16 @@ class DocumentProcessingService:
             )
             return chunks
         except Exception as e:
-            logger.error("Chunk creation failed", document_id=document.id, error=str(e))
+            logger.error(
+                "Chunk creation failed",
+                document_id=document.id,
+                error=str(e),
+            )
             return []
 
-    async def _store_chunks(self, document: Document, chunks: list[str]) -> list[DocumentChunk]:
+    async def _store_chunks(
+        self, document: Document, chunks: list[str]
+    ) -> list[DocumentChunk]:
         """Store text chunks in the database."""
         logger.info("Storing chunks")
         try:
@@ -417,7 +586,9 @@ class DocumentProcessingService:
 
             for i, chunk_text in enumerate(chunks):
                 # Calculate content hash (cheap; keep on loop)
-                content_hash = hashlib.sha256(chunk_text.encode("utf-8")).hexdigest()
+                content_hash = hashlib.sha256(
+                    chunk_text.encode("utf-8")
+                ).hexdigest()
 
                 # Create chunk object
                 chunk = DocumentChunk(
@@ -425,7 +596,9 @@ class DocumentProcessingService:
                     content=chunk_text,
                     chunk_index=i,
                     content_hash=content_hash,
-                    token_count=len(chunk_text.split()),  # Simple token count approximation
+                    token_count=len(
+                        chunk_text.split()
+                    ),  # Simple token count approximation
                 )
                 chunk_objects.append(chunk)
                 self.session.add(chunk)
@@ -437,20 +610,32 @@ class DocumentProcessingService:
             for chunk in chunk_objects:
                 await self.session.refresh(chunk)
 
-            logger.debug("Chunks stored in database", document_id=document.id, chunk_count=len(chunk_objects))
+            logger.debug(
+                "Chunks stored in database",
+                document_id=document.id,
+                chunk_count=len(chunk_objects),
+            )
             return chunk_objects
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Chunk storage failed", document_id=document.id, error=str(e))
+            logger.error(
+                "Chunk storage failed",
+                document_id=document.id,
+                error=str(e),
+            )
             return []
 
-    async def _generate_embeddings(self, document: Document, chunks: list[DocumentChunk]) -> bool:
+    async def _generate_embeddings(
+        self, document: Document, chunks: list[DocumentChunk]
+    ) -> bool:
         """Generate embeddings for document chunks."""
         try:
             # Check if embedding service is available
             if not self.embedding_service.list_available_providers():
-                logger.warning("No embedding providers available, skipping embedding generation")
+                logger.warning(
+                    "No embedding providers available, skipping embedding generation"
+                )
                 return False
 
             # Process chunks in batches
@@ -463,10 +648,16 @@ class DocumentProcessingService:
 
                 try:
                     # Generate embeddings for batch (async HTTP, non-blocking)
-                    (embeddings, usage_info) = await self.embedding_service.generate_embeddings(batch_texts)
+                    (embeddings, usage_info) = (
+                        await self.embedding_service.generate_embeddings(
+                            batch_texts
+                        )
+                    )
 
                     # Store embeddings
-                    for chunk, embedding in zip(batch, embeddings, strict=False):
+                    for chunk, embedding in zip(
+                        batch, embeddings, strict=False
+                    ):
                         provider = usage_info.get("provider")
                         model = usage_info.get("model")
                         embedding_metadata = {
@@ -485,14 +676,20 @@ class DocumentProcessingService:
                         )
 
                         if not success:
-                            logger.warning("Failed to store embedding", chunk_id=chunk.id)
+                            logger.warning(
+                                "Failed to store embedding",
+                                chunk_id=chunk.id,
+                            )
                             raise EmbeddingError
 
                     success_count += len(batch)
                     await self.session.commit()
 
                 except EmbeddingError as e:
-                    logger.error("Embedding generation failed for batch", error=str(e))
+                    logger.error(
+                        "Embedding generation failed for batch",
+                        error=str(e),
+                    )
                     await self.session.rollback()
                     await self.session.refresh(document, ["chunks"])
                     continue
@@ -505,13 +702,17 @@ class DocumentProcessingService:
                 success_rate=success_rate,
             )
 
-            return success_rate > 0.5  # Consider successful if >50% of embeddings generated
+            return (
+                success_rate > 0.5
+            )  # Consider successful if >50% of embeddings generated
 
         except Exception as e:
             logger.error("Embedding generation failed", error=str(e))
             return False
 
-    async def _mark_processing_failed(self, document: Document, error_message: str) -> None:
+    async def _mark_processing_failed(
+        self, document: Document, error_message: str
+    ) -> None:
         """Mark document processing as failed."""
         try:
             document.status = DocumentStatus.FAILED
@@ -520,21 +721,37 @@ class DocumentProcessingService:
             await self.session.commit()
             await self.session.refresh(document)
 
-            logger.error("Document processing marked as failed", document_id=document.id, error=error_message)
+            logger.error(
+                "Document processing marked as failed",
+                document_id=document.id,
+                error=error_message,
+            )
 
             # Trigger document processing failed event
             try:
                 from chatter.services.sse_events import (
                     trigger_document_processing_failed,
                 )
-                await trigger_document_processing_failed(str(document.id), error_message, document.owner_id)
+
+                await trigger_document_processing_failed(
+                    str(document.id), error_message, document.owner_id
+                )
             except Exception as e:
-                logger.warning("Failed to trigger document processing failed event", error=str(e))
+                logger.warning(
+                    "Failed to trigger document processing failed event",
+                    error=str(e),
+                )
 
         except Exception as e:
-            logger.error("Failed to mark processing as failed", document_id=document.id, error=str(e))
+            logger.error(
+                "Failed to mark processing as failed",
+                document_id=document.id,
+                error=str(e),
+            )
 
-    def detect_document_type(self, filename: str, mime_type: str) -> DocumentType:
+    def detect_document_type(
+        self, filename: str, mime_type: str
+    ) -> DocumentType:
         """Detect document type from filename and MIME type."""
         # Get file extension
         file_ext = Path(filename).suffix.lower()
@@ -573,7 +790,11 @@ class DocumentProcessingService:
             elif mime_type == "application/pdf":
                 return DocumentType.PDF
             elif "word" in mime_type or "msword" in mime_type:
-                return DocumentType.DOCX if "openxml" in mime_type else DocumentType.DOC
+                return (
+                    DocumentType.DOCX
+                    if "openxml" in mime_type
+                    else DocumentType.DOC
+                )
             elif mime_type == "application/json":
                 return DocumentType.JSON
             elif "xml" in mime_type:
@@ -588,7 +809,9 @@ class DocumentProcessingService:
             status_counts = {}
             for status in DocumentStatus:
                 result = await self.session.execute(
-                    select(func.count(Document.id)).where(Document.status == status)
+                    select(func.count(Document.id)).where(
+                        Document.status == status
+                    )
                 )
                 status_counts[status.value] = result.scalar()
 
@@ -611,13 +834,18 @@ class DocumentProcessingService:
                     duration = (end_time - start_time).total_seconds()
                     processing_times.append(duration)
 
-            avg_processing_time = (sum(processing_times) / len(processing_times)) if processing_times else 0
+            avg_processing_time = (
+                (sum(processing_times) / len(processing_times))
+                if processing_times
+                else 0
+            )
 
             return {
                 "status_counts": status_counts,
                 "total_documents": sum(status_counts.values()),
                 "processing_success_rate": (
-                    status_counts.get("processed", 0) / sum(status_counts.values())
+                    status_counts.get("processed", 0)
+                    / sum(status_counts.values())
                     if sum(status_counts.values()) > 0
                     else 0
                 ),
@@ -638,18 +866,15 @@ class DocumentProcessingService:
             }
 
     async def get_user_documents(
-        self, 
-        user_id: str, 
-        offset: int = 0, 
-        limit: int = 50
+        self, user_id: str, offset: int = 0, limit: int = 50
     ) -> list[Document]:
         """Get documents for a specific user.
-        
+
         Args:
             user_id: User identifier
             offset: Number of documents to skip
             limit: Maximum number of documents to return
-            
+
         Returns:
             List of user documents
         """
@@ -663,16 +888,22 @@ class DocumentProcessingService:
             )
             return list(result.scalars().all())
         except Exception as e:
-            logger.error("Failed to get user documents", user_id=user_id, error=str(e))
+            logger.error(
+                "Failed to get user documents",
+                user_id=user_id,
+                error=str(e),
+            )
             return []
 
-    async def get_document(self, document_id: str, user_id: str | None = None) -> Document | None:
+    async def get_document(
+        self, document_id: str, user_id: str | None = None
+    ) -> Document | None:
         """Get a document by ID.
-        
+
         Args:
             document_id: Document identifier
             user_id: Optional user identifier for ownership check
-            
+
         Returns:
             Document or None if not found
         """
@@ -680,26 +911,30 @@ class DocumentProcessingService:
             query = select(Document).where(Document.id == document_id)
             if user_id:
                 query = query.where(Document.owner_id == user_id)
-                
+
             result = await self.session.execute(query)
             return result.scalar_one_or_none()
         except Exception as e:
-            logger.error("Failed to get document", document_id=document_id, error=str(e))
+            logger.error(
+                "Failed to get document",
+                document_id=document_id,
+                error=str(e),
+            )
             return None
 
     async def update_document(
-        self, 
-        document_id: str, 
-        updates: dict[str, Any], 
-        user_id: str | None = None
+        self,
+        document_id: str,
+        updates: dict[str, Any],
+        user_id: str | None = None,
     ) -> Document | None:
         """Update a document.
-        
+
         Args:
             document_id: Document identifier
             updates: Updates to apply
             user_id: Optional user identifier for ownership check
-            
+
         Returns:
             Updated document or None if not found
         """
@@ -707,29 +942,35 @@ class DocumentProcessingService:
             document = await self.get_document(document_id, user_id)
             if not document:
                 return None
-                
+
             for key, value in updates.items():
                 if hasattr(document, key):
                     setattr(document, key, value)
-                    
+
             document.updated_at = datetime.now(UTC)
             await self.session.commit()
             await self.session.refresh(document)
-            
+
             logger.info("Document updated", document_id=document_id)
             return document
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to update document", document_id=document_id, error=str(e))
+            logger.error(
+                "Failed to update document",
+                document_id=document_id,
+                error=str(e),
+            )
             return None
 
-    async def delete_document(self, document_id: str, user_id: str | None = None) -> bool:
+    async def delete_document(
+        self, document_id: str, user_id: str | None = None
+    ) -> bool:
         """Delete a document.
-        
+
         Args:
             document_id: Document identifier
             user_id: Optional user identifier for ownership check
-            
+
         Returns:
             True if deleted, False if not found
         """
@@ -737,15 +978,19 @@ class DocumentProcessingService:
             document = await self.get_document(document_id, user_id)
             if not document:
                 return False
-                
+
             await self.session.delete(document)
             await self.session.commit()
-            
+
             logger.info("Document deleted", document_id=document_id)
             return True
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to delete document", document_id=document_id, error=str(e))
+            logger.error(
+                "Failed to delete document",
+                document_id=document_id,
+                error=str(e),
+            )
             return False
 
     async def search_documents(
@@ -753,16 +998,16 @@ class DocumentProcessingService:
         query: str,
         user_id: str | None = None,
         document_type: str | None = None,
-        limit: int = 10
+        limit: int = 10,
     ) -> list[Document]:
         """Search documents.
-        
+
         Args:
             query: Search query
             user_id: Optional user identifier to filter by owner
             document_type: Optional document type filter
             limit: Maximum number of results
-            
+
         Returns:
             List of matching documents
         """
@@ -772,21 +1017,30 @@ class DocumentProcessingService:
             if user_id:
                 conditions.append(Document.owner_id == user_id)
             if document_type:
-                conditions.append(Document.document_type == document_type)
-                
+                conditions.append(
+                    Document.document_type == document_type
+                )
+
             # Simple text search in filename and extracted text
             search_condition = Document.filename.ilike(f"%{query}%")
             if hasattr(Document, 'extracted_text'):
-                search_condition = search_condition | Document.extracted_text.ilike(f"%{query}%")
+                search_condition = (
+                    search_condition
+                    | Document.extracted_text.ilike(f"%{query}%")
+                )
             conditions.append(search_condition)
-            
+
             # Execute query
-            db_query = select(Document).where(and_(*conditions)).limit(limit)
+            db_query = (
+                select(Document).where(and_(*conditions)).limit(limit)
+            )
             result = await self.session.execute(db_query)
-            
+
             return list(result.scalars().all())
         except Exception as e:
-            logger.error("Failed to search documents", query=query, error=str(e))
+            logger.error(
+                "Failed to search documents", query=query, error=str(e)
+            )
             return []
 
 

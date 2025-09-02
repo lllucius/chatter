@@ -15,6 +15,7 @@ logger = get_logger(__name__)
 
 class TestStatus(str, Enum):
     """A/B test status."""
+
     DRAFT = "draft"
     RUNNING = "running"
     PAUSED = "paused"
@@ -24,6 +25,7 @@ class TestStatus(str, Enum):
 
 class TestType(str, Enum):
     """Types of A/B tests."""
+
     PROMPT = "prompt"
     MODEL = "model"
     PARAMETER = "parameter"
@@ -33,6 +35,7 @@ class TestType(str, Enum):
 
 class VariantAllocation(str, Enum):
     """Variant allocation strategies."""
+
     EQUAL = "equal"
     WEIGHTED = "weighted"
     GRADUAL_ROLLOUT = "gradual_rollout"
@@ -41,6 +44,7 @@ class VariantAllocation(str, Enum):
 
 class MetricType(str, Enum):
     """Types of metrics to track."""
+
     RESPONSE_TIME = "response_time"
     USER_SATISFACTION = "user_satisfaction"
     ACCURACY = "accuracy"
@@ -53,6 +57,7 @@ class MetricType(str, Enum):
 
 class TestVariant(BaseModel):
     """A/B test variant configuration."""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     description: str
@@ -64,6 +69,7 @@ class TestVariant(BaseModel):
 
 class TestMetric(BaseModel):
     """Metric configuration for A/B tests."""
+
     name: str
     metric_type: MetricType
     target_value: float | None = None
@@ -74,6 +80,7 @@ class TestMetric(BaseModel):
 
 class ABTest(BaseModel):
     """A/B test configuration."""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     description: str
@@ -83,7 +90,9 @@ class ABTest(BaseModel):
     # Test configuration
     variants: list[TestVariant] = Field(default_factory=list)
     allocation_strategy: VariantAllocation = VariantAllocation.EQUAL
-    traffic_percentage: float = 1.0  # Percentage of traffic to include in test
+    traffic_percentage: float = (
+        1.0  # Percentage of traffic to include in test
+    )
 
     # Metrics and goals
     primary_metric: TestMetric
@@ -104,8 +113,12 @@ class ABTest(BaseModel):
     minimum_sample_size: int = 100
 
     # Metadata
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
     created_by: str
     tags: list[str] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
@@ -113,17 +126,21 @@ class ABTest(BaseModel):
 
 class TestAssignment(BaseModel):
     """User assignment to test variant."""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     test_id: str
     user_id: str
     variant_id: str
     session_id: str | None = None
-    assigned_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    assigned_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class TestEvent(BaseModel):
     """Event recorded during A/B test."""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     test_id: str
     variant_id: str
@@ -131,18 +148,29 @@ class TestEvent(BaseModel):
     session_id: str | None = None
     event_type: str
     event_data: dict[str, Any] = Field(default_factory=dict)
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
     metrics: dict[str, float] = Field(default_factory=dict)
 
 
 class TestResult(BaseModel):
     """A/B test results and analysis."""
+
     test_id: str
-    variant_results: dict[str, dict[str, Any]] = Field(default_factory=dict)
-    statistical_significance: dict[str, bool] = Field(default_factory=dict)
-    confidence_intervals: dict[str, dict[str, float]] = Field(default_factory=dict)
+    variant_results: dict[str, dict[str, Any]] = Field(
+        default_factory=dict
+    )
+    statistical_significance: dict[str, bool] = Field(
+        default_factory=dict
+    )
+    confidence_intervals: dict[str, dict[str, float]] = Field(
+        default_factory=dict
+    )
     recommendations: list[str] = Field(default_factory=list)
-    analysis_date: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    analysis_date: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
 
 
 class ABTestManager:
@@ -250,14 +278,18 @@ class ABTestManager:
             return False
 
         if test.status != TestStatus.DRAFT:
-            logger.warning(f"Cannot start test {test_id} - status is {test.status}")
+            logger.warning(
+                f"Cannot start test {test_id} - status is {test.status}"
+            )
             return False
 
         test.status = TestStatus.RUNNING
         test.start_date = datetime.now(UTC)
 
         if test.duration_days:
-            test.end_date = test.start_date + timedelta(days=test.duration_days)
+            test.end_date = test.start_date + timedelta(
+                days=test.duration_days
+            )
 
         test.updated_at = datetime.now(UTC)
 
@@ -335,7 +367,9 @@ class ABTestManager:
             return None
 
         # Check if user already assigned
-        existing_assignment = await self._get_user_assignment(test_id, user_id)
+        existing_assignment = await self._get_user_assignment(
+            test_id, user_id
+        )
         if existing_assignment:
             return existing_assignment.variant_id
 
@@ -344,11 +378,15 @@ class ABTestManager:
             return None
 
         # Check targeting criteria
-        if not self._matches_targeting_criteria(test, user_attributes or {}):
+        if not self._matches_targeting_criteria(
+            test, user_attributes or {}
+        ):
             return None
 
         # Assign variant based on strategy
-        variant_id = await self._assign_variant_by_strategy(test, user_id, user_attributes)
+        variant_id = await self._assign_variant_by_strategy(
+            test, user_id, user_attributes
+        )
 
         if variant_id:
             assignment = TestAssignment(
@@ -410,7 +448,7 @@ class ABTestManager:
 
         # Limit event storage
         if len(self.events) > self.max_events:
-            self.events = self.events[-self.max_events:]
+            self.events = self.events[-self.max_events :]
 
         logger.debug(
             "Recorded test event",
@@ -490,7 +528,9 @@ class ABTestManager:
 
         return None
 
-    def _should_include_user_in_test(self, test: ABTest, user_id: str) -> bool:
+    def _should_include_user_in_test(
+        self, test: ABTest, user_id: str
+    ) -> bool:
         """Check if user should be included in test based on traffic percentage.
 
         Args:
@@ -505,7 +545,9 @@ class ABTestManager:
 
         # Use deterministic hash-based assignment
         hash_input = f"{test.id}:{user_id}"
-        hash_value = int(hashlib.md5(hash_input.encode()).hexdigest(), 16)
+        hash_value = int(
+            hashlib.md5(hash_input.encode()).hexdigest(), 16
+        )
         return (hash_value % 100) / 100.0 < test.traffic_percentage
 
     def _matches_targeting_criteria(
@@ -557,7 +599,9 @@ class ABTestManager:
         if test.allocation_strategy == VariantAllocation.EQUAL:
             # Equal distribution
             hash_input = f"{test.id}:{user_id}"
-            hash_value = int(hashlib.md5(hash_input.encode()).hexdigest(), 16)
+            hash_value = int(
+                hashlib.md5(hash_input.encode()).hexdigest(), 16
+            )
             variant_index = hash_value % len(active_variants)
             return active_variants[variant_index].id
 
@@ -568,8 +612,12 @@ class ABTestManager:
                 return None
 
             hash_input = f"{test.id}:{user_id}"
-            hash_value = int(hashlib.md5(hash_input.encode()).hexdigest(), 16)
-            random_value = (hash_value % 1000000) / 1000000.0 * total_weight
+            hash_value = int(
+                hashlib.md5(hash_input.encode()).hexdigest(), 16
+            )
+            random_value = (
+                (hash_value % 1000000) / 1000000.0 * total_weight
+            )
 
             cumulative_weight = 0
             for variant in active_variants:
@@ -593,7 +641,10 @@ class ABTestManager:
             Assignment or None if not found
         """
         for assignment in self.assignments.values():
-            if assignment.test_id == test_id and assignment.user_id == user_id:
+            if (
+                assignment.test_id == test_id
+                and assignment.user_id == user_id
+            ):
                 return assignment
         return None
 
@@ -613,7 +664,9 @@ class ABTestManager:
         # Group by variant
         variant_results = {}
         for variant in test.variants:
-            variant_events = [e for e in test_events if e.variant_id == variant.id]
+            variant_events = [
+                e for e in test_events if e.variant_id == variant.id
+            ]
 
             # Calculate basic metrics
             total_events = len(variant_events)
@@ -621,7 +674,11 @@ class ABTestManager:
 
             # Calculate metric aggregations
             metrics = {}
-            if test.primary_metric.name in variant_events[0].metrics if variant_events else {}:
+            if (
+                test.primary_metric.name in variant_events[0].metrics
+                if variant_events
+                else {}
+            ):
                 metric_values = [
                     e.metrics.get(test.primary_metric.name, 0)
                     for e in variant_events
@@ -649,17 +706,27 @@ class ABTestManager:
             # In a real implementation, you would perform proper statistical tests
             # like t-tests, chi-square tests, or bayesian analysis
             for variant_id in variant_results:
-                statistical_significance[variant_id] = False  # Placeholder
-                confidence_intervals[variant_id] = {"lower": 0, "upper": 1}  # Placeholder
+                statistical_significance[variant_id] = (
+                    False  # Placeholder
+                )
+                confidence_intervals[variant_id] = {
+                    "lower": 0,
+                    "upper": 1,
+                }  # Placeholder
 
         # Generate recommendations
         recommendations = []
         if variant_results:
             best_variant = max(
                 variant_results.items(),
-                key=lambda x: x[1].get("metrics", {}).get(test.primary_metric.name, {}).get("mean", 0)
+                key=lambda x: x[1]
+                .get("metrics", {})
+                .get(test.primary_metric.name, {})
+                .get("mean", 0),
             )
-            recommendations.append(f"Variant '{best_variant[1]['variant_name']}' shows the highest {test.primary_metric.name}")
+            recommendations.append(
+                f"Variant '{best_variant[1]['variant_name']}' shows the highest {test.primary_metric.name}"
+            )
 
         # Store results
         result = TestResult(
@@ -678,7 +745,9 @@ class ABTestManager:
         """Get a test by ID."""
         return self.tests.get(test_id)
 
-    async def update_test(self, test_id: str, update_data: dict[str, Any]) -> ABTest | None:
+    async def update_test(
+        self, test_id: str, update_data: dict[str, Any]
+    ) -> ABTest | None:
         """Update a test configuration."""
         test = self.tests.get(test_id)
         if not test:
@@ -719,7 +788,9 @@ class ABTestManager:
         await self._analyze_test_results(test_id)
         return self.results.get(test_id)
 
-    async def end_test(self, test_id: str, winner_variant: str | None = None) -> bool:
+    async def end_test(
+        self, test_id: str, winner_variant: str | None = None
+    ) -> bool:
         """End a test with optional winner selection."""
         test = self.tests.get(test_id)
         if test:
@@ -734,7 +805,9 @@ class ABTestManager:
             return True
         return False
 
-    async def get_test_performance(self, test_id: str) -> dict[str, Any] | None:
+    async def get_test_performance(
+        self, test_id: str
+    ) -> dict[str, Any] | None:
         """Get test performance metrics."""
         test = self.tests.get(test_id)
         result = self.results.get(test_id)
@@ -745,19 +818,29 @@ class ABTestManager:
         performance = {
             "test_id": test_id,
             "status": test.status.value,
-            "total_participants": len([a for a in self.assignments.values() if a.test_id == test_id]),
-            "events_count": len([e for e in self.events if e.test_id == test_id]),
+            "total_participants": len(
+                [
+                    a
+                    for a in self.assignments.values()
+                    if a.test_id == test_id
+                ]
+            ),
+            "events_count": len(
+                [e for e in self.events if e.test_id == test_id]
+            ),
             "start_date": test.start_date,
             "end_date": test.end_date,
         }
 
         if result:
-            performance.update({
-                "variant_results": result.variant_results,
-                "statistical_significance": result.statistical_significance,
-                "confidence_intervals": result.confidence_intervals,
-                "recommendations": result.recommendations,
-            })
+            performance.update(
+                {
+                    "variant_results": result.variant_results,
+                    "statistical_significance": result.statistical_significance,
+                    "confidence_intervals": result.confidence_intervals,
+                    "recommendations": result.recommendations,
+                }
+            )
 
         return performance
 

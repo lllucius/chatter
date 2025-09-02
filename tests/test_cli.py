@@ -1,9 +1,8 @@
 """Tests for CLI commands."""
 
-import json
 import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, mock_open, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 import typer
@@ -11,18 +10,7 @@ from typer.testing import CliRunner
 
 from chatter.cli import (
     app,
-    clone_prompt,
-    config_show,
-    config_test,
-    create_prompt,
-    db_check,
-    db_init,
-    delete_prompt,
     get_api_client,
-    health_check,
-    list_prompts,
-    show_prompt,
-    test_prompt,
 )
 
 
@@ -81,10 +69,20 @@ class TestPromptCommands:
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "success": True,
-            "data": {"prompts": [
-                {"id": "1", "name": "test_prompt", "description": "A test prompt"},
-                {"id": "2", "name": "another_prompt", "description": "Another prompt"}
-            ]}
+            "data": {
+                "prompts": [
+                    {
+                        "id": "1",
+                        "name": "test_prompt",
+                        "description": "A test prompt",
+                    },
+                    {
+                        "id": "2",
+                        "name": "another_prompt",
+                        "description": "Another prompt",
+                    },
+                ]
+            },
         }
         mock_client.get.return_value = mock_response
 
@@ -120,17 +118,24 @@ class TestPromptCommands:
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "success": True,
-            "data": {"id": "new_prompt_id", "name": "new_prompt"}
+            "data": {"id": "new_prompt_id", "name": "new_prompt"},
         }
         mock_client.post.return_value = mock_response
 
         # Act
-        result = self.runner.invoke(app, [
-            "prompts", "create",
-            "--name", "new_prompt",
-            "--description", "A new test prompt",
-            "--content", "This is the prompt content"
-        ])
+        result = self.runner.invoke(
+            app,
+            [
+                "prompts",
+                "create",
+                "--name",
+                "new_prompt",
+                "--description",
+                "A new test prompt",
+                "--content",
+                "This is the prompt content",
+            ],
+        )
 
         # Assert
         assert result.exit_code == 0
@@ -149,8 +154,8 @@ class TestPromptCommands:
                 "id": "test_id",
                 "name": "test_prompt",
                 "description": "A test prompt",
-                "content": "This is the prompt content"
-            }
+                "content": "This is the prompt content",
+            },
         }
         mock_client.get.return_value = mock_response
 
@@ -174,7 +179,9 @@ class TestPromptCommands:
 
         # Act
         with patch('chatter.cli.Confirm.ask', return_value=True):
-            result = self.runner.invoke(app, ["prompts", "delete", "test_id"])
+            result = self.runner.invoke(
+                app, ["prompts", "delete", "test_id"]
+            )
 
         # Assert
         assert result.exit_code == 0
@@ -189,16 +196,22 @@ class TestPromptCommands:
         mock_response = MagicMock()
         mock_response.json.return_value = {
             "success": True,
-            "data": {"response": "This is the AI response"}
+            "data": {"response": "This is the AI response"},
         }
         mock_client.post.return_value = mock_response
 
         # Act
-        result = self.runner.invoke(app, [
-            "prompts", "test",
-            "--prompt-id", "test_id",
-            "--input", "Test input message"
-        ])
+        result = self.runner.invoke(
+            app,
+            [
+                "prompts",
+                "test",
+                "--prompt-id",
+                "test_id",
+                "--input",
+                "Test input message",
+            ],
+        )
 
         # Assert
         assert result.exit_code == 0
@@ -210,7 +223,7 @@ class TestPromptCommands:
         # Arrange
         mock_client = MagicMock()
         mock_get_client.return_value = mock_client
-        
+
         # Mock the get response for the original prompt
         mock_get_response = MagicMock()
         mock_get_response.json.return_value = {
@@ -218,26 +231,32 @@ class TestPromptCommands:
             "data": {
                 "name": "original_prompt",
                 "description": "Original description",
-                "content": "Original content"
-            }
+                "content": "Original content",
+            },
         }
-        
+
         # Mock the post response for creating the clone
         mock_post_response = MagicMock()
         mock_post_response.json.return_value = {
             "success": True,
-            "data": {"id": "cloned_id", "name": "cloned_prompt"}
+            "data": {"id": "cloned_id", "name": "cloned_prompt"},
         }
-        
+
         mock_client.get.return_value = mock_get_response
         mock_client.post.return_value = mock_post_response
 
         # Act
-        result = self.runner.invoke(app, [
-            "prompts", "clone",
-            "--source-id", "original_id",
-            "--new-name", "cloned_prompt"
-        ])
+        result = self.runner.invoke(
+            app,
+            [
+                "prompts",
+                "clone",
+                "--source-id",
+                "original_id",
+                "--new-name",
+                "cloned_prompt",
+            ],
+        )
 
         # Assert
         assert result.exit_code == 0
@@ -257,7 +276,9 @@ class TestDatabaseCommands:
     def test_db_init_success(self, mock_init_db, mock_asyncio_run):
         """Test database initialization command."""
         # Arrange
-        mock_asyncio_run.side_effect = lambda coro: None  # Simulate successful execution
+        mock_asyncio_run.side_effect = (
+            lambda coro: None
+        )  # Simulate successful execution
 
         # Act
         result = self.runner.invoke(app, ["db", "init"])
@@ -272,7 +293,9 @@ class TestDatabaseCommands:
     def test_db_check_success(self, mock_check_db, mock_asyncio_run):
         """Test database connection check command."""
         # Arrange
-        mock_asyncio_run.side_effect = lambda coro: None  # Simulate successful execution
+        mock_asyncio_run.side_effect = (
+            lambda coro: None
+        )  # Simulate successful execution
 
         # Act
         result = self.runner.invoke(app, ["db", "check"])
@@ -327,7 +350,9 @@ class TestConfigCommands:
     def test_config_show_sensitive_hidden(self, mock_settings):
         """Test that sensitive config values are hidden."""
         # Arrange
-        mock_settings.database_url = "postgresql://user:secret@localhost/db"
+        mock_settings.database_url = (
+            "postgresql://user:secret@localhost/db"
+        )
         mock_settings.jwt_secret_key = "super-secret-key"
 
         # Act
@@ -336,7 +361,9 @@ class TestConfigCommands:
         # Assert
         assert result.exit_code == 0
         assert "secret" not in result.stdout.lower()
-        assert "***" in result.stdout or "hidden" in result.stdout.lower()
+        assert (
+            "***" in result.stdout or "hidden" in result.stdout.lower()
+        )
 
     @patch('chatter.cli.asyncio.run')
     def test_config_test_success(self, mock_asyncio_run):
@@ -345,7 +372,9 @@ class TestConfigCommands:
         mock_asyncio_run.side_effect = lambda coro: None
 
         # Act
-        with patch('chatter.cli.validate_startup_configuration') as mock_validate:
+        with patch(
+            'chatter.cli.validate_startup_configuration'
+        ) as mock_validate:
             result = self.runner.invoke(app, ["config", "test"])
 
         # Assert
@@ -371,7 +400,7 @@ class TestHealthCommands:
         mock_response.json.return_value = {
             "status": "healthy",
             "service": "chatter",
-            "version": "1.0.0"
+            "version": "1.0.0",
         }
         mock_get.return_value = mock_response
 
@@ -413,7 +442,7 @@ class TestServeCommand:
         # Assert
         assert result.exit_code == 0
         mock_uvicorn_run.assert_called_once()
-        
+
         # Check that uvicorn.run was called with expected parameters
         call_args = mock_uvicorn_run.call_args
         assert call_args[0][0] == "chatter.main:app"
@@ -427,7 +456,7 @@ class TestServeCommand:
         # Assert
         assert result.exit_code == 0
         mock_uvicorn_run.assert_called_once()
-        
+
         # Check that port was passed correctly
         call_kwargs = mock_uvicorn_run.call_args[1]
         assert call_kwargs.get("port") == 9000
@@ -441,7 +470,7 @@ class TestServeCommand:
         # Assert
         assert result.exit_code == 0
         mock_uvicorn_run.assert_called_once()
-        
+
         # Check that reload was passed correctly
         call_kwargs = mock_uvicorn_run.call_args[1]
         assert call_kwargs.get("reload") is True
@@ -457,7 +486,9 @@ class TestDocsCommands:
 
     @patch('chatter.cli.generate_openapi_spec')
     @patch('chatter.cli.export_openapi_json')
-    def test_docs_generate_json(self, mock_export_json, mock_generate_spec):
+    def test_docs_generate_json(
+        self, mock_export_json, mock_generate_spec
+    ):
         """Test generating OpenAPI documentation as JSON."""
         # Arrange
         mock_spec = {"info": {"version": "1.0.0"}, "paths": {}}
@@ -466,11 +497,17 @@ class TestDocsCommands:
         # Act
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "openapi.json"
-            result = self.runner.invoke(app, [
-                "docs", "generate",
-                "--format", "json",
-                "--output", str(output_path)
-            ])
+            result = self.runner.invoke(
+                app,
+                [
+                    "docs",
+                    "generate",
+                    "--format",
+                    "json",
+                    "--output",
+                    str(output_path),
+                ],
+            )
 
         # Assert
         assert result.exit_code == 0
@@ -479,7 +516,9 @@ class TestDocsCommands:
 
     @patch('chatter.cli.generate_openapi_spec')
     @patch('chatter.cli.export_openapi_yaml')
-    def test_docs_generate_yaml(self, mock_export_yaml, mock_generate_spec):
+    def test_docs_generate_yaml(
+        self, mock_export_yaml, mock_generate_spec
+    ):
         """Test generating OpenAPI documentation as YAML."""
         # Arrange
         mock_spec = {"info": {"version": "1.0.0"}, "paths": {}}
@@ -488,11 +527,17 @@ class TestDocsCommands:
         # Act
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "openapi.yaml"
-            result = self.runner.invoke(app, [
-                "docs", "generate",
-                "--format", "yaml",
-                "--output", str(output_path)
-            ])
+            result = self.runner.invoke(
+                app,
+                [
+                    "docs",
+                    "generate",
+                    "--format",
+                    "yaml",
+                    "--output",
+                    str(output_path),
+                ],
+            )
 
         # Assert
         assert result.exit_code == 0
@@ -515,7 +560,10 @@ class TestCLIIntegration:
 
         # Assert
         assert result.exit_code == 0
-        assert "Chatter CLI" in result.stdout or "Commands:" in result.stdout
+        assert (
+            "Chatter CLI" in result.stdout
+            or "Commands:" in result.stdout
+        )
 
     def test_prompts_help_command(self):
         """Test that prompts help command works."""
@@ -572,4 +620,7 @@ class TestCLIErrorHandling:
 
         # Assert
         assert result.exit_code == 1
-        assert "Error" in result.stdout or "Connection failed" in result.stdout
+        assert (
+            "Error" in result.stdout
+            or "Connection failed" in result.stdout
+        )

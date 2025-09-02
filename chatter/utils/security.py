@@ -15,22 +15,50 @@ logger = get_logger(__name__)
 
 # Patterns for sensitive data detection
 SENSITIVE_PATTERNS = {
-    'api_key': re.compile(r'(?i)(api[_-]?key|apikey|access[_-]?token|secret[_-]?key|bearer[_-]?token)["\s]*[:=]["\s]*([a-zA-Z0-9_\-\.]{8,})', re.IGNORECASE),
-    'password': re.compile(r'(?i)(password|passwd|pwd)["\s]*[:=]["\s]*([^\s"]{6,})', re.IGNORECASE),
+    'api_key': re.compile(
+        r'(?i)(api[_-]?key|apikey|access[_-]?token|secret[_-]?key|bearer[_-]?token)["\s]*[:=]["\s]*([a-zA-Z0-9_\-\.]{8,})',
+        re.IGNORECASE,
+    ),
+    'password': re.compile(
+        r'(?i)(password|passwd|pwd)["\s]*[:=]["\s]*([^\s"]{6,})',
+        re.IGNORECASE,
+    ),
     'credit_card': re.compile(r'\b(?:\d{4}[-\s]?){3}\d{4}\b'),
     'ssn': re.compile(r'\b\d{3}-\d{2}-\d{4}\b'),
-    'email': re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'),
-    'jwt_token': re.compile(r'eyJ[A-Za-z0-9_-]*\.eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'),
-    'bearer_token': re.compile(r'Bearer\s+([A-Za-z0-9_\-\.]{20,})', re.IGNORECASE),
-    'authorization': re.compile(r'Authorization:\s*([^\r\n]*)', re.IGNORECASE),
+    'email': re.compile(
+        r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    ),
+    'jwt_token': re.compile(
+        r'eyJ[A-Za-z0-9_-]*\.eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*'
+    ),
+    'bearer_token': re.compile(
+        r'Bearer\s+([A-Za-z0-9_\-\.]{20,})', re.IGNORECASE
+    ),
+    'authorization': re.compile(
+        r'Authorization:\s*([^\r\n]*)', re.IGNORECASE
+    ),
 }
 
 # Common secret key names
 SECRET_KEYS = {
-    'api_key', 'apikey', 'access_token', 'secret_key', 'bearer_token',
-    'password', 'passwd', 'pwd', 'client_secret', 'private_key',
-    'authorization', 'auth_token', 'refresh_token', 'session_token',
-    'database_url', 'redis_url', 'jwt_secret', 'encryption_key'
+    'api_key',
+    'apikey',
+    'access_token',
+    'secret_key',
+    'bearer_token',
+    'password',
+    'passwd',
+    'pwd',
+    'client_secret',
+    'private_key',
+    'authorization',
+    'auth_token',
+    'refresh_token',
+    'session_token',
+    'database_url',
+    'redis_url',
+    'jwt_secret',
+    'encryption_key',
 }
 
 
@@ -43,7 +71,9 @@ def hash_password(password: str) -> str:
     Returns:
         Hashed password string
     """
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=settings.bcrypt_rounds)).decode()
+    return bcrypt.hashpw(
+        password.encode(), bcrypt.gensalt(rounds=settings.bcrypt_rounds)
+    ).decode()
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -57,7 +87,9 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
         True if password matches, False otherwise
     """
     try:
-        return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
+        return bcrypt.checkpw(
+            plain_password.encode(), hashed_password.encode()
+        )
     except Exception as e:
         logger.warning(f"Password verification failed: {e}")
         return False
@@ -74,14 +106,18 @@ def hash_api_key(api_key: str, salt: str | None = None) -> str:
         Hashed API key
     """
     if salt is None:
-        salt = settings.secret_key[:16]  # Use first 16 chars of secret key as salt
+        salt = settings.secret_key[
+            :16
+        ]  # Use first 16 chars of secret key as salt
 
     # Use SHA-256 with salt for API key hashing
     combined = f"{salt}{api_key}{salt}"
     return hashlib.sha256(combined.encode()).hexdigest()
 
 
-def verify_api_key(plain_key: str, hashed_key: str, salt: str | None = None) -> bool:
+def verify_api_key(
+    plain_key: str, hashed_key: str, salt: str | None = None
+) -> bool:
     """Verify an API key against its hash.
 
     Args:
@@ -178,6 +214,7 @@ def sanitize_string(text: str) -> str:
 
     # Apply all sensitive patterns
     for pattern_name, pattern in SENSITIVE_PATTERNS.items():
+
         def replace_match(match):
             if pattern_name == 'email':
                 # For emails, just mask the domain part
@@ -269,7 +306,9 @@ class SecureLogger:
         """Initialize with a logger instance."""
         self.logger = logger_instance
 
-    def _sanitize_message(self, message: str, *args, **kwargs) -> tuple[str, tuple, dict]:
+    def _sanitize_message(
+        self, message: str, *args, **kwargs
+    ) -> tuple[str, tuple, dict]:
         """Sanitize log message and arguments."""
         # Sanitize the message
         sanitized_message = sanitize_string(str(message))
@@ -284,27 +323,37 @@ class SecureLogger:
 
     def debug(self, message: str, *args, **kwargs):
         """Log debug message with sanitization."""
-        msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
         self.logger.debug(msg, *args, **kwargs)
 
     def info(self, message: str, *args, **kwargs):
         """Log info message with sanitization."""
-        msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
         self.logger.info(msg, *args, **kwargs)
 
     def warning(self, message: str, *args, **kwargs):
         """Log warning message with sanitization."""
-        msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
         self.logger.warning(msg, *args, **kwargs)
 
     def error(self, message: str, *args, **kwargs):
         """Log error message with sanitization."""
-        msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
         self.logger.error(msg, *args, **kwargs)
 
     def critical(self, message: str, *args, **kwargs):
         """Log critical message with sanitization."""
-        msg, args, kwargs = self._sanitize_message(message, *args, **kwargs)
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
         self.logger.critical(msg, *args, **kwargs)
 
 
@@ -617,4 +666,5 @@ def generate_session_id(length: int = 32) -> str:
         Secure session ID string
     """
     import secrets
+
     return secrets.token_urlsafe(length)

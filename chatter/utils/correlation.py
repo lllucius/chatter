@@ -44,7 +44,11 @@ def set_correlation_id(correlation_id: str) -> None:
 class CorrelationIdMiddleware(BaseHTTPMiddleware):
     """Middleware to add correlation IDs to requests and responses."""
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
         """Add correlation ID to request and response.
 
         Args:

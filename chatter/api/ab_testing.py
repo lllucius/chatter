@@ -38,10 +38,15 @@ async def get_ab_test_manager() -> ABTestManager:
         ABTestManager instance
     """
     from chatter.services.ab_testing import ab_test_manager
+
     return ab_test_manager
 
 
-@router.post("/", response_model=ABTestResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=ABTestResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_ab_test(
     test_data: ABTestCreateRequest,
     current_user: User = Depends(get_current_user),
@@ -60,7 +65,9 @@ async def create_ab_test(
     try:
         # Convert request data to ABTest model format
 
-        from chatter.services.ab_testing import TestMetric
+        from chatter.services.ab_testing import (
+            TestMetric,
+        )
         from chatter.services.ab_testing import (
             TestVariant as ServiceTestVariant,
         )
@@ -86,10 +93,12 @@ async def create_ab_test(
         # Create secondary metrics
         secondary_metrics = []
         for metric in test_data.metrics[1:]:
-            secondary_metrics.append(TestMetric(
-                name=metric.value,
-                metric_type=metric,
-            ))
+            secondary_metrics.append(
+                TestMetric(
+                    name=metric.value,
+                    metric_type=metric,
+                )
+            )
 
         # Create test
 
@@ -103,10 +112,13 @@ async def create_ab_test(
                 "metric_type": test_data.metrics[0].value,
             },
             created_by=current_user.username,
-            secondary_metrics=[{
-                "name": metric.value,
-                "metric_type": metric.value,
-            } for metric in test_data.metrics[1:]],
+            secondary_metrics=[
+                {
+                    "name": metric.value,
+                    "metric_type": metric.value,
+                }
+                for metric in test_data.metrics[1:]
+            ],
             allocation_strategy=test_data.allocation_strategy,
             traffic_percentage=test_data.traffic_percentage / 100.0,
             duration_days=test_data.duration_days,
@@ -115,7 +127,9 @@ async def create_ab_test(
         created_test = await ab_test_manager.get_test(test_id)
 
         if not created_test:
-            raise InternalServerProblem(detail="Failed to retrieve created test")
+            raise InternalServerProblem(
+                detail="Failed to retrieve created test"
+            )
 
         # Convert to response format
         from chatter.schemas.ab_testing import (
@@ -124,12 +138,14 @@ async def create_ab_test(
 
         response_variants = []
         for variant in created_test.variants:
-            response_variants.append(ResponseTestVariant(
-                name=variant.name,
-                description=variant.description,
-                configuration=variant.configuration,
-                weight=variant.weight,
-            ))
+            response_variants.append(
+                ResponseTestVariant(
+                    name=variant.name,
+                    description=variant.description,
+                    configuration=variant.configuration,
+                    weight=variant.weight,
+                )
+            )
 
         return ABTestResponse(
             id=created_test.id,
@@ -140,7 +156,8 @@ async def create_ab_test(
             allocation_strategy=created_test.allocation_strategy,
             variants=response_variants,
             metrics=test_data.metrics,
-            duration_days=created_test.duration_days or test_data.duration_days,
+            duration_days=created_test.duration_days
+            or test_data.duration_days,
             min_sample_size=created_test.minimum_sample_size,
             confidence_level=created_test.confidence_level,
             target_audience=created_test.target_users,
@@ -157,7 +174,9 @@ async def create_ab_test(
 
     except Exception as e:
         logger.error("Failed to create A/B test", error=str(e))
-        raise InternalServerProblem(detail="Failed to create A/B test") from e
+        raise InternalServerProblem(
+            detail="Failed to create A/B test"
+        ) from e
 
 
 @router.get("/", response_model=ABTestListResponse)
@@ -199,49 +218,56 @@ async def list_ab_tests(
 
             response_variants = []
             for variant in test.variants:
-                response_variants.append(ResponseTestVariant(
-                    name=variant.name,
-                    description=variant.description,
-                    configuration=variant.configuration,
-                    weight=variant.weight,
-                ))
+                response_variants.append(
+                    ResponseTestVariant(
+                        name=variant.name,
+                        description=variant.description,
+                        configuration=variant.configuration,
+                        weight=variant.weight,
+                    )
+                )
 
             # Get metrics from test configuration
             metrics = [test.primary_metric.metric_type]
-            metrics.extend([m.metric_type for m in test.secondary_metrics])
+            metrics.extend(
+                [m.metric_type for m in test.secondary_metrics]
+            )
 
-            test_responses.append(ABTestResponse(
-                id=test.id,
-                name=test.name,
-                description=test.description,
-                test_type=test.test_type,
-                status=test.status,
-                allocation_strategy=test.allocation_strategy,
-                variants=response_variants,
-                metrics=metrics,
-                duration_days=test.duration_days or 7,
-                min_sample_size=test.minimum_sample_size,
-                confidence_level=test.confidence_level,
-                target_audience=test.target_users,
-                traffic_percentage=test.traffic_percentage * 100.0,
-                start_date=test.start_date,
-                end_date=test.end_date,
-                participant_count=0,  # Would need to be calculated
-                created_at=test.created_at,
-                updated_at=test.updated_at,
-                created_by=test.created_by,
-                tags=test.tags,
-                metadata=test.metadata,
-            ))
+            test_responses.append(
+                ABTestResponse(
+                    id=test.id,
+                    name=test.name,
+                    description=test.description,
+                    test_type=test.test_type,
+                    status=test.status,
+                    allocation_strategy=test.allocation_strategy,
+                    variants=response_variants,
+                    metrics=metrics,
+                    duration_days=test.duration_days or 7,
+                    min_sample_size=test.minimum_sample_size,
+                    confidence_level=test.confidence_level,
+                    target_audience=test.target_users,
+                    traffic_percentage=test.traffic_percentage * 100.0,
+                    start_date=test.start_date,
+                    end_date=test.end_date,
+                    participant_count=0,  # Would need to be calculated
+                    created_at=test.created_at,
+                    updated_at=test.updated_at,
+                    created_by=test.created_by,
+                    tags=test.tags,
+                    metadata=test.metadata,
+                )
+            )
 
         return ABTestListResponse(
-            tests=test_responses,
-            total=len(test_responses)
+            tests=test_responses, total=len(test_responses)
         )
 
     except Exception as e:
         logger.error("Failed to list A/B tests", error=str(e))
-        raise InternalServerProblem(detail="Failed to list A/B tests") from e
+        raise InternalServerProblem(
+            detail="Failed to list A/B tests"
+        ) from e
 
 
 @router.get("/{test_id}", response_model=ABTestResponse)
@@ -263,7 +289,9 @@ async def get_ab_test(
     try:
         test = await ab_test_manager.get_test(test_id)
         if not test:
-            raise NotFoundProblem(detail=f"A/B test {test_id} not found")
+            raise NotFoundProblem(
+                detail=f"A/B test {test_id} not found"
+            )
 
         # Convert to response format
         from chatter.schemas.ab_testing import (
@@ -272,12 +300,14 @@ async def get_ab_test(
 
         response_variants = []
         for variant in test.variants:
-            response_variants.append(ResponseTestVariant(
-                name=variant.name,
-                description=variant.description,
-                configuration=variant.configuration,
-                weight=variant.weight,
-            ))
+            response_variants.append(
+                ResponseTestVariant(
+                    name=variant.name,
+                    description=variant.description,
+                    configuration=variant.configuration,
+                    weight=variant.weight,
+                )
+            )
 
         # Get metrics from test configuration
         metrics = [test.primary_metric.metric_type]
@@ -310,8 +340,12 @@ async def get_ab_test(
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to get A/B test", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to get A/B test") from e
+        logger.error(
+            "Failed to get A/B test", test_id=test_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to get A/B test"
+        ) from e
 
 
 @router.put("/{test_id}", response_model=ABTestResponse)
@@ -336,18 +370,26 @@ async def update_ab_test(
         # Check if test exists
         test = await ab_test_manager.get_test(test_id)
         if not test:
-            raise NotFoundProblem(detail=f"A/B test {test_id} not found")
+            raise NotFoundProblem(
+                detail=f"A/B test {test_id} not found"
+            )
 
         # Update test data
         update_data = test_data.model_dump(exclude_unset=True)
 
         # Convert traffic percentage back to decimal
         if "traffic_percentage" in update_data:
-            update_data["traffic_percentage"] = update_data["traffic_percentage"] / 100.0
+            update_data["traffic_percentage"] = (
+                update_data["traffic_percentage"] / 100.0
+            )
 
-        updated_test = await ab_test_manager.update_test(test_id, update_data)
+        updated_test = await ab_test_manager.update_test(
+            test_id, update_data
+        )
         if not updated_test:
-            raise InternalServerProblem(detail="Failed to update A/B test")
+            raise InternalServerProblem(
+                detail="Failed to update A/B test"
+            )
 
         # Convert to response format (reuse logic from get_ab_test)
         from chatter.schemas.ab_testing import (
@@ -356,15 +398,19 @@ async def update_ab_test(
 
         response_variants = []
         for variant in updated_test.variants:
-            response_variants.append(ResponseTestVariant(
-                name=variant.name,
-                description=variant.description,
-                configuration=variant.configuration,
-                weight=variant.weight,
-            ))
+            response_variants.append(
+                ResponseTestVariant(
+                    name=variant.name,
+                    description=variant.description,
+                    configuration=variant.configuration,
+                    weight=variant.weight,
+                )
+            )
 
         metrics = [updated_test.primary_metric.metric_type]
-        metrics.extend([m.metric_type for m in updated_test.secondary_metrics])
+        metrics.extend(
+            [m.metric_type for m in updated_test.secondary_metrics]
+        )
 
         return ABTestResponse(
             id=updated_test.id,
@@ -393,8 +439,12 @@ async def update_ab_test(
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to update A/B test", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to update A/B test") from e
+        logger.error(
+            "Failed to update A/B test", test_id=test_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to update A/B test"
+        ) from e
 
 
 @router.delete("/{test_id}", response_model=ABTestDeleteResponse)
@@ -417,18 +467,24 @@ async def delete_ab_test(
         success = await ab_test_manager.delete_test(test_id)
 
         if not success:
-            raise NotFoundProblem(detail=f"A/B test {test_id} not found")
+            raise NotFoundProblem(
+                detail=f"A/B test {test_id} not found"
+            )
 
         return ABTestDeleteResponse(
             success=True,
-            message=f"A/B test {test_id} deleted successfully"
+            message=f"A/B test {test_id} deleted successfully",
         )
 
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to delete A/B test", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to delete A/B test") from e
+        logger.error(
+            "Failed to delete A/B test", test_id=test_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to delete A/B test"
+        ) from e
 
 
 @router.post("/{test_id}/start", response_model=ABTestActionResponse)
@@ -451,7 +507,9 @@ async def start_ab_test(
         success = await ab_test_manager.start_test(test_id)
 
         if not success:
-            raise BadRequestProblem(detail="Failed to start test - check test status and configuration")
+            raise BadRequestProblem(
+                detail="Failed to start test - check test status and configuration"
+            )
 
         from chatter.services.ab_testing import TestStatus
 
@@ -459,14 +517,18 @@ async def start_ab_test(
             success=True,
             message=f"A/B test {test_id} started successfully",
             test_id=test_id,
-            new_status=TestStatus.RUNNING
+            new_status=TestStatus.RUNNING,
         )
 
     except BadRequestProblem:
         raise
     except Exception as e:
-        logger.error("Failed to start A/B test", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to start A/B test") from e
+        logger.error(
+            "Failed to start A/B test", test_id=test_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to start A/B test"
+        ) from e
 
 
 @router.post("/{test_id}/pause", response_model=ABTestActionResponse)
@@ -489,7 +551,9 @@ async def pause_ab_test(
         success = await ab_test_manager.pause_test(test_id)
 
         if not success:
-            raise BadRequestProblem(detail="Failed to pause test - check test status")
+            raise BadRequestProblem(
+                detail="Failed to pause test - check test status"
+            )
 
         from chatter.services.ab_testing import TestStatus
 
@@ -497,14 +561,18 @@ async def pause_ab_test(
             success=True,
             message=f"A/B test {test_id} paused successfully",
             test_id=test_id,
-            new_status=TestStatus.PAUSED
+            new_status=TestStatus.PAUSED,
         )
 
     except BadRequestProblem:
         raise
     except Exception as e:
-        logger.error("Failed to pause A/B test", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to pause A/B test") from e
+        logger.error(
+            "Failed to pause A/B test", test_id=test_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to pause A/B test"
+        ) from e
 
 
 @router.post("/{test_id}/complete", response_model=ABTestActionResponse)
@@ -527,7 +595,9 @@ async def complete_ab_test(
         success = await ab_test_manager.complete_test(test_id)
 
         if not success:
-            raise BadRequestProblem(detail="Failed to complete test - check test status")
+            raise BadRequestProblem(
+                detail="Failed to complete test - check test status"
+            )
 
         from chatter.services.ab_testing import TestStatus
 
@@ -535,14 +605,18 @@ async def complete_ab_test(
             success=True,
             message=f"A/B test {test_id} completed successfully",
             test_id=test_id,
-            new_status=TestStatus.COMPLETED
+            new_status=TestStatus.COMPLETED,
         )
 
     except BadRequestProblem:
         raise
     except Exception as e:
-        logger.error("Failed to complete A/B test", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to complete A/B test") from e
+        logger.error(
+            "Failed to complete A/B test", test_id=test_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to complete A/B test"
+        ) from e
 
 
 @router.get("/{test_id}/results", response_model=ABTestResultsResponse)
@@ -565,14 +639,19 @@ async def get_ab_test_results(
         results = await ab_test_manager.analyze_test(test_id)
 
         if not results:
-            raise NotFoundProblem(detail=f"Results not available for test {test_id}")
+            raise NotFoundProblem(
+                detail=f"Results not available for test {test_id}"
+            )
 
         # Convert results to response format
 
         from chatter.schemas.ab_testing import TestMetric
 
         metrics = []
-        for variant_name, variant_results in results.variant_results.items():
+        for (
+            variant_name,
+            variant_results,
+        ) in results.variant_results.items():
             for metric_name, metric_value in variant_results.items():
                 # Map string metric name to MetricType enum
                 try:
@@ -580,21 +659,29 @@ async def get_ab_test_results(
                 except ValueError:
                     metric_type = MetricType.CUSTOM
 
-                metrics.append(TestMetric(
-                    metric_type=metric_type,
-                    variant_name=variant_name,
-                    value=float(metric_value),
-                    sample_size=100,  # Placeholder
-                    confidence_interval=None,
-                ))
+                metrics.append(
+                    TestMetric(
+                        metric_type=metric_type,
+                        variant_name=variant_name,
+                        value=float(metric_value),
+                        sample_size=100,  # Placeholder
+                        confidence_interval=None,
+                    )
+                )
 
         # Convert confidence intervals to expected format
         confidence_intervals_formatted = {}
-        for variant_id, intervals in results.confidence_intervals.items():
+        for (
+            variant_id,
+            intervals,
+        ) in results.confidence_intervals.items():
             confidence_intervals_formatted[variant_id] = {}
             for metric, value in intervals.items():
                 # Convert single float to list of floats [lower, upper]
-                confidence_intervals_formatted[variant_id][metric] = [float(value), float(value)]
+                confidence_intervals_formatted[variant_id][metric] = [
+                    float(value),
+                    float(value),
+                ]
 
         return ABTestResultsResponse(
             test_id=test_id,
@@ -613,8 +700,14 @@ async def get_ab_test_results(
     except NotFoundProblem:
         raise
     except Exception as e:
-        logger.error("Failed to get A/B test results", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to get A/B test results") from e
+        logger.error(
+            "Failed to get A/B test results",
+            test_id=test_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to get A/B test results"
+        ) from e
 
 
 @router.get("/{test_id}/metrics", response_model=ABTestMetricsResponse)
@@ -665,8 +758,14 @@ async def get_ab_test_metrics(
         )
 
     except Exception as e:
-        logger.error("Failed to get A/B test metrics", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to get A/B test metrics") from e
+        logger.error(
+            "Failed to get A/B test metrics",
+            test_id=test_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to get A/B test metrics"
+        ) from e
 
 
 @router.post("/{test_id}/end", response_model=ABTestActionResponse)
@@ -688,7 +787,9 @@ async def end_ab_test(
         Action response
     """
     try:
-        success = await ab_test_manager.end_test(test_id, winner_variant)
+        success = await ab_test_manager.end_test(
+            test_id, winner_variant
+        )
 
         if not success:
             raise NotFoundProblem(
@@ -705,8 +806,12 @@ async def end_ab_test(
         )
 
     except Exception as e:
-        logger.error("Failed to end A/B test", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to end A/B test") from e
+        logger.error(
+            "Failed to end A/B test", test_id=test_id, error=str(e)
+        )
+        raise InternalServerProblem(
+            detail="Failed to end A/B test"
+        ) from e
 
 
 @router.get("/{test_id}/performance", response_model=dict[str, Any])
@@ -726,7 +831,9 @@ async def get_ab_test_performance(
         Performance results per variant
     """
     try:
-        performance = await ab_test_manager.get_test_performance(test_id)
+        performance = await ab_test_manager.get_test_performance(
+            test_id
+        )
 
         if not performance:
             raise NotFoundProblem(
@@ -738,5 +845,11 @@ async def get_ab_test_performance(
         return performance
 
     except Exception as e:
-        logger.error("Failed to get A/B test performance", test_id=test_id, error=str(e))
-        raise InternalServerProblem(detail="Failed to get A/B test performance") from e
+        logger.error(
+            "Failed to get A/B test performance",
+            test_id=test_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to get A/B test performance"
+        ) from e

@@ -46,7 +46,7 @@ router = APIRouter()
 
 
 async def get_chat_service(
-    session: AsyncSession = Depends(get_session)
+    session: AsyncSession = Depends(get_session),
 ) -> ChatService:
     """Get chat service instance.
 
@@ -110,8 +110,12 @@ async def create_conversation(
     "/conversations",
     response_model=ConversationSearchResponse,
     responses={
-        401: {"description": "Unauthorized - Invalid or missing authentication token"},
-        403: {"description": "Forbidden - User lacks permission to access conversations"},
+        401: {
+            "description": "Unauthorized - Invalid or missing authentication token"
+        },
+        403: {
+            "description": "Forbidden - User lacks permission to access conversations"
+        },
         422: {"description": "Validation Error"},
     },
 )
@@ -120,10 +124,16 @@ async def list_conversations(
     status: ConversationStatus | None = Query(
         None, description="Filter by status"
     ),
-    limit: int = Query(50, ge=1, le=100, description="Maximum number of results"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    limit: int = Query(
+        50, ge=1, le=100, description="Maximum number of results"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of results to skip"
+    ),
     sort_by: str = Query("created_at", description="Sort field"),
-    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
+    sort_order: str = Query(
+        "desc", pattern="^(asc|desc)$", description="Sort order"
+    ),
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationSearchResponse:
@@ -137,7 +147,8 @@ async def list_conversations(
 
     return ConversationSearchResponse(
         conversations=[
-            ConversationResponse.model_validate(c) for c in conversations
+            ConversationResponse.model_validate(c)
+            for c in conversations
         ],
         total=total,
         limit=limit,
@@ -167,7 +178,9 @@ async def get_conversation(
         ) from None
 
     # Convert to response format
-    conversation_response = ConversationResponse.model_validate(conversation)
+    conversation_response = ConversationResponse.model_validate(
+        conversation
+    )
     messages = [
         MessageResponse.model_validate(m) for m in conversation.messages
     ]
@@ -229,8 +242,12 @@ async def delete_conversation(
     "/conversations/{conversation_id}/messages",
     response_model=list[MessageResponse],
     responses={
-        401: {"description": "Unauthorized - Invalid or missing authentication token"},
-        403: {"description": "Forbidden - User lacks permission to access this conversation"},
+        401: {
+            "description": "Unauthorized - Invalid or missing authentication token"
+        },
+        403: {
+            "description": "Forbidden - User lacks permission to access this conversation"
+        },
         404: {"description": "Not Found - Conversation does not exist"},
         422: {"description": "Validation Error"},
     },
@@ -265,8 +282,13 @@ async def add_message_to_conversation(
 ) -> MessageResponse:
     """Add a new message to existing conversation."""
     try:
-        created_message = await chat_service.add_message_to_conversation(
-            conversation_id, current_user.id, message.role, message.content
+        created_message = (
+            await chat_service.add_message_to_conversation(
+                conversation_id,
+                current_user.id,
+                message.role,
+                message.content,
+            )
         )
         return MessageResponse.model_validate(created_message)
     except NotFoundError:
@@ -276,7 +298,10 @@ async def add_message_to_conversation(
         ) from None
 
 
-@router.delete("/conversations/{conversation_id}/messages/{message_id}", response_model=MessageDeleteResponse)
+@router.delete(
+    "/conversations/{conversation_id}/messages/{message_id}",
+    response_model=MessageDeleteResponse,
+)
 async def delete_message(
     conversation_id: str,
     message_id: str,
@@ -288,7 +313,9 @@ async def delete_message(
         await chat_service.delete_message(
             conversation_id, message_id, current_user.id
         )
-        return MessageDeleteResponse(message="Message deleted successfully")
+        return MessageDeleteResponse(
+            message="Message deleted successfully"
+        )
     except NotFoundError:
         raise NotFoundProblem(
             detail="Conversation not found",
@@ -302,7 +329,9 @@ async def delete_message(
     responses={
         200: {
             "content": {
-                "application/json": {"schema": ChatResponse.model_json_schema()},
+                "application/json": {
+                    "schema": ChatResponse.model_json_schema()
+                },
                 "text/event-stream": {"schema": {"type": "string"}},
             },
             "description": "Chat response as JSON or streaming SSE when stream=true",
@@ -334,15 +363,21 @@ async def chat(
                         yield f"data: {json.dumps(chunk)}\n\n"
                 else:
                     # For workflow-based streaming
-                    if not hasattr(chat_service, "chat_workflow_streaming"):
+                    if not hasattr(
+                        chat_service, "chat_workflow_streaming"
+                    ):
                         error_chunk = {
                             "type": "error",
                             "error": f"Streaming is not yet supported for workflow '{chat_request.workflow}'.",
                         }
                         yield f"data: {json.dumps(error_chunk)}\n\n"
                     else:
-                        async for chunk in chat_service.chat_workflow_streaming(
-                            current_user.id, chat_request, workflow_type=workflow_type
+                        async for (
+                            chunk
+                        ) in chat_service.chat_workflow_streaming(
+                            current_user.id,
+                            chat_request,
+                            workflow_type=workflow_type,
                         ):
                             yield f"data: {json.dumps(chunk)}\n\n"
             except (NotFoundError, ChatServiceError) as e:
@@ -368,14 +403,20 @@ async def chat(
                 current_user.id, chat_request
             )
         else:
-            conversation, assistant_message = await chat_service.chat_with_workflow(
-                current_user.id, chat_request, workflow_type=workflow_type
+            conversation, assistant_message = (
+                await chat_service.chat_with_workflow(
+                    current_user.id,
+                    chat_request,
+                    workflow_type=workflow_type,
+                )
             )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation),
+            conversation=ConversationResponse.model_validate(
+                conversation
+            ),
         )
     except (NotFoundError, ChatServiceError) as e:
         raise BadRequestProblem(detail=str(e)) from None
@@ -444,8 +485,7 @@ async def get_workflow_templates(
             templates[name] = WorkflowTemplateInfo(**template_info)
 
         return WorkflowTemplatesResponse(
-            templates=templates,
-            total_count=len(templates)
+            templates=templates, total_count=len(templates)
         )
     except Exception as e:
         raise InternalServerProblem(
@@ -462,22 +502,30 @@ async def chat_with_template(
 ) -> ChatResponse:
     """Chat using a specific workflow template."""
     try:
-        conversation, assistant_message = await chat_service.chat_with_template(
-            current_user.id, chat_request, template_name
+        conversation, assistant_message = (
+            await chat_service.chat_with_template(
+                current_user.id, chat_request, template_name
+            )
         )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation),
+            conversation=ConversationResponse.model_validate(
+                conversation
+            ),
         )
     except Exception as e:
         if "not found" in str(e).lower():
-            raise NotFoundProblem(detail=f"Template '{template_name}' not found") from None
+            raise NotFoundProblem(
+                detail=f"Template '{template_name}' not found"
+            ) from None
         raise BadRequestProblem(detail=str(e)) from None
 
 
-@router.get("/performance/stats", response_model=PerformanceStatsResponse)
+@router.get(
+    "/performance/stats", response_model=PerformanceStatsResponse
+)
 async def get_performance_stats(
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
@@ -486,8 +534,7 @@ async def get_performance_stats(
     try:
         stats = chat_service.get_performance_stats()
         return PerformanceStatsResponse(
-            **stats,
-            timestamp=__import__('time').time()
+            **stats, timestamp=__import__('time').time()
         )
     except Exception as e:
         raise InternalServerProblem(

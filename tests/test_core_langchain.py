@@ -4,7 +4,11 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage,
+)
 from langchain_core.runnables import Runnable
 
 from chatter.core.langchain import LangChainOrchestrator, orchestrator
@@ -43,7 +47,10 @@ class TestLangChainOrchestrator:
         assert os.environ.get("LANGCHAIN_TRACING_V2") == "true"
         assert os.environ.get("LANGCHAIN_API_KEY") == "test-api-key"
         assert os.environ.get("LANGCHAIN_PROJECT") == "test-project"
-        assert os.environ.get("LANGCHAIN_ENDPOINT") == "https://test-endpoint.com"
+        assert (
+            os.environ.get("LANGCHAIN_ENDPOINT")
+            == "https://test-endpoint.com"
+        )
 
     @patch('chatter.core.langchain.settings')
     def test_setup_tracing_disabled(self, mock_settings):
@@ -56,6 +63,7 @@ class TestLangChainOrchestrator:
 
         # Assert - No environment variables should be set
         import os
+
         assert os.environ.get("LANGCHAIN_TRACING_V2") != "true"
 
     def test_create_chat_chain_basic(self):
@@ -129,7 +137,9 @@ class TestLangChainOrchestrator:
         # Assert
         assert isinstance(chain, Runnable)
 
-    def test_create_conversational_rag_chain_custom_system_message(self):
+    def test_create_conversational_rag_chain_custom_system_message(
+        self,
+    ):
         """Test creating conversational RAG chain with custom system message."""
         # Arrange
         mock_retriever = MagicMock()
@@ -151,7 +161,9 @@ class TestLangChainOrchestrator:
         mock_chain.ainvoke.return_value = "Test response"
         inputs = {"input": "Test input"}
 
-        with patch('chatter.core.langchain.get_openai_callback') as mock_callback:
+        with patch(
+            'chatter.core.langchain.get_openai_callback'
+        ) as mock_callback:
             mock_cb = MagicMock()
             mock_cb.total_tokens = 100
             mock_cb.prompt_tokens = 80
@@ -195,7 +207,9 @@ class TestLangChainOrchestrator:
         """Test error handling in chain execution."""
         # Arrange
         mock_chain = AsyncMock(spec=Runnable)
-        mock_chain.ainvoke.side_effect = Exception("Chain execution failed")
+        mock_chain.ainvoke.side_effect = Exception(
+            "Chain execution failed"
+        )
         inputs = {"input": "Test input"}
 
         # Act & Assert
@@ -211,11 +225,13 @@ class TestLangChainOrchestrator:
             {"role": "system", "content": "You are helpful."},
             {"role": "user", "content": "Hello"},
             {"role": "assistant", "content": "Hi there!"},
-            {"role": "user", "content": "How are you?"}
+            {"role": "user", "content": "How are you?"},
         ]
 
         # Act
-        langchain_messages = self.orchestrator.convert_messages_to_langchain(messages)
+        langchain_messages = (
+            self.orchestrator.convert_messages_to_langchain(messages)
+        )
 
         # Assert
         assert len(langchain_messages) == 4
@@ -233,11 +249,13 @@ class TestLangChainOrchestrator:
         # Arrange
         messages = [
             {"role": "user"},  # Missing content
-            {"role": "assistant", "content": ""}  # Empty content
+            {"role": "assistant", "content": ""},  # Empty content
         ]
 
         # Act
-        langchain_messages = self.orchestrator.convert_messages_to_langchain(messages)
+        langchain_messages = (
+            self.orchestrator.convert_messages_to_langchain(messages)
+        )
 
         # Assert
         assert len(langchain_messages) == 2
@@ -251,11 +269,13 @@ class TestLangChainOrchestrator:
         # Arrange
         messages = [
             {"role": "unknown", "content": "Test message"},
-            {"role": "", "content": "Empty role message"}
+            {"role": "", "content": "Empty role message"},
         ]
 
         # Act
-        langchain_messages = self.orchestrator.convert_messages_to_langchain(messages)
+        langchain_messages = (
+            self.orchestrator.convert_messages_to_langchain(messages)
+        )
 
         # Assert
         assert len(langchain_messages) == 2
@@ -272,11 +292,13 @@ class TestLangChainOrchestrator:
             HumanMessage(content="Hello"),
             AIMessage(content="Hi there!"),
             SystemMessage(content="Another system message"),
-            HumanMessage(content="How are you?")
+            HumanMessage(content="How are you?"),
         ]
 
         # Act
-        formatted_history = self.orchestrator.format_chat_history(messages)
+        formatted_history = self.orchestrator.format_chat_history(
+            messages
+        )
 
         # Assert
         assert len(formatted_history) == 3  # Only non-system messages
@@ -293,7 +315,9 @@ class TestLangChainOrchestrator:
         messages = []
 
         # Act
-        formatted_history = self.orchestrator.format_chat_history(messages)
+        formatted_history = self.orchestrator.format_chat_history(
+            messages
+        )
 
         # Assert
         assert len(formatted_history) == 0
@@ -303,11 +327,13 @@ class TestLangChainOrchestrator:
         # Arrange
         messages = [
             SystemMessage(content="System message 1"),
-            SystemMessage(content="System message 2")
+            SystemMessage(content="System message 2"),
         ]
 
         # Act
-        formatted_history = self.orchestrator.format_chat_history(messages)
+        formatted_history = self.orchestrator.format_chat_history(
+            messages
+        )
 
         # Assert
         assert len(formatted_history) == 0
@@ -326,7 +352,9 @@ class TestLangChainIntegration:
         """Test complete RAG workflow with mocked components."""
         # Arrange
         mock_llm = AsyncMock(spec=BaseChatModel)
-        mock_llm.ainvoke.return_value = MagicMock(content="RAG response")
+        mock_llm.ainvoke.return_value = MagicMock(
+            content="RAG response"
+        )
 
         mock_retriever = MagicMock()
         mock_doc = MagicMock()
@@ -334,12 +362,18 @@ class TestLangChainIntegration:
         mock_retriever.invoke.return_value = [mock_doc]
 
         # Create RAG chain
-        rag_chain = self.orchestrator.create_rag_chain(mock_llm, mock_retriever)
+        rag_chain = self.orchestrator.create_rag_chain(
+            mock_llm, mock_retriever
+        )
 
         # Act
-        with patch.object(mock_retriever, 'invoke', return_value=[mock_doc]):
+        with patch.object(
+            mock_retriever, 'invoke', return_value=[mock_doc]
+        ):
             result = await self.orchestrator.run_chain_with_callback(
-                rag_chain, {"input": "Test question"}, provider_name="test"
+                rag_chain,
+                {"input": "Test question"},
+                provider_name="test",
             )
 
         # Assert
@@ -352,13 +386,15 @@ class TestLangChainIntegration:
         """Test conversational workflow with chat history."""
         # Arrange
         mock_llm = AsyncMock(spec=BaseChatModel)
-        mock_llm.ainvoke.return_value = MagicMock(content="Conversational response")
+        mock_llm.ainvoke.return_value = MagicMock(
+            content="Conversational response"
+        )
 
         # Create chat chain
         chat_chain = self.orchestrator.create_chat_chain(
-            mock_llm, 
+            mock_llm,
             system_message="You are a helpful assistant.",
-            include_history=True
+            include_history=True,
         )
 
         # Prepare inputs with chat history
@@ -366,8 +402,8 @@ class TestLangChainIntegration:
             "input": "What did we discuss earlier?",
             "chat_history": [
                 HumanMessage(content="Hello"),
-                AIMessage(content="Hi there!")
-            ]
+                AIMessage(content="Hi there!"),
+            ],
         }
 
         # Act
@@ -386,12 +422,18 @@ class TestLangChainIntegration:
             {"role": "system", "content": "System prompt"},
             {"role": "user", "content": "User message 1"},
             {"role": "assistant", "content": "Assistant response 1"},
-            {"role": "user", "content": "User message 2"}
+            {"role": "user", "content": "User message 2"},
         ]
 
         # Act
-        langchain_messages = self.orchestrator.convert_messages_to_langchain(api_messages)
-        formatted_history = self.orchestrator.format_chat_history(langchain_messages)
+        langchain_messages = (
+            self.orchestrator.convert_messages_to_langchain(
+                api_messages
+            )
+        )
+        formatted_history = self.orchestrator.format_chat_history(
+            langchain_messages
+        )
 
         # Assert
         # Should have 3 messages after filtering out system message

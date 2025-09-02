@@ -61,7 +61,9 @@ class DynamicVectorStoreService:
         try:
             # Get the chunk from the main documents table (async, on main loop)
             result = await self.session.execute(
-                select(DocumentChunk).where(DocumentChunk.id == chunk_id)
+                select(DocumentChunk).where(
+                    DocumentChunk.id == chunk_id
+                )
             )
             chunk = result.scalar_one_or_none()
 
@@ -102,7 +104,9 @@ class DynamicVectorStoreService:
 
             # Update the main chunk with embedding metadata (common) - async on main loop
             if ok:
-                chunk.add_embedding_model(table_model_name, set_as_primary=True)
+                chunk.add_embedding_model(
+                    table_model_name, set_as_primary=True
+                )
                 chunk.embedding_provider = provider_name
                 await self.session.commit()
                 await self.session.refresh(chunk)
@@ -132,7 +136,10 @@ class DynamicVectorStoreService:
         try:
             # Get or create the embedding model for this provider
             embedding_model_class = get_embedding_model(
-                model_name, dim, self.sync_engine, **(index_params or {})
+                model_name,
+                dim,
+                self.sync_engine,
+                **(index_params or {}),
             )
 
             # Create synchronous session for the embedding table
@@ -149,7 +156,9 @@ class DynamicVectorStoreService:
                     # Update existing embedding
                     existing.embedding = embedding
                     existing.content = chunk.content
-                    existing.metadata = json.dumps(metadata) if metadata else None
+                    existing.metadata = (
+                        json.dumps(metadata) if metadata else None
+                    )
                 else:
                     # Create new embedding record
                     embedding_record = embedding_model_class(
@@ -157,7 +166,9 @@ class DynamicVectorStoreService:
                         chunk_id=chunk.id,
                         embedding=embedding,
                         content=chunk.content,
-                        extra_metadata=json.dumps(metadata) if metadata else None,
+                        extra_metadata=(
+                            json.dumps(metadata) if metadata else None
+                        ),
                     )
                     sync_session.add(embedding_record)
 
@@ -201,7 +212,9 @@ class DynamicVectorStoreService:
             await self.session.commit()
             await self.session.refresh(chunk)
 
-            logger.debug("Fallback JSON embedding stored", chunk_id=chunk.id)
+            logger.debug(
+                "Fallback JSON embedding stored", chunk_id=chunk.id
+            )
             return True
 
         except Exception as e:
@@ -244,7 +257,9 @@ class DynamicVectorStoreService:
                 for chunk_id, distance in rows:
                     similarity_score = 1.0 - float(distance)
                     if similarity_score >= score_threshold:
-                        id_with_scores.append((chunk_id, similarity_score))
+                        id_with_scores.append(
+                            (chunk_id, similarity_score)
+                        )
 
                 if not id_with_scores:
                     return []
@@ -252,7 +267,9 @@ class DynamicVectorStoreService:
                 # Fetch chunks in one async query
                 chunk_ids = [cid for cid, _ in id_with_scores]
                 result = await self.session.execute(
-                    select(DocumentChunk).where(DocumentChunk.id.in_(chunk_ids))
+                    select(DocumentChunk).where(
+                        DocumentChunk.id.in_(chunk_ids)
+                    )
                 )
                 chunks = result.scalars().all()
                 chunk_map = {c.id: c for c in chunks}
@@ -267,7 +284,9 @@ class DynamicVectorStoreService:
                     if metadata_filter:
                         ok = True
                         for k, v in metadata_filter.items():
-                            if not chunk.extra_metadata or str(chunk.extra_metadata.get(k)) != str(v):
+                            if not chunk.extra_metadata or str(
+                                chunk.extra_metadata.get(k)
+                            ) != str(v):
                                 ok = False
                                 break
                         if not ok:
@@ -312,7 +331,10 @@ class DynamicVectorStoreService:
             # Get the embedding model for this provider (don't create if it doesn't exist)
             embedding_models_dict = list_embedding_models()
             if model_name not in embedding_models_dict:
-                logger.warning("No embedding model found for provider", model=model_name)
+                logger.warning(
+                    "No embedding model found for provider",
+                    model=model_name,
+                )
                 return []
 
             embedding_model_class = embedding_models_dict[model_name]
@@ -321,23 +343,37 @@ class DynamicVectorStoreService:
             sync_session_maker = sessionmaker(bind=self.sync_engine)
             with sync_session_maker() as sync_session:
                 # Build query: compute cosine distance then order by it
-                query = select(
-                    embedding_model_class.chunk_id,
-                    embedding_model_class.embedding.cosine_distance(query_embedding).label("distance"),
-                ).order_by(
-                    embedding_model_class.embedding.cosine_distance(query_embedding)
-                ).limit(limit)
+                query = (
+                    select(
+                        embedding_model_class.chunk_id,
+                        embedding_model_class.embedding.cosine_distance(
+                            query_embedding
+                        ).label("distance"),
+                    )
+                    .order_by(
+                        embedding_model_class.embedding.cosine_distance(
+                            query_embedding
+                        )
+                    )
+                    .limit(limit)
+                )
 
                 # Apply filters
                 if document_ids:
-                    query = query.where(embedding_model_class.document_id.in_(document_ids))
+                    query = query.where(
+                        embedding_model_class.document_id.in_(
+                            document_ids
+                        )
+                    )
 
                 # Execute query synchronously
                 rows = sync_session.execute(query).fetchall()
 
             return rows
         except Exception as e:
-            logger.error("PGVector similarity search failed", error=str(e))
+            logger.error(
+                "PGVector similarity search failed", error=str(e)
+            )
             return []
 
     async def _similarity_search_fallback(
@@ -351,17 +387,22 @@ class DynamicVectorStoreService:
         """Perform similarity search using JSON embeddings (fallback)."""
         try:
             # Select chunks that have embeddings
-            query = select(DocumentChunk).where(DocumentChunk.embedding_models.is_not(None))
+            query = select(DocumentChunk).where(
+                DocumentChunk.embedding_models.is_not(None)
+            )
 
             # Apply filters
             if document_ids:
-                query = query.where(DocumentChunk.document_id.in_(document_ids))
+                query = query.where(
+                    DocumentChunk.document_id.in_(document_ids)
+                )
 
             if metadata_filter:
                 # Simplified metadata equals filter
                 for key, value in metadata_filter.items():
                     query = query.where(
-                        DocumentChunk.extra_metadata[key].astext == str(value)
+                        DocumentChunk.extra_metadata[key].astext
+                        == str(value)
                     )
 
             result = await self.session.execute(query)
@@ -378,7 +419,9 @@ class DynamicVectorStoreService:
                         # Some DBs may return list directly
                         chunk_embedding = emb
 
-                    similarity = self._cosine_similarity(query_embedding, chunk_embedding)
+                    similarity = self._cosine_similarity(
+                        query_embedding, chunk_embedding
+                    )
                     if similarity >= score_threshold:
                         matches.append((chunk, float(similarity)))
                 except Exception:
@@ -389,7 +432,9 @@ class DynamicVectorStoreService:
             return matches[:limit]
 
         except Exception as e:
-            logger.error("Fallback similarity search failed", error=str(e))
+            logger.error(
+                "Fallback similarity search failed", error=str(e)
+            )
             return []
 
     async def hybrid_search(
@@ -423,6 +468,7 @@ class DynamicVectorStoreService:
             # Text search (simple LIKE-based)
             from sqlalchemy import func as sa_func
             from sqlalchemy import select as sa_select
+
             text_query_words = (text_query or "").lower().split()
             text_query_obj = sa_select(DocumentChunk)
 
@@ -436,7 +482,9 @@ class DynamicVectorStoreService:
                     sa_func.lower(DocumentChunk.content).contains(word)
                 )
 
-            text_result = await self.session.execute(text_query_obj.limit(limit * 2))
+            text_result = await self.session.execute(
+                text_query_obj.limit(limit * 2)
+            )
             text_chunks = text_result.scalars().all()
 
             # Combine
@@ -450,7 +498,9 @@ class DynamicVectorStoreService:
                 }
 
             for chunk in text_chunks:
-                text_score = self._calculate_text_score(chunk.content or "", text_query)
+                text_score = self._calculate_text_score(
+                    chunk.content or "", text_query
+                )
                 if chunk.id in combined_scores:
                     combined_scores[chunk.id]["text_score"] = text_score
                 else:
@@ -465,7 +515,10 @@ class DynamicVectorStoreService:
                 semantic_score = float(data["semantic_score"])
                 text_score = float(data["text_score"])
                 chunk_obj: DocumentChunk = data["chunk"]
-                combined = semantic_weight * semantic_score + text_weight * text_score
+                combined = (
+                    semantic_weight * semantic_score
+                    + text_weight * text_score
+                )
                 if combined >= score_threshold:
                     results.append((chunk_obj, combined))
 
@@ -499,34 +552,48 @@ class DynamicVectorStoreService:
                     DocumentChunk.embedding_models.is_not(None)
                 )
             )
-            stats["embedded_chunks"] = int(embedded_result.scalar() or 0)
+            stats["embedded_chunks"] = int(
+                embedded_result.scalar() or 0
+            )
 
             # Dynamic tables counts (PGVector only)
             embedding_models_dict = list_embedding_models()
             if embedding_models_dict and PGVECTOR_AVAILABLE:
                 sync_session_maker = sessionmaker(bind=self.sync_engine)
                 rows: dict[str, dict[str, Any]] = {}
+
                 # Offload the synchronous count queries
                 def _count_sync() -> dict[str, dict[str, Any]]:
                     with sync_session_maker() as sync_session:
                         out: dict[str, dict[str, Any]] = {}
-                        for model_name, model_class in embedding_models_dict.items():
+                        for (
+                            model_name,
+                            model_class,
+                        ) in embedding_models_dict.items():
                             try:
                                 count_result = sync_session.execute(
                                     select(func.count(model_class.id))
                                 ).scalar()
                                 out[model_name] = {
-                                    "embeddings_count": int(count_result or 0),
+                                    "embeddings_count": int(
+                                        count_result or 0
+                                    ),
                                     "table_name": model_class.__tablename__,
                                 }
                             except Exception as e:
-                                logger.warning("Failed to get stats for model", model=model_name, error=str(e))
+                                logger.warning(
+                                    "Failed to get stats for model",
+                                    model=model_name,
+                                    error=str(e),
+                                )
                         return out
+
                 rows = await asyncio.to_thread(_count_sync)
                 stats["models_used"] = rows
 
             stats["embedding_coverage"] = (
-                (stats["embedded_chunks"] / stats["total_chunks"]) * 100.0
+                (stats["embedded_chunks"] / stats["total_chunks"])
+                * 100.0
                 if stats["total_chunks"] > 0
                 else 0.0
             )
@@ -544,7 +611,9 @@ class DynamicVectorStoreService:
                 "pgvector_available": PGVECTOR_AVAILABLE,
             }
 
-    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
+    def _cosine_similarity(
+        self, vec1: list[float], vec2: list[float]
+    ) -> float:
         """Calculate cosine similarity between two vectors."""
         try:
             if not vec1 or not vec2 or len(vec1) != len(vec2):

@@ -36,6 +36,7 @@ except ImportError:
 
 try:
     import joblib
+
     JOBLIB_AVAILABLE = True
 except ImportError:
     JOBLIB_AVAILABLE = False
@@ -77,22 +78,26 @@ class DimensionalReductionEmbeddings(Embeddings):
 
         if strategy == "reducer":
             if not reducer_path:
-                raise ValueError("reducer_path required for 'reducer' strategy")
+                raise ValueError(
+                    "reducer_path required for 'reducer' strategy"
+                )
             if not JOBLIB_AVAILABLE:
-                raise ImportError("joblib required for dimensional reduction")
+                raise ImportError(
+                    "joblib required for dimensional reduction"
+                )
 
             try:
                 self.reducer = joblib.load(reducer_path)
                 logger.info(
                     "Loaded dimensional reducer",
                     reducer_path=reducer_path,
-                    target_dim=target_dim
+                    target_dim=target_dim,
                 )
             except Exception as e:
                 logger.error(
                     "Failed to load dimensional reducer",
                     reducer_path=reducer_path,
-                    error=str(e)
+                    error=str(e),
                 )
                 raise
 
@@ -100,7 +105,7 @@ class DimensionalReductionEmbeddings(Embeddings):
         """Apply dimensional reduction to a single vector."""
         if self.strategy == "truncate":
             # Simple truncation to target dimension
-            reduced = vector[:self.target_dim]
+            reduced = vector[: self.target_dim]
             # Pad with zeros if vector is shorter than target
             if len(reduced) < self.target_dim:
                 reduced.extend([0.0] * (self.target_dim - len(reduced)))
@@ -113,7 +118,9 @@ class DimensionalReductionEmbeddings(Embeddings):
             reduced_array = self.reducer.transform(vector_array)[0]
             reduced = reduced_array.tolist()
         else:
-            raise ValueError(f"Unknown reduction strategy: {self.strategy}")
+            raise ValueError(
+                f"Unknown reduction strategy: {self.strategy}"
+            )
 
         # L2 normalize if requested
         if self.normalize:
@@ -126,7 +133,10 @@ class DimensionalReductionEmbeddings(Embeddings):
     def embed_documents(self, texts: list[str]) -> list[list[float]]:
         """Embed documents and apply dimensional reduction."""
         base_embeddings = self.base.embed_documents(texts)
-        return [self._reduce_vector(embedding) for embedding in base_embeddings]
+        return [
+            self._reduce_vector(embedding)
+            for embedding in base_embeddings
+        ]
 
     def embed_query(self, text: str) -> list[float]:
         """Embed query and apply dimensional reduction."""
@@ -150,14 +160,18 @@ class EmbeddingService:
         async for session in get_session():
             return session
 
-    async def _create_embedding_provider_instance(self, provider, model_def) -> Embeddings | None:
+    async def _create_embedding_provider_instance(
+        self, provider, model_def
+    ) -> Embeddings | None:
         """Create an embedding provider instance based on registry data."""
         try:
             if provider.provider_type == ProviderType.OPENAI:
                 # Get API key from environment
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
                 if not api_key:
-                    logger.warning(f"No API key found for provider {provider.name}")
+                    logger.warning(
+                        f"No API key found for provider {provider.name}"
+                    )
                     return None
 
                 config = model_def.default_config or {}
@@ -165,7 +179,8 @@ class EmbeddingService:
                     api_key=api_key,
                     base_url=provider.base_url,
                     model=model_def.model_name,
-                    chunk_size=model_def.chunk_size or config.get('chunk_size', 1000),
+                    chunk_size=model_def.chunk_size
+                    or config.get('chunk_size', 1000),
                 )
 
                 # Apply dimensional reduction if configured for this model
@@ -180,10 +195,15 @@ class EmbeddingService:
                 else:
                     return base_provider
 
-            elif provider.provider_type == ProviderType.GOOGLE and GOOGLE_AVAILABLE:
+            elif (
+                provider.provider_type == ProviderType.GOOGLE
+                and GOOGLE_AVAILABLE
+            ):
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
                 if not api_key:
-                    logger.warning(f"No API key found for provider {provider.name}")
+                    logger.warning(
+                        f"No API key found for provider {provider.name}"
+                    )
                     return None
 
                 return GoogleGenerativeAIEmbeddings(
@@ -191,10 +211,15 @@ class EmbeddingService:
                     model=model_def.model_name,
                 )
 
-            elif provider.provider_type == ProviderType.COHERE and COHERE_AVAILABLE:
+            elif (
+                provider.provider_type == ProviderType.COHERE
+                and COHERE_AVAILABLE
+            ):
                 api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
                 if not api_key:
-                    logger.warning(f"No API key found for provider {provider.name}")
+                    logger.warning(
+                        f"No API key found for provider {provider.name}"
+                    )
                     return None
 
                 return CohereEmbeddings(
@@ -203,11 +228,15 @@ class EmbeddingService:
                 )
 
             else:
-                logger.warning(f"Unsupported embedding provider type: {provider.provider_type}")
+                logger.warning(
+                    f"Unsupported embedding provider type: {provider.provider_type}"
+                )
                 return None
 
         except Exception as e:
-            logger.error(f"Failed to create embedding provider instance for {provider.name}: {e}")
+            logger.error(
+                f"Failed to create embedding provider instance for {provider.name}: {e}"
+            )
             return None
 
     def _initialize_providers(self) -> None:
@@ -215,9 +244,13 @@ class EmbeddingService:
 
         Note: Providers are now loaded dynamically from model registry.
         """
-        logger.info("Embedding providers will be loaded dynamically from model registry")
+        logger.info(
+            "Embedding providers will be loaded dynamically from model registry"
+        )
 
-    async def get_provider(self, provider_name: str) -> Embeddings | None:
+    async def get_provider(
+        self, provider_name: str
+    ) -> Embeddings | None:
         """Get embedding provider by name.
 
         Args:
@@ -237,11 +270,15 @@ class EmbeddingService:
         # Get provider by name
         provider = await registry.get_provider_by_name(provider_name)
         if not provider or not provider.is_active:
-            logger.warning(f"Provider '{provider_name}' not found or inactive")
+            logger.warning(
+                f"Provider '{provider_name}' not found or inactive"
+            )
             return None
 
         # Get default embedding model for this provider
-        models, _ = await registry.list_models(provider.id, ModelType.EMBEDDING)
+        models, _ = await registry.list_models(
+            provider.id, ModelType.EMBEDDING
+        )
         default_model = None
         for model in models:
             if model.is_default and model.is_active:
@@ -256,18 +293,26 @@ class EmbeddingService:
                     break
 
         if not default_model:
-            logger.warning(f"No active embedding model found for provider '{provider_name}'")
+            logger.warning(
+                f"No active embedding model found for provider '{provider_name}'"
+            )
             return None
 
         # Create provider instance
-        instance = await self._create_embedding_provider_instance(provider, default_model)
+        instance = await self._create_embedding_provider_instance(
+            provider, default_model
+        )
         if not instance:
-            logger.warning(f"Failed to create instance for provider '{provider_name}'")
+            logger.warning(
+                f"Failed to create instance for provider '{provider_name}'"
+            )
             return None
 
         # Cache the instance
         self._providers[provider_name] = instance
-        logger.info(f"Initialized embedding provider: {provider_name} with model: {default_model.model_name}")
+        logger.info(
+            f"Initialized embedding provider: {provider_name} with model: {default_model.model_name}"
+        )
 
         return instance
 
@@ -281,7 +326,9 @@ class EmbeddingService:
         registry = ModelRegistryService(session)
 
         # Get default provider for embeddings
-        provider = await registry.get_default_provider(ModelType.EMBEDDING)
+        provider = await registry.get_default_provider(
+            ModelType.EMBEDDING
+        )
         if not provider:
             logger.warning("No default embedding provider configured")
             return None
@@ -302,7 +349,9 @@ class EmbeddingService:
 
         return active_providers
 
-    async def get_provider_info(self, provider_name: str) -> dict[str, Any]:
+    async def get_provider_info(
+        self, provider_name: str
+    ) -> dict[str, Any]:
         """Get information about an embedding provider.
 
         Args:
@@ -319,7 +368,9 @@ class EmbeddingService:
             return {}
 
         # Get models for this provider
-        models, _ = await registry.list_models(provider.id, ModelType.EMBEDDING)
+        models, _ = await registry.list_models(
+            provider.id, ModelType.EMBEDDING
+        )
         active_models = [m for m in models if m.is_active]
 
         return {
@@ -353,7 +404,9 @@ class EmbeddingService:
         providers = await self.list_available_providers()
         all_info = {}
         for provider_name in providers:
-            all_info[provider_name] = await self.get_provider_info(provider_name)
+            all_info[provider_name] = await self.get_provider_info(
+                provider_name
+            )
         return all_info
 
     async def generate_embedding(
@@ -480,9 +533,9 @@ class EmbeddingService:
                 "model": self._get_model_name(provider_name),
                 "text_count": len(texts),
                 "total_characters": total_chars,
-                "embedding_dimensions": len(all_embeddings[0])
-                if all_embeddings
-                else 0,
+                "embedding_dimensions": (
+                    len(all_embeddings[0]) if all_embeddings else 0
+                ),
                 "response_time_ms": int(
                     (time.time() - start_time) * 1000
                 ),

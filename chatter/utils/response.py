@@ -21,10 +21,16 @@ class ResponseMetadata(BaseModel):
 class StandardResponse(BaseModel):
     """Standard API response envelope."""
 
-    success: bool = Field(description="Whether the request was successful")
+    success: bool = Field(
+        description="Whether the request was successful"
+    )
     data: Any | None = Field(default=None, description="Response data")
-    message: str | None = Field(default=None, description="Human-readable message")
-    errors: list[str] | None = Field(default=None, description="List of error messages")
+    message: str | None = Field(
+        default=None, description="Human-readable message"
+    )
+    errors: list[str] | None = Field(
+        default=None, description="List of error messages"
+    )
     metadata: ResponseMetadata = Field(default_factory=ResponseMetadata)
 
     def model_post_init(self, __context: Any) -> None:
@@ -37,15 +43,14 @@ class PaginatedResponse(StandardResponse):
     """Standard paginated response envelope."""
 
     pagination: dict[str, Any] | None = Field(
-        default=None,
-        description="Pagination metadata"
+        default=None, description="Pagination metadata"
     )
 
 
 def create_success_response(
     data: Any = None,
     message: str | None = None,
-    pagination: dict[str, Any] | None = None
+    pagination: dict[str, Any] | None = None,
 ) -> StandardResponse | PaginatedResponse:
     """Create a standardized success response.
 
@@ -62,20 +67,14 @@ def create_success_response(
             success=True,
             data=data,
             message=message,
-            pagination=pagination
+            pagination=pagination,
         )
 
-    return StandardResponse(
-        success=True,
-        data=data,
-        message=message
-    )
+    return StandardResponse(success=True, data=data, message=message)
 
 
 def create_error_response(
-    message: str,
-    errors: list[str] | None = None,
-    data: Any = None
+    message: str, errors: list[str] | None = None, data: Any = None
 ) -> StandardResponse:
     """Create a standardized error response.
 
@@ -88,14 +87,13 @@ def create_error_response(
         Standardized error response
     """
     return StandardResponse(
-        success=False,
-        data=data,
-        message=message,
-        errors=errors or []
+        success=False, data=data, message=message, errors=errors or []
     )
 
 
-def wrap_response(response_data: Any, message: str | None = None) -> StandardResponse:
+def wrap_response(
+    response_data: Any, message: str | None = None
+) -> StandardResponse:
     """Wrap existing response data in standard envelope.
 
     Args:
@@ -106,7 +104,5 @@ def wrap_response(response_data: Any, message: str | None = None) -> StandardRes
         Wrapped response in standard format
     """
     return StandardResponse(
-        success=True,
-        data=response_data,
-        message=message
+        success=True, data=response_data, message=message
     )

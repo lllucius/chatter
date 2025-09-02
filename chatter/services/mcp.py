@@ -69,10 +69,16 @@ class MCPToolService:
         """Update the client with new connections."""
         self._client = MultiServerMCPClient(self.connections)
 
-    def _convert_server_to_connection(self, server: RemoteMCPServer) -> Connection:
+    def _convert_server_to_connection(
+        self, server: RemoteMCPServer
+    ) -> Connection:
         """Convert RemoteMCPServer to langchain-mcp-adapters Connection."""
         base_connection = {
-            "transport": "streamable_http" if server.transport_type == "http" else server.transport_type,
+            "transport": (
+                "streamable_http"
+                if server.transport_type == "http"
+                else server.transport_type
+            ),
         }
 
         if server.transport_type in ["http", "sse"]:
@@ -85,7 +91,9 @@ class MCPToolService:
         elif server.transport_type == "stdio":
             # For stdio, we need command and args
             # This is a simplified example - in practice you'd need more configuration
-            raise MCPServiceError("stdio transport requires command and args configuration")
+            raise MCPServiceError(
+                "stdio transport requires command and args configuration"
+            )
 
         elif server.transport_type == "websocket":
             base_connection["url"] = str(server.base_url)
@@ -95,8 +103,7 @@ class MCPToolService:
         return base_connection
 
     async def add_remote_server(
-        self,
-        server_config: RemoteMCPServer
+        self, server_config: RemoteMCPServer
     ) -> bool:
         """Add a remote MCP server configuration."""
         if not self.enabled:
@@ -104,7 +111,9 @@ class MCPToolService:
 
         try:
             # Convert server config to connection
-            connection = self._convert_server_to_connection(server_config)
+            connection = self._convert_server_to_connection(
+                server_config
+            )
 
             self.servers[server_config.name] = server_config
             self.connections[server_config.name] = connection
@@ -157,7 +166,9 @@ class MCPToolService:
     async def _authenticate_oauth(self, server_name: str) -> bool:
         """OAuth authentication is handled by the underlying MCP client."""
         # Note: OAuth handling would need to be implemented in the connection configuration
-        logger.warning("OAuth authentication not yet implemented with langchain-mcp-adapters")
+        logger.warning(
+            "OAuth authentication not yet implemented with langchain-mcp-adapters"
+        )
         return False
 
     async def discover_tools(self, server_name: str) -> list[BaseTool]:
@@ -205,7 +216,9 @@ class MCPToolService:
                 all_tools = []
                 for server_name in server_names:
                     if server_name in self.connections:
-                        server_tools = await client.get_tools(server_name=server_name)
+                        server_tools = await client.get_tools(
+                            server_name=server_name
+                        )
                         all_tools.extend(server_tools)
                 tools = all_tools
 
@@ -217,7 +230,9 @@ class MCPToolService:
             return tools
 
         except Exception as e:
-            logger.error("Failed to get tools from MCP servers", error=str(e))
+            logger.error(
+                "Failed to get tools from MCP servers", error=str(e)
+            )
             return []
 
     async def get_tool_by_name(self, tool_name: str) -> BaseTool | None:
@@ -358,9 +373,9 @@ class MCPToolService:
                 usage_data = ToolUsageCreate(
                     tool_name=tool_name,
                     arguments=arguments,
-                    result={"data": result}
-                    if result is not None
-                    else None,
+                    result=(
+                        {"data": result} if result is not None else None
+                    ),
                     response_time_ms=response_time_ms,
                     success=success,
                     error_message=error_message,
@@ -428,7 +443,9 @@ class MCPToolService:
                     # Try to get tools to check health
                     tools = await self.discover_tools(server_name)
                     tools_count = len(tools)
-                    is_healthy = tools_count >= 0  # Consider healthy if we can connect
+                    is_healthy = (
+                        tools_count >= 0
+                    )  # Consider healthy if we can connect
 
                     server_status[server_name] = {
                         "healthy": is_healthy,
@@ -457,7 +474,9 @@ class MCPToolService:
                     "enabled": server_config.enabled,
                 }
 
-        overall_status = "healthy" if healthy_servers > 0 else "unhealthy"
+        overall_status = (
+            "healthy" if healthy_servers > 0 else "unhealthy"
+        )
         if total_tools == 0:
             overall_status = "no_tools"
 
@@ -485,7 +504,9 @@ class MCPToolService:
             # Clear tools cache for disabled server
             if server_name in self.tools_cache:
                 del self.tools_cache[server_name]
-            logger.info("Remote MCP server disabled", server=server_name)
+            logger.info(
+                "Remote MCP server disabled", server=server_name
+            )
             return True
         return False
 
@@ -531,12 +552,12 @@ class BuiltInTools:
             StructuredTool.from_function(
                 func=cls.calculate,
                 name="calculator",
-                description="Perform basic mathematical calculations"
+                description="Perform basic mathematical calculations",
             ),
             StructuredTool.from_function(
                 func=cls.get_current_time,
                 name="get_time",
-                description="Get the current date and time"
+                description="Get the current date and time",
             ),
         ]
 
@@ -546,7 +567,9 @@ class BuiltInTools:
         try:
             # Basic safety - only allow basic math operations
             allowed_chars = set('0123456789+-*/().')
-            if not all(c in allowed_chars or c.isspace() for c in expression):
+            if not all(
+                c in allowed_chars or c.isspace() for c in expression
+            ):
                 return "Error: Invalid characters in expression"
 
             result = eval(expression)
@@ -558,6 +581,7 @@ class BuiltInTools:
     def get_current_time() -> str:
         """Get the current date and time."""
         import datetime
+
         return datetime.datetime.now().isoformat()
 
 

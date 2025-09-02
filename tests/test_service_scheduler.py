@@ -1,15 +1,15 @@
 """Tests for tool server scheduler service."""
 
-import pytest
 import asyncio
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
-from datetime import datetime, timedelta, UTC
 
+import pytest
+
+from chatter.models.toolserver import ServerStatus
 from chatter.services.scheduler import (
     ToolServerScheduler,
-    scheduler,
 )
-from chatter.models.toolserver import ServerStatus
 
 
 @pytest.mark.unit
@@ -50,7 +50,7 @@ class TestToolServerScheduler:
         """Test starting scheduler when already running."""
         # Arrange
         self.scheduler.running = True
-        
+
         with patch('asyncio.create_task') as mock_create_task:
             # Act
             await self.scheduler.start()
@@ -68,7 +68,7 @@ class TestToolServerScheduler:
         mock_task2.cancel = Mock()
         mock_task3 = Mock()
         mock_task3.cancel = Mock()
-        
+
         self.scheduler.running = True
         self.scheduler._tasks = [mock_task1, mock_task2, mock_task3]
 
@@ -102,15 +102,20 @@ class TestToolServerScheduler:
         # Arrange
         self.scheduler.running = True
         self.scheduler.health_check_interval = 0.1  # Fast for testing
-        
+
         call_count = 0
+
         async def mock_perform_health_checks():
             nonlocal call_count
             call_count += 1
             if call_count >= 2:  # Stop after 2 calls
                 self.scheduler.running = False
 
-        with patch.object(self.scheduler, '_perform_health_checks', mock_perform_health_checks):
+        with patch.object(
+            self.scheduler,
+            '_perform_health_checks',
+            mock_perform_health_checks,
+        ):
             # Act
             await self.scheduler._health_check_loop()
 
@@ -123,8 +128,9 @@ class TestToolServerScheduler:
         # Arrange
         self.scheduler.running = True
         self.scheduler.health_check_interval = 0.1
-        
+
         call_count = 0
+
         async def mock_perform_health_checks():
             nonlocal call_count
             call_count += 1
@@ -133,7 +139,11 @@ class TestToolServerScheduler:
             elif call_count >= 2:
                 self.scheduler.running = False
 
-        with patch.object(self.scheduler, '_perform_health_checks', mock_perform_health_checks):
+        with patch.object(
+            self.scheduler,
+            '_perform_health_checks',
+            mock_perform_health_checks,
+        ):
             # Act
             await self.scheduler._health_check_loop()
 
@@ -149,12 +159,20 @@ class TestToolServerScheduler:
             Mock(id="server1", url="http://server1.com"),
             Mock(id="server2", url="http://server2.com"),
         ]
-        
-        with patch('chatter.services.scheduler.get_session_maker') as mock_get_session:
-            mock_get_session.return_value.return_value.__aenter__.return_value = mock_session
-            mock_session.execute.return_value.scalars.return_value.all.return_value = mock_servers
 
-            with patch.object(self.scheduler, '_check_server_health') as mock_check:
+        with patch(
+            'chatter.services.scheduler.get_session_maker'
+        ) as mock_get_session:
+            mock_get_session.return_value.return_value.__aenter__.return_value = (
+                mock_session
+            )
+            mock_session.execute.return_value.scalars.return_value.all.return_value = (
+                mock_servers
+            )
+
+            with patch.object(
+                self.scheduler, '_check_server_health'
+            ) as mock_check:
                 mock_check.return_value = True
 
                 # Act
@@ -171,37 +189,57 @@ class TestToolServerScheduler:
         # Arrange
         mock_session = AsyncMock()
         mock_server = Mock(id="server1", url="http://healthy.com")
-        
-        with patch('chatter.services.scheduler.ToolServerService') as mock_service:
+
+        with patch(
+            'chatter.services.scheduler.ToolServerService'
+        ) as mock_service:
             mock_service_instance = Mock()
-            mock_service_instance.health_check = AsyncMock(return_value=True)
+            mock_service_instance.health_check = AsyncMock(
+                return_value=True
+            )
             mock_service.return_value = mock_service_instance
 
             # Act
-            result = await self.scheduler._check_server_health(mock_session, mock_server)
+            result = await self.scheduler._check_server_health(
+                mock_session, mock_server
+            )
 
         # Assert
         assert result is True
-        mock_service_instance.health_check.assert_called_once_with(mock_server.url)
+        mock_service_instance.health_check.assert_called_once_with(
+            mock_server.url
+        )
 
     @pytest.mark.asyncio
     async def test_check_server_health_unhealthy(self):
         """Test checking unhealthy server."""
         # Arrange
         mock_session = AsyncMock()
-        mock_server = Mock(id="server1", url="http://unhealthy.com", status=ServerStatus.RUNNING)
-        
-        with patch('chatter.services.scheduler.ToolServerService') as mock_service:
+        mock_server = Mock(
+            id="server1",
+            url="http://unhealthy.com",
+            status=ServerStatus.RUNNING,
+        )
+
+        with patch(
+            'chatter.services.scheduler.ToolServerService'
+        ) as mock_service:
             mock_service_instance = Mock()
-            mock_service_instance.health_check = AsyncMock(return_value=False)
+            mock_service_instance.health_check = AsyncMock(
+                return_value=False
+            )
             mock_service.return_value = mock_service_instance
 
             # Act
-            result = await self.scheduler._check_server_health(mock_session, mock_server)
+            result = await self.scheduler._check_server_health(
+                mock_session, mock_server
+            )
 
         # Assert
         assert result is False
-        mock_service_instance.health_check.assert_called_once_with(mock_server.url)
+        mock_service_instance.health_check.assert_called_once_with(
+            mock_server.url
+        )
         assert mock_server.status == ServerStatus.UNHEALTHY
 
     @pytest.mark.asyncio
@@ -210,15 +248,20 @@ class TestToolServerScheduler:
         # Arrange
         self.scheduler.running = True
         self.scheduler.auto_update_interval = 0.1
-        
+
         call_count = 0
+
         async def mock_perform_auto_updates():
             nonlocal call_count
             call_count += 1
             if call_count >= 2:
                 self.scheduler.running = False
 
-        with patch.object(self.scheduler, '_perform_auto_updates', mock_perform_auto_updates):
+        with patch.object(
+            self.scheduler,
+            '_perform_auto_updates',
+            mock_perform_auto_updates,
+        ):
             # Act
             await self.scheduler._auto_update_loop()
 
@@ -234,21 +277,31 @@ class TestToolServerScheduler:
             id="server1",
             url="http://server1.com",
             auto_update=True,
-            last_update=datetime.now(UTC) - timedelta(hours=25)
+            last_update=datetime.now(UTC) - timedelta(hours=25),
         )
-        
-        with patch('chatter.services.scheduler.get_session_maker') as mock_get_session:
-            mock_get_session.return_value.return_value.__aenter__.return_value = mock_session
-            mock_session.execute.return_value.scalars.return_value.all.return_value = [outdated_server]
 
-            with patch.object(self.scheduler, '_update_server') as mock_update:
+        with patch(
+            'chatter.services.scheduler.get_session_maker'
+        ) as mock_get_session:
+            mock_get_session.return_value.return_value.__aenter__.return_value = (
+                mock_session
+            )
+            mock_session.execute.return_value.scalars.return_value.all.return_value = [
+                outdated_server
+            ]
+
+            with patch.object(
+                self.scheduler, '_update_server'
+            ) as mock_update:
                 mock_update.return_value = True
 
                 # Act
                 await self.scheduler._perform_auto_updates()
 
         # Assert
-        mock_update.assert_called_once_with(mock_session, outdated_server)
+        mock_update.assert_called_once_with(
+            mock_session, outdated_server
+        )
 
     @pytest.mark.asyncio
     async def test_cleanup_loop(self):
@@ -256,15 +309,18 @@ class TestToolServerScheduler:
         # Arrange
         self.scheduler.running = True
         self.scheduler.cleanup_interval = 0.1
-        
+
         call_count = 0
+
         async def mock_perform_cleanup():
             nonlocal call_count
             call_count += 1
             if call_count >= 2:
                 self.scheduler.running = False
 
-        with patch.object(self.scheduler, '_perform_cleanup', mock_perform_cleanup):
+        with patch.object(
+            self.scheduler, '_perform_cleanup', mock_perform_cleanup
+        ):
             # Act
             await self.scheduler._cleanup_loop()
 
@@ -279,12 +335,18 @@ class TestToolServerScheduler:
         old_server = Mock(
             id="server1",
             created_at=datetime.now(UTC) - timedelta(days=8),
-            status=ServerStatus.STOPPED
+            status=ServerStatus.STOPPED,
         )
-        
-        with patch('chatter.services.scheduler.get_session_maker') as mock_get_session:
-            mock_get_session.return_value.return_value.__aenter__.return_value = mock_session
-            mock_session.execute.return_value.scalars.return_value.all.return_value = [old_server]
+
+        with patch(
+            'chatter.services.scheduler.get_session_maker'
+        ) as mock_get_session:
+            mock_get_session.return_value.return_value.__aenter__.return_value = (
+                mock_session
+            )
+            mock_session.execute.return_value.scalars.return_value.all.return_value = [
+                old_server
+            ]
 
             # Act
             await self.scheduler._perform_cleanup()
@@ -299,18 +361,26 @@ class TestToolServerScheduler:
         # Arrange
         mock_session = AsyncMock()
         mock_server = Mock(id="server1", url="http://server1.com")
-        
-        with patch('chatter.services.scheduler.ToolServerService') as mock_service:
+
+        with patch(
+            'chatter.services.scheduler.ToolServerService'
+        ) as mock_service:
             mock_service_instance = Mock()
-            mock_service_instance.update_server = AsyncMock(return_value=True)
+            mock_service_instance.update_server = AsyncMock(
+                return_value=True
+            )
             mock_service.return_value = mock_service_instance
 
             # Act
-            result = await self.scheduler._update_server(mock_session, mock_server)
+            result = await self.scheduler._update_server(
+                mock_session, mock_server
+            )
 
         # Assert
         assert result is True
-        mock_service_instance.update_server.assert_called_once_with(mock_server.url)
+        mock_service_instance.update_server.assert_called_once_with(
+            mock_server.url
+        )
 
     @pytest.mark.asyncio
     async def test_update_server_failure(self):
@@ -318,14 +388,20 @@ class TestToolServerScheduler:
         # Arrange
         mock_session = AsyncMock()
         mock_server = Mock(id="server1", url="http://server1.com")
-        
-        with patch('chatter.services.scheduler.ToolServerService') as mock_service:
+
+        with patch(
+            'chatter.services.scheduler.ToolServerService'
+        ) as mock_service:
             mock_service_instance = Mock()
-            mock_service_instance.update_server = AsyncMock(side_effect=Exception("Update failed"))
+            mock_service_instance.update_server = AsyncMock(
+                side_effect=Exception("Update failed")
+            )
             mock_service.return_value = mock_service_instance
 
             # Act
-            result = await self.scheduler._update_server(mock_session, mock_server)
+            result = await self.scheduler._update_server(
+                mock_session, mock_server
+            )
 
         # Assert
         assert result is False
@@ -347,10 +423,10 @@ class TestSchedulerIntegration:
         # Act
         await test_scheduler.start()
         assert test_scheduler.running is True
-        
+
         # Let it run briefly
         await asyncio.sleep(0.2)
-        
+
         await test_scheduler.stop()
         assert test_scheduler.running is False
 
@@ -369,10 +445,10 @@ class TestSchedulerIntegration:
         # Arrange
         test_scheduler = ToolServerScheduler()
         test_scheduler.health_check_interval = 0.1
-        
+
         error_count = 0
         original_method = test_scheduler._perform_health_checks
-        
+
         async def failing_health_checks():
             nonlocal error_count
             error_count += 1
@@ -385,10 +461,10 @@ class TestSchedulerIntegration:
 
         # Act
         await test_scheduler.start()
-        
+
         # Let it run and encounter errors
         await asyncio.sleep(0.5)
-        
+
         await test_scheduler.stop()
 
         # Assert
@@ -408,12 +484,14 @@ class TestSchedulerIntegration:
         await asyncio.gather(
             test_scheduler.start(),
             test_scheduler.start(),
-            test_scheduler.start()
+            test_scheduler.start(),
         )
 
         # Assert
         assert test_scheduler.running is True
-        assert len(test_scheduler._tasks) == 3  # Should only create tasks once
+        assert (
+            len(test_scheduler._tasks) == 3
+        )  # Should only create tasks once
 
         # Cleanup
         await test_scheduler.stop()
@@ -432,8 +510,13 @@ class TestSchedulerUtilities:
         assert scheduler.health_check_interval > 0
         assert scheduler.auto_update_interval > 0
         assert scheduler.cleanup_interval > 0
-        assert scheduler.health_check_interval < scheduler.auto_update_interval
-        assert scheduler.auto_update_interval < scheduler.cleanup_interval
+        assert (
+            scheduler.health_check_interval
+            < scheduler.auto_update_interval
+        )
+        assert (
+            scheduler.auto_update_interval < scheduler.cleanup_interval
+        )
 
     def test_scheduler_interval_customization(self):
         """Test customizing scheduler intervals."""

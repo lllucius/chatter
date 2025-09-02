@@ -14,6 +14,7 @@ from chatter.schemas.common import (
 
 class JobStatus(str, Enum):
     """Job execution status."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -24,6 +25,7 @@ class JobStatus(str, Enum):
 
 class JobPriority(str, Enum):
     """Job priority levels."""
+
     LOW = "low"
     NORMAL = "normal"
     HIGH = "high"
@@ -32,6 +34,7 @@ class JobPriority(str, Enum):
 
 class Job(BaseModel):
     """Job definition."""
+
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     function_name: str
@@ -39,7 +42,9 @@ class Job(BaseModel):
     kwargs: dict[str, Any] = Field(default_factory=dict)
     priority: JobPriority = JobPriority.NORMAL
     status: JobStatus = JobStatus.PENDING
-    created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
     started_at: datetime | None = None
     completed_at: datetime | None = None
     error_message: str | None = None
@@ -56,12 +61,15 @@ class Job(BaseModel):
 
 class JobResult(BaseModel):
     """Job execution result."""
+
     job_id: str
     status: JobStatus
     result: Any = None
     error: str | None = None
     execution_time: float = 0.0
-    completed_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    completed_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC)
+    )
 
 
 class JobCreateRequest(BaseModel):
@@ -69,11 +77,21 @@ class JobCreateRequest(BaseModel):
 
     name: str = Field(..., description="Job name")
     function_name: str = Field(..., description="Function to execute")
-    args: list[Any] = Field(default_factory=list, description="Function arguments")
-    kwargs: dict[str, Any] = Field(default_factory=dict, description="Function keyword arguments")
-    priority: JobPriority = Field(JobPriority.NORMAL, description="Job priority")
-    max_retries: int = Field(3, ge=0, le=10, description="Maximum retry attempts")
-    schedule_at: datetime | None = Field(None, description="Schedule job for later execution")
+    args: list[Any] = Field(
+        default_factory=list, description="Function arguments"
+    )
+    kwargs: dict[str, Any] = Field(
+        default_factory=dict, description="Function keyword arguments"
+    )
+    priority: JobPriority = Field(
+        JobPriority.NORMAL, description="Job priority"
+    )
+    max_retries: int = Field(
+        3, ge=0, le=10, description="Maximum retry attempts"
+    )
+    schedule_at: datetime | None = Field(
+        None, description="Schedule job for later execution"
+    )
 
 
 class JobResponse(BaseModel):
@@ -87,27 +105,49 @@ class JobResponse(BaseModel):
 
     # Timing
     created_at: datetime = Field(..., description="Creation timestamp")
-    started_at: datetime | None = Field(None, description="Start timestamp")
-    completed_at: datetime | None = Field(None, description="Completion timestamp")
-    scheduled_at: datetime | None = Field(None, description="Scheduled execution time")
+    started_at: datetime | None = Field(
+        None, description="Start timestamp"
+    )
+    completed_at: datetime | None = Field(
+        None, description="Completion timestamp"
+    )
+    scheduled_at: datetime | None = Field(
+        None, description="Scheduled execution time"
+    )
 
     # Execution details
-    retry_count: int = Field(..., description="Number of retry attempts")
+    retry_count: int = Field(
+        ..., description="Number of retry attempts"
+    )
     max_retries: int = Field(..., description="Maximum retry attempts")
-    error_message: str | None = Field(None, description="Error message if failed")
-    result: Any | None = Field(None, description="Job result if completed")
+    error_message: str | None = Field(
+        None, description="Error message if failed"
+    )
+    result: Any | None = Field(
+        None, description="Job result if completed"
+    )
 
     # Progress
-    progress: int = Field(0, ge=0, le=100, description="Job progress percentage")
-    progress_message: str | None = Field(None, description="Progress message")
+    progress: int = Field(
+        0, ge=0, le=100, description="Job progress percentage"
+    )
+    progress_message: str | None = Field(
+        None, description="Progress message"
+    )
 
 
 class JobListRequest(ListRequestBase):
     """Request schema for listing jobs."""
 
-    status: JobStatus | None = Field(None, description="Filter by status")
-    priority: JobPriority | None = Field(None, description="Filter by priority")
-    function_name: str | None = Field(None, description="Filter by function name")
+    status: JobStatus | None = Field(
+        None, description="Filter by status"
+    )
+    priority: JobPriority | None = Field(
+        None, description="Filter by priority"
+    )
+    function_name: str | None = Field(
+        None, description="Filter by function name"
+    )
 
 
 class JobListResponse(BaseModel):
@@ -120,7 +160,9 @@ class JobListResponse(BaseModel):
 class JobActionResponse(BaseModel):
     """Response schema for job actions."""
 
-    success: bool = Field(..., description="Whether action was successful")
+    success: bool = Field(
+        ..., description="Whether action was successful"
+    )
     message: str = Field(..., description="Action result message")
     job_id: str = Field(..., description="Job ID")
 
@@ -131,7 +173,11 @@ class JobStatsResponse(BaseModel):
     total_jobs: int = Field(..., description="Total number of jobs")
     pending_jobs: int = Field(..., description="Number of pending jobs")
     running_jobs: int = Field(..., description="Number of running jobs")
-    completed_jobs: int = Field(..., description="Number of completed jobs")
+    completed_jobs: int = Field(
+        ..., description="Number of completed jobs"
+    )
     failed_jobs: int = Field(..., description="Number of failed jobs")
     queue_size: int = Field(..., description="Current queue size")
-    active_workers: int = Field(..., description="Number of active workers")
+    active_workers: int = Field(
+        ..., description="Number of active workers"
+    )

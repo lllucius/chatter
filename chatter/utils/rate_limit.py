@@ -16,8 +16,12 @@ logger = get_logger(__name__)
 class RateLimitMiddleware(BaseHTTPMiddleware):
     """Rate limiting middleware with X-RateLimit headers."""
 
-    def __init__(self, app: Any, requests_per_minute: int = 60,
-                 requests_per_hour: int = 1000) -> None:
+    def __init__(
+        self,
+        app: Any,
+        requests_per_minute: int = 60,
+        requests_per_hour: int = 1000,
+    ) -> None:
         """Initialize rate limiter.
 
         Args:
@@ -47,10 +51,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if auth_header:
             # Use a hash of the auth token as identifier
             import hashlib
+
             return hashlib.sha256(auth_header.encode()).hexdigest()[:16]
 
         # Fall back to client IP
-        client_ip: str = request.client.host if request.client else "unknown"
+        client_ip: str = (
+            request.client.host if request.client else "unknown"
+        )
         forwarded_for = request.headers.get("x-forwarded-for")
         if forwarded_for:
             # forwarded_for is guaranteed to be str here due to the if check
@@ -58,7 +65,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         return client_ip
 
-    def _clean_old_requests(self, client_id: str, window_seconds: int) -> None:
+    def _clean_old_requests(
+        self, client_id: str, window_seconds: int
+    ) -> None:
         """Remove old requests outside the time window.
 
         Args:
@@ -71,11 +80,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         current_time = time.time()
         self.request_history[client_id] = [
-            req_time for req_time in self.request_history[client_id]
+            req_time
+            for req_time in self.request_history[client_id]
             if current_time - req_time < window_seconds
         ]
 
-    def _check_rate_limit(self, client_id: str) -> tuple[bool, dict[str, str]]:
+    def _check_rate_limit(
+        self, client_id: str
+    ) -> tuple[bool, dict[str, str]]:
         """Check if client is within rate limits.
 
         Args:
@@ -93,23 +105,35 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if client_id not in self.request_history:
             self.request_history[client_id] = []
 
-        requests_last_minute = len([
-            req_time for req_time in self.request_history[client_id]
-            if current_time - req_time < 60
-        ])
+        requests_last_minute = len(
+            [
+                req_time
+                for req_time in self.request_history[client_id]
+                if current_time - req_time < 60
+            ]
+        )
 
-        requests_last_hour = len([
-            req_time for req_time in self.request_history[client_id]
-            if current_time - req_time < 3600
-        ])
+        requests_last_hour = len(
+            [
+                req_time
+                for req_time in self.request_history[client_id]
+                if current_time - req_time < 3600
+            ]
+        )
 
         # Calculate remaining requests
-        remaining_minute = max(0, self.requests_per_minute - requests_last_minute)
-        remaining_hour = max(0, self.requests_per_hour - requests_last_hour)
+        remaining_minute = max(
+            0, self.requests_per_minute - requests_last_minute
+        )
+        remaining_hour = max(
+            0, self.requests_per_hour - requests_last_hour
+        )
 
         # Calculate reset times
         reset_minute = int(current_time) + (60 - int(current_time) % 60)
-        reset_hour = int(current_time) + (3600 - int(current_time) % 3600)
+        reset_hour = int(current_time) + (
+            3600 - int(current_time) % 3600
+        )
 
         # Prepare headers
         headers = {
@@ -122,8 +146,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         }
 
         # Check if request should be allowed
-        allowed = (requests_last_minute < self.requests_per_minute and
-                  requests_last_hour < self.requests_per_hour)
+        allowed = (
+            requests_last_minute < self.requests_per_minute
+            and requests_last_hour < self.requests_per_hour
+        )
 
         if allowed:
             # Add current request to history
@@ -131,13 +157,21 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         else:
             # Add retry-after header for rate limited requests
             if requests_last_minute >= self.requests_per_minute:
-                headers["Retry-After"] = str(60 - int(current_time) % 60)
+                headers["Retry-After"] = str(
+                    60 - int(current_time) % 60
+                )
             else:
-                headers["Retry-After"] = str(3600 - int(current_time) % 3600)
+                headers["Retry-After"] = str(
+                    3600 - int(current_time) % 3600
+                )
 
         return allowed, headers
 
-    async def dispatch(self, request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    async def dispatch(
+        self,
+        request: Request,
+        call_next: Callable[[Request], Awaitable[Response]],
+    ) -> Response:
         """Apply rate limiting with headers.
 
         Args:
@@ -151,7 +185,14 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             HTTPException: If rate limit exceeded
         """
         # Skip rate limiting for health checks and docs
-        if request.url.path in ["/healthz", "/readyz", "/live", "/docs", "/redoc", "/openapi.json"]:
+        if request.url.path in [
+            "/healthz",
+            "/readyz",
+            "/live",
+            "/docs",
+            "/redoc",
+            "/openapi.json",
+        ]:
             return await call_next(request)
 
         client_id = self._get_client_identifier(request)
@@ -162,10 +203,11 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 "Rate limit exceeded",
                 client_id=client_id,
                 path=request.url.path,
-                method=request.method
+                method=request.method,
             )
 
             from fastapi.responses import JSONResponse
+
             return JSONResponse(
                 status_code=429,
                 content={
@@ -173,9 +215,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                     "title": "Too Many Requests",
                     "status": 429,
                     "detail": "Rate limit exceeded. Please try again later.",
-                    "instance": str(request.url.path)
+                    "instance": str(request.url.path),
                 },
-                headers=rate_headers
+                headers=rate_headers,
             )
 
         # Process request
@@ -191,10 +233,13 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 class RateLimitExceeded(Exception):
     """Exception raised when rate limit is exceeded."""
 
-    def __init__(self, message: str = "Rate limit exceeded",
-                 limit: int | None = None,
-                 window: int | None = None,
-                 retry_after: int | None = None):
+    def __init__(
+        self,
+        message: str = "Rate limit exceeded",
+        limit: int | None = None,
+        window: int | None = None,
+        retry_after: int | None = None,
+    ):
         super().__init__(message)
         self.message = message
         self.limit = limit
@@ -205,11 +250,15 @@ class RateLimitExceeded(Exception):
 class RateLimiter:
     """Generic rate limiter interface."""
 
-    async def is_allowed(self, key: str, limit: int, window: int) -> bool:
+    async def is_allowed(
+        self, key: str, limit: int, window: int
+    ) -> bool:
         """Check if request is allowed."""
         raise NotImplementedError
 
-    async def get_remaining(self, key: str, limit: int, window: int) -> int:
+    async def get_remaining(
+        self, key: str, limit: int, window: int
+    ) -> int:
         """Get remaining requests in window."""
         raise NotImplementedError
 
@@ -220,7 +269,9 @@ class MemoryRateLimiter(RateLimiter):
     def __init__(self):
         self.requests: dict[str, list[float]] = {}
 
-    async def is_allowed(self, key: str, limit: int, window: int) -> bool:
+    async def is_allowed(
+        self, key: str, limit: int, window: int
+    ) -> bool:
         """Check if request is allowed."""
         current_time = time.time()
 
@@ -229,7 +280,8 @@ class MemoryRateLimiter(RateLimiter):
 
         # Clean old requests
         self.requests[key] = [
-            req_time for req_time in self.requests[key]
+            req_time
+            for req_time in self.requests[key]
             if current_time - req_time < window
         ]
 
@@ -239,7 +291,9 @@ class MemoryRateLimiter(RateLimiter):
 
         return False
 
-    async def get_remaining(self, key: str, limit: int, window: int) -> int:
+    async def get_remaining(
+        self, key: str, limit: int, window: int
+    ) -> int:
         """Get remaining requests in window."""
         current_time = time.time()
 
@@ -248,7 +302,8 @@ class MemoryRateLimiter(RateLimiter):
 
         # Clean old requests
         self.requests[key] = [
-            req_time for req_time in self.requests[key]
+            req_time
+            for req_time in self.requests[key]
             if current_time - req_time < window
         ]
 
@@ -261,7 +316,9 @@ class RedisRateLimiter(RateLimiter):
     def __init__(self, redis_client):
         self.redis = redis_client
 
-    async def is_allowed(self, key: str, limit: int, window: int) -> bool:
+    async def is_allowed(
+        self, key: str, limit: int, window: int
+    ) -> bool:
         """Check if request is allowed using Redis."""
         current_time = int(time.time())
         pipe = self.redis.pipeline()
@@ -277,7 +334,9 @@ class RedisRateLimiter(RateLimiter):
 
         return request_count < limit
 
-    async def get_remaining(self, key: str, limit: int, window: int) -> int:
+    async def get_remaining(
+        self, key: str, limit: int, window: int
+    ) -> int:
         """Get remaining requests in window using Redis."""
         current_time = int(time.time())
 
@@ -321,6 +380,7 @@ def get_client_ip(request: Request) -> str:
     elif forwarded:
         # Look for for= parameter
         import re
+
         match = re.search(r'for=([^;,\s]+)', forwarded)
         if match:
             client_ip = match.group(1).strip('"')
@@ -328,7 +388,12 @@ def get_client_ip(request: Request) -> str:
     return client_ip
 
 
-def create_rate_limit_key(client_ip: str, path: str, user_id: str | None = None, prefix: str = "rate_limit") -> str:
+def create_rate_limit_key(
+    client_ip: str,
+    path: str,
+    user_id: str | None = None,
+    prefix: str = "rate_limit",
+) -> str:
     """Create rate limit key from client info."""
 
     # Normalize path by removing trailing slashes and making lowercase
@@ -336,7 +401,9 @@ def create_rate_limit_key(client_ip: str, path: str, user_id: str | None = None,
 
     # If user ID is provided, include both user and IP for stronger rate limiting
     if user_id:
-        return f"{prefix}:user:{user_id}:ip:{client_ip}:{normalized_path}"
+        return (
+            f"{prefix}:user:{user_id}:ip:{client_ip}:{normalized_path}"
+        )
 
     # Otherwise use IP-based key only
     return f"{prefix}:ip:{client_ip}:{normalized_path}"

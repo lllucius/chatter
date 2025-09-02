@@ -1,6 +1,5 @@
 """Basic health check tests for the Chatter application."""
 
-
 import pytest
 
 
@@ -20,7 +19,9 @@ class TestHealthCheck:
         assert hasattr(mock_session, "add")
         assert hasattr(mock_session, "commit")
 
-    def test_sample_data_fixtures(self, sample_user_data, sample_chat_data):
+    def test_sample_data_fixtures(
+        self, sample_user_data, sample_chat_data
+    ):
         """Test that sample data fixtures are working."""
         assert sample_user_data["email"] == "test@example.com"
         assert sample_chat_data["title"] == "Test Chat"

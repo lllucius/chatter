@@ -52,7 +52,7 @@ def refresh_access_token(refresh_token: str) -> str | None:
         user_data = {
             "user_id": payload.get("user_id"),
             "email": payload.get("email"),
-            "username": payload.get("username")
+            "username": payload.get("username"),
         }
 
         return create_access_token(data=user_data)
@@ -194,7 +194,9 @@ class AuthService:
         await self.session.refresh(user)
 
         logger.info(
-            "User authenticated", user_id=user.id, username=user.username
+            "User authenticated",
+            user_id=user.id,
+            username=user.username,
         )
         return user
 
@@ -222,6 +224,7 @@ class AuthService:
         # Try cache first for performance
         try:
             from chatter.services.cache import get_cache_service
+
             cache_service = await get_cache_service()
 
             if cache_service.is_connected():
@@ -232,8 +235,11 @@ class AuthService:
                     logger.debug("User found in cache", user_id=user_id)
                     # For now, fall through to database - can enhance later
         except Exception as cache_error:
-            logger.debug("Cache lookup failed, using database",
-                        user_id=user_id, error=str(cache_error))
+            logger.debug(
+                "Cache lookup failed, using database",
+                user_id=user_id,
+                error=str(cache_error),
+            )
 
         result = await self.session.execute(
             select(User).where(User.id == user_id)
@@ -251,11 +257,16 @@ class AuthService:
                 if cache_service.is_connected():
                     cache_key = f"user:{user_id}"
                     # Cache for 15 minutes
-                    await cache_service.set(cache_key, "cached", timedelta(minutes=15))
+                    await cache_service.set(
+                        cache_key, "cached", timedelta(minutes=15)
+                    )
                     logger.debug("User cached", user_id=user_id)
             except Exception as cache_error:
-                logger.debug("Cache storage failed",
-                            user_id=user_id, error=str(cache_error))
+                logger.debug(
+                    "Cache storage failed",
+                    user_id=user_id,
+                    error=str(cache_error),
+                )
 
         return user
 
@@ -528,7 +539,9 @@ class AuthService:
 
         return user
 
-    async def refresh_access_token(self, refresh_token: str) -> dict[str, Any]:
+    async def refresh_access_token(
+        self, refresh_token: str
+    ) -> dict[str, Any]:
         """Refresh access token using refresh token.
 
         Args:
@@ -574,7 +587,9 @@ class AuthService:
         # For now, return success
         return True
 
-    async def confirm_password_reset(self, token: str, new_password: str) -> bool:
+    async def confirm_password_reset(
+        self, token: str, new_password: str
+    ) -> bool:
         """Confirm password reset with token."""
         # TODO: Implement password reset confirmation
         # For now, return success

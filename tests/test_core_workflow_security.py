@@ -11,7 +11,7 @@ for module_name in [
     'chatter.utils.security',
     'chatter.schemas.workflow',
     'chatter.core.auth',
-    'chatter.models.workflow'
+    'chatter.models.workflow',
 ]:
     if module_name not in sys.modules:
         sys.modules[module_name] = MagicMock()
@@ -26,7 +26,10 @@ class TestWorkflowSecurity:
         self.mock_user = MagicMock()
         self.mock_user.id = "user-123"
         self.mock_user.role = "user"
-        self.mock_user.permissions = ["workflow.read", "workflow.execute"]
+        self.mock_user.permissions = [
+            "workflow.read",
+            "workflow.execute",
+        ]
 
     def test_workflow_access_validation(self):
         """Test workflow access validation."""
@@ -35,26 +38,24 @@ class TestWorkflowSecurity:
             "id": "workflow-123",
             "name": "Test Workflow",
             "owner_id": "user-123",
-            "visibility": "private"
+            "visibility": "private",
         }
 
         # Mock security service
         security_service = MagicMock()
-        security_service.validate_workflow_access = MagicMock(return_value=True)
+        security_service.validate_workflow_access = MagicMock(
+            return_value=True
+        )
 
         # Act
         has_access = security_service.validate_workflow_access(
-            user=self.mock_user,
-            workflow=workflow_data,
-            action="read"
+            user=self.mock_user, workflow=workflow_data, action="read"
         )
 
         # Assert
         assert has_access is True
         security_service.validate_workflow_access.assert_called_once_with(
-            user=self.mock_user,
-            workflow=workflow_data,
-            action="read"
+            user=self.mock_user, workflow=workflow_data, action="read"
         )
 
     def test_workflow_permission_check(self):
@@ -64,19 +65,21 @@ class TestWorkflowSecurity:
 
         # Mock permission service
         permission_service = MagicMock()
-        permission_service.check_permissions = MagicMock(return_value=True)
+        permission_service.check_permissions = MagicMock(
+            return_value=True
+        )
 
         # Act
         has_permissions = permission_service.check_permissions(
             user=self.mock_user,
-            required_permissions=required_permissions
+            required_permissions=required_permissions,
         )
 
         # Assert
         assert has_permissions is True
         permission_service.check_permissions.assert_called_once_with(
             user=self.mock_user,
-            required_permissions=required_permissions
+            required_permissions=required_permissions,
         )
 
     def test_workflow_input_sanitization(self):
@@ -86,25 +89,30 @@ class TestWorkflowSecurity:
             "user_input": "<script>alert('xss')</script>",
             "file_path": "../../../etc/passwd",
             "command": "rm -rf /",
-            "safe_data": "This is safe content"
+            "safe_data": "This is safe content",
         }
 
         expected_sanitized = {
             "user_input": "&lt;script&gt;alert('xss')&lt;/script&gt;",
             "file_path": "etc/passwd",
             "command": "[BLOCKED_COMMAND]",
-            "safe_data": "This is safe content"
+            "safe_data": "This is safe content",
         }
 
         # Mock sanitization service
         sanitizer = MagicMock()
-        sanitizer.sanitize_workflow_input = MagicMock(return_value=expected_sanitized)
+        sanitizer.sanitize_workflow_input = MagicMock(
+            return_value=expected_sanitized
+        )
 
         # Act
         sanitized = sanitizer.sanitize_workflow_input(unsafe_input)
 
         # Assert
-        assert sanitized["user_input"] == "&lt;script&gt;alert('xss')&lt;/script&gt;"
+        assert (
+            sanitized["user_input"]
+            == "&lt;script&gt;alert('xss')&lt;/script&gt;"
+        )
         assert sanitized["file_path"] == "etc/passwd"
         assert sanitized["command"] == "[BLOCKED_COMMAND]"
         assert sanitized["safe_data"] == "This is safe content"
@@ -116,21 +124,22 @@ class TestWorkflowSecurity:
             "id": "workflow-123",
             "security_level": "standard",
             "required_permissions": ["workflow.execute"],
-            "owner_id": "user-123"
+            "owner_id": "user-123",
         }
 
         # Mock authorization service
         auth_service = MagicMock()
-        auth_service.authorize_workflow_execution = MagicMock(return_value={
-            "authorized": True,
-            "restrictions": [],
-            "allowed_actions": ["read", "write", "execute"]
-        })
+        auth_service.authorize_workflow_execution = MagicMock(
+            return_value={
+                "authorized": True,
+                "restrictions": [],
+                "allowed_actions": ["read", "write", "execute"],
+            }
+        )
 
         # Act
         auth_result = auth_service.authorize_workflow_execution(
-            user=self.mock_user,
-            workflow=workflow
+            user=self.mock_user, workflow=workflow
         )
 
         # Assert
@@ -147,7 +156,7 @@ class TestWorkflowSecurity:
             "password": "secret123",
             "credit_card": "4111-1111-1111-1111",
             "ssn": "123-45-6789",
-            "public_info": "This is public"
+            "public_info": "This is public",
         }
 
         expected_masked = {
@@ -156,15 +165,19 @@ class TestWorkflowSecurity:
             "password": "***",
             "credit_card": "****-****-****-1111",
             "ssn": "***-**-6789",
-            "public_info": "This is public"
+            "public_info": "This is public",
         }
 
         # Mock masking service
         masking_service = MagicMock()
-        masking_service.mask_sensitive_data = MagicMock(return_value=expected_masked)
+        masking_service.mask_sensitive_data = MagicMock(
+            return_value=expected_masked
+        )
 
         # Act
-        masked_data = masking_service.mask_sensitive_data(sensitive_data)
+        masked_data = masking_service.mask_sensitive_data(
+            sensitive_data
+        )
 
         # Assert
         assert masked_data["user_email"] == "t***@example.com"
@@ -180,18 +193,18 @@ class TestWorkflowSecurity:
 
         # Mock rate limiter
         rate_limiter = MagicMock()
-        rate_limiter.check_rate_limit = MagicMock(return_value={
-            "allowed": True,
-            "remaining": 45,
-            "reset_time": 3600,
-            "limit": 50
-        })
+        rate_limiter.check_rate_limit = MagicMock(
+            return_value={
+                "allowed": True,
+                "remaining": 45,
+                "reset_time": 3600,
+                "limit": 50,
+            }
+        )
 
         # Act
         rate_check = rate_limiter.check_rate_limit(
-            user_id=user_id,
-            workflow_id=workflow_id,
-            action="execute"
+            user_id=user_id, workflow_id=workflow_id, action="execute"
         )
 
         # Assert
@@ -209,7 +222,7 @@ class TestWorkflowSecurity:
             "timestamp": "2024-01-01T00:00:00Z",
             "ip_address": "192.168.1.1",
             "user_agent": "Mozilla/5.0...",
-            "result": "success"
+            "result": "success",
         }
 
         # Mock audit logger
@@ -220,7 +233,9 @@ class TestWorkflowSecurity:
         audit_logger.log_security_event(audit_event)
 
         # Assert
-        audit_logger.log_security_event.assert_called_once_with(audit_event)
+        audit_logger.log_security_event.assert_called_once_with(
+            audit_event
+        )
 
     def test_workflow_step_security_validation(self):
         """Test individual workflow step security validation."""
@@ -231,27 +246,28 @@ class TestWorkflowSecurity:
             "config": {
                 "model": "gpt-4",
                 "temperature": 0.7,
-                "max_tokens": 1000
+                "max_tokens": 1000,
             },
             "security_constraints": {
                 "allow_external_calls": False,
                 "max_execution_time": 30,
-                "allowed_domains": ["api.openai.com"]
-            }
+                "allowed_domains": ["api.openai.com"],
+            },
         }
 
         # Mock step validator
         step_validator = MagicMock()
-        step_validator.validate_step_security = MagicMock(return_value={
-            "valid": True,
-            "warnings": [],
-            "blocked_actions": []
-        })
+        step_validator.validate_step_security = MagicMock(
+            return_value={
+                "valid": True,
+                "warnings": [],
+                "blocked_actions": [],
+            }
+        )
 
         # Act
         validation_result = step_validator.validate_step_security(
-            step=workflow_step,
-            user=self.mock_user
+            step=workflow_step, user=self.mock_user
         )
 
         # Assert
@@ -266,30 +282,31 @@ class TestWorkflowSecurity:
             "databases": ["user_db"],
             "apis": ["openai", "anthropic"],
             "file_systems": ["/app/data"],
-            "network_access": True
+            "network_access": True,
         }
 
         user_permissions = {
             "databases": ["user_db", "public_db"],
             "apis": ["openai"],
             "file_systems": ["/app/data", "/app/public"],
-            "network_access": False
+            "network_access": False,
         }
 
         # Mock access control
         access_controller = MagicMock()
-        access_controller.validate_resource_access = MagicMock(return_value={
-            "allowed_databases": ["user_db"],
-            "allowed_apis": ["openai"],
-            "allowed_file_systems": ["/app/data"],
-            "network_access_allowed": False,
-            "blocked_resources": ["anthropic", "network"]
-        })
+        access_controller.validate_resource_access = MagicMock(
+            return_value={
+                "allowed_databases": ["user_db"],
+                "allowed_apis": ["openai"],
+                "allowed_file_systems": ["/app/data"],
+                "network_access_allowed": False,
+                "blocked_resources": ["anthropic", "network"],
+            }
+        )
 
         # Act
         access_result = access_controller.validate_resource_access(
-            requested=resource_access,
-            user_permissions=user_permissions
+            requested=resource_access, user_permissions=user_permissions
         )
 
         # Assert
@@ -305,20 +322,24 @@ class TestWorkflowSecurity:
             "encrypted": True,
             "algorithm": "AES-256-GCM",
             "key_id": "key-123",
-            "data": "encrypted_content_here"
+            "data": "encrypted_content_here",
         }
 
         # Mock encryption validator
         encryption_validator = MagicMock()
-        encryption_validator.validate_encryption = MagicMock(return_value={
-            "valid": True,
-            "algorithm_approved": True,
-            "key_valid": True,
-            "data_integrity": True
-        })
+        encryption_validator.validate_encryption = MagicMock(
+            return_value={
+                "valid": True,
+                "algorithm_approved": True,
+                "key_valid": True,
+                "data_integrity": True,
+            }
+        )
 
         # Act
-        validation = encryption_validator.validate_encryption(encrypted_data)
+        validation = encryption_validator.validate_encryption(
+            encrypted_data
+        )
 
         # Assert
         assert validation["valid"] is True
@@ -348,51 +369,61 @@ class TestWorkflowSecurityIntegration:
                 {
                     "id": "step-1",
                     "type": "input_validation",
-                    "config": {"validate_schema": True}
+                    "config": {"validate_schema": True},
                 },
                 {
                     "id": "step-2",
                     "type": "llm_call",
-                    "config": {"model": "gpt-4", "temperature": 0.7}
+                    "config": {"model": "gpt-4", "temperature": 0.7},
                 },
                 {
                     "id": "step-3",
                     "type": "output_sanitization",
-                    "config": {"remove_sensitive": True}
-                }
-            ]
+                    "config": {"remove_sensitive": True},
+                },
+            ],
         }
 
         # Mock security services
         security_service = MagicMock()
-        security_service.validate_workflow_access = AsyncMock(return_value=True)
-        security_service.authorize_execution = AsyncMock(return_value=True)
-        security_service.validate_steps = AsyncMock(return_value={"all_valid": True})
+        security_service.validate_workflow_access = AsyncMock(
+            return_value=True
+        )
+        security_service.authorize_execution = AsyncMock(
+            return_value=True
+        )
+        security_service.validate_steps = AsyncMock(
+            return_value={"all_valid": True}
+        )
         security_service.audit_log = AsyncMock()
 
         # Act
         # Validate access
         access_valid = await security_service.validate_workflow_access(
-            user=self.mock_user,
-            workflow=workflow
+            user=self.mock_user, workflow=workflow
         )
 
         # Authorize execution
-        execution_authorized = await security_service.authorize_execution(
-            user=self.mock_user,
-            workflow=workflow
+        execution_authorized = (
+            await security_service.authorize_execution(
+                user=self.mock_user, workflow=workflow
+            )
         )
 
         # Validate all steps
-        steps_valid = await security_service.validate_steps(workflow["steps"])
+        steps_valid = await security_service.validate_steps(
+            workflow["steps"]
+        )
 
         # Log audit event
-        await security_service.audit_log({
-            "action": "workflow_execution",
-            "user_id": self.mock_user.id,
-            "workflow_id": workflow["id"],
-            "result": "authorized"
-        })
+        await security_service.audit_log(
+            {
+                "action": "workflow_execution",
+                "user_id": self.mock_user.id,
+                "workflow_id": workflow["id"],
+                "result": "authorized",
+            }
+        )
 
         # Assert
         assert access_valid is True
@@ -410,29 +441,35 @@ class TestWorkflowSecurityIntegration:
                 {
                     "id": "malicious-step",
                     "type": "system_call",
-                    "config": {"command": "rm -rf /"}
+                    "config": {"command": "rm -rf /"},
                 }
-            ]
+            ],
         }
 
         # Mock security service that detects violation
         security_service = MagicMock()
-        security_service.detect_security_violations = AsyncMock(return_value={
-            "violations_found": True,
-            "violations": [
-                {
-                    "type": "dangerous_command",
-                    "severity": "critical",
-                    "step_id": "malicious-step"
-                }
-            ]
-        })
+        security_service.detect_security_violations = AsyncMock(
+            return_value={
+                "violations_found": True,
+                "violations": [
+                    {
+                        "type": "dangerous_command",
+                        "severity": "critical",
+                        "step_id": "malicious-step",
+                    }
+                ],
+            }
+        )
         security_service.block_execution = AsyncMock(return_value=True)
         security_service.alert_security_team = AsyncMock()
 
         # Act
-        violations = await security_service.detect_security_violations(malicious_workflow)
-        blocked = await security_service.block_execution(malicious_workflow["id"])
+        violations = await security_service.detect_security_violations(
+            malicious_workflow
+        )
+        blocked = await security_service.block_execution(
+            malicious_workflow["id"]
+        )
         await security_service.alert_security_team(violations)
 
         # Assert
@@ -455,20 +492,32 @@ class TestWorkflowSecurityIntegration:
         child_user.id = "user-123"
         child_user.role = "user"
         child_user.parent_id = "admin-123"
-        child_user.inherited_permissions = ["workflow.read", "workflow.execute"]
+        child_user.inherited_permissions = [
+            "workflow.read",
+            "workflow.execute",
+        ]
 
         # Mock permission inheritance service
         inheritance_service = MagicMock()
-        inheritance_service.resolve_permissions = AsyncMock(return_value={
-            "direct_permissions": ["workflow.read"],
-            "inherited_permissions": ["workflow.execute"],
-            "effective_permissions": ["workflow.read", "workflow.execute"]
-        })
+        inheritance_service.resolve_permissions = AsyncMock(
+            return_value={
+                "direct_permissions": ["workflow.read"],
+                "inherited_permissions": ["workflow.execute"],
+                "effective_permissions": [
+                    "workflow.read",
+                    "workflow.execute",
+                ],
+            }
+        )
 
         # Act
-        permissions = await inheritance_service.resolve_permissions(child_user)
+        permissions = await inheritance_service.resolve_permissions(
+            child_user
+        )
 
         # Assert
         assert "workflow.read" in permissions["effective_permissions"]
-        assert "workflow.execute" in permissions["effective_permissions"]
+        assert (
+            "workflow.execute" in permissions["effective_permissions"]
+        )
         assert len(permissions["effective_permissions"]) == 2

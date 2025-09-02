@@ -12,7 +12,7 @@ for module_name in [
     'chatter.services.job_queue',
     'chatter.schemas.jobs',
     'chatter.core.auth',
-    'fastapi'
+    'fastapi',
 ]:
     if module_name not in sys.modules:
         sys.modules[module_name] = MagicMock()
@@ -43,10 +43,10 @@ class TestJobsAPIEndpoints:
             "type": "document_processing",
             "config": {
                 "input_files": ["file1.pdf", "file2.pdf"],
-                "processing_options": {"extract_text": True}
+                "processing_options": {"extract_text": True},
             },
             "priority": "normal",
-            "scheduled_at": None
+            "scheduled_at": None,
         }
 
         mock_job = {
@@ -54,10 +54,12 @@ class TestJobsAPIEndpoints:
             "name": job_data["name"],
             "type": job_data["type"],
             "status": "pending",
-            "created_by": self.mock_user.id
+            "created_by": self.mock_user.id,
         }
 
-        with patch('chatter.services.job_queue.JobQueueService.create_job') as mock_create:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.create_job'
+        ) as mock_create:
             mock_create.return_value = mock_job
 
             # Mock response
@@ -69,9 +71,7 @@ class TestJobsAPIEndpoints:
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.post(
-                "/api/v1/jobs/",
-                json=job_data,
-                headers=headers
+                "/api/v1/jobs/", json=job_data, headers=headers
             )
 
             # Assert
@@ -92,10 +92,12 @@ class TestJobsAPIEndpoints:
             "status": "running",
             "progress": 45,
             "created_by": self.mock_user.id,
-            "created_at": "2024-01-01T00:00:00Z"
+            "created_at": "2024-01-01T00:00:00Z",
         }
 
-        with patch('chatter.services.job_queue.JobQueueService.get_job') as mock_get:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.get_job'
+        ) as mock_get:
             mock_get.return_value = mock_job
 
             # Mock response
@@ -106,7 +108,9 @@ class TestJobsAPIEndpoints:
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.get(f"/api/v1/jobs/{job_id}", headers=headers)
+            response = self.client.get(
+                f"/api/v1/jobs/{job_id}", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -123,23 +127,28 @@ class TestJobsAPIEndpoints:
                 "id": "job-1",
                 "name": "Job 1",
                 "type": "embedding",
-                "status": "completed"
+                "status": "completed",
             },
             {
                 "id": "job-2",
                 "name": "Job 2",
                 "type": "document_processing",
-                "status": "running"
-            }
+                "status": "running",
+            },
         ]
 
-        with patch('chatter.services.job_queue.JobQueueService.list_user_jobs') as mock_list:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.list_user_jobs'
+        ) as mock_list:
             mock_list.return_value = mock_jobs
 
             # Mock response
             mock_response = MagicMock()
             mock_response.status_code = status.HTTP_200_OK
-            mock_response.json.return_value = {"jobs": mock_jobs, "total": 2}
+            mock_response.json.return_value = {
+                "jobs": mock_jobs,
+                "total": 2,
+            }
             self.client.get.return_value = mock_response
 
             # Act
@@ -161,10 +170,12 @@ class TestJobsAPIEndpoints:
             "id": job_id,
             "name": "Test Job",
             "status": "cancelled",
-            "cancelled_at": "2024-01-01T01:00:00Z"
+            "cancelled_at": "2024-01-01T01:00:00Z",
         }
 
-        with patch('chatter.services.job_queue.JobQueueService.cancel_job') as mock_cancel:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.cancel_job'
+        ) as mock_cancel:
             mock_cancel.return_value = mock_cancelled_job
 
             # Mock response
@@ -175,7 +186,9 @@ class TestJobsAPIEndpoints:
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.put(f"/api/v1/jobs/{job_id}/cancel", headers=headers)
+            response = self.client.put(
+                f"/api/v1/jobs/{job_id}/cancel", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -192,10 +205,12 @@ class TestJobsAPIEndpoints:
             "name": "Test Job",
             "status": "pending",
             "retry_count": 1,
-            "retried_at": "2024-01-01T02:00:00Z"
+            "retried_at": "2024-01-01T02:00:00Z",
         }
 
-        with patch('chatter.services.job_queue.JobQueueService.retry_job') as mock_retry:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.retry_job'
+        ) as mock_retry:
             mock_retry.return_value = mock_retried_job
 
             # Mock response
@@ -206,7 +221,9 @@ class TestJobsAPIEndpoints:
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.put(f"/api/v1/jobs/{job_id}/retry", headers=headers)
+            response = self.client.put(
+                f"/api/v1/jobs/{job_id}/retry", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -222,21 +239,23 @@ class TestJobsAPIEndpoints:
             {
                 "timestamp": "2024-01-01T00:00:00Z",
                 "level": "info",
-                "message": "Job started"
+                "message": "Job started",
             },
             {
                 "timestamp": "2024-01-01T00:01:00Z",
                 "level": "info",
-                "message": "Processing file 1 of 3"
+                "message": "Processing file 1 of 3",
             },
             {
                 "timestamp": "2024-01-01T00:02:00Z",
                 "level": "warning",
-                "message": "File format not optimal"
-            }
+                "message": "File format not optimal",
+            },
         ]
 
-        with patch('chatter.services.job_queue.JobQueueService.get_job_logs') as mock_get_logs:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.get_job_logs'
+        ) as mock_get_logs:
             mock_get_logs.return_value = mock_logs
 
             # Mock response
@@ -247,7 +266,9 @@ class TestJobsAPIEndpoints:
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.get(f"/api/v1/jobs/{job_id}/logs", headers=headers)
+            response = self.client.get(
+                f"/api/v1/jobs/{job_id}/logs", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -264,15 +285,14 @@ class TestJobsAPIEndpoints:
             "output": {
                 "processed_files": 3,
                 "extracted_text_length": 15420,
-                "embeddings_created": 45
+                "embeddings_created": 45,
             },
-            "metadata": {
-                "duration": 12.5,
-                "memory_used": "256MB"
-            }
+            "metadata": {"duration": 12.5, "memory_used": "256MB"},
         }
 
-        with patch('chatter.services.job_queue.JobQueueService.get_job_results') as mock_get_results:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.get_job_results'
+        ) as mock_get_results:
             mock_get_results.return_value = mock_results
 
             # Mock response
@@ -283,7 +303,9 @@ class TestJobsAPIEndpoints:
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.get(f"/api/v1/jobs/{job_id}/results", headers=headers)
+            response = self.client.get(
+                f"/api/v1/jobs/{job_id}/results", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_200_OK
@@ -298,17 +320,19 @@ class TestJobsAPIEndpoints:
             "name": "Scheduled Backup Job",
             "type": "backup",
             "config": {"backup_type": "full"},
-            "scheduled_at": "2024-01-02T00:00:00Z"
+            "scheduled_at": "2024-01-02T00:00:00Z",
         }
 
         mock_scheduled_job = {
             "id": "job-456",
             "name": job_data["name"],
             "status": "scheduled",
-            "scheduled_at": job_data["scheduled_at"]
+            "scheduled_at": job_data["scheduled_at"],
         }
 
-        with patch('chatter.services.job_queue.JobQueueService.schedule_job') as mock_schedule:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.schedule_job'
+        ) as mock_schedule:
             mock_schedule.return_value = mock_scheduled_job
 
             # Mock response
@@ -320,9 +344,7 @@ class TestJobsAPIEndpoints:
             # Act
             headers = {"Authorization": "Bearer test-token"}
             response = self.client.post(
-                "/api/v1/jobs/schedule",
-                json=job_data,
-                headers=headers
+                "/api/v1/jobs/schedule", json=job_data, headers=headers
             )
 
             # Assert
@@ -335,7 +357,9 @@ class TestJobsAPIEndpoints:
         # Arrange
         job_id = "job-123"
 
-        with patch('chatter.services.job_queue.JobQueueService.delete_job') as mock_delete:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.delete_job'
+        ) as mock_delete:
             mock_delete.return_value = True
 
             # Mock response
@@ -345,7 +369,9 @@ class TestJobsAPIEndpoints:
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.delete(f"/api/v1/jobs/{job_id}", headers=headers)
+            response = self.client.delete(
+                f"/api/v1/jobs/{job_id}", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_204_NO_CONTENT
@@ -355,18 +381,24 @@ class TestJobsAPIEndpoints:
         # Arrange
         job_id = "non-existent-job"
 
-        with patch('chatter.services.job_queue.JobQueueService.get_job') as mock_get:
+        with patch(
+            'chatter.services.job_queue.JobQueueService.get_job'
+        ) as mock_get:
             mock_get.return_value = None
 
             # Mock response
             mock_response = MagicMock()
             mock_response.status_code = status.HTTP_404_NOT_FOUND
-            mock_response.json.return_value = {"detail": "Job not found"}
+            mock_response.json.return_value = {
+                "detail": "Job not found"
+            }
             self.client.get.return_value = mock_response
 
             # Act
             headers = {"Authorization": "Bearer test-token"}
-            response = self.client.get(f"/api/v1/jobs/{job_id}", headers=headers)
+            response = self.client.get(
+                f"/api/v1/jobs/{job_id}", headers=headers
+            )
 
             # Assert
             assert response.status_code == status.HTTP_404_NOT_FOUND
@@ -377,7 +409,9 @@ class TestJobsAPIEndpoints:
         # Mock response for unauthorized access
         mock_response = MagicMock()
         mock_response.status_code = status.HTTP_401_UNAUTHORIZED
-        mock_response.json.return_value = {"detail": "Not authenticated"}
+        mock_response.json.return_value = {
+            "detail": "Not authenticated"
+        }
         self.client.get.return_value = mock_response
 
         # Act
@@ -403,17 +437,30 @@ class TestJobsAPIIntegration:
         job_data = {
             "name": "Integration Test Job",
             "type": "test_processing",
-            "config": {"test_param": "value"}
+            "config": {"test_param": "value"},
         }
 
         # Mock service responses
         mock_created_job = {"id": "job-123", "status": "pending"}
-        mock_running_job = {"id": "job-123", "status": "running", "progress": 50}
-        mock_completed_job = {"id": "job-123", "status": "completed", "progress": 100}
+        mock_running_job = {
+            "id": "job-123",
+            "status": "running",
+            "progress": 50,
+        }
+        mock_completed_job = {
+            "id": "job-123",
+            "status": "completed",
+            "progress": 100,
+        }
 
-        with patch('chatter.services.job_queue.JobQueueService') as mock_service:
+        with patch(
+            'chatter.services.job_queue.JobQueueService'
+        ) as mock_service:
             mock_service.create_job.return_value = mock_created_job
-            mock_service.get_job.side_effect = [mock_running_job, mock_completed_job]
+            mock_service.get_job.side_effect = [
+                mock_running_job,
+                mock_completed_job,
+            ]
 
             # Mock responses
             create_response = MagicMock()
@@ -429,19 +476,28 @@ class TestJobsAPIIntegration:
             get_response_2.json.return_value = mock_completed_job
 
             self.client.post.return_value = create_response
-            self.client.get.side_effect = [get_response_1, get_response_2]
+            self.client.get.side_effect = [
+                get_response_1,
+                get_response_2,
+            ]
 
             # Act & Assert
             # Create job
             headers = {"Authorization": "Bearer test-token"}
-            create_resp = self.client.post("/api/v1/jobs/", json=job_data, headers=headers)
+            create_resp = self.client.post(
+                "/api/v1/jobs/", json=job_data, headers=headers
+            )
             assert create_resp.status_code == status.HTTP_201_CREATED
 
             # Check job status (running)
             job_id = create_resp.json()["id"]
-            status_resp_1 = self.client.get(f"/api/v1/jobs/{job_id}", headers=headers)
+            status_resp_1 = self.client.get(
+                f"/api/v1/jobs/{job_id}", headers=headers
+            )
             assert status_resp_1.json()["status"] == "running"
 
             # Check job status (completed)
-            status_resp_2 = self.client.get(f"/api/v1/jobs/{job_id}", headers=headers)
+            status_resp_2 = self.client.get(
+                f"/api/v1/jobs/{job_id}", headers=headers
+            )
             assert status_resp_2.json()["status"] == "completed"

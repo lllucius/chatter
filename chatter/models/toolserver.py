@@ -8,6 +8,9 @@ from sqlalchemy import (
     JSON,
     Boolean,
     DateTime,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
@@ -15,7 +18,6 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -53,27 +55,43 @@ class ToolServer(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # Remote server configuration
-    base_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    base_url: Mapped[str | None] = mapped_column(
+        String(500), nullable=True
+    )
     transport_type: Mapped[str] = mapped_column(
         String(20), nullable=False, default="http"  # "http" or "sse"
     )
 
     # Built-in server configuration (for local servers)
-    command: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    command: Mapped[str | None] = mapped_column(
+        String(200), nullable=True
+    )
     args: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
-    env: Mapped[dict[str, str] | None] = mapped_column(JSON, nullable=True)
+    env: Mapped[dict[str, str] | None] = mapped_column(
+        JSON, nullable=True
+    )
 
     # OAuth configuration
-    oauth_client_id: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    oauth_client_secret: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    oauth_token_url: Mapped[str | None] = mapped_column(String(500), nullable=True)
-    oauth_scope: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    oauth_client_id: Mapped[str | None] = mapped_column(
+        String(200), nullable=True
+    )
+    oauth_client_secret: Mapped[str | None] = mapped_column(
+        String(500), nullable=True
+    )
+    oauth_token_url: Mapped[str | None] = mapped_column(
+        String(500), nullable=True
+    )
+    oauth_scope: Mapped[str | None] = mapped_column(
+        String(200), nullable=True
+    )
 
     # Additional headers and configuration
     headers: Mapped[dict[str, str] | None] = mapped_column(
         JSON, nullable=True
     )
-    timeout: Mapped[int] = mapped_column(Integer, default=30, nullable=False)
+    timeout: Mapped[int] = mapped_column(
+        Integer, default=30, nullable=False
+    )
 
     # Management fields
     status: Mapped[ServerStatus] = mapped_column(
@@ -279,10 +297,16 @@ class ToolPermission(Base):
         String(26), ForeignKey(Keys.USERS), nullable=False, index=True
     )
     tool_id: Mapped[str | None] = mapped_column(
-        String(26), ForeignKey(Keys.SERVER_TOOLS), nullable=True, index=True
+        String(26),
+        ForeignKey(Keys.SERVER_TOOLS),
+        nullable=True,
+        index=True,
     )
     server_id: Mapped[str | None] = mapped_column(
-        String(26), ForeignKey(Keys.TOOL_SERVERS), nullable=True, index=True
+        String(26),
+        ForeignKey(Keys.TOOL_SERVERS),
+        nullable=True,
+        index=True,
     )
 
     # Permission configuration
@@ -400,7 +424,9 @@ class RoleToolAccess(Base):
     # Constraints
     __table_args__ = (
         UniqueConstraint(
-            "role", "tool_pattern", "server_pattern",
-            name="uix_role_tool_access"
+            "role",
+            "tool_pattern",
+            "server_pattern",
+            name="uix_role_tool_access",
         ),
     )

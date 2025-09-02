@@ -20,6 +20,7 @@ from chatter.core.exceptions import (
 # Test interfaces and implementations
 class ITestService(Protocol):
     """Test service interface."""
+
     def get_value(self) -> str: ...
 
 
@@ -46,7 +47,12 @@ class DependentService:
 class ComplexService:
     """Service with multiple dependencies."""
 
-    def __init__(self, service1: TestService, service2: DependentService, config: dict):
+    def __init__(
+        self,
+        service1: TestService,
+        service2: DependentService,
+        config: dict,
+    ):
         self.service1 = service1
         self.service2 = service2
         self.config = config
@@ -86,6 +92,7 @@ class TestDependencyContainer:
 
     def test_register_factory(self):
         """Test registering a factory function."""
+
         # Arrange
         def test_factory() -> TestService:
             return TestService("factory_value")
@@ -100,6 +107,7 @@ class TestDependencyContainer:
 
     def test_register_lazy_loader(self):
         """Test registering a lazy loader."""
+
         # Arrange
         def lazy_loader():
             return TestService("lazy_value")
@@ -109,7 +117,9 @@ class TestDependencyContainer:
 
         # Assert
         assert "test_service" in self.container._lazy_loaders
-        assert self.container._lazy_loaders["test_service"] == lazy_loader
+        assert (
+            self.container._lazy_loaders["test_service"] == lazy_loader
+        )
 
     def test_resolve_singleton(self):
         """Test resolving a singleton service."""
@@ -129,6 +139,7 @@ class TestDependencyContainer:
 
     def test_resolve_factory(self):
         """Test resolving a service from factory."""
+
         # Arrange
         def test_factory() -> TestService:
             return TestService("factory_test")
@@ -147,6 +158,7 @@ class TestDependencyContainer:
 
     def test_resolve_lazy_loader(self):
         """Test resolving a service from lazy loader."""
+
         # Arrange
         def lazy_loader():
             return TestService("lazy_test")
@@ -178,14 +190,19 @@ class TestDependencyContainer:
             test_service = self.container.resolve(TestService)
             return DependentService(test_service)
 
-        self.container.register_factory(DependentService, dependent_factory)
+        self.container.register_factory(
+            DependentService, dependent_factory
+        )
 
         # Act
         resolved = self.container.resolve(DependentService)
 
         # Assert
         assert isinstance(resolved, DependentService)
-        assert resolved.get_dependent_value() == "dependent_dependency_test"
+        assert (
+            resolved.get_dependent_value()
+            == "dependent_dependency_test"
+        )
 
     def test_get_service_key_generation(self):
         """Test service key generation for different types."""
@@ -205,7 +222,9 @@ class TestDependencyContainer:
         """Test clearing the container."""
         # Arrange
         self.container.register_singleton(TestService, TestService())
-        self.container.register_factory(DependentService, lambda: DependentService(TestService()))
+        self.container.register_factory(
+            DependentService, lambda: DependentService(TestService())
+        )
 
         # Act
         self.container.clear()
@@ -220,7 +239,9 @@ class TestDependencyContainer:
         """Test listing registered services."""
         # Arrange
         self.container.register_singleton(TestService, TestService())
-        self.container.register_factory(DependentService, lambda: DependentService(TestService()))
+        self.container.register_factory(
+            DependentService, lambda: DependentService(TestService())
+        )
 
         # Act
         services = self.container.list_registered_services()
@@ -228,7 +249,9 @@ class TestDependencyContainer:
         # Assert
         assert len(services) == 2
         assert any("TestService" in service for service in services)
-        assert any("DependentService" in service for service in services)
+        assert any(
+            "DependentService" in service for service in services
+        )
 
     def test_service_exists_check(self):
         """Test checking if service is registered."""
@@ -262,7 +285,7 @@ class TestServiceRegistry:
             "type": TestService,
             "lifecycle": "singleton",
             "dependencies": [],
-            "description": "Test service for unit testing"
+            "description": "Test service for unit testing",
         }
 
         # Act
@@ -270,8 +293,14 @@ class TestServiceRegistry:
 
         # Assert
         assert "test_service" in self.registry.services
-        assert self.registry.services["test_service"]["type"] == TestService
-        assert self.registry.services["test_service"]["lifecycle"] == "singleton"
+        assert (
+            self.registry.services["test_service"]["type"]
+            == TestService
+        )
+        assert (
+            self.registry.services["test_service"]["lifecycle"]
+            == "singleton"
+        )
 
     def test_register_service_with_dependencies(self):
         """Test registering service with dependencies."""
@@ -280,7 +309,7 @@ class TestServiceRegistry:
             "name": "dependent_service",
             "type": DependentService,
             "lifecycle": "transient",
-            "dependencies": ["test_service"]
+            "dependencies": ["test_service"],
         }
 
         # Act
@@ -288,7 +317,12 @@ class TestServiceRegistry:
 
         # Assert
         assert "dependent_service" in self.registry.services
-        assert "test_service" in self.registry.services["dependent_service"]["dependencies"]
+        assert (
+            "test_service"
+            in self.registry.services["dependent_service"][
+                "dependencies"
+            ]
+        )
 
     def test_get_service_info(self):
         """Test getting service information."""
@@ -296,7 +330,7 @@ class TestServiceRegistry:
         service_info = {
             "name": "test_service",
             "type": TestService,
-            "lifecycle": "singleton"
+            "lifecycle": "singleton",
         }
         self.registry.register_service(service_info)
 
@@ -310,16 +344,20 @@ class TestServiceRegistry:
     def test_get_service_dependencies(self):
         """Test getting service dependencies."""
         # Arrange
-        self.registry.register_service({
-            "name": "service_a",
-            "type": TestService,
-            "dependencies": []
-        })
-        self.registry.register_service({
-            "name": "service_b",
-            "type": DependentService,
-            "dependencies": ["service_a"]
-        })
+        self.registry.register_service(
+            {
+                "name": "service_a",
+                "type": TestService,
+                "dependencies": [],
+            }
+        )
+        self.registry.register_service(
+            {
+                "name": "service_b",
+                "type": DependentService,
+                "dependencies": ["service_a"],
+            }
+        )
 
         # Act
         deps = self.registry.get_service_dependencies("service_b")
@@ -331,9 +369,21 @@ class TestServiceRegistry:
         """Test building dependency graph."""
         # Arrange
         services = [
-            {"name": "service_a", "type": TestService, "dependencies": []},
-            {"name": "service_b", "type": DependentService, "dependencies": ["service_a"]},
-            {"name": "service_c", "type": ComplexService, "dependencies": ["service_a", "service_b"]}
+            {
+                "name": "service_a",
+                "type": TestService,
+                "dependencies": [],
+            },
+            {
+                "name": "service_b",
+                "type": DependentService,
+                "dependencies": ["service_a"],
+            },
+            {
+                "name": "service_c",
+                "type": ComplexService,
+                "dependencies": ["service_a", "service_b"],
+            },
         ]
 
         for service in services:
@@ -346,7 +396,9 @@ class TestServiceRegistry:
         assert "service_a" in graph
         assert "service_b" in graph
         assert "service_c" in graph
-        assert len(graph["service_c"]) == 2  # service_c depends on service_a and service_b
+        assert (
+            len(graph["service_c"]) == 2
+        )  # service_c depends on service_a and service_b
 
 
 @pytest.mark.unit
@@ -365,12 +417,15 @@ class TestLazyServiceLoader:
 
     def test_register_lazy_service(self):
         """Test registering a lazy service loader."""
+
         # Arrange
         def service_loader():
             return TestService("lazy_loaded")
 
         # Act
-        self.loader.register_lazy_service("test_service", service_loader)
+        self.loader.register_lazy_service(
+            "test_service", service_loader
+        )
 
         # Assert
         assert "test_service" in self.loader.service_loaders
@@ -385,7 +440,9 @@ class TestLazyServiceLoader:
             load_count += 1
             return TestService(f"loaded_{load_count}")
 
-        self.loader.register_lazy_service("test_service", service_loader)
+        self.loader.register_lazy_service(
+            "test_service", service_loader
+        )
 
         # Act
         service1 = self.loader.load_service("test_service")
@@ -408,13 +465,16 @@ class TestLazyServiceLoader:
         module_path = "chatter.services.test_service"
 
         # Act
-        self.loader.register_module_loader("test_service", module_path, "TestService")
+        self.loader.register_module_loader(
+            "test_service", module_path, "TestService"
+        )
 
         # Assert
         assert "test_service" in self.loader.service_loaders
 
     def test_lazy_loading_with_dependencies(self):
         """Test lazy loading with service dependencies."""
+
         # Arrange
         def base_service_loader():
             return TestService("base")
@@ -423,15 +483,23 @@ class TestLazyServiceLoader:
             base_service = self.loader.load_service("base_service")
             return DependentService(base_service)
 
-        self.loader.register_lazy_service("base_service", base_service_loader)
-        self.loader.register_lazy_service("dependent_service", dependent_service_loader)
+        self.loader.register_lazy_service(
+            "base_service", base_service_loader
+        )
+        self.loader.register_lazy_service(
+            "dependent_service", dependent_service_loader
+        )
 
         # Act
-        dependent_service = self.loader.load_service("dependent_service")
+        dependent_service = self.loader.load_service(
+            "dependent_service"
+        )
 
         # Assert
         assert isinstance(dependent_service, DependentService)
-        assert dependent_service.get_dependent_value() == "dependent_base"
+        assert (
+            dependent_service.get_dependent_value() == "dependent_base"
+        )
 
 
 @pytest.mark.unit
@@ -448,11 +516,13 @@ class TestCircularDependencyDetector:
         dependencies = {
             "service_a": [],
             "service_b": ["service_a"],
-            "service_c": ["service_a", "service_b"]
+            "service_c": ["service_a", "service_b"],
         }
 
         # Act
-        result = self.detector.detect_circular_dependencies(dependencies)
+        result = self.detector.detect_circular_dependencies(
+            dependencies
+        )
 
         # Assert
         assert result.has_cycles is False
@@ -463,11 +533,13 @@ class TestCircularDependencyDetector:
         # Arrange
         dependencies = {
             "service_a": ["service_b"],
-            "service_b": ["service_a"]
+            "service_b": ["service_a"],
         }
 
         # Act
-        result = self.detector.detect_circular_dependencies(dependencies)
+        result = self.detector.detect_circular_dependencies(
+            dependencies
+        )
 
         # Assert
         assert result.has_cycles is True
@@ -480,11 +552,13 @@ class TestCircularDependencyDetector:
             "service_a": ["service_b"],
             "service_b": ["service_c"],
             "service_c": ["service_d"],
-            "service_d": ["service_a"]  # Creates cycle a->b->c->d->a
+            "service_d": ["service_a"],  # Creates cycle a->b->c->d->a
         }
 
         # Act
-        result = self.detector.detect_circular_dependencies(dependencies)
+        result = self.detector.detect_circular_dependencies(
+            dependencies
+        )
 
         # Assert
         assert result.has_cycles is True
@@ -498,11 +572,13 @@ class TestCircularDependencyDetector:
             "service_b": ["service_a"],  # Cycle 1: a->b->a
             "service_c": ["service_d"],
             "service_d": ["service_c"],  # Cycle 2: c->d->c
-            "service_e": []  # Independent service
+            "service_e": [],  # Independent service
         }
 
         # Act
-        result = self.detector.detect_circular_dependencies(dependencies)
+        result = self.detector.detect_circular_dependencies(
+            dependencies
+        )
 
         # Assert
         assert result.has_cycles is True
@@ -511,12 +587,12 @@ class TestCircularDependencyDetector:
     def test_self_dependency(self):
         """Test detection of self-dependency."""
         # Arrange
-        dependencies = {
-            "service_a": ["service_a"]  # Self-dependency
-        }
+        dependencies = {"service_a": ["service_a"]}  # Self-dependency
 
         # Act
-        result = self.detector.detect_circular_dependencies(dependencies)
+        result = self.detector.detect_circular_dependencies(
+            dependencies
+        )
 
         # Assert
         assert result.has_cycles is True
@@ -528,16 +604,21 @@ class TestCircularDependencyDetector:
         dependencies = {
             "service_a": ["service_b"],
             "service_b": ["service_c"],
-            "service_c": ["service_a"]
+            "service_c": ["service_a"],
         }
 
         # Act
-        result = self.detector.detect_circular_dependencies(dependencies)
+        result = self.detector.detect_circular_dependencies(
+            dependencies
+        )
         suggestions = self.detector.suggest_resolution(result.cycles[0])
 
         # Assert
         assert len(suggestions) > 0
-        assert any("interface" in suggestion.lower() for suggestion in suggestions)
+        assert any(
+            "interface" in suggestion.lower()
+            for suggestion in suggestions
+        )
 
 
 @pytest.mark.unit
@@ -562,15 +643,20 @@ class TestServiceLifecycleManager:
             "startup_priority": 1,
             "shutdown_priority": 1,
             "health_check": lambda: True,
-            "dependencies": []
+            "dependencies": [],
         }
 
         # Act
-        self.lifecycle_manager.register_service("test_service", mock_service, lifecycle_config)
+        self.lifecycle_manager.register_service(
+            "test_service", mock_service, lifecycle_config
+        )
 
         # Assert
         assert "test_service" in self.lifecycle_manager.services
-        assert self.lifecycle_manager.services["test_service"]["instance"] == mock_service
+        assert (
+            self.lifecycle_manager.services["test_service"]["instance"]
+            == mock_service
+        )
 
     @pytest.mark.asyncio
     async def test_startup_sequence(self):
@@ -581,8 +667,12 @@ class TestServiceLifecycleManager:
         service1.startup = AsyncMock()
         service2.startup = AsyncMock()
 
-        self.lifecycle_manager.register_service("service1", service1, {"startup_priority": 1})
-        self.lifecycle_manager.register_service("service2", service2, {"startup_priority": 2})
+        self.lifecycle_manager.register_service(
+            "service1", service1, {"startup_priority": 1}
+        )
+        self.lifecycle_manager.register_service(
+            "service2", service2, {"startup_priority": 2}
+        )
 
         # Act
         await self.lifecycle_manager.startup_services()
@@ -600,8 +690,12 @@ class TestServiceLifecycleManager:
         service1.shutdown = AsyncMock()
         service2.shutdown = AsyncMock()
 
-        self.lifecycle_manager.register_service("service1", service1, {"shutdown_priority": 1})
-        self.lifecycle_manager.register_service("service2", service2, {"shutdown_priority": 2})
+        self.lifecycle_manager.register_service(
+            "service1", service1, {"shutdown_priority": 1}
+        )
+        self.lifecycle_manager.register_service(
+            "service2", service2, {"shutdown_priority": 2}
+        )
 
         # Act
         await self.lifecycle_manager.shutdown_services()
@@ -619,16 +713,18 @@ class TestServiceLifecycleManager:
         self.lifecycle_manager.register_service(
             "healthy_service",
             healthy_service,
-            {"health_check": lambda: True}
+            {"health_check": lambda: True},
         )
         self.lifecycle_manager.register_service(
             "unhealthy_service",
             unhealthy_service,
-            {"health_check": lambda: False}
+            {"health_check": lambda: False},
         )
 
         # Act
-        health_status = self.lifecycle_manager.check_all_services_health()
+        health_status = (
+            self.lifecycle_manager.check_all_services_health()
+        )
 
         # Assert
         assert health_status["healthy_service"] is True
@@ -640,14 +736,22 @@ class TestServiceLifecycleManager:
         services = [
             ("service_a", {}, {"dependencies": []}),
             ("service_b", {}, {"dependencies": ["service_a"]}),
-            ("service_c", {}, {"dependencies": ["service_a", "service_b"]})
+            (
+                "service_c",
+                {},
+                {"dependencies": ["service_a", "service_b"]},
+            ),
         ]
 
         for service_name, service_instance, config in services:
-            self.lifecycle_manager.register_service(service_name, service_instance, config)
+            self.lifecycle_manager.register_service(
+                service_name, service_instance, config
+            )
 
         # Act
-        startup_order = self.lifecycle_manager._calculate_startup_order()
+        startup_order = (
+            self.lifecycle_manager._calculate_startup_order()
+        )
 
         # Assert
         assert len(startup_order) == 3
@@ -678,13 +782,13 @@ class TestDependencyIntegration:
             "name": "base_service",
             "type": TestService,
             "lifecycle": "singleton",
-            "dependencies": []
+            "dependencies": [],
         }
         dependent_service_info = {
             "name": "dependent_service",
             "type": DependentService,
             "lifecycle": "transient",
-            "dependencies": ["base_service"]
+            "dependencies": ["base_service"],
         }
 
         self.registry.register_service(base_service_info)
@@ -698,14 +802,19 @@ class TestDependencyIntegration:
             base = self.container.resolve(TestService)
             return DependentService(base)
 
-        self.container.register_factory(DependentService, dependent_factory)
+        self.container.register_factory(
+            DependentService, dependent_factory
+        )
 
         # Act
         resolved_dependent = self.container.resolve(DependentService)
 
         # Assert
         assert isinstance(resolved_dependent, DependentService)
-        assert resolved_dependent.get_dependent_value() == "dependent_integration_test"
+        assert (
+            resolved_dependent.get_dependent_value()
+            == "dependent_integration_test"
+        )
 
     def test_service_lifecycle_with_dependencies(self):
         """Test service lifecycle management with dependencies."""
@@ -717,20 +826,26 @@ class TestDependencyIntegration:
         self.lifecycle_manager.register_service(
             "base_service",
             base_service,
-            {"startup_priority": 1, "dependencies": []}
+            {"startup_priority": 1, "dependencies": []},
         )
         self.lifecycle_manager.register_service(
             "dependent_service",
             dependent_service,
-            {"startup_priority": 2, "dependencies": ["base_service"]}
+            {"startup_priority": 2, "dependencies": ["base_service"]},
         )
 
         # Act
-        startup_order = self.lifecycle_manager._calculate_startup_order()
-        health_status = self.lifecycle_manager.check_all_services_health()
+        startup_order = (
+            self.lifecycle_manager._calculate_startup_order()
+        )
+        health_status = (
+            self.lifecycle_manager.check_all_services_health()
+        )
 
         # Assert
-        assert startup_order.index("base_service") < startup_order.index("dependent_service")
+        assert startup_order.index(
+            "base_service"
+        ) < startup_order.index("dependent_service")
         assert health_status["base_service"] is True
         assert health_status["dependent_service"] is True
 
@@ -743,18 +858,22 @@ class TestDependencyIntegration:
         dependencies = {
             "service_a": ["service_b"],
             "service_b": ["service_c"],
-            "service_c": ["service_a"]
+            "service_c": ["service_a"],
         }
 
         # Act
-        detection_result = detector.detect_circular_dependencies(dependencies)
+        detection_result = detector.detect_circular_dependencies(
+            dependencies
+        )
 
         # Assert
         assert detection_result.has_cycles is True
 
         # Test resolution suggestion
         if detection_result.cycles:
-            suggestions = detector.suggest_resolution(detection_result.cycles[0])
+            suggestions = detector.suggest_resolution(
+                detection_result.cycles[0]
+            )
             assert len(suggestions) > 0
 
     def test_lazy_loading_with_container_integration(self):
@@ -765,7 +884,9 @@ class TestDependencyIntegration:
         def lazy_service_factory():
             return TestService("lazy_integration")
 
-        lazy_loader.register_lazy_service("lazy_test_service", lazy_service_factory)
+        lazy_loader.register_lazy_service(
+            "lazy_test_service", lazy_service_factory
+        )
 
         # Act
         loaded_service = lazy_loader.load_service("lazy_test_service")
@@ -792,9 +913,10 @@ class TestDependencyIntegration:
                 service,
                 {
                     "startup_priority": i + 1,
-                    "shutdown_priority": 3 - i,  # Reverse order for shutdown
-                    "health_check": lambda: True
-                }
+                    "shutdown_priority": 3
+                    - i,  # Reverse order for shutdown
+                    "health_check": lambda: True,
+                },
             )
 
         # Act

@@ -1,21 +1,21 @@
 """Tests for exception handling core functionality."""
 
-import pytest
 from unittest.mock import patch
-import traceback
+
+import pytest
 
 from chatter.core.exceptions import (
-    ChatterException,
     AuthenticationError,
     AuthorizationError,
-    NotFoundError,
+    ChatServiceError,
+    ChatterException,
     ConflictError,
-    ValidationError,
-    RateLimitError,
-    ExternalServiceError,
-    WorkflowExecutionError,
     EmbeddingError,
-    ChatServiceError
+    ExternalServiceError,
+    NotFoundError,
+    RateLimitError,
+    ValidationError,
+    WorkflowExecutionError,
 )
 
 
@@ -28,10 +28,10 @@ class TestBaseException:
         # Arrange
         message = "Test exception message"
         code = "TEST_ERROR"
-        
+
         # Act
         exception = ChatterException(message, error_code=code)
-        
+
         # Assert
         assert str(exception) == message
         assert exception.error_code == code
@@ -42,10 +42,10 @@ class TestBaseException:
         # Arrange
         message = "Error with details"
         details = {"field": "username", "value": "invalid"}
-        
+
         # Act
         exception = ChatterException(message, details=details)
-        
+
         # Assert
         assert exception.details == details
         assert exception.error_code is None
@@ -54,10 +54,12 @@ class TestBaseException:
         """Test ChatterException with underlying cause."""
         # Arrange
         original_error = ValueError("Original error")
-        
+
         # Act
-        exception = ChatterException("Wrapped error", cause=original_error)
-        
+        exception = ChatterException(
+            "Wrapped error", cause=original_error
+        )
+
         # Assert
         assert exception.cause == original_error
         assert exception.__cause__ == original_error
@@ -68,12 +70,12 @@ class TestBaseException:
         exception = ChatterException(
             "Serialization test",
             error_code="SERIALIZE_ERROR",
-            details={"key": "value"}
+            details={"key": "value"},
         )
-        
+
         # Act
         serialized = exception.to_dict()
-        
+
         # Assert
         assert serialized["message"] == "Serialization test"
         assert serialized["error_code"] == "SERIALIZE_ERROR"
@@ -89,7 +91,7 @@ class TestAuthenticationErrors:
         """Test basic AuthenticationError."""
         # Act
         error = AuthenticationError("Invalid credentials")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "Invalid credentials"
@@ -99,10 +101,10 @@ class TestAuthenticationErrors:
         """Test AuthenticationError with user ID."""
         # Act
         error = AuthenticationError(
-            "Token expired", 
-            details={"user_id": "user-123", "token_type": "access"}
+            "Token expired",
+            details={"user_id": "user-123", "token_type": "access"},
         )
-        
+
         # Assert
         assert error.details["user_id"] == "user-123"
         assert error.details["token_type"] == "access"
@@ -111,7 +113,7 @@ class TestAuthenticationErrors:
         """Test basic AuthorizationError."""
         # Act
         error = AuthorizationError("Insufficient permissions")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "Insufficient permissions"
@@ -124,10 +126,10 @@ class TestAuthenticationErrors:
             "Missing permission",
             details={
                 "required_permission": "documents:write",
-                "user_permissions": ["documents:read", "chats:write"]
-            }
+                "user_permissions": ["documents:read", "chats:write"],
+            },
         )
-        
+
         # Assert
         assert error.details["required_permission"] == "documents:write"
         assert "documents:read" in error.details["user_permissions"]
@@ -141,7 +143,7 @@ class TestResourceErrors:
         """Test basic NotFoundError."""
         # Act
         error = NotFoundError("Document not found")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "Document not found"
@@ -155,10 +157,10 @@ class TestResourceErrors:
             details={
                 "resource_type": "user",
                 "resource_id": "user-123",
-                "operation": "get_profile"
-            }
+                "operation": "get_profile",
+            },
         )
-        
+
         # Assert
         assert error.details["resource_type"] == "user"
         assert error.details["resource_id"] == "user-123"
@@ -167,7 +169,7 @@ class TestResourceErrors:
         """Test basic ConflictError."""
         # Act
         error = ConflictError("Email already exists")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "Email already exists"
@@ -181,10 +183,10 @@ class TestResourceErrors:
             details={
                 "field": "username",
                 "value": "testuser",
-                "existing_id": "user-456"
-            }
+                "existing_id": "user-456",
+            },
         )
-        
+
         # Assert
         assert error.details["field"] == "username"
         assert error.details["existing_id"] == "user-456"
@@ -198,7 +200,7 @@ class TestValidationErrors:
         """Test basic ValidationError."""
         # Act
         error = ValidationError("Invalid input format")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "Invalid input format"
@@ -212,11 +214,14 @@ class TestValidationErrors:
             details={
                 "field_errors": {
                     "email": ["Invalid email format"],
-                    "password": ["Password too short", "Must contain numbers"]
+                    "password": [
+                        "Password too short",
+                        "Must contain numbers",
+                    ],
                 }
-            }
+            },
         )
-        
+
         # Assert
         assert "email" in error.details["field_errors"]
         assert len(error.details["field_errors"]["password"]) == 2
@@ -225,13 +230,21 @@ class TestValidationErrors:
         """Test ValidationError created from Pydantic validation."""
         # Arrange
         pydantic_errors = [
-            {"loc": ("email",), "msg": "field required", "type": "value_error.missing"},
-            {"loc": ("age",), "msg": "ensure this value is greater than 0", "type": "value_error.number.not_gt"}
+            {
+                "loc": ("email",),
+                "msg": "field required",
+                "type": "value_error.missing",
+            },
+            {
+                "loc": ("age",),
+                "msg": "ensure this value is greater than 0",
+                "type": "value_error.number.not_gt",
+            },
         ]
-        
+
         # Act
         error = ValidationError.from_pydantic_errors(pydantic_errors)
-        
+
         # Assert
         assert "email" in str(error)
         assert "field required" in str(error)
@@ -245,7 +258,7 @@ class TestServiceErrors:
         """Test basic RateLimitError."""
         # Act
         error = RateLimitError("Rate limit exceeded")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "Rate limit exceeded"
@@ -260,10 +273,10 @@ class TestServiceErrors:
                 "retry_after": 60,
                 "limit": 100,
                 "remaining": 0,
-                "reset_time": "2024-01-01T12:00:00Z"
-            }
+                "reset_time": "2024-01-01T12:00:00Z",
+            },
         )
-        
+
         # Assert
         assert error.details["retry_after"] == 60
         assert error.details["limit"] == 100
@@ -272,7 +285,7 @@ class TestServiceErrors:
         """Test basic ExternalServiceError."""
         # Act
         error = ExternalServiceError("OpenAI API unavailable")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "OpenAI API unavailable"
@@ -287,10 +300,10 @@ class TestServiceErrors:
                 "service": "openai",
                 "endpoint": "/v1/chat/completions",
                 "status_code": 504,
-                "response_time": 30.5
-            }
+                "response_time": 30.5,
+            },
         )
-        
+
         # Assert
         assert error.details["service"] == "openai"
         assert error.details["status_code"] == 504
@@ -299,7 +312,7 @@ class TestServiceErrors:
         """Test basic WorkflowExecutionError."""
         # Act
         error = WorkflowExecutionError("Workflow step failed")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "Workflow step failed"
@@ -314,10 +327,10 @@ class TestServiceErrors:
                 "workflow_id": "workflow-123",
                 "step_id": "step-2",
                 "step_name": "LLM Processing",
-                "execution_time": 15.2
-            }
+                "execution_time": 15.2,
+            },
         )
-        
+
         # Assert
         assert error.details["workflow_id"] == "workflow-123"
         assert error.details["step_name"] == "LLM Processing"
@@ -331,7 +344,7 @@ class TestSpecializedErrors:
         """Test basic EmbeddingError."""
         # Act
         error = EmbeddingError("Embedding generation failed")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "Embedding generation failed"
@@ -346,10 +359,10 @@ class TestSpecializedErrors:
                 "model": "text-embedding-ada-002",
                 "provider": "openai",
                 "text_length": 5000,
-                "max_tokens": 8191
-            }
+                "max_tokens": 8191,
+            },
         )
-        
+
         # Assert
         assert error.details["model"] == "text-embedding-ada-002"
         assert error.details["text_length"] == 5000
@@ -358,7 +371,7 @@ class TestSpecializedErrors:
         """Test basic ChatServiceError."""
         # Act
         error = ChatServiceError("Chat processing failed")
-        
+
         # Assert
         assert isinstance(error, ChatterException)
         assert str(error) == "Chat processing failed"
@@ -373,10 +386,10 @@ class TestSpecializedErrors:
                 "conversation_id": "conv-123",
                 "message_id": "msg-456",
                 "user_id": "user-789",
-                "agent_id": "agent-abc"
-            }
+                "agent_id": "agent-abc",
+            },
         )
-        
+
         # Assert
         assert error.details["conversation_id"] == "conv-123"
         assert error.details["agent_id"] == "agent-abc"
@@ -390,11 +403,11 @@ class TestExceptionHandling:
         """Test exception logging functionality."""
         # Arrange
         error = ChatterException("Test error for logging")
-        
+
         with patch('chatter.core.exceptions.logger') as mock_logger:
             # Act
             error.log_error()
-            
+
             # Assert
             mock_logger.error.assert_called_once()
 
@@ -406,7 +419,7 @@ class TestExceptionHandling:
         except ValueError as e:
             # Act
             wrapped_error = ChatterException("Wrapped error", cause=e)
-            
+
             # Assert
             assert wrapped_error.cause is not None
             assert isinstance(wrapped_error.cause, ValueError)
@@ -417,12 +430,12 @@ class TestExceptionHandling:
         original = ValueError("Original")
         try:
             raise RuntimeError("Middle") from original
-        except RuntimeError as middle:
+        except RuntimeError:
             pass
-        
+
         # Act
         final = ChatterException("Final", cause=middle)
-        
+
         # Assert
         assert final.cause == middle
         assert final.cause.__cause__ == original
@@ -433,23 +446,39 @@ class TestExceptionHandling:
         with pytest.raises(ChatterException) as exc_info:
             with ChatterException.context("Test operation"):
                 raise ValueError("Internal error")
-        
+
         # The context manager should wrap the error
         assert "Test operation" in str(exc_info.value)
 
     def test_exception_error_codes(self):
         """Test that all exception types have correct error codes."""
         # Act & Assert
-        assert AuthenticationError("test").error_code == "AUTHENTICATION_ERROR"
-        assert AuthorizationError("test").error_code == "AUTHORIZATION_ERROR"
+        assert (
+            AuthenticationError("test").error_code
+            == "AUTHENTICATION_ERROR"
+        )
+        assert (
+            AuthorizationError("test").error_code
+            == "AUTHORIZATION_ERROR"
+        )
         assert NotFoundError("test").error_code == "NOT_FOUND"
         assert ConflictError("test").error_code == "CONFLICT"
         assert ValidationError("test").error_code == "VALIDATION_ERROR"
-        assert RateLimitError("test").error_code == "RATE_LIMIT_EXCEEDED"
-        assert ExternalServiceError("test").error_code == "EXTERNAL_SERVICE_ERROR"
-        assert WorkflowExecutionError("test").error_code == "WORKFLOW_EXECUTION_ERROR"
+        assert (
+            RateLimitError("test").error_code == "RATE_LIMIT_EXCEEDED"
+        )
+        assert (
+            ExternalServiceError("test").error_code
+            == "EXTERNAL_SERVICE_ERROR"
+        )
+        assert (
+            WorkflowExecutionError("test").error_code
+            == "WORKFLOW_EXECUTION_ERROR"
+        )
         assert EmbeddingError("test").error_code == "EMBEDDING_ERROR"
-        assert ChatServiceError("test").error_code == "CHAT_SERVICE_ERROR"
+        assert (
+            ChatServiceError("test").error_code == "CHAT_SERVICE_ERROR"
+        )
 
 
 @pytest.mark.integration
@@ -460,16 +489,16 @@ class TestExceptionIntegration:
         """Test exception handling in request context."""
         # This would test how exceptions are handled in the FastAPI context
         # For now, we'll test the basic exception handling flow
-        
+
         # Arrange
         error = ValidationError(
             "Request validation failed",
-            details={"field": "email", "value": "invalid"}
+            details={"field": "email", "value": "invalid"},
         )
-        
+
         # Act
         error_dict = error.to_dict()
-        
+
         # Assert
         assert error_dict["error_code"] == "VALIDATION_ERROR"
         assert error_dict["details"]["field"] == "email"
@@ -479,12 +508,12 @@ class TestExceptionIntegration:
         # Arrange
         error = NotFoundError(
             "Resource not found",
-            details={"resource_id": "123", "resource_type": "document"}
+            details={"resource_id": "123", "resource_type": "document"},
         )
-        
+
         # Act
         response_data = error.to_response_dict()
-        
+
         # Assert
         assert "error" in response_data
         assert response_data["error"]["code"] == "NOT_FOUND"
@@ -495,16 +524,18 @@ class TestExceptionIntegration:
         # Arrange
         error = ExternalServiceError(
             "Service unavailable",
-            details={"service": "openai", "status_code": 503}
+            details={"service": "openai", "status_code": 503},
         )
-        
-        with patch('chatter.core.exceptions.monitoring') as mock_monitoring:
+
+        with patch(
+            'chatter.core.exceptions.monitoring'
+        ) as mock_monitoring:
             # Act
             error.report_to_monitoring()
-            
+
             # Assert
             mock_monitoring.report_error.assert_called_once_with(
                 error_type="EXTERNAL_SERVICE_ERROR",
                 message="Service unavailable",
-                details={"service": "openai", "status_code": 503}
+                details={"service": "openai", "status_code": 503},
             )

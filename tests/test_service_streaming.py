@@ -13,7 +13,7 @@ for module_name in [
     'chatter.schemas.chat',
     'chatter.utils.correlation',
     'chatter.utils.monitoring',
-    'chatter.utils.security'
+    'chatter.utils.security',
 ]:
     if module_name not in sys.modules:
         sys.modules[module_name] = MagicMock()
@@ -46,7 +46,7 @@ class TestStreamingService:
             type="token",
             content="Hello",
             metadata={"confidence": 0.9},
-            correlation_id=self.mock_correlation_id
+            correlation_id=self.mock_correlation_id,
         )
 
         # Assert
@@ -92,7 +92,7 @@ class TestStreamingService:
             "content": "Hello world",
             "type": "token",
             "metadata": {"model": "gpt-4"},
-            "correlation_id": self.mock_correlation_id
+            "correlation_id": self.mock_correlation_id,
         }
 
         # Mock StreamingChatChunk
@@ -141,11 +141,31 @@ class TestStreamingService:
         # Arrange
         mock_events = [
             {"type": "start", "content": "", "metadata": {}},
-            {"type": "thinking", "content": "I need to use a tool", "metadata": {}},
-            {"type": "tool_call_start", "content": "", "metadata": {"tool": "search"}},
-            {"type": "tool_call_end", "content": "", "metadata": {"result": "found"}},
-            {"type": "token", "content": "Based on the search", "metadata": {}},
-            {"type": "complete", "content": "", "metadata": {"tokens_used": 50}}
+            {
+                "type": "thinking",
+                "content": "I need to use a tool",
+                "metadata": {},
+            },
+            {
+                "type": "tool_call_start",
+                "content": "",
+                "metadata": {"tool": "search"},
+            },
+            {
+                "type": "tool_call_end",
+                "content": "",
+                "metadata": {"result": "found"},
+            },
+            {
+                "type": "token",
+                "content": "Based on the search",
+                "metadata": {},
+            },
+            {
+                "type": "complete",
+                "content": "",
+                "metadata": {"tokens_used": 50},
+            },
         ]
 
         async def mock_streaming_with_tools():
@@ -172,6 +192,7 @@ class TestStreamingService:
     @pytest.mark.asyncio
     async def test_streaming_error_handling(self):
         """Test streaming error handling."""
+
         # Arrange
         async def mock_failing_stream():
             yield {"type": "start", "content": ""}
@@ -195,12 +216,21 @@ class TestStreamingService:
     @pytest.mark.asyncio
     async def test_streaming_heartbeat(self):
         """Test streaming heartbeat functionality."""
+
         # Arrange
         async def mock_heartbeat_stream():
             yield {"type": "start", "content": ""}
-            yield {"type": "heartbeat", "content": "", "metadata": {"timestamp": 1234567890}}
+            yield {
+                "type": "heartbeat",
+                "content": "",
+                "metadata": {"timestamp": 1234567890},
+            }
             yield {"type": "token", "content": "Hello"}
-            yield {"type": "heartbeat", "content": "", "metadata": {"timestamp": 1234567891}}
+            yield {
+                "type": "heartbeat",
+                "content": "",
+                "metadata": {"timestamp": 1234567891},
+            }
             yield {"type": "complete", "content": ""}
 
         streaming_service = MagicMock()
@@ -225,9 +255,21 @@ class TestStreamingService:
         """Test streaming with metadata events."""
         # Arrange
         metadata_events = [
-            {"type": "metadata", "content": "", "metadata": {"model": "gpt-4", "temperature": 0.7}},
-            {"type": "metadata", "content": "", "metadata": {"tokens_remaining": 3950}},
-            {"type": "metadata", "content": "", "metadata": {"processing_time": 0.5}}
+            {
+                "type": "metadata",
+                "content": "",
+                "metadata": {"model": "gpt-4", "temperature": 0.7},
+            },
+            {
+                "type": "metadata",
+                "content": "",
+                "metadata": {"tokens_remaining": 3950},
+            },
+            {
+                "type": "metadata",
+                "content": "",
+                "metadata": {"processing_time": 0.5},
+            },
         ]
 
         async def mock_metadata_stream():
@@ -252,6 +294,7 @@ class TestStreamingService:
         """Test streaming event timestamp handling."""
         # Arrange
         import time
+
         current_time = time.time()
 
         # Mock StreamingEvent with timestamp handling
@@ -272,20 +315,38 @@ class TestStreamingIntegration:
         """Test complete streaming workflow."""
         # Arrange
         workflow_events = [
-            {"type": "start", "content": "", "metadata": {"conversation_id": "conv-123"}},
-            {"type": "thinking", "content": "Processing user request", "metadata": {}},
-            {"type": "source_found", "content": "", "metadata": {"source": "document-1"}},
+            {
+                "type": "start",
+                "content": "",
+                "metadata": {"conversation_id": "conv-123"},
+            },
+            {
+                "type": "thinking",
+                "content": "Processing user request",
+                "metadata": {},
+            },
+            {
+                "type": "source_found",
+                "content": "",
+                "metadata": {"source": "document-1"},
+            },
             {"type": "token", "content": "According", "metadata": {}},
             {"type": "token", "content": " to", "metadata": {}},
             {"type": "token", "content": " the", "metadata": {}},
             {"type": "token", "content": " document", "metadata": {}},
-            {"type": "complete", "content": "", "metadata": {"total_tokens": 50, "duration": 2.5}}
+            {
+                "type": "complete",
+                "content": "",
+                "metadata": {"total_tokens": 50, "duration": 2.5},
+            },
         ]
 
         async def mock_workflow_stream():
             for event in workflow_events:
                 yield event
-                await asyncio.sleep(0.01)  # Simulate real-time streaming
+                await asyncio.sleep(
+                    0.01
+                )  # Simulate real-time streaming
 
         streaming_service = MagicMock()
         streaming_service.workflow_stream = mock_workflow_stream
@@ -312,25 +373,29 @@ class TestStreamingIntegration:
         # Arrange
         correlation_id = "test-correlation-456"
 
-        with patch('chatter.utils.correlation.get_correlation_id', return_value=correlation_id):
+        with patch(
+            'chatter.utils.correlation.get_correlation_id',
+            return_value=correlation_id,
+        ):
+
             async def mock_correlated_stream():
                 yield {
                     "type": "start",
                     "content": "",
                     "correlation_id": correlation_id,
-                    "metadata": {}
+                    "metadata": {},
                 }
                 yield {
                     "type": "token",
                     "content": "Hello",
                     "correlation_id": correlation_id,
-                    "metadata": {}
+                    "metadata": {},
                 }
                 yield {
                     "type": "complete",
                     "content": "",
                     "correlation_id": correlation_id,
-                    "metadata": {}
+                    "metadata": {},
                 }
 
             streaming_service = MagicMock()
@@ -355,11 +420,27 @@ class TestStreamingIntegration:
         def mock_record_metrics(event_type, metadata):
             metrics.append({"type": event_type, "metadata": metadata})
 
-        with patch('chatter.utils.monitoring.record_workflow_metrics', side_effect=mock_record_metrics):
+        with patch(
+            'chatter.utils.monitoring.record_workflow_metrics',
+            side_effect=mock_record_metrics,
+        ):
+
             async def mock_monitored_stream():
-                yield {"type": "start", "content": "", "metadata": {"workflow_id": "wf-123"}}
-                yield {"type": "token", "content": "Hello", "metadata": {}}
-                yield {"type": "complete", "content": "", "metadata": {"duration": 1.5, "tokens": 25}}
+                yield {
+                    "type": "start",
+                    "content": "",
+                    "metadata": {"workflow_id": "wf-123"},
+                }
+                yield {
+                    "type": "token",
+                    "content": "Hello",
+                    "metadata": {},
+                }
+                yield {
+                    "type": "complete",
+                    "content": "",
+                    "metadata": {"duration": 1.5, "tokens": 25},
+                }
 
             streaming_service = MagicMock()
             streaming_service.monitored_stream = mock_monitored_stream

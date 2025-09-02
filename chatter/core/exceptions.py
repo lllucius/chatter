@@ -26,7 +26,7 @@ class ChatterBaseException(Exception):
         error_code: str | None = None,
         status_code: int = 500,
         details: dict[str, Any] | None = None,
-        **kwargs
+        **kwargs,
     ):
         """Initialize Chatter error.
 
@@ -55,6 +55,7 @@ class ChatterBaseException(Exception):
         """Get default error code based on class name."""
         # Convert CamelCase to UPPER_CASE_WITH_UNDERSCORES
         import re
+
         name = self.__class__.__name__
         # Remove 'Error' suffix if present
         if name.endswith('Error'):
@@ -86,7 +87,7 @@ class ChatterBaseException(Exception):
             title=self._get_error_title(),
             detail=self.message,
             type_=f"about:blank#{self.error_code.lower().replace('_', '-')}",
-            **self.details or {}
+            **self.details or {},
         )
 
     def _get_error_title(self) -> str:
@@ -97,6 +98,7 @@ class ChatterBaseException(Exception):
             class_name = class_name[:-5]
         # Add spaces before capitals
         import re
+
         return re.sub(r'([a-z])([A-Z])', r'\1 \2', class_name)
 
 
@@ -113,7 +115,7 @@ class ServiceError(ChatterError):
             message=f"{service_name}: {message}",
             status_code=500,
             details={"service": service_name},
-            **kwargs
+            **kwargs,
         )
 
     def _get_error_title(self) -> str:
@@ -121,9 +123,6 @@ class ServiceError(ChatterError):
 
     def _get_type_suffix(self) -> str:
         return "service-error"
-
-
-
 
 
 class DatabaseError(ServiceError):
@@ -136,16 +135,20 @@ class DatabaseError(ServiceError):
 class ValidationError(ChatterBaseException):
     """Data validation errors."""
 
-    def __init__(self, message: str, field_errors: dict | None = None, **kwargs):
+    def __init__(
+        self, message: str, field_errors: dict | None = None, **kwargs
+    ):
         super().__init__(
             message=message,
             status_code=400,
             field_errors=field_errors,
-            **kwargs
+            **kwargs,
         )
 
     @classmethod
-    def aggregate(cls, errors: list["ValidationError"]) -> "ValidationError":
+    def aggregate(
+        cls, errors: list["ValidationError"]
+    ) -> "ValidationError":
         """Aggregate multiple validation errors."""
         messages = [error.message for error in errors]
         field_errors = {}
@@ -154,31 +157,24 @@ class ValidationError(ChatterBaseException):
                 field_errors.update(error.field_errors)
 
         return cls(
-            message="; ".join(messages),
-            field_errors=field_errors
+            message="; ".join(messages), field_errors=field_errors
         )
 
 
 class AuthenticationError(ChatterBaseException):
     """Authentication-related errors."""
 
-    def __init__(self, message: str = "Authentication failed", **kwargs):
-        super().__init__(
-            message=message,
-            status_code=401,
-            **kwargs
-        )
+    def __init__(
+        self, message: str = "Authentication failed", **kwargs
+    ):
+        super().__init__(message=message, status_code=401, **kwargs)
 
 
 class AuthorizationError(ChatterBaseException):
     """Authorization-related errors."""
 
     def __init__(self, message: str = "Access forbidden", **kwargs):
-        super().__init__(
-            message=message,
-            status_code=403,
-            **kwargs
-        )
+        super().__init__(message=message, status_code=403, **kwargs)
 
 
 class RateLimitError(ServiceError):
@@ -186,10 +182,7 @@ class RateLimitError(ServiceError):
 
     def __init__(self, message: str, **kwargs):
         super().__init__(
-            "rate_limiter",
-            message,
-            status_code=429,
-            **kwargs
+            "rate_limiter", message, status_code=429, **kwargs
         )
 
 
@@ -197,18 +190,18 @@ class ConfigurationError(ChatterBaseException):
     """Configuration-related errors."""
 
     def __init__(self, message: str, **kwargs):
-        super().__init__(
-            message=message,
-            status_code=500,
-            **kwargs
-        )
+        super().__init__(message=message, status_code=500, **kwargs)
 
     def get_safe_message(self) -> str:
         """Get a safe version of the error message without sensitive data."""
         # Remove sensitive values from message
         safe_message = self.message
-        if hasattr(self, 'config_value') and getattr(self, 'config_value', None):
-            safe_message = safe_message.replace(str(self.config_value), "***")
+        if hasattr(self, 'config_value') and getattr(
+            self, 'config_value', None
+        ):
+            safe_message = safe_message.replace(
+                str(self.config_value), "***"
+            )
         return safe_message
 
 
@@ -220,7 +213,7 @@ class NotFoundError(ChatterBaseException):
         message: str = "Resource not found",
         resource_type: str | None = None,
         resource_id: str | None = None,
-        **kwargs
+        **kwargs,
     ):
         details = {}
         if resource_type:
@@ -229,10 +222,7 @@ class NotFoundError(ChatterBaseException):
             details["resource_id"] = resource_id
 
         super().__init__(
-            message=message,
-            status_code=404,
-            details=details,
-            **kwargs
+            message=message, status_code=404, details=details, **kwargs
         )
 
 
@@ -240,26 +230,24 @@ class WorkflowError(ChatterBaseException):
     """Workflow execution errors."""
 
     def __init__(self, message: str, **kwargs):
-        super().__init__(
-            message=message,
-            status_code=500,
-            **kwargs
-        )
+        super().__init__(message=message, status_code=500, **kwargs)
 
 
 class ConflictError(ChatterError):
     """Resource conflict errors."""
 
-    def __init__(self, message: str, conflicting_resource: str | None = None, **kwargs):
+    def __init__(
+        self,
+        message: str,
+        conflicting_resource: str | None = None,
+        **kwargs,
+    ):
         details = {}
         if conflicting_resource:
             details["conflicting_resource"] = conflicting_resource
 
         super().__init__(
-            message=message,
-            status_code=409,
-            details=details,
-            **kwargs
+            message=message, status_code=409, details=details, **kwargs
         )
 
     def _get_error_title(self) -> str:
@@ -267,7 +255,6 @@ class ConflictError(ChatterError):
 
     def _get_type_suffix(self) -> str:
         return "resource-conflict"
-
 
 
 class ChatServiceError(ServiceError):
@@ -280,13 +267,12 @@ class ChatServiceError(ServiceError):
 class LLMServiceError(ServiceError):
     """LLM service specific errors."""
 
-    def __init__(self, message: str, provider: str | None = None, **kwargs):
+    def __init__(
+        self, message: str, provider: str | None = None, **kwargs
+    ):
         details = {"provider": provider} if provider else {}
         super().__init__(
-            "LLMService",
-            message,
-            details=details,
-            **kwargs
+            "LLMService", message, details=details, **kwargs
         )
 
 
@@ -300,26 +286,29 @@ class MCPServiceError(ServiceError):
 class VectorStoreError(ServiceError):
     """Vector store service specific errors."""
 
-    def __init__(self, message: str, store_type: str | None = None, **kwargs):
+    def __init__(
+        self, message: str, store_type: str | None = None, **kwargs
+    ):
         details = {"store_type": store_type} if store_type else {}
         super().__init__(
-            "VectorStoreService",
-            message,
-            details=details,
-            **kwargs
+            "VectorStoreService", message, details=details, **kwargs
         )
 
 
 class DocumentProcessingError(ServiceError):
     """Document processing service specific errors."""
 
-    def __init__(self, message: str, document_type: str | None = None, **kwargs):
-        details = {"document_type": document_type} if document_type else {}
+    def __init__(
+        self, message: str, document_type: str | None = None, **kwargs
+    ):
+        details = (
+            {"document_type": document_type} if document_type else {}
+        )
         super().__init__(
             "DocumentProcessingService",
             message,
             details=details,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -335,9 +324,6 @@ class EmbeddingError(ServiceError):
 
     def __init__(self, message: str, **kwargs):
         super().__init__("EmbeddingService", message, **kwargs)
-
-
-
 
 
 class WorkflowConfigurationError(WorkflowError):
@@ -356,12 +342,17 @@ class WorkflowConfigurationError(WorkflowError):
 class WorkflowValidationError(WorkflowError):
     """Workflow validation errors."""
 
-    def __init__(self, message: str, validation_issues: list | None = None, **kwargs):
+    def __init__(
+        self,
+        message: str,
+        validation_issues: list | None = None,
+        **kwargs,
+    ):
         super().__init__(
             message=message,
             status_code=422,
             details={"validation_issues": validation_issues or []},
-            **kwargs
+            **kwargs,
         )
 
     def _get_error_title(self) -> str:
@@ -379,7 +370,7 @@ class WorkflowExecutionError(WorkflowError):
         message: str,
         workflow_id: str | None = None,
         step: str | None = None,
-        **kwargs
+        **kwargs,
     ):
         details = {}
         if workflow_id:
@@ -388,10 +379,7 @@ class WorkflowExecutionError(WorkflowError):
             details["failed_step"] = step
 
         super().__init__(
-            message=message,
-            status_code=500,
-            details=details,
-            **kwargs
+            message=message, status_code=500, details=details, **kwargs
         )
 
     def _get_error_title(self) -> str:
@@ -406,7 +394,7 @@ def handle_service_error(
     func_name: str,
     service_name: str,
     error: Exception,
-    message: str | None = None
+    message: str | None = None,
 ) -> ChatterError:
     """Convert generic exceptions to standardized service errors.
 
@@ -446,11 +434,11 @@ def create_error_response(error: Exception) -> dict[str, Any]:
     else:
         # Handle non-ChatterError exceptions
         chatter_error = handle_service_error(
-            func_name="unknown",
-            service_name="system",
-            error=error
+            func_name="unknown", service_name="system", error=error
         )
-        return chatter_error.to_problem_detail().model_dump(exclude_none=True)
+        return chatter_error.to_problem_detail().model_dump(
+            exclude_none=True
+        )
 
 
 # Alias for backward compatibility with tests
@@ -460,16 +448,15 @@ ChatterBaseException = ChatterError
 class AgentError(ChatterBaseException):
     """Base class for agent-related errors."""
 
-    def __init__(self, message: str, agent_id: str | None = None, **kwargs):
+    def __init__(
+        self, message: str, agent_id: str | None = None, **kwargs
+    ):
         details = {}
         if agent_id:
             details["agent_id"] = agent_id
 
         super().__init__(
-            message=message,
-            status_code=500,
-            details=details,
-            **kwargs
+            message=message, status_code=500, details=details, **kwargs
         )
 
 
@@ -481,7 +468,7 @@ class AgentExecutionError(AgentError):
         message: str,
         agent_id: str | None = None,
         task: str | None = None,
-        **kwargs
+        **kwargs,
     ):
         details = {}
         if agent_id:
@@ -493,7 +480,7 @@ class AgentExecutionError(AgentError):
             message=message,
             agent_id=agent_id,
             details=details,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -505,7 +492,7 @@ class ServiceNotFoundError(NotFoundError):
             message=f"Service not found: {service_name}",
             resource_type="service",
             resource_id=service_name,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -517,7 +504,7 @@ class DocumentNotFoundError(NotFoundError):
             message=f"Document not found: {document_id}",
             resource_type="document",
             resource_id=document_id,
-            **kwargs
+            **kwargs,
         )
 
 
@@ -537,16 +524,14 @@ class WorkflowMetricsError(WorkflowError):
 class WorkflowTemplateError(WorkflowError):
     """Workflow template specific errors."""
 
-    def __init__(self, message: str, template_name: str | None = None, **kwargs):
+    def __init__(
+        self, message: str, template_name: str | None = None, **kwargs
+    ):
         details = {}
         if template_name:
             details["template_name"] = template_name
 
-        super().__init__(
-            message=message,
-            details=details,
-            **kwargs
-        )
+        super().__init__(message=message, details=details, **kwargs)
 
     def _get_error_title(self) -> str:
         return "Workflow Template Error"
@@ -558,16 +543,15 @@ class WorkflowTemplateError(WorkflowError):
 class EmbeddingModelError(ChatterBaseException):
     """Embedding model specific errors."""
 
-    def __init__(self, message: str, model_name: str | None = None, **kwargs):
+    def __init__(
+        self, message: str, model_name: str | None = None, **kwargs
+    ):
         details = {}
         if model_name:
             details["model_name"] = model_name
 
         super().__init__(
-            message=message,
-            status_code=500,
-            details=details,
-            **kwargs
+            message=message, status_code=500, details=details, **kwargs
         )
 
 
@@ -575,11 +559,11 @@ class DimensionMismatchError(EmbeddingModelError):
     """Dimension mismatch errors for embedding models."""
 
     def __init__(
-        self, 
-        message: str, 
+        self,
+        message: str,
         expected_dimension: int | None = None,
         actual_dimension: int | None = None,
-        **kwargs
+        **kwargs,
     ):
         details = {}
         if expected_dimension is not None:
@@ -587,8 +571,4 @@ class DimensionMismatchError(EmbeddingModelError):
         if actual_dimension is not None:
             details["actual_dimension"] = actual_dimension
 
-        super().__init__(
-            message=message,
-            details=details,
-            **kwargs
-        )
+        super().__init__(message=message, details=details, **kwargs)

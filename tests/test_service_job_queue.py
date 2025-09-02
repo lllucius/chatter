@@ -34,6 +34,7 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_register_job_handler(self):
         """Test registering a job handler."""
+
         # Arrange
         def test_handler(data: dict) -> str:
             return f"Processed: {data.get('message', 'no message')}"
@@ -50,13 +51,18 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_register_async_job_handler(self):
         """Test registering an async job handler."""
+
         # Arrange
         async def async_test_handler(data: dict) -> str:
             await asyncio.sleep(0.1)
-            return f"Async processed: {data.get('message', 'no message')}"
+            return (
+                f"Async processed: {data.get('message', 'no message')}"
+            )
 
         # Act
-        await self.job_queue.register_handler("async_test_job", async_test_handler)
+        await self.job_queue.register_handler(
+            "async_test_job", async_test_handler
+        )
 
         # Assert
         assert "async_test_job" in self.job_queue.job_handlers
@@ -67,6 +73,7 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_submit_job_success(self):
         """Test successful job submission."""
+
         # Arrange
         def test_handler(data: dict) -> str:
             return f"Processed: {data['message']}"
@@ -79,7 +86,7 @@ class TestJobQueue:
         job_id = await self.job_queue.submit_job(
             job_type="test_task",
             data=job_data,
-            priority=JobPriority.NORMAL
+            priority=JobPriority.NORMAL,
         )
 
         # Assert
@@ -95,11 +102,14 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_submit_job_with_schedule(self):
         """Test submitting a scheduled job."""
+
         # Arrange
         def scheduled_handler(data: dict) -> str:
             return "Scheduled task executed"
 
-        await self.job_queue.register_handler("scheduled_task", scheduled_handler)
+        await self.job_queue.register_handler(
+            "scheduled_task", scheduled_handler
+        )
 
         schedule_time = datetime.now(UTC) + timedelta(seconds=5)
 
@@ -107,7 +117,7 @@ class TestJobQueue:
         job_id = await self.job_queue.submit_job(
             job_type="scheduled_task",
             data={"scheduled": True},
-            scheduled_time=schedule_time
+            scheduled_time=schedule_time,
         )
 
         # Assert
@@ -121,21 +131,28 @@ class TestJobQueue:
         # Act & Assert
         with pytest.raises(ValueError) as exc_info:
             await self.job_queue.submit_job(
-                job_type="unknown_task",
-                data={"test": "data"}
+                job_type="unknown_task", data={"test": "data"}
             )
 
-        assert "No handler registered for job type: unknown_task" in str(exc_info.value)
+        assert (
+            "No handler registered for job type: unknown_task"
+            in str(exc_info.value)
+        )
 
     @pytest.mark.asyncio
     async def test_get_job_status(self):
         """Test getting job status."""
+
         # Arrange
         def test_handler(data: dict) -> str:
             return "test result"
 
-        await self.job_queue.register_handler("status_test", test_handler)
-        job_id = await self.job_queue.submit_job("status_test", {"test": "data"})
+        await self.job_queue.register_handler(
+            "status_test", test_handler
+        )
+        job_id = await self.job_queue.submit_job(
+            "status_test", {"test": "data"}
+        )
 
         # Act
         status = await self.job_queue.get_job_status(job_id)
@@ -146,12 +163,17 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_get_job_result_not_completed(self):
         """Test getting result for non-completed job."""
+
         # Arrange
         def test_handler(data: dict) -> str:
             return "test result"
 
-        await self.job_queue.register_handler("result_test", test_handler)
-        job_id = await self.job_queue.submit_job("result_test", {"test": "data"})
+        await self.job_queue.register_handler(
+            "result_test", test_handler
+        )
+        job_id = await self.job_queue.submit_job(
+            "result_test", {"test": "data"}
+        )
 
         # Act
         result = await self.job_queue.get_job_result(job_id)
@@ -162,15 +184,19 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_cancel_job_success(self):
         """Test successful job cancellation."""
+
         # Arrange
         def slow_handler(data: dict) -> str:
             # Simulate slow task
             import time
+
             time.sleep(1)
             return "slow result"
 
         await self.job_queue.register_handler("slow_task", slow_handler)
-        job_id = await self.job_queue.submit_job("slow_task", {"test": "data"})
+        job_id = await self.job_queue.submit_job(
+            "slow_task", {"test": "data"}
+        )
 
         # Act
         cancelled = await self.job_queue.cancel_job(job_id)
@@ -183,16 +209,21 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_list_jobs_filtering(self):
         """Test listing jobs with filtering."""
+
         # Arrange
         def test_handler(data: dict) -> str:
             return "test"
 
-        await self.job_queue.register_handler("filter_test", test_handler)
+        await self.job_queue.register_handler(
+            "filter_test", test_handler
+        )
 
         # Submit multiple jobs
         job_ids = []
         for i in range(3):
-            job_id = await self.job_queue.submit_job("filter_test", {"index": i})
+            job_id = await self.job_queue.submit_job(
+                "filter_test", {"index": i}
+            )
             job_ids.append(job_id)
 
         # Cancel one job
@@ -200,8 +231,12 @@ class TestJobQueue:
 
         # Act
         all_jobs = await self.job_queue.list_jobs()
-        pending_jobs = await self.job_queue.list_jobs(status=JobStatus.PENDING)
-        cancelled_jobs = await self.job_queue.list_jobs(status=JobStatus.CANCELLED)
+        pending_jobs = await self.job_queue.list_jobs(
+            status=JobStatus.PENDING
+        )
+        cancelled_jobs = await self.job_queue.list_jobs(
+            status=JobStatus.CANCELLED
+        )
 
         # Assert
         assert len(all_jobs) == 3
@@ -221,13 +256,13 @@ class TestJobQueue:
                 raise Exception(f"Attempt {call_count} failed")
             return f"Success on attempt {call_count}"
 
-        await self.job_queue.register_handler("retry_test", failing_handler)
+        await self.job_queue.register_handler(
+            "retry_test", failing_handler
+        )
 
         # Act
         job_id = await self.job_queue.submit_job(
-            job_type="retry_test",
-            data={"test": "retry"},
-            max_retries=3
+            job_type="retry_test", data={"test": "retry"}, max_retries=3
         )
 
         # Simulate job execution with retries
@@ -259,27 +294,30 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_job_priority_handling(self):
         """Test job priority handling."""
+
         # Arrange
         def priority_handler(data: dict) -> str:
             return f"Priority: {data['priority']}"
 
-        await self.job_queue.register_handler("priority_test", priority_handler)
+        await self.job_queue.register_handler(
+            "priority_test", priority_handler
+        )
 
         # Submit jobs with different priorities
         high_job_id = await self.job_queue.submit_job(
             "priority_test",
             {"priority": "high"},
-            priority=JobPriority.HIGH
+            priority=JobPriority.HIGH,
         )
         low_job_id = await self.job_queue.submit_job(
             "priority_test",
             {"priority": "low"},
-            priority=JobPriority.LOW
+            priority=JobPriority.LOW,
         )
         normal_job_id = await self.job_queue.submit_job(
             "priority_test",
             {"priority": "normal"},
-            priority=JobPriority.NORMAL
+            priority=JobPriority.NORMAL,
         )
 
         # Act
@@ -288,7 +326,9 @@ class TestJobQueue:
         # Assert jobs have correct priorities
         high_job = next(job for job in jobs if job.id == high_job_id)
         low_job = next(job for job in jobs if job.id == low_job_id)
-        normal_job = next(job for job in jobs if job.id == normal_job_id)
+        normal_job = next(
+            job for job in jobs if job.id == normal_job_id
+        )
 
         assert high_job.priority == JobPriority.HIGH
         assert low_job.priority == JobPriority.LOW
@@ -297,11 +337,14 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_get_queue_stats(self):
         """Test getting queue statistics."""
+
         # Arrange
         def stats_handler(data: dict) -> str:
             return "stats test"
 
-        await self.job_queue.register_handler("stats_test", stats_handler)
+        await self.job_queue.register_handler(
+            "stats_test", stats_handler
+        )
 
         # Submit some jobs
         for i in range(5):
@@ -321,7 +364,9 @@ class TestJobQueue:
     async def test_job_queue_start_stop(self):
         """Test starting and stopping the job queue."""
         # Arrange
-        with patch.object(self.job_queue, 'scheduler') as mock_scheduler:
+        with patch.object(
+            self.job_queue, 'scheduler'
+        ) as mock_scheduler:
             mock_scheduler.start = AsyncMock()
             mock_scheduler.shutdown = AsyncMock()
 
@@ -342,16 +387,21 @@ class TestJobQueue:
     @pytest.mark.asyncio
     async def test_job_cleanup_old_jobs(self):
         """Test cleanup of old completed jobs."""
+
         # Arrange
         def cleanup_handler(data: dict) -> str:
             return "cleanup test"
 
-        await self.job_queue.register_handler("cleanup_test", cleanup_handler)
+        await self.job_queue.register_handler(
+            "cleanup_test", cleanup_handler
+        )
 
         # Submit and complete jobs
         job_ids = []
         for i in range(3):
-            job_id = await self.job_queue.submit_job("cleanup_test", {"index": i})
+            job_id = await self.job_queue.submit_job(
+                "cleanup_test", {"index": i}
+            )
             job_ids.append(job_id)
 
             # Simulate job completion with old timestamp
@@ -363,19 +413,22 @@ class TestJobQueue:
             self.job_queue.results[job_id] = JobResult(
                 job_id=job_id,
                 result=f"Result {i}",
-                completed_at=job.completed_at
+                completed_at=job.completed_at,
             )
 
         # Act
         initial_count = len(self.job_queue.jobs)
-        cleaned_count = await self.job_queue.cleanup_old_jobs(max_age_days=1)
+        cleaned_count = await self.job_queue.cleanup_old_jobs(
+            max_age_days=1
+        )
 
         # Assert
         assert initial_count == 3
         assert cleaned_count == 3
         # Jobs should be removed from active jobs but results might be kept
         assert len(self.job_queue.jobs) == 0 or all(
-            job.status != JobStatus.COMPLETED for job in self.job_queue.jobs.values()
+            job.status != JobStatus.COMPLETED
+            for job in self.job_queue.jobs.values()
         )
 
 
@@ -396,12 +449,17 @@ class TestJobQueueIntegration:
         async def lifecycle_handler(data: dict) -> dict:
             execution_log.append(f"Processing: {data['task_name']}")
             await asyncio.sleep(0.1)  # Simulate work
-            result = {"processed": data['task_name'], "timestamp": datetime.now(UTC).isoformat()}
+            result = {
+                "processed": data['task_name'],
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
             execution_log.append(f"Completed: {data['task_name']}")
             return result
 
         # Register handler and start queue
-        await self.job_queue.register_handler("lifecycle_task", lifecycle_handler)
+        await self.job_queue.register_handler(
+            "lifecycle_task", lifecycle_handler
+        )
         await self.job_queue.start()
 
         try:
@@ -409,7 +467,7 @@ class TestJobQueueIntegration:
             job_id = await self.job_queue.submit_job(
                 "lifecycle_task",
                 {"task_name": "integration_test"},
-                priority=JobPriority.HIGH
+                priority=JobPriority.HIGH,
             )
 
             # Wait for processing (in real implementation, job would be processed automatically)
@@ -419,7 +477,9 @@ class TestJobQueueIntegration:
 
             # Simulate job execution
             try:
-                handler_info = self.job_queue.job_handlers["lifecycle_task"]
+                handler_info = self.job_queue.job_handlers[
+                    "lifecycle_task"
+                ]
                 result = await handler_info.func(job.data)
 
                 # Update job status
@@ -430,7 +490,7 @@ class TestJobQueueIntegration:
                 self.job_queue.results[job_id] = JobResult(
                     job_id=job_id,
                     result=result,
-                    completed_at=job.completed_at
+                    completed_at=job.completed_at,
                 )
 
             except Exception as e:
@@ -463,7 +523,9 @@ class TestJobQueueIntegration:
             processed_jobs.append(f"Finished: {job_name}")
             return f"Result for {job_name}"
 
-        await self.job_queue.register_handler("concurrent_task", concurrent_handler)
+        await self.job_queue.register_handler(
+            "concurrent_task", concurrent_handler
+        )
         await self.job_queue.start()
 
         try:
@@ -471,8 +533,7 @@ class TestJobQueueIntegration:
             job_ids = []
             for i in range(3):
                 job_id = await self.job_queue.submit_job(
-                    "concurrent_task",
-                    {"job_name": f"job_{i}"}
+                    "concurrent_task", {"job_name": f"job_{i}"}
                 )
                 job_ids.append(job_id)
 
@@ -480,7 +541,9 @@ class TestJobQueueIntegration:
             tasks = []
             for job_id in job_ids:
                 job = self.job_queue.jobs[job_id]
-                handler_info = self.job_queue.job_handlers["concurrent_task"]
+                handler_info = self.job_queue.job_handlers[
+                    "concurrent_task"
+                ]
 
                 async def process_job(j, h):
                     try:
@@ -490,7 +553,7 @@ class TestJobQueueIntegration:
                         self.job_queue.results[j.id] = JobResult(
                             job_id=j.id,
                             result=result,
-                            completed_at=j.completed_at
+                            completed_at=j.completed_at,
                         )
                     except Exception as e:
                         j.status = JobStatus.FAILED
@@ -526,19 +589,19 @@ class TestJobQueueIntegration:
 
             return f"Success after {error_count} calls"
 
-        await self.job_queue.register_handler("error_task", error_prone_handler)
+        await self.job_queue.register_handler(
+            "error_task", error_prone_handler
+        )
         await self.job_queue.start()
 
         try:
             # Submit a mix of successful and failing jobs
             success_job_id = await self.job_queue.submit_job(
-                "error_task",
-                {"should_fail": False}
+                "error_task", {"should_fail": False}
             )
 
             fail_job_id = await self.job_queue.submit_job(
-                "error_task",
-                {"should_fail": True}
+                "error_task", {"should_fail": True}
             )
 
             # Process jobs
@@ -553,7 +616,7 @@ class TestJobQueueIntegration:
                     self.job_queue.results[job_id] = JobResult(
                         job_id=job_id,
                         result=result,
-                        completed_at=job.completed_at
+                        completed_at=job.completed_at,
                     )
                 except Exception as e:
                     job.status = JobStatus.FAILED

@@ -23,11 +23,17 @@ class TestEmbeddingsService:
         text = "This is a test document for embedding generation."
         expected_embedding = [0.1, 0.2, 0.3, 0.4, 0.5]
 
-        with patch.object(self.embeddings_service, '_call_embedding_provider') as mock_provider:
+        with patch.object(
+            self.embeddings_service, '_call_embedding_provider'
+        ) as mock_provider:
             mock_provider.return_value = expected_embedding
 
             # Act
-            result = await self.embeddings_service.generate_text_embedding(text)
+            result = (
+                await self.embeddings_service.generate_text_embedding(
+                    text
+                )
+            )
 
             # Assert
             assert result == expected_embedding
@@ -41,11 +47,17 @@ class TestEmbeddingsService:
         model = "text-embedding-3-large"
         expected_embedding = [0.1, 0.2, 0.3]
 
-        with patch.object(self.embeddings_service, '_call_embedding_provider') as mock_provider:
+        with patch.object(
+            self.embeddings_service, '_call_embedding_provider'
+        ) as mock_provider:
             mock_provider.return_value = expected_embedding
 
             # Act
-            result = await self.embeddings_service.generate_text_embedding(text, model=model)
+            result = (
+                await self.embeddings_service.generate_text_embedding(
+                    text, model=model
+                )
+            )
 
             # Assert
             assert result == expected_embedding
@@ -58,19 +70,25 @@ class TestEmbeddingsService:
         texts = [
             "First document text",
             "Second document text",
-            "Third document text"
+            "Third document text",
         ]
         expected_embeddings = [
             [0.1, 0.2, 0.3],
             [0.4, 0.5, 0.6],
-            [0.7, 0.8, 0.9]
+            [0.7, 0.8, 0.9],
         ]
 
-        with patch.object(self.embeddings_service, '_call_batch_embedding_provider') as mock_batch:
+        with patch.object(
+            self.embeddings_service, '_call_batch_embedding_provider'
+        ) as mock_batch:
             mock_batch.return_value = expected_embeddings
 
             # Act
-            result = await self.embeddings_service.generate_batch_embeddings(texts)
+            result = (
+                await self.embeddings_service.generate_batch_embeddings(
+                    texts
+                )
+            )
 
             # Assert
             assert len(result) == 3
@@ -85,22 +103,27 @@ class TestEmbeddingsService:
         expected_processed = "this is raw text with extra spacing!"
         expected_embedding = [0.1, 0.2, 0.3]
 
-        with patch.object(self.embeddings_service, '_preprocess_text') as mock_preprocess:
+        with patch.object(
+            self.embeddings_service, '_preprocess_text'
+        ) as mock_preprocess:
             mock_preprocess.return_value = expected_processed
 
-            with patch.object(self.embeddings_service, '_call_embedding_provider') as mock_provider:
+            with patch.object(
+                self.embeddings_service, '_call_embedding_provider'
+            ) as mock_provider:
                 mock_provider.return_value = expected_embedding
 
                 # Act
                 result = await self.embeddings_service.generate_text_embedding(
-                    raw_text,
-                    preprocess=True
+                    raw_text, preprocess=True
                 )
 
                 # Assert
                 assert result == expected_embedding
                 mock_preprocess.assert_called_once_with(raw_text)
-                mock_provider.assert_called_once_with(expected_processed, model="default")
+                mock_provider.assert_called_once_with(
+                    expected_processed, model="default"
+                )
 
     @pytest.mark.asyncio
     async def test_calculate_similarity_cosine(self):
@@ -111,16 +134,22 @@ class TestEmbeddingsService:
         embedding3 = [1.0, 0.0, 0.0]  # Same as embedding1
 
         # Act
-        similarity_different = await self.embeddings_service.calculate_similarity(
-            embedding1, embedding2, method="cosine"
+        similarity_different = (
+            await self.embeddings_service.calculate_similarity(
+                embedding1, embedding2, method="cosine"
+            )
         )
-        similarity_same = await self.embeddings_service.calculate_similarity(
-            embedding1, embedding3, method="cosine"
+        similarity_same = (
+            await self.embeddings_service.calculate_similarity(
+                embedding1, embedding3, method="cosine"
+            )
         )
 
         # Assert
-        assert abs(similarity_different - 0.0) < 1e-6  # Orthogonal vectors
-        assert abs(similarity_same - 1.0) < 1e-6      # Identical vectors
+        assert (
+            abs(similarity_different - 0.0) < 1e-6
+        )  # Orthogonal vectors
+        assert abs(similarity_same - 1.0) < 1e-6  # Identical vectors
 
     @pytest.mark.asyncio
     async def test_calculate_similarity_euclidean(self):
@@ -143,17 +172,31 @@ class TestEmbeddingsService:
         # Arrange
         query_embedding = [0.1, 0.2, 0.3]
         candidate_embeddings = [
-            {"id": "doc-1", "embedding": [0.1, 0.2, 0.3]},  # Exact match
-            {"id": "doc-2", "embedding": [0.1, 0.2, 0.4]},  # Close match
-            {"id": "doc-3", "embedding": [0.9, 0.8, 0.7]}   # Different
+            {
+                "id": "doc-1",
+                "embedding": [0.1, 0.2, 0.3],
+            },  # Exact match
+            {
+                "id": "doc-2",
+                "embedding": [0.1, 0.2, 0.4],
+            },  # Close match
+            {"id": "doc-3", "embedding": [0.9, 0.8, 0.7]},  # Different
         ]
 
-        with patch.object(self.embeddings_service, 'calculate_similarity') as mock_similarity:
-            mock_similarity.side_effect = [1.0, 0.9, 0.1]  # Similarity scores
+        with patch.object(
+            self.embeddings_service, 'calculate_similarity'
+        ) as mock_similarity:
+            mock_similarity.side_effect = [
+                1.0,
+                0.9,
+                0.1,
+            ]  # Similarity scores
 
             # Act
-            similar = await self.embeddings_service.find_similar_embeddings(
-                query_embedding, candidate_embeddings, top_k=2
+            similar = (
+                await self.embeddings_service.find_similar_embeddings(
+                    query_embedding, candidate_embeddings, top_k=2
+                )
             )
 
             # Assert
@@ -166,16 +209,22 @@ class TestEmbeddingsService:
         """Test embedding dimension validation."""
         # Arrange
         valid_embedding = [0.1, 0.2, 0.3, 0.4]  # 4 dimensions
-        invalid_embedding = [0.1, 0.2]           # 2 dimensions
+        invalid_embedding = [0.1, 0.2]  # 2 dimensions
 
         # Act & Assert
-        assert await self.embeddings_service.validate_embedding_dimension(
-            valid_embedding, expected_dim=4
-        ) is True
+        assert (
+            await self.embeddings_service.validate_embedding_dimension(
+                valid_embedding, expected_dim=4
+            )
+            is True
+        )
 
-        assert await self.embeddings_service.validate_embedding_dimension(
-            invalid_embedding, expected_dim=4
-        ) is False
+        assert (
+            await self.embeddings_service.validate_embedding_dimension(
+                invalid_embedding, expected_dim=4
+            )
+            is False
+        )
 
     @pytest.mark.asyncio
     async def test_normalize_embedding(self):
@@ -184,7 +233,9 @@ class TestEmbeddingsService:
         embedding = [3.0, 4.0, 0.0]
 
         # Act
-        normalized = await self.embeddings_service.normalize_embedding(embedding)
+        normalized = await self.embeddings_service.normalize_embedding(
+            embedding
+        )
 
         # Assert
         # Normalized vector should have magnitude 1
@@ -198,13 +249,19 @@ class TestEmbeddingsService:
         text = "This text should be cached"
         expected_embedding = [0.1, 0.2, 0.3]
 
-        with patch.object(self.embeddings_service, '_get_cached_embedding') as mock_get_cache:
+        with patch.object(
+            self.embeddings_service, '_get_cached_embedding'
+        ) as mock_get_cache:
             mock_get_cache.return_value = None  # No cache hit
 
-            with patch.object(self.embeddings_service, '_call_embedding_provider') as mock_provider:
+            with patch.object(
+                self.embeddings_service, '_call_embedding_provider'
+            ) as mock_provider:
                 mock_provider.return_value = expected_embedding
 
-                with patch.object(self.embeddings_service, '_cache_embedding') as mock_set_cache:
+                with patch.object(
+                    self.embeddings_service, '_cache_embedding'
+                ) as mock_set_cache:
                     # Act
                     result = await self.embeddings_service.generate_text_embedding(
                         text, use_cache=True
@@ -213,7 +270,9 @@ class TestEmbeddingsService:
                     # Assert
                     assert result == expected_embedding
                     mock_get_cache.assert_called_once()
-                    mock_set_cache.assert_called_once_with(text, expected_embedding)
+                    mock_set_cache.assert_called_once_with(
+                        text, expected_embedding
+                    )
 
     @pytest.mark.asyncio
     async def test_embedding_cache_hit(self):
@@ -222,10 +281,14 @@ class TestEmbeddingsService:
         text = "Cached text"
         cached_embedding = [0.5, 0.6, 0.7]
 
-        with patch.object(self.embeddings_service, '_get_cached_embedding') as mock_get_cache:
+        with patch.object(
+            self.embeddings_service, '_get_cached_embedding'
+        ) as mock_get_cache:
             mock_get_cache.return_value = cached_embedding
 
-            with patch.object(self.embeddings_service, '_call_embedding_provider') as mock_provider:
+            with patch.object(
+                self.embeddings_service, '_call_embedding_provider'
+            ) as mock_provider:
                 # Act
                 result = await self.embeddings_service.generate_text_embedding(
                     text, use_cache=True
@@ -242,12 +305,16 @@ class TestEmbeddingsService:
         # Arrange
         text = "Text that causes error"
 
-        with patch.object(self.embeddings_service, '_call_embedding_provider') as mock_provider:
+        with patch.object(
+            self.embeddings_service, '_call_embedding_provider'
+        ) as mock_provider:
             mock_provider.side_effect = Exception("Provider API error")
 
             # Act & Assert
             with pytest.raises(EmbeddingError) as exc_info:
-                await self.embeddings_service.generate_text_embedding(text)
+                await self.embeddings_service.generate_text_embedding(
+                    text
+                )
 
             assert "Provider API error" in str(exc_info.value)
 
@@ -260,21 +327,25 @@ class TestEmbeddingsService:
                 "name": "text-embedding-ada-002",
                 "provider": "openai",
                 "dimensions": 1536,
-                "max_tokens": 8191
+                "max_tokens": 8191,
             },
             {
                 "name": "text-embedding-3-small",
                 "provider": "openai",
                 "dimensions": 1536,
-                "max_tokens": 8191
-            }
+                "max_tokens": 8191,
+            },
         ]
 
-        with patch.object(self.embeddings_service, '_fetch_available_models') as mock_fetch:
+        with patch.object(
+            self.embeddings_service, '_fetch_available_models'
+        ) as mock_fetch:
             mock_fetch.return_value = expected_models
 
             # Act
-            models = await self.embeddings_service.get_available_models()
+            models = (
+                await self.embeddings_service.get_available_models()
+            )
 
             # Assert
             assert len(models) == 2
@@ -286,8 +357,13 @@ class TestEmbeddingsService:
         # Arrange
         texts = [f"Text {i}" for i in range(100)]  # Large batch
 
-        with patch.object(self.embeddings_service, '_apply_rate_limit') as mock_rate_limit:
-            with patch.object(self.embeddings_service, '_call_batch_embedding_provider') as mock_batch:
+        with patch.object(
+            self.embeddings_service, '_apply_rate_limit'
+        ) as mock_rate_limit:
+            with patch.object(
+                self.embeddings_service,
+                '_call_batch_embedding_provider',
+            ) as mock_batch:
                 mock_batch.return_value = [[0.1, 0.2] for _ in texts]
 
                 # Act
@@ -315,22 +391,34 @@ class TestEmbeddingsServiceIntegration:
         # Arrange
         documents = [
             {"id": "doc-1", "content": "First document about AI"},
-            {"id": "doc-2", "content": "Second document about machine learning"},
-            {"id": "doc-3", "content": "Third document about data science"}
+            {
+                "id": "doc-2",
+                "content": "Second document about machine learning",
+            },
+            {
+                "id": "doc-3",
+                "content": "Third document about data science",
+            },
         ]
 
         # Mock embedding generation
-        with patch.object(self.embeddings_service, '_call_batch_embedding_provider') as mock_batch:
+        with patch.object(
+            self.embeddings_service, '_call_batch_embedding_provider'
+        ) as mock_batch:
             mock_embeddings = [
                 [0.1, 0.2, 0.3],
                 [0.4, 0.5, 0.6],
-                [0.7, 0.8, 0.9]
+                [0.7, 0.8, 0.9],
             ]
             mock_batch.return_value = mock_embeddings
 
             # Generate embeddings for all documents
             texts = [doc["content"] for doc in documents]
-            embeddings = await self.embeddings_service.generate_batch_embeddings(texts)
+            embeddings = (
+                await self.embeddings_service.generate_batch_embeddings(
+                    texts
+                )
+            )
 
             # Store embeddings with documents
             for i, doc in enumerate(documents):
@@ -338,14 +426,28 @@ class TestEmbeddingsServiceIntegration:
 
             # Test similarity search
             query_text = "artificial intelligence"
-            with patch.object(self.embeddings_service, '_call_embedding_provider') as mock_single:
-                mock_single.return_value = [0.15, 0.25, 0.35]  # Close to first doc
+            with patch.object(
+                self.embeddings_service, '_call_embedding_provider'
+            ) as mock_single:
+                mock_single.return_value = [
+                    0.15,
+                    0.25,
+                    0.35,
+                ]  # Close to first doc
 
-                query_embedding = await self.embeddings_service.generate_text_embedding(query_text)
+                query_embedding = await self.embeddings_service.generate_text_embedding(
+                    query_text
+                )
 
                 # Find similar documents
-                with patch.object(self.embeddings_service, 'calculate_similarity') as mock_similarity:
-                    mock_similarity.side_effect = [0.95, 0.7, 0.3]  # Similarity scores
+                with patch.object(
+                    self.embeddings_service, 'calculate_similarity'
+                ) as mock_similarity:
+                    mock_similarity.side_effect = [
+                        0.95,
+                        0.7,
+                        0.3,
+                    ]  # Similarity scores
 
                     candidate_embeddings = [
                         {"id": doc["id"], "embedding": doc["embedding"]}
@@ -358,7 +460,9 @@ class TestEmbeddingsServiceIntegration:
 
                     # Assert
                     assert len(similar_docs) == 2
-                    assert similar_docs[0]["id"] == "doc-1"  # Most similar
+                    assert (
+                        similar_docs[0]["id"] == "doc-1"
+                    )  # Most similar
 
 
 @pytest.mark.unit
@@ -383,7 +487,7 @@ class TestEmbeddingsServiceHelpers:
         assert processed.islower()
         assert "  " not in processed  # No double spaces
         assert not processed.startswith(" ")  # No leading space
-        assert not processed.endswith(" ")   # No trailing space
+        assert not processed.endswith(" ")  # No trailing space
 
     def test_embedding_validation(self):
         """Test embedding validation logic."""
@@ -393,9 +497,22 @@ class TestEmbeddingsServiceHelpers:
         invalid_embedding_inf = [0.1, float('inf'), 0.3]
 
         # Act & Assert
-        assert self.embeddings_service._validate_embedding(valid_embedding) is True
-        assert self.embeddings_service._validate_embedding(invalid_embedding_nan) is False
-        assert self.embeddings_service._validate_embedding(invalid_embedding_inf) is False
+        assert (
+            self.embeddings_service._validate_embedding(valid_embedding)
+            is True
+        )
+        assert (
+            self.embeddings_service._validate_embedding(
+                invalid_embedding_nan
+            )
+            is False
+        )
+        assert (
+            self.embeddings_service._validate_embedding(
+                invalid_embedding_inf
+            )
+            is False
+        )
 
     def test_batch_processing(self):
         """Test batch processing utilities."""
@@ -404,7 +521,9 @@ class TestEmbeddingsServiceHelpers:
         batch_size = 10
 
         # Act
-        batches = list(self.embeddings_service._create_batches(texts, batch_size))
+        batches = list(
+            self.embeddings_service._create_batches(texts, batch_size)
+        )
 
         # Assert
         assert len(batches) == 3  # 25 items in batches of 10
@@ -419,9 +538,13 @@ class TestEmbeddingsServiceHelpers:
         model = "text-embedding-ada-002"
 
         # Act
-        cache_key = self.embeddings_service._generate_cache_key(text, model)
+        cache_key = self.embeddings_service._generate_cache_key(
+            text, model
+        )
 
         # Assert
         assert isinstance(cache_key, str)
         assert len(cache_key) > 0
-        assert model in cache_key or text in cache_key  # Should contain identifying info
+        assert (
+            model in cache_key or text in cache_key
+        )  # Should contain identifying info

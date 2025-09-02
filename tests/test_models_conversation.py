@@ -1,14 +1,14 @@
 """Tests for conversation and message models."""
 
-import pytest
 from datetime import datetime
-from sqlalchemy.exc import IntegrityError
+
+import pytest
 
 from chatter.models.conversation import (
     Conversation,
+    ConversationStatus,
     Message,
     MessageRole,
-    ConversationStatus,
 )
 from chatter.models.user import User
 
@@ -63,7 +63,9 @@ class TestConversationModel:
         assert conversation.llm_model == "gpt-4"
         assert conversation.temperature == 0.8
         assert conversation.max_tokens == 2048
-        assert conversation.system_prompt == "You are a helpful assistant"
+        assert (
+            conversation.system_prompt == "You are a helpful assistant"
+        )
         assert conversation.context_window == 8192
         assert conversation.memory_strategy == "summary"
         assert conversation.enable_retrieval is True
@@ -80,8 +82,8 @@ class TestConversationModel:
             extra_metadata={
                 "source": "api",
                 "priority": "high",
-                "custom_field": "value"
-            }
+                "custom_field": "value",
+            },
         )
 
         # Assert
@@ -100,9 +102,9 @@ class TestConversationModel:
             llm_provider="openai",
             temperature=0.7,
             tags=["test"],
-            extra_metadata={"key": "value"}
+            extra_metadata={"key": "value"},
         )
-        
+
         # Mock timestamps for consistent testing
         conversation.created_at = datetime(2023, 1, 1, 12, 0, 0)
         conversation.updated_at = datetime(2023, 1, 1, 12, 30, 0)
@@ -162,7 +164,9 @@ class TestMessageModel:
         assert message.sequence_number == 1
         assert message.retry_count == 0
 
-    def test_message_with_tool_calls(self, test_conversation: Conversation):
+    def test_message_with_tool_calls(
+        self, test_conversation: Conversation
+    ):
         """Test message with tool calls."""
         # Arrange & Act
         tool_calls = [
@@ -171,11 +175,11 @@ class TestMessageModel:
                 "type": "function",
                 "function": {
                     "name": "get_weather",
-                    "arguments": '{"location": "New York"}'
-                }
+                    "arguments": '{"location": "New York"}',
+                },
             }
         ]
-        
+
         message = Message(
             conversation_id=test_conversation.id,
             role=MessageRole.ASSISTANT,
@@ -187,9 +191,13 @@ class TestMessageModel:
         # Assert
         assert message.tool_calls == tool_calls
         assert len(message.tool_calls) == 1
-        assert message.tool_calls[0]["function"]["name"] == "get_weather"
+        assert (
+            message.tool_calls[0]["function"]["name"] == "get_weather"
+        )
 
-    def test_message_with_token_usage(self, test_conversation: Conversation):
+    def test_message_with_token_usage(
+        self, test_conversation: Conversation
+    ):
         """Test message with token usage information."""
         # Arrange & Act
         message = Message(
@@ -217,7 +225,9 @@ class TestMessageModel:
         assert message.response_time_ms == 1500
         assert message.cost == 0.0045
 
-    def test_message_with_retrieval_context(self, test_conversation: Conversation):
+    def test_message_with_retrieval_context(
+        self, test_conversation: Conversation
+    ):
         """Test message with retrieved documents and context."""
         # Arrange & Act
         message = Message(
@@ -249,7 +259,9 @@ class TestMessageModel:
         assert message.error_message == "API rate limit exceeded"
         assert message.retry_count == 3
 
-    def test_message_with_metadata(self, test_conversation: Conversation):
+    def test_message_with_metadata(
+        self, test_conversation: Conversation
+    ):
         """Test message with extra metadata."""
         # Arrange & Act
         message = Message(
@@ -260,8 +272,8 @@ class TestMessageModel:
             extra_metadata={
                 "custom_field": "value",
                 "priority": "high",
-                "source": "automated"
-            }
+                "source": "automated",
+            },
         )
 
         # Assert
@@ -281,9 +293,9 @@ class TestMessageModel:
             prompt_tokens=10,
             completion_tokens=5,
             total_tokens=15,
-            extra_metadata={"key": "value"}
+            extra_metadata={"key": "value"},
         )
-        
+
         # Mock timestamps
         message.created_at = datetime(2023, 1, 1, 12, 0, 0)
         message.updated_at = datetime(2023, 1, 1, 12, 0, 5)
@@ -322,7 +334,10 @@ class TestMessageModel:
         assert "Message" in repr_str
         assert message.id in repr_str
         assert "user" in repr_str
-        assert "This is a test message with content that is longe..." in repr_str
+        assert (
+            "This is a test message with content that is longe..."
+            in repr_str
+        )
 
     def test_message_role_enum(self):
         """Test message role enumeration."""
@@ -344,7 +359,9 @@ class TestMessageModel:
 class TestConversationModelIntegration:
     """Integration tests for conversation models."""
 
-    def test_conversation_message_relationship(self, test_user: User, test_session):
+    def test_conversation_message_relationship(
+        self, test_user: User, test_session
+    ):
         """Test conversation-message relationship."""
         # Arrange
         conversation = Conversation(
@@ -367,7 +384,7 @@ class TestConversationModelIntegration:
             content="Second message",
             sequence_number=2,
         )
-        
+
         test_session.add_all([message1, message2])
         test_session.commit()
 
@@ -381,7 +398,9 @@ class TestConversationModelIntegration:
         assert conversation.messages[0].conversation == conversation
         assert conversation.messages[1].conversation == conversation
 
-    def test_conversation_user_relationship(self, test_user: User, test_session):
+    def test_conversation_user_relationship(
+        self, test_user: User, test_session
+    ):
         """Test conversation-user relationship."""
         # Arrange & Act
         conversation = Conversation(

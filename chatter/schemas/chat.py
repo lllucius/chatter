@@ -145,28 +145,52 @@ class WorkflowTemplateInfo(BaseModel):
     workflow_type: str = Field(..., description="Workflow type")
     description: str = Field(..., description="Template description")
     required_tools: list[str] = Field(..., description="Required tools")
-    required_retrievers: list[str] = Field(..., description="Required retrievers")
-    default_params: dict[str, Any] = Field(..., description="Default parameters")
+    required_retrievers: list[str] = Field(
+        ..., description="Required retrievers"
+    )
+    default_params: dict[str, Any] = Field(
+        ..., description="Default parameters"
+    )
 
 
 class WorkflowTemplatesResponse(BaseModel):
     """Schema for workflow templates response."""
 
-    templates: dict[str, WorkflowTemplateInfo] = Field(..., description="Available templates")
-    total_count: int = Field(..., description="Total number of templates")
+    templates: dict[str, WorkflowTemplateInfo] = Field(
+        ..., description="Available templates"
+    )
+    total_count: int = Field(
+        ..., description="Total number of templates"
+    )
 
 
 class PerformanceStatsResponse(BaseModel):
     """Schema for performance statistics response."""
 
-    total_executions: int = Field(..., description="Total number of executions")
-    avg_execution_time_ms: int = Field(..., description="Average execution time in milliseconds")
-    min_execution_time_ms: int = Field(..., description="Minimum execution time in milliseconds")
-    max_execution_time_ms: int = Field(..., description="Maximum execution time in milliseconds")
-    workflow_types: dict[str, int] = Field(..., description="Execution count by workflow type")
-    error_counts: dict[str, int] = Field(..., description="Error count by type")
-    cache_stats: dict[str, Any] = Field(..., description="Cache statistics")
-    tool_stats: dict[str, Any] = Field(..., description="Tool usage statistics")
+    total_executions: int = Field(
+        ..., description="Total number of executions"
+    )
+    avg_execution_time_ms: int = Field(
+        ..., description="Average execution time in milliseconds"
+    )
+    min_execution_time_ms: int = Field(
+        ..., description="Minimum execution time in milliseconds"
+    )
+    max_execution_time_ms: int = Field(
+        ..., description="Maximum execution time in milliseconds"
+    )
+    workflow_types: dict[str, int] = Field(
+        ..., description="Execution count by workflow type"
+    )
+    error_counts: dict[str, int] = Field(
+        ..., description="Error count by type"
+    )
+    cache_stats: dict[str, Any] = Field(
+        ..., description="Cache statistics"
+    )
+    tool_stats: dict[str, Any] = Field(
+        ..., description="Tool usage statistics"
+    )
     timestamp: float = Field(..., description="Statistics timestamp")
 
 

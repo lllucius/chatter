@@ -25,6 +25,7 @@ class MetricType(str, Enum):
 @dataclass
 class RequestMetrics:
     """Metrics for a single request."""
+
     timestamp: float
     method: str
     path: str
@@ -41,6 +42,7 @@ class RequestMetrics:
 @dataclass
 class DatabaseMetrics:
     """Metrics for database operations."""
+
     timestamp: float
     operation: str  # select, insert, update, delete
     table: str
@@ -53,6 +55,7 @@ class DatabaseMetrics:
 @dataclass
 class CacheMetrics:
     """Metrics for cache operations."""
+
     timestamp: float
     operation: str  # get, set, delete, clear
     key: str
@@ -64,6 +67,7 @@ class CacheMetrics:
 @dataclass
 class LLMMetrics:
     """Metrics for LLM operations."""
+
     timestamp: float
     provider: str
     model: str
@@ -78,6 +82,7 @@ class LLMMetrics:
 @dataclass
 class WorkflowMetrics:
     """Metrics for workflow execution."""
+
     timestamp: float
     workflow_type: str
     workflow_id: str
@@ -91,6 +96,7 @@ class WorkflowMetrics:
 @dataclass
 class PerformanceStats:
     """Performance statistics."""
+
     avg_response_time: float = 0.0
     min_response_time: float = float('inf')
     max_response_time: float = 0.0
@@ -107,6 +113,7 @@ class PerformanceStats:
 @dataclass
 class SystemMetrics:
     """System-wide metrics."""
+
     timestamp: float = field(default_factory=time.time)
     active_users: int = 0
     active_conversations: int = 0
@@ -130,23 +137,37 @@ class AdvancedMetricsCollector:
 
         # Metric storage
         self.requests: deque[RequestMetrics] = deque(maxlen=max_history)
-        self.database_ops: deque[DatabaseMetrics] = deque(maxlen=max_history)
+        self.database_ops: deque[DatabaseMetrics] = deque(
+            maxlen=max_history
+        )
         self.cache_ops: deque[CacheMetrics] = deque(maxlen=max_history)
         self.llm_ops: deque[LLMMetrics] = deque(maxlen=max_history)
-        self.workflow_ops: deque[WorkflowMetrics] = deque(maxlen=max_history)
+        self.workflow_ops: deque[WorkflowMetrics] = deque(
+            maxlen=max_history
+        )
 
         # Aggregated statistics
-        self.stats_by_endpoint: dict[str, PerformanceStats] = defaultdict(PerformanceStats)
-        self.stats_by_workflow: dict[str, PerformanceStats] = defaultdict(PerformanceStats)
-        self.stats_by_llm_provider: dict[str, dict[str, Any]] = defaultdict(lambda: {
-            "total_tokens": 0,
-            "total_cost": 0.0,
-            "avg_response_time": 0.0,
-            "request_count": 0
-        })
+        self.stats_by_endpoint: dict[str, PerformanceStats] = (
+            defaultdict(PerformanceStats)
+        )
+        self.stats_by_workflow: dict[str, PerformanceStats] = (
+            defaultdict(PerformanceStats)
+        )
+        self.stats_by_llm_provider: dict[str, dict[str, Any]] = (
+            defaultdict(
+                lambda: {
+                    "total_tokens": 0,
+                    "total_cost": 0.0,
+                    "avg_response_time": 0.0,
+                    "request_count": 0,
+                }
+            )
+        )
 
         # Correlation tracking
-        self.correlation_tracking: dict[str, list[Any]] = defaultdict(list)
+        self.correlation_tracking: dict[str, list[Any]] = defaultdict(
+            list
+        )
 
         # System state tracking
         self.active_users: set[str] = set()
@@ -162,21 +183,29 @@ class AdvancedMetricsCollector:
         if metrics.user_id:
             self.active_users.add(metrics.user_id)
 
-        logger.debug(f"Recorded request metrics: {metrics.method} {metrics.path} - {metrics.response_time_ms}ms")
+        logger.debug(
+            f"Recorded request metrics: {metrics.method} {metrics.path} - {metrics.response_time_ms}ms"
+        )
 
-    def record_database_operation(self, metrics: DatabaseMetrics) -> None:
+    def record_database_operation(
+        self, metrics: DatabaseMetrics
+    ) -> None:
         """Record database operation metrics."""
         self.database_ops.append(metrics)
         self._track_correlation(metrics.correlation_id, metrics)
 
-        logger.debug(f"Recorded database metrics: {metrics.operation} {metrics.table} - {metrics.duration_ms}ms")
+        logger.debug(
+            f"Recorded database metrics: {metrics.operation} {metrics.table} - {metrics.duration_ms}ms"
+        )
 
     def record_cache_operation(self, metrics: CacheMetrics) -> None:
         """Record cache operation metrics."""
         self.cache_ops.append(metrics)
         self._track_correlation(metrics.correlation_id, metrics)
 
-        logger.debug(f"Recorded cache metrics: {metrics.operation} {metrics.key} - hit: {metrics.hit}")
+        logger.debug(
+            f"Recorded cache metrics: {metrics.operation} {metrics.key} - hit: {metrics.hit}"
+        )
 
     def record_llm_operation(self, metrics: LLMMetrics) -> None:
         """Record LLM operation metrics."""
@@ -184,9 +213,13 @@ class AdvancedMetricsCollector:
         self._update_llm_stats(metrics)
         self._track_correlation(metrics.correlation_id, metrics)
 
-        logger.debug(f"Recorded LLM metrics: {metrics.provider} {metrics.model} - {metrics.duration_ms}ms")
+        logger.debug(
+            f"Recorded LLM metrics: {metrics.provider} {metrics.model} - {metrics.duration_ms}ms"
+        )
 
-    def record_workflow_operation(self, metrics: WorkflowMetrics) -> None:
+    def record_workflow_operation(
+        self, metrics: WorkflowMetrics
+    ) -> None:
         """Record workflow operation metrics."""
         self.workflow_ops.append(metrics)
         self._update_workflow_stats(metrics)
@@ -196,18 +229,28 @@ class AdvancedMetricsCollector:
         if metrics.workflow_id:
             self.active_conversations.add(metrics.workflow_id)
 
-        logger.debug(f"Recorded workflow metrics: {metrics.workflow_type} {metrics.step} - {metrics.duration_ms}ms")
+        logger.debug(
+            f"Recorded workflow metrics: {metrics.workflow_type} {metrics.step} - {metrics.duration_ms}ms"
+        )
 
-    def get_endpoint_stats(self, endpoint: str | None = None) -> dict[str, PerformanceStats]:
+    def get_endpoint_stats(
+        self, endpoint: str | None = None
+    ) -> dict[str, PerformanceStats]:
         """Get performance statistics for endpoints."""
         if endpoint:
-            return {endpoint: self.stats_by_endpoint.get(endpoint, PerformanceStats())}
+            return {
+                endpoint: self.stats_by_endpoint.get(
+                    endpoint, PerformanceStats()
+                )
+            }
         return dict(self.stats_by_endpoint)
 
     def get_system_health(self) -> dict[str, Any]:
         """Get overall system health metrics."""
         current_time = time.time()
-        recent_requests = [r for r in self.requests if current_time - r.timestamp < 300]  # Last 5 minutes
+        recent_requests = [
+            r for r in self.requests if current_time - r.timestamp < 300
+        ]  # Last 5 minutes
 
         if not recent_requests:
             return {
@@ -216,19 +259,37 @@ class AdvancedMetricsCollector:
                 "error_rate": 0.0,
                 "avg_response_time": 0.0,
                 "active_users": len(self.active_users),
-                "active_conversations": len(self.active_conversations)
+                "active_conversations": len(self.active_conversations),
             }
 
-        error_count = sum(1 for r in recent_requests if r.status_code >= 400)
-        avg_response_time = sum(r.response_time_ms for r in recent_requests) / len(recent_requests)
+        error_count = sum(
+            1 for r in recent_requests if r.status_code >= 400
+        )
+        avg_response_time = sum(
+            r.response_time_ms for r in recent_requests
+        ) / len(recent_requests)
 
         # Calculate cache hit rate
-        recent_cache_ops = [c for c in self.cache_ops if current_time - c.timestamp < 300]
+        recent_cache_ops = [
+            c
+            for c in self.cache_ops
+            if current_time - c.timestamp < 300
+        ]
         cache_hit_rate = 0.0
         if recent_cache_ops:
-            cache_hits = sum(1 for c in recent_cache_ops if c.hit and c.operation == "get")
-            cache_gets = sum(1 for c in recent_cache_ops if c.operation == "get")
-            cache_hit_rate = (cache_hits / cache_gets * 100) if cache_gets > 0 else 0.0
+            cache_hits = sum(
+                1
+                for c in recent_cache_ops
+                if c.hit and c.operation == "get"
+            )
+            cache_gets = sum(
+                1 for c in recent_cache_ops if c.operation == "get"
+            )
+            cache_hit_rate = (
+                (cache_hits / cache_gets * 100)
+                if cache_gets > 0
+                else 0.0
+            )
 
         health_status = "healthy"
         if error_count / len(recent_requests) > 0.05:  # >5% error rate
@@ -238,17 +299,25 @@ class AdvancedMetricsCollector:
 
         return {
             "status": health_status,
-            "request_rate": len(recent_requests) / 300.0,  # requests per second
+            "request_rate": len(recent_requests)
+            / 300.0,  # requests per second
             "error_rate": (error_count / len(recent_requests)) * 100,
             "avg_response_time": avg_response_time,
             "cache_hit_rate": cache_hit_rate,
             "active_users": len(self.active_users),
             "active_conversations": len(self.active_conversations),
-            "total_llm_tokens": sum(op.input_tokens + op.output_tokens for op in self.llm_ops),
-            "estimated_llm_cost": sum(op.cost_estimate for op in self.llm_ops)
+            "total_llm_tokens": sum(
+                op.input_tokens + op.output_tokens
+                for op in self.llm_ops
+            ),
+            "estimated_llm_cost": sum(
+                op.cost_estimate for op in self.llm_ops
+            ),
         }
 
-    def get_performance_summary(self, time_window: int = 3600) -> dict[str, Any]:
+    def get_performance_summary(
+        self, time_window: int = 3600
+    ) -> dict[str, Any]:
         """Get performance summary for a time window.
 
         Args:
@@ -261,14 +330,26 @@ class AdvancedMetricsCollector:
         cutoff_time = current_time - time_window
 
         # Filter metrics to time window
-        recent_requests = [r for r in self.requests if r.timestamp > cutoff_time]
-        recent_db_ops = [d for d in self.database_ops if d.timestamp > cutoff_time]
-        recent_llm_ops = [llm_op for llm_op in self.llm_ops if llm_op.timestamp > cutoff_time]
-        recent_workflows = [w for w in self.workflow_ops if w.timestamp > cutoff_time]
+        recent_requests = [
+            r for r in self.requests if r.timestamp > cutoff_time
+        ]
+        recent_db_ops = [
+            d for d in self.database_ops if d.timestamp > cutoff_time
+        ]
+        recent_llm_ops = [
+            llm_op
+            for llm_op in self.llm_ops
+            if llm_op.timestamp > cutoff_time
+        ]
+        recent_workflows = [
+            w for w in self.workflow_ops if w.timestamp > cutoff_time
+        ]
 
         # Request analysis
         if recent_requests:
-            response_times = [r.response_time_ms for r in recent_requests]
+            response_times = [
+                r.response_time_ms for r in recent_requests
+            ]
             response_times.sort()
 
             p95_index = int(len(response_times) * 0.95)
@@ -276,13 +357,28 @@ class AdvancedMetricsCollector:
 
             request_stats = {
                 "total_requests": len(recent_requests),
-                "avg_response_time": sum(response_times) / len(response_times),
+                "avg_response_time": sum(response_times)
+                / len(response_times),
                 "min_response_time": min(response_times),
                 "max_response_time": max(response_times),
-                "p95_response_time": response_times[p95_index] if p95_index < len(response_times) else 0,
-                "p99_response_time": response_times[p99_index] if p99_index < len(response_times) else 0,
-                "error_count": sum(1 for r in recent_requests if r.status_code >= 400),
-                "error_rate": sum(1 for r in recent_requests if r.status_code >= 400) / len(recent_requests) * 100
+                "p95_response_time": (
+                    response_times[p95_index]
+                    if p95_index < len(response_times)
+                    else 0
+                ),
+                "p99_response_time": (
+                    response_times[p99_index]
+                    if p99_index < len(response_times)
+                    else 0
+                ),
+                "error_count": sum(
+                    1 for r in recent_requests if r.status_code >= 400
+                ),
+                "error_rate": sum(
+                    1 for r in recent_requests if r.status_code >= 400
+                )
+                / len(recent_requests)
+                * 100,
             }
         else:
             request_stats = {"total_requests": 0}
@@ -290,8 +386,13 @@ class AdvancedMetricsCollector:
         # Database analysis
         db_stats = {
             "total_operations": len(recent_db_ops),
-            "avg_query_time": sum(d.duration_ms for d in recent_db_ops) / len(recent_db_ops) if recent_db_ops else 0,
-            "operations_by_type": {}
+            "avg_query_time": (
+                sum(d.duration_ms for d in recent_db_ops)
+                / len(recent_db_ops)
+                if recent_db_ops
+                else 0
+            ),
+            "operations_by_type": {},
         }
 
         for op in recent_db_ops:
@@ -302,33 +403,71 @@ class AdvancedMetricsCollector:
         # LLM analysis
         llm_stats = {
             "total_operations": len(recent_llm_ops),
-            "total_tokens": sum(op.input_tokens + op.output_tokens for op in recent_llm_ops),
-            "total_cost": sum(op.cost_estimate for op in recent_llm_ops),
-            "avg_response_time": sum(op.duration_ms for op in recent_llm_ops) / len(recent_llm_ops) if recent_llm_ops else 0,
-            "providers": {}
+            "total_tokens": sum(
+                op.input_tokens + op.output_tokens
+                for op in recent_llm_ops
+            ),
+            "total_cost": sum(
+                op.cost_estimate for op in recent_llm_ops
+            ),
+            "avg_response_time": (
+                sum(op.duration_ms for op in recent_llm_ops)
+                / len(recent_llm_ops)
+                if recent_llm_ops
+                else 0
+            ),
+            "providers": {},
         }
 
         for op in recent_llm_ops:
             if op.provider not in llm_stats["providers"]:
-                llm_stats["providers"][op.provider] = {"count": 0, "tokens": 0, "cost": 0.0}
+                llm_stats["providers"][op.provider] = {
+                    "count": 0,
+                    "tokens": 0,
+                    "cost": 0.0,
+                }
             llm_stats["providers"][op.provider]["count"] += 1
-            llm_stats["providers"][op.provider]["tokens"] += op.input_tokens + op.output_tokens
-            llm_stats["providers"][op.provider]["cost"] += op.cost_estimate
+            llm_stats["providers"][op.provider]["tokens"] += (
+                op.input_tokens + op.output_tokens
+            )
+            llm_stats["providers"][op.provider][
+                "cost"
+            ] += op.cost_estimate
 
         # Workflow analysis
         workflow_stats = {
             "total_executions": len(recent_workflows),
-            "success_rate": sum(1 for w in recent_workflows if w.success) / len(recent_workflows) * 100 if recent_workflows else 100,
-            "avg_duration": sum(w.duration_ms for w in recent_workflows) / len(recent_workflows) if recent_workflows else 0,
-            "workflows_by_type": {}
+            "success_rate": (
+                sum(1 for w in recent_workflows if w.success)
+                / len(recent_workflows)
+                * 100
+                if recent_workflows
+                else 100
+            ),
+            "avg_duration": (
+                sum(w.duration_ms for w in recent_workflows)
+                / len(recent_workflows)
+                if recent_workflows
+                else 0
+            ),
+            "workflows_by_type": {},
         }
 
         for wf in recent_workflows:
-            if wf.workflow_type not in workflow_stats["workflows_by_type"]:
-                workflow_stats["workflows_by_type"][wf.workflow_type] = {"count": 0, "success": 0}
-            workflow_stats["workflows_by_type"][wf.workflow_type]["count"] += 1
+            if (
+                wf.workflow_type
+                not in workflow_stats["workflows_by_type"]
+            ):
+                workflow_stats["workflows_by_type"][
+                    wf.workflow_type
+                ] = {"count": 0, "success": 0}
+            workflow_stats["workflows_by_type"][wf.workflow_type][
+                "count"
+            ] += 1
             if wf.success:
-                workflow_stats["workflows_by_type"][wf.workflow_type]["success"] += 1
+                workflow_stats["workflows_by_type"][wf.workflow_type][
+                    "success"
+                ] += 1
 
         return {
             "time_window_seconds": time_window,
@@ -336,7 +475,7 @@ class AdvancedMetricsCollector:
             "requests": request_stats,
             "database": db_stats,
             "llm": llm_stats,
-            "workflows": workflow_stats
+            "workflows": workflow_stats,
         }
 
     def get_correlation_trace(self, correlation_id: str) -> list[Any]:
@@ -349,22 +488,35 @@ class AdvancedMetricsCollector:
 
         # Clean correlation tracking
         expired_ids = [
-            corr_id for corr_id, items in self.correlation_tracking.items()
-            if items and hasattr(items[-1], 'timestamp') and items[-1].timestamp < cutoff_time
+            corr_id
+            for corr_id, items in self.correlation_tracking.items()
+            if items
+            and hasattr(items[-1], 'timestamp')
+            and items[-1].timestamp < cutoff_time
         ]
         for corr_id in expired_ids:
             del self.correlation_tracking[corr_id]
 
         # Clean active users/conversations (keep only from last hour)
         recent_cutoff = time.time() - 3600
-        recent_requests = [r for r in self.requests if r.timestamp > recent_cutoff]
+        recent_requests = [
+            r for r in self.requests if r.timestamp > recent_cutoff
+        ]
 
-        self.active_users = {r.user_id for r in recent_requests if r.user_id}
+        self.active_users = {
+            r.user_id for r in recent_requests if r.user_id
+        }
 
-        recent_workflows = [w for w in self.workflow_ops if w.timestamp > recent_cutoff]
-        self.active_conversations = {w.workflow_id for w in recent_workflows if w.workflow_id}
+        recent_workflows = [
+            w for w in self.workflow_ops if w.timestamp > recent_cutoff
+        ]
+        self.active_conversations = {
+            w.workflow_id for w in recent_workflows if w.workflow_id
+        }
 
-        logger.info(f"Cleaned up metrics data older than {max_age_hours} hours")
+        logger.info(
+            f"Cleaned up metrics data older than {max_age_hours} hours"
+        )
 
     def _update_endpoint_stats(self, metrics: RequestMetrics) -> None:
         """Update endpoint statistics."""
@@ -380,13 +532,19 @@ class AdvancedMetricsCollector:
             stats.max_response_time = metrics.response_time_ms
         else:
             # Calculate new average
-            total_time = stats.avg_response_time * (stats.total_requests - 1)
+            total_time = stats.avg_response_time * (
+                stats.total_requests - 1
+            )
             total_time += metrics.response_time_ms
             stats.avg_response_time = total_time / stats.total_requests
 
             # Update min/max
-            stats.min_response_time = min(stats.min_response_time, metrics.response_time_ms)
-            stats.max_response_time = max(stats.max_response_time, metrics.response_time_ms)
+            stats.min_response_time = min(
+                stats.min_response_time, metrics.response_time_ms
+            )
+            stats.max_response_time = max(
+                stats.max_response_time, metrics.response_time_ms
+            )
 
         # Track errors and rate limiting
         if metrics.status_code >= 400:
@@ -398,29 +556,42 @@ class AdvancedMetricsCollector:
         # Update cache hit rate
         if hasattr(metrics, 'cache_hit'):
             cache_requests = stats.total_requests
-            cache_hits = (stats.cache_hit_rate / 100 * (cache_requests - 1)) + (1 if metrics.cache_hit else 0)
+            cache_hits = (
+                stats.cache_hit_rate / 100 * (cache_requests - 1)
+            ) + (1 if metrics.cache_hit else 0)
             stats.cache_hit_rate = (cache_hits / cache_requests) * 100
 
         # Update database stats
-        stats.avg_db_queries = ((stats.avg_db_queries * (stats.total_requests - 1)) + metrics.db_queries) / stats.total_requests
+        stats.avg_db_queries = (
+            (stats.avg_db_queries * (stats.total_requests - 1))
+            + metrics.db_queries
+        ) / stats.total_requests
         stats.total_db_time_ms += metrics.db_time_ms
 
     def _update_llm_stats(self, metrics: LLMMetrics) -> None:
         """Update LLM provider statistics."""
         provider_stats = self.stats_by_llm_provider[metrics.provider]
 
-        provider_stats["total_tokens"] += metrics.input_tokens + metrics.output_tokens
+        provider_stats["total_tokens"] += (
+            metrics.input_tokens + metrics.output_tokens
+        )
         provider_stats["total_cost"] += metrics.cost_estimate
         provider_stats["request_count"] += 1
 
         # Update average response time
-        total_time = provider_stats["avg_response_time"] * (provider_stats["request_count"] - 1)
+        total_time = provider_stats["avg_response_time"] * (
+            provider_stats["request_count"] - 1
+        )
         total_time += metrics.duration_ms
-        provider_stats["avg_response_time"] = total_time / provider_stats["request_count"]
+        provider_stats["avg_response_time"] = (
+            total_time / provider_stats["request_count"]
+        )
 
     def _update_workflow_stats(self, metrics: WorkflowMetrics) -> None:
         """Update workflow statistics."""
-        workflow_key = f"{metrics.workflow_type}:{metrics.step or 'complete'}"
+        workflow_key = (
+            f"{metrics.workflow_type}:{metrics.step or 'complete'}"
+        )
         stats = self.stats_by_workflow[workflow_key]
 
         stats.total_requests += 1
@@ -431,24 +602,40 @@ class AdvancedMetricsCollector:
             stats.min_response_time = metrics.duration_ms
             stats.max_response_time = metrics.duration_ms
         else:
-            total_time = stats.avg_response_time * (stats.total_requests - 1)
+            total_time = stats.avg_response_time * (
+                stats.total_requests - 1
+            )
             total_time += metrics.duration_ms
             stats.avg_response_time = total_time / stats.total_requests
-            stats.min_response_time = min(stats.min_response_time, metrics.duration_ms)
-            stats.max_response_time = max(stats.max_response_time, metrics.duration_ms)
+            stats.min_response_time = min(
+                stats.min_response_time, metrics.duration_ms
+            )
+            stats.max_response_time = max(
+                stats.max_response_time, metrics.duration_ms
+            )
 
         if not metrics.success:
             stats.error_count += 1
 
-    def _track_correlation(self, correlation_id: str, metrics: Any) -> None:
+    def _track_correlation(
+        self, correlation_id: str, metrics: Any
+    ) -> None:
         """Track metrics for a correlation ID."""
         self.correlation_tracking[correlation_id].append(metrics)
 
-    def get_overall_stats(self, window_minutes: int = 60) -> dict[str, Any]:
+    def get_overall_stats(
+        self, window_minutes: int = 60
+    ) -> dict[str, Any]:
         """Get overall system statistics."""
         return {
-            "request_count": sum(stats.request_count for stats in self.stats_by_endpoint.values()),
-            "error_count": sum(stats.error_count for stats in self.stats_by_endpoint.values()),
+            "request_count": sum(
+                stats.request_count
+                for stats in self.stats_by_endpoint.values()
+            ),
+            "error_count": sum(
+                stats.error_count
+                for stats in self.stats_by_endpoint.values()
+            ),
             "average_response_time": 0.0,  # Would calculate from actual data
             "throughput": 0.0,  # Requests per minute
             "window_minutes": window_minutes,
@@ -479,7 +666,7 @@ def record_request_metrics(
     rate_limited: bool = False,
     cache_hit: bool = False,
     db_queries: int = 0,
-    db_time_ms: float = 0.0
+    db_time_ms: float = 0.0,
 ) -> None:
     """Record metrics for a request.
 
@@ -506,7 +693,7 @@ def record_request_metrics(
         rate_limited=rate_limited,
         cache_hit=cache_hit,
         db_queries=db_queries,
-        db_time_ms=db_time_ms
+        db_time_ms=db_time_ms,
     )
 
     metrics_collector.record_request(metrics)
@@ -518,7 +705,7 @@ def record_database_metrics(
     duration_ms: float,
     rows_affected: int,
     correlation_id: str,
-    query_hash: str | None = None
+    query_hash: str | None = None,
 ) -> None:
     """Record database operation metrics."""
     metrics = DatabaseMetrics(
@@ -528,7 +715,7 @@ def record_database_metrics(
         duration_ms=duration_ms,
         rows_affected=rows_affected,
         correlation_id=correlation_id,
-        query_hash=query_hash
+        query_hash=query_hash,
     )
 
     metrics_collector.record_database_operation(metrics)
@@ -539,7 +726,7 @@ def record_cache_metrics(
     key: str,
     hit: bool,
     duration_ms: float,
-    correlation_id: str
+    correlation_id: str,
 ) -> None:
     """Record cache operation metrics."""
     metrics = CacheMetrics(
@@ -548,7 +735,7 @@ def record_cache_metrics(
         key=key,
         hit=hit,
         duration_ms=duration_ms,
-        correlation_id=correlation_id
+        correlation_id=correlation_id,
     )
 
     metrics_collector.record_cache_operation(metrics)
@@ -562,7 +749,7 @@ def record_llm_metrics(
     output_tokens: int,
     duration_ms: float,
     cost_estimate: float,
-    correlation_id: str
+    correlation_id: str,
 ) -> None:
     """Record LLM operation metrics."""
     metrics = LLMMetrics(
@@ -574,7 +761,7 @@ def record_llm_metrics(
         output_tokens=output_tokens,
         duration_ms=duration_ms,
         cost_estimate=cost_estimate,
-        correlation_id=correlation_id
+        correlation_id=correlation_id,
     )
 
     metrics_collector.record_llm_operation(metrics)
@@ -587,7 +774,7 @@ def record_workflow_metrics(
     duration_ms: float,
     success: bool,
     error_type: str | None,
-    correlation_id: str
+    correlation_id: str,
 ) -> None:
     """Record workflow execution metrics."""
     metrics = WorkflowMetrics(
@@ -598,7 +785,7 @@ def record_workflow_metrics(
         duration_ms=duration_ms,
         success=success,
         error_type=error_type,
-        correlation_id=correlation_id
+        correlation_id=correlation_id,
     )
 
     metrics_collector.record_workflow_operation(metrics)
@@ -606,18 +793,20 @@ def record_workflow_metrics(
 
 class AlertManager:
     """Manager for system alerts and thresholds."""
-    
+
     def __init__(self):
         """Initialize alert manager."""
         self.alerts = {}
         self.thresholds = {}
         self.alert_id_counter = 0
-    
-    def create_alert(self, level: str, message: str, source: str) -> str:
+
+    def create_alert(
+        self, level: str, message: str, source: str
+    ) -> str:
         """Create a new alert."""
         self.alert_id_counter += 1
         alert_id = str(self.alert_id_counter)
-        
+
         self.alerts[alert_id] = {
             "id": alert_id,
             "level": level,
@@ -625,31 +814,46 @@ class AlertManager:
             "source": source,
             "timestamp": time.time(),
             "resolved": False,
-            "resolution_message": None
+            "resolution_message": None,
         }
-        
+
         return alert_id
-    
-    def resolve_alert(self, alert_id: str, resolution_message: str) -> bool:
+
+    def resolve_alert(
+        self, alert_id: str, resolution_message: str
+    ) -> bool:
         """Resolve an alert."""
         if alert_id in self.alerts:
             self.alerts[alert_id]["resolved"] = True
-            self.alerts[alert_id]["resolution_message"] = resolution_message
+            self.alerts[alert_id][
+                "resolution_message"
+            ] = resolution_message
             return True
         return False
-    
+
     def get_active_alerts(self) -> list[dict]:
         """Get all active alerts."""
-        return [alert for alert in self.alerts.values() if not alert["resolved"]]
-    
+        return [
+            alert
+            for alert in self.alerts.values()
+            if not alert["resolved"]
+        ]
+
     def get_resolved_alerts(self) -> list[dict]:
         """Get all resolved alerts."""
-        return [alert for alert in self.alerts.values() if alert["resolved"]]
-    
-    def set_threshold(self, metric: str, threshold: float, level: str) -> None:
+        return [
+            alert for alert in self.alerts.values() if alert["resolved"]
+        ]
+
+    def set_threshold(
+        self, metric: str, threshold: float, level: str
+    ) -> None:
         """Set a threshold for a metric."""
-        self.thresholds[metric] = {"threshold": threshold, "level": level}
-    
+        self.thresholds[metric] = {
+            "threshold": threshold,
+            "level": level,
+        }
+
     def check_threshold(self, metric: str, value: float) -> None:
         """Check if a metric value exceeds threshold."""
         if metric in self.thresholds:
@@ -658,117 +862,130 @@ class AlertManager:
                 self.create_alert(
                     level=threshold_info["level"],
                     message=f"{metric} exceeded threshold: {value} > {threshold_info['threshold']}",
-                    source="threshold_monitor"
+                    source="threshold_monitor",
                 )
-    
-    def check_escalation(self, escalation_time_seconds: int) -> list[dict]:
+
+    def check_escalation(
+        self, escalation_time_seconds: int
+    ) -> list[dict]:
         """Check for alerts that should be escalated."""
         current_time = time.time()
         escalated = []
-        
+
         for alert in self.alerts.values():
-            if (not alert["resolved"] and 
-                current_time - alert["timestamp"] > escalation_time_seconds and
-                alert["level"] == "warning"):
+            if (
+                not alert["resolved"]
+                and current_time - alert["timestamp"]
+                > escalation_time_seconds
+                and alert["level"] == "warning"
+            ):
                 # Escalate to critical
                 alert["level"] = "critical"
                 escalated.append(alert)
-        
+
         return escalated
 
 
 class MonitoringService:
     """Legacy monitoring service - wraps AdvancedMetricsCollector for backward compatibility."""
-    
+
     def __init__(self, max_history: int = 10000):
         """Initialize monitoring service."""
         self.request_metrics = deque(maxlen=max_history)
         self.database_metrics = deque(maxlen=max_history)
         self.error_counts = defaultdict(int)
         self.start_time = time.time()
-        
+
         # Use the advanced metrics collector internally
         self._collector = AdvancedMetricsCollector(max_history)
-    
+
     def record_request(self, metrics: RequestMetrics) -> None:
         """Record request metrics."""
         self.request_metrics.append(metrics)
         self._collector.record_request(metrics)
-    
+
     def record_database_query(self, metrics: DatabaseMetrics) -> None:
         """Record database query metrics."""
         self.database_metrics.append(metrics)
         self._collector.record_database_operation(metrics)
-    
-    def record_error(self, error_type: str, error_message: str = "") -> None:
+
+    def record_error(
+        self, error_type: str, error_message: str = ""
+    ) -> None:
         """Record error occurrence."""
         self.error_counts[error_type] += 1
         logger.error(f"Error recorded: {error_type} - {error_message}")
-    
+
     def get_system_health(self) -> dict[str, Any]:
         """Get system health status."""
         health = self._collector.get_system_health()
-        
+
         # Add legacy fields for backward compatibility
         health["uptime_seconds"] = time.time() - self.start_time
-        health["request_rate"] = len(self.request_metrics) / max(time.time() - self.start_time, 1)
-        
+        health["request_rate"] = len(self.request_metrics) / max(
+            time.time() - self.start_time, 1
+        )
+
         return health
-    
+
     def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics."""
         return self._collector.get_performance_summary()
-    
+
     def get_error_summary(self) -> dict[str, int]:
         """Get error count summary."""
         return dict(self.error_counts)
-    
+
     def reset_metrics(self) -> None:
         """Reset all metrics."""
         self.request_metrics.clear()
-        self.database_metrics.clear() 
+        self.database_metrics.clear()
         self.error_counts.clear()
         self.start_time = time.time()
 
 
 class PerformanceTracker:
     """Performance tracking utility."""
-    
+
     def __init__(self):
         """Initialize performance tracker."""
         self.tracked_operations = {}
         self.operation_times = defaultdict(list)
-    
-    def start_operation(self, operation_id: str, operation_type: str) -> None:
+
+    def start_operation(
+        self, operation_id: str, operation_type: str
+    ) -> None:
         """Start tracking an operation."""
         self.tracked_operations[operation_id] = {
             "type": operation_type,
-            "start_time": time.time()
+            "start_time": time.time(),
         }
-    
+
     def end_operation(self, operation_id: str) -> float:
         """End tracking an operation and return duration."""
         if operation_id not in self.tracked_operations:
             return 0.0
-        
+
         operation = self.tracked_operations[operation_id]
         duration = time.time() - operation["start_time"]
-        
+
         self.operation_times[operation["type"]].append(duration)
         del self.tracked_operations[operation_id]
-        
+
         return duration
-    
-    def get_operation_stats(self, operation_type: str) -> dict[str, float]:
+
+    def get_operation_stats(
+        self, operation_type: str
+    ) -> dict[str, float]:
         """Get statistics for an operation type."""
         times = self.operation_times.get(operation_type, [])
-        
+
         if not times:
             return {"count": 0, "avg": 0.0, "min": 0.0, "max": 0.0}
-        
+
         return {
             "count": len(times),
             "avg": sum(times) / len(times),
             "min": min(times),
-            "max": max(times)
+            "max": max(times),
         }

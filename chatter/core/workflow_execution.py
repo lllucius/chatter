@@ -9,6 +9,7 @@ from uuid import uuid4
 
 class StepStatus(str, Enum):
     """Status of a workflow step."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -18,6 +19,7 @@ class StepStatus(str, Enum):
 
 class WorkflowStatus(str, Enum):
     """Status of a workflow."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -37,7 +39,12 @@ class WorkflowError(Exception):
 class WorkflowContext:
     """Context for workflow execution."""
 
-    def __init__(self, workflow_id: str = None, user_id: str = None, data: dict[str, Any] | None = None):
+    def __init__(
+        self,
+        workflow_id: str = None,
+        user_id: str = None,
+        data: dict[str, Any] | None = None,
+    ):
         self.workflow_id = workflow_id or str(uuid4())
         self.user_id = user_id
         self.data = data or {}
@@ -74,8 +81,14 @@ class WorkflowContext:
             "data": self.data,
             "variables": self.variables,
             "step_results": self.step_results,
-            "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "started_at": (
+                self.started_at.isoformat() if self.started_at else None
+            ),
+            "completed_at": (
+                self.completed_at.isoformat()
+                if self.completed_at
+                else None
+            ),
         }
 
     @classmethod
@@ -84,16 +97,20 @@ class WorkflowContext:
         context = cls(
             workflow_id=data.get("workflow_id"),
             user_id=data.get("user_id"),
-            data=data.get("data", {})
+            data=data.get("data", {}),
         )
         context.variables = data.get("variables", {})
         context.step_results = data.get("step_results", {})
 
         # Parse timestamps
         if data.get("started_at"):
-            context.started_at = datetime.fromisoformat(data["started_at"])
+            context.started_at = datetime.fromisoformat(
+                data["started_at"]
+            )
         if data.get("completed_at"):
-            context.completed_at = datetime.fromisoformat(data["completed_at"])
+            context.completed_at = datetime.fromisoformat(
+                data["completed_at"]
+            )
 
         return context
 
@@ -101,7 +118,13 @@ class WorkflowContext:
 class WorkflowResult:
     """Result of workflow execution."""
 
-    def __init__(self, workflow_id: str, status: WorkflowStatus, output: dict[str, Any] | None = None, errors: list[WorkflowError] | None = None):
+    def __init__(
+        self,
+        workflow_id: str,
+        status: WorkflowStatus,
+        output: dict[str, Any] | None = None,
+        errors: list[WorkflowError] | None = None,
+    ):
         self.workflow_id = workflow_id
         self.status = status
         self.output = output or {}
@@ -126,9 +149,21 @@ class WorkflowResult:
             "workflow_id": self.workflow_id,
             "status": self.status.value,
             "output": self.output,
-            "errors": [{"message": str(e), "step_id": getattr(e, 'step_id', None)} for e in self.errors],
-            "started_at": self.started_at.isoformat() if self.started_at else None,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "errors": [
+                {
+                    "message": str(e),
+                    "step_id": getattr(e, 'step_id', None),
+                }
+                for e in self.errors
+            ],
+            "started_at": (
+                self.started_at.isoformat() if self.started_at else None
+            ),
+            "completed_at": (
+                self.completed_at.isoformat()
+                if self.completed_at
+                else None
+            ),
             "execution_time": self.execution_time,
         }
 
@@ -136,7 +171,9 @@ class WorkflowResult:
 class WorkflowStep:
     """Base class for workflow steps."""
 
-    def __init__(self, step_id: str, name: str, description: str | None = None):
+    def __init__(
+        self, step_id: str, name: str, description: str | None = None
+    ):
         self.step_id = step_id
         self.name = name
         self.description = description
@@ -164,7 +201,9 @@ class WorkflowStep:
 
     async def _execute_impl(self, context: WorkflowContext) -> Any:
         """Implementation of step execution."""
-        raise NotImplementedError("Subclasses must implement _execute_impl")
+        raise NotImplementedError(
+            "Subclasses must implement _execute_impl"
+        )
 
     def validate(self) -> bool:
         """Validate the workflow step configuration."""
@@ -179,8 +218,14 @@ class WorkflowStep:
 class ConditionalStep(WorkflowStep):
     """A workflow step that executes conditionally."""
 
-    def __init__(self, step_id: str, name: str, condition: str,
-                 true_step: WorkflowStep, false_step: WorkflowStep | None = None):
+    def __init__(
+        self,
+        step_id: str,
+        name: str,
+        condition: str,
+        true_step: WorkflowStep,
+        false_step: WorkflowStep | None = None,
+    ):
         super().__init__(step_id, name)
         self.condition = condition
         self.true_step = true_step
@@ -203,11 +248,15 @@ class ConditionalStep(WorkflowStep):
 class ParallelStep(WorkflowStep):
     """A workflow step that executes multiple steps in parallel."""
 
-    def __init__(self, step_id: str, name: str, steps: list[WorkflowStep]):
+    def __init__(
+        self, step_id: str, name: str, steps: list[WorkflowStep]
+    ):
         super().__init__(step_id, name)
         self.steps = steps
 
-    async def _execute_impl(self, context: WorkflowContext) -> list[Any]:
+    async def _execute_impl(
+        self, context: WorkflowContext
+    ) -> list[Any]:
         """Execute steps in parallel."""
         tasks = [step.execute(context) for step in self.steps]
         return await asyncio.gather(*tasks)
@@ -216,20 +265,29 @@ class ParallelStep(WorkflowStep):
 class LoopStep(WorkflowStep):
     """A workflow step that loops over a collection."""
 
-    def __init__(self, step_id: str, name: str, collection_key: str,
-                 loop_step: WorkflowStep):
+    def __init__(
+        self,
+        step_id: str,
+        name: str,
+        collection_key: str,
+        loop_step: WorkflowStep,
+    ):
         super().__init__(step_id, name)
         self.collection_key = collection_key
         self.loop_step = loop_step
 
-    async def _execute_impl(self, context: WorkflowContext) -> list[Any]:
+    async def _execute_impl(
+        self, context: WorkflowContext
+    ) -> list[Any]:
         """Execute step for each item in collection."""
         collection = context.get_variable(self.collection_key, [])
         results = []
 
         for i, item in enumerate(collection):
             # Create a new context for each iteration
-            loop_context = WorkflowContext(f"{context.workflow_id}_loop_{i}")
+            loop_context = WorkflowContext(
+                f"{context.workflow_id}_loop_{i}"
+            )
             loop_context.variables.update(context.variables)
             loop_context.set_variable("loop_item", item)
             loop_context.set_variable("loop_index", i)
@@ -246,8 +304,11 @@ class WorkflowExecutor:
     def __init__(self):
         self.running_workflows: dict[str, WorkflowContext] = {}
 
-    async def execute(self, steps: list[WorkflowStep],
-                     initial_data: dict[str, Any] | None = None) -> WorkflowResult:
+    async def execute(
+        self,
+        steps: list[WorkflowStep],
+        initial_data: dict[str, Any] | None = None,
+    ) -> WorkflowResult:
         """Execute a workflow."""
         workflow_id = str(uuid4())
         context = WorkflowContext(workflow_id, initial_data)
@@ -283,8 +344,9 @@ class WorkflowExecutor:
 
         return result
 
-    async def _wait_for_dependencies(self, step: WorkflowStep,
-                                   context: WorkflowContext) -> None:
+    async def _wait_for_dependencies(
+        self, step: WorkflowStep, context: WorkflowContext
+    ) -> None:
         """Wait for step dependencies to complete."""
         # Simple implementation - in practice this would be more sophisticated
         pass

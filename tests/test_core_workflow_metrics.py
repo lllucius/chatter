@@ -43,7 +43,7 @@ class TestWorkflowMetrics:
         metrics = WorkflowMetrics(
             workflow_id=custom_id,
             workflow_type=custom_type,
-            user_id=custom_user_id
+            user_id=custom_user_id,
         )
 
         # Assert
@@ -135,7 +135,7 @@ class TestWorkflowMetricsCollector:
         workflow_id = self.collector.start_workflow_tracking(
             workflow_type=workflow_type,
             user_id=user_id,
-            conversation_id=conversation_id
+            conversation_id=conversation_id,
         )
 
         # Assert
@@ -149,13 +149,13 @@ class TestWorkflowMetricsCollector:
     def test_update_workflow_metrics(self):
         """Test updating workflow metrics."""
         # Arrange
-        workflow_id = self.collector.start_workflow_tracking("test_workflow")
+        workflow_id = self.collector.start_workflow_tracking(
+            "test_workflow"
+        )
 
         # Act
         self.collector.update_workflow_metrics(
-            workflow_id=workflow_id,
-            tool_calls=3,
-            memory_usage_mb=25.5
+            workflow_id=workflow_id, tool_calls=3, memory_usage_mb=25.5
         )
 
         # Assert
@@ -166,7 +166,9 @@ class TestWorkflowMetricsCollector:
     def test_add_token_usage_to_workflow(self):
         """Test adding token usage to specific workflow."""
         # Arrange
-        workflow_id = self.collector.start_workflow_tracking("test_workflow")
+        workflow_id = self.collector.start_workflow_tracking(
+            "test_workflow"
+        )
 
         # Act
         self.collector.add_token_usage(workflow_id, "openai", 100)
@@ -179,7 +181,9 @@ class TestWorkflowMetricsCollector:
     def test_add_error_to_workflow(self):
         """Test adding error to specific workflow."""
         # Arrange
-        workflow_id = self.collector.start_workflow_tracking("test_workflow")
+        workflow_id = self.collector.start_workflow_tracking(
+            "test_workflow"
+        )
         error_message = "Tool execution failed"
 
         # Act
@@ -193,11 +197,17 @@ class TestWorkflowMetricsCollector:
     def test_finish_workflow_tracking(self):
         """Test finishing workflow tracking."""
         # Arrange
-        workflow_id = self.collector.start_workflow_tracking("test_workflow")
-        self.collector.update_workflow_metrics(workflow_id, tool_calls=2)
+        workflow_id = self.collector.start_workflow_tracking(
+            "test_workflow"
+        )
+        self.collector.update_workflow_metrics(
+            workflow_id, tool_calls=2
+        )
 
         # Act
-        final_metrics = self.collector.finish_workflow_tracking(workflow_id)
+        final_metrics = self.collector.finish_workflow_tracking(
+            workflow_id
+        )
 
         # Assert
         assert final_metrics is not None
@@ -238,11 +248,11 @@ class TestWorkflowMetricsCollector:
     def test_get_performance_metrics(self):
         """Test getting performance metrics."""
         # Arrange
-        workflow_id = self.collector.start_workflow_tracking("performance_test")
+        workflow_id = self.collector.start_workflow_tracking(
+            "performance_test"
+        )
         self.collector.update_workflow_metrics(
-            workflow_id,
-            tool_calls=5,
-            memory_usage_mb=100.0
+            workflow_id, tool_calls=5, memory_usage_mb=100.0
         )
         self.collector.add_token_usage(workflow_id, "openai", 500)
         self.collector.finish_workflow_tracking(workflow_id)
@@ -259,7 +269,9 @@ class TestWorkflowMetricsCollector:
     def test_cleanup_stale_workflows(self):
         """Test cleanup of stale workflows."""
         # Arrange
-        workflow_id = self.collector.start_workflow_tracking("stale_test")
+        workflow_id = self.collector.start_workflow_tracking(
+            "stale_test"
+        )
 
         # Manually set old start time to simulate stale workflow
         self.collector.active_workflows[workflow_id].start_time = (
@@ -267,7 +279,9 @@ class TestWorkflowMetricsCollector:
         )
 
         # Act
-        cleaned_count = self.collector.cleanup_stale_workflows(max_age_hours=1)
+        cleaned_count = self.collector.cleanup_stale_workflows(
+            max_age_hours=1
+        )
 
         # Assert
         assert cleaned_count == 1
@@ -291,8 +305,7 @@ class TestWorkflowMetricsIntegration:
 
         # Act - Start tracking
         workflow_id = self.collector.start_workflow_tracking(
-            workflow_type=workflow_type,
-            user_id=user_id
+            workflow_type=workflow_type, user_id=user_id
         )
 
         # Simulate workflow execution
@@ -303,7 +316,7 @@ class TestWorkflowMetricsIntegration:
             workflow_id,
             tool_calls=3,
             memory_usage_mb=45.2,
-            retrieval_context_size=1500
+            retrieval_context_size=1500,
         )
 
         # Add token usage
@@ -311,7 +324,9 @@ class TestWorkflowMetricsIntegration:
         self.collector.add_token_usage(workflow_id, "openai", 100)
 
         # Finish tracking
-        final_metrics = self.collector.finish_workflow_tracking(workflow_id)
+        final_metrics = self.collector.finish_workflow_tracking(
+            workflow_id
+        )
 
         # Assert - Complete metrics
         assert final_metrics.workflow_type == workflow_type
@@ -335,7 +350,7 @@ class TestWorkflowMetricsIntegration:
         for i in range(workflow_count):
             workflow_id = self.collector.start_workflow_tracking(
                 workflow_type=f"concurrent_test_{i}",
-                user_id=f"user-{i}"
+                user_id=f"user-{i}",
             )
             workflow_ids.append(workflow_id)
 
@@ -344,13 +359,15 @@ class TestWorkflowMetricsIntegration:
             self.collector.update_workflow_metrics(
                 workflow_id,
                 tool_calls=i + 1,
-                memory_usage_mb=10.0 * (i + 1)
+                memory_usage_mb=10.0 * (i + 1),
             )
 
         # Finish all workflows
         final_metrics_list = []
         for workflow_id in workflow_ids:
-            final_metrics = self.collector.finish_workflow_tracking(workflow_id)
+            final_metrics = self.collector.finish_workflow_tracking(
+                workflow_id
+            )
             final_metrics_list.append(final_metrics)
 
         # Assert - All workflows tracked correctly
@@ -363,19 +380,27 @@ class TestWorkflowMetricsIntegration:
     def test_workflow_metrics_aggregation(self):
         """Test metrics aggregation across multiple workflows."""
         # Arrange
-        workflow_types = ["type_a", "type_b", "type_a", "type_b", "type_c"]
+        workflow_types = [
+            "type_a",
+            "type_b",
+            "type_a",
+            "type_b",
+            "type_c",
+        ]
         completed_workflows = []
 
         # Act - Execute multiple workflows
         for workflow_type in workflow_types:
-            workflow_id = self.collector.start_workflow_tracking(workflow_type)
+            workflow_id = self.collector.start_workflow_tracking(
+                workflow_type
+            )
             self.collector.update_workflow_metrics(
-                workflow_id,
-                tool_calls=2,
-                memory_usage_mb=20.0
+                workflow_id, tool_calls=2, memory_usage_mb=20.0
             )
             self.collector.add_token_usage(workflow_id, "openai", 100)
-            final_metrics = self.collector.finish_workflow_tracking(workflow_id)
+            final_metrics = self.collector.finish_workflow_tracking(
+                workflow_id
+            )
             completed_workflows.append(final_metrics)
 
         # Get aggregated stats
@@ -394,21 +419,29 @@ class TestWorkflowMetricsIntegration:
     def test_error_handling_in_metrics_collection(self):
         """Test error handling during metrics collection."""
         # Arrange
-        workflow_id = self.collector.start_workflow_tracking("error_test")
+        workflow_id = self.collector.start_workflow_tracking(
+            "error_test"
+        )
 
         # Act - Add multiple errors
         self.collector.add_error(workflow_id, "First error")
         self.collector.add_error(workflow_id, "Second error")
 
         # Update other metrics
-        self.collector.update_workflow_metrics(workflow_id, tool_calls=1)
+        self.collector.update_workflow_metrics(
+            workflow_id, tool_calls=1
+        )
 
         # Finish workflow
-        final_metrics = self.collector.finish_workflow_tracking(workflow_id)
+        final_metrics = self.collector.finish_workflow_tracking(
+            workflow_id
+        )
 
         # Assert - Errors recorded correctly
         assert len(final_metrics.errors) == 2
         assert "First error" in final_metrics.errors
         assert "Second error" in final_metrics.errors
         assert final_metrics.success is False
-        assert final_metrics.tool_calls == 1  # Other metrics still recorded
+        assert (
+            final_metrics.tool_calls == 1
+        )  # Other metrics still recorded

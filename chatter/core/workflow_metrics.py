@@ -48,7 +48,9 @@ class WorkflowMetrics:
     def finalize(self) -> None:
         """Finalize metrics by setting end time and calculating execution time."""
         self.end_time = datetime.now()
-        self.execution_time = (self.end_time - self.start_time).total_seconds()
+        self.execution_time = (
+            self.end_time - self.start_time
+        ).total_seconds()
 
     def to_dict(self) -> dict[str, Any]:
         """Convert metrics to dictionary format."""
@@ -61,7 +63,9 @@ class WorkflowMetrics:
             "errors": self.errors,
             "user_satisfaction": self.user_satisfaction,
             "start_time": self.start_time.isoformat(),
-            "end_time": self.end_time.isoformat() if self.end_time else None,
+            "end_time": (
+                self.end_time.isoformat() if self.end_time else None
+            ),
             "user_id": self.user_id,
             "conversation_id": self.conversation_id,
             "provider_name": self.provider_name,
@@ -93,7 +97,7 @@ class WorkflowMetricsCollector:
         conversation_id: str,
         provider_name: str = "",
         model_name: str = "",
-        workflow_config: dict[str, Any] | None = None
+        workflow_config: dict[str, Any] | None = None,
     ) -> str:
         """Start tracking a new workflow execution.
 
@@ -114,7 +118,7 @@ class WorkflowMetricsCollector:
             conversation_id=conversation_id,
             provider_name=provider_name,
             model_name=model_name,
-            workflow_config=workflow_config or {}
+            workflow_config=workflow_config or {},
         )
 
         self.active_workflows[metrics.workflow_id] = metrics
@@ -122,7 +126,7 @@ class WorkflowMetricsCollector:
             "Started workflow tracking",
             workflow_id=metrics.workflow_id,
             workflow_type=workflow_type,
-            user_id=user_id
+            user_id=user_id,
         )
 
         return metrics.workflow_id
@@ -134,7 +138,7 @@ class WorkflowMetricsCollector:
         tool_calls: int | None = None,
         retrieval_context_size: int | None = None,
         memory_usage_mb: float | None = None,
-        error: str | None = None
+        error: str | None = None,
     ) -> None:
         """Update metrics for an active workflow.
 
@@ -149,7 +153,7 @@ class WorkflowMetricsCollector:
         if workflow_id not in self.active_workflows:
             logger.warning(
                 "Attempted to update metrics for unknown workflow",
-                workflow_id=workflow_id
+                workflow_id=workflow_id,
             )
             return
 
@@ -172,9 +176,7 @@ class WorkflowMetricsCollector:
             metrics.add_error(error)
 
     def finish_workflow_tracking(
-        self,
-        workflow_id: str,
-        user_satisfaction: float | None = None
+        self, workflow_id: str, user_satisfaction: float | None = None
     ) -> WorkflowMetrics | None:
         """Finish tracking a workflow and move it to history.
 
@@ -188,7 +190,7 @@ class WorkflowMetricsCollector:
         if workflow_id not in self.active_workflows:
             logger.warning(
                 "Attempted to finish tracking for unknown workflow",
-                workflow_id=workflow_id
+                workflow_id=workflow_id,
             )
             return None
 
@@ -208,7 +210,7 @@ class WorkflowMetricsCollector:
             "Finished workflow tracking",
             workflow_id=workflow_id,
             execution_time=metrics.execution_time,
-            success=metrics.success
+            success=metrics.success,
         )
 
         return metrics
@@ -217,7 +219,7 @@ class WorkflowMetricsCollector:
         self,
         workflow_type: str | None = None,
         user_id: str | None = None,
-        hours: int = 24
+        hours: int = 24,
     ) -> dict[str, Any]:
         """Get aggregated workflow statistics.
 
@@ -232,7 +234,8 @@ class WorkflowMetricsCollector:
         # Filter metrics based on criteria
         cutoff_time = datetime.now().timestamp() - (hours * 3600)
         filtered_metrics = [
-            m for m in self.metrics_history
+            m
+            for m in self.metrics_history
             if m.start_time.timestamp() > cutoff_time
             and (not workflow_type or m.workflow_type == workflow_type)
             and (not user_id or m.user_id == user_id)
@@ -252,15 +255,19 @@ class WorkflowMetricsCollector:
 
         # Calculate statistics
         total_executions = len(filtered_metrics)
-        successful_executions = sum(1 for m in filtered_metrics if m.success)
+        successful_executions = sum(
+            1 for m in filtered_metrics if m.success
+        )
         success_rate = successful_executions / total_executions
 
         execution_times = [m.execution_time for m in filtered_metrics]
         avg_execution_time = sum(execution_times) / len(execution_times)
 
         total_tokens = sum(
-            sum(usage.values()) for m in filtered_metrics
-            for usage in [m.token_usage] if usage
+            sum(usage.values())
+            for m in filtered_metrics
+            for usage in [m.token_usage]
+            if usage
         )
 
         total_tool_calls = sum(m.tool_calls for m in filtered_metrics)
@@ -294,7 +301,9 @@ class WorkflowMetricsCollector:
             "max_execution_time": max(execution_times),
         }
 
-    def get_recent_errors(self, limit: int = 10) -> list[dict[str, Any]]:
+    def get_recent_errors(
+        self, limit: int = 10
+    ) -> list[dict[str, Any]]:
         """Get recent workflow errors.
 
         Args:
@@ -307,15 +316,17 @@ class WorkflowMetricsCollector:
         for metrics in reversed(self.metrics_history):
             if metrics.errors:
                 for error in metrics.errors:
-                    errors.append({
-                        "workflow_id": metrics.workflow_id,
-                        "workflow_type": metrics.workflow_type,
-                        "user_id": metrics.user_id,
-                        "timestamp": metrics.start_time.isoformat(),
-                        "error": error,
-                        "provider": metrics.provider_name,
-                        "model": metrics.model_name,
-                    })
+                    errors.append(
+                        {
+                            "workflow_id": metrics.workflow_id,
+                            "workflow_type": metrics.workflow_type,
+                            "user_id": metrics.user_id,
+                            "timestamp": metrics.start_time.isoformat(),
+                            "error": error,
+                            "provider": metrics.provider_name,
+                            "model": metrics.model_name,
+                        }
+                    )
 
                     if len(errors) >= limit:
                         return errors

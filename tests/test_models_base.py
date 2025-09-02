@@ -1,7 +1,6 @@
 """Tests for base model functionality."""
 
 import re
-from datetime import datetime
 
 import pytest
 from sqlalchemy import DateTime, String
@@ -38,12 +37,15 @@ class TestGenerateUlid:
         """Test that ULIDs are lexicographically sortable by time."""
         # Act - Generate ULIDs with small delay
         import time
+
         ulid1 = generate_ulid()
         time.sleep(0.001)  # Small delay to ensure different timestamp
         ulid2 = generate_ulid()
 
         # Assert
-        assert ulid1 < ulid2  # Later ULID should be lexicographically greater
+        assert (
+            ulid1 < ulid2
+        )  # Later ULID should be lexicographically greater
 
 
 @pytest.mark.unit
@@ -96,6 +98,7 @@ class TestTableNameGeneration:
 
     def test_simple_class_name(self):
         """Test simple class name conversion."""
+
         # Arrange
         class User(Base):
             pass
@@ -105,6 +108,7 @@ class TestTableNameGeneration:
 
     def test_camelcase_class_name(self):
         """Test CamelCase class name conversion."""
+
         # Arrange
         class UserProfile(Base):
             pass
@@ -114,6 +118,7 @@ class TestTableNameGeneration:
 
     def test_class_ending_with_s(self):
         """Test class name already ending with 's'."""
+
         # Arrange
         class Analytics(Base):
             pass
@@ -123,6 +128,7 @@ class TestTableNameGeneration:
 
     def test_class_ending_with_y(self):
         """Test class name ending with 'y'."""
+
         # Arrange
         class Category(Base):
             pass
@@ -132,6 +138,7 @@ class TestTableNameGeneration:
 
     def test_class_ending_with_ch(self):
         """Test class name ending with 'ch'."""
+
         # Arrange
         class Branch(Base):
             pass
@@ -141,6 +148,7 @@ class TestTableNameGeneration:
 
     def test_class_ending_with_sh(self):
         """Test class name ending with 'sh'."""
+
         # Arrange
         class Brush(Base):
             pass
@@ -150,6 +158,7 @@ class TestTableNameGeneration:
 
     def test_class_ending_with_x(self):
         """Test class name ending with 'x'."""
+
         # Arrange
         class Box(Base):
             pass
@@ -159,6 +168,7 @@ class TestTableNameGeneration:
 
     def test_class_ending_with_z(self):
         """Test class name ending with 'z'."""
+
         # Arrange
         class Quiz(Base):
             pass
@@ -168,6 +178,7 @@ class TestTableNameGeneration:
 
     def test_class_ending_with_f(self):
         """Test class name ending with 'f'."""
+
         # Arrange
         class Shelf(Base):
             pass
@@ -177,6 +188,7 @@ class TestTableNameGeneration:
 
     def test_class_ending_with_fe(self):
         """Test class name ending with 'fe'."""
+
         # Arrange
         class Life(Base):
             pass
@@ -186,24 +198,32 @@ class TestTableNameGeneration:
 
     def test_complex_camelcase_name(self):
         """Test complex CamelCase name conversion."""
+
         # Arrange
         class UserPreferenceCategory(Base):
             pass
 
         # Assert
-        assert UserPreferenceCategory.__tablename__ == "user_preference_categories"
+        assert (
+            UserPreferenceCategory.__tablename__
+            == "user_preference_categories"
+        )
 
     def test_abbreviation_in_name(self):
         """Test class name with abbreviations."""
+
         # Arrange
         class APIKey(Base):
             pass
 
         # Assert
-        assert APIKey.__tablename__ == "a_p_i_keys"  # Each capital becomes separate
+        assert (
+            APIKey.__tablename__ == "a_p_i_keys"
+        )  # Each capital becomes separate
 
     def test_number_in_name(self):
         """Test class name with numbers."""
+
         # Arrange
         class OAuth2Token(Base):
             pass
@@ -253,13 +273,14 @@ class TestKeys:
         # Assert
         assert issubclass(Keys, str)
         from enum import Enum
+
         assert issubclass(Keys, Enum)
 
     def test_keys_enum_string_operations(self):
         """Test that Keys can be used as strings."""
         # Act
         user_key = Keys.USERS
-        
+
         # Assert
         assert str(user_key) == "users.id"
         assert user_key == "users.id"
@@ -273,10 +294,11 @@ class TestBaseModelIntegration:
 
     def test_model_creation_with_inheritance(self):
         """Test creating a model that inherits from Base."""
+
         # Arrange
         class TestModel(Base):
             name: Mapped[str] = mapped_column(String(100))
-            
+
             def __repr__(self):
                 return f"<TestModel(id={self.id}, name={self.name})>"
 
@@ -292,6 +314,7 @@ class TestBaseModelIntegration:
 
     def test_multiple_models_with_different_names(self):
         """Test multiple models have different table names."""
+
         # Arrange
         class FirstModel(Base):
             pass
@@ -309,6 +332,7 @@ class TestBaseModelIntegration:
 
     def test_ulid_generation_integration(self):
         """Test ULID generation in model context."""
+
         # Arrange
         class TestUlidModel(Base):
             name: Mapped[str] = mapped_column(String(50))
@@ -319,7 +343,11 @@ class TestBaseModelIntegration:
 
         # Assert
         # IDs should be different even though generated at same time
-        assert instance1.id != instance2.id if instance1.id and instance2.id else True
+        assert (
+            instance1.id != instance2.id
+            if instance1.id and instance2.id
+            else True
+        )
         # Both should be valid ULID format
         if instance1.id:
             assert len(instance1.id) == 26
@@ -333,6 +361,7 @@ class TestTableNameEdgeCases:
 
     def test_single_letter_class(self):
         """Test single letter class name."""
+
         # Arrange
         class A(Base):
             pass
@@ -342,6 +371,7 @@ class TestTableNameEdgeCases:
 
     def test_all_caps_class(self):
         """Test all caps class name."""
+
         # Arrange
         class HTML(Base):
             pass
@@ -351,34 +381,40 @@ class TestTableNameEdgeCases:
 
     def test_mixed_case_with_numbers(self):
         """Test mixed case with numbers."""
+
         # Arrange
         class OAuth2ClientSecret(Base):
             pass
 
         # Assert
-        assert OAuth2ClientSecret.__tablename__ == "o_auth2_client_secrets"
+        assert (
+            OAuth2ClientSecret.__tablename__ == "o_auth2_client_secrets"
+        )
 
     def test_class_with_underscores(self):
         """Test class name that already has underscores."""
-        # Arrange  
+
+        # Arrange
         class User_Profile(Base):  # Not recommended, but should work
             pass
 
         # Assert
         # Should convert normally, underscores are preserved
-        expected_name = "user__profiles"  # Double underscore due to existing one
+        expected_name = (
+            "user__profiles"  # Double underscore due to existing one
+        )
         assert User_Profile.__tablename__ == expected_name
 
     def test_empty_class_name_handling(self):
         """Test edge case handling of class names."""
         # This test is more about ensuring the regex doesn't break
         # with unusual but valid Python class names
-        
+
         # Test that the regex patterns work correctly
         name = "TestClass"
         step1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
         step2 = re.sub("([a-z0-9])([A-Z])", r"\1_\2", step1).lower()
-        
+
         assert step1 == "Test_Class"
         assert step2 == "test_class"
 
@@ -391,8 +427,9 @@ class TestUlidProperties:
         """Test ULID timestamp component."""
         # Arrange
         import time
+
         from ulid import ULID
-        
+
         start_time = time.time()
         ulid_obj = ULID()
         end_time = time.time()
@@ -408,7 +445,7 @@ class TestUlidProperties:
         """Test ULID randomness component."""
         # Arrange
         from ulid import ULID
-        
+
         # Act
         ulid1 = ULID()
         ulid2 = ULID()
@@ -426,10 +463,10 @@ class TestUlidProperties:
         # First 10 characters are timestamp (base32 encoded)
         # Last 16 characters are randomness (base32 encoded)
         assert len(ulid_str) == 26
-        
+
         # Should be uppercase (Crockford base32 uses uppercase)
         assert ulid_str.isupper()
-        
+
         # Should not contain ambiguous characters (I, L, O, U)
         ambiguous_chars = ['I', 'L', 'O', 'U']
         assert not any(char in ulid_str for char in ambiguous_chars)
@@ -438,7 +475,7 @@ class TestUlidProperties:
         """Test ULID uses Crockford's base32 encoding."""
         # Arrange
         crockford_chars = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
-        
+
         # Act
         ulid_str = generate_ulid()
 

@@ -609,6 +609,7 @@ class TestDynamicEmbeddingIntegration:
         """Test complete embedding workflow with real database."""
         from chatter.models.user import User
         from chatter.models.document import Document, DocumentType
+        from chatter.core.dynamic_embeddings import EmbeddingModelManager, DynamicEmbeddingService
         from sqlalchemy import text
         
         # Create a real user for testing
@@ -661,45 +662,53 @@ class TestDynamicEmbeddingIntegration:
         doc_count = user_docs_result.scalar()
         assert doc_count == 1
 
-        # Step 3: Retrieve embeddings
-        mock_embeddings = [
-            MagicMock(
-                text=data["text"],
-                embedding=data["embedding"],
-                chunk_index=data["chunk_index"],
-            )
-            for data in embeddings_data
-        ]
-        mock_result = MagicMock()
-        mock_result.scalars.return_value.all.return_value = (
-            mock_embeddings
-        )
-        self.mock_session.execute.return_value = mock_result
-
-        retrieved_embeddings = await self.service.retrieve_embeddings(
-            model_name, dimension, document_id
-        )
-
-        # Step 4: Search similar embeddings
-        query_embedding = [0.15] * dimension
-        mock_search_result = MagicMock()
-        mock_search_result.fetchall.return_value = [
-            MagicMock(text="Integration test text 1", similarity=0.95)
-        ]
-        self.mock_session.execute.return_value = mock_search_result
-
-        similar_embeddings = (
-            await self.service.search_similar_embeddings(
-                model_name, dimension, query_embedding, limit=5
-            )
-        )
-
-        # Assert
+        # Test embedding model management with real database
+        manager = EmbeddingModelManager(test_db_session)
+        embedding_service = DynamicEmbeddingService(test_db_session)
+        
+        # Test model registration
+        model_name = "test_integration_model"
+        dimension = 384
+        
+        model_class = await manager.register_model(model_name, dimension)
         assert model_class is not None
+        assert hasattr(model_class, '__tablename__')
+        
+        # Test that model table was created
+        table_exists = await manager.table_exists(model_name, dimension)
+        assert table_exists is True
+        
+        # Test storing embeddings in the dynamic table
+        embeddings_data = [
+            {
+                "text": "Integration test text chunk 1",
+                "embedding": [0.1] * dimension,
+                "document_id": document.id,
+                "chunk_index": 0,
+            },
+            {
+                "text": "Integration test text chunk 2", 
+                "embedding": [0.2] * dimension,
+                "document_id": document.id,
+                "chunk_index": 1,
+            },
+        ]
+        
+        store_result = await embedding_service.store_embeddings(
+            model_name, dimension, embeddings_data
+        )
         assert store_result is True
-        assert len(retrieved_embeddings) == 3
-        assert len(similar_embeddings) == 1
-        assert similar_embeddings[0].similarity > 0.9
+        
+        # Test retrieving embeddings
+        retrieved_embeddings = await embedding_service.retrieve_embeddings(
+            model_name, dimension, document.id
+        )
+        assert len(retrieved_embeddings) == 2
+        assert retrieved_embeddings[0].text == "Integration test text chunk 1"
+        
+        # Cleanup: unregister the model
+        cleanup_result = await manager.unregister_model(model_name, dimension)
+        assert cleanup_result is True
 
     @pytest.mark.asyncio
     async def test_multiple_model_management(self):

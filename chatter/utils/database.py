@@ -31,6 +31,7 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 # Import QueryOptimizer from database_optimization for backward compatibility
+from chatter.utils.database_optimization import QueryOptimizer
 
 # Global database engine and session maker
 _engine: AsyncEngine | None = None

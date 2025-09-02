@@ -126,12 +126,13 @@ async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
         try:
             # Check if session is still usable before attempting cleanup
             if session:
-                # Don't commit or rollback on GeneratorExit - just close if safe
-                if not session.in_transaction():
-                    await session.close()
-                else:
-                    # If in transaction, let the session cleanup happen naturally
+                # Be very conservative on GeneratorExit - don't do anything that might hang
+                # Just expunge objects to clear the session state
+                try:
                     session.expunge_all()
+                except Exception:
+                    # Even expunge_all might fail, so be defensive
+                    pass
         except Exception as e:
             logger.debug(
                 "Session cleanup during generator exit", error=str(e)
@@ -161,9 +162,31 @@ async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
         # Final cleanup - close the session if it's still open and safe to do so
         try:
             if session:
-                # Only attempt close if not in the middle of a transaction operation
-                if not session.in_transaction():
-                    await session.close()
+                # Be more defensive about session cleanup to avoid hangs
+                # Check if the session is still bound and usable before attempting operations
+                try:
+                    # Only attempt close if the session is not in an active transaction
+                    # and we actually own the session lifecycle
+                    if hasattr(session, '_connection') and session._connection is not None:
+                        # Check if we're in a transaction - but be more defensive
+                        in_transaction = False
+                        try:
+                            in_transaction = session.in_transaction()
+                        except Exception:
+                            # If we can't determine transaction state, assume we're in one
+                            in_transaction = True
+                            
+                        if not in_transaction:
+                            await session.close()
+                        else:
+                            # If in transaction, just expunge to avoid cleanup conflicts
+                            session.expunge_all()
+                    else:
+                        # Session is already detached/closed, nothing to do
+                        pass
+                except Exception as cleanup_error:
+                    # Log but don't re-raise cleanup errors to avoid masking original issues
+                    logger.debug("Session cleanup skipped due to error", error=str(cleanup_error))
         except Exception as e:
             logger.debug("Error in final session cleanup", error=str(e))
 

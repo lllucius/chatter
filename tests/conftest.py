@@ -195,15 +195,14 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
         expire_on_commit=False,
     )
     
+    # Create a session for the test
     async with session_maker() as session:
-        # Begin a transaction for the test
-        await session.begin()
-        
         try:
             yield session
         finally:
-            # Always rollback the transaction
+            # Always rollback to ensure clean state
             await session.rollback()
+            await session.close()
 
 
 @pytest.fixture

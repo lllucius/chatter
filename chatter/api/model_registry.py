@@ -1,6 +1,6 @@
 """Model and embedding registry endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -93,27 +93,66 @@ async def create_provider(
     provider_data: ProviderCreate,
     session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
+    request: Request,
 ):
     """Create a new provider."""
+    from chatter.utils.audit_logging import get_audit_logger, AuditEventType, AuditResult
+    
     service = ModelRegistryService(session)
+    audit_logger = get_audit_logger(session)
 
-    # Check if provider name already exists
-    existing = await service.get_provider_by_name(provider_data.name)
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Provider with this name already exists",
+    try:
+        # Check if provider name already exists
+        existing = await service.get_provider_by_name(provider_data.name)
+        if existing:
+            await audit_logger.log_event(
+                event_type=AuditEventType.PROVIDER_CREATE,
+                result=AuditResult.FAILURE,
+                user_id=current_user.id,
+                details={"provider_name": provider_data.name, "error": "name_already_exists"},
+                request=request,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Provider with this name already exists",
+            )
+
+        provider = await service.create_provider(provider_data)
+        
+        # Log successful creation
+        await audit_logger.log_provider_create(
+            provider_id=provider.id,
+            provider_name=provider.name,
+            user_id=current_user.id,
+            request=request,
+            success=True,
+        )
+        
+        logger.info(
+            "Created provider",
+            provider_id=provider.id,
+            provider_name=provider.name,
+            user_id=current_user.id,
         )
 
-    provider = await service.create_provider(provider_data)
-    logger.info(
-        "Created provider",
-        provider_id=provider.id,
-        provider_name=provider.name,
-        user_id=current_user.id,
-    )
-
-    return provider
+        return provider
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        # Log failed creation
+        await audit_logger.log_provider_create(
+            provider_id="unknown",
+            provider_name=provider_data.name,
+            user_id=current_user.id,
+            request=request,
+            success=False,
+            error_message=str(e),
+        )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create provider",
+        ) from e
 
 
 @router.put("/providers/{provider_id}", response_model=Provider)

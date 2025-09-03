@@ -4,7 +4,13 @@ import asyncio
 import os
 from typing import AsyncGenerator, Generator
 
+# Set up test environment before any other imports
+os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
+os.environ.setdefault("SECRET_KEY", "test_secret_key_for_testing")
+os.environ.setdefault("ENVIRONMENT", "testing")
+
 import pytest
+from pytest_postgresql import factories
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from chatter.utils.database import Base, get_session_generator
@@ -46,19 +52,69 @@ def app(db_session: AsyncSession):
     return app
 
 
+# =============================================================================
+# POSTGRESQL FIXTURES using pytest-postgresql
+# =============================================================================
+
+# Create a PostgreSQL test database factory
+postgresql_proc = factories.postgresql_proc(
+    port=None,  # Use any available port
+    unixsocketdir="/tmp",  # Use tmp directory for socket
+)
+
+# Create session-scoped postgresql fixture using the proc
 @pytest.fixture(scope="session")
-async def db_engine():
+def postgresql_session(postgresql_proc):
+    """Session-scoped PostgreSQL database connection."""
+    from pytest_postgresql.janitor import DatabaseJanitor
+    import psycopg
+
+    pg_host = postgresql_proc.host
+    pg_port = postgresql_proc.port
+    pg_user = postgresql_proc.user
+    pg_db = postgresql_proc.dbname
+
+    janitor = DatabaseJanitor(
+        user=pg_user,
+        host=pg_host,
+        port=pg_port,
+        dbname=pg_db,
+        template_dbname="template1",
+        version=postgresql_proc.version,
+    )
+    
+    # Ensure database exists
+    with janitor:
+        # Create database connection
+        db_connection = psycopg.connect(
+            dbname=pg_db,
+            user=pg_user,
+            host=pg_host,
+            port=pg_port,
+            connect_timeout=10,
+        )
+        try:
+            yield db_connection
+        finally:
+            db_connection.close()
+
+
+@pytest.fixture(scope="session") 
+async def db_engine(postgresql_proc, postgresql_session):
     """
     Create a session-scoped database engine for testing.
     
-    Uses PostgreSQL for testing to ensure real database constraints
-    and PostgreSQL-specific features like pgvector work correctly.
+    Uses pytest-postgresql to create an embedded PostgreSQL instance
+    for testing, eliminating the need for external PostgreSQL setup.
     """
-    # Lazy import to avoid hanging during test collection
-    from chatter.config import settings
+    # Get connection details from postgresql_proc
+    pg_host = postgresql_proc.host
+    pg_port = postgresql_proc.port
+    pg_user = postgresql_proc.user
+    pg_db = postgresql_proc.dbname
     
-    # Use PostgreSQL test database
-    db_url = settings.database_url_for_env
+    # Build the database URL for async operation (no password needed)
+    db_url = f"postgresql+asyncpg://{pg_user}@{pg_host}:{pg_port}/{pg_db}"
     
     # Create async engine with test-appropriate settings
     engine = create_async_engine(
@@ -70,15 +126,26 @@ async def db_engine():
     )
     
     # Create all tables and ensure pgvector extension is available
-    async with engine.begin() as conn:
-        # Ensure pgvector extension is installed (fail silently if not available)
-        try:
-            from sqlalchemy import text
-            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-        except Exception:
-            pass  # pgvector may not be available in test environment
+    try:
+        async with engine.begin() as conn:
+            # Try to install pgvector extension (fail silently if not available)
+            try:
+                from sqlalchemy import text
+                await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            except Exception:
+                # pgvector may not be available in test environment
+                # Roll back the transaction and continue
+                await conn.rollback()
+                pass
         
-        await conn.run_sync(Base.metadata.create_all)
+        # Create tables in a separate transaction
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+            
+    except Exception as e:
+        # If anything fails, try without the vector extension
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
     
     try:
         yield engine
@@ -93,7 +160,7 @@ async def db_setup(db_engine):
     
     This fixture applies SQLAlchemy models to create the database schema.
     It runs once per test session to set up all tables and relationships.
-    Uses PostgreSQL for real database constraints and functionality.
+    Uses pytest-postgresql for real database constraints and functionality.
     
     Args:
         db_engine: The database engine from db_engine fixture
@@ -128,15 +195,14 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
         expire_on_commit=False,
     )
     
+    # Create a session for the test
     async with session_maker() as session:
-        # Begin a transaction for the test
-        await session.begin()
-        
         try:
             yield session
         finally:
-            # Always rollback the transaction
+            # Always rollback to ensure clean state
             await session.rollback()
+            await session.close()
 
 
 @pytest.fixture
@@ -212,7 +278,5 @@ def test_login_data() -> dict:
 @pytest.fixture(autouse=True)
 def setup_test_environment():
     """Setup test environment variables."""
-    # Set required DATABASE_URL for non-testing environment config loading
-    os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
-    os.environ.setdefault("SECRET_KEY", "test_secret_key_for_testing")
-    os.environ.setdefault("ENVIRONMENT", "testing")
+    # These are already set at the top of the file, but keep for compatibility
+    pass

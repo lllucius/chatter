@@ -26,6 +26,7 @@ from chatter.schemas.toolserver import (
     UserToolAccessCheck,
 )
 from chatter.utils.logging import get_logger
+from chatter.utils.rate_limiter import get_rate_limiter, RateLimitExceeded
 
 logger = get_logger(__name__)
 
@@ -563,11 +564,24 @@ class ToolAccessService:
                 restriction_reason="Access not allowed at this time",
             )
 
-        # For role-based access, we don't track individual usage
-        # Rate limits would be applied at the application level
+        # Check role-based rate limits
+        rate_limit_result = await self._check_role_rate_limits(
+            role_access, user_id, tool_name
+        )
+        if not rate_limit_result["allowed"]:
+            return ToolAccessResult(
+                allowed=False,
+                access_level=role_access.access_level,
+                rate_limit_remaining_hour=rate_limit_result["remaining_hour"],
+                rate_limit_remaining_day=rate_limit_result["remaining_day"],
+                restriction_reason="Rate limit exceeded",
+            )
+
         return ToolAccessResult(
             allowed=True,
             access_level=role_access.access_level,
+            rate_limit_remaining_hour=rate_limit_result["remaining_hour"],
+            rate_limit_remaining_day=rate_limit_result["remaining_day"],
         )
 
     def _check_time_restrictions(
@@ -591,40 +605,108 @@ class ToolAccessService:
     async def _check_rate_limits(
         self, permission: ToolPermission
     ) -> dict[str, Any]:
-        """Check rate limits for permission."""
-        now = datetime.now(UTC)
+        """Check rate limits for permission using proper rate limiter."""
+        if not permission.rate_limit_per_hour and not permission.rate_limit_per_day:
+            return {
+                "allowed": True,
+                "remaining_hour": None,
+                "remaining_day": None,
+            }
 
-        # Default to no limits
-        result = {
-            "allowed": True,
-            "remaining_hour": None,
-            "remaining_day": None,
-        }
+        rate_limiter = get_rate_limiter()
+        
+        # Create unique key for this user+permission
+        if permission.tool_id:
+            key = f"user:{permission.user_id}:tool:{permission.tool_id}"
+        elif permission.server_id:
+            key = f"user:{permission.user_id}:server:{permission.server_id}"
+        else:
+            key = f"user:{permission.user_id}:general"
 
-        # Check hourly limit
-        if permission.rate_limit_per_hour:
-            hour_ago = now - timedelta(hours=1)
-            # This would need additional tracking table in real implementation
-            # For now, use the usage_count as approximation
-            if permission.last_used and permission.last_used > hour_ago:
-                # Simplified check - in real implementation would need hourly usage tracking
-                result["remaining_hour"] = max(
-                    0, permission.rate_limit_per_hour - 1
-                )
-                if result["remaining_hour"] <= 0:
-                    result["allowed"] = False
+        try:
+            # Check rate limits
+            result = await rate_limiter.check_rate_limit(
+                key=key,
+                limit_per_hour=permission.rate_limit_per_hour,
+                limit_per_day=permission.rate_limit_per_day,
+            )
+            
+            return {
+                "allowed": result["allowed"],
+                "remaining_hour": result["hour_remaining"],
+                "remaining_day": result["day_remaining"],
+            }
+            
+        except RateLimitExceeded as e:
+            logger.warning(
+                "Rate limit exceeded for user",
+                user_id=permission.user_id,
+                tool_id=permission.tool_id,
+                server_id=permission.server_id,
+                error=str(e)
+            )
+            
+            # Get remaining quotas without consuming
+            quota = await rate_limiter.get_remaining_quota(
+                key=key,
+                limit_per_hour=permission.rate_limit_per_hour,
+                limit_per_day=permission.rate_limit_per_day,
+            )
+            
+            return {
+                "allowed": False,
+                "remaining_hour": quota["hour_remaining"],
+                "remaining_day": quota["day_remaining"],
+            }
 
-        # Check daily limit
-        if permission.rate_limit_per_day:
-            day_ago = now - timedelta(days=1)
-            # Similar simplification for daily limits
-            if permission.last_used and permission.last_used > day_ago:
-                result["remaining_day"] = max(
-                    0,
-                    permission.rate_limit_per_day
-                    - permission.usage_count,
-                )
-                if result["remaining_day"] <= 0:
-                    result["allowed"] = False
+    async def _check_role_rate_limits(
+        self, role_access: RoleToolAccess, user_id: str, tool_name: str
+    ) -> dict[str, Any]:
+        """Check rate limits for role-based access."""
+        if not role_access.default_rate_limit_per_hour and not role_access.default_rate_limit_per_day:
+            return {
+                "allowed": True,
+                "remaining_hour": None,
+                "remaining_day": None,
+            }
 
-        return result
+        rate_limiter = get_rate_limiter()
+        
+        # Create unique key for this user+role+tool
+        key = f"user:{user_id}:role:{role_access.role.value}:tool:{tool_name}"
+
+        try:
+            # Check rate limits
+            result = await rate_limiter.check_rate_limit(
+                key=key,
+                limit_per_hour=role_access.default_rate_limit_per_hour,
+                limit_per_day=role_access.default_rate_limit_per_day,
+            )
+            
+            return {
+                "allowed": result["allowed"],
+                "remaining_hour": result["hour_remaining"],
+                "remaining_day": result["day_remaining"],
+            }
+            
+        except RateLimitExceeded as e:
+            logger.warning(
+                "Role-based rate limit exceeded for user",
+                user_id=user_id,
+                role=role_access.role.value,
+                tool_name=tool_name,
+                error=str(e)
+            )
+            
+            # Get remaining quotas without consuming
+            quota = await rate_limiter.get_remaining_quota(
+                key=key,
+                limit_per_hour=role_access.default_rate_limit_per_hour,
+                limit_per_day=role_access.default_rate_limit_per_day,
+            )
+            
+            return {
+                "allowed": False,
+                "remaining_hour": quota["hour_remaining"],
+                "remaining_day": quota["day_remaining"],
+            }

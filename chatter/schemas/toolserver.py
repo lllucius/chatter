@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 
 from chatter.models.toolserver import (
     ServerStatus,
@@ -44,8 +44,8 @@ class ToolServerBase(BaseModel):
     )
     transport_type: str = Field(
         "http",
-        pattern="^(http|sse|stdio)$",
-        description="Transport type: http, sse, or stdio",
+        pattern="^(http|sse|stdio|websocket)$",
+        description="Transport type: http, sse, stdio, or websocket",
     )
     oauth_config: OAuthConfigSchema | None = Field(
         None, description="OAuth configuration if required"
@@ -76,7 +76,27 @@ class ToolServerBase(BaseModel):
 class ToolServerCreate(ToolServerBase):
     """Schema for creating a tool server."""
 
-    pass
+    @model_validator(mode='after')
+    def validate_server_config(self) -> 'ToolServerCreate':
+        """Validate server configuration based on transport type."""
+        if self.transport_type == "stdio":
+            if not self.base_url:
+                raise ValueError("stdio transport requires base_url for command specification")
+        
+        if self.transport_type in ["http", "sse", "websocket"]:
+            if not self.base_url:
+                raise ValueError(f"{self.transport_type} transport requires base_url")
+        
+        if self.oauth_config:
+            # Validate OAuth config completeness
+            if not all([
+                self.oauth_config.client_id,
+                self.oauth_config.client_secret,
+                self.oauth_config.token_url
+            ]):
+                raise ValueError("OAuth config requires client_id, client_secret, and token_url")
+        
+        return self
 
 
 class ToolServerUpdate(BaseModel):
@@ -86,7 +106,7 @@ class ToolServerUpdate(BaseModel):
     description: str | None = Field(None)
     base_url: HttpUrl | None = Field(None)
     transport_type: str | None = Field(
-        None, pattern="^(http|sse|stdio)$"
+        None, pattern="^(http|sse|stdio|websocket)$"
     )
     oauth_config: OAuthConfigSchema | None = Field(None)
     headers: dict[str, str] | None = Field(None)

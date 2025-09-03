@@ -58,12 +58,104 @@ class MCPToolService:
         self.connections: dict[str, Connection] = {}
         self.tools_cache: dict[str, list[BaseTool]] = {}
         self._client: MultiServerMCPClient | None = None
+        self._connection_retry_counts: dict[str, int] = {}
+        self._max_retries = 3
+        self._retry_delay_base = 1.0  # seconds
+        self._circuit_breaker_threshold = 5
+        self._circuit_breaker_reset_timeout = 300  # 5 minutes
 
     def _get_client(self) -> MultiServerMCPClient:
         """Get or create the MCP client."""
         if self._client is None:
             self._client = MultiServerMCPClient(self.connections)
         return self._client
+
+    async def _retry_with_backoff(
+        self, 
+        operation: Callable, 
+        server_name: str,
+        *args, 
+        **kwargs
+    ) -> Any:
+        """Execute operation with exponential backoff retry logic."""
+        retry_count = self._connection_retry_counts.get(server_name, 0)
+        
+        # Circuit breaker check
+        if retry_count >= self._circuit_breaker_threshold:
+            logger.warning(
+                "Circuit breaker open for server",
+                server=server_name,
+                failures=retry_count
+            )
+            raise MCPServiceError(
+                f"Circuit breaker open for server {server_name} after {retry_count} failures"
+            )
+        
+        last_exception = None
+        
+        for attempt in range(self._max_retries):
+            try:
+                result = await operation(*args, **kwargs)
+                # Reset retry count on success
+                if server_name in self._connection_retry_counts:
+                    del self._connection_retry_counts[server_name]
+                return result
+                
+            except Exception as e:
+                last_exception = e
+                retry_count += 1
+                self._connection_retry_counts[server_name] = retry_count
+                
+                if attempt < self._max_retries - 1:
+                    delay = self._retry_delay_base * (2 ** attempt)
+                    logger.warning(
+                        "Operation failed, retrying",
+                        server=server_name,
+                        attempt=attempt + 1,
+                        delay=delay,
+                        error=str(e)
+                    )
+                    await asyncio.sleep(delay)
+                else:
+                    logger.error(
+                        "Operation failed after all retries",
+                        server=server_name,
+                        attempts=self._max_retries,
+                        error=str(e)
+                    )
+        
+        # If we get here, all retries failed
+        raise MCPServiceError(f"Operation failed after {self._max_retries} retries: {last_exception}")
+
+    def _is_server_healthy(self, server_name: str) -> bool:
+        """Check if server is healthy (circuit breaker status)."""
+        retry_count = self._connection_retry_counts.get(server_name, 0)
+        return retry_count < self._circuit_breaker_threshold
+
+    def _validate_server_config(self, server_config: RemoteMCPServer) -> None:
+        """Validate server configuration."""
+        if not server_config.name:
+            raise ValueError("Server name is required")
+        
+        if not server_config.base_url:
+            raise ValueError("Base URL is required")
+        
+        if server_config.transport_type not in ["http", "sse", "stdio", "websocket"]:
+            raise ValueError(f"Unsupported transport type: {server_config.transport_type}")
+        
+        if server_config.transport_type == "stdio":
+            # For stdio, we would need command configuration
+            # This is handled elsewhere in the system
+            pass
+        
+        if server_config.timeout <= 0:
+            raise ValueError("Timeout must be positive")
+        
+        # Validate OAuth config if present
+        if server_config.oauth_config:
+            oauth = server_config.oauth_config
+            if not all([oauth.client_id, oauth.client_secret, oauth.token_url]):
+                raise ValueError("OAuth config requires client_id, client_secret, and token_url")
 
     def _update_client(self) -> None:
         """Update the client with new connections."""
@@ -110,16 +202,32 @@ class MCPToolService:
             return False
 
         try:
-            # Convert server config to connection
-            connection = self._convert_server_to_connection(
-                server_config
+            # Validate configuration first
+            self._validate_server_config(server_config)
+            
+            # Check if server is already configured
+            if server_config.name in self.servers:
+                logger.warning(
+                    "Server already exists, updating configuration",
+                    server=server_config.name
+                )
+
+            # Convert server config to connection with retry logic
+            async def _add_server():
+                connection = self._convert_server_to_connection(server_config)
+                
+                self.servers[server_config.name] = server_config
+                self.connections[server_config.name] = connection
+                
+                # Update client with new connections
+                self._update_client()
+                
+                return True
+
+            result = await self._retry_with_backoff(
+                _add_server,
+                server_config.name
             )
-
-            self.servers[server_config.name] = server_config
-            self.connections[server_config.name] = connection
-
-            # Update client with new connections
-            self._update_client()
 
             logger.info(
                 "Remote MCP server added",
@@ -127,7 +235,7 @@ class MCPToolService:
                 transport=server_config.transport_type,
                 url=str(server_config.base_url),
             )
-            return True
+            return result
 
         except Exception as e:
             logger.error(
@@ -176,9 +284,24 @@ class MCPToolService:
         if not self.enabled or server_name not in self.servers:
             return []
 
+        # Check circuit breaker
+        if not self._is_server_healthy(server_name):
+            logger.warning(
+                "Server unhealthy, skipping tool discovery",
+                server=server_name
+            )
+            return []
+
         try:
-            client = self._get_client()
-            tools = await client.get_tools(server_name=server_name)
+            async def _discover():
+                client = self._get_client()
+                tools = await client.get_tools(server_name=server_name)
+                return tools
+
+            tools = await self._retry_with_backoff(
+                _discover,
+                server_name
+            )
 
             # Cache the tools
             self.tools_cache[server_name] = tools
@@ -245,6 +368,57 @@ class MCPToolService:
 
         return None
 
+    def _sanitize_tool_arguments(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        """Sanitize and validate tool arguments."""
+        if not isinstance(arguments, dict):
+            raise ValueError("Tool arguments must be a dictionary")
+        
+        # Check argument size
+        import json
+        serialized = json.dumps(arguments)
+        if len(serialized) > 1024 * 1024:  # 1MB limit
+            raise ValueError("Tool arguments too large (max 1MB)")
+        
+        # Deep sanitization - remove potentially dangerous content
+        def sanitize_value(value: Any) -> Any:
+            if isinstance(value, str):
+                # Remove potential script injections
+                if any(danger in value.lower() for danger in ['<script', 'javascript:', 'data:', 'vbscript:']):
+                    raise ValueError("Potentially dangerous content in arguments")
+                # Limit string length
+                if len(value) > 10000:  # 10KB per string
+                    raise ValueError("String argument too long (max 10KB)")
+                return value
+            elif isinstance(value, dict):
+                return {k: sanitize_value(v) for k, v in value.items()}
+            elif isinstance(value, list):
+                return [sanitize_value(item) for item in value]
+            elif isinstance(value, (int, float, bool)) or value is None:
+                return value
+            else:
+                # Convert other types to string with length limit
+                str_value = str(value)
+                if len(str_value) > 1000:
+                    raise ValueError("Converted argument too long")
+                return str_value
+        
+        return sanitize_value(arguments)
+
+    def _validate_tool_result(self, result: Any) -> Any:
+        """Validate and sanitize tool results."""
+        # Check result size
+        import json
+        try:
+            serialized = json.dumps(result, default=str)
+            if len(serialized) > 5 * 1024 * 1024:  # 5MB limit
+                logger.warning("Tool result too large, truncating")
+                return {"error": "Result too large", "truncated": True}
+        except (TypeError, ValueError):
+            logger.warning("Tool result not serializable")
+            return {"error": "Result not serializable", "type": str(type(result))}
+        
+        return result
+
     async def call_tool(
         self,
         tool_name: str,
@@ -268,13 +442,23 @@ class MCPToolService:
         start_time = time.time()
 
         try:
+            # Sanitize arguments first
+            sanitized_args = self._sanitize_tool_arguments(arguments)
+            
             # Find the tool
             tool = await self.get_tool_by_name(tool_name)
             if not tool:
                 raise MCPServiceError(f"Tool not found: {tool_name}")
 
-            # Call the tool
-            result = await tool.ainvoke(arguments)
+            # Call the tool with retry logic
+            async def _call_tool():
+                result = await tool.ainvoke(sanitized_args)
+                return self._validate_tool_result(result)
+
+            result = await self._retry_with_backoff(
+                _call_tool,
+                server_name or "unknown"
+            )
 
             response_time_ms = (time.time() - start_time) * 1000
 
@@ -283,7 +467,7 @@ class MCPToolService:
                 self._track_tool_usage(
                     server_name or "unknown",
                     tool_name,
-                    arguments,
+                    sanitized_args,
                     result,
                     response_time_ms,
                     True,

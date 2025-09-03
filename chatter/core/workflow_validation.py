@@ -738,7 +738,7 @@ class ParameterValidator:
         self, temperature: float
     ) -> ValidationResult:
         """Validate temperature parameter."""
-        if not isinstance(temperature, (int, float)):
+        if not isinstance(temperature, int | float):
             return ValidationResult(
                 valid=False, errors=["Temperature must be a number"]
             )
@@ -861,7 +861,7 @@ class SchemaValidator:
                 ):
                     errors.append(f"Field '{field}' must be a string")
                 elif expected_type == 'number' and not isinstance(
-                    value, (int, float)
+                    value, int | float
                 ):
                     errors.append(f"Field '{field}' must be a number")
                 elif expected_type == 'object' and not isinstance(

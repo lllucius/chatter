@@ -77,8 +77,8 @@ class ConversationService:
                     from uuid import UUID
 
                     UUID(user_id)
-                except ValueError:
-                    raise ValueError("Invalid user ID format")
+                except ValueError as e:
+                    raise ValueError("Invalid user ID format") from e
 
                 conversation = Conversation(
                     title=title,
@@ -122,7 +122,7 @@ class ConversationService:
                 user_id=user_id,
                 error=str(e),
             )
-            raise ValidationError(f"Failed to create conversation: {e}")
+            raise ValidationError(f"Failed to create conversation: {e}") from e
 
     async def get_conversation(
         self,
@@ -303,7 +303,7 @@ class ConversationService:
                 user_id=user_id,
                 error=str(e),
             )
-            raise ValidationError(f"Failed to update conversation: {e}")
+            raise ValidationError(f"Failed to update conversation: {e}") from e
 
     async def delete_conversation(
         self, conversation_id: str, user_id: str

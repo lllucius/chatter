@@ -291,7 +291,7 @@ class ChatService:
                 error=str(e),
                 correlation_id=correlation_id,
             )
-            raise ChatServiceError(f"Chat processing failed: {e}")
+            raise ChatServiceError(f"Chat processing failed: {e}") from e
 
     async def chat_streaming(
         self, user_id: str, chat_request: ChatRequest

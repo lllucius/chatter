@@ -480,7 +480,10 @@ class StreamingService:
         current_time = time.time()
         inactive_streams = []
 
-        for stream_id, stream_info in self.active_streams.items():
+        # Create a snapshot of stream items to avoid race conditions
+        stream_items = list(self.active_streams.items())
+
+        for stream_id, stream_info in stream_items:
             if (
                 current_time - stream_info["last_activity"]
                 > timeout_seconds
@@ -489,13 +492,20 @@ class StreamingService:
 
         cleaned_count = 0
         for stream_id in inactive_streams:
-            await self.end_stream(stream_id)
-            cleaned_count += 1
-            logger.warning(
-                "Cleaned up inactive stream",
-                stream_id=stream_id,
-                inactive_duration=timeout_seconds,
-            )
+            try:
+                await self.end_stream(stream_id)
+                cleaned_count += 1
+                logger.warning(
+                    "Cleaned up inactive stream",
+                    stream_id=stream_id,
+                    inactive_duration=timeout_seconds,
+                )
+            except Exception as e:
+                logger.error(
+                    "Failed to clean up inactive stream",
+                    stream_id=stream_id,
+                    error=str(e),
+                )
 
         return cleaned_count
 

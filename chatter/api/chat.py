@@ -1,8 +1,9 @@
 """Chat endpoints."""
 
 import json
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -60,21 +61,56 @@ async def get_chat_service(
     return ChatService(session, llm_service)
 
 
-def _map_workflow_type(workflow: str) -> str:
+def _validate_uuid(value: str, field_name: str) -> str:
+    """Validate that a string is a valid UUID.
+
+    Args:
+        value: String to validate
+        field_name: Name of the field for error messages
+
+    Returns:
+        The original string if valid
+
+    Raises:
+        BadRequestProblem: If the string is not a valid UUID
+    """
+    try:
+        UUID(value)
+        return value
+    except ValueError as e:
+        from chatter.utils.problem import BadRequestProblem
+        raise BadRequestProblem(
+            detail=f"Invalid {field_name} format: must be a valid UUID"
+        ) from e
+
+
+def _map_workflow_type(workflow: str | None) -> str:
     """Map API workflow to internal workflow types.
 
     - plain -> basic (legacy name used internally)
     - rag -> rag
     - tools -> tools
     - full -> full (rag + tools)
+
+    Args:
+        workflow: Workflow type string or None
+
+    Returns:
+        Mapped workflow type, defaults to "basic"
     """
+    if not workflow:
+        return "basic"
+
     mapping = {
         "plain": "basic",
         "rag": "rag",
         "tools": "tools",
         "full": "full",
     }
-    return mapping.get(workflow, "basic")
+
+    # Normalize to lowercase for case-insensitive matching
+    workflow_lower = workflow.lower().strip()
+    return mapping.get(workflow_lower, "basic")
 
 
 @router.post(
@@ -167,6 +203,9 @@ async def get_conversation(
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationWithMessages:
     """Get conversation details with messages."""
+    # Validate conversation_id format
+    _validate_uuid(conversation_id, "conversation_id")
+
     conversation = await chat_service.get_conversation(
         conversation_id, current_user.id, include_messages=True
     )
@@ -201,16 +240,19 @@ async def update_conversation(
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationResponse:
     """Update conversation."""
+    # Validate conversation_id format
+    _validate_uuid(conversation_id, "conversation_id")
+
     try:
         conversation = await chat_service.update_conversation(
             conversation_id, current_user.id, update_data
         )
         return ConversationResponse.model_validate(conversation)
-    except NotFoundError:
+    except NotFoundError as e:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
-        ) from None
+        ) from e
 
 
 @router.delete(
@@ -224,6 +266,9 @@ async def delete_conversation(
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ConversationDeleteResponse:
     """Delete conversation."""
+    # Validate conversation_id format
+    _validate_uuid(conversation_id, "conversation_id")
+
     try:
         await chat_service.delete_conversation(
             conversation_id, current_user.id
@@ -231,11 +276,11 @@ async def delete_conversation(
         return ConversationDeleteResponse(
             message="Conversation deleted successfully"
         )
-    except NotFoundError:
+    except NotFoundError as e:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
-        ) from None
+        ) from e
 
 
 @router.get(
@@ -309,6 +354,10 @@ async def delete_message(
     chat_service: ChatService = Depends(get_chat_service),
 ) -> MessageDeleteResponse:
     """Delete a message from conversation."""
+    # Validate UUID formats
+    _validate_uuid(conversation_id, "conversation_id")
+    _validate_uuid(message_id, "message_id")
+
     try:
         await chat_service.delete_message(
             conversation_id, message_id, current_user.id
@@ -316,11 +365,11 @@ async def delete_message(
         return MessageDeleteResponse(
             message="Message deleted successfully"
         )
-    except NotFoundError:
+    except NotFoundError as e:
         raise NotFoundProblem(
             detail="Conversation not found",
             resource_type="conversation",
-        ) from None
+        ) from e
 
 
 @router.post(
@@ -340,6 +389,7 @@ async def delete_message(
 )
 async def chat(
     chat_request: ChatRequest,
+    request: Request,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
 ):
@@ -360,6 +410,10 @@ async def chat(
                     async for chunk in chat_service.chat_streaming(
                         current_user.id, chat_request
                     ):
+                        # Check if client disconnected
+                        if await request.is_disconnected():
+                            logger.info("Client disconnected during streaming")
+                            break
                         yield f"data: {json.dumps(chunk)}\n\n"
                 else:
                     # For workflow-based streaming
@@ -379,6 +433,10 @@ async def chat(
                             chat_request,
                             workflow_type=workflow_type,
                         ):
+                            # Check if client disconnected
+                            if await request.is_disconnected():
+                                logger.info("Client disconnected during workflow streaming")
+                                break
                             yield f"data: {json.dumps(chunk)}\n\n"
             except (NotFoundError, ChatServiceError) as e:
                 error_chunk = {"type": "error", "error": str(e)}
@@ -419,7 +477,7 @@ async def chat(
             ),
         )
     except (NotFoundError, ChatServiceError) as e:
-        raise BadRequestProblem(detail=str(e)) from None
+        raise BadRequestProblem(detail=str(e)) from e
 
 
 @router.get("/tools/available", response_model=AvailableToolsResponse)
@@ -464,7 +522,7 @@ async def get_available_tools(
     except Exception as e:
         raise InternalServerProblem(
             detail=f"Failed to get available tools: {str(e)}"
-        ) from None
+        ) from e
 
 
 @router.get("/templates", response_model=WorkflowTemplatesResponse)
@@ -490,7 +548,7 @@ async def get_workflow_templates(
     except Exception as e:
         raise InternalServerProblem(
             detail=f"Failed to get workflow templates: {str(e)}"
-        ) from None
+        ) from e
 
 
 @router.post("/template/{template_name}")
@@ -519,8 +577,8 @@ async def chat_with_template(
         if "not found" in str(e).lower():
             raise NotFoundProblem(
                 detail=f"Template '{template_name}' not found"
-            ) from None
-        raise BadRequestProblem(detail=str(e)) from None
+            ) from e
+        raise BadRequestProblem(detail=str(e)) from e
 
 
 @router.get(
@@ -539,7 +597,7 @@ async def get_performance_stats(
     except Exception as e:
         raise InternalServerProblem(
             detail=f"Failed to get performance stats: {str(e)}"
-        ) from None
+        ) from e
 
 
 @router.get("/mcp/status", response_model=McpStatusResponse)
@@ -555,4 +613,4 @@ async def get_mcp_status(
     except Exception as e:
         raise InternalServerProblem(
             detail=f"Failed to get MCP status: {str(e)}"
-        ) from None
+        ) from e

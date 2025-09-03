@@ -27,6 +27,8 @@ from chatter.utils.problem import (
     InternalServerProblem,
     NotFoundProblem,
     ProblemException,
+    RateLimitProblem,
+    ValidationProblem,
 )
 from chatter.utils.rate_limiter import RateLimiter, RateLimitExceeded
 
@@ -78,8 +80,9 @@ async def create_profile(
                 "Rate limit exceeded for profile creation",
                 user_id=current_user.id
             )
-            raise BadRequestProblem(
-                detail="Rate limit exceeded. Please wait before creating more profiles."
+            raise RateLimitProblem(
+                detail="Profile creation rate limit exceeded. You can create up to 10 profiles per hour and 50 per day.",
+                retry_after=3600  # Suggest retry after 1 hour
             ) from e
 
         profile = await profile_service.create_profile(
@@ -88,7 +91,10 @@ async def create_profile(
         return ProfileResponse.model_validate(profile)
 
     except ProfileError as e:
-        raise BadRequestProblem(detail=str(e)) from None
+        raise ValidationProblem(
+            detail=f"Profile creation failed: {str(e)}",
+            validation_errors=[{"field": "profile", "message": str(e)}]
+        ) from None
     except ProblemException:
         raise
     except Exception as e:
@@ -251,7 +257,10 @@ async def update_profile(
         return ProfileResponse.model_validate(profile)
 
     except ProfileError as e:
-        raise BadRequestProblem(detail=str(e)) from None
+        raise ValidationProblem(
+            detail=f"Profile update failed: {str(e)}",
+            validation_errors=[{"field": "profile", "message": str(e)}]
+        ) from None
     except ProblemException:
         raise
     except Exception as e:
@@ -345,8 +354,9 @@ async def test_profile(
                 user_id=current_user.id,
                 profile_id=profile_id
             )
-            raise BadRequestProblem(
-                detail="Rate limit exceeded. Please wait before testing again."
+            raise RateLimitProblem(
+                detail="Profile testing rate limit exceeded. You can test up to 20 profiles per hour and 100 per day.",
+                retry_after=1800  # Suggest retry after 30 minutes
             ) from e
 
         result = await profile_service.test_profile(
@@ -356,7 +366,10 @@ async def test_profile(
         return ProfileTestResponse(**result)
 
     except ProfileError as e:
-        raise BadRequestProblem(detail=str(e)) from None
+        raise ValidationProblem(
+            detail=f"Profile test failed: {str(e)}",
+            validation_errors=[{"field": "profile", "message": str(e)}]
+        ) from None
     except ProblemException:
         raise
     except Exception as e:
@@ -398,7 +411,10 @@ async def clone_profile(
         return ProfileResponse.model_validate(cloned_profile)
 
     except ProfileError as e:
-        raise BadRequestProblem(detail=str(e)) from None
+        raise ValidationProblem(
+            detail=f"Profile cloning failed: {str(e)}",
+            validation_errors=[{"field": "profile", "message": str(e)}]
+        ) from None
     except Exception as e:
         logger.error(
             "Profile cloning failed",

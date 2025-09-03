@@ -1,7 +1,7 @@
 """Profile management schemas."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -11,7 +11,9 @@ from chatter.schemas.common import (
     GetRequestBase,
     ListRequestBase,
 )
-from chatter.utils.validation import security_validator
+
+if TYPE_CHECKING:
+    from chatter.utils.validation import SecurityValidator
 
 
 class ProfileBase(BaseModel):
@@ -142,6 +144,8 @@ class ProfileBase(BaseModel):
     def validate_text_fields(cls, v: str | None) -> str | None:
         """Validate text fields for security threats."""
         if v is not None:
+            # Lazy import to avoid circular imports
+            from chatter.utils.validation import security_validator
             security_validator.validate_security(v)
         return v
     
@@ -153,6 +157,8 @@ class ProfileBase(BaseModel):
             # Basic validation for provider/model names
             if not v.replace('-', '').replace('_', '').replace('.', '').isalnum():
                 raise ValueError("Provider/model names can only contain alphanumeric characters, hyphens, underscores, and dots")
+            # Lazy import to avoid circular imports
+            from chatter.utils.validation import security_validator
             security_validator.validate_security(v)
         return v
     
@@ -161,6 +167,7 @@ class ProfileBase(BaseModel):
     def validate_tags(cls, v: list[str] | None) -> list[str] | None:
         """Validate tags for security."""
         if v:
+            from chatter.utils.validation import security_validator
             for tag in v:
                 if len(tag) > 50:
                     raise ValueError("Tag length cannot exceed 50 characters")
@@ -172,6 +179,7 @@ class ProfileBase(BaseModel):
     def validate_tools(cls, v: list[str] | None) -> list[str] | None:
         """Validate available tools."""
         if v:
+            from chatter.utils.validation import security_validator
             for tool in v:
                 if len(tool) > 100:
                     raise ValueError("Tool name length cannot exceed 100 characters")
@@ -183,6 +191,7 @@ class ProfileBase(BaseModel):
     def validate_stop_sequences(cls, v: list[str] | None) -> list[str] | None:
         """Validate stop sequences."""
         if v:
+            from chatter.utils.validation import security_validator
             for seq in v:
                 if len(seq) > 20:
                     raise ValueError("Stop sequence length cannot exceed 20 characters")
@@ -452,6 +461,14 @@ class ProfileTestRequest(BaseModel):
     include_tools: bool = Field(
         False, description="Include tools in test"
     )
+
+    @field_validator('test_message')
+    @classmethod
+    def validate_test_message(cls, v: str) -> str:
+        """Validate test message for security threats."""
+        from chatter.utils.validation import security_validator
+        security_validator.validate_security(v)
+        return v
 
 
 class ProfileTestResponse(BaseModel):

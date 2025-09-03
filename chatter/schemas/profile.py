@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from chatter.models.profile import ProfileType
 from chatter.schemas.common import (
@@ -11,6 +11,7 @@ from chatter.schemas.common import (
     GetRequestBase,
     ListRequestBase,
 )
+from chatter.utils.validation import security_validator
 
 
 class ProfileBase(BaseModel):
@@ -20,7 +21,7 @@ class ProfileBase(BaseModel):
         ..., min_length=1, max_length=255, description="Profile name"
     )
     description: str | None = Field(
-        None, description="Profile description"
+        None, max_length=2000, description="Profile description"
     )
     profile_type: ProfileType = Field(
         ProfileType.CUSTOM, description="Profile type"
@@ -28,9 +29,11 @@ class ProfileBase(BaseModel):
 
     # LLM Configuration
     llm_provider: str = Field(
-        ..., description="LLM provider (openai, anthropic, etc.)"
+        ..., min_length=1, max_length=50, description="LLM provider (openai, anthropic, etc.)"
     )
-    llm_model: str = Field(..., description="LLM model name")
+    llm_model: str = Field(
+        ..., min_length=1, max_length=100, description="LLM model name"
+    )
 
     # Generation parameters
     temperature: float = Field(
@@ -40,7 +43,7 @@ class ProfileBase(BaseModel):
         None, ge=0.0, le=1.0, description="Top-p sampling parameter"
     )
     top_k: int | None = Field(
-        None, ge=1, description="Top-k sampling parameter"
+        None, ge=1, le=1000, description="Top-k sampling parameter"
     )
     max_tokens: int = Field(
         4096, ge=1, le=100000, description="Maximum tokens to generate"
@@ -57,7 +60,7 @@ class ProfileBase(BaseModel):
         4096, ge=1, le=200000, description="Context window size"
     )
     system_prompt: str | None = Field(
-        None, description="System prompt template"
+        None, max_length=10000, description="System prompt template"
     )
 
     # Memory and retrieval settings
@@ -65,7 +68,7 @@ class ProfileBase(BaseModel):
         True, description="Enable conversation memory"
     )
     memory_strategy: str | None = Field(
-        None, description="Memory management strategy"
+        None, max_length=50, description="Memory management strategy"
     )
     enable_retrieval: bool = Field(
         False, description="Enable document retrieval"
@@ -80,21 +83,23 @@ class ProfileBase(BaseModel):
     # Tool calling
     enable_tools: bool = Field(False, description="Enable tool calling")
     available_tools: list[str] | None = Field(
-        None, description="List of available tools"
+        None, max_length=20, description="List of available tools"
     )
     tool_choice: str | None = Field(
-        None, description="Tool choice strategy"
+        None, max_length=50, description="Tool choice strategy"
     )
 
     # Safety and filtering
     content_filter_enabled: bool = Field(
         True, description="Enable content filtering"
     )
-    safety_level: str | None = Field(None, description="Safety level")
+    safety_level: str | None = Field(
+        None, max_length=20, description="Safety level"
+    )
 
     # Response formatting
     response_format: str | None = Field(
-        None, description="Response format (json, text, markdown)"
+        None, max_length=20, description="Response format (json, text, markdown)"
     )
     stream_response: bool = Field(
         True, description="Enable streaming responses"
@@ -102,10 +107,10 @@ class ProfileBase(BaseModel):
 
     # Advanced settings
     seed: int | None = Field(
-        None, description="Random seed for reproducibility"
+        None, ge=0, le=2147483647, description="Random seed for reproducibility"
     )
     stop_sequences: list[str] | None = Field(
-        None, description="Stop sequences"
+        None, max_length=10, description="Stop sequences"
     )
     logit_bias: dict[str, float] | None = Field(
         None, description="Logit bias adjustments"
@@ -113,10 +118,10 @@ class ProfileBase(BaseModel):
 
     # Embedding configuration
     embedding_provider: str | None = Field(
-        None, description="Embedding provider"
+        None, max_length=50, description="Embedding provider"
     )
     embedding_model: str | None = Field(
-        None, description="Embedding model"
+        None, max_length=100, description="Embedding model"
     )
 
     # Access control
@@ -125,16 +130,96 @@ class ProfileBase(BaseModel):
     )
 
     # Metadata and tags
-    tags: list[str] | None = Field(None, description="Profile tags")
+    tags: list[str] | None = Field(
+        None, max_length=10, description="Profile tags"
+    )
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
+
+    @field_validator('name', 'description', 'system_prompt')
+    @classmethod
+    def validate_text_fields(cls, v: str | None) -> str | None:
+        """Validate text fields for security threats."""
+        if v is not None:
+            security_validator.validate_security(v)
+        return v
+    
+    @field_validator('llm_provider', 'llm_model', 'embedding_provider', 'embedding_model')
+    @classmethod
+    def validate_provider_model(cls, v: str | None) -> str | None:
+        """Validate provider and model names."""
+        if v:
+            # Basic validation for provider/model names
+            if not v.replace('-', '').replace('_', '').replace('.', '').isalnum():
+                raise ValueError("Provider/model names can only contain alphanumeric characters, hyphens, underscores, and dots")
+            security_validator.validate_security(v)
+        return v
+    
+    @field_validator('tags')
+    @classmethod
+    def validate_tags(cls, v: list[str] | None) -> list[str] | None:
+        """Validate tags for security."""
+        if v:
+            for tag in v:
+                if len(tag) > 50:
+                    raise ValueError("Tag length cannot exceed 50 characters")
+                security_validator.validate_security(tag)
+        return v
+    
+    @field_validator('available_tools')
+    @classmethod
+    def validate_tools(cls, v: list[str] | None) -> list[str] | None:
+        """Validate available tools."""
+        if v:
+            for tool in v:
+                if len(tool) > 100:
+                    raise ValueError("Tool name length cannot exceed 100 characters")
+                security_validator.validate_security(tool)
+        return v
+    
+    @field_validator('stop_sequences')
+    @classmethod
+    def validate_stop_sequences(cls, v: list[str] | None) -> list[str] | None:
+        """Validate stop sequences."""
+        if v:
+            for seq in v:
+                if len(seq) > 20:
+                    raise ValueError("Stop sequence length cannot exceed 20 characters")
+                security_validator.validate_security(seq)
+        return v
+    
+    @field_validator('temperature')
+    @classmethod
+    def validate_temperature(cls, v: float) -> float:
+        """Validate temperature is not too extreme."""
+        if v <= 0.01:
+            raise ValueError("Temperature must be greater than 0.01 for reasonable outputs")
+        return v
+    
+    @field_validator('max_tokens')
+    @classmethod
+    def validate_max_tokens(cls, v: int) -> int:
+        """Validate max tokens is reasonable."""
+        if v < 10:
+            raise ValueError("max_tokens must be at least 10 for meaningful outputs")
+        return v
 
 
 class ProfileCreate(ProfileBase):
     """Schema for creating a profile."""
 
-    pass
+    # For profile creation, we can add specific validation that differs from updates
+    # For now, it inherits all validation from ProfileBase, but this allows
+    # for future customization of creation-specific validation rules
+    
+    @field_validator('llm_provider', 'llm_model')
+    @classmethod
+    def validate_required_llm_fields(cls, v: str) -> str:
+        """Ensure LLM provider and model are provided for new profiles."""
+        if not v or not v.strip():
+            raise ValueError("LLM provider and model are required for new profiles")
+        return v.strip()
 
 
 class ProfileUpdate(BaseModel):

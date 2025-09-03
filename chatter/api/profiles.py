@@ -28,9 +28,13 @@ from chatter.utils.problem import (
     NotFoundProblem,
     ProblemException,
 )
+from chatter.utils.rate_limiter import RateLimiter, RateLimitExceeded
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+# Rate limiter for expensive operations
+rate_limiter = RateLimiter()
 
 
 async def get_profile_service(
@@ -61,6 +65,23 @@ async def create_profile(
         Created profile information
     """
     try:
+        # Rate limiting for profile creation to prevent spam
+        rate_limit_key = f"profile_create:{current_user.id}"
+        try:
+            await rate_limiter.check_rate_limit(
+                key=rate_limit_key,
+                limit_per_hour=10,  # Max 10 profile creations per hour
+                limit_per_day=50    # Max 50 profile creations per day
+            )
+        except RateLimitExceeded as e:
+            logger.warning(
+                "Rate limit exceeded for profile creation",
+                user_id=current_user.id
+            )
+            raise BadRequestProblem(
+                detail="Rate limit exceeded. Please wait before creating more profiles."
+            ) from e
+
         profile = await profile_service.create_profile(
             current_user.id, profile_data
         )
@@ -68,6 +89,8 @@ async def create_profile(
 
     except ProfileError as e:
         raise BadRequestProblem(detail=str(e)) from None
+    except ProblemException:
+        raise
     except Exception as e:
         logger.error("Profile creation failed", error=str(e))
         raise InternalServerProblem(
@@ -308,6 +331,24 @@ async def test_profile(
         Test results
     """
     try:
+        # Rate limiting for expensive LLM operations
+        rate_limit_key = f"profile_test:{current_user.id}"
+        try:
+            await rate_limiter.check_rate_limit(
+                key=rate_limit_key,
+                limit_per_hour=20,  # Max 20 tests per hour per user
+                limit_per_day=100   # Max 100 tests per day per user
+            )
+        except RateLimitExceeded as e:
+            logger.warning(
+                "Rate limit exceeded for profile test",
+                user_id=current_user.id,
+                profile_id=profile_id
+            )
+            raise BadRequestProblem(
+                detail="Rate limit exceeded. Please wait before testing again."
+            ) from e
+
         result = await profile_service.test_profile(
             profile_id, current_user.id, test_request
         )
@@ -316,6 +357,8 @@ async def test_profile(
 
     except ProfileError as e:
         raise BadRequestProblem(detail=str(e)) from None
+    except ProblemException:
+        raise
     except Exception as e:
         logger.error(
             "Profile test failed", profile_id=profile_id, error=str(e)

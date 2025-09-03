@@ -262,7 +262,6 @@ class EmbeddingSpaceList(BaseModel):
 class DefaultProvider(BaseModel):
     """Schema for setting default provider."""
 
-    provider_id: str
     model_type: ModelType
 
 

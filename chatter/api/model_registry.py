@@ -124,23 +124,33 @@ async def update_provider(
     current_user: User = Depends(get_current_user),
 ):
     """Update a provider."""
-    service = ModelRegistryService(session)
-    provider = await service.update_provider(provider_id, provider_data)
+    from chatter.core.exceptions import ValidationError
 
-    if not provider:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Provider not found",
+    service = ModelRegistryService(session)
+
+    try:
+        provider = await service.update_provider(provider_id, provider_data)
+
+        if not provider:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Provider not found",
+            )
+
+        logger.info(
+            "Updated provider",
+            provider_id=provider.id,
+            provider_name=provider.name,
+            user_id=current_user.id,
         )
 
-    logger.info(
-        "Updated provider",
-        provider_id=provider.id,
-        provider_name=provider.name,
-        user_id=current_user.id,
-    )
+        return provider
 
-    return provider
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
 
 
 @router.delete(
@@ -190,27 +200,53 @@ async def set_default_provider(
     current_user: User = Depends(get_current_user),
 ) -> ProviderDefaultResponse:
     """Set a provider as default for a model type."""
-    service = ModelRegistryService(session)
-    success = await service.set_default_provider(
-        provider_id, default_data.model_type
-    )
 
-    if not success:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Provider not found",
+    service = ModelRegistryService(session)
+
+    try:
+        success = await service.set_default_provider(
+            provider_id, default_data.model_type
         )
 
-    logger.info(
-        "Set default provider",
-        provider_id=provider_id,
-        model_type=default_data.model_type,
-        user_id=current_user.id,
-    )
+        if not success:
+            # Check if provider exists
+            provider = await service.get_provider(provider_id)
+            if not provider:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Provider not found",
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Provider {provider.name} has no active models of type {default_data.model_type}",
+                )
 
-    return ProviderDefaultResponse(
-        message="Default provider set successfully"
-    )
+        logger.info(
+            "Set default provider",
+            provider_id=provider_id,
+            model_type=default_data.model_type,
+            user_id=current_user.id,
+        )
+
+        return ProviderDefaultResponse(
+            message="Default provider set successfully"
+        )
+
+    except Exception as e:
+        logger.error(
+            "Failed to set default provider",
+            provider_id=provider_id,
+            model_type=default_data.model_type,
+            error=str(e),
+            user_id=current_user.id,
+        )
+        if isinstance(e, HTTPException):
+            raise
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to set default provider",
+        ) from e
 
 
 # Model endpoints
@@ -275,44 +311,60 @@ async def create_model(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new model definition."""
+    from chatter.core.exceptions import ValidationError
+
     service = ModelRegistryService(session)
 
-    # Check if model name already exists for this provider
-    existing = await service.get_model_by_name(
-        model_data.provider_id, model_data.name
-    )
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Model with this name already exists for this provider",
+    try:
+        # Check if model name already exists for this provider
+        existing = await service.get_model_by_name(
+            model_data.provider_id, model_data.name
+        )
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Model with this name already exists for this provider",
+            )
+
+        model = await service.create_model(model_data)
+
+        # Refresh to get provider relationship
+        model = await service.get_model(model.id)
+
+        if not model:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to retrieve created model",
+            )
+
+        logger.info(
+            "Created model",
+            model_id=model.id,
+            model_name=model.name,
+            provider_id=model.provider_id,
+            user_id=current_user.id,
         )
 
-    model = await service.create_model(model_data)
+        return model
 
-    if not model:
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+    except Exception as e:
+        await session.rollback()
+        logger.error(
+            "Failed to create model",
+            model_name=model_data.name,
+            provider_id=model_data.provider_id,
+            error=str(e),
+            user_id=current_user.id,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create model",
-        )
-
-    # Refresh to get provider relationship
-    model = await service.get_model(model.id)
-
-    if not model:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve created model",
-        )
-
-    logger.info(
-        "Created model",
-        model_id=model.id,
-        model_name=model.name,
-        provider_id=model.provider_id,
-        user_id=current_user.id,
-    )
-
-    return model
+        ) from e
 
 
 @router.put("/models/{model_id}", response_model=ModelDefWithProvider)
@@ -323,32 +375,42 @@ async def update_model(
     current_user: User = Depends(get_current_user),
 ):
     """Update a model definition."""
+    from chatter.core.exceptions import ValidationError
+
     service = ModelRegistryService(session)
-    model = await service.update_model(model_id, model_data)
 
-    if not model:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
+    try:
+        model = await service.update_model(model_id, model_data)
+
+        if not model:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Model not found",
+            )
+
+        # Refresh to get provider relationship
+        model = await service.get_model(model.id)
+
+        if not model:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to retrieve updated model",
+            )
+
+        logger.info(
+            "Updated model",
+            model_id=model.id,
+            model_name=model.name,
+            user_id=current_user.id,
         )
 
-    # Refresh to get provider relationship
-    model = await service.get_model(model.id)
+        return model
 
-    if not model:
+    except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve updated model",
-        )
-
-    logger.info(
-        "Updated model",
-        model_id=model.id,
-        model_name=model.name,
-        user_id=current_user.id,
-    )
-
-    return model
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
 
 
 @router.delete("/models/{model_id}", response_model=ModelDeleteResponse)
@@ -475,39 +537,35 @@ async def create_embedding_space(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new embedding space with backing table and index."""
+    from chatter.core.exceptions import ValidationError
+
     service = ModelRegistryService(session)
 
-    # Check if space name already exists
-    existing = await service.get_embedding_space_by_name(
-        space_data.name
-    )
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Embedding space with this name already exists",
-        )
-
-    # Check if table name already exists
-    existing_table = await service.get_embedding_space_by_table_name(
-        space_data.table_name
-    )
-    if existing_table:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Embedding space with this table name already exists",
-        )
-
-    # Get user ID before any potential rollback
-    user_id = current_user.id
-
     try:
-        space = await service.create_embedding_space(space_data)
-
-        if not space:
+        # Check if space name already exists
+        existing = await service.get_embedding_space_by_name(
+            space_data.name
+        )
+        if existing:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create embedding space",
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Embedding space with this name already exists",
             )
+
+        # Check if table name already exists
+        existing_table = await service.get_embedding_space_by_table_name(
+            space_data.table_name
+        )
+        if existing_table:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Embedding space with this table name already exists",
+            )
+
+        # Get user ID before any potential rollback
+        user_id = current_user.id
+
+        space = await service.create_embedding_space(space_data)
 
         # Refresh to get full relationships
         space = await service.get_embedding_space(space.id)
@@ -528,12 +586,18 @@ async def create_embedding_space(
         )
 
         return space
+
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
     except Exception as e:
         logger.error(
             "Failed to create embedding space",
             space_name=space_data.name,
             error=str(e),
-            user_id=user_id,
+            user_id=current_user.id,
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

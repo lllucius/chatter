@@ -195,3 +195,24 @@ class PluginDeleteResponse(BaseModel):
         ..., description="Whether deletion was successful"
     )
     message: str = Field(..., description="Deletion result message")
+
+
+class PluginHealthCheckResponse(BaseModel):
+    """Response schema for plugin health check."""
+
+    summary: dict[str, Any] = Field(
+        ..., description="Health check summary"
+    )
+    results: dict[str, dict[str, Any]] = Field(
+        ..., description="Detailed health check results for each plugin"
+    )
+
+
+class PluginStatsResponse(BaseModel):
+    """Response schema for plugin statistics."""
+
+    total_plugins: int = Field(..., description="Total number of plugins")
+    active_plugins: int = Field(..., description="Number of active plugins")
+    inactive_plugins: int = Field(..., description="Number of inactive plugins")
+    plugin_types: dict[str, int] = Field(..., description="Plugin count by type")
+    plugins_directory: str = Field(..., description="Plugin installation directory")

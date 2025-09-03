@@ -115,6 +115,7 @@ class AdvancedJobQueue:
         tags: list[str] | None = None,
         metadata: dict[str, Any] | None = None,
         schedule_at: datetime | None = None,
+        created_by_user_id: str | None = None,  # Add user ID for security
     ) -> str:
         """Add a job to the queue.
 
@@ -129,6 +130,7 @@ class AdvancedJobQueue:
             tags: Job tags for filtering
             metadata: Additional job metadata
             schedule_at: Optional datetime to schedule job for later execution
+            created_by_user_id: ID of user creating the job (for security)
 
         Returns:
             Job ID
@@ -151,6 +153,7 @@ class AdvancedJobQueue:
             tags=tags or [],
             metadata=metadata or {},
             scheduled_at=schedule_at,  # Store the scheduled time
+            created_by_user_id=created_by_user_id,  # Store user ID for security
         )
 
         self.jobs[job.id] = job
@@ -330,6 +333,7 @@ class AdvancedJobQueue:
         status: JobStatus | None = None,
         tags: list[str] | None = None,
         limit: int = 100,
+        user_id: str | None = None,  # Add user filtering
     ) -> list[Job]:
         """List jobs with optional filtering.
 
@@ -337,11 +341,16 @@ class AdvancedJobQueue:
             status: Filter by job status
             tags: Filter by job tags
             limit: Maximum number of jobs to return
+            user_id: Filter by user ID (for security)
 
         Returns:
             List of jobs
         """
         jobs = list(self.jobs.values())
+
+        # Apply user filter first (security)
+        if user_id:
+            jobs = [job for job in jobs if job.created_by_user_id == user_id]
 
         if status:
             jobs = [job for job in jobs if job.status == status]
@@ -357,6 +366,37 @@ class AdvancedJobQueue:
         jobs.sort(key=lambda x: x.created_at, reverse=True)
 
         return jobs[:limit]
+
+    def get_user_job(self, job_id: str, user_id: str) -> Job | None:
+        """Get a job by ID, but only if it belongs to the user.
+        
+        Args:
+            job_id: Job ID
+            user_id: User ID
+            
+        Returns:
+            Job if found and belongs to user, None otherwise
+        """
+        job = self.jobs.get(job_id)
+        if job and job.created_by_user_id == user_id:
+            return job
+        return None
+
+    async def cancel_user_job(self, job_id: str, user_id: str) -> bool:
+        """Cancel a job, but only if it belongs to the user.
+        
+        Args:
+            job_id: Job ID
+            user_id: User ID
+            
+        Returns:
+            True if cancelled, False if not found or not owned by user
+        """
+        job = self.jobs.get(job_id)
+        if not job or job.created_by_user_id != user_id:
+            return False
+
+        return await self.cancel_job(job_id)
 
     async def get_queue_stats(self) -> dict[str, Any]:
         """Get queue statistics.

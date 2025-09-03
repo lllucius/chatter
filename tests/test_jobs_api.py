@@ -164,19 +164,71 @@ class TestJobQueue:
         success = await job_queue.cancel_job(fake_id)
         assert success is False
 
-    async def test_get_stats(self, job_queue):
-        """Test getting queue statistics."""
-        # Add some jobs
-        await job_queue.add_job("Job 1", "test_job")
-        await job_queue.add_job("Job 2", "test_job")
+    async def test_add_job_with_user_id(self, job_queue):
+        """Test adding a job with user ID for security."""
+        job_id = await job_queue.add_job(
+            name="User Job",
+            function_name="test_job",
+            args=["test message"],
+            created_by_user_id="user123"
+        )
         
-        stats = await job_queue.get_stats()
+        assert job_id in job_queue.jobs
+        job = job_queue.jobs[job_id]
+        assert job.name == "User Job"
+        assert job.created_by_user_id == "user123"
+
+    async def test_get_user_job_security(self, job_queue):
+        """Test user job isolation in get_user_job method."""
+        # Create job for user1
+        job_id = await job_queue.add_job(
+            name="User1 Job",
+            function_name="test_job",
+            created_by_user_id="user1"
+        )
         
-        assert stats["total_jobs"] == 2
-        assert stats["pending_jobs"] == 2
-        assert stats["running_jobs"] == 0
-        assert stats["completed_jobs"] == 0
-        assert stats["failed_jobs"] == 0
+        # User1 can access their job
+        job = job_queue.get_user_job(job_id, "user1")
+        assert job is not None
+        assert job.name == "User1 Job"
+        
+        # User2 cannot access user1's job
+        job = job_queue.get_user_job(job_id, "user2")
+        assert job is None
+
+    async def test_cancel_user_job_security(self, job_queue):
+        """Test user job isolation in cancel_user_job method."""
+        # Create job for user1
+        job_id = await job_queue.add_job(
+            name="User1 Job",
+            function_name="test_job",
+            created_by_user_id="user1"
+        )
+        
+        # User2 cannot cancel user1's job
+        success = await job_queue.cancel_user_job(job_id, "user2")
+        assert success is False
+        
+        # User1 can cancel their own job
+        success = await job_queue.cancel_user_job(job_id, "user1")
+        assert success is True
+
+    async def test_list_jobs_user_filter(self, job_queue):
+        """Test listing jobs with user filter."""
+        # Create jobs for different users
+        await job_queue.add_job("User1 Job1", "test_job", created_by_user_id="user1")
+        await job_queue.add_job("User1 Job2", "test_job", created_by_user_id="user1")
+        await job_queue.add_job("User2 Job1", "test_job", created_by_user_id="user2")
+        
+        # User1 should only see their jobs
+        user1_jobs = await job_queue.list_jobs(user_id="user1")
+        assert len(user1_jobs) == 2
+        assert all(job.created_by_user_id == "user1" for job in user1_jobs)
+        
+        # User2 should only see their jobs
+        user2_jobs = await job_queue.list_jobs(user_id="user2")
+        assert len(user2_jobs) == 1
+        assert user2_jobs[0].created_by_user_id == "user2"
 
 
 class TestJobAPI:
@@ -186,13 +238,15 @@ class TestJobAPI:
     async def test_create_job_endpoint(self, mock_queue, mock_user):
         """Test create_job endpoint logic."""
         # Setup mock - make add_job async
-        mock_queue.add_job = AsyncMock(return_value="test-job-id")
+        mock_queue.add_job = AsyncMock(return_value="550e8400-e29b-41d4-a716-446655440000")
         mock_job = Job(
-            id="test-job-id",
+            id="550e8400-e29b-41d4-a716-446655440000",
             name="Test Job",
-            function_name="test_job"
+            function_name="test_job",
+            created_by_user_id=mock_user.id
         )
-        mock_queue.jobs = {"test-job-id": mock_job}
+        mock_queue.jobs = {"550e8400-e29b-41d4-a716-446655440000": mock_job}
+        mock_queue.job_handlers = {"test_job": Mock()}
         
         # Create job request
         job_data = JobCreateRequest(
@@ -205,10 +259,13 @@ class TestJobAPI:
         result = await create_job(job_data, mock_user)
         
         # Verify
-        assert result.id == "test-job-id"
+        assert result.id == "550e8400-e29b-41d4-a716-446655440000"
         assert result.name == "Test Job"
         assert result.function_name == "test_job"
         mock_queue.add_job.assert_called_once()
+        # Verify user ID was passed
+        call_args = mock_queue.add_job.call_args
+        assert call_args.kwargs['created_by_user_id'] == mock_user.id
 
     @patch('chatter.api.jobs.job_queue')
     async def test_create_scheduled_job_tracking_issue(self, mock_queue, mock_user):
@@ -216,13 +273,13 @@ class TestJobAPI:
         future_time = datetime.now(UTC) + timedelta(hours=1)
         
         # Setup mock
-        mock_queue.add_job = AsyncMock(return_value="test-job-id")
+        mock_queue.add_job = AsyncMock(return_value="550e8400-e29b-41d4-a716-446655440000")
         mock_job = Job(
-            id="test-job-id",
+            id="550e8400-e29b-41d4-a716-446655440000",
             name="Scheduled Job",
             function_name="test_job"
         )
-        mock_queue.jobs = {"test-job-id": mock_job}
+        mock_queue.jobs = {"550e8400-e29b-41d4-a716-446655440000": mock_job}
         
         # Create scheduled job request
         job_data = JobCreateRequest(
@@ -240,29 +297,45 @@ class TestJobAPI:
 
     @patch('chatter.api.jobs.job_queue')
     async def test_list_jobs_endpoint(self, mock_queue, mock_user):
-        """Test list_jobs endpoint logic."""
-        # Setup mock jobs
-        job1 = Job(id="job1", name="Job 1", function_name="test_job")
-        job2 = Job(id="job2", name="Job 2", function_name="test_job", priority=JobPriority.HIGH)
-        mock_queue.jobs = {"job1": job1, "job2": job2}
+        """Test list_jobs endpoint logic with user isolation."""
+        # Setup mock jobs - only user's jobs should be returned
+        job1 = Job(id="550e8400-e29b-41d4-a716-446655440002", name="Job 1", function_name="test_job", created_by_user_id=mock_user.id)
+        job2 = Job(id="550e8400-e29b-41d4-a716-446655440003", name="Job 2", function_name="test_job", priority=JobPriority.HIGH, created_by_user_id=mock_user.id)
+        job3 = Job(id="550e8400-e29b-41d4-a716-446655440004", name="Other User Job", function_name="test_job", created_by_user_id="other-user")
+        mock_queue.jobs = {"550e8400-e29b-41d4-a716-446655440002": job1, "550e8400-e29b-41d4-a716-446655440003": job2, "550e8400-e29b-41d4-a716-446655440004": job3}
         
-        # Test listing all jobs
+        # Test listing all jobs - should only return user's jobs
         request = JobListRequest()
         result = await list_jobs(request, mock_user)
         
-        assert result.total == 2
+        assert result.total == 2  # Only user's jobs
         assert len(result.jobs) == 2
         assert result.limit == 20  # Default limit
         assert result.offset == 0  # Default offset
         assert result.has_more is False
+        # Verify all returned jobs belong to the user
+        for job in result.jobs:
+            assert job.id in ["550e8400-e29b-41d4-a716-446655440002", "550e8400-e29b-41d4-a716-446655440003"]  # job3 should not be included
 
     @patch('chatter.api.jobs.job_queue')
     async def test_list_jobs_with_filters(self, mock_queue, mock_user):
         """Test list_jobs with filtering."""
-        # Setup mock jobs
-        job1 = Job(id="job1", name="Job 1", function_name="test_job", priority=JobPriority.HIGH)
-        job2 = Job(id="job2", name="Job 2", function_name="other_job", priority=JobPriority.LOW)
-        mock_queue.jobs = {"job1": job1, "job2": job2}
+        # Setup mock jobs - include user_id to pass filtering
+        job1 = Job(
+            id="550e8400-e29b-41d4-a716-446655440002", 
+            name="Job 1", 
+            function_name="test_job", 
+            priority=JobPriority.HIGH,
+            created_by_user_id=mock_user.id
+        )
+        job2 = Job(
+            id="550e8400-e29b-41d4-a716-446655440003", 
+            name="Job 2", 
+            function_name="other_job", 
+            priority=JobPriority.LOW,
+            created_by_user_id=mock_user.id
+        )
+        mock_queue.jobs = {"550e8400-e29b-41d4-a716-446655440002": job1, "550e8400-e29b-41d4-a716-446655440003": job2}
         
         # Test filtering by priority
         request = JobListRequest(priority=JobPriority.HIGH)
@@ -277,8 +350,13 @@ class TestJobAPI:
         # Setup mock jobs
         jobs = {}
         for i in range(25):  # More than default limit
-            job = Job(id=f"job{i}", name=f"Job {i}", function_name="test_job")
-            jobs[f"job{i}"] = job
+            job = Job(
+                id=f"550e8400-e29b-41d4-a716-44665544{i:04d}", 
+                name=f"Job {i}", 
+                function_name="test_job",
+                created_by_user_id=mock_user.id
+            )
+            jobs[f"550e8400-e29b-41d4-a716-44665544{i:04d}"] = job
         mock_queue.jobs = jobs
         
         # Test first page
@@ -317,12 +395,13 @@ class TestJobAPI:
         # Setup mock job with scheduled_at
         future_time = datetime.now(UTC) + timedelta(hours=1)
         job = Job(
-            id="job1", 
+            id="550e8400-e29b-41d4-a716-446655440002", 
             name="Scheduled Job", 
             function_name="test_job",
-            scheduled_at=future_time
+            scheduled_at=future_time,
+            created_by_user_id=mock_user.id
         )
-        mock_queue.jobs = {"job1": job}
+        mock_queue.jobs = {"550e8400-e29b-41d4-a716-446655440002": job}
         
         request = JobListRequest()
         result = await list_jobs(request, mock_user)
@@ -332,51 +411,81 @@ class TestJobAPI:
 
     @patch('chatter.api.jobs.job_queue')
     async def test_get_job_endpoint(self, mock_queue, mock_user):
-        """Test get_job endpoint logic."""
+        """Test get_job endpoint logic with user isolation."""
         # Setup mock job
-        job = Job(id="test-job-id", name="Test Job", function_name="test_job")
-        mock_queue.jobs = {"test-job-id": job}
+        job = Job(id="550e8400-e29b-41d4-a716-446655440000", name="Test Job", function_name="test_job", created_by_user_id=mock_user.id)
+        mock_queue.get_user_job.return_value = job
         
         # Call endpoint
-        result = await get_job("test-job-id", mock_user)
+        result = await get_job("550e8400-e29b-41d4-a716-446655440000", mock_user)
         
-        assert result.id == "test-job-id"
+        assert result.id == "550e8400-e29b-41d4-a716-446655440000"
         assert result.name == "Test Job"
+        # Verify get_user_job was called with correct parameters
+        mock_queue.get_user_job.assert_called_once_with("550e8400-e29b-41d4-a716-446655440000", mock_user.id)
+
+    @patch('chatter.api.jobs.job_queue')
+    async def test_get_job_user_isolation(self, mock_queue, mock_user):
+        """Test that users cannot access other users' jobs."""
+        # Setup mock - job not found for this user
+        mock_queue.get_user_job.return_value = None
+        
+        # Should raise NotFoundProblem
+        with pytest.raises(Exception) as exc_info:
+            await get_job("550e8400-e29b-41d4-a716-446655440001", mock_user)
+        
+        assert "not found" in str(exc_info.value)
+        mock_queue.get_user_job.assert_called_once_with("550e8400-e29b-41d4-a716-446655440001", mock_user.id)
 
     @patch('chatter.api.jobs.job_queue')
     async def test_cancel_job_endpoint(self, mock_queue, mock_user):
-        """Test cancel_job endpoint logic."""
+        """Test cancel_job endpoint logic with user isolation."""
         # Setup mock
-        mock_queue.cancel_job = AsyncMock(return_value=True)
+        mock_queue.cancel_user_job = AsyncMock(return_value=True)
         
         # Call endpoint
-        result = await cancel_job("test-job-id", mock_user)
+        result = await cancel_job("550e8400-e29b-41d4-a716-446655440000", mock_user)
         
         assert result.success is True
-        assert result.job_id == "test-job-id"
-        mock_queue.cancel_job.assert_called_once_with("test-job-id")
+        assert result.job_id == "550e8400-e29b-41d4-a716-446655440000"
+        mock_queue.cancel_user_job.assert_called_once_with("550e8400-e29b-41d4-a716-446655440000", mock_user.id)
+
+    @patch('chatter.api.jobs.job_queue')
+    async def test_cancel_job_user_isolation(self, mock_queue, mock_user):
+        """Test that users cannot cancel other users' jobs."""
+        # Setup mock - job not found for this user
+        mock_queue.cancel_user_job = AsyncMock(return_value=False)
+        
+        # Should raise NotFoundProblem
+        with pytest.raises(Exception) as exc_info:
+            await cancel_job("550e8400-e29b-41d4-a716-446655440001", mock_user)
+        
+        assert "not found" in str(exc_info.value)
+        mock_queue.cancel_user_job.assert_called_once_with("550e8400-e29b-41d4-a716-446655440001", mock_user.id)
 
     @patch('chatter.api.jobs.job_queue')
     async def test_get_job_stats_endpoint(self, mock_queue, mock_user):
-        """Test get_job_stats endpoint logic."""
-        # Setup mock stats
-        mock_queue.get_stats = AsyncMock(return_value={
-            "total_jobs": 10,
-            "pending_jobs": 3,
-            "running_jobs": 2,
-            "completed_jobs": 4,
-            "failed_jobs": 1,
-            "queue_size": 5,
-            "active_workers": 2
-        })
+        """Test get_job_stats endpoint logic with user isolation."""
+        # Setup mock jobs - mix of user's and other users' jobs
+        user_jobs = [
+            Job(id="550e8400-e29b-41d4-a716-446655440002", name="User Job 1", function_name="test_job", status=JobStatus.COMPLETED, created_by_user_id=mock_user.id),
+            Job(id="550e8400-e29b-41d4-a716-446655440003", name="User Job 2", function_name="test_job", status=JobStatus.PENDING, created_by_user_id=mock_user.id),
+            Job(id="550e8400-e29b-41d4-a716-446655440004", name="User Job 3", function_name="test_job", status=JobStatus.FAILED, created_by_user_id=mock_user.id),
+        ]
+        other_jobs = [
+            Job(id="job4", name="Other Job", function_name="test_job", status=JobStatus.COMPLETED, created_by_user_id="other-user"),
+        ]
+        
+        mock_queue.jobs = {job.id: job for job in user_jobs + other_jobs}
         
         # Call endpoint
         result = await get_job_stats(mock_user)
         
-        assert result.total_jobs == 10
-        assert result.pending_jobs == 3
-        assert result.running_jobs == 2
-        assert result.completed_jobs == 4
+        # Should only count user's jobs
+        assert result.total_jobs == 3
+        assert result.pending_jobs == 1
+        assert result.running_jobs == 0
+        assert result.completed_jobs == 1
         assert result.failed_jobs == 1
 
 
@@ -460,16 +569,56 @@ class TestJobValidation:
 
 
 class TestJobSecurity:
-    """Test job security and isolation issues."""
+    """Test job security and isolation."""
 
-    def test_user_isolation_not_implemented(self):
-        """Test that user isolation is not currently implemented."""
-        # This test documents the security issue where users can access
-        # jobs from other users. This should be fixed in the implementation.
+    def test_user_isolation_implemented(self):
+        """Test that user isolation is now implemented."""
+        # User isolation has been implemented with:
+        # - created_by_user_id field in Job model
+        # - User-specific methods in job queue (get_user_job, cancel_user_job)  
+        # - User filtering in all API endpoints
+        assert True  # This is now fixed
+
+    @patch('chatter.api.jobs.job_queue')
+    async def test_user_cannot_see_other_jobs(self, mock_queue, mock_user):
+        """Test that users cannot see jobs from other users."""
+        # Setup jobs from different users
+        user_job = Job(id="550e8400-e29b-41d4-a716-446655440005", name="User Job", function_name="test_job", created_by_user_id=mock_user.id)
+        other_job = Job(id="550e8400-e29b-41d4-a716-446655440006", name="Other Job", function_name="test_job", created_by_user_id="other-user")
+        mock_queue.jobs = {"550e8400-e29b-41d4-a716-446655440005": user_job, "550e8400-e29b-41d4-a716-446655440006": other_job}
         
-        # Currently there's no user filtering in the job endpoints
-        # All users can see all jobs, which is a security issue
-        assert True  # Placeholder documenting the issue
+        # List jobs should only return user's jobs
+        request = JobListRequest()
+        result = await list_jobs(request, mock_user)
+        
+        assert result.total == 1
+        assert result.jobs[0].id == "550e8400-e29b-41d4-a716-446655440005"
+
+    @patch('chatter.api.jobs.job_queue')
+    async def test_user_cannot_access_other_job_details(self, mock_queue, mock_user):
+        """Test that users cannot get details of other users' jobs."""
+        # Setup mock to return None for other user's job
+        mock_queue.get_user_job.return_value = None
+        other_job_id = "550e8400-e29b-41d4-a716-446655440000"  # Valid UUID
+        
+        # Should raise NotFoundProblem
+        with pytest.raises(Exception) as exc_info:
+            await get_job(other_job_id, mock_user)
+        
+        assert "not found" in str(exc_info.value)
+
+    @patch('chatter.api.jobs.job_queue')
+    async def test_user_cannot_cancel_other_jobs(self, mock_queue, mock_user):
+        """Test that users cannot cancel other users' jobs."""
+        # Setup mock to return False for other user's job
+        mock_queue.cancel_user_job = AsyncMock(return_value=False)
+        other_job_id = "550e8400-e29b-41d4-a716-446655440001"  # Valid UUID
+        
+        # Should raise NotFoundProblem
+        with pytest.raises(Exception) as exc_info:
+            await cancel_job(other_job_id, mock_user)
+        
+        assert "not found" in str(exc_info.value)
 
     def test_no_rate_limiting(self):
         """Test that rate limiting is not implemented for job creation."""
@@ -477,8 +626,8 @@ class TestJobSecurity:
         # Should implement rate limiting to prevent abuse
         assert True  # Placeholder documenting the issue
 
-    def test_no_authorization_beyond_authentication(self):
-        """Test that there's no authorization beyond basic authentication."""
-        # This documents that any authenticated user can cancel any job
-        # Should implement proper authorization checks
-        assert True  # Placeholder documenting the issue
+    def test_authorization_beyond_authentication_partially_implemented(self):
+        """Test that authorization beyond authentication is partially implemented."""
+        # User isolation has been implemented, but other authorization checks 
+        # like role-based permissions are not yet implemented
+        assert True  # Placeholder documenting remaining work

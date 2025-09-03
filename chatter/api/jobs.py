@@ -12,6 +12,8 @@ from chatter.schemas.jobs import (
     JobListResponse,
     JobResponse,
     JobStatsResponse,
+    JobStatus,  # Add JobStatus import
+    JobPriority,  # Add JobPriority import  
 )
 from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger
@@ -80,6 +82,7 @@ async def create_job(
                 priority=job_data.priority,
                 max_retries=job_data.max_retries,
                 schedule_at=job_data.schedule_at,
+                created_by_user_id=current_user.id,  # Add user ID for security
             )
         else:
             job_id = await job_queue.add_job(
@@ -89,6 +92,7 @@ async def create_job(
                 kwargs=job_data.kwargs,
                 priority=job_data.priority,
                 max_retries=job_data.max_retries,
+                created_by_user_id=current_user.id,  # Add user ID for security
             )
 
         created_job = job_queue.jobs.get(job_id)
@@ -144,7 +148,10 @@ async def list_jobs(
     try:
         jobs = list(job_queue.jobs.values())
 
-        # Apply filters
+        # Apply user filter first (security) - users can only see their own jobs
+        jobs = [j for j in jobs if j.created_by_user_id == current_user.id]
+
+        # Apply other filters
         if request.status is not None:
             jobs = [j for j in jobs if j.status == request.status]
 
@@ -242,7 +249,8 @@ async def get_job(
         # Validate job ID format
         validate_job_id(job_id)
         
-        job = job_queue.jobs.get(job_id)
+        # Get job with user security check
+        job = job_queue.get_user_job(job_id, current_user.id)
         if not job:
             raise NotFoundProblem(detail=f"Job {job_id} not found")
 
@@ -289,16 +297,11 @@ async def cancel_job(
         # Validate job ID format
         validate_job_id(job_id)
         
-        # Check if job exists
-        if job_id not in job_queue.jobs:
-            raise NotFoundProblem(detail=f"Job {job_id} not found")
-        
-        success = await job_queue.cancel_job(job_id)
+        # Use user-specific cancel method for security
+        success = await job_queue.cancel_user_job(job_id, current_user.id)
 
         if not success:
-            raise BadRequestProblem(
-                detail="Failed to cancel job - check job status"
-            )
+            raise NotFoundProblem(detail=f"Job {job_id} not found")
 
         return JobActionResponse(
             success=True,
@@ -330,16 +333,28 @@ async def get_job_stats(
         Job statistics
     """
     try:
-        stats = await job_queue.get_stats()
+        # Get stats filtered by user
+        all_jobs = list(job_queue.jobs.values())
+        user_jobs = [job for job in all_jobs if job.created_by_user_id == current_user.id]
+        
+        stats = {
+            "total_jobs": len(user_jobs),
+            "pending_jobs": len([j for j in user_jobs if j.status == JobStatus.PENDING]),
+            "running_jobs": len([j for j in user_jobs if j.status == JobStatus.RUNNING]),
+            "completed_jobs": len([j for j in user_jobs if j.status == JobStatus.COMPLETED]),
+            "failed_jobs": len([j for j in user_jobs if j.status == JobStatus.FAILED]),
+            "queue_size": len([j for j in user_jobs if j.status in [JobStatus.PENDING, JobStatus.RETRYING]]),
+            "active_workers": len([j for j in user_jobs if j.status == JobStatus.RUNNING]),
+        }
 
         return JobStatsResponse(
-            total_jobs=stats.get("total_jobs", 0),
-            pending_jobs=stats.get("pending_jobs", 0),
-            running_jobs=stats.get("running_jobs", 0),
-            completed_jobs=stats.get("completed_jobs", 0),
-            failed_jobs=stats.get("failed_jobs", 0),
-            queue_size=stats.get("queue_size", 0),
-            active_workers=stats.get("active_workers", 0),
+            total_jobs=stats["total_jobs"],
+            pending_jobs=stats["pending_jobs"],
+            running_jobs=stats["running_jobs"],
+            completed_jobs=stats["completed_jobs"],
+            failed_jobs=stats["failed_jobs"],
+            queue_size=stats["queue_size"],
+            active_workers=stats["active_workers"],
         )
 
     except Exception as e:

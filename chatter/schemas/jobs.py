@@ -58,6 +58,9 @@ class Job(BaseModel):
     result: Any = None  # Job execution result
     progress: int = 0  # Progress percentage (0-100)
     progress_message: str | None = None  # Progress description
+    
+    # User ownership for security
+    created_by_user_id: str | None = None  # ID of user who created the job
 
 
 class JobResult(BaseModel):

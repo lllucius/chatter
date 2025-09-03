@@ -51,20 +51,33 @@ async def db_engine():
     """
     Create a session-scoped database engine for testing.
     
-    The hanging issue has been resolved by using lazy imports in the fixtures.
-    Using SQLite for simplicity in tests, but the approach works for PostgreSQL too.
+    Uses PostgreSQL for testing to ensure real database constraints
+    and PostgreSQL-specific features like pgvector work correctly.
     """
-    # Use SQLite in-memory database for testing
-    db_url = "sqlite+aiosqlite:///:memory:"
+    # Lazy import to avoid hanging during test collection
+    from chatter.config import settings
+    
+    # Use PostgreSQL test database
+    db_url = settings.database_url_for_env
     
     # Create async engine with test-appropriate settings
     engine = create_async_engine(
         db_url,
         echo=False,  # Set to True for SQL query debugging
+        pool_size=5,
+        max_overflow=10,
+        pool_pre_ping=True,
     )
     
-    # Create all tables, but skip PostgreSQL-specific constraints for SQLite
+    # Create all tables and ensure pgvector extension is available
     async with engine.begin() as conn:
+        # Ensure pgvector extension is installed (fail silently if not available)
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+        except Exception:
+            pass  # pgvector may not be available in test environment
+        
         await conn.run_sync(Base.metadata.create_all)
     
     try:
@@ -80,6 +93,7 @@ async def db_setup(db_engine):
     
     This fixture applies SQLAlchemy models to create the database schema.
     It runs once per test session to set up all tables and relationships.
+    Uses PostgreSQL for real database constraints and functionality.
     
     Args:
         db_engine: The database engine from db_engine fixture
@@ -87,7 +101,7 @@ async def db_setup(db_engine):
     Returns:
         AsyncGenerator yielding after schema setup is complete
     """
-    # Schema is already created in db_engine fixture for SQLite
+    # Schema is already created in db_engine fixture for PostgreSQL
     yield
 
 
@@ -198,6 +212,7 @@ def test_login_data() -> dict:
 @pytest.fixture(autouse=True)
 def setup_test_environment():
     """Setup test environment variables."""
-    os.environ.setdefault("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+    # Set required DATABASE_URL for non-testing environment config loading
+    os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
     os.environ.setdefault("SECRET_KEY", "test_secret_key_for_testing")
     os.environ.setdefault("ENVIRONMENT", "testing")

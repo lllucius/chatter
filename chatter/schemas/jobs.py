@@ -154,6 +154,24 @@ class JobListRequest(BaseModel):
         None, description="Filter by function name"
     )
     
+    # Date filtering
+    created_after: datetime | None = Field(
+        None, description="Filter jobs created after this date"
+    )
+    created_before: datetime | None = Field(
+        None, description="Filter jobs created before this date"
+    )
+    
+    # Tag filtering
+    tags: list[str] | None = Field(
+        None, description="Filter by job tags (any of the provided tags)"
+    )
+    
+    # Search
+    search: str | None = Field(
+        None, description="Search in job names and metadata"
+    )
+    
     # Pagination
     limit: int = Field(
         20, ge=1, le=100, description="Maximum number of results"

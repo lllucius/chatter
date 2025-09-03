@@ -1,6 +1,7 @@
 """Job management endpoints."""
 
 import uuid
+from typing import Any
 from fastapi import APIRouter, Depends, status, HTTPException
 
 from chatter.api.auth import get_current_user
@@ -163,6 +164,30 @@ async def list_jobs(
                 j
                 for j in jobs
                 if j.function_name == request.function_name
+            ]
+
+        # Apply date filters
+        if request.created_after is not None:
+            jobs = [j for j in jobs if j.created_at >= request.created_after]
+
+        if request.created_before is not None:
+            jobs = [j for j in jobs if j.created_at <= request.created_before]
+
+        # Apply tag filter (any of the provided tags)
+        if request.tags:
+            jobs = [
+                j for j in jobs 
+                if any(tag in j.tags for tag in request.tags)
+            ]
+
+        # Apply search filter (search in name and metadata)
+        if request.search:
+            search_lower = request.search.lower()
+            jobs = [
+                j for j in jobs
+                if (search_lower in j.name.lower() or
+                    any(search_lower in str(v).lower() 
+                        for v in j.metadata.values()))
             ]
 
         # Total count before pagination
@@ -361,4 +386,39 @@ async def get_job_stats(
         logger.error("Failed to get job stats", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get job stats"
+        ) from e
+
+
+@router.post("/cleanup", response_model=dict)
+async def cleanup_jobs(
+    force: bool = False,
+    current_user: User = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Clean up old completed jobs to free up memory.
+    
+    Note: This is a system-wide cleanup operation that affects all users.
+    Only completed, failed, or cancelled jobs older than 24 hours are removed.
+    
+    Args:
+        force: If True, remove all completed/failed jobs regardless of age
+        current_user: Current authenticated user
+        
+    Returns:
+        Cleanup statistics
+    """
+    try:
+        # For now, any authenticated user can trigger cleanup
+        # In production, you might want to restrict this to admin users
+        cleanup_stats = await job_queue.cleanup_jobs(force=force)
+        
+        return {
+            "success": True,
+            "message": f"Cleanup completed. Removed {cleanup_stats['removed']} jobs.",
+            "statistics": cleanup_stats
+        }
+        
+    except Exception as e:
+        logger.error("Failed to cleanup jobs", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to cleanup jobs"
         ) from e

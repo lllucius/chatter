@@ -230,6 +230,63 @@ class TestJobQueue:
         assert len(user2_jobs) == 1
         assert user2_jobs[0].created_by_user_id == "user2"
 
+    async def test_job_queue_capacity_limit(self, job_queue):
+        """Test job queue capacity limits."""
+        # Set a low capacity for testing
+        job_queue.max_jobs = 3
+        
+        # Add jobs up to capacity
+        await job_queue.add_job("Job 1", "test_job")
+        await job_queue.add_job("Job 2", "test_job") 
+        await job_queue.add_job("Job 3", "test_job")
+        
+        # Adding another job should trigger cleanup or raise error
+        with pytest.raises(ValueError, match="Job queue is full"):
+            await job_queue.add_job("Job 4", "test_job")
+
+    async def test_cleanup_old_jobs(self, job_queue):
+        """Test cleanup of old jobs."""
+        from datetime import timedelta
+        
+        # Create some old completed jobs
+        job1 = await job_queue.add_job("Old Job 1", "test_job")
+        job2 = await job_queue.add_job("Recent Job", "test_job")
+        
+        # Manually set completion times
+        old_time = datetime.now(UTC) - timedelta(hours=25)  # Older than 24h
+        recent_time = datetime.now(UTC) - timedelta(hours=1)  # Recent
+        
+        job_queue.jobs[job1].status = JobStatus.COMPLETED
+        job_queue.jobs[job1].completed_at = old_time
+        job_queue.jobs[job2].status = JobStatus.COMPLETED
+        job_queue.jobs[job2].completed_at = recent_time
+        
+        # Cleanup should remove only the old job
+        removed = await job_queue._cleanup_old_jobs()
+        assert removed == 1
+        assert job1 not in job_queue.jobs
+        assert job2 in job_queue.jobs
+
+    async def test_force_cleanup_jobs(self, job_queue):
+        """Test force cleanup of all completed jobs."""
+        # Create some completed jobs
+        job1 = await job_queue.add_job("Completed Job 1", "test_job")
+        job2 = await job_queue.add_job("Completed Job 2", "test_job")
+        job3 = await job_queue.add_job("Running Job", "test_job")
+        
+        # Set statuses
+        job_queue.jobs[job1].status = JobStatus.COMPLETED
+        job_queue.jobs[job2].status = JobStatus.FAILED
+        job_queue.jobs[job3].status = JobStatus.RUNNING
+        
+        # Force cleanup should remove completed/failed jobs
+        stats = await job_queue.cleanup_jobs(force=True)
+        assert stats["removed"] == 2
+        assert stats["type"] == "force"
+        assert job1 not in job_queue.jobs
+        assert job2 not in job_queue.jobs
+        assert job3 in job_queue.jobs  # Running job should remain
+
 
 class TestJobAPI:
     """Test job API endpoints using mocks."""
@@ -271,15 +328,18 @@ class TestJobAPI:
     async def test_create_scheduled_job_tracking_issue(self, mock_queue, mock_user):
         """Test that scheduled_at is properly returned (currently fails)."""
         future_time = datetime.now(UTC) + timedelta(hours=1)
+        job_id = "550e8400-e29b-41d4-a716-446655440001"
         
         # Setup mock
-        mock_queue.add_job = AsyncMock(return_value="550e8400-e29b-41d4-a716-446655440000")
+        mock_queue.add_job = AsyncMock(return_value=job_id)
         mock_job = Job(
-            id="550e8400-e29b-41d4-a716-446655440000",
+            id=job_id,
             name="Scheduled Job",
-            function_name="test_job"
+            function_name="test_job",
+            scheduled_at=future_time
         )
-        mock_queue.jobs = {"550e8400-e29b-41d4-a716-446655440000": mock_job}
+        mock_queue.jobs = {job_id: mock_job}
+        mock_queue.job_handlers = {"test_job": Mock()}  # Add this line
         
         # Create scheduled job request
         job_data = JobCreateRequest(
@@ -626,8 +686,71 @@ class TestJobSecurity:
         # Should implement rate limiting to prevent abuse
         assert True  # Placeholder documenting the issue
 
-    def test_authorization_beyond_authentication_partially_implemented(self):
-        """Test that authorization beyond authentication is partially implemented."""
-        # User isolation has been implemented, but other authorization checks 
-        # like role-based permissions are not yet implemented
-        assert True  # Placeholder documenting remaining work
+    @patch('chatter.api.jobs.job_queue')
+    async def test_list_jobs_enhanced_filtering(self, mock_queue, mock_user):
+        """Test enhanced filtering capabilities."""
+        from datetime import timedelta
+        
+        past_time = datetime.now(UTC) - timedelta(hours=2)
+        future_time = datetime.now(UTC) + timedelta(hours=1)
+        
+        # Setup mock jobs with various attributes
+        job1 = Job(
+            id="550e8400-e29b-41d4-a716-446655440010", 
+            name="Test Job",
+            function_name="test_job",
+            created_at=past_time,
+            tags=["urgent", "processing"],
+            metadata={"department": "engineering", "project": "alpha"},
+            created_by_user_id=mock_user.id
+        )
+        job2 = Job(
+            id="550e8400-e29b-41d4-a716-446655440011",
+            name="Analysis Job", 
+            function_name="analysis_job",
+            created_at=datetime.now(UTC),
+            tags=["analysis"],
+            metadata={"department": "research", "project": "beta"},
+            created_by_user_id=mock_user.id
+        )
+        mock_queue.jobs = {job1.id: job1, job2.id: job2}
+        
+        # Test date filtering
+        request = JobListRequest(created_after=past_time + timedelta(minutes=30))
+        result = await list_jobs(request, mock_user)
+        assert result.total == 1
+        assert result.jobs[0].name == "Analysis Job"
+        
+        # Test tag filtering
+        request = JobListRequest(tags=["urgent"])
+        result = await list_jobs(request, mock_user)
+        assert result.total == 1
+        assert result.jobs[0].name == "Test Job"
+        
+        # Test search filtering
+        request = JobListRequest(search="engineering")
+        result = await list_jobs(request, mock_user)
+        assert result.total == 1
+        assert result.jobs[0].name == "Test Job"
+        
+        # Test search in name
+        request = JobListRequest(search="analysis")
+        result = await list_jobs(request, mock_user)
+        assert result.total == 1
+        assert result.jobs[0].name == "Analysis Job"
+
+    @patch('chatter.api.jobs.job_queue')
+    async def test_cleanup_endpoint(self, mock_queue, mock_user):
+        """Test job cleanup endpoint."""
+        from chatter.api.jobs import cleanup_jobs
+        
+        # Setup mock
+        mock_queue.cleanup_jobs = AsyncMock(return_value={"removed": 5, "type": "normal"})
+        
+        # Call endpoint
+        result = await cleanup_jobs(force=False, current_user=mock_user)
+        
+        assert result["success"] is True
+        assert "Removed 5 jobs" in result["message"]
+        assert result["statistics"]["removed"] == 5
+        mock_queue.cleanup_jobs.assert_called_once_with(force=False)

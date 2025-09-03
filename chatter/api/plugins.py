@@ -362,9 +362,16 @@ async def enable_plugin(
         success = await plugin_manager.enable_plugin(plugin_id)
 
         if not success:
-            raise BadRequestProblem(
-                detail="Failed to enable plugin - check plugin status and dependencies"
-            )
+            # Get plugin instance to provide more detailed error information
+            plugin_instance = await plugin_manager.get_plugin(plugin_id)
+            if not plugin_instance:
+                raise NotFoundProblem(detail=f"Plugin {plugin_id} not found")
+            
+            error_detail = "Failed to enable plugin"
+            if plugin_instance.error_message:
+                error_detail += f": {plugin_instance.error_message}"
+            
+            raise BadRequestProblem(detail=error_detail)
 
         return PluginActionResponse(
             success=True,
@@ -372,7 +379,7 @@ async def enable_plugin(
             plugin_id=plugin_id,
         )
 
-    except BadRequestProblem:
+    except (BadRequestProblem, NotFoundProblem):
         raise
     except Exception as e:
         logger.error(
@@ -405,6 +412,11 @@ async def disable_plugin(
         success = await plugin_manager.disable_plugin(plugin_id)
 
         if not success:
+            # Get plugin instance to provide more detailed error information
+            plugin_instance = await plugin_manager.get_plugin(plugin_id)
+            if not plugin_instance:
+                raise NotFoundProblem(detail=f"Plugin {plugin_id} not found")
+            
             raise BadRequestProblem(detail="Failed to disable plugin")
 
         return PluginActionResponse(
@@ -413,7 +425,7 @@ async def disable_plugin(
             plugin_id=plugin_id,
         )
 
-    except BadRequestProblem:
+    except (BadRequestProblem, NotFoundProblem):
         raise
     except Exception as e:
         logger.error(
@@ -423,4 +435,70 @@ async def disable_plugin(
         )
         raise InternalServerProblem(
             detail="Failed to disable plugin"
+        ) from e
+
+
+@router.get("/health", response_model=dict)
+async def health_check_plugins(
+    auto_disable_unhealthy: bool = False,
+    current_user: User = Depends(get_current_user),
+    plugin_manager: PluginManager = Depends(get_plugin_manager),
+) -> dict:
+    """Perform health check on all plugins.
+
+    Args:
+        auto_disable_unhealthy: Whether to automatically disable unhealthy plugins
+        current_user: Current authenticated user
+        plugin_manager: Plugin manager instance
+
+    Returns:
+        Health check results
+    """
+    try:
+        results = await plugin_manager.health_check_plugins(auto_disable_unhealthy)
+        
+        # Summarize results
+        total_plugins = len(results)
+        healthy_plugins = sum(1 for r in results.values() if r.get("healthy", False))
+        unhealthy_plugins = total_plugins - healthy_plugins
+        
+        return {
+            "summary": {
+                "total_plugins": total_plugins,
+                "healthy_plugins": healthy_plugins,
+                "unhealthy_plugins": unhealthy_plugins,
+                "auto_disable_enabled": auto_disable_unhealthy
+            },
+            "results": results
+        }
+
+    except Exception as e:
+        logger.error("Failed to perform health check", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to perform health check"
+        ) from e
+
+
+@router.get("/stats", response_model=dict)
+async def get_plugin_stats(
+    current_user: User = Depends(get_current_user),
+    plugin_manager: PluginManager = Depends(get_plugin_manager),
+) -> dict:
+    """Get plugin system statistics.
+
+    Args:
+        current_user: Current authenticated user
+        plugin_manager: Plugin manager instance
+
+    Returns:
+        Plugin system statistics
+    """
+    try:
+        stats = await plugin_manager.get_plugin_stats()
+        return stats
+
+    except Exception as e:
+        logger.error("Failed to get plugin stats", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to get plugin stats"
         ) from e

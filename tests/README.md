@@ -99,7 +99,7 @@ open htmlcov/index.html
 ### Key Fixtures Available
 
 1. **Database Fixtures**
-   - `db_engine` - Session-scoped PostgreSQL engine
+   - `db_engine` - Function-scoped PostgreSQL engine
    - `db_session` - Test-scoped session with rollback
    - `db_setup` - Database schema setup
 

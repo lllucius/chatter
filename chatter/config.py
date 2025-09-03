@@ -92,8 +92,9 @@ class Settings(BaseSettings):
     # DATABASE SETTINGS
     # =============================================================================
 
-    database_url: str = Field(
-        description="Database URL (required, no default for security)",
+    database_url: str | None = Field(
+        default=None,
+        description="Database URL (required except in testing mode)",
     )
     test_database_url: str = Field(
         default="postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test",
@@ -386,11 +387,12 @@ class Settings(BaseSettings):
         # In v2, 'self' is the instance
         database_url = self.database_url
         is_production = self.is_production
+        is_testing = self.is_testing
         debug = self.debug
         secret_key = self.secret_key
 
-        # Validate database URL is provided
-        if not database_url:
+        # Validate database URL is provided (except in testing mode)
+        if not database_url and not is_testing:
             raise ValueError(
                 "DATABASE_URL must be provided - no default database credentials allowed for security"
             )
@@ -415,8 +417,11 @@ class Settings(BaseSettings):
 
     @field_validator('database_url')
     @classmethod
-    def validate_database_url(cls, v: str) -> str:
+    def validate_database_url(cls, v: str | None) -> str | None:
         """Validate database URL format."""
+        if v is None:
+            # Allow None for testing mode - will be validated in model_validator
+            return v
         if not v:
             raise ValueError("Database URL is required")
 
@@ -456,6 +461,8 @@ class Settings(BaseSettings):
         """Get database URL for current environment."""
         if self.is_testing:
             return self.test_database_url
+        if self.database_url is None:
+            raise ValueError("DATABASE_URL must be provided when not in testing mode")
         return self.database_url
 
     @property

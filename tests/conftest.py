@@ -53,6 +53,7 @@ async def db_engine():
     
     Uses PostgreSQL for testing to ensure real database constraints
     and PostgreSQL-specific features like pgvector work correctly.
+    Skips database-dependent tests if PostgreSQL is not available.
     """
     # Lazy import to avoid hanging during test collection
     from chatter.config import settings
@@ -68,6 +69,17 @@ async def db_engine():
         max_overflow=10,
         pool_pre_ping=True,
     )
+    
+    # Test if PostgreSQL is available
+    try:
+        async with engine.begin() as conn:
+            from sqlalchemy import text
+            await conn.execute(text("SELECT 1"))
+        print(f"✅ Using PostgreSQL for testing: {db_url}")
+    except Exception as e:
+        print(f"⚠️  PostgreSQL not available ({e})")
+        await engine.dispose()
+        pytest.skip("PostgreSQL database not available for testing")
     
     # Create all tables and ensure pgvector extension is available
     async with engine.begin() as conn:

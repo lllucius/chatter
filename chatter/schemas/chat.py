@@ -267,6 +267,8 @@ class StreamingChatChunk(BaseModel):
         None, description="Conversation ID"
     )
     message_id: str | None = Field(None, description="Message ID")
+    correlation_id: str | None = Field(None, description="Correlation ID")
+    metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
 
 
 class ConversationSearchRequest(ListRequestBase):

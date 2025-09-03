@@ -23,61 +23,10 @@ from chatter.schemas.analytics import (
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem
+from chatter.utils.unified_rate_limiter import rate_limit
 
 logger = get_logger(__name__)
 router = APIRouter()
-
-# Simple in-memory rate limiting (in production, use Redis)
-_rate_limit_data: dict[str, list[float]] = defaultdict(list)
-
-
-def rate_limit(max_requests: int = 10, window_seconds: int = 60):
-    """Rate limiting decorator for analytics endpoints.
-    
-    Args:
-        max_requests: Maximum requests allowed in the time window
-        window_seconds: Time window in seconds
-    """
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            # Extract user info from request
-            current_user = None
-            request = None
-            
-            for arg in args:
-                if isinstance(arg, User):
-                    current_user = arg
-                elif isinstance(arg, Request):
-                    request = arg
-            
-            # Try to get user from kwargs
-            if not current_user:
-                current_user = kwargs.get('current_user')
-            
-            if current_user:
-                user_key = f"analytics_rate_limit:{current_user.id}"
-                current_time = time.time()
-                
-                # Clean old entries
-                _rate_limit_data[user_key] = [
-                    timestamp for timestamp in _rate_limit_data[user_key]
-                    if current_time - timestamp < window_seconds
-                ]
-                
-                # Check if limit exceeded
-                if len(_rate_limit_data[user_key]) >= max_requests:
-                    from chatter.utils.problem import RateLimitProblem
-                    raise RateLimitProblem(
-                        detail=f"Rate limit exceeded: {max_requests} requests per {window_seconds} seconds"
-                    )
-                
-                # Record this request
-                _rate_limit_data[user_key].append(current_time)
-            
-            return await func(*args, **kwargs)
-        return wrapper
-    return decorator
 
 
 async def get_analytics_service(

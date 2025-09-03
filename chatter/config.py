@@ -262,14 +262,57 @@ class Settings(BaseSettings):
     )
 
     # =============================================================================
-    # RATE LIMITING
+    # UNIFIED RATE LIMITING SETTINGS
     # =============================================================================
 
+    # Global rate limiting defaults
     rate_limit_requests: int = Field(
-        default=100, description="Rate limit requests per window"
+        default=100, description="Default rate limit requests per window"
     )
     rate_limit_window: int = Field(
-        default=60, description="Rate limit window in seconds"
+        default=60, description="Default rate limit window in seconds"
+    )
+
+    # Cache integration for rate limiting
+    rate_limit_use_cache: bool = Field(
+        default=True, description="Use cache backend for distributed rate limiting"
+    )
+
+    # Endpoint-specific rate limits
+    rate_limit_auth_requests: int = Field(
+        default=10, description="Auth endpoint requests per window"
+    )
+    rate_limit_auth_window: int = Field(
+        default=300, description="Auth endpoint window in seconds (5 minutes)"
+    )
+
+    rate_limit_analytics_requests: int = Field(
+        default=20, description="Analytics endpoint requests per window"
+    )
+    rate_limit_analytics_window: int = Field(
+        default=60, description="Analytics endpoint window in seconds"
+    )
+
+    rate_limit_model_write_requests: int = Field(
+        default=30, description="Model registry write requests per window"
+    )
+    rate_limit_model_write_window: int = Field(
+        default=60, description="Model registry write window in seconds"
+    )
+
+    rate_limit_model_read_requests: int = Field(
+        default=200, description="Model registry read requests per window"
+    )
+    rate_limit_model_read_window: int = Field(
+        default=60, description="Model registry read window in seconds"
+    )
+
+    # Tool access rate limiting (preserves existing behavior)
+    rate_limit_tool_hourly: int = Field(
+        default=100, description="Tool access requests per hour"
+    )
+    rate_limit_tool_daily: int = Field(
+        default=1000, description="Tool access requests per day"
     )
 
     # =============================================================================

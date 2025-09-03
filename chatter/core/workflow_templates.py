@@ -444,7 +444,7 @@ class CustomWorkflowBuilder:
         else:
             try:
                 template = self.template_manager.get_template(name)
-            except:
+            except Exception:
                 return None
 
         if template:

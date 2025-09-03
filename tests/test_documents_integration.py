@@ -143,7 +143,8 @@ class TestDocumentsIntegration:
             stats_data = response.json()
             assert isinstance(stats_data, dict)
             # Stats should contain expected fields
-            expected_fields = ["total_documents", "total_size", "by_type", "by_status"]
+            # TODO: Validate specific fields when implementation is complete
+            # expected_fields = ["total_documents", "total_size", "by_type", "by_status"]
             # Not all fields may be present in initial implementation
 
     @pytest.mark.integration

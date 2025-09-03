@@ -283,9 +283,9 @@ class DynamicEmbeddingService:
     ) -> list:
         """Search for similar embeddings."""
         try:
-            embedding_model = get_embedding_model(model_name, dimension)
             # This would need proper vector similarity search implementation
             # For now, return empty list as placeholder
+            # TODO: Implement actual vector similarity search using embedding model
             return []
         except Exception as e:
             logger.error(f"Failed to search similar embeddings: {e}")

@@ -58,7 +58,8 @@ class TestDataManagementIntegration:
         if response.status_code == 202:
             response_data = response.json()
             assert "backup_id" in response_data
-            backup_id = response_data["backup_id"]
+            # TODO: Use backup_id for subsequent operations
+            # backup_id = response_data["backup_id"]
 
         # Test list backups
         response = await client.get("/api/v1/data-management/backups",
@@ -101,7 +102,8 @@ class TestDataManagementIntegration:
             stats_data = response.json()
             assert isinstance(stats_data, dict)
             # Expected fields in storage stats
-            expected_fields = ["total_size", "documents", "conversations", "backups"]
+            # TODO: Validate specific fields when implementation is complete
+            # expected_fields = ["total_size", "documents", "conversations", "backups"]
             # Not all fields may be present in initial implementation
 
     @pytest.mark.integration

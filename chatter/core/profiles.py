@@ -1,5 +1,6 @@
 """Profile management service."""
 
+import time
 from datetime import UTC, datetime
 from typing import Any
 
@@ -22,6 +23,11 @@ logger = get_logger(__name__)
 
 class ProfileService:
     """Service for profile management operations."""
+    
+    # Cache for expensive provider lookups (TTL: 10 minutes)
+    _provider_cache = {}
+    _provider_cache_timestamp = 0
+    _provider_cache_ttl = 600  # 10 minutes
 
     def __init__(self, session: AsyncSession):
         """Initialize profile service.
@@ -64,16 +70,47 @@ class ProfileService:
                     "Profile with this name already exists"
                 ) from None
 
-            # Validate LLM provider
-            available_providers = (
-                self.llm_service.list_available_providers()
-            )
-            if profile_data.llm_provider not in available_providers:
+            # Validate LLM provider against available providers
+            try:
+                available_providers_info = await self.get_available_providers()
+                available_providers = available_providers_info.get("providers", {})
+                
+                if profile_data.llm_provider not in available_providers:
+                    logger.warning(
+                        "LLM provider not available",
+                        provider=profile_data.llm_provider,
+                        available_providers=list(available_providers.keys()),
+                    )
+                    raise ProfileError(
+                        f"LLM provider '{profile_data.llm_provider}' is not available. "
+                        f"Available providers: {', '.join(available_providers.keys())}"
+                    ) from None
+                
+                # Validate model against provider's available models
+                provider_info = available_providers[profile_data.llm_provider]
+                available_models = provider_info.get("models", [])
+                if available_models and profile_data.llm_model not in available_models:
+                    logger.warning(
+                        "LLM model not available for provider",
+                        provider=profile_data.llm_provider,
+                        model=profile_data.llm_model,
+                        available_models=available_models,
+                    )
+                    raise ProfileError(
+                        f"Model '{profile_data.llm_model}' is not available for provider '{profile_data.llm_provider}'. "
+                        f"Available models: {', '.join(available_models)}"
+                    ) from None
+                    
+            except ProfileError:
+                raise
+            except Exception as e:
                 logger.warning(
-                    "LLM provider not available, profile will be created but may not work",
+                    "Could not validate provider/model availability",
+                    error=str(e),
                     provider=profile_data.llm_provider,
-                    available_providers=available_providers,
+                    model=profile_data.llm_model
                 )
+                # Continue with creation but log the issue
 
             # Create profile
             profile = Profile(
@@ -170,6 +207,7 @@ class ProfileService:
                 )
 
             if list_request.tags:
+                # Use JSON operators for efficient tag filtering
                 for tag in list_request.tags:
                     query = query.where(Profile.tags.contains([tag]))
 
@@ -178,14 +216,14 @@ class ProfileService:
                     Profile.is_public == list_request.is_public
                 )
 
-            # Get total count
+            # Get total count efficiently - use the same query without ordering/pagination
             count_query = select(func.count()).select_from(
                 query.subquery()
             )
             count_result = await self.session.execute(count_query)
             total_count = count_result.scalar()
 
-            # Add sorting
+            # Add sorting with proper column references
             sort_column = getattr(
                 Profile, list_request.sort_by, Profile.created_at
             )
@@ -202,6 +240,19 @@ class ProfileService:
             # Execute query
             result = await self.session.execute(query)
             profiles = result.scalars().all()
+
+            logger.debug(
+                "Listed profiles",
+                user_id=user_id,
+                total_count=total_count,
+                returned_count=len(profiles),
+                filters={
+                    "profile_type": list_request.profile_type,
+                    "llm_provider": list_request.llm_provider,
+                    "tags": list_request.tags,
+                    "is_public": list_request.is_public,
+                }
+            )
 
             return list(profiles), total_count
 
@@ -648,13 +699,33 @@ class ProfileService:
             logger.error("Failed to get profile stats", error=str(e))
             return {}
 
+    @classmethod
+    def clear_provider_cache(cls) -> None:
+        """Clear the provider cache to force fresh data on next request."""
+        cls._provider_cache = {}
+        cls._provider_cache_timestamp = 0
+        logger.info("Provider cache cleared")
+
     async def get_available_providers(self) -> dict[str, Any]:
         """Get available LLM providers and their information.
+        
+        Uses caching to avoid expensive provider lookups on every request.
 
         Returns:
             Dictionary with provider information
         """
         try:
+            current_time = time.time()
+            
+            # Check if cache is valid
+            if (
+                self._provider_cache 
+                and (current_time - self._provider_cache_timestamp) < self._provider_cache_ttl
+            ):
+                logger.debug("Returning cached provider information")
+                return self._provider_cache
+            
+            logger.debug("Fetching fresh provider information")
             providers = {}
 
             for (
@@ -665,10 +736,16 @@ class ProfileService:
                 )
                 providers[provider_name] = provider_info
 
-            return {
+            result = {
                 "providers": providers,
-                "default_provider": settings.default_llm_provider,
+                "default_provider": getattr(settings, 'default_llm_provider', 'openai'),
             }
+            
+            # Update cache
+            self._provider_cache = result
+            self._provider_cache_timestamp = current_time
+            
+            return result
 
         except Exception as e:
             logger.error(

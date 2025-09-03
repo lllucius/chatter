@@ -1,11 +1,13 @@
 """Step by step conftest debugging."""
 
-import asyncio
-import os
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from chatter.utils.database import Base
 
@@ -28,26 +30,26 @@ async def session_async_fixture():
     return "session_async_value"
 
 
-# Test 4: Database engine fixture  
+# Test 4: Database engine fixture
 @pytest.fixture(scope="session")
 async def test_db_engine():
     """Simple database engine fixture using PostgreSQL."""
     # Lazy import to avoid hanging during test collection
     from chatter.config import settings
-    
+
     # Use PostgreSQL test database
     db_url = settings.database_url_for_env
-    
+
     engine = create_async_engine(
-        db_url, 
+        db_url,
         echo=False,
         pool_size=5,
         max_overflow=10,
     )
-    
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     try:
         yield engine
     finally:
@@ -63,7 +65,7 @@ async def test_db_session(test_db_engine) -> AsyncGenerator[AsyncSession, None]:
         class_=AsyncSession,
         expire_on_commit=False,
     )
-    
+
     async with session_maker() as session:
         await session.begin()
         try:

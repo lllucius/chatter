@@ -1,12 +1,11 @@
 """Test to verify the hanging issue is resolved."""
 
-import pytest
 
 
 async def test_simple_fixture_works(db_session):
     """Test that basic database session fixture works without hanging."""
     from sqlalchemy import text
-    
+
     # Simple query that should work with PostgreSQL
     result = await db_session.execute(text("SELECT 1 as test_value"))
     row = result.fetchone()

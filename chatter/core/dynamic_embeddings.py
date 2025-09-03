@@ -366,7 +366,7 @@ class EmbeddingModelManager:
                         # Rollback the failed transaction
                         await self.session.rollback()
                         vector_available = False
-                
+
                 # Update the SQL to use TEXT if vector is not available
                 embedding_type = f"VECTOR({dimension})" if vector_available else "TEXT"
                 create_sql = f"""
@@ -379,7 +379,7 @@ class EmbeddingModelManager:
                     extra_metadata TEXT
                 );
                 """
-                
+
                 await self.session.execute(text(create_sql))
                 await self.session.execute(text(index_sql_1))
                 await self.session.execute(text(index_sql_2))

@@ -27,10 +27,16 @@ from chatter.utils.problem import (
     InternalServerProblem,
     NotFoundProblem,
     ProblemException,
+    RateLimitProblem,
+    ValidationProblem,
 )
+from chatter.utils.rate_limiter import RateLimiter, RateLimitExceeded
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+# Rate limiter for expensive operations
+rate_limiter = RateLimiter()
 
 
 async def get_profile_service(
@@ -61,13 +67,36 @@ async def create_profile(
         Created profile information
     """
     try:
+        # Rate limiting for profile creation to prevent spam
+        rate_limit_key = f"profile_create:{current_user.id}"
+        try:
+            await rate_limiter.check_rate_limit(
+                key=rate_limit_key,
+                limit_per_hour=10,  # Max 10 profile creations per hour
+                limit_per_day=50    # Max 50 profile creations per day
+            )
+        except RateLimitExceeded as e:
+            logger.warning(
+                "Rate limit exceeded for profile creation",
+                user_id=current_user.id
+            )
+            raise RateLimitProblem(
+                detail="Profile creation rate limit exceeded. You can create up to 10 profiles per hour and 50 per day.",
+                retry_after=3600  # Suggest retry after 1 hour
+            ) from e
+
         profile = await profile_service.create_profile(
             current_user.id, profile_data
         )
         return ProfileResponse.model_validate(profile)
 
     except ProfileError as e:
-        raise BadRequestProblem(detail=str(e)) from None
+        raise ValidationProblem(
+            detail=f"Profile creation failed: {str(e)}",
+            validation_errors=[{"field": "profile", "message": str(e)}]
+        ) from None
+    except ProblemException:
+        raise
     except Exception as e:
         logger.error("Profile creation failed", error=str(e))
         raise InternalServerProblem(
@@ -228,7 +257,10 @@ async def update_profile(
         return ProfileResponse.model_validate(profile)
 
     except ProfileError as e:
-        raise BadRequestProblem(detail=str(e)) from None
+        raise ValidationProblem(
+            detail=f"Profile update failed: {str(e)}",
+            validation_errors=[{"field": "profile", "message": str(e)}]
+        ) from None
     except ProblemException:
         raise
     except Exception as e:
@@ -308,6 +340,25 @@ async def test_profile(
         Test results
     """
     try:
+        # Rate limiting for expensive LLM operations
+        rate_limit_key = f"profile_test:{current_user.id}"
+        try:
+            await rate_limiter.check_rate_limit(
+                key=rate_limit_key,
+                limit_per_hour=20,  # Max 20 tests per hour per user
+                limit_per_day=100   # Max 100 tests per day per user
+            )
+        except RateLimitExceeded as e:
+            logger.warning(
+                "Rate limit exceeded for profile test",
+                user_id=current_user.id,
+                profile_id=profile_id
+            )
+            raise RateLimitProblem(
+                detail="Profile testing rate limit exceeded. You can test up to 20 profiles per hour and 100 per day.",
+                retry_after=1800  # Suggest retry after 30 minutes
+            ) from e
+
         result = await profile_service.test_profile(
             profile_id, current_user.id, test_request
         )
@@ -315,7 +366,12 @@ async def test_profile(
         return ProfileTestResponse(**result)
 
     except ProfileError as e:
-        raise BadRequestProblem(detail=str(e)) from None
+        raise ValidationProblem(
+            detail=f"Profile test failed: {str(e)}",
+            validation_errors=[{"field": "profile", "message": str(e)}]
+        ) from None
+    except ProblemException:
+        raise
     except Exception as e:
         logger.error(
             "Profile test failed", profile_id=profile_id, error=str(e)
@@ -355,7 +411,10 @@ async def clone_profile(
         return ProfileResponse.model_validate(cloned_profile)
 
     except ProfileError as e:
-        raise BadRequestProblem(detail=str(e)) from None
+        raise ValidationProblem(
+            detail=f"Profile cloning failed: {str(e)}",
+            validation_errors=[{"field": "profile", "message": str(e)}]
+        ) from None
     except Exception as e:
         logger.error(
             "Profile cloning failed",

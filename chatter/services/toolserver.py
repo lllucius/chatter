@@ -25,6 +25,7 @@ from chatter.schemas.toolserver import (
     ToolUsageCreate,
 )
 from chatter.services.mcp import MCPToolService
+from chatter.utils.crypto import get_secret_manager
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -77,6 +78,15 @@ class ToolServerService:
                 ) from None
 
             # Create server model for remote server
+            secret_manager = get_secret_manager()
+            
+            # Encrypt OAuth secrets if present
+            oauth_client_secret = None
+            if server_data.oauth_config and server_data.oauth_config.client_secret:
+                oauth_client_secret = secret_manager.encrypt(
+                    server_data.oauth_config.client_secret
+                )
+
             server = ToolServer(
                 name=server_data.name,
                 display_name=server_data.display_name,
@@ -88,11 +98,7 @@ class ToolServerService:
                     if server_data.oauth_config
                     else None
                 ),
-                oauth_client_secret=(
-                    server_data.oauth_config.client_secret
-                    if server_data.oauth_config
-                    else None
-                ),
+                oauth_client_secret=oauth_client_secret,
                 oauth_token_url=(
                     str(server_data.oauth_config.token_url)
                     if server_data.oauth_config
@@ -939,10 +945,23 @@ class ToolServerService:
                 and server.oauth_token_url
             ):
                 from chatter.services.mcp import OAuthConfig
+                
+                # Decrypt the client secret
+                secret_manager = get_secret_manager()
+                try:
+                    decrypted_secret = secret_manager.decrypt(server.oauth_client_secret)
+                except Exception as e:
+                    logger.warning(
+                        "Failed to decrypt OAuth client secret, using as plain text",
+                        server_id=server.id,
+                        error=str(e)
+                    )
+                    # Fallback to plain text for backward compatibility
+                    decrypted_secret = server.oauth_client_secret
 
                 oauth_config = OAuthConfig(
                     client_id=server.oauth_client_id,
-                    client_secret=server.oauth_client_secret,
+                    client_secret=decrypted_secret,
                     token_url=server.oauth_token_url,
                     scope=server.oauth_scope,
                 )
@@ -1285,18 +1304,23 @@ class ToolServerService:
                 }
 
             # Test connection based on server type
-            if server.server_type == "remote":
+            if not server.is_builtin:
+                # For remote servers, attempt connection
                 success = await self._connect_remote_server(server)
             else:
-                # For local servers, just check if they're running
-                success = server.status == "running"
+                # For local servers, check if they're enabled/running
+                success = server.status in [ServerStatus.ENABLED, ServerStatus.STARTING]
 
+            server_type = "remote" if not server.is_builtin else "builtin"
+            
             return {
                 "success": success,
                 "status": "connected" if success else "failed",
                 "server_id": server_id,
                 "server_name": server.name,
-                "server_type": server.server_type,
+                "server_type": server_type,
+                "is_builtin": server.is_builtin,
+                "current_status": server.status.value,
             }
 
         except Exception as e:

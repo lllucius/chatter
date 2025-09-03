@@ -1074,7 +1074,7 @@ async def refresh_server_tools(
             )
             db_server = result.scalar_one_or_none()
             if db_server:
-                await service.discover_server_tools(db_server)
+                await service._discover_server_tools(db_server)
                 await service.session.commit()
 
         return {

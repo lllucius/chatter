@@ -1,11 +1,14 @@
 """Test configuration and shared fixtures."""
 
-import asyncio
 import os
-from typing import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from chatter.utils.database import Base, get_session_generator
 
@@ -29,20 +32,20 @@ def app(db_session: AsyncSession):
         FastAPI application configured for testing
     """
     # Lazy import to avoid hanging during test collection
+
     from chatter.main import create_app
-    from fastapi import FastAPI
-    
+
     # Create the FastAPI application
     app = create_app()
-    
+
     # Override the database session dependency
     async def get_test_session():
         """Override database session for testing."""
         yield db_session
-    
+
     # Replace the production dependency with our test version
     app.dependency_overrides[get_session_generator] = get_test_session
-    
+
     return app
 
 
@@ -57,10 +60,10 @@ async def db_engine():
     """
     # Lazy import to avoid hanging during test collection
     from chatter.config import settings
-    
+
     # Use PostgreSQL test database
     db_url = settings.database_url_for_env
-    
+
     # Create async engine with test-appropriate settings
     engine = create_async_engine(
         db_url,
@@ -69,7 +72,7 @@ async def db_engine():
         max_overflow=10,
         pool_pre_ping=True,
     )
-    
+
     # Test if PostgreSQL is available
     try:
         async with engine.begin() as conn:
@@ -80,7 +83,7 @@ async def db_engine():
         print(f"⚠️  PostgreSQL not available ({e})")
         await engine.dispose()
         pytest.skip("PostgreSQL database not available for testing")
-    
+
     # Create all tables and ensure pgvector extension is available
     async with engine.begin() as conn:
         # Ensure pgvector extension is installed (fail silently if not available)
@@ -89,9 +92,9 @@ async def db_engine():
             await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
         except Exception:
             pass  # pgvector may not be available in test environment
-        
+
         await conn.run_sync(Base.metadata.create_all)
-    
+
     try:
         yield engine
     finally:
@@ -139,11 +142,11 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
         class_=AsyncSession,
         expire_on_commit=False,
     )
-    
+
     async with session_maker() as session:
         # Begin a transaction for the test
         await session.begin()
-        
+
         try:
             yield session
         finally:
@@ -164,7 +167,7 @@ async def client(app) -> AsyncGenerator:
     """
     # Lazy import to avoid hanging issues
     from httpx import ASGITransport, AsyncClient
-    
+
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://testserver",
@@ -187,17 +190,17 @@ async def auth_headers(client) -> dict[str, str]:
     # Register a test user
     user_data = {
         "username": "testuser",
-        "email": "test@example.com", 
+        "email": "test@example.com",
         "password": "TestPassword123!",
         "full_name": "Test User",
     }
-    
+
     response = await client.post("/api/v1/auth/register", json=user_data)
     assert response.status_code == 201
-    
+
     auth_response = response.json()
     access_token = auth_response["access_token"]
-    
+
     return {"Authorization": f"Bearer {access_token}"}
 
 

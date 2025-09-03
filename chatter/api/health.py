@@ -7,8 +7,10 @@ from chatter.config import settings
 from chatter.schemas.health import (
     CorrelationTraceResponse,
     HealthCheckResponse,
+    HealthStatus,
     MetricsResponse,
     ReadinessCheckResponse,
+    ReadinessStatus,
 )
 from chatter.utils.database import get_session_generator, health_check
 from chatter.utils.problem import InternalServerProblem
@@ -24,7 +26,7 @@ async def health_check_endpoint() -> HealthCheckResponse:
         Health status
     """
     return HealthCheckResponse(
-        status="healthy",
+        status=HealthStatus.HEALTHY,
         service="chatter",
         version=settings.app_version,
         environment=settings.environment,
@@ -37,18 +39,43 @@ async def readiness_check(
 ) -> ReadinessCheckResponse:
     """Readiness check endpoint with database connectivity.
 
+    This checks that the application is ready to serve traffic by validating
+    that all external dependencies (database, etc.) are available.
+
     Args:
         session: Database session
 
     Returns:
         Readiness status with detailed checks
     """
-    # Perform database health check
-    db_health = await health_check()
+    checks = {}
+    
+    # Perform database health check with timeout
+    try:
+        import asyncio
+        # Use the provided session and add timeout
+        db_health = await asyncio.wait_for(
+            health_check(session), 
+            timeout=5.0  # 5 second timeout
+        )
+    except asyncio.TimeoutError:
+        db_health = {
+            "status": "unhealthy",
+            "connected": False,
+            "error": "Database health check timeout (>5s)"
+        }
+    except Exception as e:
+        db_health = {
+            "status": "unhealthy", 
+            "connected": False,
+            "error": f"Database health check failed: {str(e)}"
+        }
+    
+    checks["database"] = db_health
 
-    checks = {
-        "database": db_health,
-    }
+    # Could add more checks here (Redis, external APIs, etc.)
+    # checks["redis"] = await redis_health_check()
+    # checks["external_api"] = await external_api_health_check()
 
     # Determine overall status
     all_healthy = all(
@@ -56,7 +83,7 @@ async def readiness_check(
     )
 
     return ReadinessCheckResponse(
-        status="ready" if all_healthy else "not_ready",
+        status=ReadinessStatus.READY if all_healthy else ReadinessStatus.NOT_READY,
         service="chatter",
         version=settings.app_version,
         environment=settings.environment,
@@ -66,13 +93,18 @@ async def readiness_check(
 
 @router.get("/live", response_model=HealthCheckResponse)
 async def liveness_check() -> HealthCheckResponse:
-    """Liveness check endpoint for Kubernetes (alias for /healthz).
+    """Liveness check endpoint for Kubernetes.
+
+    This is a simple liveness probe that checks if the application process
+    is running and responding. It should NOT check external dependencies.
 
     Returns:
-        Health status (same as /healthz)
+        Health status indicating the application is alive
     """
+    # Simple liveness check - just return that the process is running
+    # This should never fail unless the process is dead
     return HealthCheckResponse(
-        status="healthy",
+        status=HealthStatus.ALIVE,
         service="chatter",
         version=settings.app_version,
         environment=settings.environment,
@@ -87,6 +119,7 @@ async def get_metrics() -> MetricsResponse:
         Application metrics including performance and health data
     """
     try:
+        from datetime import datetime, timezone
         from chatter.utils.monitoring import metrics_collector
 
         overall_stats = metrics_collector.get_overall_stats(
@@ -95,8 +128,11 @@ async def get_metrics() -> MetricsResponse:
         health_metrics = metrics_collector.get_health_metrics()
         endpoint_stats = metrics_collector.get_endpoint_stats()
 
+        # Use real timestamp
+        current_timestamp = datetime.now(timezone.utc).isoformat()
+
         return MetricsResponse(
-            timestamp="2024-01-01T12:00:00Z",  # Would use actual timestamp
+            timestamp=current_timestamp,
             service="chatter",
             version=settings.app_version,
             environment=settings.environment,

@@ -278,11 +278,11 @@ class WorkflowValidator:
         # Validate workflow type
         try:
             wf_type = WorkflowType(workflow_type)
-        except ValueError:
+        except ValueError as e:
             raise WorkflowConfigurationError(
                 f"Invalid workflow type '{workflow_type}'. "
                 f"Must be one of: {', '.join([t.value for t in WorkflowType])}"
-            )
+            ) from e
 
         # Validate required parameters
         required_params = cls.REQUIRED_PARAMS[wf_type]
@@ -468,10 +468,10 @@ class WorkflowValidator:
         """
         try:
             wf_type = WorkflowType(workflow_type)
-        except ValueError:
+        except ValueError as e:
             raise WorkflowConfigurationError(
                 f"Invalid workflow type '{workflow_type}'"
-            )
+            ) from e
 
         validated_params = {}
         issues = []
@@ -641,10 +641,10 @@ class WorkflowValidator:
         try:
             wf_type = WorkflowType(workflow_type)
             return cls.REQUIRED_PARAMS[wf_type]
-        except ValueError:
+        except ValueError as e:
             raise WorkflowConfigurationError(
                 f"Invalid workflow type '{workflow_type}'"
-            )
+            ) from e
 
     @classmethod
     def get_optional_parameters(cls, workflow_type: str) -> list[str]:
@@ -655,10 +655,10 @@ class WorkflowValidator:
             if wf_type in cls.OPTIONAL_PARAMS:
                 params.extend(cls.OPTIONAL_PARAMS[wf_type])
             return params
-        except ValueError:
+        except ValueError as e:
             raise WorkflowConfigurationError(
                 f"Invalid workflow type '{workflow_type}'"
-            )
+            ) from e
 
 
 # Convenience functions for common validations

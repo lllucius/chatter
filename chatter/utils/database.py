@@ -31,7 +31,6 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 # Import QueryOptimizer from database_optimization for backward compatibility
-from chatter.utils.database_optimization import QueryOptimizer
 
 # Global database engine and session maker
 _engine: AsyncEngine | None = None
@@ -175,7 +174,7 @@ async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
                         except Exception:
                             # If we can't determine transaction state, assume we're in one
                             in_transaction = True
-                            
+
                         if not in_transaction:
                             await session.close()
                         else:
@@ -896,7 +895,7 @@ class DatabaseManager:
     async def get_connection_with_timeout(self, timeout_seconds: int = 30):
         """Get connection with timeout."""
         return await asyncio.wait_for(
-            self._attempt_connection(), 
+            self._attempt_connection(),
             timeout=timeout_seconds
         )
 
@@ -923,12 +922,12 @@ class DatabaseManager:
         import time
         current_time = time.time()
         leaked_sessions = []
-        
+
         for session_id, session_info in self.active_sessions.items():
             session_age = current_time - session_info.get('created_at', current_time)
             if session_age > max_age_seconds:
                 leaked_sessions.append(session_info)
-        
+
         return leaked_sessions
 
 
@@ -966,7 +965,7 @@ async def health_check() -> dict:
             # Test basic connection
             await session.execute(text("SELECT 1"))
             is_connected = True
-            
+
             # Test query performance with a simple query
             await session.execute(text("SELECT 1"))
 

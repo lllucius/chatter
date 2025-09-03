@@ -1,6 +1,5 @@
 """Input validation middleware for API security."""
 
-import html
 import re
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -286,9 +285,9 @@ class InputValidator:
             # Re-raise ValidationErrors that indicate security/critical issues as ValueError
             error_msg = str(e)
             critical_errors = [
-                "forbidden pattern", 
-                "exceeds maximum length", 
-                "below minimum length", 
+                "forbidden pattern",
+                "exceeds maximum length",
+                "below minimum length",
                 "Unknown validation rule",
                 "is required"
             ]
@@ -806,17 +805,17 @@ def sanitize_html(html_content: str) -> str:
 
     # First remove script tags and their content
     clean_text = re.sub(r'<script[^>]*>.*?</script>', '', html_content, flags=re.IGNORECASE | re.DOTALL)
-    
+
     # Remove other dangerous tags and content
     clean_text = re.sub(r'<(style|iframe|object|embed)[^>]*>.*?</\1>', '', clean_text, flags=re.IGNORECASE | re.DOTALL)
-    
+
     # Remove HTML tags completely
     clean_text = re.sub(r'<[^>]+>', '', clean_text)
-    
+
     # Remove javascript: URLs and other dangerous patterns
     clean_text = re.sub(r'javascript\s*:', '', clean_text, flags=re.IGNORECASE)
     clean_text = re.sub(r'on\w+\s*=\s*["\'][^"\']*["\']', '', clean_text, flags=re.IGNORECASE)
-    
+
     # Clean up whitespace
     clean_text = re.sub(r'\s+', ' ', clean_text).strip()
     return clean_text

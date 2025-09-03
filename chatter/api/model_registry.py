@@ -538,7 +538,7 @@ async def create_embedding_space(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create embedding space: {str(e)}",
-        )
+        ) from e
 
 
 @router.put(

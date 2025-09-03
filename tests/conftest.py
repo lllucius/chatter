@@ -1,8 +1,7 @@
 """Test configuration and shared fixtures."""
 
-import asyncio
 import os
-from typing import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator
 
 # Set up test environment before any other imports
 os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
@@ -10,7 +9,11 @@ os.environ.setdefault("SECRET_KEY", "test_secret_key_for_testing")
 os.environ.setdefault("ENVIRONMENT", "testing")
 
 import pytest
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from chatter.utils.database import Base, get_session_generator
 
@@ -34,20 +37,20 @@ def app(db_session: AsyncSession):
         FastAPI application configured for testing
     """
     # Lazy import to avoid hanging during test collection
+
     from chatter.main import create_app
-    from fastapi import FastAPI
-    
+
     # Create the FastAPI application
     app = create_app()
-    
+
     # Override the database session dependency
     async def get_test_session():
         """Override database session for testing."""
         yield db_session
-    
+
     # Replace the production dependency with our test version
     app.dependency_overrides[get_session_generator] = get_test_session
-    
+
     return app
 
 
@@ -55,7 +58,7 @@ def app(db_session: AsyncSession):
 # POSTGRESQL FIXTURES using real PostgreSQL server
 # =============================================================================
 
-@pytest.fixture(scope="function") 
+@pytest.fixture(scope="function")
 async def db_engine():
     """
     Create a function-scoped database engine for testing.
@@ -65,10 +68,10 @@ async def db_engine():
     """
     # Lazy import to avoid hanging during test collection
     from chatter.config import settings
-    
+
     # Use the test database URL from configuration
     db_url = settings.test_database_url
-    
+
     # Create async engine with test-appropriate settings
     engine = create_async_engine(
         db_url,
@@ -77,7 +80,7 @@ async def db_engine():
         max_overflow=10,
         pool_pre_ping=True,
     )
-    
+
     # Create all tables and ensure pgvector extension is available
     try:
         async with engine.begin() as conn:
@@ -88,16 +91,16 @@ async def db_engine():
             except Exception:
                 # pgvector may not be available in test environment
                 pass
-        
+
         # Create tables in a separate transaction
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-            
-    except Exception as e:
+
+    except Exception:
         # If anything fails, try without the vector extension
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-    
+
     try:
         yield engine
     finally:
@@ -145,7 +148,7 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
         class_=AsyncSession,
         expire_on_commit=False,
     )
-    
+
     # Create a session for the test
     async with session_maker() as session:
         # Start a transaction
@@ -171,7 +174,7 @@ async def client(app) -> AsyncGenerator:
     """
     # Lazy import to avoid hanging issues
     from httpx import ASGITransport, AsyncClient
-    
+
     async with AsyncClient(
         transport=ASGITransport(app=app),
         base_url="http://testserver",
@@ -194,17 +197,17 @@ async def auth_headers(client) -> dict[str, str]:
     # Register a test user
     user_data = {
         "username": "testuser",
-        "email": "test@example.com", 
+        "email": "test@example.com",
         "password": "TestPassword123!",
         "full_name": "Test User",
     }
-    
+
     response = await client.post("/api/v1/auth/register", json=user_data)
     assert response.status_code == 201
-    
+
     auth_response = response.json()
     access_token = auth_response["access_token"]
-    
+
     return {"Authorization": f"Bearer {access_token}"}
 
 

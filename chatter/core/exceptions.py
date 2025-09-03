@@ -49,7 +49,7 @@ class ChatterBaseException(Exception):
         self.status_code = status_code
         self.details = details
         self.error_id = str(uuid.uuid4())
-        
+
         # Add timestamp
         from datetime import datetime
         self.timestamp = datetime.utcnow().isoformat()
@@ -76,11 +76,11 @@ class ChatterBaseException(Exception):
             name = name[:-5]
         # Convert to uppercase with underscores
         name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).upper()
-        
+
         # Special case mappings for specific error types
         error_code_mapping = {
             "CHATTER_BASE_EXCEPTION": "CHATTER_BASE_EXCEPTION_ERROR",
-            "VALIDATION": "VALIDATION_ERROR", 
+            "VALIDATION": "VALIDATION_ERROR",
             "AUTHENTICATION": "AUTHENTICATION_ERROR",
             "AUTHORIZATION": "AUTHORIZATION_ERROR",
             "RATE_LIMIT": "RATE_LIMIT_EXCEEDED",
@@ -89,7 +89,7 @@ class ChatterBaseException(Exception):
             "EMBEDDING": "EMBEDDING_ERROR",
             "CHAT_SERVICE": "CHAT_SERVICE_ERROR",
         }
-        
+
         return error_code_mapping.get(name, name)
 
     def _log_error(self) -> None:
@@ -156,10 +156,10 @@ class ChatterBaseException(Exception):
         class ErrorContextManager:
             def __init__(self, operation_name: str):
                 self.operation = operation_name
-                
+
             def __enter__(self):
                 return self
-                
+
             def __exit__(self, exc_type, exc_val, exc_tb):
                 if exc_type and not issubclass(exc_type, cls):
                     # Wrap non-ChatterException errors
@@ -168,7 +168,7 @@ class ChatterBaseException(Exception):
                         details={"operation": self.operation, "original_error": str(exc_val)}
                     ) from exc_val
                 return False
-                
+
         return ErrorContextManager(operation)
 
     def to_problem_detail(self):
@@ -253,7 +253,7 @@ class ValidationError(ChatterBaseException):
             message="; ".join(messages), field_errors=field_errors
         )
 
-    @classmethod 
+    @classmethod
     def from_pydantic_errors(cls, pydantic_errors: list[dict[str, Any]]) -> "ValidationError":
         """Create ValidationError from Pydantic validation errors.
         
@@ -265,19 +265,19 @@ class ValidationError(ChatterBaseException):
         """
         field_errors = {}
         messages = []
-        
+
         for error in pydantic_errors:
             loc = error.get("loc", ())
             msg = error.get("msg", "Validation error")
-            
+
             # Convert location tuple to field name
             field_name = ".".join(str(part) for part in loc) if loc else "unknown"
-            
+
             if field_name not in field_errors:
                 field_errors[field_name] = []
             field_errors[field_name].append(msg)
             messages.append(f"{field_name}: {msg}")
-        
+
         return cls(
             message="; ".join(messages),
             details={"field_errors": field_errors}
@@ -305,9 +305,9 @@ class RateLimitError(ChatterBaseException):
 
     def __init__(self, message: str, **kwargs):
         super().__init__(
-            message=message, 
-            status_code=429, 
-            details={"service": "rate_limiter"}, 
+            message=message,
+            status_code=429,
+            details={"service": "rate_limiter"},
             **kwargs
         )
 

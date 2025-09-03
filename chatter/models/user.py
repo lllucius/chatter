@@ -68,6 +68,9 @@ class User(Base):
     avatar_url: Mapped[str | None] = mapped_column(
         String(500), nullable=True
     )
+    phone_number: Mapped[str | None] = mapped_column(
+        String(20), nullable=True
+    )
 
     # Status fields
     is_active: Mapped[bool] = mapped_column(
@@ -154,6 +157,7 @@ class User(Base):
             "full_name": self.full_name,
             "bio": self.bio,
             "avatar_url": self.avatar_url,
+            "phone_number": self.phone_number,
             "is_active": self.is_active,
             "is_verified": self.is_verified,
             "default_llm_provider": self.default_llm_provider,

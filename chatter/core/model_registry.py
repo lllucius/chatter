@@ -157,19 +157,73 @@ class ModelRegistryService:
         self, provider_id: str, model_type: ModelType
     ) -> bool:
         """Set a provider as default for a model type."""
-        # First, unset current default
-        await self.session.execute(
-            update(Provider)
-            .where(Provider.is_default)
-            .values(is_default=False)
-        )
+        # Verify the provider exists and supports the model type
+        provider = await self.get_provider(provider_id)
+        if not provider:
+            return False
 
-        # Set new default
+        # Check if provider has models of the specified type
+        models_of_type = await self.session.execute(
+            select(ModelDef).where(
+                ModelDef.provider_id == provider_id,
+                ModelDef.model_type == model_type,
+                ModelDef.is_active
+            )
+        )
+        if not models_of_type.scalars().first():
+            # Provider doesn't have models of this type, cannot be default
+            return False
+
+        # First, unset current default for this model type by finding
+        # all providers that have default models of this type
+        current_default_models = await self.session.execute(
+            select(ModelDef.provider_id).where(
+                ModelDef.model_type == model_type,
+                ModelDef.is_default,
+                ModelDef.is_active
+            ).distinct()
+        )
+        current_provider_ids = [row[0] for row in current_default_models.fetchall()]
+
+        if current_provider_ids:
+            await self.session.execute(
+                update(Provider)
+                .where(Provider.id.in_(current_provider_ids))
+                .values(is_default=False)
+            )
+
+        # Set new default provider
         result = await self.session.execute(
             update(Provider)
             .where(Provider.id == provider_id)
             .values(is_default=True)
         )
+
+        # Also set one of its models as default for this type if none exists
+        default_model = await self.session.execute(
+            select(ModelDef).where(
+                ModelDef.provider_id == provider_id,
+                ModelDef.model_type == model_type,
+                ModelDef.is_default,
+                ModelDef.is_active
+            )
+        )
+        if not default_model.scalars().first():
+            # Set the first active model as default
+            first_model = await self.session.execute(
+                select(ModelDef).where(
+                    ModelDef.provider_id == provider_id,
+                    ModelDef.model_type == model_type,
+                    ModelDef.is_active
+                ).limit(1)
+            )
+            if first_model_obj := first_model.scalar_one_or_none():
+                await self.session.execute(
+                    update(ModelDef)
+                    .where(ModelDef.id == first_model_obj.id)
+                    .values(is_default=True)
+                )
+
         await self.session.commit()
         return result.rowcount > 0
 
@@ -239,6 +293,17 @@ class ModelRegistryService:
         self, model_data: ModelDefCreate
     ) -> ModelDef:
         """Create a new model definition."""
+        # Validate that provider exists
+        provider = await self.get_provider(model_data.provider_id)
+        if not provider:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError(f"Provider with ID {model_data.provider_id} not found")
+
+        # Validate that provider is active
+        if not provider.is_active:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError(f"Provider {provider.name} is not active")
+
         model = ModelDef(**model_data.model_dump())
         self.session.add(model)
         await self.session.commit()
@@ -385,6 +450,27 @@ class ModelRegistryService:
         self, space_data: EmbeddingSpaceCreate
     ) -> EmbeddingSpace:
         """Create a new embedding space with backing table and index."""
+        # Validate that model exists and is an embedding model
+        model = await self.get_model(space_data.model_id)
+        if not model:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError(f"Model with ID {space_data.model_id} not found")
+
+        if model.model_type != ModelType.EMBEDDING:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError(f"Model {model.name} is not an embedding model")
+
+        if not model.is_active:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError(f"Model {model.name} is not active")
+
+        # Validate dimensions match
+        if model.dimensions and space_data.base_dimensions != model.dimensions:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError(
+                f"Base dimensions {space_data.base_dimensions} do not match model dimensions {model.dimensions}"
+            )
+
         # Create the space record
         space = EmbeddingSpace(**space_data.model_dump())
         self.session.add(space)
@@ -493,10 +579,18 @@ class ModelRegistryService:
         self, model_type: ModelType
     ) -> Provider | None:
         """Get the default provider for a model type."""
+        # Find provider that has default models of the specified type
         result = await self.session.execute(
-            select(Provider).where(
-                Provider.is_default, Provider.is_active
+            select(Provider)
+            .join(ModelDef)
+            .where(
+                ModelDef.model_type == model_type,
+                ModelDef.is_default,
+                ModelDef.is_active,
+                Provider.is_active,
+                Provider.is_default
             )
+            .distinct()
         )
         return result.scalar_one_or_none()
 

@@ -14,6 +14,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -53,6 +54,10 @@ class DocumentType(str, Enum):
 
 class Document(Base):
     """Document model for knowledge base files."""
+
+    __table_args__ = (
+        UniqueConstraint('owner_id', 'file_hash', name='uq_document_owner_hash'),
+    )
 
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(

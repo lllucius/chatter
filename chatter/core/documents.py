@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import UploadFile
-from sqlalchemy import and_, asc, desc, func, or_, select
+from sqlalchemy import and_, asc, desc, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
@@ -73,34 +73,36 @@ class DocumentService:
             DocumentError: If document creation fails
         """
         try:
-            # Read file content
-            file_content = await upload_file.read()
-            file_size = len(file_content)
+            # Create a hash object for streaming calculation
+            hasher = hashlib.sha256()
+            file_size = 0
 
-            # Validate file size
-            if file_size > settings.max_file_size:
-                raise DocumentError(
-                    f"File size exceeds maximum allowed size of {settings.max_file_size} bytes"
-                ) from None
+            # Read file in chunks to avoid memory exhaustion
+            CHUNK_SIZE = 8192  # 8KB chunks
 
-            # Calculate file hash
-            file_hash = hashlib.sha256(file_content).hexdigest()
+            # Reset file pointer to beginning
+            await upload_file.seek(0)
 
-            # Check for duplicate files
-            existing_doc_result = await self.session.execute(
-                select(Document).where(
-                    and_(
-                        Document.owner_id == user_id,
-                        Document.file_hash == file_hash,
-                    )
-                )
-            )
-            existing_doc = existing_doc_result.scalar_one_or_none()
+            # Read and hash file in chunks
+            while True:
+                chunk = await upload_file.read(CHUNK_SIZE)
+                if not chunk:
+                    break
 
-            if existing_doc:
-                raise DocumentError(
-                    "Document with identical content already exists"
-                ) from None
+                hasher.update(chunk)
+                file_size += len(chunk)
+
+                # Check file size limit early to avoid reading entire large files
+                if file_size > settings.max_file_size:
+                    raise DocumentError(
+                        f"File size exceeds maximum allowed size of {settings.max_file_size} bytes"
+                    ) from None
+
+            # Calculate final hash
+            file_hash = hasher.hexdigest()
+
+            # Reset file pointer for later processing
+            await upload_file.seek(0)
 
             # Detect MIME type and document type
             mime_type = (
@@ -126,10 +128,18 @@ class DocumentService:
             # Generate unique filename
             unique_filename = f"{uuid.uuid4()}.{file_ext}"
 
-            # Save file to storage
+            # Save file to storage using streaming
             file_path = self.storage_path / unique_filename
             with open(file_path, "wb") as f:
-                f.write(file_content)
+                # Reset file pointer to beginning
+                await upload_file.seek(0)
+
+                # Copy file in chunks
+                while True:
+                    chunk = await upload_file.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    f.write(chunk)
 
             # Create document record
             document = Document(
@@ -152,8 +162,20 @@ class DocumentService:
             )
 
             self.session.add(document)
-            await self.session.commit()
-            await self.session.refresh(document)
+            try:
+                await self.session.commit()
+                await self.session.refresh(document)
+            except Exception as db_error:
+                await self.session.rollback()
+                # Check if it's a unique constraint violation (duplicate file)
+                if "uq_document_owner_hash" in str(db_error):
+                    raise DocumentError(
+                        "Document with identical content already exists"
+                    ) from db_error
+                # Re-raise other database errors
+                raise DocumentError(
+                    f"Database error creating document: {str(db_error)}"
+                ) from db_error
 
             # Trigger document uploaded event
             try:
@@ -170,9 +192,10 @@ class DocumentService:
                     error=str(e),
                 )
 
-            # Start background processing
-            await self._process_document_async(
-                document.id, file_content
+            # Start background processing (non-blocking)
+            import asyncio
+            asyncio.create_task(
+                self._process_document_async(document.id, file_path)
             )
 
             logger.info(
@@ -220,9 +243,15 @@ class DocumentService:
             document = result.scalar_one_or_none()
 
             if document:
-                # Update view count and last accessed time
-                document.view_count += 1
-                document.last_accessed_at = datetime.now(UTC)
+                # Update view count and last accessed time atomically
+                await self.session.execute(
+                    update(Document)
+                    .where(Document.id == document_id)
+                    .values(
+                        view_count=Document.view_count + 1,
+                        last_accessed_at=datetime.now(UTC)
+                    )
+                )
                 await self.session.commit()
                 await self.session.refresh(document)
 
@@ -614,32 +643,50 @@ class DocumentService:
             return False
 
     async def get_document_chunks(
-        self, document_id: str, user_id: str
-    ) -> list[DocumentChunk]:
-        """Get chunks for a document.
+        self, document_id: str, user_id: str, limit: int | None = None, offset: int | None = None
+    ) -> tuple[list[DocumentChunk], int]:
+        """Get chunks for a document with optional pagination.
 
         Args:
             document_id: Document ID
             user_id: Requesting user ID
+            limit: Maximum number of chunks to return
+            offset: Number of chunks to skip
 
         Returns:
-            List of document chunks
+            Tuple of (chunks list, total count)
         """
         try:
             # Check document access
             document = await self.get_document(document_id, user_id)
             if not document:
-                return []
+                return [], 0
 
-            # Get chunks
-            result = await self.session.execute(
+            # Build base query
+            query = (
                 select(DocumentChunk)
                 .where(DocumentChunk.document_id == document_id)
                 .order_by(DocumentChunk.chunk_index)
             )
+
+            # Get total count first
+            count_query = select(func.count()).select_from(
+                select(DocumentChunk).where(DocumentChunk.document_id == document_id).subquery()
+            )
+            count_result = await self.session.execute(count_query)
+            total_count = count_result.scalar() or 0
+
+            # Apply pagination if requested
+            if offset is not None:
+                query = query.offset(offset)
+            if limit is not None:
+                query = query.limit(limit)
+
+            # Execute query
+            result = await self.session.execute(query)
             chunks = result.scalars().all()
 
-            return list(chunks)
+            return list(chunks), total_count
 
         except Exception as e:
             logger.error(
@@ -647,7 +694,7 @@ class DocumentService:
                 document_id=document_id,
                 error=str(e),
             )
-            return []
+            return [], 0
 
     async def get_document_stats(self, user_id: str) -> dict[str, Any]:
         """Get document statistics for user.
@@ -722,13 +769,13 @@ class DocumentService:
             return {}
 
     async def _process_document_async(
-        self, document_id: str, file_content: bytes
+        self, document_id: str, file_path: Path
     ) -> None:
         """Process document asynchronously using job queue.
 
         Args:
             document_id: Document ID
-            file_content: File content bytes
+            file_path: Path to the file on disk
         """
         try:
             from chatter.services.job_queue import (
@@ -740,7 +787,7 @@ class DocumentService:
             job_id = await job_queue.add_job(
                 name=f"Document Processing: {document_id}",
                 function_name="document_processing",
-                args=[document_id, file_content],
+                args=[document_id, str(file_path)],
                 priority=JobPriority.NORMAL,
                 tags=["document", "processing"],
                 metadata={"document_id": document_id},

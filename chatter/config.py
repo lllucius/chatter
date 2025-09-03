@@ -360,6 +360,51 @@ class Settings(BaseSettings):
     )
 
     # =============================================================================
+    # WORKFLOW EXECUTION SETTINGS
+    # =============================================================================
+
+    # Workflow timeouts
+    workflow_execution_timeout: int = Field(
+        default=300, description="Workflow execution timeout in seconds"
+    )
+    workflow_step_timeout: int = Field(
+        default=60, description="Individual workflow step timeout in seconds"
+    )
+    workflow_streaming_timeout: int = Field(
+        default=600, description="Workflow streaming timeout in seconds"
+    )
+
+    # Resource limits
+    workflow_max_tokens: int = Field(
+        default=100000, description="Maximum tokens per workflow execution"
+    )
+    workflow_max_memory_mb: int = Field(
+        default=1024, description="Maximum memory usage per workflow in MB"
+    )
+    workflow_max_concurrent: int = Field(
+        default=10, description="Maximum concurrent workflows per user"
+    )
+
+    # Token streaming settings
+    streaming_chunk_size: int = Field(
+        default=1, description="Number of tokens per streaming chunk"
+    )
+    streaming_heartbeat_interval: float = Field(
+        default=30.0, description="Streaming heartbeat interval in seconds"
+    )
+    streaming_buffer_size: int = Field(
+        default=4096, description="Streaming buffer size"
+    )
+
+    # Circuit breaker settings for workflow reliability
+    workflow_failure_threshold: int = Field(
+        default=5, description="Failure threshold for workflow circuit breaker"
+    )
+    workflow_circuit_breaker_timeout: int = Field(
+        default=60, description="Circuit breaker timeout in seconds"
+    )
+
+    # =============================================================================
     # TESTING SETTINGS
     # =============================================================================
 

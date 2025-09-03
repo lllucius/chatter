@@ -11,6 +11,13 @@ from langchain_core.messages import AIMessage, BaseMessage
 
 from chatter.core.dependencies import get_workflow_manager
 from chatter.core.langgraph import ConversationState
+from chatter.core.workflow_limits import (
+    WorkflowLimitManager,
+    WorkflowLimits,
+    WorkflowTimeoutError,
+    WorkflowResourceLimitError,
+    workflow_limit_manager,
+)
 from chatter.core.workflow_performance import (
     performance_monitor,
     workflow_cache,
@@ -53,12 +60,15 @@ class WorkflowExecutionService:
         self.message_service = message_service
         self.template_manager = WorkflowTemplateManager()
         self.validator = WorkflowValidator()
+        self.limit_manager = workflow_limit_manager
 
     async def execute_workflow(
         self,
         conversation: Conversation,
         chat_request: ChatRequest,
         correlation_id: str,
+        user_id: str | None = None,
+        limits: WorkflowLimits | None = None,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute a workflow for a chat request.
 
@@ -66,26 +76,45 @@ class WorkflowExecutionService:
             conversation: Conversation context
             chat_request: Chat request
             correlation_id: Request correlation ID
+            user_id: User ID for resource tracking
+            limits: Custom workflow limits (uses defaults if None)
 
         Returns:
             Tuple of (response_message, usage_info)
 
         Raises:
             WorkflowExecutionError: If workflow execution fails
+            WorkflowTimeoutError: If workflow times out
+            WorkflowResourceLimitError: If workflow exceeds limits
         """
         start_time = time.time()
-        workflow_type = chat_request.workflow_type or "plain"
+        workflow_type = chat_request.workflow or "plain"
+        workflow_id = f"{correlation_id}_{workflow_type}"
+        
+        # Use provided limits or get defaults
+        if limits is None:
+            limits = self.limit_manager.get_default_limits()
+        
+        # Start resource tracking if user_id provided
+        if user_id:
+            try:
+                self.limit_manager.start_workflow_tracking(workflow_id, user_id, limits)
+            except WorkflowResourceLimitError as e:
+                logger.warning(
+                    "Workflow rejected due to resource limits",
+                    user_id=user_id,
+                    error=str(e),
+                    correlation_id=correlation_id,
+                )
+                raise WorkflowExecutionError(f"Resource limit exceeded: {e}") from e
 
         try:
             # Validate workflow configuration
             self.validator.validate_workflow_parameters(
-                workflow_type, **(chat_request.workflow_config or {})
+                workflow_type, **{}
             )
 
             # Check cache first
-            # TODO: Implement proper workflow result caching
-            # cache_key = self._get_cache_key(conversation.id, chat_request)
-            # cached_result = await workflow_cache.get(cache_key)
             cached_result = None
 
             if cached_result:
@@ -110,36 +139,39 @@ class WorkflowExecutionService:
 
                 return cached_result
 
-            # Execute workflow based on type
-            workflow_execution_id = f"{correlation_id}_{workflow_type}"
+            # Execute workflow based on type with timeout protection
             performance_monitor.start_workflow(
-                workflow_execution_id, workflow_type
+                workflow_id, workflow_type
             )
 
-            if workflow_type == "plain":
-                result = await self._execute_plain_workflow(
-                    conversation, chat_request, correlation_id
+            # Wrap execution in timeout context
+            try:
+                async with asyncio.timeout(limits.execution_timeout):
+                    if workflow_type == "plain":
+                        result = await self._execute_plain_workflow(
+                            conversation, chat_request, correlation_id, workflow_id, limits
+                        )
+                    elif workflow_type == "rag":
+                        result = await self._execute_rag_workflow(
+                            conversation, chat_request, correlation_id, workflow_id, limits
+                        )
+                    elif workflow_type == "tools":
+                        result = await self._execute_tools_workflow(
+                            conversation, chat_request, correlation_id, workflow_id, limits
+                        )
+                    elif workflow_type == "full":
+                        result = await self._execute_full_workflow(
+                            conversation, chat_request, correlation_id, workflow_id, limits
+                        )
+                    else:
+                        raise WorkflowExecutionError(
+                            f"Unknown workflow type: {workflow_type}"
+                        )
+            except asyncio.TimeoutError:
+                raise WorkflowTimeoutError(
+                    f"Workflow execution timed out after {limits.execution_timeout} seconds",
+                    "execution_timeout"
                 )
-            elif workflow_type == "rag":
-                result = await self._execute_rag_workflow(
-                    conversation, chat_request, correlation_id
-                )
-            elif workflow_type == "tools":
-                result = await self._execute_tools_workflow(
-                    conversation, chat_request, correlation_id
-                )
-            elif workflow_type == "full":
-                result = await self._execute_full_workflow(
-                    conversation, chat_request, correlation_id
-                )
-            else:
-                raise WorkflowExecutionError(
-                    f"Unknown workflow type: {workflow_type}"
-                )
-
-            # Cache the result
-            # TODO: Implement proper result caching with correct parameters
-            # await workflow_cache.set(cache_key, result, ttl=300)  # 5 minutes
 
             # Record successful execution metrics
             duration_ms = (time.time() - start_time) * 1000
@@ -163,6 +195,9 @@ class WorkflowExecutionService:
 
             return result
 
+        except (WorkflowTimeoutError, WorkflowResourceLimitError):
+            # Re-raise timeout/limit errors without wrapping
+            raise
         except Exception as e:
             # Record failed execution metrics
             duration_ms = (time.time() - start_time) * 1000
@@ -188,14 +223,20 @@ class WorkflowExecutionService:
             ) from e
         finally:
             performance_monitor.end_workflow(
-                workflow_execution_id, success=True
+                workflow_id, success=True
             )
+            
+            # End resource tracking
+            if user_id:
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
 
     async def execute_workflow_streaming(
         self,
         conversation: Conversation,
         chat_request: ChatRequest,
         correlation_id: str,
+        user_id: str | None = None,
+        limits: WorkflowLimits | None = None,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute a workflow with streaming response.
 
@@ -203,25 +244,52 @@ class WorkflowExecutionService:
             conversation: Conversation context
             chat_request: Chat request
             correlation_id: Request correlation ID
+            user_id: User ID for resource tracking
+            limits: Custom workflow limits (uses defaults if None)
 
         Yields:
             Streaming chat chunks
 
         Raises:
             WorkflowExecutionError: If workflow execution fails
+            WorkflowTimeoutError: If workflow times out
+            WorkflowResourceLimitError: If workflow exceeds limits
         """
         start_time = time.time()
-        workflow_type = chat_request.workflow_type or "plain"
+        workflow_type = chat_request.workflow or "plain"
+        workflow_id = f"{correlation_id}_{workflow_type}_streaming"
+        
+        # Use provided limits or get defaults
+        if limits is None:
+            limits = self.limit_manager.get_default_limits()
 
         # Create streaming session
         stream_id = await create_stream(workflow_type, correlation_id)
+
+        # Start resource tracking if user_id provided
+        if user_id:
+            try:
+                self.limit_manager.start_workflow_tracking(workflow_id, user_id, limits)
+            except WorkflowResourceLimitError as e:
+                logger.warning(
+                    "Streaming workflow rejected due to resource limits",
+                    user_id=user_id,
+                    error=str(e),
+                    correlation_id=correlation_id,
+                )
+                yield StreamingChatChunk(
+                    type="error",
+                    content=f"Resource limit exceeded: {str(e)}",
+                    correlation_id=correlation_id,
+                )
+                return
 
         try:
             # Validate workflow configuration
             try:
                 self.validator.validate_workflow_parameters(
                     workflow_type,
-                    **(chat_request.workflow_config or {}),
+                    **{},
                 )
             except Exception as e:
                 raise WorkflowExecutionError(
@@ -236,22 +304,37 @@ class WorkflowExecutionService:
                 correlation_id=correlation_id,
             )
 
-            # Create workflow event generator
-            workflow_generator = self._create_workflow_generator(
-                workflow_type,
-                conversation,
-                chat_request,
-                correlation_id,
-            )
+            # Create workflow event generator with timeout protection
+            async with asyncio.timeout(limits.streaming_timeout):
+                workflow_generator = self._create_workflow_generator(
+                    workflow_type,
+                    conversation,
+                    chat_request,
+                    correlation_id,
+                    workflow_id,
+                    limits,
+                )
 
-            # Stream with heartbeat, token chunking, etc.
-            async for chunk in stream_workflow(
-                stream_id,
-                workflow_generator,
-                enable_heartbeat=True,
-                heartbeat_interval=30.0,
-            ):
-                yield chunk
+                # Stream with heartbeat, token chunking, etc.
+                async for chunk in stream_workflow(
+                    stream_id,
+                    workflow_generator,
+                    enable_heartbeat=True,
+                    heartbeat_interval=30.0,
+                ):
+                    # Check resource limits during streaming
+                    if user_id:
+                        try:
+                            self.limit_manager.check_workflow_limits(workflow_id, limits)
+                        except (WorkflowTimeoutError, WorkflowResourceLimitError) as e:
+                            yield StreamingChatChunk(
+                                type="error",
+                                content=f"Workflow limit exceeded: {str(e)}",
+                                correlation_id=correlation_id,
+                            )
+                            return
+                    
+                    yield chunk
 
             # Record successful streaming metrics
             duration_ms = (time.time() - start_time) * 1000
@@ -274,6 +357,36 @@ class WorkflowExecutionService:
                 correlation_id=correlation_id,
             )
 
+        except asyncio.TimeoutError:
+            error_msg = f"Streaming workflow timed out after {limits.streaming_timeout} seconds"
+            logger.error(
+                "Streaming workflow timeout",
+                conversation_id=conversation.id,
+                workflow_type=workflow_type,
+                stream_id=stream_id,
+                timeout_seconds=limits.streaming_timeout,
+                correlation_id=correlation_id,
+            )
+            yield StreamingChatChunk(
+                type="error",
+                content=error_msg,
+                correlation_id=correlation_id,
+            )
+        except (WorkflowTimeoutError, WorkflowResourceLimitError) as e:
+            # Resource/timeout limit errors
+            logger.error(
+                "Streaming workflow limit exceeded",
+                conversation_id=conversation.id,
+                workflow_type=workflow_type,
+                stream_id=stream_id,
+                error=str(e),
+                correlation_id=correlation_id,
+            )
+            yield StreamingChatChunk(
+                type="error",
+                content=f"Workflow limit exceeded: {str(e)}",
+                correlation_id=correlation_id,
+            )
         except Exception as e:
             # Record failed streaming metrics
             duration_ms = (time.time() - start_time) * 1000
@@ -302,175 +415,223 @@ class WorkflowExecutionService:
                 content=f"Workflow execution failed: {str(e)}",
                 correlation_id=correlation_id,
             )
+        finally:
+            # End resource tracking
+            if user_id:
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
 
     async def _execute_plain_workflow(
         self,
         conversation: Conversation,
         chat_request: ChatRequest,
         correlation_id: str,
+        workflow_id: str,
+        limits: WorkflowLimits,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute plain chat workflow."""
-        messages = self.llm_service.convert_conversation_to_messages(
-            conversation,
-            await self._get_conversation_messages(conversation),
-        )
+        async with self.limit_manager.step_timeout_context(workflow_id, limits):
+            messages = self.llm_service.convert_conversation_to_messages(
+                conversation,
+                await self._get_conversation_messages(conversation),
+            )
 
-        # Add user message
-        messages.append(
-            BaseMessage(content=chat_request.message, type="human")
-        )
+            # Add user message
+            messages.append(
+                BaseMessage(content=chat_request.message, type="human")
+            )
 
-        # Get LLM provider
-        provider = await self.llm_service.get_default_provider()
+            # Get LLM provider
+            provider = await self.llm_service.get_default_provider()
 
-        # Generate response
-        response = await provider.ainvoke(messages)
+            # Generate response
+            response = await provider.ainvoke(messages)
 
-        # Create response message
-        response_message = Message(
-            conversation_id=conversation.id,
-            role=MessageRole.ASSISTANT,
-            content=response.content,
-            provider=provider.__class__.__name__,
-            metadata={"workflow_type": "plain"},
-        )
+            # Update token usage
+            response_tokens = len(response.content.split()) if hasattr(response, 'content') else 0
+            self.limit_manager.update_workflow_usage(
+                workflow_id, tokens_delta=response_tokens
+            )
 
-        usage_info = {"tokens": 0, "cost": 0.0}
-        return response_message, usage_info
+            # Create response message
+            response_message = Message(
+                conversation_id=conversation.id,
+                role=MessageRole.ASSISTANT,
+                content=response.content,
+                provider_used=provider.__class__.__name__,
+                extra_metadata={"workflow_type": "plain"},
+            )
+
+            usage_info = {
+                "tokens": response_tokens, 
+                "cost": response_tokens * 0.00001,  # Rough estimate
+            }
+            return response_message, usage_info
 
     async def _execute_rag_workflow(
         self,
         conversation: Conversation,
         chat_request: ChatRequest,
         correlation_id: str,
+        workflow_id: str,
+        limits: WorkflowLimits,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute RAG workflow."""
-        workflow_manager = get_workflow_manager()
+        async with self.limit_manager.step_timeout_context(workflow_id, limits):
+            workflow_manager = get_workflow_manager()
 
-        # Prepare state
-        state = ConversationState(
-            conversation_id=conversation.id,
-            messages=await self._get_conversation_messages(
-                conversation
-            ),
-            user_message=chat_request.message,
-            workflow_config=chat_request.workflow_config or {},
-            correlation_id=correlation_id,
-        )
-
-        # Run RAG workflow
-        result = await workflow_manager.run_workflow("rag", state)
-
-        # Extract response
-        ai_message = result.get("response")
-        if not isinstance(ai_message, AIMessage):
-            raise WorkflowExecutionError(
-                "Invalid RAG workflow response"
+            # Prepare state
+            state = ConversationState(
+                conversation_id=conversation.id,
+                messages=await self._get_conversation_messages(
+                    conversation
+                ),
+                user_message=chat_request.message,
+                workflow_config={},
+                correlation_id=correlation_id,
             )
 
-        response_message = Message(
-            conversation_id=conversation.id,
-            role=MessageRole.ASSISTANT,
-            content=ai_message.content,
-            metadata={
-                "workflow_type": "rag",
-                "sources": result.get("sources", []),
-                "documents_used": result.get("documents_used", 0),
-            },
-        )
+            # Run RAG workflow
+            result = await workflow_manager.run_workflow("rag", state)
 
-        usage_info = result.get("usage", {"tokens": 0, "cost": 0.0})
-        return response_message, usage_info
+            # Extract response
+            ai_message = result.get("response")
+            if not isinstance(ai_message, AIMessage):
+                raise WorkflowExecutionError(
+                    "Invalid RAG workflow response"
+                )
+
+            # Update token usage
+            response_tokens = len(ai_message.content.split()) if ai_message.content else 0
+            self.limit_manager.update_workflow_usage(
+                workflow_id, tokens_delta=response_tokens, steps_delta=1
+            )
+
+            response_message = Message(
+                conversation_id=conversation.id,
+                role=MessageRole.ASSISTANT,
+                content=ai_message.content,
+                metadata={
+                    "workflow_type": "rag",
+                    "sources": result.get("sources", []),
+                    "documents_used": result.get("documents_used", 0),
+                },
+            )
+
+            usage_info = result.get("usage", {"tokens": response_tokens, "cost": response_tokens * 0.00001})
+            return response_message, usage_info
 
     async def _execute_tools_workflow(
         self,
         conversation: Conversation,
         chat_request: ChatRequest,
         correlation_id: str,
+        workflow_id: str,
+        limits: WorkflowLimits,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute tools workflow."""
-        workflow_manager = get_workflow_manager()
+        async with self.limit_manager.step_timeout_context(workflow_id, limits):
+            workflow_manager = get_workflow_manager()
 
-        # Prepare state
-        state = ConversationState(
-            conversation_id=conversation.id,
-            messages=await self._get_conversation_messages(
-                conversation
-            ),
-            user_message=chat_request.message,
-            workflow_config=chat_request.workflow_config or {},
-            correlation_id=correlation_id,
-        )
-
-        # Run tools workflow
-        result = await workflow_manager.run_workflow("tools", state)
-
-        # Extract response
-        ai_message = result.get("response")
-        if not isinstance(ai_message, AIMessage):
-            raise WorkflowExecutionError(
-                "Invalid tools workflow response"
+            # Prepare state
+            state = ConversationState(
+                conversation_id=conversation.id,
+                messages=await self._get_conversation_messages(
+                    conversation
+                ),
+                user_message=chat_request.message,
+                workflow_config={},
+                correlation_id=correlation_id,
             )
 
-        response_message = Message(
-            conversation_id=conversation.id,
-            role=MessageRole.ASSISTANT,
-            content=ai_message.content,
-            metadata={
-                "workflow_type": "tools",
-                "tools_used": result.get("tools_used", []),
-                "tool_calls": result.get("tool_calls", 0),
-            },
-        )
+            # Run tools workflow
+            result = await workflow_manager.run_workflow("tools", state)
 
-        usage_info = result.get("usage", {"tokens": 0, "cost": 0.0})
-        return response_message, usage_info
+            # Extract response
+            ai_message = result.get("response")
+            if not isinstance(ai_message, AIMessage):
+                raise WorkflowExecutionError(
+                    "Invalid tools workflow response"
+                )
+
+            # Update token usage
+            response_tokens = len(ai_message.content.split()) if ai_message.content else 0
+            tool_calls = result.get("tool_calls", 0)
+            self.limit_manager.update_workflow_usage(
+                workflow_id, tokens_delta=response_tokens, steps_delta=1 + tool_calls
+            )
+
+            response_message = Message(
+                conversation_id=conversation.id,
+                role=MessageRole.ASSISTANT,
+                content=ai_message.content,
+                metadata={
+                    "workflow_type": "tools",
+                    "tools_used": result.get("tools_used", []),
+                    "tool_calls": tool_calls,
+                },
+            )
+
+            usage_info = result.get("usage", {"tokens": response_tokens, "cost": response_tokens * 0.00001})
+            return response_message, usage_info
 
     async def _execute_full_workflow(
         self,
         conversation: Conversation,
         chat_request: ChatRequest,
         correlation_id: str,
+        workflow_id: str,
+        limits: WorkflowLimits,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute full workflow (RAG + tools)."""
-        workflow_manager = get_workflow_manager()
+        async with self.limit_manager.step_timeout_context(workflow_id, limits):
+            workflow_manager = get_workflow_manager()
 
-        # Prepare state
-        state = ConversationState(
-            conversation_id=conversation.id,
-            messages=await self._get_conversation_messages(
-                conversation
-            ),
-            user_message=chat_request.message,
-            workflow_config=chat_request.workflow_config or {},
-            correlation_id=correlation_id,
-        )
-
-        # Run full workflow
-        result = await workflow_manager.run_workflow("full", state)
-
-        # Extract response
-        ai_message = result.get("response")
-        if not isinstance(ai_message, AIMessage):
-            raise WorkflowExecutionError(
-                "Invalid full workflow response"
+            # Prepare state
+            state = ConversationState(
+                conversation_id=conversation.id,
+                messages=await self._get_conversation_messages(
+                    conversation
+                ),
+                user_message=chat_request.message,
+                workflow_config={},
+                correlation_id=correlation_id,
             )
 
-        response_message = Message(
-            conversation_id=conversation.id,
-            role=MessageRole.ASSISTANT,
-            content=ai_message.content,
-            metadata={
-                "workflow_type": "full",
-                "sources": result.get("sources", []),
-                "tools_used": result.get("tools_used", []),
-                "documents_used": result.get("documents_used", 0),
-                "tool_calls": result.get("tool_calls", 0),
-            },
-        )
+            # Run full workflow
+            result = await workflow_manager.run_workflow("full", state)
 
-        usage_info = result.get("usage", {"tokens": 0, "cost": 0.0})
-        return response_message, usage_info
+            # Extract response
+            ai_message = result.get("response")
+            if not isinstance(ai_message, AIMessage):
+                raise WorkflowExecutionError(
+                    "Invalid full workflow response"
+                )
+
+            # Update token usage
+            response_tokens = len(ai_message.content.split()) if ai_message.content else 0
+            tool_calls = result.get("tool_calls", 0)
+            documents_used = result.get("documents_used", 0)
+            self.limit_manager.update_workflow_usage(
+                workflow_id, 
+                tokens_delta=response_tokens, 
+                steps_delta=1 + tool_calls + (1 if documents_used > 0 else 0)
+            )
+
+            response_message = Message(
+                conversation_id=conversation.id,
+                role=MessageRole.ASSISTANT,
+                content=ai_message.content,
+                metadata={
+                    "workflow_type": "full",
+                    "sources": result.get("sources", []),
+                    "tools_used": result.get("tools_used", []),
+                    "documents_used": documents_used,
+                    "tool_calls": tool_calls,
+                },
+            )
+
+            usage_info = result.get("usage", {"tokens": response_tokens, "cost": response_tokens * 0.00001})
+            return response_message, usage_info
 
     async def _create_workflow_generator(
         self,
@@ -478,6 +639,8 @@ class WorkflowExecutionService:
         conversation: Conversation,
         chat_request: ChatRequest,
         correlation_id: str,
+        workflow_id: str,
+        limits: WorkflowLimits,
     ) -> AsyncGenerator[dict[str, Any], None]:
         """Create workflow event generator with detailed streaming.
 
@@ -486,6 +649,8 @@ class WorkflowExecutionService:
             conversation: Conversation context
             chat_request: Chat request
             correlation_id: Request correlation ID
+            workflow_id: Workflow ID for resource tracking
+            limits: Workflow limits
 
         Yields:
             Workflow events with detailed metadata
@@ -499,7 +664,7 @@ class WorkflowExecutionService:
                 conversation
             ),
             user_message=chat_request.message,
-            workflow_config=chat_request.workflow_config or {},
+            workflow_config={},
             correlation_id=correlation_id,
         )
 
@@ -511,20 +676,30 @@ class WorkflowExecutionService:
             "timestamp": time.time(),
         }
 
-        # Streaming based on workflow type
-        if workflow_type == "plain":
-            async for event in self._stream_plain_workflow(state):
-                yield event
-        elif workflow_type in ["rag", "tools", "full"]:
-            async for event in workflow_manager.stream_workflow(
-                workflow_type, state
-            ):
-                # Basic workflow events with additional metadata
-                yield self._workflow_event(event, workflow_type)
-        else:
-            raise WorkflowExecutionError(
-                f"Unknown workflow type: {workflow_type}"
-            )
+        # Streaming based on workflow type with comprehensive token-level streaming
+        try:
+            if workflow_type == "plain":
+                async for event in self._stream_plain_workflow(state, workflow_id, limits):
+                    yield event
+            elif workflow_type in ["rag", "tools", "full"]:
+                # Enhanced streaming for complex workflows
+                async for event in self._stream_complex_workflow(
+                    workflow_type, workflow_manager, state, workflow_id, limits
+                ):
+                    yield event
+            else:
+                raise WorkflowExecutionError(
+                    f"Unknown workflow type: {workflow_type}"
+                )
+        except (WorkflowTimeoutError, WorkflowResourceLimitError) as e:
+            yield {
+                "type": "error",
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "step": f"{workflow_type}_workflow_execution",
+                "timestamp": time.time(),
+            }
+            return
 
         # Yield completion event
         yield {
@@ -535,71 +710,128 @@ class WorkflowExecutionService:
         }
 
     async def _stream_plain_workflow(
-        self, state: ConversationState
+        self, state: ConversationState, workflow_id: str, limits: WorkflowLimits
     ) -> AsyncGenerator[dict[str, Any], None]:
-        """Stream plain workflow with token-level streaming."""
+        """Stream plain workflow with enhanced token-level streaming."""
         try:
-            # Convert conversation to messages
-            messages = self.llm_service.convert_conversation_to_messages(
-                None,
-                state.messages,  # We'll handle conversation context differently
-            )
+            async with self.limit_manager.step_timeout_context(workflow_id, limits):
+                # Convert conversation to messages
+                messages = self.llm_service.convert_conversation_to_messages(
+                    None,
+                    state.messages,  # We'll handle conversation context differently
+                )
 
-            # Add user message
-            from langchain_core.messages import HumanMessage
+                # Add user message
+                from langchain_core.messages import HumanMessage
 
-            messages.append(HumanMessage(content=state.user_message))
+                messages.append(HumanMessage(content=state.user_message))
 
-            # Get LLM provider
-            provider = await self.llm_service.get_default_provider()
+                # Get LLM provider
+                provider = await self.llm_service.get_default_provider()
 
-            # Yield thinking event
-            yield {
-                "type": "thinking",
-                "thought": "Processing request with plain workflow...",
-                "step": "provider_selection",
-                "provider": provider.__class__.__name__,
-            }
-
-            # Stream response tokens
-            token_count = 0
-            response_content = ""
-
-            # For demonstration, we'll simulate token streaming
-            # In a real implementation, this would use the provider's streaming capabilities
-            async for token in self._simulate_token_streaming(
-                provider, messages
-            ):
-                token_count += 1
-                response_content += token
-
+                # Yield thinking event
                 yield {
-                    "type": "token",
-                    "content": token,
-                    "token_index": token_count,
-                    "accumulated_content": response_content,
+                    "type": "thinking",
+                    "thought": "Processing request with plain workflow...",
+                    "step": "provider_selection",
                     "provider": provider.__class__.__name__,
                 }
 
-                # Add small delay to simulate realistic streaming
-                await asyncio.sleep(0.01)
+                # Enhanced token streaming with real provider streaming when available
+                token_count = 0
+                response_content = ""
 
-            # Yield completion with usage
-            yield {
-                "type": "complete",
-                "content": response_content,
-                "usage": {
-                    "tokens": token_count,
-                    "input_tokens": sum(
-                        len(msg.content.split()) for msg in messages
-                    ),
-                    "output_tokens": token_count,
-                    "cost": token_count * 0.00001,  # Rough estimate
-                },
-                "provider": provider.__class__.__name__,
-            }
+                # Try to use provider's native streaming if available
+                if hasattr(provider, 'astream') and callable(getattr(provider, 'astream')):
+                    try:
+                        async for chunk in provider.astream(messages):
+                            if hasattr(chunk, 'content') and chunk.content:
+                                token_count += 1
+                                response_content += chunk.content
 
+                                # Update resource usage
+                                self.limit_manager.update_workflow_usage(
+                                    workflow_id, tokens_delta=1
+                                )
+
+                                # Check limits during streaming
+                                self.limit_manager.check_workflow_limits(workflow_id, limits)
+
+                                yield {
+                                    "type": "token",
+                                    "content": chunk.content,
+                                    "token_index": token_count,
+                                    "accumulated_content": response_content,
+                                    "provider": provider.__class__.__name__,
+                                    "streaming_method": "native",
+                                }
+
+                                # Add small delay for realistic streaming
+                                await asyncio.sleep(0.01)
+                    except Exception as streaming_error:
+                        logger.warning(
+                            "Native streaming failed, falling back to simulation",
+                            provider=provider.__class__.__name__,
+                            error=str(streaming_error),
+                        )
+                        # Fall back to simulation
+                        async for token in self._simulate_token_streaming(
+                            provider, messages, workflow_id, limits
+                        ):
+                            token_count += 1
+                            response_content += token
+
+                            yield {
+                                "type": "token",
+                                "content": token,
+                                "token_index": token_count,
+                                "accumulated_content": response_content,
+                                "provider": provider.__class__.__name__,
+                                "streaming_method": "simulated",
+                            }
+
+                            await asyncio.sleep(0.01)
+                else:
+                    # Use simulated streaming for providers without native streaming
+                    async for token in self._simulate_token_streaming(
+                        provider, messages, workflow_id, limits
+                    ):
+                        token_count += 1
+                        response_content += token
+
+                        yield {
+                            "type": "token",
+                            "content": token,
+                            "token_index": token_count,
+                            "accumulated_content": response_content,
+                            "provider": provider.__class__.__name__,
+                            "streaming_method": "simulated",
+                        }
+
+                        await asyncio.sleep(0.01)
+
+                # Yield completion with usage
+                yield {
+                    "type": "complete",
+                    "content": response_content,
+                    "usage": {
+                        "tokens": token_count,
+                        "input_tokens": sum(
+                            len(msg.content.split()) for msg in messages
+                        ),
+                        "output_tokens": token_count,
+                        "cost": token_count * 0.00001,  # Rough estimate
+                    },
+                    "provider": provider.__class__.__name__,
+                }
+
+        except (WorkflowTimeoutError, WorkflowResourceLimitError):
+            # Re-raise timeout/limit errors
+            raise
         except Exception as e:
+            self.limit_manager.update_workflow_usage(
+                workflow_id, errors_delta=1
+            )
             yield {
                 "type": "error",
                 "error": str(e),
@@ -608,10 +840,13 @@ class WorkflowExecutionService:
             }
 
     async def _simulate_token_streaming(
-        self, provider, messages
+        self, provider, messages, workflow_id: str, limits: WorkflowLimits
     ) -> AsyncGenerator[str, None]:
         """Simulate token-level streaming for providers that don't support it natively."""
         try:
+            # Check timeout before starting
+            self.limit_manager.check_workflow_limits(workflow_id, limits)
+            
             # Get complete response first
             response = await provider.ainvoke(messages)
             response_text = (
@@ -624,13 +859,142 @@ class WorkflowExecutionService:
             tokens = response_text.split()
 
             for i, token in enumerate(tokens):
+                # Check limits during token generation
+                self.limit_manager.update_workflow_usage(workflow_id, tokens_delta=1)
+                self.limit_manager.check_workflow_limits(workflow_id, limits)
+                
                 # Add space before token (except first)
                 if i > 0:
                     yield " "
                 yield token
 
+        except (WorkflowTimeoutError, WorkflowResourceLimitError):
+            # Re-raise limit violations
+            raise
         except Exception as e:
             yield f"[Error: {str(e)}]"
+
+    async def _stream_complex_workflow(
+        self,
+        workflow_type: str,
+        workflow_manager,
+        state: ConversationState,
+        workflow_id: str,
+        limits: WorkflowLimits,
+    ) -> AsyncGenerator[dict[str, Any], None]:
+        """Stream complex workflows (rag, tools, full) with enhanced token-level streaming."""
+        try:
+            async with self.limit_manager.step_timeout_context(workflow_id, limits):
+                # Check if workflow manager supports streaming
+                if hasattr(workflow_manager, 'stream_workflow'):
+                    async for event in workflow_manager.stream_workflow(
+                        workflow_type, state
+                    ):
+                        # Update resource usage
+                        self.limit_manager.update_workflow_usage(
+                            workflow_id, steps_delta=1
+                        )
+                        
+                        # Process and enhance the event
+                        enhanced_event = self._enhance_workflow_event(
+                            event, workflow_type, workflow_id, limits
+                        )
+                        
+                        # Check limits after each event
+                        self.limit_manager.check_workflow_limits(workflow_id, limits)
+                        
+                        yield enhanced_event
+                else:
+                    # Fallback to non-streaming execution
+                    yield {
+                        "type": "thinking",
+                        "thought": f"Executing {workflow_type} workflow (non-streaming)...",
+                        "step": "workflow_execution",
+                    }
+                    
+                    result = await workflow_manager.run_workflow(workflow_type, state)
+                    
+                    # Simulate token streaming for the result
+                    if "response" in result and hasattr(result["response"], "content"):
+                        content = result["response"].content
+                        tokens = content.split()
+                        
+                        for i, token in enumerate(tokens):
+                            self.limit_manager.update_workflow_usage(
+                                workflow_id, tokens_delta=1
+                            )
+                            self.limit_manager.check_workflow_limits(workflow_id, limits)
+                            
+                            yield {
+                                "type": "token",
+                                "content": token if i == 0 else f" {token}",
+                                "token_index": i + 1,
+                                "accumulated_content": " ".join(tokens[:i+1]),
+                                "workflow_type": workflow_type,
+                                "streaming_method": "fallback_simulation",
+                            }
+                            
+                            await asyncio.sleep(0.01)
+                    
+                    # Yield usage information
+                    yield {
+                        "type": "complete",
+                        "usage": result.get("usage", {}),
+                        "metadata": {
+                            "workflow_type": workflow_type,
+                            "sources": result.get("sources", []),
+                            "tools_used": result.get("tools_used", []),
+                            "tool_calls": result.get("tool_calls", 0),
+                        },
+                    }
+                    
+        except (WorkflowTimeoutError, WorkflowResourceLimitError):
+            # Re-raise timeout/limit errors
+            raise
+        except Exception as e:
+            self.limit_manager.update_workflow_usage(
+                workflow_id, errors_delta=1
+            )
+            yield {
+                "type": "error",
+                "error": str(e),
+                "error_type": type(e).__name__,
+                "step": f"{workflow_type}_workflow_execution",
+            }
+
+    def _enhance_workflow_event(
+        self, 
+        event: dict[str, Any], 
+        workflow_type: str, 
+        workflow_id: str,
+        limits: WorkflowLimits,
+    ) -> dict[str, Any]:
+        """Enhance workflow events with additional metadata and resource tracking."""
+        enhanced_event = self._workflow_event(event, workflow_type)
+        
+        # Add resource tracking info
+        if workflow_id in self.limit_manager.active_workflows:
+            usage = self.limit_manager.active_workflows[workflow_id]
+            enhanced_event["resource_usage"] = {
+                "tokens_used": usage.tokens_used,
+                "memory_used_mb": usage.memory_used_mb,
+                "steps_completed": usage.steps_completed,
+                "errors_count": usage.errors_count,
+                "elapsed_time": time.time() - usage.start_time,
+            }
+            
+            # Add limit progress
+            enhanced_event["limit_progress"] = {
+                "token_usage_percent": (usage.tokens_used / limits.max_tokens) * 100,
+                "memory_usage_percent": (usage.memory_used_mb / limits.max_memory_mb) * 100,
+                "time_usage_percent": ((time.time() - usage.start_time) / limits.execution_timeout) * 100,
+            }
+        
+        # Add token count for token events
+        if event.get("type") == "token":
+            self.limit_manager.update_workflow_usage(workflow_id, tokens_delta=1)
+        
+        return enhanced_event
 
     def _workflow_event(
         self, event: dict[str, Any], workflow_type: str
@@ -839,7 +1203,7 @@ class WorkflowExecutionService:
                 conversation
             ),
             user_message=chat_request.message,
-            workflow_config=chat_request.workflow_config or {},
+            workflow_config={},
             correlation_id=correlation_id,
         )
 
@@ -900,7 +1264,7 @@ class WorkflowExecutionService:
         """Generate cache key for workflow result."""
         import hashlib
 
-        key_data = f"{conversation_id}:{chat_request.message}:{chat_request.workflow_type}:{chat_request.workflow_config}"
+        key_data = f"{conversation_id}:{chat_request.message}:{chat_request.workflow}:{chat_request.workflow_config}"
         return f"workflow:{hashlib.md5(key_data.encode()).hexdigest()}"
 
     async def get_workflow_performance_stats(self) -> dict[str, Any]:

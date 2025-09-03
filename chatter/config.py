@@ -235,6 +235,32 @@ class Settings(BaseSettings):
         default=3600, description="Long cache TTL"
     )
 
+    # Unified cache system settings
+    cache_backend: str = Field(
+        default="auto", description="Cache backend: 'memory', 'redis', 'multi_tier', or 'auto'"
+    )
+    cache_model_registry_ttl: int = Field(
+        default=1800, description="Model registry cache TTL (30 minutes)"
+    )
+    cache_workflow_ttl: int = Field(
+        default=3600, description="Workflow cache TTL (1 hour)"
+    )
+    cache_tool_ttl: int = Field(
+        default=3600, description="Tool cache TTL (1 hour)"
+    )
+    cache_session_ttl: int = Field(
+        default=300, description="Session cache TTL (5 minutes)"
+    )
+    cache_max_memory_size: int = Field(
+        default=1000, description="Maximum entries in memory cache"
+    )
+    cache_l1_size_ratio: float = Field(
+        default=0.1, description="L1 cache size as ratio of L2 cache (for multi-tier)"
+    )
+    cache_eviction_policy: str = Field(
+        default="lru", description="Cache eviction policy: 'lru', 'ttl', or 'random'"
+    )
+
     # =============================================================================
     # RATE LIMITING
     # =============================================================================

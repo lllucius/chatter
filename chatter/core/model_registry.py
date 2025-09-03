@@ -62,7 +62,7 @@ class ModelRegistryService:
         """
         self.session = session
         # Import here to avoid circular imports
-        from chatter.utils.caching import get_registry_cache
+        from chatter.core.unified_model_registry_cache import get_registry_cache
         from chatter.utils.performance import get_performance_metrics
 
         self.cache = get_registry_cache()
@@ -74,7 +74,7 @@ class ModelRegistryService:
     ) -> tuple[Sequence[Provider], int]:
         """List providers with pagination and caching."""
         # Check cache first
-        cached_result = self.cache.get_provider_list(
+        cached_result = await self.cache.get_provider_list(
             provider_type=None,
             active_only=params.active_only,
             page=params.page,
@@ -132,7 +132,7 @@ class ModelRegistryService:
                 }
                 provider_dicts.append(provider_dict)
 
-            self.cache.set_provider_list(
+            await self.cache.set_provider_list(
                 provider_type=None,
                 active_only=params.active_only,
                 page=params.page,
@@ -725,14 +725,14 @@ class ModelRegistryService:
     ) -> Provider | None:
         """Get the default provider for a model type with caching."""
         # Check cache first
-        cached_provider_id = self.cache.get_default_provider(model_type)
+        cached_provider_id = await self.cache.get_default_provider(model_type)
         if cached_provider_id:
             provider = await self.get_provider(cached_provider_id)
             if provider and provider.is_active:
                 return provider
             else:
                 # Cache is stale, invalidate it
-                self.cache.invalidate_defaults(model_type)
+                await self.cache.invalidate_defaults(model_type)
 
         # Use performance metrics
         async with self.metrics.measure_query("get_default_provider"):
@@ -753,7 +753,7 @@ class ModelRegistryService:
 
             # Cache the result
             if provider:
-                self.cache.set_default_provider(model_type, provider.id)
+                await self.cache.set_default_provider(model_type, provider.id)
 
             return provider
 
@@ -762,14 +762,14 @@ class ModelRegistryService:
     ) -> ModelDef | None:
         """Get the default model for a type with caching."""
         # Check cache first
-        cached_model_id = self.cache.get_default_model(model_type)
+        cached_model_id = await self.cache.get_default_model(model_type)
         if cached_model_id:
             model = await self.get_model(cached_model_id)
             if model and model.is_active:
                 return model
             else:
                 # Cache is stale, invalidate it
-                self.cache.invalidate_defaults(model_type)
+                await self.cache.invalidate_defaults(model_type)
 
         # Use performance metrics
         async with self.metrics.measure_query("get_default_model"):
@@ -786,7 +786,7 @@ class ModelRegistryService:
 
             # Cache the result
             if model:
-                self.cache.set_default_model(model_type, model.id)
+                await self.cache.set_default_model(model_type, model.id)
 
             return model
 

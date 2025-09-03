@@ -368,9 +368,11 @@ class LazyToolLoader:
         }
 
 
-# Global instances for easy access
-workflow_cache = WorkflowCache()
-lazy_tool_loader = LazyToolLoader()
+# Global instances for easy access - now using unified cache system
+from chatter.core.unified_workflow_cache import get_unified_workflow_cache, get_unified_lazy_tool_loader
+
+workflow_cache = get_unified_workflow_cache()
+lazy_tool_loader = get_unified_lazy_tool_loader()
 
 
 class PerformanceMonitor:

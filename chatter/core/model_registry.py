@@ -55,35 +55,93 @@ class ModelRegistryService:
     """Service for managing providers, models, and embedding spaces."""
 
     def __init__(self, session: AsyncSession):
+        """Initialize the model registry service.
+
+        Args:
+            session: Database session
+        """
         self.session = session
+        # Import here to avoid circular imports
+        from chatter.utils.caching import get_registry_cache
+        from chatter.utils.performance import get_performance_metrics
+
+        self.cache = get_registry_cache()
+        self.metrics = get_performance_metrics()
 
     # Provider methods
     async def list_providers(
         self, params: ListParams = ListParams()
     ) -> tuple[Sequence[Provider], int]:
-        """List providers with pagination."""
-        query = select(Provider)
-
-        if params.active_only:
-            query = query.where(Provider.is_active)
-
-        # Order by default first, then by display name
-        query = query.order_by(
-            Provider.is_default.desc(), Provider.display_name
+        """List providers with pagination and caching."""
+        # Check cache first
+        cached_result = self.cache.get_provider_list(
+            provider_type=None,
+            active_only=params.active_only,
+            page=params.page,
+            per_page=params.per_page,
         )
 
-        # Get total count
-        count_query = select(func.count()).select_from(query.subquery())
-        total = await self.session.scalar(count_query)
+        if cached_result:
+            # Convert cached dicts back to Provider objects for consistency
+            providers = []
+            for provider_dict in cached_result[0]:
+                # Create Provider-like object from dict
+                # In production, you'd use proper deserialization
+                provider = type('Provider', (), provider_dict)()
+                providers.append(provider)
+            return providers, cached_result[1]
 
-        # Apply pagination
-        query = query.offset((params.page - 1) * params.per_page).limit(
-            params.per_page
-        )
-        result = await self.session.execute(query)
-        providers = result.scalars().all()
+        # Use performance metrics
+        async with self.metrics.measure_query("list_providers"):
+            query = select(Provider)
 
-        return providers, total or 0
+            if params.active_only:
+                query = query.where(Provider.is_active)
+
+            # Order by default first, then by display name
+            query = query.order_by(
+                Provider.is_default.desc(), Provider.display_name
+            )
+
+            # Use optimized count query
+            count_query = select(func.count(Provider.id))
+            if params.active_only:
+                count_query = count_query.where(Provider.is_active)
+            total = await self.session.scalar(count_query)
+
+            # Apply pagination
+            query = query.offset((params.page - 1) * params.per_page).limit(
+                params.per_page
+            )
+            result = await self.session.execute(query)
+            providers = result.scalars().all()
+
+            # Cache the result as dictionaries
+            provider_dicts = []
+            for provider in providers:
+                provider_dict = {
+                    'id': provider.id,
+                    'name': provider.name,
+                    'display_name': provider.display_name,
+                    'description': provider.description,
+                    'provider_type': provider.provider_type,
+                    'is_active': provider.is_active,
+                    'is_default': provider.is_default,
+                    'created_at': provider.created_at,
+                    'updated_at': provider.updated_at,
+                }
+                provider_dicts.append(provider_dict)
+
+            self.cache.set_provider_list(
+                provider_type=None,
+                active_only=params.active_only,
+                page=params.page,
+                per_page=params.per_page,
+                providers=provider_dicts,
+                total=total or 0,
+            )
+
+            return providers, total or 0
 
     async def get_provider(self, provider_id: str) -> Provider | None:
         """Get provider by ID."""
@@ -665,36 +723,72 @@ class ModelRegistryService:
     async def get_default_provider(
         self, model_type: ModelType
     ) -> Provider | None:
-        """Get the default provider for a model type."""
-        # Find provider that has default models of the specified type
-        result = await self.session.execute(
-            select(Provider)
-            .join(ModelDef)
-            .where(
-                ModelDef.model_type == model_type,
-                ModelDef.is_default,
-                ModelDef.is_active,
-                Provider.is_active,
-                Provider.is_default
+        """Get the default provider for a model type with caching."""
+        # Check cache first
+        cached_provider_id = self.cache.get_default_provider(model_type)
+        if cached_provider_id:
+            provider = await self.get_provider(cached_provider_id)
+            if provider and provider.is_active:
+                return provider
+            else:
+                # Cache is stale, invalidate it
+                self.cache.invalidate_defaults(model_type)
+
+        # Use performance metrics
+        async with self.metrics.measure_query("get_default_provider"):
+            # Find provider that has default models of the specified type
+            result = await self.session.execute(
+                select(Provider)
+                .join(ModelDef)
+                .where(
+                    ModelDef.model_type == model_type,
+                    ModelDef.is_default,
+                    ModelDef.is_active,
+                    Provider.is_active,
+                    Provider.is_default
+                )
+                .distinct()
             )
-            .distinct()
-        )
-        return result.scalar_one_or_none()
+            provider = result.scalar_one_or_none()
+
+            # Cache the result
+            if provider:
+                self.cache.set_default_provider(model_type, provider.id)
+
+            return provider
 
     async def get_default_model(
         self, model_type: ModelType
     ) -> ModelDef | None:
-        """Get the default model for a type."""
-        result = await self.session.execute(
-            select(ModelDef)
-            .options(selectinload(ModelDef.provider))
-            .where(
-                ModelDef.model_type == model_type,
-                ModelDef.is_default,
-                ModelDef.is_active,
+        """Get the default model for a type with caching."""
+        # Check cache first
+        cached_model_id = self.cache.get_default_model(model_type)
+        if cached_model_id:
+            model = await self.get_model(cached_model_id)
+            if model and model.is_active:
+                return model
+            else:
+                # Cache is stale, invalidate it
+                self.cache.invalidate_defaults(model_type)
+
+        # Use performance metrics
+        async with self.metrics.measure_query("get_default_model"):
+            result = await self.session.execute(
+                select(ModelDef)
+                .options(selectinload(ModelDef.provider))
+                .where(
+                    ModelDef.model_type == model_type,
+                    ModelDef.is_default,
+                    ModelDef.is_active,
+                )
             )
-        )
-        return result.scalar_one_or_none()
+            model = result.scalar_one_or_none()
+
+            # Cache the result
+            if model:
+                self.cache.set_default_model(model_type, model.id)
+
+            return model
 
     async def get_default_embedding_space(
         self,

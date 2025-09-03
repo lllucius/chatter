@@ -228,38 +228,31 @@ class Prompt(Base):
 
         Returns:
             Rendered prompt string
+            
+        Raises:
+            ValueError: If template rendering fails or variables are invalid
         """
+        from chatter.utils.template_security import SecureTemplateRenderer
+        
         if self.template_format == "f-string":
-            try:
-                return self.content.format(**kwargs)
-            except KeyError as e:
-                raise ValueError(
-                    f"Missing required variable: {e}"
-                ) from e
+            return SecureTemplateRenderer.render_secure_f_string(
+                self.content, kwargs
+            )
         elif self.template_format == "jinja2":
-            try:
-                from jinja2 import Template
-
-                template = Template(self.content)
-                return template.render(**kwargs)
-            except ImportError as e:
-                raise ValueError(
-                    "Jinja2 not installed for template rendering"
-                ) from e
+            return SecureTemplateRenderer.render_jinja2_secure(
+                self.content, kwargs
+            )
         elif self.template_format == "mustache":
-            try:
-                import pystache
-
-                return pystache.render(self.content, kwargs)
-            except ImportError as e:
-                raise ValueError(
-                    "Pystache not installed for mustache template rendering"
-                ) from e
+            return SecureTemplateRenderer.render_mustache_secure(
+                self.content, kwargs
+            )
         else:
             # Simple string replacement for basic templates
+            from chatter.utils.template_security import SecureTemplateRenderer
+            sanitized_vars = SecureTemplateRenderer._sanitize_variables(kwargs)
             result = self.content
-            for key, value in kwargs.items():
-                result = result.replace(f"{{{key}}}", str(value))
+            for key, value in sanitized_vars.items():
+                result = result.replace(f"{{{key}}}", value)
             return result
 
     def validate_variables(self, **kwargs: Any) -> dict[str, Any]:
@@ -271,6 +264,8 @@ class Prompt(Base):
         Returns:
             Validation result with errors and warnings
         """
+        from chatter.utils.template_security import SecureTemplateRenderer
+        
         result = {
             "valid": True,
             "errors": [],
@@ -279,74 +274,103 @@ class Prompt(Base):
             "unexpected": [],
         }
 
-        # Check required variables
-        if self.required_variables:
-            for var in self.required_variables:
-                if var not in kwargs:
-                    result["valid"] = False
-                    result["errors"].append(
-                        f"Missing required variable: {var}"
-                    )
-                    result["missing_required"].append(var)
+        try:
+            # First validate template syntax and extract expected variables
+            template_validation = SecureTemplateRenderer.validate_template_syntax(
+                self.content, self.template_format
+            )
+            
+            # If template syntax is invalid, return early
+            if not template_validation['valid']:
+                result['valid'] = False
+                result['errors'].extend(template_validation['errors'])
+                return result
+            
+            expected_variables = set(template_validation['variables'])
+            
+            # Validate variable names and values using secure renderer
+            try:
+                SecureTemplateRenderer._sanitize_variables(kwargs)
+            except ValueError as e:
+                result['valid'] = False
+                result['errors'].append(str(e))
+                return result
 
-        # Check for unexpected variables
-        if self.variables:
+            # Check required variables
+            if self.required_variables:
+                for var in self.required_variables:
+                    if var not in kwargs:
+                        result["valid"] = False
+                        result["errors"].append(
+                            f"Missing required variable: {var}"
+                        )
+                        result["missing_required"].append(var)
+
+            # Check for unexpected variables (warnings only)
+            if self.variables:
+                expected_from_config = set(self.variables)
+            else:
+                expected_from_config = expected_variables
+                
             for var in kwargs:
-                if var not in self.variables:
+                if var not in expected_from_config:
                     result["warnings"].append(
                         f"Unexpected variable: {var}"
                     )
                     result["unexpected"].append(var)
 
-        # Validate input schema if provided
-        if self.input_schema:
-            try:
-                import jsonschema
+            # Validate input schema if provided
+            if self.input_schema:
+                try:
+                    import jsonschema
 
-                # Validate each variable against the schema
-                for var_name, var_value in kwargs.items():
-                    # Check if there's a schema for this variable
+                    # Validate each variable against the schema
+                    for var_name, var_value in kwargs.items():
+                        # Check if there's a schema for this variable
+                        if (
+                            "properties" in self.input_schema
+                            and var_name in self.input_schema["properties"]
+                        ):
+                            var_schema = self.input_schema["properties"][
+                                var_name
+                            ]
+
+                            try:
+                                jsonschema.validate(var_value, var_schema)
+                            except jsonschema.ValidationError as ve:
+                                result["valid"] = False
+                                result["errors"].append(
+                                    f"Variable '{var_name}' failed schema validation: {ve.message}"
+                                )
+                            except jsonschema.SchemaError as se:
+                                result["warnings"].append(
+                                    f"Invalid schema for variable '{var_name}': {se.message}"
+                                )
+
+                    # Validate the complete input against the full schema if it's a complete object schema
                     if (
-                        "properties" in self.input_schema
-                        and var_name in self.input_schema["properties"]
+                        "type" in self.input_schema
+                        and self.input_schema["type"] == "object"
                     ):
-                        var_schema = self.input_schema["properties"][
-                            var_name
-                        ]
-
                         try:
-                            jsonschema.validate(var_value, var_schema)
+                            jsonschema.validate(kwargs, self.input_schema)
                         except jsonschema.ValidationError as ve:
                             result["valid"] = False
                             result["errors"].append(
-                                f"Variable '{var_name}' failed schema validation: {ve.message}"
+                                f"Input validation failed: {ve.message}"
                             )
                         except jsonschema.SchemaError as se:
                             result["warnings"].append(
-                                f"Invalid schema for variable '{var_name}': {se.message}"
+                                f"Invalid input schema: {se.message}"
                             )
 
-                # Validate the complete input against the full schema if it's a complete object schema
-                if (
-                    "type" in self.input_schema
-                    and self.input_schema["type"] == "object"
-                ):
-                    try:
-                        jsonschema.validate(kwargs, self.input_schema)
-                    except jsonschema.ValidationError as ve:
-                        result["valid"] = False
-                        result["errors"].append(
-                            f"Input validation failed: {ve.message}"
-                        )
-                    except jsonschema.SchemaError as se:
-                        result["warnings"].append(
-                            f"Invalid input schema: {se.message}"
-                        )
-
-            except ImportError:
-                result["warnings"].append(
-                    "jsonschema package not available for input validation"
-                )
+                except ImportError:
+                    result["warnings"].append(
+                        "jsonschema package not available for input validation"
+                    )
+        except Exception as e:
+            result["valid"] = False
+            result["errors"].append(f"Validation failed: {str(e)}")
 
         return result
 

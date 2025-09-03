@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator, field_validator
 
 from chatter.models.prompt import PromptCategory, PromptType
 from chatter.schemas.common import (
@@ -31,7 +31,10 @@ class PromptBase(BaseModel):
 
     # Prompt content
     content: str = Field(
-        ..., min_length=1, description="Prompt content/template"
+        ..., 
+        min_length=1, 
+        max_length=100000,  # Reasonable limit for prompt content
+        description="Prompt content/template"
     )
     variables: list[str] | None = Field(
         None, description="Template variables"
@@ -101,9 +104,95 @@ class PromptBase(BaseModel):
         None, description="Additional metadata"
     )
 
+    @field_validator('content')
+    @classmethod
+    def validate_content(cls, v: str) -> str:
+        """Validate and sanitize prompt content."""
+        if not v or not v.strip():
+            raise ValueError("Content cannot be empty")
+        
+        # Basic sanitization - remove potentially dangerous patterns
+        dangerous_patterns = [
+            '__import__', 'exec(', 'eval(', 'compile(',
+            'subprocess', 'os.system', 'os.popen',
+            'open(', 'file(', '__builtins__'
+        ]
+        
+        content_lower = v.lower()
+        for pattern in dangerous_patterns:
+            if pattern in content_lower:
+                raise ValueError(f"Content contains potentially dangerous pattern: {pattern}")
+        
+        return v.strip()
+
+    @field_validator('template_format')
+    @classmethod
+    def validate_template_format(cls, v: str) -> str:
+        """Validate template format."""
+        allowed_formats = {'f-string', 'jinja2', 'mustache', 'simple'}
+        if v not in allowed_formats:
+            raise ValueError(f"Template format must be one of: {allowed_formats}")
+        return v
+
+    @field_validator('variables')
+    @classmethod
+    def validate_variables(cls, v: list[str] | None) -> list[str] | None:
+        """Validate variable names."""
+        if v is None:
+            return v
+        
+        for var in v:
+            if not var.isidentifier():
+                raise ValueError(f"Invalid variable name: {var}")
+        
+        return v
+
 
 class PromptCreate(PromptBase):
     """Schema for creating a prompt."""
+
+    @model_validator(mode='after')
+    def validate_prompt_create(self) -> 'PromptCreate':
+        """Validate prompt creation data."""
+        # Validate chain configuration
+        if self.is_chain and not self.chain_steps:
+            raise ValueError("Chain prompts must have chain_steps defined")
+        
+        if not self.is_chain and self.chain_steps:
+            raise ValueError("Non-chain prompts cannot have chain_steps")
+        
+        # Validate JSON schemas if provided
+        if self.input_schema:
+            self._validate_json_schema(self.input_schema, "input_schema")
+        
+        if self.output_schema:
+            self._validate_json_schema(self.output_schema, "output_schema")
+        
+        # Validate required variables are in variables list
+        if self.required_variables and self.variables:
+            missing_vars = set(self.required_variables) - set(self.variables)
+            if missing_vars:
+                raise ValueError(f"Required variables not in variables list: {missing_vars}")
+        
+        # Validate suggested temperature range
+        if self.suggested_temperature is not None:
+            if not 0.0 <= self.suggested_temperature <= 2.0:
+                raise ValueError("Suggested temperature must be between 0.0 and 2.0")
+        
+        return self
+    
+    def _validate_json_schema(self, schema: dict, field_name: str) -> None:
+        """Validate that a dictionary is a valid JSON schema."""
+        try:
+            import jsonschema
+            # This will raise SchemaError if invalid
+            jsonschema.Draft7Validator.check_schema(schema)
+        except ImportError:
+            # If jsonschema not available, do basic validation
+            if not isinstance(schema, dict):
+                raise ValueError(f"{field_name} must be a valid JSON object")
+        except Exception as e:
+            raise ValueError(f"Invalid {field_name}: {e}")
 
     pass
 
@@ -194,6 +283,49 @@ class PromptUpdate(BaseModel):
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
+
+    @model_validator(mode='after')
+    def validate_prompt_update(self) -> 'PromptUpdate':
+        """Validate prompt update data."""
+        # Validate chain configuration consistency
+        if self.is_chain is not None and self.chain_steps is not None:
+            if self.is_chain and not self.chain_steps:
+                raise ValueError("Chain prompts must have chain_steps defined")
+            if not self.is_chain and self.chain_steps:
+                raise ValueError("Non-chain prompts cannot have chain_steps")
+        
+        # Validate JSON schemas if provided
+        if self.input_schema:
+            self._validate_json_schema(self.input_schema, "input_schema")
+        
+        if self.output_schema:
+            self._validate_json_schema(self.output_schema, "output_schema")
+        
+        # Validate required variables are in variables list
+        if self.required_variables and self.variables:
+            missing_vars = set(self.required_variables) - set(self.variables)
+            if missing_vars:
+                raise ValueError(f"Required variables not in variables list: {missing_vars}")
+        
+        # Validate length constraints
+        if self.min_length is not None and self.max_length is not None:
+            if self.min_length > self.max_length:
+                raise ValueError("min_length cannot be greater than max_length")
+        
+        return self
+    
+    def _validate_json_schema(self, schema: dict, field_name: str) -> None:
+        """Validate that a dictionary is a valid JSON schema."""
+        try:
+            import jsonschema
+            # This will raise SchemaError if invalid
+            jsonschema.Draft7Validator.check_schema(schema)
+        except ImportError:
+            # If jsonschema not available, do basic validation
+            if not isinstance(schema, dict):
+                raise ValueError(f"{field_name} must be a valid JSON object")
+        except Exception as e:
+            raise ValueError(f"Invalid {field_name}: {e}")
 
 
 class PromptResponse(BaseModel):

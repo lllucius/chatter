@@ -228,39 +228,106 @@ class Prompt(Base):
 
         Returns:
             Rendered prompt string
+            
+        Raises:
+            ValueError: If template rendering fails or contains unsafe content
         """
+        # Sanitize input values to prevent injection attacks
+        sanitized_kwargs = self._sanitize_template_variables(kwargs)
+        
         if self.template_format == "f-string":
             try:
-                return self.content.format(**kwargs)
+                # Convert {var} format to $var format for safe_substitute
+                import re
+                import string
+                
+                # Convert {var} to $var for Template
+                template_content = re.sub(r'\{(\w+)\}', r'$\1', self.content)
+                template = string.Template(template_content)
+                return template.safe_substitute(sanitized_kwargs)
             except KeyError as e:
                 raise ValueError(
                     f"Missing required variable: {e}"
                 ) from e
+            except ValueError as e:
+                raise ValueError(
+                    f"Template formatting error: {e}"
+                ) from e
         elif self.template_format == "jinja2":
             try:
-                from jinja2 import Template
-
-                template = Template(self.content)
-                return template.render(**kwargs)
+                from jinja2 import Template, Environment, select_autoescape
+                
+                # Use sandboxed environment for security
+                from jinja2.sandbox import SandboxedEnvironment
+                
+                env = SandboxedEnvironment(
+                    autoescape=select_autoescape(['html', 'xml']),
+                    trim_blocks=True,
+                    lstrip_blocks=True
+                )
+                template = env.from_string(self.content)
+                return template.render(**sanitized_kwargs)
             except ImportError as e:
                 raise ValueError(
                     "Jinja2 not installed for template rendering"
                 ) from e
+            except Exception as e:
+                raise ValueError(
+                    f"Jinja2 template error: {e}"
+                ) from e
         elif self.template_format == "mustache":
             try:
                 import pystache
-
-                return pystache.render(self.content, kwargs)
+                
+                return pystache.render(self.content, sanitized_kwargs)
             except ImportError as e:
                 raise ValueError(
                     "Pystache not installed for mustache template rendering"
                 ) from e
+            except Exception as e:
+                raise ValueError(
+                    f"Mustache template error: {e}"
+                ) from e
         else:
             # Simple string replacement for basic templates
             result = self.content
-            for key, value in kwargs.items():
+            for key, value in sanitized_kwargs.items():
                 result = result.replace(f"{{{key}}}", str(value))
             return result
+    
+    def _sanitize_template_variables(self, kwargs: dict[str, Any]) -> dict[str, Any]:
+        """Sanitize template variables to prevent injection attacks.
+        
+        Args:
+            kwargs: Raw template variables
+            
+        Returns:
+            Sanitized template variables
+        """
+        sanitized = {}
+        for key, value in kwargs.items():
+            # Validate key names to prevent injection
+            if not key.isidentifier():
+                raise ValueError(f"Invalid variable name: {key}")
+            
+            # Convert value to string and escape potentially dangerous content
+            if isinstance(value, str):
+                # Basic HTML/script tag sanitization
+                import html
+                sanitized_value = html.escape(value)
+                # Remove potential script injections
+                sanitized_value = sanitized_value.replace('<script', '&lt;script')
+                sanitized_value = sanitized_value.replace('</script>', '&lt;/script&gt;')
+                sanitized[key] = sanitized_value
+            elif isinstance(value, (int, float, bool)):
+                sanitized[key] = value
+            elif value is None:
+                sanitized[key] = ""
+            else:
+                # Convert other types to safe string representation
+                sanitized[key] = html.escape(str(value))
+        
+        return sanitized
 
     def validate_variables(self, **kwargs: Any) -> dict[str, Any]:
         """Validate provided variables against prompt requirements.

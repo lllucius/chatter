@@ -67,14 +67,22 @@ async def create_prompt(
 
     except PromptError as e:
         raise BadRequestProblem(detail=str(e)) from None
+    except ValueError as e:
+        # Handle validation errors from schema validation
+        raise BadRequestProblem(detail=f"Validation error: {str(e)}") from None
     except Exception as e:
-        logger.error("Prompt creation failed", error=str(e))
+        logger.error(
+            "Prompt creation failed", 
+            user_id=current_user.id,
+            prompt_name=getattr(prompt_data, 'name', 'unknown'),
+            error=str(e)
+        )
         raise InternalServerProblem(
             detail="Failed to create prompt"
         ) from None
 
 
-@router.get("", response_model=PromptListResponse)
+@router.get("/", response_model=PromptListResponse)
 async def list_prompts(
     prompt_type: PromptType | None = Query(
         None, description="Filter by prompt type"
@@ -95,7 +103,11 @@ async def list_prompts(
     offset: int = Query(
         0, ge=0, description="Number of results to skip"
     ),
-    sort_by: str = Query("created_at", description="Sort field"),
+    sort_by: str = Query(
+        "created_at", 
+        pattern="^(id|name|created_at|updated_at|usage_count|rating|last_used_at|prompt_type|category|is_public|is_chain|version)$",
+        description="Sort field"
+    ),
     sort_order: str = Query(
         "desc", pattern="^(asc|desc)$", description="Sort order"
     ),

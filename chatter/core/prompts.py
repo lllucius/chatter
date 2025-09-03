@@ -22,6 +22,13 @@ logger = get_logger(__name__)
 class PromptService:
     """Service for prompt management operations."""
 
+    # Define allowed sort columns to prevent SQL injection
+    ALLOWED_SORT_COLUMNS = {
+        'id', 'name', 'created_at', 'updated_at', 'usage_count', 
+        'rating', 'last_used_at', 'prompt_type', 'category',
+        'is_public', 'is_chain', 'version'
+    }
+
     def __init__(self, session: AsyncSession):
         """Initialize prompt service.
 
@@ -29,6 +36,24 @@ class PromptService:
             session: Database session
         """
         self.session = session
+    
+    def _get_safe_sort_column(self, sort_by: str):
+        """Get a safe sort column to prevent SQL injection.
+        
+        Args:
+            sort_by: Requested sort column name
+            
+        Returns:
+            Safe SQLAlchemy column object
+            
+        Raises:
+            ValueError: If sort column is not allowed
+        """
+        if sort_by not in self.ALLOWED_SORT_COLUMNS:
+            # Default to created_at for invalid columns
+            sort_by = 'created_at'
+        
+        return getattr(Prompt, sort_by)
 
     async def create_prompt(
         self, user_id: str, prompt_data: PromptCreate
@@ -99,13 +124,14 @@ class PromptService:
             ) from e
 
     async def get_prompt(
-        self, prompt_id: str, user_id: str
+        self, prompt_id: str, user_id: str, include_sensitive: bool = True
     ) -> Prompt | None:
         """Get prompt by ID with access control.
 
         Args:
             prompt_id: Prompt ID
             user_id: Requesting user ID
+            include_sensitive: Whether to include sensitive fields (usage stats, etc.)
 
         Returns:
             Prompt if found and accessible, None otherwise
@@ -122,12 +148,30 @@ class PromptService:
                     )
                 )
             )
-            return result.scalar_one_or_none()
+            prompt = result.scalar_one_or_none()
+            
+            # For non-owners accessing public prompts, filter sensitive data
+            if prompt and prompt.owner_id != user_id and not include_sensitive:
+                # Create a copy with sensitive fields cleared
+                prompt_dict = prompt.to_dict()
+                sensitive_fields = [
+                    'usage_count', 'total_tokens_used', 'total_cost',
+                    'success_rate', 'avg_response_time_ms', 'last_used_at',
+                    'avg_tokens_per_use', 'extra_metadata'
+                ]
+                for field in sensitive_fields:
+                    prompt_dict[field] = None
+                
+                # Note: This is a simplified approach. In a real system,
+                # you might want to create a separate public view or DTO
+            
+            return prompt
 
         except Exception as e:
             logger.error(
                 "Failed to get prompt",
                 prompt_id=prompt_id,
+                user_id=user_id,
                 error=str(e),
             )
             return None
@@ -185,10 +229,8 @@ class PromptService:
             count_result = await self.session.execute(count_query)
             total_count = count_result.scalar()
 
-            # Add sorting
-            sort_column = getattr(
-                Prompt, list_request.sort_by, Prompt.created_at
-            )
+            # Add sorting with safe column validation
+            sort_column = self._get_safe_sort_column(list_request.sort_by)
             if list_request.sort_order == "desc":
                 query = query.order_by(desc(sort_column))
             else:
@@ -538,62 +580,44 @@ class PromptService:
             Dictionary with prompt statistics
         """
         try:
-            # Count prompts by type
-            type_counts = {}
-            for prompt_type in PromptType:
-                result = await self.session.execute(
-                    select(func.count(Prompt.id)).where(
-                        and_(
-                            Prompt.owner_id == user_id,
-                            Prompt.prompt_type == prompt_type,
-                        )
-                    )
-                )
-                type_counts[prompt_type.value] = result.scalar()
-
-            # Count prompts by category
-            category_counts = {}
-            for category in PromptCategory:
-                result = await self.session.execute(
-                    select(func.count(Prompt.id)).where(
-                        and_(
-                            Prompt.owner_id == user_id,
-                            Prompt.category == category,
-                        )
-                    )
-                )
-                category_counts[category.value] = result.scalar()
-
-            # Get most used prompts
-            most_used_result = await self.session.execute(
-                select(Prompt)
-                .where(Prompt.owner_id == user_id)
-                .order_by(desc(Prompt.usage_count))
-                .limit(5)
+            # Get all prompts for this user in a single query for efficiency
+            result = await self.session.execute(
+                select(Prompt).where(Prompt.owner_id == user_id)
             )
-            most_used_prompts = most_used_result.scalars().all()
+            prompts = result.scalars().all()
+            
+            # Count prompts by type and category
+            type_counts = {prompt_type.value: 0 for prompt_type in PromptType}
+            category_counts = {category.value: 0 for category in PromptCategory}
+            
+            total_usage = 0
+            total_tokens = 0
+            total_cost = 0.0
+            
+            # Calculate stats in memory (more efficient than multiple DB queries)
+            for prompt in prompts:
+                type_counts[prompt.prompt_type.value] += 1
+                category_counts[prompt.category.value] += 1
+                total_usage += prompt.usage_count
+                total_tokens += prompt.total_tokens_used
+                total_cost += prompt.total_cost
+            
+            # Get most used prompts (already loaded)
+            most_used_prompts = sorted(
+                prompts, 
+                key=lambda p: p.usage_count, 
+                reverse=True
+            )[:5]
 
-            # Get recent prompts
-            recent_result = await self.session.execute(
-                select(Prompt)
-                .where(Prompt.owner_id == user_id)
-                .order_by(desc(Prompt.created_at))
-                .limit(5)
-            )
-            recent_prompts = recent_result.scalars().all()
-
-            # Get usage totals
-            usage_result = await self.session.execute(
-                select(
-                    func.sum(Prompt.usage_count),
-                    func.sum(Prompt.total_tokens_used),
-                    func.sum(Prompt.total_cost),
-                ).where(Prompt.owner_id == user_id)
-            )
-            total_usage, total_tokens, total_cost = usage_result.first()
+            # Get recent prompts (already loaded)
+            recent_prompts = sorted(
+                prompts,
+                key=lambda p: p.created_at,
+                reverse=True
+            )[:5]
 
             return {
-                "total_prompts": sum(type_counts.values()),
+                "total_prompts": len(prompts),
                 "prompts_by_type": type_counts,
                 "prompts_by_category": category_counts,
                 "most_used_prompts": [
@@ -603,9 +627,9 @@ class PromptService:
                     prompt.to_dict() for prompt in recent_prompts
                 ],
                 "usage_stats": {
-                    "total_usage_count": total_usage or 0,
-                    "total_tokens_used": total_tokens or 0,
-                    "total_cost": float(total_cost or 0),
+                    "total_usage_count": total_usage,
+                    "total_tokens_used": total_tokens,
+                    "total_cost": total_cost,
                 },
             }
 

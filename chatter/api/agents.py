@@ -17,11 +17,13 @@ from chatter.schemas.agents import (
     AgentStatsResponse,
     AgentUpdateRequest,
 )
+from chatter.utils.agent_validation import AgentInputValidator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     InternalServerProblem,
     NotFoundProblem,
 )
+from chatter.utils.rate_limiter import get_rate_limiter, RateLimitExceeded
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -59,44 +61,79 @@ async def create_agent(
         Created agent data
     """
     try:
-        # We'll need to adapt this to work with the actual agent manager interface
-        # For now, create a placeholder response structure
-        agent_id = await agent_manager.create_agent(
-            name=agent_data.name,
-            agent_type=agent_data.agent_type,
-            description=agent_data.description,
-            system_prompt=agent_data.system_prompt,
-            llm=None,  # This would need to be properly initialized
-            personality_traits=agent_data.personality_traits,
-            knowledge_domains=agent_data.knowledge_domains,
-            response_style=agent_data.response_style,
-            capabilities=agent_data.capabilities,
-            available_tools=agent_data.available_tools,
-            primary_llm=agent_data.primary_llm,
-            fallback_llm=agent_data.fallback_llm,
-            temperature=agent_data.temperature,
-            max_tokens=agent_data.max_tokens,
-            max_conversation_length=agent_data.max_conversation_length,
-            context_window_size=agent_data.context_window_size,
-            response_timeout=agent_data.response_timeout,
-            learning_enabled=agent_data.learning_enabled,
-            feedback_weight=agent_data.feedback_weight,
-            adaptation_threshold=agent_data.adaptation_threshold,
-            tags=agent_data.tags,
-            metadata=agent_data.metadata,
-        )
+        # Apply rate limiting for agent creation
+        rate_limiter = get_rate_limiter()
+        try:
+            await rate_limiter.check_rate_limit(
+                f"create_agent:{current_user.id}",
+                limit_per_hour=10,  # 10 agents per hour
+                limit_per_day=50,   # 50 agents per day
+            )
+        except RateLimitExceeded as e:
+            raise InternalServerProblem(detail=str(e))
+
+        # Validate input data using the input validator
+        agent_data.name = AgentInputValidator.validate_agent_name(agent_data.name)
+        agent_data.description = AgentInputValidator.validate_agent_name(agent_data.description)  # Same validation rules
+        agent_data.system_prompt = AgentInputValidator.validate_agent_message(agent_data.system_prompt)
+        agent_data.agent_type = AgentInputValidator.validate_agent_type(agent_data.agent_type)
+        agent_data.temperature = AgentInputValidator.validate_temperature(agent_data.temperature)
+        agent_data.max_tokens = AgentInputValidator.validate_max_tokens(agent_data.max_tokens)
+
+        # Add created_by to metadata
+        metadata = agent_data.metadata or {}
+        metadata["created_by"] = current_user.id
+        
+        # Create agent with enhanced error handling
+        try:
+            agent_id = await agent_manager.create_agent(
+                name=agent_data.name,
+                agent_type=agent_data.agent_type,
+                description=agent_data.description,
+                system_message=agent_data.system_prompt,
+                llm=None,  # Will be handled by agent manager
+                personality_traits=agent_data.personality_traits,
+                knowledge_domains=agent_data.knowledge_domains,
+                response_style=agent_data.response_style,
+                capabilities=agent_data.capabilities,
+                available_tools=agent_data.available_tools,
+                primary_llm=agent_data.primary_llm,
+                fallback_llm=agent_data.fallback_llm,
+                temperature=agent_data.temperature,
+                max_tokens=agent_data.max_tokens,
+                max_conversation_length=agent_data.max_conversation_length,
+                context_window_size=agent_data.context_window_size,
+                response_timeout=agent_data.response_timeout,
+                learning_enabled=agent_data.learning_enabled,
+                feedback_weight=agent_data.feedback_weight,
+                adaptation_threshold=agent_data.adaptation_threshold,
+                tags=agent_data.tags,
+                metadata=metadata,
+                created_by=current_user.id,
+            )
+        except ValueError as e:
+            logger.error("Invalid agent configuration", error=str(e))
+            raise InternalServerProblem(detail=f"Invalid agent configuration: {str(e)}")
 
         # Get the created agent
         agent = await agent_manager.get_agent(agent_id)
         if not agent:
+            logger.error("Created agent not found", agent_id=agent_id)
             raise InternalServerProblem(
                 detail="Failed to retrieve created agent"
             )
 
+        logger.info("Agent created successfully", 
+                   agent_id=agent_id, 
+                   agent_name=agent_data.name,
+                   created_by=current_user.id)
+
         return AgentResponse.model_validate(agent.profile.model_dump())
 
+    except InternalServerProblem:
+        raise
     except Exception as e:
-        logger.error("Failed to create agent", error=str(e))
+        logger.error("Failed to create agent", error=str(e), exc_info=True)
         raise InternalServerProblem(
             detail="Failed to create agent"
         ) from e
@@ -119,33 +156,50 @@ async def list_agents(
         Paginated list of agents
     """
     try:
-        offset = request.pagination.offset
-        limit = request.pagination.limit
+        # Validate pagination parameters
+        offset, limit = AgentInputValidator.validate_pagination_params(
+            request.pagination.offset, 
+            request.pagination.limit
+        )
 
+        # Get agents with filtering
         agents, total = await agent_manager.list_agents(
             agent_type=request.agent_type,
             status=request.status,
             offset=offset,
             limit=limit,
+            user_id=current_user.id,  # Filter by user's agents only
         )
 
-        # Filter by tags if specified
+        # Additional client-side filtering by tags if specified
         if request.tags:
             filtered_agents = []
             for agent in agents:
+                # Check if any of the requested tags match agent tags
                 if any(tag in agent.tags for tag in request.tags):
                     filtered_agents.append(agent)
             agents = filtered_agents
-            total = len(agents)  # Update total after tag filtering
+            # Note: This changes the total count for this page but not the overall total
+            # In a production system, tag filtering should be done at the database level
 
-        agent_responses = [
-            AgentResponse.model_validate(agent.model_dump())
-            for agent in agents
-        ]
+        # Convert to response format
+        agent_responses = []
+        for agent in agents:
+            try:
+                agent_responses.append(AgentResponse.model_validate(agent.model_dump()))
+            except Exception as e:
+                logger.warning(f"Failed to serialize agent {agent.id}: {e}")
+                continue
 
         # Calculate pagination info
-        current_page = (offset // limit) + 1
-        total_pages = (total + limit - 1) // limit  # Ceiling division
+        current_page = (offset // limit) + 1 if limit > 0 else 1
+        total_pages = (total + limit - 1) // limit if limit > 0 else 1  # Ceiling division
+
+        logger.info("Listed agents", 
+                   count=len(agent_responses), 
+                   total=total,
+                   page=current_page,
+                   user_id=current_user.id)
 
         return AgentListResponse(
             agents=agent_responses,
@@ -156,9 +210,34 @@ async def list_agents(
         )
 
     except Exception as e:
-        logger.error("Failed to list agents", error=str(e))
+        logger.error("Failed to list agents", error=str(e), user_id=current_user.id)
         raise InternalServerProblem(
             detail="Failed to list agents"
+        ) from e
+
+
+@router.get("/stats/overview", response_model=AgentStatsResponse)
+async def get_agent_stats(
+    current_user: User = Depends(get_current_user),
+    agent_manager: AgentManager = Depends(get_agent_manager),
+) -> AgentStatsResponse:
+    """Get agent statistics.
+
+    Args:
+        current_user: Current authenticated user
+        agent_manager: Agent manager instance
+
+    Returns:
+        Agent statistics
+    """
+    try:
+        stats = await agent_manager.get_agent_stats()
+        return AgentStatsResponse.model_validate(stats)
+
+    except Exception as e:
+        logger.error("Failed to get agent stats", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to get agent stats"
         ) from e
 
 
@@ -181,8 +260,15 @@ async def get_agent(
         Agent data
     """
     try:
+        # Validate agent_id format
+        agent_id = AgentInputValidator.validate_agent_id(agent_id)
+
         agent = await agent_manager.get_agent(agent_id)
         if not agent:
+            raise NotFoundProblem(detail=f"Agent {agent_id} not found")
+
+        # Check if user has access to this agent (basic ownership check)
+        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         return AgentResponse.model_validate(agent.profile.model_dump())
@@ -215,23 +301,34 @@ async def update_agent(
         Updated agent data
     """
     try:
+        # Validate agent_id format (UUID)
+        import uuid
+        try:
+            uuid.UUID(agent_id)
+        except ValueError:
+            raise NotFoundProblem(detail=f"Invalid agent ID format: {agent_id}")
+
         # First check if agent exists
         agent = await agent_manager.get_agent(agent_id)
         if not agent:
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
-        # Update agent profile with provided data
-        profile = agent.profile
-        update_data = agent_data.model_dump(exclude_unset=True)
+        # Check if user has permission to update this agent
+        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+            raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
-        for field, value in update_data.items():
-            if hasattr(profile, field):
-                setattr(profile, field, value)
+        # Update agent using the agent manager
+        success = await agent_manager.update_agent(agent_id, agent_data.model_dump(exclude_unset=True))
+        
+        if not success:
+            raise InternalServerProblem(detail="Failed to update agent")
 
-        # The agent manager would need an update method - for now we'll simulate it
-        # await agent_manager.update_agent(agent_id, profile)
+        # Get updated agent
+        updated_agent = await agent_manager.get_agent(agent_id)
+        if not updated_agent:
+            raise InternalServerProblem(detail="Failed to retrieve updated agent")
 
-        return AgentResponse.model_validate(profile.model_dump())
+        return AgentResponse.model_validate(updated_agent.profile.model_dump())
 
     except NotFoundProblem:
         raise
@@ -261,10 +358,26 @@ async def delete_agent(
         Deletion result
     """
     try:
+        # Validate agent_id format (UUID)
+        import uuid
+        try:
+            uuid.UUID(agent_id)
+        except ValueError:
+            raise NotFoundProblem(detail=f"Invalid agent ID format: {agent_id}")
+
+        # Check if agent exists and user has permission to delete
+        agent = await agent_manager.get_agent(agent_id)
+        if not agent:
+            raise NotFoundProblem(detail=f"Agent {agent_id} not found")
+
+        # Check if user has permission to delete this agent
+        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+            raise NotFoundProblem(detail=f"Agent {agent_id} not found")
+
         success = await agent_manager.delete_agent(agent_id)
 
         if not success:
-            raise NotFoundProblem(detail=f"Agent {agent_id} not found")
+            raise InternalServerProblem(detail="Failed to delete agent")
 
         return AgentDeleteResponse(
             success=True,
@@ -303,11 +416,43 @@ async def interact_with_agent(
         Agent response
     """
     try:
+        # Apply rate limiting for agent interactions
+        rate_limiter = get_rate_limiter()
+        try:
+            await rate_limiter.check_rate_limit(
+                f"interact_agent:{current_user.id}:{agent_id}",
+                limit_per_hour=100,  # 100 interactions per hour per agent
+                limit_per_day=1000,  # 1000 interactions per day per agent
+            )
+        except RateLimitExceeded as e:
+            raise InternalServerProblem(detail=str(e))
+
+        # Validate inputs
+        agent_id = AgentInputValidator.validate_agent_id(agent_id)
+        conversation_id = AgentInputValidator.validate_conversation_id(interaction_data.conversation_id)
+        message = AgentInputValidator.validate_agent_message(interaction_data.message)
+        context = AgentInputValidator.sanitize_agent_context(interaction_data.context)
+
+        # Check if agent exists and user has access
+        agent = await agent_manager.get_agent(agent_id)
+        if not agent:
+            raise NotFoundProblem(detail=f"Agent {agent_id} not found")
+
+        # Check if user has permission to interact with this agent
+        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+            raise NotFoundProblem(detail=f"Agent {agent_id} not found")
+
+        # Add user context to interaction
+        context["user_id"] = current_user.id
+
+        from datetime import UTC, datetime
+        start_time = datetime.now(UTC)
+
         response = await agent_manager.send_message_to_agent(
             agent_id=agent_id,
-            message=interaction_data.message,
-            conversation_id=interaction_data.conversation_id,
-            context=interaction_data.context,
+            message=message,
+            conversation_id=conversation_id,
+            context=context,
         )
 
         if response is None:
@@ -315,17 +460,15 @@ async def interact_with_agent(
                 detail=f"Agent {agent_id} not found or unable to respond"
             )
 
-        # For now, return a basic response structure
-        # In a real implementation, the agent manager would return full interaction details
-        from datetime import UTC, datetime
+        response_time = (datetime.now(UTC) - start_time).total_seconds()
 
         return AgentInteractResponse(
             agent_id=agent_id,
             response=response,
-            conversation_id=interaction_data.conversation_id,
+            conversation_id=conversation_id,
             tools_used=[],  # Would be populated by actual agent response
             confidence_score=0.9,  # Would be calculated by agent
-            response_time=1.5,  # Would be measured
+            response_time=response_time,
             timestamp=datetime.now(UTC),
         )
 
@@ -339,29 +482,4 @@ async def interact_with_agent(
         )
         raise InternalServerProblem(
             detail="Failed to interact with agent"
-        ) from e
-
-
-@router.get("/stats/overview", response_model=AgentStatsResponse)
-async def get_agent_stats(
-    current_user: User = Depends(get_current_user),
-    agent_manager: AgentManager = Depends(get_agent_manager),
-) -> AgentStatsResponse:
-    """Get agent statistics.
-
-    Args:
-        current_user: Current authenticated user
-        agent_manager: Agent manager instance
-
-    Returns:
-        Agent statistics
-    """
-    try:
-        stats = await agent_manager.get_agent_stats()
-        return AgentStatsResponse.model_validate(stats)
-
-    except Exception as e:
-        logger.error("Failed to get agent stats", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get agent stats"
         ) from e

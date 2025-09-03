@@ -124,23 +124,33 @@ async def update_provider(
     current_user: User = Depends(get_current_user),
 ):
     """Update a provider."""
-    service = ModelRegistryService(session)
-    provider = await service.update_provider(provider_id, provider_data)
+    from chatter.core.exceptions import ValidationError
 
-    if not provider:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Provider not found",
+    service = ModelRegistryService(session)
+
+    try:
+        provider = await service.update_provider(provider_id, provider_data)
+
+        if not provider:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Provider not found",
+            )
+
+        logger.info(
+            "Updated provider",
+            provider_id=provider.id,
+            provider_name=provider.name,
+            user_id=current_user.id,
         )
 
-    logger.info(
-        "Updated provider",
-        provider_id=provider.id,
-        provider_name=provider.name,
-        user_id=current_user.id,
-    )
+        return provider
 
-    return provider
+    except ValidationError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
 
 
 @router.delete(
@@ -365,32 +375,42 @@ async def update_model(
     current_user: User = Depends(get_current_user),
 ):
     """Update a model definition."""
+    from chatter.core.exceptions import ValidationError
+
     service = ModelRegistryService(session)
-    model = await service.update_model(model_id, model_data)
 
-    if not model:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
+    try:
+        model = await service.update_model(model_id, model_data)
+
+        if not model:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Model not found",
+            )
+
+        # Refresh to get provider relationship
+        model = await service.get_model(model.id)
+
+        if not model:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to retrieve updated model",
+            )
+
+        logger.info(
+            "Updated model",
+            model_id=model.id,
+            model_name=model.name,
+            user_id=current_user.id,
         )
 
-    # Refresh to get provider relationship
-    model = await service.get_model(model.id)
+        return model
 
-    if not model:
+    except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to retrieve updated model",
-        )
-
-    logger.info(
-        "Updated model",
-        model_id=model.id,
-        model_name=model.name,
-        user_id=current_user.id,
-    )
-
-    return model
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
 
 
 @router.delete("/models/{model_id}", response_model=ModelDeleteResponse)

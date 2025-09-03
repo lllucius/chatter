@@ -118,6 +118,12 @@ class ModelRegistryService:
             return None
 
         update_data = provider_data.model_dump(exclude_unset=True)
+
+        # Validate that we're not trying to update critical read-only fields
+        if 'name' in update_data or 'provider_type' in update_data:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError("Cannot update provider name or type after creation")
+
         for field, value in update_data.items():
             setattr(provider, field, value)
 
@@ -305,6 +311,10 @@ class ModelRegistryService:
             raise ValidationError(f"Provider {provider.name} is not active")
 
         model = ModelDef(**model_data.model_dump())
+
+        # Validate model configuration consistency
+        await self._validate_model_consistency(model)
+
         self.session.add(model)
         await self.session.commit()
         await self.session.refresh(model)
@@ -319,6 +329,31 @@ class ModelRegistryService:
             return None
 
         update_data = model_data.model_dump(exclude_unset=True)
+
+        # Validate that we're not trying to update critical read-only fields
+        if 'name' in update_data or 'model_type' in update_data or 'provider_id' in update_data:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError("Cannot update model name, type, or provider after creation")
+
+        # Validate dimension changes for embedding models
+        if 'dimensions' in update_data and model.model_type == ModelType.EMBEDDING:
+            # Check if there are existing embedding spaces using this model
+            existing_spaces = await self.session.execute(
+                select(EmbeddingSpace).where(
+                    EmbeddingSpace.model_id == model_id,
+                    EmbeddingSpace.is_active
+                )
+            )
+            if existing_spaces.scalars().first():
+                from chatter.core.exceptions import ValidationError
+                raise ValidationError(
+                    "Cannot change dimensions of embedding model that has active embedding spaces"
+                )
+
+        # Validate if trying to deactivate the model
+        if 'is_active' in update_data and not update_data['is_active']:
+            await self._validate_deactivation_allowed(model)
+
         for field, value in update_data.items():
             setattr(model, field, value)
 
@@ -404,6 +439,58 @@ class ModelRegistryService:
         spaces = result.scalars().all()
 
         return spaces, total or 0
+
+    async def _validate_model_consistency(self, model: ModelDef) -> None:
+        """Validate that model configuration is consistent."""
+        # Embedding models must have dimensions
+        if model.model_type == ModelType.EMBEDDING and not model.dimensions:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError("Embedding models must specify dimensions")
+
+        # LLM models should not have dimensions
+        if model.model_type == ModelType.LLM and model.dimensions:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError("LLM models should not specify dimensions")
+
+        # Validate token limits are reasonable
+        if model.max_tokens and model.max_tokens <= 0:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError("max_tokens must be positive")
+
+        if model.context_length and model.context_length <= 0:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError("context_length must be positive")
+
+        # Validate batch settings
+        if model.max_batch_size and model.max_batch_size <= 0:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError("max_batch_size must be positive")
+
+        if model.max_batch_size and not model.supports_batch:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError("max_batch_size specified but supports_batch is False")
+
+    async def _validate_deactivation_allowed(self, model: ModelDef) -> None:
+        """Validate that model can be deactivated."""
+        if not model.is_active:
+            return  # Already inactive
+
+        # Check if this is the only active model of its type for this provider
+        active_models = await self.session.execute(
+            select(func.count()).where(
+                ModelDef.provider_id == model.provider_id,
+                ModelDef.model_type == model.model_type,
+                ModelDef.is_active,
+                ModelDef.id != model.id
+            )
+        )
+        count = active_models.scalar() or 0
+
+        if count == 0:
+            from chatter.core.exceptions import ValidationError
+            raise ValidationError(
+                f"Cannot deactivate the last active {model.model_type} model for provider {model.provider.name}"
+            )
 
     async def get_embedding_space(
         self, space_id: str

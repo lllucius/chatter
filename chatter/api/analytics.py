@@ -1,9 +1,12 @@
 """Analytics and statistics endpoints."""
 
+import time
+from collections import defaultdict
 from datetime import UTC, datetime
+from functools import wraps
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -24,6 +27,58 @@ from chatter.utils.problem import InternalServerProblem
 logger = get_logger(__name__)
 router = APIRouter()
 
+# Simple in-memory rate limiting (in production, use Redis)
+_rate_limit_data: dict[str, list[float]] = defaultdict(list)
+
+
+def rate_limit(max_requests: int = 10, window_seconds: int = 60):
+    """Rate limiting decorator for analytics endpoints.
+    
+    Args:
+        max_requests: Maximum requests allowed in the time window
+        window_seconds: Time window in seconds
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            # Extract user info from request
+            current_user = None
+            request = None
+            
+            for arg in args:
+                if isinstance(arg, User):
+                    current_user = arg
+                elif isinstance(arg, Request):
+                    request = arg
+            
+            # Try to get user from kwargs
+            if not current_user:
+                current_user = kwargs.get('current_user')
+            
+            if current_user:
+                user_key = f"analytics_rate_limit:{current_user.id}"
+                current_time = time.time()
+                
+                # Clean old entries
+                _rate_limit_data[user_key] = [
+                    timestamp for timestamp in _rate_limit_data[user_key]
+                    if current_time - timestamp < window_seconds
+                ]
+                
+                # Check if limit exceeded
+                if len(_rate_limit_data[user_key]) >= max_requests:
+                    from chatter.utils.problem import RateLimitProblem
+                    raise RateLimitProblem(
+                        detail=f"Rate limit exceeded: {max_requests} requests per {window_seconds} seconds"
+                    )
+                
+                # Record this request
+                _rate_limit_data[user_key].append(current_time)
+            
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
+
 
 async def get_analytics_service(
     session: AsyncSession = Depends(get_session_generator),
@@ -33,6 +88,7 @@ async def get_analytics_service(
 
 
 @router.get("/conversations", response_model=ConversationStatsResponse)
+@rate_limit(max_requests=20, window_seconds=60)  # 20 requests per minute
 async def get_conversation_stats(
     start_date: datetime | None = Query(
         None, description="Start date for analytics"
@@ -63,12 +119,19 @@ async def get_conversation_stats(
     try:
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+        from pydantic import ValidationError
 
-        time_range = AnalyticsTimeRange(
-            start_date=start_date,
-            end_date=end_date,
-            period=period,
-        )
+        try:
+            time_range = AnalyticsTimeRange(
+                start_date=start_date,
+                end_date=end_date,
+                period=period,
+            )
+        except ValidationError as ve:
+            from chatter.utils.problem import BadRequestProblem
+            raise BadRequestProblem(
+                detail=f"Invalid time range parameters: {ve}"
+            ) from ve
 
         stats = await analytics_service.get_conversation_stats(
             current_user.id, time_range
@@ -395,6 +458,7 @@ async def get_system_analytics(
 
 
 @router.get("/dashboard", response_model=DashboardResponse)
+@rate_limit(max_requests=10, window_seconds=60)  # 10 dashboard requests per minute
 async def get_dashboard(
     start_date: datetime | None = Query(
         None, description="Start date for analytics"
@@ -543,6 +607,21 @@ async def get_user_analytics(
         User-specific analytics
     """
     try:
+        # Authorization check: users can only access their own analytics
+        # unless they are admin (assuming is_admin field exists)
+        if current_user.id != user_id and not getattr(current_user, 'is_admin', False):
+            from chatter.utils.problem import ForbiddenProblem
+            raise ForbiddenProblem(
+                detail="Access denied: You can only view your own analytics"
+            )
+
+        # Validate user_id format (assuming it follows ULID format)
+        if not user_id or len(user_id) != 26:
+            from chatter.utils.problem import BadRequestProblem
+            raise BadRequestProblem(
+                detail="Invalid user ID format"
+            )
+
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
 
@@ -564,6 +643,7 @@ async def get_user_analytics(
 
 
 @router.post("/export")
+@rate_limit(max_requests=5, window_seconds=300)  # 5 exports per 5 minutes
 async def export_analytics(
     format: str = Query(
         "json", description="Export format (json, csv, xlsx)"
@@ -600,17 +680,35 @@ async def export_analytics(
         Exported analytics report
     """
     try:
-
         from fastapi.responses import StreamingResponse
+        from pydantic import ValidationError
 
-        # Create time range object
-        from chatter.schemas.analytics import AnalyticsTimeRange
+        # Validate export parameters first
+        try:
+            # Create time range object
+            from chatter.schemas.analytics import AnalyticsTimeRange
 
-        time_range = AnalyticsTimeRange(
-            start_date=start_date,
-            end_date=end_date,
-            period=period,
-        )
+            time_range = AnalyticsTimeRange(
+                start_date=start_date,
+                end_date=end_date,
+                period=period,
+            )
+            
+            # Validate the export request
+            from chatter.schemas.analytics import AnalyticsExportRequest
+            
+            export_request = AnalyticsExportRequest(
+                metrics=metrics,
+                time_range=time_range,
+                format=format,
+                include_raw_data=False
+            )
+            
+        except ValidationError as ve:
+            from chatter.utils.problem import BadRequestProblem
+            raise BadRequestProblem(
+                detail=f"Invalid export parameters: {ve}"
+            ) from ve
 
         # Convert time range to tuple, handling None values
         date_range = None
@@ -646,4 +744,43 @@ async def export_analytics(
         logger.error("Failed to export analytics", error=str(e))
         raise InternalServerProblem(
             detail="Failed to export analytics"
+        ) from e
+
+
+@router.get("/health")
+async def get_analytics_health(
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
+) -> dict[str, Any]:
+    """Get analytics system health status.
+    
+    Returns:
+        Health check results for analytics system
+    """
+    try:
+        return await analytics_service.get_analytics_health_check()
+    except Exception as e:
+        logger.error("Failed to get analytics health", error=str(e))
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.now(UTC).isoformat(),
+        }
+
+
+@router.get("/metrics/summary")
+@rate_limit(max_requests=30, window_seconds=60)  # 30 requests per minute
+async def get_analytics_metrics_summary(
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
+) -> dict[str, Any]:
+    """Get summary of key analytics metrics for monitoring.
+    
+    Returns:
+        Summary of analytics metrics
+    """
+    try:
+        return await analytics_service.get_analytics_metrics_summary()
+    except Exception as e:
+        logger.error("Failed to get analytics metrics summary", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to get analytics metrics summary"
         ) from e

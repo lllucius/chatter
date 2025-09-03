@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from chatter.schemas.common import GetRequestBase
 
@@ -354,6 +354,32 @@ class AnalyticsTimeRange(BaseModel):
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     )
 
+    @field_validator("period")
+    @classmethod
+    def validate_period(cls, v: str) -> str:
+        """Validate the period parameter."""
+        valid_periods = {"1h", "24h", "7d", "30d", "90d"}
+        if v not in valid_periods:
+            raise ValueError(
+                f"Invalid period '{v}'. Must be one of: {', '.join(valid_periods)}"
+            )
+        return v
+
+    @model_validator(mode="after")
+    def validate_date_range(self) -> "AnalyticsTimeRange":
+        """Validate that start_date is before end_date when both are provided."""
+        if self.start_date and self.end_date:
+            if self.start_date >= self.end_date:
+                raise ValueError(
+                    "start_date must be before end_date"
+                )
+            # Warn about very large date ranges (more than 1 year)
+            delta = self.end_date - self.start_date
+            if delta.days > 365:
+                # Could raise a warning or validation error for performance
+                pass
+        return self
+
 
 class ConversationStatsRequest(GetRequestBase):
     """Schema for conversation stats request."""
@@ -430,6 +456,36 @@ class AnalyticsExportRequest(BaseModel):
     include_raw_data: bool = Field(
         False, description="Include raw data points"
     )
+
+    @field_validator("metrics")
+    @classmethod
+    def validate_metrics(cls, v: list[str]) -> list[str]:
+        """Validate metrics list."""
+        if not v:
+            raise ValueError("At least one metric must be specified")
+        
+        valid_metrics = {
+            "conversations", "usage", "performance", "documents", 
+            "system", "toolservers", "custom"
+        }
+        
+        for metric in v:
+            if metric not in valid_metrics:
+                raise ValueError(
+                    f"Invalid metric '{metric}'. Valid metrics: {', '.join(valid_metrics)}"
+                )
+        return v
+
+    @field_validator("format")
+    @classmethod
+    def validate_format(cls, v: str) -> str:
+        """Validate export format."""
+        valid_formats = {"json", "csv", "xlsx"}
+        if v not in valid_formats:
+            raise ValueError(
+                f"Invalid format '{v}'. Must be one of: {', '.join(valid_formats)}"
+            )
+        return v
 
 
 class AnalyticsExportResponse(BaseModel):

@@ -1,5 +1,7 @@
 """Agent management endpoints with comprehensive validation, caching, and security."""
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.responses import JSONResponse
 

@@ -7,10 +7,12 @@ from chatter.models.user import User
 from chatter.schemas.plugins import (
     PluginActionResponse,
     PluginDeleteResponse,
+    PluginHealthCheckResponse,
     PluginInstallRequest,
     PluginListRequest,
     PluginListResponse,
     PluginResponse,
+    PluginStatsResponse,
     PluginUpdateRequest,
 )
 from chatter.services.plugins import PluginManager
@@ -438,7 +440,7 @@ async def disable_plugin(
         ) from e
 
 
-@router.get("/health", response_model=dict)
+@router.get("/health", response_model=PluginHealthCheckResponse)
 async def health_check_plugins(
     auto_disable_unhealthy: bool = False,
     current_user: User = Depends(get_current_user),
@@ -462,15 +464,15 @@ async def health_check_plugins(
         healthy_plugins = sum(1 for r in results.values() if r.get("healthy", False))
         unhealthy_plugins = total_plugins - healthy_plugins
         
-        return {
-            "summary": {
+        return PluginHealthCheckResponse(
+            summary={
                 "total_plugins": total_plugins,
                 "healthy_plugins": healthy_plugins,
                 "unhealthy_plugins": unhealthy_plugins,
                 "auto_disable_enabled": auto_disable_unhealthy
             },
-            "results": results
-        }
+            results=results
+        )
 
     except Exception as e:
         logger.error("Failed to perform health check", error=str(e))
@@ -479,11 +481,11 @@ async def health_check_plugins(
         ) from e
 
 
-@router.get("/stats", response_model=dict)
+@router.get("/stats", response_model=PluginStatsResponse)
 async def get_plugin_stats(
     current_user: User = Depends(get_current_user),
     plugin_manager: PluginManager = Depends(get_plugin_manager),
-) -> dict:
+) -> PluginStatsResponse:
     """Get plugin system statistics.
 
     Args:
@@ -495,10 +497,107 @@ async def get_plugin_stats(
     """
     try:
         stats = await plugin_manager.get_plugin_stats()
-        return stats
+        return PluginStatsResponse(**stats)
 
     except Exception as e:
         logger.error("Failed to get plugin stats", error=str(e))
         raise InternalServerProblem(
             detail="Failed to get plugin stats"
+        ) from e
+
+
+@router.get("/{plugin_id}/dependencies", response_model=dict)
+async def check_plugin_dependencies(
+    plugin_id: str,
+    current_user: User = Depends(get_current_user),
+    plugin_manager: PluginManager = Depends(get_plugin_manager),
+) -> dict:
+    """Check plugin dependencies.
+
+    Args:
+        plugin_id: Plugin ID
+        current_user: Current authenticated user
+        plugin_manager: Plugin manager instance
+
+    Returns:
+        Dependency check results
+    """
+    try:
+        results = await plugin_manager.check_plugin_dependencies(plugin_id)
+        return results
+
+    except Exception as e:
+        logger.error("Failed to check plugin dependencies", plugin_id=plugin_id, error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to check plugin dependencies"
+        ) from e
+
+
+@router.post("/bulk/enable", response_model=dict)
+async def bulk_enable_plugins(
+    plugin_ids: list[str],
+    current_user: User = Depends(get_current_user),
+    plugin_manager: PluginManager = Depends(get_plugin_manager),
+) -> dict:
+    """Enable multiple plugins.
+
+    Args:
+        plugin_ids: List of plugin IDs to enable
+        current_user: Current authenticated user
+        plugin_manager: Plugin manager instance
+
+    Returns:
+        Bulk operation results
+    """
+    try:
+        results = await plugin_manager.bulk_enable_plugins(plugin_ids)
+        
+        success_count = sum(1 for success in results.values() if success)
+        total_count = len(plugin_ids)
+        
+        return {
+            "success_count": success_count,
+            "total_count": total_count,
+            "results": results
+        }
+
+    except Exception as e:
+        logger.error("Failed to bulk enable plugins", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to bulk enable plugins"
+        ) from e
+
+
+@router.post("/bulk/disable", response_model=dict)
+async def bulk_disable_plugins(
+    plugin_ids: list[str],
+    current_user: User = Depends(get_current_user),
+    plugin_manager: PluginManager = Depends(get_plugin_manager),
+) -> dict:
+    """Disable multiple plugins.
+
+    Args:
+        plugin_ids: List of plugin IDs to disable
+        current_user: Current authenticated user
+        plugin_manager: Plugin manager instance
+
+    Returns:
+        Bulk operation results
+    """
+    try:
+        results = await plugin_manager.bulk_disable_plugins(plugin_ids)
+        
+        success_count = sum(1 for success in results.values() if success)
+        total_count = len(plugin_ids)
+        
+        return {
+            "success_count": success_count,
+            "total_count": total_count,
+            "results": results
+        }
+
+    except Exception as e:
+        logger.error("Failed to bulk disable plugins", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to bulk disable plugins"
         ) from e

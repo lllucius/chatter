@@ -776,6 +776,97 @@ class PluginManager:
 
         return results
 
+    async def check_plugin_dependencies(self, plugin_id: str) -> dict[str, Any]:
+        """Check if plugin dependencies are satisfied.
+        
+        Args:
+            plugin_id: Plugin ID
+            
+        Returns:
+            Dependency check results
+        """
+        plugin_instance = self.plugins.get(plugin_id)
+        if not plugin_instance:
+            return {"error": "Plugin not found"}
+        
+        manifest = plugin_instance.manifest
+        results = {
+            "plugin_id": plugin_id,
+            "plugin_name": manifest.name,
+            "dependencies": [],
+            "all_satisfied": True
+        }
+        
+        for dependency in manifest.dependencies:
+            dep_result = {
+                "name": dependency,
+                "satisfied": False,
+                "error": None
+            }
+            
+            try:
+                # Basic check - try to parse as package requirement
+                import re
+                match = re.match(r"([a-zA-Z0-9_\-\.]+)(.*)$", dependency)
+                if match:
+                    package_name = match.group(1)
+                    version_spec = match.group(2)
+                    
+                    # Try to import the package
+                    try:
+                        __import__(package_name.replace("-", "_"))
+                        dep_result["satisfied"] = True
+                    except ImportError:
+                        dep_result["error"] = f"Package {package_name} not installed"
+                        results["all_satisfied"] = False
+                else:
+                    dep_result["error"] = "Invalid dependency format"
+                    results["all_satisfied"] = False
+                    
+            except Exception as e:
+                dep_result["error"] = str(e)
+                results["all_satisfied"] = False
+            
+            results["dependencies"].append(dep_result)
+        
+        return results
+
+    async def bulk_enable_plugins(self, plugin_ids: list[str]) -> dict[str, bool]:
+        """Enable multiple plugins.
+        
+        Args:
+            plugin_ids: List of plugin IDs to enable
+            
+        Returns:
+            Dictionary mapping plugin ID to success status
+        """
+        results = {}
+        for plugin_id in plugin_ids:
+            try:
+                results[plugin_id] = await self.enable_plugin(plugin_id)
+            except Exception as e:
+                logger.error(f"Failed to enable plugin {plugin_id}: {e}")
+                results[plugin_id] = False
+        return results
+
+    async def bulk_disable_plugins(self, plugin_ids: list[str]) -> dict[str, bool]:
+        """Disable multiple plugins.
+        
+        Args:
+            plugin_ids: List of plugin IDs to disable
+            
+        Returns:
+            Dictionary mapping plugin ID to success status
+        """
+        results = {}
+        for plugin_id in plugin_ids:
+            try:
+                results[plugin_id] = await self.disable_plugin(plugin_id)
+            except Exception as e:
+                logger.error(f"Failed to disable plugin {plugin_id}: {e}")
+                results[plugin_id] = False
+        return results
+
     async def _validate_plugin(
         self, plugin_path: Path, manifest: PluginManifest
     ) -> None:
@@ -986,6 +1077,11 @@ class PluginManager:
                 raise ImportError("Plugin loading timed out or failed")
             except Exception as e:
                 raise ImportError(f"Error loading plugin module: {e}")
+
+        except ImportError:
+            raise
+        except Exception as e:
+            raise ImportError(f"Failed to load plugin: {e}")
 
         # Find plugin class
         plugin_class = None

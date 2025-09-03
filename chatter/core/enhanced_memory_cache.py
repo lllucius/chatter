@@ -268,8 +268,16 @@ class EnhancedInMemoryCache(CacheInterface):
         Returns:
             New value after increment
         """
+        if not self.is_valid_key(key):
+            raise ValueError("Invalid cache key")
+        
         async with self._lock:
-            current_value = await self.get(key)
+            # Get current value without using the async get method to avoid deadlock
+            current_value = None
+            if key in self._cache and not self._is_expired(key):
+                current_value = self._cache[key]
+                # Move to end for LRU
+                self._cache.move_to_end(key)
             
             if current_value is None:
                 new_value = delta
@@ -279,7 +287,21 @@ class EnhancedInMemoryCache(CacheInterface):
                 except (ValueError, TypeError):
                     raise ValueError(f"Cannot increment non-numeric value: {current_value}")
             
-            await self.set(key, new_value)
+            # Set value directly without using async set method to avoid deadlock
+            ttl = self.config.default_ttl
+            expiry_time = datetime.now() + timedelta(seconds=ttl)
+            
+            # Check if we need to evict items
+            if key not in self._cache and len(self._cache) >= self.config.max_size:
+                await self._evict()
+            
+            # Store value and expiry
+            self._cache[key] = new_value
+            self._expiry_times[key] = expiry_time
+            
+            # Move to end for LRU
+            self._cache.move_to_end(key)
+            
             return new_value
     
     async def expire(self, key: str, ttl: int) -> bool:

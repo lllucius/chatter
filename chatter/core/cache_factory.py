@@ -47,37 +47,37 @@ class CacheFactory:
         """
         return {
             CacheType.MODEL_REGISTRY: CacheConfig(
-                default_ttl=settings.cache_ttl_medium,  # 30 minutes
-                max_size=500,
-                eviction_policy="lru",
+                default_ttl=settings.cache_model_registry_ttl,
+                max_size=settings.cache_max_memory_size // 2,  # Smaller for specialized cache
+                eviction_policy=settings.cache_eviction_policy,
                 key_prefix="model_registry",
                 enable_stats=True
             ),
             CacheType.WORKFLOW: CacheConfig(
-                default_ttl=settings.cache_ttl_long,  # 1 hour
-                max_size=100,
-                eviction_policy="lru",
+                default_ttl=settings.cache_workflow_ttl,
+                max_size=100,  # Workflows are larger objects, keep smaller cache
+                eviction_policy=settings.cache_eviction_policy,
                 key_prefix="workflow",
                 enable_stats=True
             ),
             CacheType.TOOL: CacheConfig(
-                default_ttl=settings.cache_ttl_long,  # 1 hour
-                max_size=200,
-                eviction_policy="lru",
+                default_ttl=settings.cache_tool_ttl,
+                max_size=200,  # Tools are medium-sized objects
+                eviction_policy=settings.cache_eviction_policy,
                 key_prefix="tool",
                 enable_stats=True
             ),
             CacheType.GENERAL: CacheConfig(
-                default_ttl=settings.cache_ttl,  # Default TTL
-                max_size=1000,
-                eviction_policy="lru",
+                default_ttl=settings.cache_ttl,
+                max_size=settings.cache_max_memory_size,
+                eviction_policy=settings.cache_eviction_policy,
                 key_prefix="general",
                 enable_stats=True
             ),
             CacheType.SESSION: CacheConfig(
-                default_ttl=settings.cache_ttl_short,  # 5 minutes
-                max_size=1000,
-                eviction_policy="ttl",  # Sessions expire by time
+                default_ttl=settings.cache_session_ttl,
+                max_size=settings.cache_max_memory_size,
+                eviction_policy="ttl",  # Sessions should expire by time
                 key_prefix="session",
                 enable_stats=True
             )
@@ -140,6 +140,22 @@ class CacheFactory:
         Returns:
             Optimal cache backend
         """
+        # Use explicit setting if provided
+        if settings.cache_backend != "auto":
+            backend_map = {
+                "memory": CacheBackend.MEMORY,
+                "redis": CacheBackend.REDIS,
+                "multi_tier": CacheBackend.MULTI_TIER,
+            }
+            
+            if settings.cache_backend in backend_map:
+                logger.debug(f"Using configured cache backend: {settings.cache_backend}")
+                return backend_map[settings.cache_backend]
+            else:
+                logger.warning(f"Unknown cache backend '{settings.cache_backend}', using auto-detection")
+        
+        # Auto-detect optimal backend
+        
         # If Redis is explicitly disabled, use memory
         if not settings.cache_enabled:
             logger.debug("Redis disabled, using memory cache")
@@ -185,7 +201,7 @@ class CacheFactory:
         elif backend == CacheBackend.MULTI_TIER:
             redis_url = kwargs.get('redis_url')
             l1_config = kwargs.get('l1_config')
-            l1_size_ratio = kwargs.get('l1_size_ratio', 0.1)
+            l1_size_ratio = kwargs.get('l1_size_ratio', settings.cache_l1_size_ratio)
             return MultiTierCache(config, l1_config, redis_url, l1_size_ratio)
         
         else:

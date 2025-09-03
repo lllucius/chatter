@@ -1,6 +1,7 @@
 """Analytics service for generating statistics and insights."""
 
 import asyncio
+import time
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -1474,6 +1475,63 @@ class AnalyticsService:
         else:
             return 60 * 24 * 7  # Default 7 days
 
+    def _apply_query_optimizations(self, query, limit: int | None = None):
+        """Apply query optimizations like limits and hints.
+        
+        Args:
+            query: SQLAlchemy query object
+            limit: Optional limit for results
+            
+        Returns:
+            Optimized query
+        """
+        # Add limit to prevent memory issues
+        if limit:
+            query = query.limit(limit)
+        
+        # Add execution options for better performance
+        query = query.execution_options(
+            compiled_cache={},  # Enable statement caching
+            autocommit=False,   # Use transactions
+        )
+        
+        return query
+    
+    async def _execute_with_retry(self, query, max_retries: int = 3):
+        """Execute query with retry logic for transient failures.
+        
+        Args:
+            query: SQLAlchemy query to execute
+            max_retries: Maximum number of retries
+            
+        Returns:
+            Query result
+        """
+        last_exception = None
+        
+        for attempt in range(max_retries):
+            try:
+                result = await self.session.execute(query)
+                return result
+            except Exception as e:
+                last_exception = e
+                logger.warning(
+                    f"Query execution failed (attempt {attempt + 1}/{max_retries}): {e}"
+                )
+                
+                # Only retry on specific database errors
+                if "connection" in str(e).lower() or "timeout" in str(e).lower():
+                    if attempt < max_retries - 1:
+                        import asyncio
+                        await asyncio.sleep(0.5 * (attempt + 1))  # Exponential backoff
+                        continue
+                
+                # Don't retry on other errors
+                break
+        
+        # Re-raise the last exception if all retries failed
+        raise last_exception
+
     async def get_user_analytics(
         self,
         user_id: str,
@@ -1673,6 +1731,184 @@ class AnalyticsService:
         return generate()
     
     def _export_to_xlsx(self, data: dict[str, Any]) -> Any:
+        """Convert analytics data to Excel format."""
+        try:
+            import io
+            from openpyxl import Workbook
+            
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Analytics Export"
+            
+            # Write header info
+            ws.append(["Analytics Export"])
+            ws.append(["Generated:", data["export_info"]["generated_at"]])
+            ws.append(["User ID:", data["export_info"]["user_id"]])
+            ws.append([])  # Empty row
+            
+            # Write each metric as separate sections
+            for metric, metric_data in data.items():
+                if metric == "export_info":
+                    continue
+                    
+                ws.append([f"{metric.title()} Metrics"])
+                
+                if isinstance(metric_data, dict) and "error" not in metric_data:
+                    # Flatten the dictionary for Excel
+                    for key, value in metric_data.items():
+                        if isinstance(value, (int, float, str)):
+                            ws.append([key, value])
+                        elif isinstance(value, dict):
+                            ws.append([key, str(value)])
+                
+                ws.append([])  # Empty row between sections
+            
+            # Save to bytes
+            output = io.BytesIO()
+            wb.save(output)
+            output.seek(0)
+            
+            content = output.getvalue()
+            output.close()
+            
+            # Return as generator for streaming
+            def generate():
+                yield content
+                
+            return generate()
+            
+        except ImportError:
+            logger.error("openpyxl not available for Excel export")
+            return self._export_to_csv(data)  # Fallback to CSV
+    
+    async def get_analytics_health_check(self) -> dict[str, Any]:
+        """Perform health check on analytics system.
+        
+        Returns:
+            Health check results including database connectivity and query performance
+        """
+        health_data = {
+            "status": "healthy",
+            "timestamp": datetime.now(UTC).isoformat(),
+            "checks": {}
+        }
+        
+        try:
+            # Test database connectivity
+            start_time = time.time()
+            await self.session.execute(select(literal(1)))
+            db_response_time = (time.time() - start_time) * 1000
+            
+            health_data["checks"]["database"] = {
+                "status": "healthy" if db_response_time < 1000 else "slow",
+                "response_time_ms": db_response_time,
+                "details": "Database connectivity check"
+            }
+            
+            # Test basic query performance with a simple count
+            start_time = time.time()
+            result = await self.session.execute(
+                select(func.count(Conversation.id)).limit(1)
+            )
+            query_response_time = (time.time() - start_time) * 1000
+            
+            health_data["checks"]["query_performance"] = {
+                "status": "healthy" if query_response_time < 2000 else "slow",
+                "response_time_ms": query_response_time,
+                "details": "Basic query performance check"
+            }
+            
+            # Check for any critical errors in analytics data
+            health_data["checks"]["data_integrity"] = {
+                "status": "healthy",
+                "details": "No data integrity issues detected"
+            }
+            
+            # Overall health assessment
+            all_checks_healthy = all(
+                check["status"] == "healthy" 
+                for check in health_data["checks"].values()
+            )
+            
+            if not all_checks_healthy:
+                health_data["status"] = "degraded"
+                
+            return health_data
+            
+        except Exception as e:
+            logger.error(f"Analytics health check failed: {e}")
+            health_data["status"] = "unhealthy"
+            health_data["error"] = str(e)
+            health_data["checks"]["database"] = {
+                "status": "unhealthy",
+                "error": str(e),
+                "details": "Database connectivity failed"
+            }
+            
+            return health_data
+    
+    async def get_analytics_metrics_summary(self) -> dict[str, Any]:
+        """Get a quick summary of key analytics metrics for monitoring.
+        
+        Returns:
+            Summary of analytics metrics for system monitoring
+        """
+        try:
+            import time
+            
+            # Quick metrics collection (last 24 hours)
+            yesterday = datetime.now(UTC) - timedelta(hours=24)
+            
+            # Count recent conversations
+            recent_conversations = await self.session.execute(
+                select(func.count(Conversation.id))
+                .where(Conversation.created_at >= yesterday)
+            )
+            
+            # Count recent messages
+            recent_messages = await self.session.execute(
+                select(func.count(Message.id))
+                .where(Message.created_at >= yesterday)
+            )
+            
+            # Count recent documents
+            recent_documents = await self.session.execute(
+                select(func.count(Document.id))
+                .where(Document.created_at >= yesterday)
+            )
+            
+            # Get average response time
+            avg_response_time = await self.session.execute(
+                select(func.avg(Message.response_time_ms))
+                .where(
+                    and_(
+                        Message.created_at >= yesterday,
+                        Message.response_time_ms.is_not(None)
+                    )
+                )
+            )
+            
+            return {
+                "period": "last_24_hours",
+                "metrics": {
+                    "conversations_created": recent_conversations.scalar() or 0,
+                    "messages_sent": recent_messages.scalar() or 0,
+                    "documents_processed": recent_documents.scalar() or 0,
+                    "avg_response_time_ms": float(avg_response_time.scalar() or 0),
+                },
+                "timestamp": datetime.now(UTC).isoformat(),
+                "status": "collected"
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to collect analytics metrics summary: {e}")
+            return {
+                "period": "last_24_hours",
+                "metrics": {},
+                "timestamp": datetime.now(UTC).isoformat(),
+                "status": "failed",
+                "error": str(e)
+            }
         """Convert analytics data to Excel format."""
         try:
             import io

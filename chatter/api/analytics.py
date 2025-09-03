@@ -1,9 +1,12 @@
 """Analytics and statistics endpoints."""
 
+import time
+from collections import defaultdict
 from datetime import UTC, datetime
+from functools import wraps
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -24,6 +27,58 @@ from chatter.utils.problem import InternalServerProblem
 logger = get_logger(__name__)
 router = APIRouter()
 
+# Simple in-memory rate limiting (in production, use Redis)
+_rate_limit_data: dict[str, list[float]] = defaultdict(list)
+
+
+def rate_limit(max_requests: int = 10, window_seconds: int = 60):
+    """Rate limiting decorator for analytics endpoints.
+    
+    Args:
+        max_requests: Maximum requests allowed in the time window
+        window_seconds: Time window in seconds
+    """
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            # Extract user info from request
+            current_user = None
+            request = None
+            
+            for arg in args:
+                if isinstance(arg, User):
+                    current_user = arg
+                elif isinstance(arg, Request):
+                    request = arg
+            
+            # Try to get user from kwargs
+            if not current_user:
+                current_user = kwargs.get('current_user')
+            
+            if current_user:
+                user_key = f"analytics_rate_limit:{current_user.id}"
+                current_time = time.time()
+                
+                # Clean old entries
+                _rate_limit_data[user_key] = [
+                    timestamp for timestamp in _rate_limit_data[user_key]
+                    if current_time - timestamp < window_seconds
+                ]
+                
+                # Check if limit exceeded
+                if len(_rate_limit_data[user_key]) >= max_requests:
+                    from chatter.utils.problem import RateLimitProblem
+                    raise RateLimitProblem(
+                        detail=f"Rate limit exceeded: {max_requests} requests per {window_seconds} seconds"
+                    )
+                
+                # Record this request
+                _rate_limit_data[user_key].append(current_time)
+            
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
+
 
 async def get_analytics_service(
     session: AsyncSession = Depends(get_session_generator),
@@ -33,6 +88,7 @@ async def get_analytics_service(
 
 
 @router.get("/conversations", response_model=ConversationStatsResponse)
+@rate_limit(max_requests=20, window_seconds=60)  # 20 requests per minute
 async def get_conversation_stats(
     start_date: datetime | None = Query(
         None, description="Start date for analytics"
@@ -402,6 +458,7 @@ async def get_system_analytics(
 
 
 @router.get("/dashboard", response_model=DashboardResponse)
+@rate_limit(max_requests=10, window_seconds=60)  # 10 dashboard requests per minute
 async def get_dashboard(
     start_date: datetime | None = Query(
         None, description="Start date for analytics"
@@ -586,6 +643,7 @@ async def get_user_analytics(
 
 
 @router.post("/export")
+@rate_limit(max_requests=5, window_seconds=300)  # 5 exports per 5 minutes
 async def export_analytics(
     format: str = Query(
         "json", description="Export format (json, csv, xlsx)"
@@ -686,4 +744,43 @@ async def export_analytics(
         logger.error("Failed to export analytics", error=str(e))
         raise InternalServerProblem(
             detail="Failed to export analytics"
+        ) from e
+
+
+@router.get("/health")
+async def get_analytics_health(
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
+) -> dict[str, Any]:
+    """Get analytics system health status.
+    
+    Returns:
+        Health check results for analytics system
+    """
+    try:
+        return await analytics_service.get_analytics_health_check()
+    except Exception as e:
+        logger.error("Failed to get analytics health", error=str(e))
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.now(UTC).isoformat(),
+        }
+
+
+@router.get("/metrics/summary")
+@rate_limit(max_requests=30, window_seconds=60)  # 30 requests per minute
+async def get_analytics_metrics_summary(
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
+) -> dict[str, Any]:
+    """Get summary of key analytics metrics for monitoring.
+    
+    Returns:
+        Summary of analytics metrics
+    """
+    try:
+        return await analytics_service.get_analytics_metrics_summary()
+    except Exception as e:
+        logger.error("Failed to get analytics metrics summary", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to get analytics metrics summary"
         ) from e

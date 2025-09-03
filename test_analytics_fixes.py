@@ -132,6 +132,184 @@ def test_import_fixes():
         traceback.print_exc()
         return False
 
+def test_analyzer_implementations():
+    """Test that analyzer classes have proper implementations."""
+    print("\nTesting analyzer implementations...")
+    
+    try:
+        from chatter.core.analytics import (
+            ConversationAnalyzer, 
+            PerformanceAnalyzer, 
+            TrendAnalyzer
+        )
+        import asyncio
+        
+        # Test ConversationAnalyzer
+        conv_analyzer = ConversationAnalyzer()
+        sample_messages = [
+            {"role": "user", "content": "Hello, how are you?"},
+            {"role": "assistant", "content": "I'm doing well, thank you for asking!"},
+        ]
+        
+        async def test_conversation_analysis():
+            result = await conv_analyzer.analyze_conversation("test_conv", sample_messages)
+            return result.get("analysis") == "conversation_analyzed"
+        
+        if asyncio.run(test_conversation_analysis()):
+            print("✓ ConversationAnalyzer working correctly")
+        else:
+            print("✗ ConversationAnalyzer failed")
+            return False
+        
+        # Test PerformanceAnalyzer  
+        perf_analyzer = PerformanceAnalyzer()
+        sample_metrics = {
+            "avg_response_time_ms": 1500,
+            "error_rate": 0.02,
+            "cpu_usage": 0.75,
+            "memory_usage": 0.80
+        }
+        
+        async def test_performance_analysis():
+            result = await perf_analyzer.analyze_performance("test_component", sample_metrics)
+            return "analysis" in result and "health_score" in result.get("analysis", {})
+        
+        if asyncio.run(test_performance_analysis()):
+            print("✓ PerformanceAnalyzer working correctly")
+        else:
+            print("✗ PerformanceAnalyzer failed")
+            return False
+        
+        # Test TrendAnalyzer
+        trend_analyzer = TrendAnalyzer()
+        sample_data = [
+            {"timestamp": "2023-01-01", "value": 100},
+            {"timestamp": "2023-01-02", "value": 110},
+            {"timestamp": "2023-01-03", "value": 120},
+        ]
+        
+        async def test_trend_analysis():
+            result = await trend_analyzer.analyze_trends("test_metric", sample_data)
+            return "trend" in result and "confidence" in result
+        
+        if asyncio.run(test_trend_analysis()):
+            print("✓ TrendAnalyzer working correctly")
+        else:
+            print("✗ TrendAnalyzer failed")
+            return False
+        
+        return True
+        
+    except Exception as e:
+        print(f"✗ Analyzer implementations test failed: {e}")
+        traceback.print_exc()
+        return False
+
+def test_export_functionality():
+    """Test export functionality implementation."""
+    print("\nTesting export functionality...")
+    
+    try:
+        from chatter.core.analytics import AnalyticsService
+        from chatter.schemas.analytics import AnalyticsTimeRange
+        from datetime import datetime, UTC
+        
+        # Test CSV export helper
+        service = AnalyticsService(None)  # Mock session
+        
+        sample_data = {
+            "export_info": {
+                "generated_at": datetime.now(UTC).isoformat(),
+                "user_id": "test_user",
+                "metrics_included": ["conversations"]
+            },
+            "conversations": {
+                "total_conversations": 10,
+                "total_messages": 50
+            }
+        }
+        
+        # Test CSV export
+        csv_result = service._export_to_csv(sample_data)
+        if csv_result:
+            print("✓ CSV export functionality implemented")
+        else:
+            print("✗ CSV export failed")
+            return False
+        
+        # Test Excel export 
+        try:
+            xlsx_result = service._export_to_xlsx(sample_data)
+            if xlsx_result:
+                print("✓ Excel export functionality implemented")
+            else:
+                print("✗ Excel export failed")
+                return False
+        except ImportError:
+            print("⚠ Excel export requires openpyxl (fallback to CSV works)")
+        
+        return True
+        
+    except Exception as e:
+        print(f"✗ Export functionality test failed: {e}")
+        traceback.print_exc()
+        return False
+
+def test_rate_limiting():
+    """Test rate limiting implementation."""
+    print("\nTesting rate limiting...")
+    
+    try:
+        from chatter.api.analytics import rate_limit, _rate_limit_data
+        from chatter.models.user import User
+        
+        # Clear any existing rate limit data
+        _rate_limit_data.clear()
+        
+        # Create a mock user
+        class MockUser:
+            def __init__(self, user_id):
+                self.id = user_id
+        
+        # Test rate limit decorator
+        @rate_limit(max_requests=2, window_seconds=60)
+        async def test_endpoint(current_user=None):
+            return {"status": "ok"}
+        
+        mock_user = MockUser("test_user")
+        
+        # Should succeed for first 2 requests
+        import asyncio
+        
+        async def test_requests():
+            try:
+                await test_endpoint(current_user=mock_user)
+                await test_endpoint(current_user=mock_user)
+                print("✓ First 2 requests allowed")
+                
+                # Third request should fail
+                try:
+                    await test_endpoint(current_user=mock_user)
+                    print("✗ Rate limit should have been enforced")
+                    return False
+                except Exception as e:
+                    if "Rate limit exceeded" in str(e):
+                        print("✓ Rate limit correctly enforced")
+                        return True
+                    else:
+                        print(f"✗ Unexpected error: {e}")
+                        return False
+            except Exception as e:
+                print(f"✗ Rate limiting test failed: {e}")
+                return False
+        
+        return asyncio.run(test_requests())
+        
+    except Exception as e:
+        print(f"✗ Rate limiting test failed: {e}")
+        traceback.print_exc()
+        return False
+
 def main():
     """Run all tests."""
     print("Running analytics fixes validation tests...\n")
@@ -140,6 +318,9 @@ def main():
         test_import_fixes,
         test_schema_validation, 
         test_division_by_zero_fixes,
+        test_analyzer_implementations,
+        test_export_functionality,
+        test_rate_limiting,
     ]
     
     passed = 0

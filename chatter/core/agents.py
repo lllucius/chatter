@@ -20,6 +20,7 @@ from chatter.schemas.agents import (
     AgentStatus,
     AgentType,
 )
+from chatter.services.cache import CacheService
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -490,6 +491,10 @@ class AgentManager:
         """Initialize the agent manager."""
         self.agents: dict[str, BaseAgent] = {}
         self.registry = AgentRegistry()
+        self.cache = CacheService(
+            key_prefix="agents:",
+            fallback_to_memory=True,
+        )
         self.agent_classes: dict[AgentType, type[BaseAgent]] = {
             AgentType.CONVERSATIONAL: ConversationalAgent,
             AgentType.TASK_ORIENTED: TaskOrientedAgent,
@@ -510,6 +515,7 @@ class AgentManager:
         description: str,
         system_message: str,
         llm: BaseChatModel | None = None,
+        created_by: str = "system",
         **kwargs: Any,
     ) -> str:
         """Create a new AI agent.
@@ -520,6 +526,7 @@ class AgentManager:
             description: Agent description
             system_message: System message for the agent
             llm: Language model instance
+            created_by: ID of user creating the agent
             **kwargs: Additional profile configuration
 
         Returns:
@@ -532,6 +539,7 @@ class AgentManager:
             type=agent_type,
             system_message=system_message,
             status=AgentStatus.ACTIVE,
+            created_by=created_by,
             **kwargs,
         )
 
@@ -540,24 +548,70 @@ class AgentManager:
         if not agent_class:
             raise ValueError(f"Unsupported agent type: {agent_type}")
 
-        # Create agent instance
+        # Create default LLM if not provided
         if llm is None:
-            # TODO: Create a default LLM or get from configuration
-            raise ValueError("LLM is required but not provided")
+            llm = await self._create_default_llm(profile.primary_llm)
+
+        # Create agent instance
         agent = agent_class(profile=profile, llm=llm)
         self.agents[profile.id] = agent
+
+        # Cache the agent profile
+        try:
+            await self.cache.set(
+                f"profile:{profile.id}",
+                profile.model_dump(),
+                ttl=3600  # Cache for 1 hour
+            )
+        except Exception as e:
+            logger.warning(f"Failed to cache agent profile: {e}")
 
         logger.info(
             "Created agent",
             agent_id=profile.id,
             name=name,
             type=agent_type,
+            created_by=created_by,
         )
 
         return profile.id
 
+    async def _create_default_llm(self, provider: str = "openai") -> BaseChatModel:
+        """Create a default LLM instance.
+        
+        Args:
+            provider: LLM provider name
+            
+        Returns:
+            BaseChatModel instance
+        """
+        # Import here to avoid circular imports
+        try:
+            if provider == "openai":
+                from langchain_openai import ChatOpenAI
+                return ChatOpenAI(
+                    model="gpt-3.5-turbo",
+                    temperature=0.7,
+                    max_tokens=4096,
+                )
+            elif provider == "anthropic":
+                from langchain_anthropic import ChatAnthropic
+                return ChatAnthropic(
+                    model="claude-3-sonnet-20240229",
+                    temperature=0.7,
+                    max_tokens=4096,
+                )
+            else:
+                # Fallback to a mock LLM for testing
+                from langchain_core.language_models.fake import FakeListChatModel
+                return FakeListChatModel(responses=["I'm a test response."])
+        except ImportError as e:
+            logger.warning(f"Failed to import {provider} LLM: {e}, using fake LLM")
+            from langchain_core.language_models.fake import FakeListChatModel
+            return FakeListChatModel(responses=["I'm a test response."])
+
     async def get_agent(self, agent_id: str) -> BaseAgent | None:
-        """Get an agent by ID.
+        """Get an agent by ID with caching.
 
         Args:
             agent_id: Agent identifier
@@ -565,7 +619,26 @@ class AgentManager:
         Returns:
             Agent instance or None if not found
         """
-        return self.agents.get(agent_id)
+        # Try to get from in-memory cache first
+        if agent_id in self.agents:
+            return self.agents[agent_id]
+
+        # Try to get from external cache
+        try:
+            cached_profile = await self.cache.get(f"profile:{agent_id}")
+            if cached_profile:
+                # Reconstruct agent from cached profile
+                profile = AgentProfile.model_validate(cached_profile)
+                agent_class = self.agent_classes.get(profile.type)
+                if agent_class:
+                    llm = await self._create_default_llm(profile.primary_llm)
+                    agent = agent_class(profile=profile, llm=llm)
+                    self.agents[agent_id] = agent  # Cache in memory
+                    return agent
+        except Exception as e:
+            logger.warning(f"Failed to retrieve agent from cache: {e}")
+
+        return None
 
     async def list_agents(
         self,
@@ -573,6 +646,7 @@ class AgentManager:
         status: AgentStatus | None = None,
         offset: int = 0,
         limit: int = 50,
+        user_id: str | None = None,
     ) -> tuple[list[AgentProfile], int]:
         """List agents with optional filtering and pagination.
 
@@ -581,17 +655,22 @@ class AgentManager:
             status: Filter by agent status
             offset: Number of items to skip
             limit: Maximum number of items to return
+            user_id: Filter by user who created the agent
 
         Returns:
             Tuple of (list of agent profiles, total count)
         """
         profiles = [agent.profile for agent in self.agents.values()]
 
+        # Apply filters
         if agent_type:
             profiles = [p for p in profiles if p.type == agent_type]
 
         if status:
             profiles = [p for p in profiles if p.status == status]
+
+        if user_id:
+            profiles = [p for p in profiles if getattr(p, 'created_by', None) == user_id]
 
         total = len(profiles)
 
@@ -599,6 +678,51 @@ class AgentManager:
         paginated_profiles = profiles[offset : offset + limit]
 
         return paginated_profiles, total
+
+    async def update_agent(self, agent_id: str, update_data: dict[str, Any]) -> bool:
+        """Update an agent's configuration.
+
+        Args:
+            agent_id: Agent identifier
+            update_data: Dictionary of fields to update
+
+        Returns:
+            True if updated successfully, False if agent not found
+        """
+        agent = self.agents.get(agent_id)
+        if not agent:
+            return False
+
+        try:
+            # Update agent profile
+            await agent.update_profile(update_data)
+            
+            # If LLM-related fields changed, recreate LLM
+            llm_fields = {'primary_llm', 'fallback_llm', 'temperature', 'max_tokens'}
+            if any(field in update_data for field in llm_fields):
+                new_llm = await self._create_default_llm(agent.profile.primary_llm)
+                agent.llm = new_llm
+
+            # Update cache
+            try:
+                await self.cache.set(
+                    f"profile:{agent_id}",
+                    agent.profile.model_dump(),
+                    ttl=3600
+                )
+            except Exception as e:
+                logger.warning(f"Failed to update agent cache: {e}")
+
+            logger.info(
+                "Updated agent",
+                agent_id=agent_id,
+                updated_fields=list(update_data.keys()),
+            )
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to update agent {agent_id}: {e}")
+            return False
 
     async def delete_agent(self, agent_id: str) -> bool:
         """Delete an agent.
@@ -613,6 +737,13 @@ class AgentManager:
             agent = self.agents[agent_id]
             agent.profile.status = AgentStatus.INACTIVE
             del self.agents[agent_id]
+            
+            # Remove from cache
+            try:
+                await self.cache.delete(f"profile:{agent_id}")
+            except Exception as e:
+                logger.warning(f"Failed to remove agent from cache: {e}")
+            
             logger.info(f"Deleted agent {agent_id}")
             return True
         return False

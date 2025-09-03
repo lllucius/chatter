@@ -1,6 +1,7 @@
-"""Agent management endpoints."""
+"""Agent management endpoints with comprehensive validation, caching, and security."""
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi.responses import JSONResponse
 
 from chatter.api.auth import get_current_user
 from chatter.core.agents import AgentManager
@@ -16,6 +17,10 @@ from chatter.schemas.agents import (
     AgentResponse,
     AgentStatsResponse,
     AgentUpdateRequest,
+    AgentHealthResponse,
+    AgentBulkCreateRequest,
+    AgentBulkCreateResponse,
+    AgentBulkDeleteRequest,
 )
 from chatter.utils.agent_validation import AgentInputValidator
 from chatter.utils.logging import get_logger
@@ -26,7 +31,18 @@ from chatter.utils.problem import (
 from chatter.utils.rate_limiter import get_rate_limiter, RateLimitExceeded
 
 logger = get_logger(__name__)
-router = APIRouter()
+router = APIRouter(
+    prefix="/agents",
+    tags=["agents"],
+    responses={
+        400: {"description": "Bad request"},
+        401: {"description": "Unauthorized"},
+        403: {"description": "Forbidden"},
+        404: {"description": "Not found"},
+        429: {"description": "Rate limit exceeded"},
+        500: {"description": "Internal server error"},
+    },
+)
 
 
 async def get_agent_manager() -> AgentManager:
@@ -44,6 +60,13 @@ async def get_agent_manager() -> AgentManager:
     "/",
     response_model=AgentResponse,
     status_code=status.HTTP_201_CREATED,
+    summary="Create a new agent",
+    description="Create a new AI agent with specified configuration and capabilities.",
+    responses={
+        201: {"description": "Agent created successfully"},
+        400: {"description": "Invalid input data"},
+        429: {"description": "Rate limit exceeded"},
+    },
 )
 async def create_agent(
     agent_data: AgentCreateRequest,
@@ -139,7 +162,12 @@ async def create_agent(
         ) from e
 
 
-@router.get("/", response_model=AgentListResponse)
+@router.get(
+    "/", 
+    response_model=AgentListResponse,
+    summary="List agents", 
+    description="List all agents with optional filtering and pagination. Users can only see their own agents.",
+)
 async def list_agents(
     request: AgentListRequest = Depends(),
     current_user: User = Depends(get_current_user),
@@ -216,7 +244,12 @@ async def list_agents(
         ) from e
 
 
-@router.get("/stats/overview", response_model=AgentStatsResponse)
+@router.get(
+    "/stats/overview", 
+    response_model=AgentStatsResponse,
+    summary="Get agent statistics",
+    description="Get comprehensive statistics about all agents for the current user.",
+)
 async def get_agent_stats(
     current_user: User = Depends(get_current_user),
     agent_manager: AgentManager = Depends(get_agent_manager),
@@ -396,7 +429,15 @@ async def delete_agent(
 
 
 @router.post(
-    "/{agent_id}/interact", response_model=AgentInteractResponse
+    "/{agent_id}/interact", 
+    response_model=AgentInteractResponse,
+    summary="Interact with agent",
+    description="Send a message to an agent and receive a response. Rate limited per user per agent.",
+    responses={
+        200: {"description": "Interaction successful"},
+        404: {"description": "Agent not found or access denied"},
+        429: {"description": "Rate limit exceeded"},
+    },
 )
 async def interact_with_agent(
     agent_id: str,
@@ -483,3 +524,262 @@ async def interact_with_agent(
         raise InternalServerProblem(
             detail="Failed to interact with agent"
         ) from e
+
+
+@router.get("/{agent_id}/health", response_model=AgentHealthResponse)
+async def get_agent_health(
+    agent_id: str,
+    current_user: User = Depends(get_current_user),
+    agent_manager: AgentManager = Depends(get_agent_manager),
+) -> AgentHealthResponse:
+    """Get agent health status.
+
+    Args:
+        agent_id: Agent ID
+        current_user: Current authenticated user
+        agent_manager: Agent manager instance
+
+    Returns:
+        Agent health information
+    """
+    try:
+        # Validate agent_id format
+        agent_id = AgentInputValidator.validate_agent_id(agent_id)
+
+        agent = await agent_manager.get_agent(agent_id)
+        if not agent:
+            raise NotFoundProblem(detail=f"Agent {agent_id} not found")
+
+        # Check if user has access to this agent
+        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+            raise NotFoundProblem(detail=f"Agent {agent_id} not found")
+
+        # Calculate health metrics
+        health_status = "healthy"
+        if agent.profile.status != AgentStatus.ACTIVE:
+            health_status = "unhealthy"
+        
+        # Get performance metrics
+        metrics = agent.performance_metrics
+        last_interaction = None
+        if agent.conversation_history:
+            # Find the most recent interaction across all conversations
+            all_interactions = []
+            for conv_history in agent.conversation_history.values():
+                all_interactions.extend(conv_history)
+            if all_interactions:
+                last_interaction = max(all_interactions, key=lambda x: x.timestamp).timestamp
+
+        return AgentHealthResponse(
+            agent_id=agent_id,
+            status=agent.profile.status,
+            health=health_status,
+            last_interaction=last_interaction,
+            response_time_avg=metrics.get("average_response_time", 0.0),
+            error_rate=0.0,  # Would be calculated from actual error tracking
+        )
+
+    except NotFoundProblem:
+        raise
+    except Exception as e:
+        logger.error(
+            "Failed to get agent health", agent_id=agent_id, error=str(e)
+        )
+        raise InternalServerProblem(detail="Failed to get agent health") from e
+
+
+@router.post("/bulk", response_model=AgentBulkCreateResponse, status_code=status.HTTP_201_CREATED)
+async def bulk_create_agents(
+    request: AgentBulkCreateRequest,
+    current_user: User = Depends(get_current_user),
+    agent_manager: AgentManager = Depends(get_agent_manager),
+) -> AgentBulkCreateResponse:
+    """Create multiple agents in bulk.
+
+    Args:
+        request: Bulk creation request
+        current_user: Current authenticated user
+        agent_manager: Agent manager instance
+
+    Returns:
+        Bulk creation results
+    """
+    try:
+        # Apply rate limiting for bulk operations
+        rate_limiter = get_rate_limiter()
+        try:
+            await rate_limiter.check_rate_limit(
+                f"bulk_create_agents:{current_user.id}",
+                limit_per_hour=3,  # 3 bulk operations per hour
+                limit_per_day=10,  # 10 bulk operations per day
+            )
+        except RateLimitExceeded as e:
+            raise InternalServerProblem(detail=str(e))
+
+        created_agents = []
+        failed_creations = []
+
+        for i, agent_data in enumerate(request.agents):
+            try:
+                # Validate each agent data
+                agent_data.name = AgentInputValidator.validate_agent_name(agent_data.name)
+                agent_data.description = AgentInputValidator.validate_agent_name(agent_data.description)
+                agent_data.system_prompt = AgentInputValidator.validate_agent_message(agent_data.system_prompt)
+                agent_data.agent_type = AgentInputValidator.validate_agent_type(agent_data.agent_type)
+                agent_data.temperature = AgentInputValidator.validate_temperature(agent_data.temperature)
+                agent_data.max_tokens = AgentInputValidator.validate_max_tokens(agent_data.max_tokens)
+
+                # Add created_by to metadata
+                metadata = agent_data.metadata or {}
+                metadata["created_by"] = current_user.id
+                metadata["bulk_creation"] = True
+                metadata["bulk_index"] = i
+
+                # Create agent
+                agent_id = await agent_manager.create_agent(
+                    name=agent_data.name,
+                    agent_type=agent_data.agent_type,
+                    description=agent_data.description,
+                    system_message=agent_data.system_prompt,
+                    llm=None,
+                    personality_traits=agent_data.personality_traits,
+                    knowledge_domains=agent_data.knowledge_domains,
+                    response_style=agent_data.response_style,
+                    capabilities=agent_data.capabilities,
+                    available_tools=agent_data.available_tools,
+                    primary_llm=agent_data.primary_llm,
+                    fallback_llm=agent_data.fallback_llm,
+                    temperature=agent_data.temperature,
+                    max_tokens=agent_data.max_tokens,
+                    max_conversation_length=agent_data.max_conversation_length,
+                    context_window_size=agent_data.context_window_size,
+                    response_timeout=agent_data.response_timeout,
+                    learning_enabled=agent_data.learning_enabled,
+                    feedback_weight=agent_data.feedback_weight,
+                    adaptation_threshold=agent_data.adaptation_threshold,
+                    tags=agent_data.tags,
+                    metadata=metadata,
+                    created_by=current_user.id,
+                )
+
+                # Get the created agent
+                agent = await agent_manager.get_agent(agent_id)
+                if agent:
+                    created_agents.append(AgentResponse.model_validate(agent.profile.model_dump()))
+
+            except Exception as e:
+                failed_creations.append({
+                    "index": i,
+                    "name": getattr(agent_data, 'name', f'Agent {i}'),
+                    "error": str(e)
+                })
+                logger.warning(f"Failed to create agent {i} in bulk operation", error=str(e))
+
+        logger.info("Bulk agent creation completed",
+                   total_requested=len(request.agents),
+                   created=len(created_agents),
+                   failed=len(failed_creations),
+                   user_id=current_user.id)
+
+        return AgentBulkCreateResponse(
+            created=created_agents,
+            failed=failed_creations,
+            total_requested=len(request.agents),
+            total_created=len(created_agents),
+        )
+
+    except InternalServerProblem:
+        raise
+    except Exception as e:
+        logger.error("Failed to bulk create agents", error=str(e), user_id=current_user.id)
+        raise InternalServerProblem(detail="Failed to bulk create agents") from e
+
+
+@router.delete("/bulk", response_model=dict[str, Any])
+async def bulk_delete_agents(
+    request: AgentBulkDeleteRequest,
+    current_user: User = Depends(get_current_user),
+    agent_manager: AgentManager = Depends(get_agent_manager),
+) -> dict[str, Any]:
+    """Delete multiple agents in bulk.
+
+    Args:
+        request: Bulk deletion request
+        current_user: Current authenticated user
+        agent_manager: Agent manager instance
+
+    Returns:
+        Bulk deletion results
+    """
+    try:
+        # Apply rate limiting for bulk operations
+        rate_limiter = get_rate_limiter()
+        try:
+            await rate_limiter.check_rate_limit(
+                f"bulk_delete_agents:{current_user.id}",
+                limit_per_hour=3,  # 3 bulk operations per hour
+                limit_per_day=10,  # 10 bulk operations per day
+            )
+        except RateLimitExceeded as e:
+            raise InternalServerProblem(detail=str(e))
+
+        deleted_agents = []
+        failed_deletions = []
+
+        for agent_id in request.agent_ids:
+            try:
+                # Validate agent_id format
+                agent_id = AgentInputValidator.validate_agent_id(agent_id)
+
+                # Check if agent exists and user has permission
+                agent = await agent_manager.get_agent(agent_id)
+                if not agent:
+                    failed_deletions.append({
+                        "agent_id": agent_id,
+                        "error": "Agent not found"
+                    })
+                    continue
+
+                # Check if user has permission to delete this agent
+                if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+                    failed_deletions.append({
+                        "agent_id": agent_id,
+                        "error": "Permission denied"
+                    })
+                    continue
+
+                # Delete the agent
+                success = await agent_manager.delete_agent(agent_id)
+                if success:
+                    deleted_agents.append(agent_id)
+                else:
+                    failed_deletions.append({
+                        "agent_id": agent_id,
+                        "error": "Deletion failed"
+                    })
+
+            except Exception as e:
+                failed_deletions.append({
+                    "agent_id": agent_id,
+                    "error": str(e)
+                })
+                logger.warning(f"Failed to delete agent {agent_id} in bulk operation", error=str(e))
+
+        logger.info("Bulk agent deletion completed",
+                   total_requested=len(request.agent_ids),
+                   deleted=len(deleted_agents),
+                   failed=len(failed_deletions),
+                   user_id=current_user.id)
+
+        return {
+            "deleted": deleted_agents,
+            "failed": failed_deletions,
+            "total_requested": len(request.agent_ids),
+            "total_deleted": len(deleted_agents),
+        }
+
+    except InternalServerProblem:
+        raise
+    except Exception as e:
+        logger.error("Failed to bulk delete agents", error=str(e), user_id=current_user.id)
+        raise InternalServerProblem(detail="Failed to bulk delete agents") from e

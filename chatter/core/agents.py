@@ -20,6 +20,7 @@ from chatter.schemas.agents import (
     AgentStatus,
     AgentType,
 )
+from chatter.services.cache import CacheService
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -490,6 +491,10 @@ class AgentManager:
         """Initialize the agent manager."""
         self.agents: dict[str, BaseAgent] = {}
         self.registry = AgentRegistry()
+        self.cache = CacheService(
+            key_prefix="agents:",
+            fallback_to_memory=True,
+        )
         self.agent_classes: dict[AgentType, type[BaseAgent]] = {
             AgentType.CONVERSATIONAL: ConversationalAgent,
             AgentType.TASK_ORIENTED: TaskOrientedAgent,
@@ -551,6 +556,16 @@ class AgentManager:
         agent = agent_class(profile=profile, llm=llm)
         self.agents[profile.id] = agent
 
+        # Cache the agent profile
+        try:
+            await self.cache.set(
+                f"profile:{profile.id}",
+                profile.model_dump(),
+                ttl=3600  # Cache for 1 hour
+            )
+        except Exception as e:
+            logger.warning(f"Failed to cache agent profile: {e}")
+
         logger.info(
             "Created agent",
             agent_id=profile.id,
@@ -596,7 +611,7 @@ class AgentManager:
             return FakeListChatModel(responses=["I'm a test response."])
 
     async def get_agent(self, agent_id: str) -> BaseAgent | None:
-        """Get an agent by ID.
+        """Get an agent by ID with caching.
 
         Args:
             agent_id: Agent identifier
@@ -604,7 +619,26 @@ class AgentManager:
         Returns:
             Agent instance or None if not found
         """
-        return self.agents.get(agent_id)
+        # Try to get from in-memory cache first
+        if agent_id in self.agents:
+            return self.agents[agent_id]
+
+        # Try to get from external cache
+        try:
+            cached_profile = await self.cache.get(f"profile:{agent_id}")
+            if cached_profile:
+                # Reconstruct agent from cached profile
+                profile = AgentProfile.model_validate(cached_profile)
+                agent_class = self.agent_classes.get(profile.type)
+                if agent_class:
+                    llm = await self._create_default_llm(profile.primary_llm)
+                    agent = agent_class(profile=profile, llm=llm)
+                    self.agents[agent_id] = agent  # Cache in memory
+                    return agent
+        except Exception as e:
+            logger.warning(f"Failed to retrieve agent from cache: {e}")
+
+        return None
 
     async def list_agents(
         self,
@@ -669,6 +703,16 @@ class AgentManager:
                 new_llm = await self._create_default_llm(agent.profile.primary_llm)
                 agent.llm = new_llm
 
+            # Update cache
+            try:
+                await self.cache.set(
+                    f"profile:{agent_id}",
+                    agent.profile.model_dump(),
+                    ttl=3600
+                )
+            except Exception as e:
+                logger.warning(f"Failed to update agent cache: {e}")
+
             logger.info(
                 "Updated agent",
                 agent_id=agent_id,
@@ -693,6 +737,13 @@ class AgentManager:
             agent = self.agents[agent_id]
             agent.profile.status = AgentStatus.INACTIVE
             del self.agents[agent_id]
+            
+            # Remove from cache
+            try:
+                await self.cache.delete(f"profile:{agent_id}")
+            except Exception as e:
+                logger.warning(f"Failed to remove agent from cache: {e}")
+            
             logger.info(f"Deleted agent {agent_id}")
             return True
         return False

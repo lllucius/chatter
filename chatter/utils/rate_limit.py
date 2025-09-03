@@ -1,5 +1,10 @@
-"""Rate limiting middleware with proper headers."""
+"""Rate limiting middleware with proper headers.
 
+DEPRECATED: This module is deprecated and will be removed in a future version.
+Use chatter.utils.unified_rate_limiter instead for the new unified rate limiting system.
+"""
+
+import warnings
 import time
 from collections.abc import Awaitable, Callable
 from typing import Any
@@ -9,6 +14,13 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from chatter.utils.logging import get_logger
+
+# Issue deprecation warning
+warnings.warn(
+    "chatter.utils.rate_limit is deprecated. Use chatter.utils.unified_rate_limiter instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 logger = get_logger(__name__)
 

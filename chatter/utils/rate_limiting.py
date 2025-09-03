@@ -1,5 +1,10 @@
-"""Rate limiting middleware for API endpoints."""
+"""Rate limiting middleware for API endpoints.
 
+DEPRECATED: This module is deprecated and will be removed in a future version.
+Use chatter.utils.unified_rate_limiter instead for the new unified rate limiting system.
+"""
+
+import warnings
 import time
 from collections import defaultdict, deque
 from typing import Any
@@ -8,6 +13,13 @@ from fastapi import HTTPException, Request, Response, status
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from chatter.utils.logging import get_logger
+
+# Issue deprecation warning
+warnings.warn(
+    "chatter.utils.rate_limiting is deprecated. Use chatter.utils.unified_rate_limiter instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 logger = get_logger(__name__)
 

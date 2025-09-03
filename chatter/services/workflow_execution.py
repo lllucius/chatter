@@ -185,7 +185,7 @@ class WorkflowExecutionService:
             )
             raise WorkflowExecutionError(
                 f"Workflow execution failed: {e}"
-            )
+            ) from e
         finally:
             performance_monitor.end_workflow(
                 workflow_execution_id, success=True
@@ -226,7 +226,7 @@ class WorkflowExecutionService:
             except Exception as e:
                 raise WorkflowExecutionError(
                     f"Invalid workflow configuration for {workflow_type}: {e}"
-                )
+                ) from e
 
             logger.info(
                 "Starting streaming workflow execution",

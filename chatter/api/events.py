@@ -73,6 +73,11 @@ async def events_stream(
 
             # Stream events as they arrive
             async for event in connection.get_events():
+                # Check if client disconnected
+                if await request.is_disconnected():
+                    logger.info("Client disconnected from SSE stream")
+                    break
+
                 # Skip keepalive events for the client unless explicitly requested
                 if (
                     event.type == EventType.SYSTEM_STATUS
@@ -189,6 +194,11 @@ async def admin_events_stream(
 
             # Stream all system events
             async for event in connection.get_events():
+                # Check if client disconnected
+                if await request.is_disconnected():
+                    logger.info("Admin client disconnected from SSE stream")
+                    break
+
                 # Skip keepalive events for admin stream too
                 if (
                     event.type == EventType.SYSTEM_STATUS

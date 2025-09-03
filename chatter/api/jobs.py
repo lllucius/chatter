@@ -1,6 +1,7 @@
 """Job management endpoints."""
 
-from fastapi import APIRouter, Depends, status
+import uuid
+from fastapi import APIRouter, Depends, status, HTTPException
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
@@ -18,10 +19,32 @@ from chatter.utils.problem import (
     BadRequestProblem,
     InternalServerProblem,
     NotFoundProblem,
+    ValidationProblem,
 )
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+
+def validate_job_id(job_id: str) -> str:
+    """Validate that job_id is a valid UUID format.
+    
+    Args:
+        job_id: The job ID to validate
+        
+    Returns:
+        The validated job ID
+        
+    Raises:
+        ValidationProblem: If job_id is not a valid UUID
+    """
+    try:
+        uuid.UUID(job_id)
+        return job_id
+    except ValueError:
+        raise ValidationProblem(
+            detail=f"Invalid job ID format: {job_id}. Must be a valid UUID."
+        )
 
 
 @router.post(
@@ -41,6 +64,13 @@ async def create_job(
         Created job data
     """
     try:
+        # Validate that the function handler exists
+        if job_data.function_name not in job_queue.job_handlers:
+            raise ValidationProblem(
+                detail=f"Unknown function: {job_data.function_name}. "
+                       f"Available functions: {list(job_queue.job_handlers.keys())}"
+            )
+
         if job_data.schedule_at:
             job_id = await job_queue.add_job(
                 name=job_data.name,
@@ -76,7 +106,7 @@ async def create_job(
             created_at=created_job.created_at,
             started_at=created_job.started_at,
             completed_at=created_job.completed_at,
-            scheduled_at=job_data.schedule_at,
+            scheduled_at=created_job.scheduled_at,  # Use job's scheduled_at
             retry_count=created_job.retry_count,
             max_retries=created_job.max_retries,
             error_message=created_job.error_message,
@@ -85,6 +115,11 @@ async def create_job(
             progress_message=created_job.progress_message,
         )
 
+    except ValidationProblem:
+        raise  # Re-raise validation errors as-is
+    except ValueError as e:
+        # Handle job queue validation errors
+        raise ValidationProblem(detail=str(e)) from e
     except Exception as e:
         logger.error("Failed to create job", error=str(e))
         raise InternalServerProblem(
@@ -97,14 +132,14 @@ async def list_jobs(
     request: JobListRequest = Depends(),
     current_user: User = Depends(get_current_user),
 ) -> JobListResponse:
-    """List jobs with optional filtering.
+    """List jobs with optional filtering and pagination.
 
     Args:
         request: List request parameters
         current_user: Current authenticated user
 
     Returns:
-        List of jobs
+        List of jobs with pagination info
     """
     try:
         jobs = list(job_queue.jobs.values())
@@ -123,8 +158,39 @@ async def list_jobs(
                 if j.function_name == request.function_name
             ]
 
+        # Total count before pagination
+        total_jobs = len(jobs)
+
+        # Apply sorting
+        reverse_sort = request.sort_order == "desc"
+        if request.sort_by == "created_at":
+            jobs.sort(key=lambda x: x.created_at, reverse=reverse_sort)
+        elif request.sort_by == "name":
+            jobs.sort(key=lambda x: x.name, reverse=reverse_sort)
+        elif request.sort_by == "priority":
+            # Sort by priority order (critical > high > normal > low)
+            priority_order = {
+                JobPriority.CRITICAL: 4,
+                JobPriority.HIGH: 3,
+                JobPriority.NORMAL: 2,
+                JobPriority.LOW: 1
+            }
+            jobs.sort(
+                key=lambda x: priority_order.get(x.priority, 0),
+                reverse=reverse_sort
+            )
+        elif request.sort_by == "status":
+            jobs.sort(key=lambda x: x.status.value, reverse=reverse_sort)
+
+        # Apply pagination
+        start_idx = request.offset
+        end_idx = start_idx + request.limit
+        paginated_jobs = jobs[start_idx:end_idx]
+        has_more = end_idx < total_jobs
+
+        # Convert to response format
         job_responses = []
-        for job in jobs:
+        for job in paginated_jobs:
             job_responses.append(
                 JobResponse(
                     id=job.id,
@@ -135,7 +201,7 @@ async def list_jobs(
                     created_at=job.created_at,
                     started_at=job.started_at,
                     completed_at=job.completed_at,
-                    scheduled_at=None,  # Would need to track this
+                    scheduled_at=job.scheduled_at,  # Use job's scheduled_at
                     retry_count=job.retry_count,
                     max_retries=job.max_retries,
                     error_message=job.error_message,
@@ -146,7 +212,11 @@ async def list_jobs(
             )
 
         return JobListResponse(
-            jobs=job_responses, total=len(job_responses)
+            jobs=job_responses,
+            total=total_jobs,
+            limit=request.limit,
+            offset=request.offset,
+            has_more=has_more
         )
 
     except Exception as e:
@@ -169,6 +239,9 @@ async def get_job(
         Job data
     """
     try:
+        # Validate job ID format
+        validate_job_id(job_id)
+        
         job = job_queue.jobs.get(job_id)
         if not job:
             raise NotFoundProblem(detail=f"Job {job_id} not found")
@@ -182,7 +255,7 @@ async def get_job(
             created_at=job.created_at,
             started_at=job.started_at,
             completed_at=job.completed_at,
-            scheduled_at=None,  # Would need to track this
+            scheduled_at=job.scheduled_at,  # Use job's scheduled_at
             retry_count=job.retry_count,
             max_retries=job.max_retries,
             error_message=job.error_message,
@@ -191,8 +264,8 @@ async def get_job(
             progress_message=job.progress_message,
         )
 
-    except NotFoundProblem:
-        raise
+    except (NotFoundProblem, ValidationProblem):
+        raise  # Re-raise these as-is
     except Exception as e:
         logger.error("Failed to get job", job_id=job_id, error=str(e))
         raise InternalServerProblem(detail="Failed to get job") from e
@@ -213,6 +286,13 @@ async def cancel_job(
         Cancellation result
     """
     try:
+        # Validate job ID format
+        validate_job_id(job_id)
+        
+        # Check if job exists
+        if job_id not in job_queue.jobs:
+            raise NotFoundProblem(detail=f"Job {job_id} not found")
+        
         success = await job_queue.cancel_job(job_id)
 
         if not success:
@@ -226,8 +306,8 @@ async def cancel_job(
             job_id=job_id,
         )
 
-    except BadRequestProblem:
-        raise
+    except (BadRequestProblem, NotFoundProblem, ValidationProblem):
+        raise  # Re-raise these as-is
     except Exception as e:
         logger.error(
             "Failed to cancel job", job_id=job_id, error=str(e)

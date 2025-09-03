@@ -150,6 +150,7 @@ class AdvancedJobQueue:
             timeout=timeout,
             tags=tags or [],
             metadata=metadata or {},
+            scheduled_at=schedule_at,  # Store the scheduled time
         )
 
         self.jobs[job.id] = job

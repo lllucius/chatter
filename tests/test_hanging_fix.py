@@ -21,6 +21,6 @@ async def test_app_fixture_works(app):
 async def test_client_fixture_works(client):
     """Test that the client fixture works without hanging."""
     # Simple health check that should work
-    response = await client.get("/health")
-    # The response may fail due to missing dependencies, but the fixture should work
-    assert response is not None
+    response = await client.get("/healthz")
+    # The response should succeed since health endpoints are always available
+    assert response.status_code == 200

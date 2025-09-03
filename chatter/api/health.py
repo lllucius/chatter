@@ -1,18 +1,23 @@
 """Health check and monitoring endpoints."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
 from chatter.schemas.health import (
     CorrelationTraceResponse,
     HealthCheckResponse,
+    HealthStatus,
     MetricsResponse,
     ReadinessCheckResponse,
+    ReadinessStatus,
 )
 from chatter.utils.database import get_session_generator, health_check
+from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem
 
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -24,7 +29,7 @@ async def health_check_endpoint() -> HealthCheckResponse:
         Health status
     """
     return HealthCheckResponse(
-        status="healthy",
+        status=HealthStatus.HEALTHY,
         service="chatter",
         version=settings.app_version,
         environment=settings.environment,
@@ -34,45 +39,84 @@ async def health_check_endpoint() -> HealthCheckResponse:
 @router.get("/readyz", response_model=ReadinessCheckResponse)
 async def readiness_check(
     session: AsyncSession = Depends(get_session_generator),
-) -> ReadinessCheckResponse:
+) -> JSONResponse:
     """Readiness check endpoint with database connectivity.
+
+    This checks that the application is ready to serve traffic by validating
+    that all external dependencies (database, etc.) are available.
 
     Args:
         session: Database session
 
     Returns:
-        Readiness status with detailed checks
+        Readiness status with detailed checks.
+        Returns 200 if ready, 503 if not ready.
     """
-    # Perform database health check
-    db_health = await health_check()
+    checks = {}
+    
+    # Perform database health check with timeout
+    try:
+        import asyncio
+        # Use the provided session and add timeout
+        db_health = await asyncio.wait_for(
+            health_check(session), 
+            timeout=5.0  # 5 second timeout
+        )
+    except asyncio.TimeoutError:
+        db_health = {
+            "status": "unhealthy",
+            "connected": False,
+            "error": "Database health check timeout (>5s)"
+        }
+    except Exception as e:
+        db_health = {
+            "status": "unhealthy", 
+            "connected": False,
+            "error": f"Database health check failed: {str(e)}"
+        }
+    
+    checks["database"] = db_health
 
-    checks = {
-        "database": db_health,
-    }
+    # Could add more checks here (Redis, external APIs, etc.)
+    # checks["redis"] = await redis_health_check()
+    # checks["external_api"] = await external_api_health_check()
 
     # Determine overall status
     all_healthy = all(
         check.get("status") == "healthy" for check in checks.values()
     )
 
-    return ReadinessCheckResponse(
-        status="ready" if all_healthy else "not_ready",
+    response_data = ReadinessCheckResponse(
+        status=ReadinessStatus.READY if all_healthy else ReadinessStatus.NOT_READY,
         service="chatter",
         version=settings.app_version,
         environment=settings.environment,
         checks=checks,
     )
 
+    # Return 503 if not ready (Kubernetes standard)
+    status_code = status.HTTP_200_OK if all_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
+    
+    return JSONResponse(
+        content=response_data.model_dump(),
+        status_code=status_code
+    )
+
 
 @router.get("/live", response_model=HealthCheckResponse)
 async def liveness_check() -> HealthCheckResponse:
-    """Liveness check endpoint for Kubernetes (alias for /healthz).
+    """Liveness check endpoint for Kubernetes.
+
+    This is a simple liveness probe that checks if the application process
+    is running and responding. It should NOT check external dependencies.
 
     Returns:
-        Health status (same as /healthz)
+        Health status indicating the application is alive
     """
+    # Simple liveness check - just return that the process is running
+    # This should never fail unless the process is dead
     return HealthCheckResponse(
-        status="healthy",
+        status=HealthStatus.ALIVE,
         service="chatter",
         version=settings.app_version,
         environment=settings.environment,
@@ -86,26 +130,62 @@ async def get_metrics() -> MetricsResponse:
     Returns:
         Application metrics including performance and health data
     """
+    from datetime import datetime, timezone
+    
+    # Use real timestamp
+    current_timestamp = datetime.now(timezone.utc).isoformat()
+    
+    # Default empty metrics in case monitoring is unavailable
+    health_metrics = {"status": "unknown", "checks_available": False}
+    performance_stats = {"requests": 0, "errors": 0, "response_time_ms": 0}
+    endpoint_stats = {}
+    
     try:
         from chatter.utils.monitoring import metrics_collector
 
-        overall_stats = metrics_collector.get_overall_stats(
-            window_minutes=60
-        )
-        health_metrics = metrics_collector.get_health_metrics()
-        endpoint_stats = metrics_collector.get_endpoint_stats()
+        # Try to get metrics with individual fallbacks
+        try:
+            overall_stats = metrics_collector.get_overall_stats(window_minutes=60)
+            performance_stats.update(overall_stats)
+        except Exception as e:
+            logger.warning(f"Failed to get performance stats: {e}")
+            
+        try:
+            health_data = metrics_collector.get_health_metrics()
+            health_metrics.update(health_data)
+        except Exception as e:
+            logger.warning(f"Failed to get health metrics: {e}")
+            
+        try:
+            endpoint_data = metrics_collector.get_endpoint_stats()
+            endpoint_stats.update(endpoint_data)
+        except Exception as e:
+            logger.warning(f"Failed to get endpoint stats: {e}")
 
         return MetricsResponse(
-            timestamp="2024-01-01T12:00:00Z",  # Would use actual timestamp
+            timestamp=current_timestamp,
             service="chatter",
             version=settings.app_version,
             environment=settings.environment,
             health=health_metrics,
-            performance=overall_stats,
+            performance=performance_stats,
+            endpoints=endpoint_stats,
+        )
+        
+    except ImportError:
+        # Monitoring module not available
+        logger.warning("Monitoring module not available, returning basic metrics")
+        return MetricsResponse(
+            timestamp=current_timestamp,
+            service="chatter",
+            version=settings.app_version,
+            environment=settings.environment,
+            health=health_metrics,
+            performance=performance_stats,
             endpoints=endpoint_stats,
         )
     except Exception as e:
-        # No fallback metrics - raise proper problem instead
+        # Other unexpected errors
         raise InternalServerProblem(
             detail=f"Metrics collection failed: {str(e)}"
         ) from e
@@ -135,8 +215,17 @@ async def get_correlation_trace(
             trace_length=len(trace),
             requests=trace,
         )
+    except ImportError:
+        # Monitoring module not available
+        logger.warning("Monitoring module not available for correlation trace")
+        return CorrelationTraceResponse(
+            correlation_id=correlation_id,
+            trace_length=0,
+            requests=[],
+        )
     except Exception as e:
-        # No fallback response - raise proper problem instead
+        # Log the error but don't expose internal details
+        logger.error(f"Failed to get correlation trace for {correlation_id}: {e}")
         raise InternalServerProblem(
-            detail=f"Failed to get trace: {str(e)}"
+            detail=f"Failed to get trace for correlation ID: {correlation_id}"
         ) from e

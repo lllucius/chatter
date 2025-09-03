@@ -950,8 +950,11 @@ async def execute_query(query: str, **params) -> any:
         return result
 
 
-async def health_check() -> dict:
+async def health_check(session: AsyncSession | None = None) -> dict:
     """Perform database health check.
+
+    Args:
+        session: Optional database session to use. If None, creates a new one.
 
     Returns:
         dict: Health check results
@@ -960,14 +963,22 @@ async def health_check() -> dict:
         start_time = asyncio.get_event_loop().time()
         is_connected = False
 
-        # Test database connection and basic query
-        async with DatabaseManager() as session:
-            # Test basic connection
+        if session is not None:
+            # Use the provided session
             await session.execute(text("SELECT 1"))
             is_connected = True
-
+            
             # Test query performance with a simple query
             await session.execute(text("SELECT 1"))
+        else:
+            # Create a new session using DatabaseManager
+            async with DatabaseManager() as db_session:
+                # Test basic connection
+                await db_session.execute(text("SELECT 1"))
+                is_connected = True
+
+                # Test query performance with a simple query
+                await db_session.execute(text("SELECT 1"))
 
         end_time = asyncio.get_event_loop().time()
         response_time = round((end_time - start_time) * 1000, 2)  # ms
@@ -976,9 +987,8 @@ async def health_check() -> dict:
             "status": "healthy" if is_connected else "unhealthy",
             "connected": is_connected,
             "response_time_ms": response_time,
-            "database_url": settings.database_url_for_env.split("@")[
-                -1
-            ],  # Hide credentials
+            # Don't expose full database URL for security
+            "database_type": "postgresql",
         }
     except Exception as e:
         return {

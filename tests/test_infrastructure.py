@@ -61,9 +61,9 @@ class TestDatabaseFixtures:
         assert client is not None
         # Test a basic endpoint if health check exists
         try:
-            response = await client.get("/health")
-            # Health endpoint might exist or might not - either is fine for this test
-            assert response.status_code in [200, 404]
+            response = await client.get("/healthz")
+            # Health endpoint should exist and return 200
+            assert response.status_code == 200
         except Exception:
-            # If health endpoint doesn't exist, that's fine too
-            pass
+            # If health endpoint doesn't exist, that's a problem
+            assert False, "Health endpoint /healthz should be available"

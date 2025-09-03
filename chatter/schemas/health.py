@@ -1,14 +1,28 @@
 """Health check schemas for API responses."""
 
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
+class HealthStatus(str, Enum):
+    """Health status enumeration."""
+    HEALTHY = "healthy"
+    ALIVE = "alive"
+    UNHEALTHY = "unhealthy"
+    
+
+class ReadinessStatus(str, Enum):
+    """Readiness status enumeration."""
+    READY = "ready"
+    NOT_READY = "not_ready"
+
+
 class HealthCheckResponse(BaseModel):
     """Schema for health check response."""
 
-    status: str = Field(..., description="Health status")
+    status: HealthStatus = Field(..., description="Health status")
     service: str = Field(..., description="Service name")
     version: str = Field(..., description="Service version")
     environment: str = Field(..., description="Environment")
@@ -17,9 +31,13 @@ class HealthCheckResponse(BaseModel):
 class DatabaseHealthCheck(BaseModel):
     """Schema for database health check."""
 
-    status: str = Field(..., description="Database status")
-    latency_ms: float | None = Field(
-        None, description="Database latency in milliseconds"
+    status: HealthStatus = Field(..., description="Database status")
+    connected: bool = Field(..., description="Database connection status")
+    response_time_ms: float | None = Field(
+        None, description="Database response time in milliseconds"
+    )
+    database_type: str | None = Field(
+        None, description="Database type"
     )
     error: str | None = Field(
         None, description="Error message if unhealthy"
@@ -29,7 +47,7 @@ class DatabaseHealthCheck(BaseModel):
 class ReadinessCheckResponse(BaseModel):
     """Schema for readiness check response."""
 
-    status: str = Field(..., description="Readiness status")
+    status: ReadinessStatus = Field(..., description="Readiness status")
     service: str = Field(..., description="Service name")
     version: str = Field(..., description="Service version")
     environment: str = Field(..., description="Environment")
@@ -41,14 +59,14 @@ class ReadinessCheckResponse(BaseModel):
 class LivenessCheckResponse(BaseModel):
     """Schema for liveness check response."""
 
-    status: str = Field(..., description="Liveness status")
+    status: HealthStatus = Field(..., description="Liveness status")
 
 
 class MetricsResponse(BaseModel):
     """Schema for application metrics response."""
 
     timestamp: str = Field(
-        ..., description="Metrics collection timestamp"
+        ..., description="Metrics collection timestamp (ISO 8601)"
     )
     service: str = Field(..., description="Service name")
     version: str = Field(..., description="Service version")

@@ -74,6 +74,45 @@ async def create_prompt(
         ) from None
 
 
+@router.get("/stats/overview", response_model=PromptStatsResponse)
+async def get_prompt_stats(
+    current_user: User = Depends(get_current_user),
+    prompt_service: PromptService = Depends(get_prompt_service),
+) -> PromptStatsResponse:
+    """Get prompt statistics.
+
+    Args:
+        current_user: Current authenticated user
+        prompt_service: Prompt service
+
+    Returns:
+        Prompt statistics
+    """
+    try:
+        stats = await prompt_service.get_prompt_stats(current_user.id)
+
+        return PromptStatsResponse(
+            total_prompts=stats.get("total_prompts", 0),
+            prompts_by_type=stats.get("prompts_by_type", {}),
+            prompts_by_category=stats.get("prompts_by_category", {}),
+            most_used_prompts=[
+                PromptResponse.model_validate(prompt)
+                for prompt in stats.get("most_used_prompts", [])
+            ],
+            recent_prompts=[
+                PromptResponse.model_validate(prompt)
+                for prompt in stats.get("recent_prompts", [])
+            ],
+            usage_stats=stats.get("usage_stats", {}),
+        )
+
+    except Exception as e:
+        logger.error("Failed to get prompt stats", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to get prompt stats"
+        ) from None
+
+
 @router.get("", response_model=PromptListResponse)
 async def list_prompts(
     prompt_type: PromptType | None = Query(
@@ -366,41 +405,3 @@ async def clone_prompt(
         ) from None
 
 
-@router.get("/stats/overview", response_model=PromptStatsResponse)
-async def get_prompt_stats(
-    current_user: User = Depends(get_current_user),
-    prompt_service: PromptService = Depends(get_prompt_service),
-) -> PromptStatsResponse:
-    """Get prompt statistics.
-
-    Args:
-        request: Stats request parameters
-        current_user: Current authenticated user
-        prompt_service: Prompt service
-
-    Returns:
-        Prompt statistics
-    """
-    try:
-        stats = await prompt_service.get_prompt_stats(current_user.id)
-
-        return PromptStatsResponse(
-            total_prompts=stats.get("total_prompts", 0),
-            prompts_by_type=stats.get("prompts_by_type", {}),
-            prompts_by_category=stats.get("prompts_by_category", {}),
-            most_used_prompts=[
-                PromptResponse.model_validate(prompt)
-                for prompt in stats.get("most_used_prompts", [])
-            ],
-            recent_prompts=[
-                PromptResponse.model_validate(prompt)
-                for prompt in stats.get("recent_prompts", [])
-            ],
-            usage_stats=stats.get("usage_stats", {}),
-        )
-
-    except Exception as e:
-        logger.error("Failed to get prompt stats", error=str(e))
-        raise InternalServerProblem(
-            detail="Failed to get prompt stats"
-        ) from None

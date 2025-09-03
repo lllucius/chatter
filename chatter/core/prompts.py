@@ -45,6 +45,8 @@ class PromptService:
         Raises:
             PromptError: If prompt creation fails
         """
+        from chatter.utils.prompt_audit import PromptAuditLogger
+        
         try:
             # Check for duplicate prompt names for this user
             existing_result = await self.session.execute(
@@ -58,6 +60,13 @@ class PromptService:
             existing_prompt = existing_result.scalar_one_or_none()
 
             if existing_prompt:
+                PromptAuditLogger.log_security_incident(
+                    prompt_id=None,
+                    user_id=user_id,
+                    incident_type="duplicate_name_attempt",
+                    description=f"Attempted to create prompt with existing name: {prompt_data.name}",
+                    severity="low"
+                )
                 raise PromptError(
                     "Prompt with this name already exists"
                 ) from None
@@ -78,6 +87,21 @@ class PromptService:
             self.session.add(prompt)
             await self.session.commit()
             await self.session.refresh(prompt)
+
+            # Audit log the creation
+            PromptAuditLogger.log_prompt_created(
+                prompt_id=prompt.id,
+                user_id=user_id,
+                prompt_name=prompt.name,
+                prompt_type=prompt.prompt_type.value,
+                category=prompt.category.value,
+                is_public=prompt.is_public,
+                metadata={
+                    "template_format": prompt.template_format,
+                    "content_length": len(prompt.content),
+                    "variables_count": len(prompt.variables or [])
+                }
+            )
 
             logger.info(
                 "Prompt created",
@@ -110,6 +134,8 @@ class PromptService:
         Returns:
             Prompt if found and accessible, None otherwise
         """
+        from chatter.utils.prompt_audit import PromptAuditLogger
+        
         try:
             result = await self.session.execute(
                 select(Prompt).where(
@@ -122,7 +148,41 @@ class PromptService:
                     )
                 )
             )
-            return result.scalar_one_or_none()
+            prompt = result.scalar_one_or_none()
+            
+            # Log access attempt
+            if prompt:
+                PromptAuditLogger.log_access_attempt(
+                    prompt_id=prompt_id,
+                    user_id=user_id,
+                    access_granted=True,
+                    access_type="read"
+                )
+            else:
+                # Check if prompt exists but user doesn't have access
+                check_result = await self.session.execute(
+                    select(Prompt).where(Prompt.id == prompt_id)
+                )
+                existing_prompt = check_result.scalar_one_or_none()
+                
+                if existing_prompt:
+                    PromptAuditLogger.log_access_attempt(
+                        prompt_id=prompt_id,
+                        user_id=user_id,
+                        access_granted=False,
+                        access_type="read",
+                        reason="insufficient_permissions"
+                    )
+                else:
+                    PromptAuditLogger.log_access_attempt(
+                        prompt_id=prompt_id,
+                        user_id=user_id,
+                        access_granted=False,
+                        access_type="read",
+                        reason="prompt_not_found"
+                    )
+            
+            return prompt
 
         except Exception as e:
             logger.error(
@@ -358,6 +418,20 @@ class PromptService:
 
             rendered_content = None
             estimated_tokens = None
+            security_warnings = []
+            template_variables_used = []
+            performance_metrics = {}
+
+            # Check for potential security issues
+            from chatter.utils.template_security import SecureTemplateRenderer
+            template_validation = SecureTemplateRenderer.validate_template_syntax(
+                prompt.content, prompt.template_format
+            )
+            template_variables_used = template_validation.get('variables', [])
+            
+            # Add security warnings
+            if template_validation.get('warnings'):
+                security_warnings.extend(template_validation['warnings'])
 
             # Render prompt if validation passed and not validate-only
             if (
@@ -365,17 +439,40 @@ class PromptService:
                 and not test_request.validate_only
             ):
                 try:
+                    render_start = datetime.now(UTC)
                     rendered_content = prompt.render(
                         **test_request.variables
                     )
-                    # Simple token estimation (approximate)
-                    estimated_tokens = (
-                        len(rendered_content.split()) * 1.3
-                    )  # rough approximation
+                    render_end = datetime.now(UTC)
+                    
+                    # Improved token estimation using better approximation
+                    if rendered_content:
+                        # More accurate token estimation
+                        # Rough approximation: 1 token ≈ 4 characters for English text
+                        char_count = len(rendered_content)
+                        word_count = len(rendered_content.split())
+                        estimated_tokens = max(
+                            char_count // 4,  # Character-based estimation
+                            int(word_count * 1.3),  # Word-based estimation  
+                        )
+                    
+                    if test_request.include_performance_metrics:
+                        performance_metrics = {
+                            'render_time_ms': int(
+                                (render_end - render_start).total_seconds() * 1000
+                            ),
+                            'content_length': len(rendered_content) if rendered_content else 0,
+                            'variable_count': len(test_request.variables),
+                            'template_complexity_score': self._calculate_template_complexity(prompt.content),
+                        }
+                        
                 except Exception as render_error:
                     validation_result["valid"] = False
                     validation_result["errors"].append(
                         f"Render error: {str(render_error)}"
+                    )
+                    security_warnings.append(
+                        "Template rendering failed - possible security issue"
                     )
 
             end_time = datetime.now(UTC)
@@ -393,10 +490,11 @@ class PromptService:
             result = {
                 "rendered_content": rendered_content,
                 "validation_result": validation_result,
-                "estimated_tokens": (
-                    int(estimated_tokens) if estimated_tokens else None
-                ),
+                "estimated_tokens": estimated_tokens,
                 "test_duration_ms": test_duration_ms,
+                "template_variables_used": template_variables_used,
+                "security_warnings": security_warnings,
+                "performance_metrics": performance_metrics if test_request.include_performance_metrics else None,
             }
 
             logger.info(
@@ -404,6 +502,23 @@ class PromptService:
                 prompt_id=prompt_id,
                 test_duration_ms=test_duration_ms,
                 validation_valid=validation_result["valid"],
+                security_warnings_count=len(security_warnings),
+            )
+
+            # Audit log the test
+            from chatter.utils.prompt_audit import PromptAuditLogger
+            PromptAuditLogger.log_prompt_tested(
+                prompt_id=prompt_id,
+                user_id=user_id,
+                test_success=validation_result["valid"] and rendered_content is not None,
+                test_duration_ms=test_duration_ms,
+                security_warnings=security_warnings,
+                metadata={
+                    "validate_only": test_request.validate_only,
+                    "include_performance_metrics": test_request.include_performance_metrics,
+                    "variables_count": len(test_request.variables),
+                    "estimated_tokens": estimated_tokens
+                }
             )
 
             return result
@@ -415,6 +530,26 @@ class PromptService:
                 "Prompt test failed", prompt_id=prompt_id, error=str(e)
             )
             raise PromptError(f"Prompt test failed: {str(e)}") from e
+
+    def _calculate_template_complexity(self, content: str) -> int:
+        """Calculate a simple complexity score for a template.
+        
+        Args:
+            content: Template content
+            
+        Returns:
+            Complexity score (higher = more complex)
+        """
+        score = 0
+        
+        # Basic complexity factors
+        score += len(content) // 100  # Length factor
+        score += content.count('{')   # Variable count
+        score += content.count('{{')  # Mustache variables
+        score += content.count('{% ')  # Jinja2 control structures
+        score += content.count('{{ ')  # Jinja2 variables
+        
+        return score
 
     async def clone_prompt(
         self,

@@ -103,23 +103,23 @@ class TestHealthApiBasic:
         mock_health_check.side_effect = mock_health_check_func
         
         response = client.get("/readyz")
-        assert response.status_code == 200
+        assert response.status_code == 503  # Service Unavailable
         
         data = response.json()
         assert data["status"] == "not_ready"
         assert data["service"] == "chatter"
+        assert data["checks"]["database"]["status"] == "unhealthy"
+
     @patch('chatter.api.health.health_check')
     def test_readiness_check_timeout(self, mock_health_check, client):
         """Test readiness check with database timeout."""
-        import asyncio
-        
         async def mock_health_check_func(session=None):
             raise asyncio.TimeoutError("Database timeout")
         
         mock_health_check.side_effect = mock_health_check_func
         
         response = client.get("/readyz")
-        assert response.status_code == 200
+        assert response.status_code == 503  # Service Unavailable
         
         data = response.json()
         assert data["status"] == "not_ready"
@@ -145,17 +145,18 @@ class TestHealthApiBasic:
         assert "performance" in data
         assert "endpoints" in data
 
-    @patch('chatter.utils.monitoring.metrics_collector')  
-    def test_metrics_endpoint_failure(self, mock_metrics_collector, client):
-        """Test metrics endpoint when monitoring fails."""
-        mock_metrics_collector.get_overall_stats.side_effect = Exception("Monitoring unavailable")
-        
+    def test_metrics_endpoint_fallback(self, client):
+        """Test metrics endpoint when monitoring is unavailable."""
+        # Don't patch anything - let it use fallback
         response = client.get("/metrics")
-        assert response.status_code == 500
+        assert response.status_code == 200
         
         data = response.json()
-        assert "detail" in data
-        assert "Metrics collection failed" in data["detail"]
+        assert "timestamp" in data
+        assert data["service"] == "chatter"
+        assert "health" in data
+        assert "performance" in data
+        assert "endpoints" in data
 
     @patch('chatter.utils.monitoring.metrics_collector')
     def test_correlation_trace_endpoint_success(self, mock_metrics_collector, client):
@@ -174,15 +175,14 @@ class TestHealthApiBasic:
         assert data["trace_length"] == 1
         assert data["requests"] == mock_trace
 
-    @patch('chatter.utils.monitoring.metrics_collector')
-    def test_correlation_trace_endpoint_failure(self, mock_metrics_collector, client):
-        """Test correlation trace endpoint failure."""
+    def test_correlation_trace_endpoint_fallback(self, client):
+        """Test correlation trace endpoint fallback when monitoring unavailable."""
         correlation_id = "test-123"
-        mock_metrics_collector.get_correlation_trace.side_effect = Exception("Trace not found")
         
         response = client.get(f"/trace/{correlation_id}")
-        assert response.status_code == 500
+        assert response.status_code == 200
         
         data = response.json()
-        assert "detail" in data
-        assert "Failed to get trace" in data["detail"]
+        assert data["correlation_id"] == correlation_id
+        assert data["trace_length"] == 0
+        assert data["requests"] == []

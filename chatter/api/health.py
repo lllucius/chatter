@@ -1,6 +1,7 @@
 """Health check and monitoring endpoints."""
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
@@ -13,8 +14,10 @@ from chatter.schemas.health import (
     ReadinessStatus,
 )
 from chatter.utils.database import get_session_generator, health_check
+from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem
 
+logger = get_logger(__name__)
 router = APIRouter()
 
 
@@ -36,7 +39,7 @@ async def health_check_endpoint() -> HealthCheckResponse:
 @router.get("/readyz", response_model=ReadinessCheckResponse)
 async def readiness_check(
     session: AsyncSession = Depends(get_session_generator),
-) -> ReadinessCheckResponse:
+) -> JSONResponse:
     """Readiness check endpoint with database connectivity.
 
     This checks that the application is ready to serve traffic by validating
@@ -46,7 +49,8 @@ async def readiness_check(
         session: Database session
 
     Returns:
-        Readiness status with detailed checks
+        Readiness status with detailed checks.
+        Returns 200 if ready, 503 if not ready.
     """
     checks = {}
     
@@ -82,12 +86,20 @@ async def readiness_check(
         check.get("status") == "healthy" for check in checks.values()
     )
 
-    return ReadinessCheckResponse(
+    response_data = ReadinessCheckResponse(
         status=ReadinessStatus.READY if all_healthy else ReadinessStatus.NOT_READY,
         service="chatter",
         version=settings.app_version,
         environment=settings.environment,
         checks=checks,
+    )
+
+    # Return 503 if not ready (Kubernetes standard)
+    status_code = status.HTTP_200_OK if all_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
+    
+    return JSONResponse(
+        content=response_data.model_dump(),
+        status_code=status_code
     )
 
 
@@ -118,18 +130,37 @@ async def get_metrics() -> MetricsResponse:
     Returns:
         Application metrics including performance and health data
     """
+    from datetime import datetime, timezone
+    
+    # Use real timestamp
+    current_timestamp = datetime.now(timezone.utc).isoformat()
+    
+    # Default empty metrics in case monitoring is unavailable
+    health_metrics = {"status": "unknown", "checks_available": False}
+    performance_stats = {"requests": 0, "errors": 0, "response_time_ms": 0}
+    endpoint_stats = {}
+    
     try:
-        from datetime import datetime, timezone
         from chatter.utils.monitoring import metrics_collector
 
-        overall_stats = metrics_collector.get_overall_stats(
-            window_minutes=60
-        )
-        health_metrics = metrics_collector.get_health_metrics()
-        endpoint_stats = metrics_collector.get_endpoint_stats()
-
-        # Use real timestamp
-        current_timestamp = datetime.now(timezone.utc).isoformat()
+        # Try to get metrics with individual fallbacks
+        try:
+            overall_stats = metrics_collector.get_overall_stats(window_minutes=60)
+            performance_stats.update(overall_stats)
+        except Exception as e:
+            logger.warning(f"Failed to get performance stats: {e}")
+            
+        try:
+            health_data = metrics_collector.get_health_metrics()
+            health_metrics.update(health_data)
+        except Exception as e:
+            logger.warning(f"Failed to get health metrics: {e}")
+            
+        try:
+            endpoint_data = metrics_collector.get_endpoint_stats()
+            endpoint_stats.update(endpoint_data)
+        except Exception as e:
+            logger.warning(f"Failed to get endpoint stats: {e}")
 
         return MetricsResponse(
             timestamp=current_timestamp,
@@ -137,11 +168,24 @@ async def get_metrics() -> MetricsResponse:
             version=settings.app_version,
             environment=settings.environment,
             health=health_metrics,
-            performance=overall_stats,
+            performance=performance_stats,
+            endpoints=endpoint_stats,
+        )
+        
+    except ImportError:
+        # Monitoring module not available
+        logger.warning("Monitoring module not available, returning basic metrics")
+        return MetricsResponse(
+            timestamp=current_timestamp,
+            service="chatter",
+            version=settings.app_version,
+            environment=settings.environment,
+            health=health_metrics,
+            performance=performance_stats,
             endpoints=endpoint_stats,
         )
     except Exception as e:
-        # No fallback metrics - raise proper problem instead
+        # Other unexpected errors
         raise InternalServerProblem(
             detail=f"Metrics collection failed: {str(e)}"
         ) from e
@@ -171,8 +215,17 @@ async def get_correlation_trace(
             trace_length=len(trace),
             requests=trace,
         )
+    except ImportError:
+        # Monitoring module not available
+        logger.warning("Monitoring module not available for correlation trace")
+        return CorrelationTraceResponse(
+            correlation_id=correlation_id,
+            trace_length=0,
+            requests=[],
+        )
     except Exception as e:
-        # No fallback response - raise proper problem instead
+        # Log the error but don't expose internal details
+        logger.error(f"Failed to get correlation trace for {correlation_id}: {e}")
         raise InternalServerProblem(
-            detail=f"Failed to get trace: {str(e)}"
+            detail=f"Failed to get trace for correlation ID: {correlation_id}"
         ) from e

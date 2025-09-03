@@ -215,8 +215,8 @@ def sanitize_string(text: str) -> str:
     # Apply all sensitive patterns
     for pattern_name, pattern in SENSITIVE_PATTERNS.items():
 
-        def replace_match(match):
-            if pattern_name == 'email':
+        def replace_match(match, current_pattern_name=pattern_name):
+            if current_pattern_name == 'email':
                 # For emails, just mask the domain part
                 email = match.group(0)
                 if '@' in email:

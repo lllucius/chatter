@@ -261,7 +261,7 @@ class InputValidator:
                     value, rule_name
                 )
             except ValidationError as e:
-                raise ValidationError(f"Field '{field_name}': {str(e)}")
+                raise ValidationError(f"Field '{field_name}': {str(e)}") from e
 
         return validated_data
 
@@ -274,7 +274,7 @@ class InputValidator:
 
         Returns:
             True if valid, False otherwise
-            
+
         Raises:
             ValueError: If validation fails with critical security or length errors
         """
@@ -521,7 +521,7 @@ async def validate_request_middleware(
             raise HTTPException(
                 status_code=400,
                 detail=f"Request validation failed: {str(e)}",
-            )
+            ) from e
         except Exception as e:
             logger.error(
                 "Error during request validation",

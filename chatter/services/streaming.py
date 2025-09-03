@@ -482,7 +482,7 @@ class StreamingService:
 
         # Create a snapshot of stream items to avoid race conditions
         stream_items = list(self.active_streams.items())
-        
+
         for stream_id, stream_info in stream_items:
             if (
                 current_time - stream_info["last_activity"]

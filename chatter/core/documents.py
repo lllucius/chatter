@@ -450,7 +450,6 @@ class DocumentService:
                 usage.get("model") if isinstance(usage, dict) else None
             )
 
-            print("USAGES$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
             # Get accessible document IDs
             accessible_docs_result = await self.session.execute(
                 select(Document.id).where(
@@ -467,7 +466,6 @@ class DocumentService:
             if not accessible_doc_ids:
                 return []
 
-            print("USAGES$%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
             # Apply document type filter
             if search_request.document_types:
                 filtered_docs_result = await self.session.execute(

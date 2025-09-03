@@ -63,14 +63,14 @@ async def get_chat_service(
 
 def _validate_uuid(value: str, field_name: str) -> str:
     """Validate that a string is a valid UUID.
-    
+
     Args:
         value: String to validate
         field_name: Name of the field for error messages
-        
+
     Returns:
         The original string if valid
-        
+
     Raises:
         BadRequestProblem: If the string is not a valid UUID
     """
@@ -205,7 +205,7 @@ async def get_conversation(
     """Get conversation details with messages."""
     # Validate conversation_id format
     _validate_uuid(conversation_id, "conversation_id")
-    
+
     conversation = await chat_service.get_conversation(
         conversation_id, current_user.id, include_messages=True
     )
@@ -242,7 +242,7 @@ async def update_conversation(
     """Update conversation."""
     # Validate conversation_id format
     _validate_uuid(conversation_id, "conversation_id")
-    
+
     try:
         conversation = await chat_service.update_conversation(
             conversation_id, current_user.id, update_data
@@ -268,7 +268,7 @@ async def delete_conversation(
     """Delete conversation."""
     # Validate conversation_id format
     _validate_uuid(conversation_id, "conversation_id")
-    
+
     try:
         await chat_service.delete_conversation(
             conversation_id, current_user.id
@@ -357,7 +357,7 @@ async def delete_message(
     # Validate UUID formats
     _validate_uuid(conversation_id, "conversation_id")
     _validate_uuid(message_id, "message_id")
-    
+
     try:
         await chat_service.delete_message(
             conversation_id, message_id, current_user.id

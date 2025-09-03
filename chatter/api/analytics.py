@@ -63,12 +63,19 @@ async def get_conversation_stats(
     try:
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
+        from pydantic import ValidationError
 
-        time_range = AnalyticsTimeRange(
-            start_date=start_date,
-            end_date=end_date,
-            period=period,
-        )
+        try:
+            time_range = AnalyticsTimeRange(
+                start_date=start_date,
+                end_date=end_date,
+                period=period,
+            )
+        except ValidationError as ve:
+            from chatter.utils.problem import BadRequestProblem
+            raise BadRequestProblem(
+                detail=f"Invalid time range parameters: {ve}"
+            ) from ve
 
         stats = await analytics_service.get_conversation_stats(
             current_user.id, time_range
@@ -543,6 +550,21 @@ async def get_user_analytics(
         User-specific analytics
     """
     try:
+        # Authorization check: users can only access their own analytics
+        # unless they are admin (assuming is_admin field exists)
+        if current_user.id != user_id and not getattr(current_user, 'is_admin', False):
+            from chatter.utils.problem import ForbiddenProblem
+            raise ForbiddenProblem(
+                detail="Access denied: You can only view your own analytics"
+            )
+
+        # Validate user_id format (assuming it follows ULID format)
+        if not user_id or len(user_id) != 26:
+            from chatter.utils.problem import BadRequestProblem
+            raise BadRequestProblem(
+                detail="Invalid user ID format"
+            )
+
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
 
@@ -600,17 +622,35 @@ async def export_analytics(
         Exported analytics report
     """
     try:
-
         from fastapi.responses import StreamingResponse
+        from pydantic import ValidationError
 
-        # Create time range object
-        from chatter.schemas.analytics import AnalyticsTimeRange
+        # Validate export parameters first
+        try:
+            # Create time range object
+            from chatter.schemas.analytics import AnalyticsTimeRange
 
-        time_range = AnalyticsTimeRange(
-            start_date=start_date,
-            end_date=end_date,
-            period=period,
-        )
+            time_range = AnalyticsTimeRange(
+                start_date=start_date,
+                end_date=end_date,
+                period=period,
+            )
+            
+            # Validate the export request
+            from chatter.schemas.analytics import AnalyticsExportRequest
+            
+            export_request = AnalyticsExportRequest(
+                metrics=metrics,
+                time_range=time_range,
+                format=format,
+                include_raw_data=False
+            )
+            
+        except ValidationError as ve:
+            from chatter.utils.problem import BadRequestProblem
+            raise BadRequestProblem(
+                detail=f"Invalid export parameters: {ve}"
+            ) from ve
 
         # Convert time range to tuple, handling None values
         date_range = None

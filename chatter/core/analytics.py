@@ -202,7 +202,7 @@ class AnalyticsService:
                 "avg_messages_per_conversation": (
                     total_messages / total_conversations
                     if total_conversations > 0
-                    else 0
+                    else 0.0
                 ),
                 "total_tokens_used": total_tokens,
                 "total_cost": total_cost,
@@ -522,20 +522,23 @@ class AnalyticsService:
                 total_requests = 0
                 total_tokens = 0
 
-            # Calculate per-minute rates (assuming time range)
+            # Calculate per-minute rates with proper division by zero handling
             time_range_minutes = self._get_time_range_minutes(
                 time_range
             )
-            requests_per_minute = (
-                total_requests / time_range_minutes
-                if time_range_minutes > 0
-                else 0
-            )
-            tokens_per_minute = (
-                total_tokens / time_range_minutes
-                if time_range_minutes > 0
-                else 0
-            )
+            
+            # Ensure we don't divide by zero
+            if time_range_minutes > 0:
+                requests_per_minute = total_requests / time_range_minutes
+                tokens_per_minute = total_tokens / time_range_minutes
+            else:
+                # Log warning about invalid time range
+                logger.warning(
+                    "Invalid time range for performance metrics calculation",
+                    time_range_minutes=time_range_minutes
+                )
+                requests_per_minute = 0.0
+                tokens_per_minute = 0.0
 
             # Error metrics (placeholder - would need error tracking)
             total_errors = 0
@@ -729,7 +732,7 @@ class AnalyticsService:
                 avg_chunks = 0.0
 
             processing_success_rate = (
-                processed_docs / total_docs if total_docs > 0 else 0
+                processed_docs / total_docs if total_docs > 0 else 0.0
             )
 
             # Storage metrics
@@ -1478,33 +1481,247 @@ class AnalyticsService:
         end_date: datetime | None = None,
     ) -> dict[str, Any]:
         """Get analytics for a specific user."""
-        # TODO: Implement user-specific analytics
-        return {
-            "user_id": user_id,
-            "conversations": 0,
-            "messages": 0,
-            "documents": 0,
-            "total_usage_time": 0,
-            "start_date": start_date,
-            "end_date": end_date,
-        }
+        try:
+            # Build time filter 
+            time_range = AnalyticsTimeRange(
+                start_date=start_date,
+                end_date=end_date,
+                period="30d" if not start_date and not end_date else "custom"
+            )
+            
+            # Get comprehensive user analytics
+            conversations_task = self.get_conversation_stats(user_id, time_range)
+            usage_task = self.get_usage_metrics(user_id, time_range)
+            performance_task = self.get_performance_metrics(user_id, time_range)
+            document_task = self.get_document_analytics(user_id, time_range)
+            
+            # Run analytics in parallel for better performance
+            conversations, usage, performance, documents = await asyncio.gather(
+                conversations_task,
+                usage_task,
+                performance_task,
+                document_task,
+                return_exceptions=True
+            )
+            
+            # Handle any exceptions from individual analytics
+            result = {
+                "user_id": user_id,
+                "start_date": start_date,
+                "end_date": end_date,
+                "generated_at": datetime.now(UTC),
+            }
+            
+            if not isinstance(conversations, Exception):
+                result["conversations"] = conversations
+            else:
+                logger.warning(f"Failed to get conversation analytics: {conversations}")
+                result["conversations"] = {}
+                
+            if not isinstance(usage, Exception):
+                result["usage"] = usage
+            else:
+                logger.warning(f"Failed to get usage analytics: {usage}")
+                result["usage"] = {}
+                
+            if not isinstance(performance, Exception):
+                result["performance"] = performance
+            else:
+                logger.warning(f"Failed to get performance analytics: {performance}")
+                result["performance"] = {}
+                
+            if not isinstance(documents, Exception):
+                result["documents"] = documents
+            else:
+                logger.warning(f"Failed to get document analytics: {documents}")
+                result["documents"] = {}
+            
+            # Calculate some derived metrics
+            total_usage_time = usage.get("active_days", 0) * 24 if isinstance(usage, dict) else 0
+            result["total_usage_time_hours"] = total_usage_time
+            
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to get user analytics for {user_id}", error=str(e))
+            return {
+                "user_id": user_id,
+                "error": "Failed to retrieve analytics",
+                "start_date": start_date,
+                "end_date": end_date,
+            }
 
     async def export_analytics(
         self,
         export_format: str,
         date_range: tuple[datetime, datetime] | None = None,
         filters: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+    ) -> dict[str, Any] | Any:
         """Export analytics data in specified format."""
-        # TODO: Implement analytics export
-        return {
-            "export_id": "export_001",
-            "format": export_format,
-            "status": "completed",
-            "download_url": "/exports/analytics_export.csv",
-            "file_size": 1024,
-            "record_count": 100,
-        }
+        try:
+            if not filters:
+                filters = {}
+                
+            user_id = filters.get("user_id")
+            metrics = filters.get("metrics", ["conversations", "usage", "performance"])
+            
+            if not user_id:
+                raise ValueError("user_id is required for analytics export")
+            
+            # Create time range from date_range tuple
+            time_range = None
+            if date_range:
+                time_range = AnalyticsTimeRange(
+                    start_date=date_range[0],
+                    end_date=date_range[1],
+                    period="custom"
+                )
+            
+            # Collect requested analytics data
+            export_data = {
+                "export_info": {
+                    "format": export_format,
+                    "generated_at": datetime.now(UTC).isoformat(),
+                    "user_id": user_id,
+                    "date_range": {
+                        "start": date_range[0].isoformat() if date_range else None,
+                        "end": date_range[1].isoformat() if date_range else None,
+                    } if date_range else None,
+                    "metrics_included": metrics,
+                }
+            }
+            
+            # Gather requested metrics
+            for metric in metrics:
+                try:
+                    if metric == "conversations":
+                        export_data["conversations"] = await self.get_conversation_stats(user_id, time_range)
+                    elif metric == "usage":
+                        export_data["usage"] = await self.get_usage_metrics(user_id, time_range)
+                    elif metric == "performance":
+                        export_data["performance"] = await self.get_performance_metrics(user_id, time_range)
+                    elif metric == "documents":
+                        export_data["documents"] = await self.get_document_analytics(user_id, time_range)
+                    elif metric == "system":
+                        export_data["system"] = await self.get_system_analytics()
+                    elif metric == "toolservers":
+                        export_data["toolservers"] = await self.get_tool_server_analytics(user_id, time_range)
+                    else:
+                        logger.warning(f"Unknown metric requested for export: {metric}")
+                        
+                except Exception as e:
+                    logger.error(f"Failed to export metric '{metric}': {e}")
+                    export_data[metric] = {"error": f"Failed to export: {str(e)}"}
+            
+            # Handle different export formats
+            if export_format == "json":
+                return export_data
+            elif export_format == "csv":
+                return self._export_to_csv(export_data)
+            elif export_format == "xlsx":
+                return self._export_to_xlsx(export_data)
+            else:
+                raise ValueError(f"Unsupported export format: {export_format}")
+                
+        except Exception as e:
+            logger.error(f"Analytics export failed: {e}")
+            return {
+                "error": str(e),
+                "export_format": export_format,
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+    
+    def _export_to_csv(self, data: dict[str, Any]) -> Any:
+        """Convert analytics data to CSV format."""
+        import io
+        import csv
+        
+        # Create CSV content
+        output = io.StringIO()
+        
+        # Write export info
+        writer = csv.writer(output)
+        writer.writerow(["Analytics Export"])
+        writer.writerow(["Generated:", data["export_info"]["generated_at"]])
+        writer.writerow(["User ID:", data["export_info"]["user_id"]])
+        writer.writerow([])  # Empty row
+        
+        # Write each metric as separate sections
+        for metric, metric_data in data.items():
+            if metric == "export_info":
+                continue
+                
+            writer.writerow([f"{metric.title()} Metrics"])
+            
+            if isinstance(metric_data, dict) and "error" not in metric_data:
+                # Flatten the dictionary for CSV
+                for key, value in metric_data.items():
+                    if isinstance(value, (int, float, str)):
+                        writer.writerow([key, value])
+                    elif isinstance(value, dict):
+                        writer.writerow([key, str(value)])
+            
+            writer.writerow([])  # Empty row between sections
+        
+        content = output.getvalue()
+        output.close()
+        
+        # Return as generator for streaming
+        def generate():
+            yield content
+            
+        return generate()
+    
+    def _export_to_xlsx(self, data: dict[str, Any]) -> Any:
+        """Convert analytics data to Excel format."""
+        try:
+            import io
+            from openpyxl import Workbook
+            
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Analytics Export"
+            
+            # Write header info
+            ws.append(["Analytics Export"])
+            ws.append(["Generated:", data["export_info"]["generated_at"]])
+            ws.append(["User ID:", data["export_info"]["user_id"]])
+            ws.append([])  # Empty row
+            
+            # Write each metric as separate sections
+            for metric, metric_data in data.items():
+                if metric == "export_info":
+                    continue
+                    
+                ws.append([f"{metric.title()} Metrics"])
+                
+                if isinstance(metric_data, dict) and "error" not in metric_data:
+                    # Flatten the dictionary for Excel
+                    for key, value in metric_data.items():
+                        if isinstance(value, (int, float, str)):
+                            ws.append([key, value])
+                        elif isinstance(value, dict):
+                            ws.append([key, str(value)])
+                
+                ws.append([])  # Empty row between sections
+            
+            # Save to bytes
+            output = io.BytesIO()
+            wb.save(output)
+            output.seek(0)
+            
+            content = output.getvalue()
+            output.close()
+            
+            # Return as generator for streaming
+            def generate():
+                yield content
+                
+            return generate()
+            
+        except ImportError:
+            logger.error("openpyxl not available for Excel export")
+            return self._export_to_csv(data)  # Fallback to CSV
 
 
 class AnalyticsError(Exception):
@@ -1532,11 +1749,65 @@ class ConversationAnalyzer:
         Returns:
             Analysis results
         """
-        return {
-            "conversation_id": conversation_id,
-            "message_count": len(messages),
-            "analysis": "conversation_analyzed",
-        }
+        try:
+            if not messages:
+                return {
+                    "conversation_id": conversation_id,
+                    "message_count": 0,
+                    "analysis": "empty_conversation",
+                    "patterns": [],
+                    "quality_score": 0.0,
+                }
+            
+            # Basic conversation analysis
+            user_messages = [m for m in messages if m.get("role") == "user"]
+            assistant_messages = [m for m in messages if m.get("role") == "assistant"]
+            
+            # Calculate metrics
+            total_words = sum(
+                len(m.get("content", "").split()) 
+                for m in messages 
+                if isinstance(m.get("content"), str)
+            )
+            avg_words_per_message = total_words / len(messages) if messages else 0
+            
+            # Detect patterns
+            patterns = []
+            if len(user_messages) > len(assistant_messages):
+                patterns.append("incomplete_responses")
+            if avg_words_per_message > 100:
+                patterns.append("detailed_conversation")
+            if len(messages) > 20:
+                patterns.append("long_conversation")
+            
+            # Simple quality score based on response completeness
+            quality_score = min(1.0, len(assistant_messages) / max(1, len(user_messages)))
+            
+            analysis = {
+                "conversation_id": conversation_id,
+                "message_count": len(messages),
+                "user_messages": len(user_messages),
+                "assistant_messages": len(assistant_messages),
+                "total_words": total_words,
+                "avg_words_per_message": avg_words_per_message,
+                "patterns": patterns,
+                "quality_score": quality_score,
+                "analysis": "conversation_analyzed",
+            }
+            
+            # Store metrics for later retrieval
+            self.metrics[conversation_id] = analysis
+            
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Failed to analyze conversation {conversation_id}: {e}")
+            return {
+                "conversation_id": conversation_id,
+                "message_count": len(messages) if messages else 0,
+                "analysis": "analysis_failed",
+                "error": str(e),
+            }
 
     def get_conversation_metrics(
         self, conversation_id: str
@@ -1549,7 +1820,10 @@ class ConversationAnalyzer:
         Returns:
             Conversation metrics
         """
-        return self.metrics.get(conversation_id, {})
+        return self.metrics.get(conversation_id, {
+            "conversation_id": conversation_id,
+            "status": "not_analyzed"
+        })
 
 
 class PerformanceAnalyzer:
@@ -1558,6 +1832,14 @@ class PerformanceAnalyzer:
     def __init__(self):
         """Initialize the performance analyzer."""
         self.performance_data: dict[str, Any] = {}
+        self.thresholds = {
+            "response_time_warning_ms": 5000,
+            "response_time_critical_ms": 10000,
+            "error_rate_warning": 0.05,  # 5%
+            "error_rate_critical": 0.10,  # 10%
+            "cpu_warning": 0.80,  # 80%
+            "memory_warning": 0.85,  # 85%
+        }
 
     async def analyze_performance(
         self, component: str, metrics: dict[str, Any]
@@ -1571,11 +1853,93 @@ class PerformanceAnalyzer:
         Returns:
             Performance analysis results
         """
-        return {
-            "component": component,
-            "metrics": metrics,
-            "analysis": "performance_analyzed",
-        }
+        try:
+            # Extract key metrics
+            response_time = metrics.get("avg_response_time_ms", 0)
+            error_rate = metrics.get("error_rate", 0)
+            cpu_usage = metrics.get("cpu_usage", 0)
+            memory_usage = metrics.get("memory_usage", 0)
+            
+            # Analyze response time
+            response_status = "good"
+            if response_time > self.thresholds["response_time_critical_ms"]:
+                response_status = "critical"
+            elif response_time > self.thresholds["response_time_warning_ms"]:
+                response_status = "warning"
+            
+            # Analyze error rate
+            error_status = "good"
+            if error_rate > self.thresholds["error_rate_critical"]:
+                error_status = "critical"
+            elif error_rate > self.thresholds["error_rate_warning"]:
+                error_status = "warning"
+            
+            # Analyze resource usage
+            resource_status = "good"
+            if (cpu_usage > self.thresholds["cpu_warning"] or 
+                memory_usage > self.thresholds["memory_warning"]):
+                resource_status = "warning"
+            
+            # Overall health score (0-100)
+            health_score = 100
+            if response_status == "warning":
+                health_score -= 20
+            elif response_status == "critical":
+                health_score -= 40
+            
+            if error_status == "warning":
+                health_score -= 15
+            elif error_status == "critical":
+                health_score -= 30
+            
+            if resource_status == "warning":
+                health_score -= 10
+            
+            health_score = max(0, health_score)
+            
+            # Determine overall status
+            overall_status = "good"
+            if health_score < 50:
+                overall_status = "critical"
+            elif health_score < 80:
+                overall_status = "warning"
+            
+            # Generate recommendations
+            recommendations = []
+            if response_status in ["warning", "critical"]:
+                recommendations.append("Consider optimizing database queries or adding caching")
+            if error_status in ["warning", "critical"]:
+                recommendations.append("Investigate error patterns and improve error handling")
+            if resource_status == "warning":
+                recommendations.append("Monitor resource usage and consider scaling")
+            
+            analysis = {
+                "component": component,
+                "metrics": metrics,
+                "analysis": {
+                    "response_time_status": response_status,
+                    "error_rate_status": error_status,
+                    "resource_status": resource_status,
+                    "overall_status": overall_status,
+                    "health_score": health_score,
+                    "recommendations": recommendations,
+                },
+                "timestamp": datetime.now(UTC).isoformat(),
+            }
+            
+            # Store for retrieval
+            self.performance_data[component] = analysis
+            
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Failed to analyze performance for {component}: {e}")
+            return {
+                "component": component,
+                "metrics": metrics,
+                "analysis": "analysis_failed",
+                "error": str(e),
+            }
 
     def get_performance_summary(self) -> dict[str, Any]:
         """Get overall performance summary.
@@ -1583,9 +1947,49 @@ class PerformanceAnalyzer:
         Returns:
             Performance summary
         """
+        if not self.performance_data:
+            return {
+                "overall_health": "unknown",
+                "components_analyzed": 0,
+                "summary": "No performance data available",
+            }
+        
+        # Calculate overall health
+        total_health = 0
+        critical_count = 0
+        warning_count = 0
+        
+        for component_data in self.performance_data.values():
+            analysis = component_data.get("analysis", {})
+            health_score = analysis.get("health_score", 0)
+            total_health += health_score
+            
+            status = analysis.get("overall_status", "unknown")
+            if status == "critical":
+                critical_count += 1
+            elif status == "warning":
+                warning_count += 1
+        
+        component_count = len(self.performance_data)
+        avg_health = total_health / component_count if component_count > 0 else 0
+        
+        # Determine overall health
+        if critical_count > 0:
+            overall_health = "critical"
+        elif warning_count > 0:
+            overall_health = "warning"
+        elif avg_health >= 80:
+            overall_health = "good"
+        else:
+            overall_health = "degraded"
+        
         return {
-            "overall_health": "good",
-            "components_analyzed": len(self.performance_data),
+            "overall_health": overall_health,
+            "average_health_score": avg_health,
+            "components_analyzed": component_count,
+            "critical_components": critical_count,
+            "warning_components": warning_count,
+            "healthy_components": component_count - critical_count - warning_count,
         }
 
 
@@ -1608,11 +2012,123 @@ class TrendAnalyzer:
         Returns:
             Trend analysis results
         """
-        return {
-            "data_type": data_type,
-            "data_points": len(time_series_data),
-            "trend": "analyzed",
-        }
+        try:
+            if not time_series_data or len(time_series_data) < 2:
+                return {
+                    "data_type": data_type,
+                    "data_points": len(time_series_data),
+                    "trend": "insufficient_data",
+                    "confidence": 0.0,
+                }
+            
+            # Extract values and timestamps
+            values = []
+            timestamps = []
+            
+            for point in time_series_data:
+                if "value" in point and "timestamp" in point:
+                    values.append(float(point["value"]))
+                    timestamps.append(point["timestamp"])
+            
+            if len(values) < 2:
+                return {
+                    "data_type": data_type,
+                    "data_points": len(time_series_data),
+                    "trend": "invalid_data",
+                    "confidence": 0.0,
+                }
+            
+            # Simple linear trend analysis
+            n = len(values)
+            
+            # Calculate trend direction and strength
+            first_half = values[:n//2]
+            second_half = values[n//2:]
+            
+            first_avg = sum(first_half) / len(first_half)
+            second_avg = sum(second_half) / len(second_half)
+            
+            # Calculate percentage change
+            if first_avg != 0:
+                percent_change = ((second_avg - first_avg) / first_avg) * 100
+            else:
+                percent_change = 0
+            
+            # Determine trend direction
+            if abs(percent_change) < 5:
+                trend_direction = "stable"
+            elif percent_change > 0:
+                trend_direction = "increasing"
+            else:
+                trend_direction = "decreasing"
+            
+            # Calculate trend strength
+            if abs(percent_change) > 50:
+                trend_strength = "strong"
+            elif abs(percent_change) > 20:
+                trend_strength = "moderate"
+            elif abs(percent_change) > 5:
+                trend_strength = "weak"
+            else:
+                trend_strength = "stable"
+            
+            # Calculate volatility (standard deviation)
+            mean_value = sum(values) / len(values)
+            variance = sum((x - mean_value) ** 2 for x in values) / len(values)
+            volatility = variance ** 0.5
+            
+            # Confidence score based on data consistency
+            if volatility == 0:
+                confidence = 1.0
+            else:
+                cv = volatility / mean_value if mean_value != 0 else float('inf')
+                confidence = max(0, min(1, 1 - (cv / 2)))  # Normalize coefficient of variation
+            
+            # Detect anomalies (values significantly different from mean)
+            anomalies = []
+            threshold = mean_value + (2 * volatility)  # 2 standard deviations
+            for i, value in enumerate(values):
+                if abs(value - mean_value) > threshold:
+                    anomalies.append({
+                        "index": i,
+                        "value": value,
+                        "deviation": abs(value - mean_value),
+                    })
+            
+            analysis = {
+                "data_type": data_type,
+                "data_points": len(time_series_data),
+                "trend": {
+                    "direction": trend_direction,
+                    "strength": trend_strength,
+                    "percent_change": percent_change,
+                },
+                "statistics": {
+                    "mean": mean_value,
+                    "min": min(values),
+                    "max": max(values),
+                    "volatility": volatility,
+                    "first_half_avg": first_avg,
+                    "second_half_avg": second_avg,
+                },
+                "confidence": confidence,
+                "anomalies": anomalies,
+                "analysis_timestamp": datetime.now(UTC).isoformat(),
+            }
+            
+            # Store for later retrieval
+            self.trend_data[data_type] = analysis
+            
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Failed to analyze trends for {data_type}: {e}")
+            return {
+                "data_type": data_type,
+                "data_points": len(time_series_data),
+                "trend": "analysis_failed",
+                "error": str(e),
+            }
 
     def get_trend_summary(self, data_type: str) -> dict[str, Any]:
         """Get trend summary for a data type.
@@ -1623,7 +2139,10 @@ class TrendAnalyzer:
         Returns:
             Trend summary
         """
-        return self.trend_data.get(data_type, {})
+        return self.trend_data.get(data_type, {
+            "data_type": data_type,
+            "status": "not_analyzed"
+        })
 
 
 class UserBehaviorAnalyzer:

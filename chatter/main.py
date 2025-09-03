@@ -330,13 +330,70 @@ def create_app() -> FastAPI:
 
     app.add_middleware(CorrelationIdMiddleware)
 
-    # Add rate limiting middleware
-    from chatter.utils.rate_limit import RateLimitMiddleware
+    # Add rate limiting middleware (unified system)
+    from chatter.utils.unified_rate_limiter import (
+        UnifiedRateLimitMiddleware,
+        get_unified_rate_limiter,
+    )
+
+    # Initialize cache service for distributed rate limiting
+    cache_service = None
+    if settings.rate_limit_use_cache:
+        try:
+            from chatter.services.cache import CacheService
+
+            cache_service = CacheService()
+            # Note: Cache service will connect during first use
+        except Exception as e:
+            logger.warning(f"Failed to initialize cache for rate limiting: {e}")
+
+    # Create unified rate limiter
+    rate_limiter = get_unified_rate_limiter(cache_service=cache_service)
+
+    # Define endpoint-specific limits
+    endpoint_limits = {
+        # Authentication endpoints (more restrictive)
+        "/api/v1/auth/login": (
+            settings.rate_limit_auth_requests,
+            settings.rate_limit_auth_window,
+        ),
+        "/api/v1/auth/register": (
+            settings.rate_limit_auth_requests,
+            settings.rate_limit_auth_window,
+        ),
+        "/api/v1/auth/refresh": (
+            settings.rate_limit_auth_requests,
+            settings.rate_limit_auth_window,
+        ),
+        # Analytics endpoints
+        "/api/v1/analytics/": (
+            settings.rate_limit_analytics_requests,
+            settings.rate_limit_analytics_window,
+        ),
+        # Model registry write operations
+        "/api/v1/models/providers": (
+            settings.rate_limit_model_write_requests,
+            settings.rate_limit_model_write_window,
+        ),
+        "/api/v1/models/models": (
+            settings.rate_limit_model_write_requests,
+            settings.rate_limit_model_write_window,
+        ),
+        "/api/v1/models/embedding-spaces": (
+            settings.rate_limit_model_write_requests,
+            settings.rate_limit_model_write_window,
+        ),
+        # Model registry read operations (more permissive)
+        "/api/v1/models/": (
+            settings.rate_limit_model_read_requests,
+            settings.rate_limit_model_read_window,
+        ),
+    }
 
     app.add_middleware(
-        RateLimitMiddleware,
-        requests_per_minute=100,
-        requests_per_hour=2000,
+        UnifiedRateLimitMiddleware,
+        rate_limiter=rate_limiter,
+        endpoint_limits=endpoint_limits,
     )
 
     # Add custom middleware

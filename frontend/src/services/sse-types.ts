@@ -14,6 +14,34 @@ export interface SSEEvent {
   metadata: Record<string, any>;
 }
 
+// Event categories matching backend unified system
+export enum EventCategory {
+  REALTIME = 'realtime',
+  SECURITY = 'security',
+  AUDIT = 'audit',
+  MONITORING = 'monitoring',
+  STREAMING = 'streaming',
+  ANALYTICS = 'analytics',
+  WORKFLOW = 'workflow'
+}
+
+// Event priorities matching backend
+export enum EventPriority {
+  LOW = 'low',
+  NORMAL = 'normal',
+  HIGH = 'high',
+  CRITICAL = 'critical'
+}
+
+// Enhanced event with unified system metadata
+export interface UnifiedSSEEvent extends SSEEvent {
+  category?: EventCategory;
+  priority?: EventPriority;
+  source_system?: string;
+  correlation_id?: string;
+  session_id?: string;
+}
+
 // Backup Events
 export interface BackupStartedEvent extends SSEEvent {
   type: 'backup.started';

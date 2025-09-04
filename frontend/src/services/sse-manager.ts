@@ -258,6 +258,17 @@ export class SSEEventManager {
       return;
     }
 
+    // Extract unified event metadata if available
+    const unifiedMetadata = this.extractUnifiedMetadata(event);
+    if (unifiedMetadata) {
+      console.log('SSE: Unified event metadata:', unifiedMetadata);
+    }
+
+    // Route high priority events to special handlers
+    if (unifiedMetadata?.priority === 'high' || unifiedMetadata?.priority === 'critical') {
+      this.handleHighPriorityEvent(event, unifiedMetadata);
+    }
+
     // Emit to specific event type listeners
     if (this.listeners[event.type]) {
       this.listeners[event.type]!.forEach(listener => {
@@ -278,6 +289,11 @@ export class SSEEventManager {
           console.error('SSE: Error in wildcard event listener:', error);
         }
       });
+    }
+
+    // Emit to category listeners if this is a unified event
+    if (unifiedMetadata?.category) {
+      this.emitToCategoryListeners(event, unifiedMetadata.category);
     }
   }
 
@@ -399,6 +415,133 @@ export class SSEEventManager {
       reconnectAttempts: this.reconnectAttempts,
       lastEventTime: this.lastEventTime,
     };
+  }
+
+  /**
+   * Extract unified event metadata from SSE event
+   */
+  private extractUnifiedMetadata(event: AnySSEEvent): {
+    category?: string;
+    priority?: string;
+    source_system?: string;
+    correlation_id?: string;
+  } | null {
+    if (!event.metadata) return null;
+
+    return {
+      category: event.metadata.category,
+      priority: event.metadata.priority,
+      source_system: event.metadata.source_system,
+      correlation_id: event.metadata.correlation_id,
+    };
+  }
+
+  /**
+   * Handle high priority events with special treatment
+   */
+  private handleHighPriorityEvent(event: AnySSEEvent, metadata: any): void {
+    // Log high priority events
+    console.warn('SSE: High priority event received:', {
+      type: event.type,
+      priority: metadata.priority,
+      category: metadata.category,
+      timestamp: event.timestamp
+    });
+
+    // Could trigger notifications, sounds, or other UI feedback
+    if (metadata.priority === 'critical') {
+      // Show critical alert
+      this.showCriticalAlert(event);
+    }
+  }
+
+  /**
+   * Show critical alert for critical priority events
+   */
+  private showCriticalAlert(event: AnySSEEvent): void {
+    // This could integrate with a notification system
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('Critical System Alert', {
+        body: `${event.type}: ${event.data.message || 'Critical event occurred'}`,
+        icon: '/favicon.ico',
+        tag: 'critical-alert'
+      });
+    }
+  }
+
+  /**
+   * Emit to category-specific listeners
+   */
+  private emitToCategoryListeners(event: AnySSEEvent, category: string): void {
+    const categoryKey = `category:${category}`;
+    if (this.listeners[categoryKey]) {
+      this.listeners[categoryKey]!.forEach(listener => {
+        try {
+          listener(event);
+        } catch (error) {
+          console.error(`SSE: Error in category listener for ${category}:`, error);
+        }
+      });
+    }
+  }
+
+  /**
+   * Subscribe to events by category
+   */
+  public onCategory(category: string, listener: SSEEventListener): () => void {
+    const categoryKey = `category:${category}`;
+    if (!this.listeners[categoryKey]) {
+      this.listeners[categoryKey] = [];
+    }
+    this.listeners[categoryKey]!.push(listener);
+
+    // Return unsubscribe function
+    return () => {
+      this.offCategory(category, listener);
+    };
+  }
+
+  /**
+   * Unsubscribe from category events
+   */
+  public offCategory(category: string, listener: SSEEventListener): void {
+    const categoryKey = `category:${category}`;
+    if (this.listeners[categoryKey]) {
+      this.listeners[categoryKey] = this.listeners[categoryKey]!.filter(l => l !== listener);
+    }
+  }
+
+  /**
+   * Subscribe to high priority events
+   */
+  public onHighPriority(listener: SSEEventListener): () => void {
+    return this.on('*', (event) => {
+      const metadata = this.extractUnifiedMetadata(event);
+      if (metadata?.priority === 'high' || metadata?.priority === 'critical') {
+        listener(event);
+      }
+    });
+  }
+
+  /**
+   * Request notification permission for critical alerts
+   */
+  public async requestNotificationPermission(): Promise<boolean> {
+    if (!('Notification' in window)) {
+      console.warn('SSE: Notifications not supported');
+      return false;
+    }
+
+    if (Notification.permission === 'granted') {
+      return true;
+    }
+
+    if (Notification.permission !== 'denied') {
+      const permission = await Notification.requestPermission();
+      return permission === 'granted';
+    }
+
+    return false;
   }
 }
 

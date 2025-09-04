@@ -16,6 +16,11 @@ interface SSEContextValue {
   disconnect: () => void;
   on: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => () => void;
   off: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => void;
+  onCategory: (category: string, listener: SSEEventListener) => () => void;
+  offCategory: (category: string, listener: SSEEventListener) => void;
+  onHighPriority: (listener: SSEEventListener) => () => void;
+  requestNotificationPermission: () => Promise<boolean>;
+  getConnectionStats: () => any;
 }
 
 const SSEContext = createContext<SSEContextValue | null>(null);
@@ -76,6 +81,26 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
     sseEventManager.off(eventType, listener);
   }, []);
 
+  const onCategory = useCallback((category: string, listener: SSEEventListener) => {
+    return sseEventManager.onCategory(category, listener);
+  }, []);
+
+  const offCategory = useCallback((category: string, listener: SSEEventListener) => {
+    sseEventManager.offCategory(category, listener);
+  }, []);
+
+  const onHighPriority = useCallback((listener: SSEEventListener) => {
+    return sseEventManager.onHighPriority(listener);
+  }, []);
+
+  const requestNotificationPermission = useCallback(() => {
+    return sseEventManager.requestNotificationPermission();
+  }, []);
+
+  const getConnectionStats = useCallback(() => {
+    return sseEventManager.getConnectionStats();
+  }, []);
+
   const value: SSEContextValue = useMemo(() => ({
     isConnected,
     connectionState,
@@ -83,7 +108,24 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
     disconnect,
     on,
     off,
-  }), [isConnected, connectionState, connect, disconnect, on, off]);
+    onCategory,
+    offCategory,
+    onHighPriority,
+    requestNotificationPermission,
+    getConnectionStats,
+  }), [
+    isConnected, 
+    connectionState, 
+    connect, 
+    disconnect, 
+    on, 
+    off, 
+    onCategory, 
+    offCategory, 
+    onHighPriority, 
+    requestNotificationPermission,
+    getConnectionStats
+  ]);
 
   return (
     <SSEContext.Provider value={value}>

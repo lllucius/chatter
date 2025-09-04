@@ -788,13 +788,6 @@ async def init_database() -> None:
 
     logger.info("Database tables created")
 
-    # Initialize default data for virgin database
-    try:
-        await initialize_default_data()
-    except Exception as e:
-        logger.error("Failed to initialize default data", error=str(e))
-        # Don't fail the entire initialization if default data fails
-
     logger.info("Database initialization completed")
 
 

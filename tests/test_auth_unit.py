@@ -354,7 +354,7 @@ class TestAuthServiceUnit:
             username="testuser",
             email="test@example.com",
             full_name="Test User",
-            password_hash="hashed_password",
+            hashed_password="hashed_password",
         )
 
         tokens = auth_service.create_tokens(user)

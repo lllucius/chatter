@@ -381,16 +381,16 @@ def create_app() -> FastAPI:
     endpoint_limits = {
         # Authentication endpoints (more restrictive)
         "/api/v1/auth/login": (
-            settings.rate_limit_auth_requests,
-            settings.rate_limit_auth_window,
+            settings.effective_rate_limit_auth_requests,
+            settings.effective_rate_limit_auth_window,
         ),
         "/api/v1/auth/register": (
-            settings.rate_limit_auth_requests,
-            settings.rate_limit_auth_window,
+            settings.effective_rate_limit_auth_requests,
+            settings.effective_rate_limit_auth_window,
         ),
         "/api/v1/auth/refresh": (
-            settings.rate_limit_auth_requests,
-            settings.rate_limit_auth_window,
+            settings.effective_rate_limit_auth_requests,
+            settings.effective_rate_limit_auth_window,
         ),
         # Analytics endpoints
         "/api/v1/analytics/": (

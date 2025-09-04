@@ -71,7 +71,12 @@ class TestAgentsUnit:
     @pytest.mark.unit
     async def test_bulk_delete_agents_requires_auth(self, client: AsyncClient):
         """Test that bulk deleting agents requires authentication."""
-        response = await client.delete("/api/v1/agents/bulk", json={})
+        import json
+        response = await client.delete(
+            "/api/v1/agents/bulk", 
+            content=json.dumps({"agent_ids": ["test-id"]}),
+            headers={"Content-Type": "application/json"}
+        )
         assert response.status_code == 401
 
     @pytest.mark.unit

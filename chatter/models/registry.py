@@ -7,6 +7,7 @@ from enum import Enum
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
     ForeignKey,
     Integer,
     String,
@@ -56,6 +57,17 @@ class Provider(Base):
 
     __tablename__ = "providers"  # type: ignore[assignment]
 
+    __table_args__ = (
+        CheckConstraint(
+            "name != ''",
+            name='check_name_not_empty',
+        ),
+        CheckConstraint(
+            "display_name != ''",
+            name='check_display_name_not_empty',
+        ),
+    )
+
     name: Mapped[str] = mapped_column(
         String(100), unique=True, nullable=False, index=True
     )
@@ -93,6 +105,45 @@ class ModelDef(Base):
     """AI model definition registry."""
 
     __tablename__ = "model_defs"  # type: ignore[assignment]
+
+    # Constraints
+    __table_args__ = (
+        CheckConstraint(
+            'max_tokens IS NULL OR max_tokens > 0',
+            name='check_max_tokens_positive',
+        ),
+        CheckConstraint(
+            'context_length IS NULL OR context_length > 0',
+            name='check_context_length_positive',
+        ),
+        CheckConstraint(
+            'dimensions IS NULL OR dimensions > 0',
+            name='check_dimensions_positive',
+        ),
+        CheckConstraint(
+            'chunk_size IS NULL OR chunk_size > 0',
+            name='check_chunk_size_positive',
+        ),
+        CheckConstraint(
+            'max_batch_size IS NULL OR max_batch_size > 0',
+            name='check_max_batch_size_positive',
+        ),
+        CheckConstraint(
+            "name != ''",
+            name='check_name_not_empty',
+        ),
+        CheckConstraint(
+            "display_name != ''",
+            name='check_display_name_not_empty',
+        ),
+        CheckConstraint(
+            "model_name != ''",
+            name='check_model_name_not_empty',
+        ),
+        UniqueConstraint(
+            'provider_id', 'name', name='uq_provider_model_name'
+        ),
+    )
 
     provider_id: Mapped[str] = mapped_column(
         String(26), ForeignKey("providers.id"), nullable=False
@@ -138,13 +189,6 @@ class ModelDef(Base):
         cascade="all, delete-orphan",
     )
 
-    # Constraints
-    __table_args__ = (
-        UniqueConstraint(
-            'provider_id', 'name', name='uq_provider_model_name'
-        ),
-    )
-
     def __repr__(self) -> str:
         return f"<ModelDef(name='{self.name}', type='{self.model_type}', dimensions={self.dimensions})>"
 
@@ -153,6 +197,33 @@ class EmbeddingSpace(Base):
     """Embedding space definition with dimensional reduction support."""
 
     __tablename__ = "embedding_spaces"  # type: ignore[assignment]
+
+    __table_args__ = (
+        CheckConstraint(
+            'base_dimensions > 0',
+            name='check_base_dimensions_positive',
+        ),
+        CheckConstraint(
+            'effective_dimensions > 0',
+            name='check_effective_dimensions_positive',
+        ),
+        CheckConstraint(
+            'effective_dimensions <= base_dimensions',
+            name='check_effective_dimensions_lte_base',
+        ),
+        CheckConstraint(
+            "name != ''",
+            name='check_name_not_empty',
+        ),
+        CheckConstraint(
+            "display_name != ''",
+            name='check_display_name_not_empty',
+        ),
+        CheckConstraint(
+            "table_name != ''",
+            name='check_table_name_not_empty',
+        ),
+    )
 
     model_id: Mapped[str] = mapped_column(
         String(26), ForeignKey("model_defs.id"), nullable=False

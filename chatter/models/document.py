@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
     DateTime,
     ForeignKey,
     Integer,
@@ -56,6 +57,34 @@ class Document(Base):
     """Document model for knowledge base files."""
 
     __table_args__ = (
+        CheckConstraint(
+            'file_size > 0',
+            name='check_file_size_positive',
+        ),
+        CheckConstraint(
+            'chunk_size > 0', 
+            name='check_chunk_size_positive',
+        ),
+        CheckConstraint(
+            'chunk_overlap >= 0',
+            name='check_chunk_overlap_non_negative',
+        ),
+        CheckConstraint(
+            'chunk_count >= 0',
+            name='check_chunk_count_non_negative',
+        ),
+        CheckConstraint(
+            'version > 0',
+            name='check_version_positive',
+        ),
+        CheckConstraint(
+            'view_count >= 0',
+            name='check_view_count_non_negative',
+        ),
+        CheckConstraint(
+            'search_count >= 0',
+            name='check_search_count_non_negative',
+        ),
         UniqueConstraint('owner_id', 'file_hash', name='uq_document_owner_hash'),
     )
 
@@ -243,6 +272,33 @@ class Document(Base):
 
 class DocumentChunk(Base):
     """Document chunk model for vector storage."""
+
+    __table_args__ = (
+        CheckConstraint(
+            'chunk_index >= 0',
+            name='check_chunk_index_non_negative',
+        ),
+        CheckConstraint(
+            'start_char IS NULL OR start_char >= 0',
+            name='check_start_char_non_negative',
+        ),
+        CheckConstraint(
+            'end_char IS NULL OR end_char > 0',
+            name='check_end_char_positive',
+        ),
+        CheckConstraint(
+            'start_char IS NULL OR end_char IS NULL OR end_char > start_char',
+            name='check_end_char_greater_than_start',
+        ),
+        CheckConstraint(
+            'token_count IS NULL OR token_count > 0',
+            name='check_token_count_positive',
+        ),
+        CheckConstraint(
+            "content != ''", 
+            name='check_content_not_empty'
+        ),
+    )
 
     # Foreign keys
     document_id: Mapped[str] = mapped_column(

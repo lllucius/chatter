@@ -65,43 +65,31 @@ async def create_ab_test(
     try:
         # Convert request data to ABTest model format
 
-        from chatter.services.ab_testing import (
-            TestMetric,
-        )
-        from chatter.services.ab_testing import (
-            TestVariant as ServiceTestVariant,
-        )
+        # Validate variants
+        if len(test_data.variants) < 2:
+            raise BadRequestProblem(
+                detail="Test must have at least 2 variants"
+            )
 
         # Create variants
         variants = []
         for i, variant_data in enumerate(test_data.variants):
-            variant = ServiceTestVariant(
-                name=variant_data.name,
-                description=variant_data.description,
-                weight=variant_data.weight,
-                configuration=variant_data.configuration,
-                is_control=(i == 0),  # First variant is control
-            )
-            variants.append(variant)
+            variant_dict = {
+                "name": variant_data.name,
+                "description": variant_data.description,
+                "weight": variant_data.weight,
+                "configuration": variant_data.configuration,
+                "is_control": (i == 0),  # First variant is control
+            }
+            variants.append(variant_dict)
 
-        # Create primary metric from first metric in list
-        TestMetric(
-            name=test_data.metrics[0].value,
-            metric_type=test_data.metrics[0],
-        )
-
-        # Create secondary metrics
-        secondary_metrics = []
-        for metric in test_data.metrics[1:]:
-            secondary_metrics.append(
-                TestMetric(
-                    name=metric.value,
-                    metric_type=metric,
-                )
+        # Validate metrics
+        if not test_data.metrics:
+            raise BadRequestProblem(
+                detail="Test must have at least one metric"
             )
 
         # Create test
-
         test_id = await ab_test_manager.create_test(
             name=test_data.name,
             description=test_data.description,
@@ -109,13 +97,17 @@ async def create_ab_test(
             variants=variants,
             primary_metric={
                 "name": test_data.metrics[0].value,
-                "metric_type": test_data.metrics[0].value,
+                "metric_type": test_data.metrics[0],
+                "direction": "increase",  # Default direction
+                "improvement_threshold": 0.05,  # Default 5% improvement
             },
             created_by=current_user.username,
             secondary_metrics=[
                 {
                     "name": metric.value,
-                    "metric_type": metric.value,
+                    "metric_type": metric,
+                    "direction": "increase",
+                    "improvement_threshold": 0.05,
                 }
                 for metric in test_data.metrics[1:]
             ],
@@ -123,6 +115,10 @@ async def create_ab_test(
             traffic_percentage=test_data.traffic_percentage / 100.0,
             duration_days=test_data.duration_days,
             target_users=test_data.target_audience or {},
+            confidence_level=test_data.confidence_level,
+            minimum_sample_size=test_data.min_sample_size,
+            tags=test_data.tags,
+            metadata=test_data.metadata,
         )
         created_test = await ab_test_manager.get_test(test_id)
 
@@ -644,57 +640,98 @@ async def get_ab_test_results(
             )
 
         # Convert results to response format
-
         from chatter.schemas.ab_testing import TestMetric
 
         metrics = []
-        for (
-            variant_name,
-            variant_results,
-        ) in results.variant_results.items():
-            for metric_name, metric_value in variant_results.items():
+        test = await ab_test_manager.get_test(test_id)
+        test_name = test.name if test else "Unknown Test"
+        test_status = test.status if test else TestStatus.COMPLETED
+
+        # Convert variant results to metrics
+        for variant_id, variant_data in results.variant_results.items():
+            variant_name = variant_data.get("variant_name", variant_id)
+            variant_metrics = variant_data.get("metrics", {})
+
+            for metric_name, metric_data in variant_metrics.items():
                 # Map string metric name to MetricType enum
                 try:
                     metric_type = MetricType(metric_name)
                 except ValueError:
                     metric_type = MetricType.CUSTOM
 
+                # Extract confidence interval for this variant and metric
+                confidence_interval = None
+                if (variant_id in results.confidence_intervals and
+                    metric_name in results.confidence_intervals[variant_id]):
+                    ci_data = results.confidence_intervals[variant_id][metric_name]
+                    if isinstance(ci_data, dict) and "lower" in ci_data and "upper" in ci_data:
+                        confidence_interval = [ci_data["lower"], ci_data["upper"]]
+
                 metrics.append(
                     TestMetric(
                         metric_type=metric_type,
                         variant_name=variant_name,
-                        value=float(metric_value),
-                        sample_size=100,  # Placeholder
-                        confidence_interval=None,
+                        value=float(metric_data.get("mean", 0)),
+                        sample_size=int(metric_data.get("count", 0)),
+                        confidence_interval=confidence_interval,
                     )
                 )
 
-        # Convert confidence intervals to expected format
+        # Format confidence intervals properly for response
         confidence_intervals_formatted = {}
-        for (
-            variant_id,
-            intervals,
-        ) in results.confidence_intervals.items():
+        for variant_id, intervals in results.confidence_intervals.items():
             confidence_intervals_formatted[variant_id] = {}
-            for metric, value in intervals.items():
-                # Convert single float to list of floats [lower, upper]
-                confidence_intervals_formatted[variant_id][metric] = [
-                    float(value),
-                    float(value),
-                ]
+            for metric, ci_data in intervals.items():
+                if isinstance(ci_data, dict) and "lower" in ci_data and "upper" in ci_data:
+                    confidence_intervals_formatted[variant_id][metric] = [
+                        float(ci_data["lower"]),
+                        float(ci_data["upper"]),
+                    ]
+                else:
+                    # Fallback for malformed data
+                    confidence_intervals_formatted[variant_id][metric] = [0.0, 0.0]
+
+        # Determine winning variant from statistical significance
+        winning_variant = None
+        for variant_id, is_significant in results.statistical_significance.items():
+            if is_significant and variant_id in results.variant_results:
+                # Check if this variant is better than others
+                variant_data = results.variant_results[variant_id]
+                variant_metrics = variant_data.get("metrics", {})
+                primary_metric_name = test.primary_metric.name if test else None
+                if primary_metric_name and primary_metric_name in variant_metrics:
+                    winning_variant = variant_data.get("variant_name", variant_id)
+                    break
+
+        # Calculate total sample size and duration
+        total_sample_size = sum(
+            data.get("unique_users", 0)
+            for data in results.variant_results.values()
+        )
+
+        duration_days = 7  # Default
+        if test and test.start_date:
+            from datetime import UTC, datetime
+            end_date = test.end_date or datetime.now(UTC)
+            duration_days = (end_date - test.start_date).days
+            if duration_days <= 0:
+                duration_days = 1
 
         return ABTestResultsResponse(
             test_id=test_id,
-            test_name="Test Name",  # Would need to fetch from test
-            status=TestStatus.COMPLETED,  # Would need to fetch from test
+            test_name=test_name,
+            status=test_status,
             metrics=metrics,
             statistical_significance=results.statistical_significance,
             confidence_intervals=confidence_intervals_formatted,
-            winning_variant=None,  # Would be determined from analysis
-            recommendation="Continue monitoring",  # Would be generated
+            winning_variant=winning_variant,
+            recommendation=(
+                results.recommendations[0] if results.recommendations
+                else "Continue monitoring for more data"
+            ),
             generated_at=results.analysis_date,
-            sample_size=100,  # Would need to be calculated
-            duration_days=7,  # Would need to be calculated
+            sample_size=total_sample_size,
+            duration_days=duration_days,
         )
 
     except NotFoundProblem:

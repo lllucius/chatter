@@ -24,6 +24,7 @@ const AgentsPage = lazy(() => import('./pages/AgentsPage'));
 const AdministrationPage = lazy(() => import('./pages/AdministrationPage'));
 const ModelManagementPage = lazy(() => import('./pages/ModelManagementPage'));
 const ToolsPage = lazy(() => import('./pages/ToolsPage'));
+const WorkflowManagementPage = lazy(() => import('./pages/WorkflowManagementPage'));
 
 // Create theme context
 export const ThemeContext = React.createContext<{
@@ -154,6 +155,11 @@ function App() {
                   <Route path="tools" element={
                     <SuspenseWrapper loadingMessage="Loading tools...">
                       <ToolsPage />
+                    </SuspenseWrapper>
+                  } />
+                  <Route path="workflows" element={
+                    <SuspenseWrapper loadingMessage="Loading workflow management...">
+                      <WorkflowManagementPage />
                     </SuspenseWrapper>
                   } />
                   <Route path="health" element={

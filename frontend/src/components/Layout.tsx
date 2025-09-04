@@ -41,6 +41,7 @@ import {
   AdminPanelSettings as AdminIcon,
   Storage as ModelsIcon,
   Build as ToolsIcon,
+  AccountTree as WorkflowIcon,
   ExpandLess,
   ExpandMore,
 } from '@mui/icons-material';
@@ -94,6 +95,7 @@ const navSections: NavSection[] = [
       { label: 'Models', path: '/models', icon: <ModelsIcon /> },
       { label: 'Agents', path: '/agents', icon: <AgentIcon /> },
       { label: 'Tools', path: '/tools', icon: <ToolsIcon /> },
+      { label: 'Workflows', path: '/workflows', icon: <WorkflowIcon /> },
     ]
   },
   {

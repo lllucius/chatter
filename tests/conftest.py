@@ -194,12 +194,14 @@ async def auth_headers(client) -> dict[str, str]:
     Returns:
         Dictionary with Authorization header
     """
-    # Register a test user
+    import uuid
+    # Generate unique user data for each test to avoid conflicts
+    unique_id = str(uuid.uuid4())[:8]
     user_data = {
-        "username": "testuser",
-        "email": "test@example.com", 
+        "username": f"testuser_{unique_id}",
+        "email": f"test_{unique_id}@example.com", 
         "password": "SecureP@ssw0rd!",
-        "full_name": "Test User",
+        "full_name": f"Test User {unique_id}",
     }
 
     response = await client.post("/api/v1/auth/register", json=user_data)

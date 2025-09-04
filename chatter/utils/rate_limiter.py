@@ -2,13 +2,14 @@
 
 This module provides a compatibility layer for the existing rate limiter
 interface while using the new unified rate limiting system underneath.
+
+This is a backward compatibility shim that preserves the original API
+while delegating all functionality to the unified rate limiting system.
+For new code, use `chatter.utils.unified_rate_limiter` directly.
 """
 
-import asyncio
-import time
 from typing import Any
 
-from chatter.config import settings
 from chatter.utils.logging import get_logger
 from chatter.utils.unified_rate_limiter import (
     RateLimitExceeded as UnifiedRateLimitExceeded,
@@ -31,6 +32,9 @@ class RateLimiter:
     
     This class maintains the same API as the original but uses the unified
     rate limiting system underneath for consistency.
+    
+    Note: This is a backward compatibility layer. For new code, use
+    `chatter.utils.unified_rate_limiter.UnifiedRateLimiter` directly.
     """
 
     def __init__(self):
@@ -90,17 +94,14 @@ class RateLimiter:
             }
 
         except UnifiedRateLimitExceeded as e:
-            # Convert to the expected exception type
-            if "tool_hourly" in str(e.message):
-                raise RateLimitExceeded(
-                    f"Hourly rate limit exceeded. Limit: {limit_per_hour}/hour"
-                )
-            elif "tool_daily" in str(e.message):
-                raise RateLimitExceeded(
-                    f"Daily rate limit exceeded. Limit: {limit_per_day}/day"
-                )
-            else:
-                raise RateLimitExceeded(e.message)
+            # Convert to the expected exception type with clearer messaging
+            error_message = e.message
+            if "tool_hourly" in error_message:
+                error_message = f"Hourly rate limit exceeded. Limit: {limit_per_hour}/hour"
+            elif "tool_daily" in error_message:
+                error_message = f"Daily rate limit exceeded. Limit: {limit_per_day}/day"
+            
+            raise RateLimitExceeded(error_message)
 
     async def get_remaining_quota(
         self,

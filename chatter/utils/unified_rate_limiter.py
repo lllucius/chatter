@@ -1,4 +1,22 @@
-"""Unified rate limiting system consolidating all rate limiting schemes."""
+"""Unified rate limiting system consolidating all rate limiting schemes.
+
+This is the primary rate limiting implementation for the Chatter platform.
+It provides:
+
+- Sliding window rate limiting algorithm
+- Redis backend with memory fallback 
+- Multiple rate limits per key (e.g., hourly + daily)
+- FastAPI middleware with endpoint-specific limits
+- Rich metadata and error responses
+
+For backward compatibility with existing code, use the compatibility
+layer in `chatter.utils.rate_limiter` which delegates to this system.
+
+For new code, use this module directly via:
+- `get_unified_rate_limiter()` for programmatic access
+- `UnifiedRateLimitMiddleware` for application-wide rate limiting
+- `@rate_limit` decorator for endpoint-specific rate limiting
+"""
 
 import asyncio
 import time

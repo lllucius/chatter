@@ -583,11 +583,12 @@ Keep the summary {length} and focused on {focus_area}.""",
             await self.session.refresh(conversation)
             
             # Add messages
-            for msg_data in conv_data["messages"]:
+            for idx, msg_data in enumerate(conv_data["messages"]):
                 message = Message(
                     conversation_id=conversation.id,
                     role=msg_data["role"],
                     content=msg_data["content"],
+                    sequence_number=idx,
                 )
                 self.session.add(message)
             

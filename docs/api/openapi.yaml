@@ -127,9 +127,11 @@ paths:
       tags:
       - Health
       summary: Readiness Check
-      description: "Readiness check endpoint with database connectivity.\n\nArgs:\n\
-        \    session: Database session\n\nReturns:\n    Readiness status with detailed\
-        \ checks"
+      description: "Readiness check endpoint with database connectivity.\n\nThis checks\
+        \ that the application is ready to serve traffic by validating\nthat all external\
+        \ dependencies (database, etc.) are available.\n\nArgs:\n    session: Database\
+        \ session\n\nReturns:\n    Readiness status with detailed checks.\n    Returns\
+        \ 200 if ready, 503 if not ready."
       operationId: readiness_check_readyz_get
       responses:
         '200':
@@ -143,8 +145,10 @@ paths:
       tags:
       - Health
       summary: Liveness Check
-      description: "Liveness check endpoint for Kubernetes (alias for /healthz).\n\
-        \nReturns:\n    Health status (same as /healthz)"
+      description: "Liveness check endpoint for Kubernetes.\n\nThis is a simple liveness\
+        \ probe that checks if the application process\nis running and responding.\
+        \ It should NOT check external dependencies.\n\nReturns:\n    Health status\
+        \ indicating the application is alive"
       operationId: liveness_check_live_get
       responses:
         '200':
@@ -202,9 +206,10 @@ paths:
       tags:
       - Authentication
       summary: Register
-      description: "Register a new user.\n\nArgs:\n    user_data: User registration\
-        \ data\n    auth_service: Authentication service\n\nReturns:\n    User data\
-        \ and authentication tokens"
+      description: "Register a new user with enhanced security validation.\n\nArgs:\n\
+        \    user_data: User registration data\n    request: HTTP request for security\
+        \ logging\n    auth_service: Authentication service\n\nReturns:\n    User\
+        \ data and authentication tokens"
       operationId: register_api_v1_auth_register_post
       requestBody:
         content:
@@ -230,9 +235,10 @@ paths:
       tags:
       - Authentication
       summary: Login
-      description: "Authenticate user and return tokens.\n\nArgs:\n    user_data:\
-        \ User login data\n    auth_service: Authentication service\n\nReturns:\n\
-        \    User data and authentication tokens"
+      description: "Authenticate user and return tokens with enhanced security.\n\n\
+        Args:\n    user_data: User login data\n    request: HTTP request for security\
+        \ logging\n    auth_service: Authentication service\n\nReturns:\n    User\
+        \ data and authentication tokens"
       operationId: login_api_v1_auth_login_post
       requestBody:
         content:
@@ -258,8 +264,9 @@ paths:
       tags:
       - Authentication
       summary: Refresh Token
-      description: "Refresh access token.\n\nArgs:\n    token_data: Refresh token\
-        \ data\n    auth_service: Authentication service\n\nReturns:\n    New access\
+      description: "Refresh access token with enhanced security validation.\n\nArgs:\n\
+        \    token_data: Refresh token data\n    request: HTTP request for security\
+        \ logging\n    auth_service: Authentication service\n\nReturns:\n    New access\
         \ and refresh tokens"
       operationId: refresh_token_api_v1_auth_refresh_post
       requestBody:
@@ -332,9 +339,10 @@ paths:
       tags:
       - Authentication
       summary: Change Password
-      description: "Change user password.\n\nArgs:\n    password_data: Password change\
-        \ data\n    current_user: Current authenticated user\n    auth_service: Authentication\
-        \ service\n\nReturns:\n    Success message"
+      description: "Change user password with enhanced security logging.\n\nArgs:\n\
+        \    password_data: Password change data\n    request: HTTP request for security\
+        \ logging\n    current_user: Current authenticated user\n    auth_service:\
+        \ Authentication service\n\nReturns:\n    Success message"
       operationId: change_password_api_v1_auth_change_password_post
       requestBody:
         content:
@@ -362,8 +370,9 @@ paths:
       tags:
       - Authentication
       summary: Create Api Key
-      description: "Create API key for current user.\n\nArgs:\n    key_data: API key\
-        \ creation data\n    current_user: Current authenticated user\n    auth_service:\
+      description: "Create API key for current user with enhanced security.\n\nArgs:\n\
+        \    key_data: API key creation data\n    request: HTTP request for security\
+        \ logging\n    current_user: Current authenticated user\n    auth_service:\
         \ Authentication service\n\nReturns:\n    Created API key"
       operationId: create_api_key_api_v1_auth_api_key_post
       requestBody:
@@ -391,7 +400,8 @@ paths:
       tags:
       - Authentication
       summary: Revoke Api Key
-      description: "Revoke current user's API key.\n\nArgs:\n    current_user: Current\
+      description: "Revoke current user's API key with security logging.\n\nArgs:\n\
+        \    request: HTTP request for security logging\n    current_user: Current\
         \ authenticated user\n    auth_service: Authentication service\n\nReturns:\n\
         \    Success message"
       operationId: revoke_api_key_api_v1_auth_api_key_delete
@@ -430,7 +440,8 @@ paths:
       tags:
       - Authentication
       summary: Logout
-      description: "Logout and revoke current token.\n\nArgs:\n    current_user: Current\
+      description: "Logout and revoke current token with enhanced security.\n\nArgs:\n\
+        \    request: HTTP request for security logging\n    current_user: Current\
         \ authenticated user\n    auth_service: Authentication service\n\nReturns:\n\
         \    Success message"
       operationId: logout_api_v1_auth_logout_post
@@ -448,8 +459,9 @@ paths:
       tags:
       - Authentication
       summary: Request Password Reset
-      description: "Request password reset.\n\nArgs:\n    email: User email\n    auth_service:\
-        \ Authentication service\n\nReturns:\n    Success message"
+      description: "Request password reset with enhanced security logging.\n\nArgs:\n\
+        \    email: User email\n    request: HTTP request for security logging\n \
+        \   auth_service: Authentication service\n\nReturns:\n    Success message"
       operationId: request_password_reset_api_v1_auth_password_reset_request_post
       parameters:
       - name: email
@@ -476,9 +488,10 @@ paths:
       tags:
       - Authentication
       summary: Confirm Password Reset
-      description: "Confirm password reset.\n\nArgs:\n    token: Reset token\n   \
-        \ new_password: New password\n    auth_service: Authentication service\n\n\
-        Returns:\n    Success message"
+      description: "Confirm password reset with enhanced security logging.\n\nArgs:\n\
+        \    token: Reset token\n    new_password: New password\n    request: HTTP\
+        \ request for security logging\n    auth_service: Authentication service\n\
+        \nReturns:\n    Success message"
       operationId: confirm_password_reset_api_v1_auth_password_reset_confirm_post
       parameters:
       - name: token
@@ -511,9 +524,10 @@ paths:
       tags:
       - Authentication
       summary: Deactivate Account
-      description: "Deactivate current user account.\n\nArgs:\n    current_user: Current\
-        \ authenticated user\n    auth_service: Authentication service\n\nReturns:\n\
-        \    Success message"
+      description: "Deactivate current user account with enhanced security logging.\n\
+        \nArgs:\n    request: HTTP request for security logging\n    current_user:\
+        \ Current authenticated user\n    auth_service: Authentication service\n\n\
+        Returns:\n    Success message"
       operationId: deactivate_account_api_v1_auth_account_delete
       responses:
         '200':
@@ -974,6 +988,7 @@ paths:
                         description: Message role
                       content:
                         type: string
+                        minLength: 1
                         title: Content
                         description: Message content
                       id:
@@ -1030,6 +1045,12 @@ paths:
                         - type: 'null'
                         title: Cost
                         description: Cost of the message
+                      finish_reason:
+                        anyOf:
+                        - type: string
+                        - type: 'null'
+                        title: Finish Reason
+                        description: Reason for completion
                       created_at:
                         type: string
                         format: date-time
@@ -2003,6 +2024,23 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
       security:
       - HTTPBearer: []
+  /api/v1/prompts/stats/overview:
+    get:
+      tags:
+      - Prompts
+      summary: Get Prompt Stats
+      description: "Get prompt statistics.\n\nArgs:\n    current_user: Current authenticated\
+        \ user\n    prompt_service: Prompt service\n\nReturns:\n    Prompt statistics"
+      operationId: get_prompt_stats_api_v1_prompts_stats_overview_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PromptStatsResponse'
+      security:
+      - HTTPBearer: []
   /api/v1/prompts:
     get:
       tags:
@@ -2010,10 +2048,11 @@ paths:
       summary: List Prompts
       description: "List user's prompts.\n\nArgs:\n    prompt_type: Filter by prompt\
         \ type\n    category: Filter by category\n    tags: Filter by tags\n    is_public:\
-        \ Filter by public status\n    limit: Maximum number of results\n    offset:\
-        \ Number of results to skip\n    sort_by: Sort field\n    sort_order: Sort\
-        \ order (asc/desc)\n    current_user: Current authenticated user\n    prompt_service:\
-        \ Prompt service\n\nReturns:\n    List of prompts with pagination info"
+        \ Filter by public status\n    is_chain: Filter by chain status\n    limit:\
+        \ Maximum number of results\n    offset: Number of results to skip\n    sort_by:\
+        \ Sort field\n    sort_order: Sort order (asc/desc)\n    current_user: Current\
+        \ authenticated user\n    prompt_service: Prompt service\n\nReturns:\n   \
+        \ List of prompts with pagination info"
       operationId: list_prompts_api_v1_prompts_get
       security:
       - HTTPBearer: []
@@ -2060,6 +2099,16 @@ paths:
           description: Filter by public status
           title: Is Public
         description: Filter by public status
+      - name: is_chain
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Filter by chain status
+          title: Is Chain
+        description: Filter by chain status
       - name: limit
         in: query
         required: false
@@ -2285,24 +2334,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /api/v1/prompts/stats/overview:
-    get:
-      tags:
-      - Prompts
-      summary: Get Prompt Stats
-      description: "Get prompt statistics.\n\nArgs:\n    request: Stats request parameters\n\
-        \    current_user: Current authenticated user\n    prompt_service: Prompt\
-        \ service\n\nReturns:\n    Prompt statistics"
-      operationId: get_prompt_stats_api_v1_prompts_stats_overview_get
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PromptStatsResponse'
-      security:
-      - HTTPBearer: []
   /api/v1/analytics/conversations:
     get:
       tags:
@@ -2804,6 +2835,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/analytics/health:
+    get:
+      tags:
+      - Analytics
+      summary: Get Analytics Health
+      description: "Get analytics system health status.\n\nReturns:\n    Health check\
+        \ results for analytics system"
+      operationId: get_analytics_health_api_v1_analytics_health_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Get Analytics Health Api V1 Analytics Health Get
+  /api/v1/analytics/metrics/summary:
+    get:
+      tags:
+      - Analytics
+      summary: Get Analytics Metrics Summary
+      description: "Get summary of key analytics metrics for monitoring.\n\nReturns:\n\
+        \    Summary of analytics metrics"
+      operationId: get_analytics_metrics_summary_api_v1_analytics_metrics_summary_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Get Analytics Metrics Summary Api V1 Analytics Metrics
+                  Summary Get
   /api/v1/toolservers/servers:
     post:
       tags:
@@ -3652,15 +3718,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /api/v1/agents/:
+  /api/v1/agents/agents/:
     post:
       tags:
       - Agents
-      summary: Create Agent
-      description: "Create a new agent.\n\nArgs:\n    agent_data: Agent creation data\n\
-        \    current_user: Current authenticated user\n    agent_manager: Agent manager\
-        \ instance\n\nReturns:\n    Created agent data"
-      operationId: create_agent_api_v1_agents__post
+      - agents
+      summary: Create a new agent
+      description: Create a new AI agent with specified configuration and capabilities.
+      operationId: create_agent_api_v1_agents_agents__post
       security:
       - HTTPBearer: []
       requestBody:
@@ -3671,11 +3736,23 @@ paths:
               $ref: '#/components/schemas/AgentCreateRequest'
       responses:
         '201':
-          description: Successful Response
+          description: Agent created successfully
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgentResponse'
+        '400':
+          description: Invalid input data
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
         '422':
           description: Validation Error
           content:
@@ -3685,12 +3762,11 @@ paths:
     get:
       tags:
       - Agents
-      summary: List Agents
-      description: "List all agents with optional filtering and pagination.\n\nArgs:\n\
-        \    request: List request parameters with pagination\n    current_user: Current\
-        \ authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n\
-        \    Paginated list of agents"
-      operationId: list_agents_api_v1_agents__get
+      - agents
+      summary: List agents
+      description: List all agents with optional filtering and pagination. Users can
+        only see their own agents.
+      operationId: list_agents_api_v1_agents_agents__get
       security:
       - HTTPBearer: []
       parameters:
@@ -3714,7 +3790,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Body_list_agents_api_v1_agents__get'
+              $ref: '#/components/schemas/Body_list_agents_api_v1_agents_agents__get'
       responses:
         '200':
           description: Successful Response
@@ -3722,21 +3798,63 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgentListResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /api/v1/agents/{agent_id}:
+  /api/v1/agents/agents/stats/overview:
     get:
       tags:
       - Agents
+      - agents
+      summary: Get agent statistics
+      description: Get comprehensive statistics about all agents for the current user.
+      operationId: get_agent_stats_api_v1_agents_agents_stats_overview_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentStatsResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+      security:
+      - HTTPBearer: []
+  /api/v1/agents/agents/{agent_id}:
+    get:
+      tags:
+      - Agents
+      - agents
       summary: Get Agent
       description: "Get agent by ID.\n\nArgs:\n    agent_id: Agent ID\n    request:\
         \ Get request parameters\n    current_user: Current authenticated user\n \
         \   agent_manager: Agent manager instance\n\nReturns:\n    Agent data"
-      operationId: get_agent_api_v1_agents__agent_id__get
+      operationId: get_agent_api_v1_agents_agents__agent_id__get
       security:
       - HTTPBearer: []
       parameters:
@@ -3753,6 +3871,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgentResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
         '422':
           description: Validation Error
           content:
@@ -3762,11 +3892,12 @@ paths:
     put:
       tags:
       - Agents
+      - agents
       summary: Update Agent
       description: "Update an agent.\n\nArgs:\n    agent_id: Agent ID\n    agent_data:\
         \ Agent update data\n    current_user: Current authenticated user\n    agent_manager:\
         \ Agent manager instance\n\nReturns:\n    Updated agent data"
-      operationId: update_agent_api_v1_agents__agent_id__put
+      operationId: update_agent_api_v1_agents_agents__agent_id__put
       security:
       - HTTPBearer: []
       parameters:
@@ -3789,6 +3920,18 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgentResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
         '422':
           description: Validation Error
           content:
@@ -3798,11 +3941,12 @@ paths:
     delete:
       tags:
       - Agents
+      - agents
       summary: Delete Agent
       description: "Delete an agent.\n\nArgs:\n    agent_id: Agent ID\n    current_user:\
         \ Current authenticated user\n    agent_manager: Agent manager instance\n\n\
         Returns:\n    Deletion result"
-      operationId: delete_agent_api_v1_agents__agent_id__delete
+      operationId: delete_agent_api_v1_agents_agents__agent_id__delete
       security:
       - HTTPBearer: []
       parameters:
@@ -3819,22 +3963,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgentDeleteResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /api/v1/agents/{agent_id}/interact:
+  /api/v1/agents/agents/{agent_id}/interact:
     post:
       tags:
       - Agents
-      summary: Interact With Agent
-      description: "Send a message to an agent and get a response.\n\nArgs:\n    agent_id:\
-        \ Agent ID\n    interaction_data: Interaction data\n    current_user: Current\
-        \ authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n\
-        \    Agent response"
-      operationId: interact_with_agent_api_v1_agents__agent_id__interact_post
+      - agents
+      summary: Interact with agent
+      description: Send a message to an agent and receive a response. Rate limited
+        per user per agent.
+      operationId: interact_with_agent_api_v1_agents_agents__agent_id__interact_post
       security:
       - HTTPBearer: []
       parameters:
@@ -3852,32 +4007,158 @@ paths:
               $ref: '#/components/schemas/AgentInteractRequest'
       responses:
         '200':
-          description: Successful Response
+          description: Interaction successful
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgentInteractResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Agent not found or access denied
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
         '422':
           description: Validation Error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
-  /api/v1/agents/stats/overview:
+  /api/v1/agents/agents/{agent_id}/health:
     get:
       tags:
       - Agents
-      summary: Get Agent Stats
-      description: "Get agent statistics.\n\nArgs:\n    current_user: Current authenticated\
-        \ user\n    agent_manager: Agent manager instance\n\nReturns:\n    Agent statistics"
-      operationId: get_agent_stats_api_v1_agents_stats_overview_get
+      - agents
+      summary: Get Agent Health
+      description: "Get agent health status.\n\nArgs:\n    agent_id: Agent ID\n  \
+        \  current_user: Current authenticated user\n    agent_manager: Agent manager\
+        \ instance\n\nReturns:\n    Agent health information"
+      operationId: get_agent_health_api_v1_agents_agents__agent_id__health_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: agent_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Agent Id
       responses:
         '200':
           description: Successful Response
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AgentStatsResponse'
+                $ref: '#/components/schemas/AgentHealthResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/agents/agents/bulk:
+    post:
+      tags:
+      - Agents
+      - agents
+      summary: Bulk Create Agents
+      description: "Create multiple agents in bulk.\n\nArgs:\n    request: Bulk creation\
+        \ request\n    current_user: Current authenticated user\n    agent_manager:\
+        \ Agent manager instance\n\nReturns:\n    Bulk creation results"
+      operationId: bulk_create_agents_api_v1_agents_agents_bulk_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentBulkCreateRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentBulkCreateResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+    delete:
+      tags:
+      - Agents
+      - agents
+      summary: Bulk Delete Agents
+      description: "Delete multiple agents in bulk.\n\nArgs:\n    request: Bulk deletion\
+        \ request\n    current_user: Current authenticated user\n    agent_manager:\
+        \ Agent manager instance\n\nReturns:\n    Bulk deletion results"
+      operationId: bulk_delete_agents_api_v1_agents_agents_bulk_delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentBulkDeleteRequest'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Bulk Delete Agents Api V1 Agents Agents Bulk Delete
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+        '429':
+          description: Rate limit exceeded
+        '500':
+          description: Internal server error
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
       security:
       - HTTPBearer: []
   /api/v1/ab-tests/:
@@ -4285,6 +4566,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/ab-tests/{test_id}/recommendations:
+    get:
+      tags:
+      - A/B Testing
+      summary: Get Ab Test Recommendations
+      description: "Get comprehensive recommendations for an A/B test.\n\nArgs:\n\
+        \    test_id: A/B test ID\n    current_user: Current authenticated user\n\
+        \    ab_test_manager: A/B test manager instance\n\nReturns:\n    Recommendations\
+        \ and insights for the test"
+      operationId: get_ab_test_recommendations_api_v1_ab_tests__test_id__recommendations_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: test_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Test Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Get Ab Test Recommendations Api V1 Ab Tests  Test
+                  Id  Recommendations Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/events/stream:
     get:
       tags:
@@ -4311,8 +4627,8 @@ paths:
       - Events
       summary: Admin Events Stream
       description: "Stream all system events for admin users.\n\nArgs:\n    request:\
-        \ FastAPI request object\n    current_user: Current authenticated user (must\
-        \ be admin)\n\nReturns:\n    StreamingResponse with SSE format for all events"
+        \ FastAPI request object\n    current_user: Current authenticated admin user\n\
+        \nReturns:\n    StreamingResponse with SSE format for all events"
       operationId: admin_events_stream_api_v1_events_admin_stream_get
       responses:
         '200':
@@ -4331,7 +4647,7 @@ paths:
       - Events
       summary: Get Sse Stats
       description: "Get SSE service statistics.\n\nArgs:\n    current_user: Current\
-        \ authenticated user\n\nReturns:\n    SSE service statistics"
+        \ authenticated admin user\n\nReturns:\n    SSE service statistics"
       operationId: get_sse_stats_api_v1_events_stats_get
       responses:
         '200':
@@ -4365,7 +4681,8 @@ paths:
       - Events
       summary: Trigger Broadcast Test
       description: "Trigger a broadcast test event for all users.\n\nArgs:\n    current_user:\
-        \ Current authenticated user\n\nReturns:\n    Success message with event ID"
+        \ Current authenticated admin user\n\nReturns:\n    Success message with event\
+        \ ID"
       operationId: trigger_broadcast_test_api_v1_events_broadcast_test_post
       responses:
         '200':
@@ -4615,6 +4932,161 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/plugins/health:
+    get:
+      tags:
+      - Plugins
+      summary: Health Check Plugins
+      description: "Perform health check on all plugins.\n\nArgs:\n    auto_disable_unhealthy:\
+        \ Whether to automatically disable unhealthy plugins\n    current_user: Current\
+        \ authenticated user\n    plugin_manager: Plugin manager instance\n\nReturns:\n\
+        \    Health check results"
+      operationId: health_check_plugins_api_v1_plugins_health_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: auto_disable_unhealthy
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Auto Disable Unhealthy
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginHealthCheckResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/plugins/stats:
+    get:
+      tags:
+      - Plugins
+      summary: Get Plugin Stats
+      description: "Get plugin system statistics.\n\nArgs:\n    current_user: Current\
+        \ authenticated user\n    plugin_manager: Plugin manager instance\n\nReturns:\n\
+        \    Plugin system statistics"
+      operationId: get_plugin_stats_api_v1_plugins_stats_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PluginStatsResponse'
+      security:
+      - HTTPBearer: []
+  /api/v1/plugins/{plugin_id}/dependencies:
+    get:
+      tags:
+      - Plugins
+      summary: Check Plugin Dependencies
+      description: "Check plugin dependencies.\n\nArgs:\n    plugin_id: Plugin ID\n\
+        \    current_user: Current authenticated user\n    plugin_manager: Plugin\
+        \ manager instance\n\nReturns:\n    Dependency check results"
+      operationId: check_plugin_dependencies_api_v1_plugins__plugin_id__dependencies_get
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: plugin_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Plugin Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Check Plugin Dependencies Api V1 Plugins  Plugin Id  Dependencies
+                  Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/v1/plugins/bulk/enable:
+    post:
+      tags:
+      - Plugins
+      summary: Bulk Enable Plugins
+      description: "Enable multiple plugins.\n\nArgs:\n    plugin_ids: List of plugin\
+        \ IDs to enable\n    current_user: Current authenticated user\n    plugin_manager:\
+        \ Plugin manager instance\n\nReturns:\n    Bulk operation results"
+      operationId: bulk_enable_plugins_api_v1_plugins_bulk_enable_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                type: string
+              type: array
+              title: Plugin Ids
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Bulk Enable Plugins Api V1 Plugins Bulk Enable Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
+  /api/v1/plugins/bulk/disable:
+    post:
+      tags:
+      - Plugins
+      summary: Bulk Disable Plugins
+      description: "Disable multiple plugins.\n\nArgs:\n    plugin_ids: List of plugin\
+        \ IDs to disable\n    current_user: Current authenticated user\n    plugin_manager:\
+        \ Plugin manager instance\n\nReturns:\n    Bulk operation results"
+      operationId: bulk_disable_plugins_api_v1_plugins_bulk_disable_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                type: string
+              type: array
+              title: Plugin Ids
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                type: object
+                title: Response Bulk Disable Plugins Api V1 Plugins Bulk Disable Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - HTTPBearer: []
   /api/v1/jobs/:
     post:
       tags:
@@ -4649,9 +5121,9 @@ paths:
       tags:
       - Jobs
       summary: List Jobs
-      description: "List jobs with optional filtering.\n\nArgs:\n    request: List\
-        \ request parameters\n    current_user: Current authenticated user\n\nReturns:\n\
-        \    List of jobs"
+      description: "List jobs with optional filtering and pagination.\n\nArgs:\n \
+        \   request: List request parameters\n    current_user: Current authenticated\
+        \ user\n\nReturns:\n    List of jobs with pagination info"
       operationId: list_jobs_api_v1_jobs__get
       security:
       - HTTPBearer: []
@@ -4680,6 +5152,74 @@ paths:
           - type: string
           - type: 'null'
           title: Function Name
+      - name: created_after
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created After
+      - name: created_before
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Created Before
+      - name: search
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Search
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: sort_by
+        in: query
+        required: false
+        schema:
+          type: string
+          default: created_at
+          title: Sort By
+      - name: sort_order
+        in: query
+        required: false
+        schema:
+          type: string
+          pattern: ^(asc|desc)$
+          default: desc
+          title: Sort Order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - type: array
+                items:
+                  type: string
+              - type: 'null'
+              title: Tags
       responses:
         '200':
           description: Successful Response
@@ -4770,6 +5310,42 @@ paths:
                 $ref: '#/components/schemas/JobStatsResponse'
       security:
       - HTTPBearer: []
+  /api/v1/jobs/cleanup:
+    post:
+      tags:
+      - Jobs
+      summary: Cleanup Jobs
+      description: "Clean up old completed jobs to free up memory.\n\nNote: This is\
+        \ a system-wide cleanup operation that affects all users.\nOnly completed,\
+        \ failed, or cancelled jobs older than 24 hours are removed.\n\nArgs:\n  \
+        \  force: If True, remove all completed/failed jobs regardless of age\n  \
+        \  current_user: Current authenticated user\n    \nReturns:\n    Cleanup statistics"
+      operationId: cleanup_jobs_api_v1_jobs_cleanup_post
+      security:
+      - HTTPBearer: []
+      parameters:
+      - name: force
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Force
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                title: Response Cleanup Jobs Api V1 Jobs Cleanup Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
   /api/v1/data/export:
     post:
       tags:
@@ -5703,29 +6279,6 @@ paths:
                 $ref: '#/components/schemas/EmbeddingSpaceWithModel'
       security:
       - HTTPBearer: []
-  /{full_path}:
-    get:
-      summary: Serve React App
-      operationId: serve_react_app__full_path__get
-      parameters:
-      - name: full_path
-        in: path
-        required: true
-        schema:
-          type: string
-          title: Full Path
-      responses:
-        '200':
-          description: Successful Response
-          content:
-            application/json:
-              schema: {}
-        '422':
-          description: Validation Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
   /:
     get:
       summary: Root
@@ -6202,17 +6755,11 @@ components:
           type: string
           title: Api Key Name
           description: API key name
-        created_at:
-          type: string
-          format: date-time
-          title: Created At
-          description: Creation date
       type: object
       required:
       - id
       - api_key
       - api_key_name
-      - created_at
       title: APIKeyResponse
       description: Schema for API key response.
     APIKeyRevokeResponse:
@@ -6237,38 +6784,80 @@ components:
       - message
       title: AccountDeactivateResponse
       description: Schema for account deactivation response.
-    AgentCapability:
+    AgentBulkCreateRequest:
       properties:
-        name:
-          type: string
-          title: Name
-        description:
-          type: string
-          title: Description
-        required_tools:
+        agents:
           items:
-            type: string
+            $ref: '#/components/schemas/AgentCreateRequest'
           type: array
-          title: Required Tools
-        required_models:
-          items:
-            type: string
-          type: array
-          title: Required Models
-        confidence_threshold:
-          type: number
-          title: Confidence Threshold
-          default: 0.7
-        enabled:
-          type: boolean
-          title: Enabled
-          default: true
+          maxItems: 10
+          minItems: 1
+          title: Agents
+          description: List of agents to create (max 10)
       type: object
       required:
-      - name
-      - description
+      - agents
+      title: AgentBulkCreateRequest
+      description: Request schema for bulk agent creation.
+    AgentBulkCreateResponse:
+      properties:
+        created:
+          items:
+            $ref: '#/components/schemas/AgentResponse'
+          type: array
+          title: Created
+          description: Successfully created agents
+        failed:
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+          title: Failed
+          description: Failed agent creations with errors
+        total_requested:
+          type: integer
+          title: Total Requested
+          description: Total agents requested
+        total_created:
+          type: integer
+          title: Total Created
+          description: Total agents successfully created
+      type: object
+      required:
+      - created
+      - failed
+      - total_requested
+      - total_created
+      title: AgentBulkCreateResponse
+      description: Response schema for bulk agent creation.
+    AgentBulkDeleteRequest:
+      properties:
+        agent_ids:
+          items:
+            type: string
+          type: array
+          maxItems: 50
+          minItems: 1
+          title: Agent Ids
+          description: List of agent IDs to delete (max 50)
+      type: object
+      required:
+      - agent_ids
+      title: AgentBulkDeleteRequest
+      description: Request schema for bulk agent deletion.
+    AgentCapability:
+      type: string
+      enum:
+      - natural_language
+      - memory
+      - code_generation
+      - tool_use
+      - analytical
+      - creative
+      - research
+      - support
       title: AgentCapability
-      description: Agent capability definition.
+      description: Agent capabilities.
     AgentCreateRequest:
       properties:
         name:
@@ -6414,6 +7003,45 @@ components:
       - message
       title: AgentDeleteResponse
       description: Response schema for agent deletion.
+    AgentHealthResponse:
+      properties:
+        agent_id:
+          type: string
+          title: Agent Id
+          description: Agent ID
+        status:
+          $ref: '#/components/schemas/AgentStatus'
+          description: Agent status
+        health:
+          type: string
+          title: Health
+          description: Health status (healthy/unhealthy/unknown)
+        last_interaction:
+          anyOf:
+          - type: string
+            format: date-time
+          - type: 'null'
+          title: Last Interaction
+          description: Last interaction timestamp
+        response_time_avg:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Response Time Avg
+          description: Average response time
+        error_rate:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Error Rate
+          description: Error rate percentage
+      type: object
+      required:
+      - agent_id
+      - status
+      - health
+      title: AgentHealthResponse
+      description: Response schema for agent health check.
     AgentInteractRequest:
       properties:
         message:
@@ -6528,16 +7156,16 @@ components:
           type: string
           title: Description
           description: Agent description
-        agent_type:
+        type:
           $ref: '#/components/schemas/AgentType'
           description: Type of agent
         status:
           $ref: '#/components/schemas/AgentStatus'
           description: Agent status
-        system_prompt:
+        system_message:
           type: string
-          title: System Prompt
-          description: System prompt
+          title: System Message
+          description: System message
         personality_traits:
           items:
             type: string
@@ -6636,9 +7264,9 @@ components:
       - id
       - name
       - description
-      - agent_type
+      - type
       - status
-      - system_prompt
+      - system_message
       - personality_traits
       - knowledge_domains
       - response_style
@@ -6708,6 +7336,7 @@ components:
       - creative
       - research
       - support
+      - specialist
       - specialist
       title: AgentType
       description: Types of AI agents.
@@ -7091,7 +7720,7 @@ components:
       - differential
       title: BackupType
       description: Types of backups.
-    Body_list_agents_api_v1_agents__get:
+    Body_list_agents_api_v1_agents_agents__get:
       properties:
         pagination:
           $ref: '#/components/schemas/PaginationRequest'
@@ -7111,7 +7740,7 @@ components:
           - type: 'null'
           title: Tags
       type: object
-      title: Body_list_agents_api_v1_agents__get
+      title: Body_list_agents_api_v1_agents_agents__get
     Body_upload_document_api_v1_documents_upload_post:
       properties:
         file:
@@ -7287,6 +7916,13 @@ components:
           - type: 'null'
           title: Max Tokens
           description: Max tokens override
+        context_limit:
+          anyOf:
+          - type: integer
+            minimum: 1.0
+          - type: 'null'
+          title: Context Limit
+          description: Context limit override
         enable_retrieval:
           anyOf:
           - type: boolean
@@ -7307,6 +7943,12 @@ components:
           - type: 'null'
           title: System Prompt Override
           description: Override system prompt for this request
+        workflow_type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Workflow Type
+          description: Internal workflow type (set by API processing)
       type: object
       required:
       - message
@@ -7794,14 +8436,10 @@ components:
       description: Supported data formats.
     DefaultProvider:
       properties:
-        provider_id:
-          type: string
-          title: Provider Id
         model_type:
           $ref: '#/components/schemas/ModelType'
       type: object
       required:
-      - provider_id
       - model_type
       title: DefaultProvider
       description: Schema for setting default provider.
@@ -8509,24 +9147,34 @@ components:
       properties:
         name:
           type: string
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
           title: Name
           description: Unique space name
         display_name:
           type: string
+          maxLength: 200
+          minLength: 1
           title: Display Name
           description: Human-readable name
         description:
           anyOf:
           - type: string
+            maxLength: 1000
           - type: 'null'
           title: Description
           description: Space description
         base_dimensions:
           type: integer
+          maximum: 10000.0
+          exclusiveMinimum: 0.0
           title: Base Dimensions
           description: Original model dimensions
         effective_dimensions:
           type: integer
+          maximum: 10000.0
+          exclusiveMinimum: 0.0
           title: Effective Dimensions
           description: Effective dimensions after reduction
         reduction_strategy:
@@ -8536,12 +9184,14 @@ components:
         reducer_path:
           anyOf:
           - type: string
+            maxLength: 500
           - type: 'null'
           title: Reducer Path
           description: Path to reducer file
         reducer_version:
           anyOf:
           - type: string
+            maxLength: 100
           - type: 'null'
           title: Reducer Version
           description: Reducer version/hash
@@ -8556,10 +9206,14 @@ components:
           default: cosine
         table_name:
           type: string
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_]+$
           title: Table Name
           description: Database table name
         index_type:
           type: string
+          maxLength: 50
           title: Index Type
           description: Index type
           default: hnsw
@@ -8701,24 +9355,34 @@ components:
       properties:
         name:
           type: string
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
           title: Name
           description: Unique space name
         display_name:
           type: string
+          maxLength: 200
+          minLength: 1
           title: Display Name
           description: Human-readable name
         description:
           anyOf:
           - type: string
+            maxLength: 1000
           - type: 'null'
           title: Description
           description: Space description
         base_dimensions:
           type: integer
+          maximum: 10000.0
+          exclusiveMinimum: 0.0
           title: Base Dimensions
           description: Original model dimensions
         effective_dimensions:
           type: integer
+          maximum: 10000.0
+          exclusiveMinimum: 0.0
           title: Effective Dimensions
           description: Effective dimensions after reduction
         reduction_strategy:
@@ -8728,12 +9392,14 @@ components:
         reducer_path:
           anyOf:
           - type: string
+            maxLength: 500
           - type: 'null'
           title: Reducer Path
           description: Path to reducer file
         reducer_version:
           anyOf:
           - type: string
+            maxLength: 100
           - type: 'null'
           title: Reducer Version
           description: Reducer version/hash
@@ -8748,10 +9414,14 @@ components:
           default: cosine
         table_name:
           type: string
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_]+$
           title: Table Name
           description: Database table name
         index_type:
           type: string
+          maxLength: 50
           title: Index Type
           description: Index type
           default: hnsw
@@ -8939,8 +9609,7 @@ components:
     HealthCheckResponse:
       properties:
         status:
-          type: string
-          title: Status
+          $ref: '#/components/schemas/HealthStatus'
           description: Health status
         service:
           type: string
@@ -8962,6 +9631,14 @@ components:
       - environment
       title: HealthCheckResponse
       description: Schema for health check response.
+    HealthStatus:
+      type: string
+      enum:
+      - healthy
+      - alive
+      - unhealthy
+      title: HealthStatus
+      description: Health status enumeration.
     JobActionResponse:
       properties:
         success:
@@ -9039,10 +9716,25 @@ components:
           type: integer
           title: Total
           description: Total number of jobs
+        limit:
+          type: integer
+          title: Limit
+          description: Maximum results per page
+        offset:
+          type: integer
+          title: Offset
+          description: Number of results skipped
+        has_more:
+          type: boolean
+          title: Has More
+          description: Whether more results exist
       type: object
       required:
       - jobs
       - total
+      - limit
+      - offset
+      - has_more
       title: JobListResponse
       description: Response schema for job list.
     JobPriority:
@@ -9247,6 +9939,7 @@ components:
           description: Message role
         content:
           type: string
+          minLength: 1
           title: Content
           description: Message content
       type: object
@@ -9273,6 +9966,7 @@ components:
           description: Message role
         content:
           type: string
+          minLength: 1
           title: Content
           description: Message content
         id:
@@ -9329,6 +10023,12 @@ components:
           - type: 'null'
           title: Cost
           description: Cost of the message
+        finish_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Finish Reason
+          description: Reason for completion
         created_at:
           type: string
           format: date-time
@@ -9371,7 +10071,7 @@ components:
         timestamp:
           type: string
           title: Timestamp
-          description: Metrics collection timestamp
+          description: Metrics collection timestamp (ISO 8601)
         service:
           type: string
           title: Service
@@ -9414,6 +10114,9 @@ components:
       properties:
         name:
           type: string
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
           title: Name
           description: Model name
         model_type:
@@ -9421,50 +10124,65 @@ components:
           description: Type of model
         display_name:
           type: string
+          maxLength: 200
+          minLength: 1
           title: Display Name
           description: Human-readable name
         description:
           anyOf:
           - type: string
+            maxLength: 1000
           - type: 'null'
           title: Description
           description: Model description
         model_name:
           type: string
+          maxLength: 200
+          minLength: 1
           title: Model Name
           description: Actual model name for API calls
         max_tokens:
           anyOf:
           - type: integer
+            maximum: 1000000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Max Tokens
           description: Maximum tokens
         context_length:
           anyOf:
           - type: integer
+            maximum: 10000000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Context Length
           description: Context length
         dimensions:
           anyOf:
           - type: integer
+            maximum: 10000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Dimensions
           description: Embedding dimensions
         chunk_size:
           anyOf:
           - type: integer
+            maximum: 100000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Chunk Size
           description: Default chunk size
         supports_batch:
           type: boolean
           title: Supports Batch
-          description: Supports batch processing
-          default: true
+          description: Whether model supports batch operations
+          default: false
         max_batch_size:
           anyOf:
           - type: integer
+            maximum: 1000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Max Batch Size
           description: Maximum batch size
@@ -9525,36 +10243,49 @@ components:
         display_name:
           anyOf:
           - type: string
+            maxLength: 200
+            minLength: 1
           - type: 'null'
           title: Display Name
         description:
           anyOf:
           - type: string
+            maxLength: 1000
           - type: 'null'
           title: Description
         model_name:
           anyOf:
           - type: string
+            maxLength: 200
+            minLength: 1
           - type: 'null'
           title: Model Name
         max_tokens:
           anyOf:
           - type: integer
+            maximum: 1000000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Max Tokens
         context_length:
           anyOf:
           - type: integer
+            maximum: 10000000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Context Length
         dimensions:
           anyOf:
           - type: integer
+            maximum: 10000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Dimensions
         chunk_size:
           anyOf:
           - type: integer
+            maximum: 100000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Chunk Size
         supports_batch:
@@ -9565,6 +10296,8 @@ components:
         max_batch_size:
           anyOf:
           - type: integer
+            maximum: 1000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Max Batch Size
         default_config:
@@ -9590,6 +10323,9 @@ components:
       properties:
         name:
           type: string
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
           title: Name
           description: Model name
         model_type:
@@ -9597,50 +10333,65 @@ components:
           description: Type of model
         display_name:
           type: string
+          maxLength: 200
+          minLength: 1
           title: Display Name
           description: Human-readable name
         description:
           anyOf:
           - type: string
+            maxLength: 1000
           - type: 'null'
           title: Description
           description: Model description
         model_name:
           type: string
+          maxLength: 200
+          minLength: 1
           title: Model Name
           description: Actual model name for API calls
         max_tokens:
           anyOf:
           - type: integer
+            maximum: 1000000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Max Tokens
           description: Maximum tokens
         context_length:
           anyOf:
           - type: integer
+            maximum: 10000000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Context Length
           description: Context length
         dimensions:
           anyOf:
           - type: integer
+            maximum: 10000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Dimensions
           description: Embedding dimensions
         chunk_size:
           anyOf:
           - type: integer
+            maximum: 100000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Chunk Size
           description: Default chunk size
         supports_batch:
           type: boolean
           title: Supports Batch
-          description: Supports batch processing
-          default: true
+          description: Whether model supports batch operations
+          default: false
         max_batch_size:
           anyOf:
           - type: integer
+            maximum: 1000.0
+            exclusiveMinimum: 0.0
           - type: 'null'
           title: Max Batch Size
           description: Maximum batch size
@@ -9996,6 +10747,26 @@ components:
       - message
       title: PluginDeleteResponse
       description: Response schema for plugin deletion.
+    PluginHealthCheckResponse:
+      properties:
+        summary:
+          additionalProperties: true
+          type: object
+          title: Summary
+          description: Health check summary
+        results:
+          additionalProperties:
+            additionalProperties: true
+            type: object
+          type: object
+          title: Results
+          description: Detailed health check results for each plugin
+      type: object
+      required:
+      - summary
+      - results
+      title: PluginHealthCheckResponse
+      description: Response schema for plugin health check.
     PluginInstallRequest:
       properties:
         plugin_path:
@@ -10125,6 +10896,39 @@ components:
       - metadata
       title: PluginResponse
       description: Response schema for plugin data.
+    PluginStatsResponse:
+      properties:
+        total_plugins:
+          type: integer
+          title: Total Plugins
+          description: Total number of plugins
+        active_plugins:
+          type: integer
+          title: Active Plugins
+          description: Number of active plugins
+        inactive_plugins:
+          type: integer
+          title: Inactive Plugins
+          description: Number of inactive plugins
+        plugin_types:
+          additionalProperties:
+            type: integer
+          type: object
+          title: Plugin Types
+          description: Plugin count by type
+        plugins_directory:
+          type: string
+          title: Plugins Directory
+          description: Plugin installation directory
+      type: object
+      required:
+      - total_plugins
+      - active_plugins
+      - inactive_plugins
+      - plugin_types
+      - plugins_directory
+      title: PluginStatsResponse
+      description: Response schema for plugin statistics.
     PluginStatus:
       type: string
       enum:
@@ -10199,6 +11003,7 @@ components:
         description:
           anyOf:
           - type: string
+            maxLength: 2000
           - type: 'null'
           title: Description
           description: Profile description
@@ -10208,10 +11013,14 @@ components:
           default: custom
         llm_provider:
           type: string
+          maxLength: 50
+          minLength: 1
           title: Llm Provider
           description: LLM provider (openai, anthropic, etc.)
         llm_model:
           type: string
+          maxLength: 100
+          minLength: 1
           title: Llm Model
           description: LLM model name
         temperature:
@@ -10232,6 +11041,7 @@ components:
         top_k:
           anyOf:
           - type: integer
+            maximum: 1000.0
             minimum: 1.0
           - type: 'null'
           title: Top K
@@ -10269,6 +11079,7 @@ components:
         system_prompt:
           anyOf:
           - type: string
+            maxLength: 10000
           - type: 'null'
           title: System Prompt
           description: System prompt template
@@ -10280,6 +11091,7 @@ components:
         memory_strategy:
           anyOf:
           - type: string
+            maxLength: 50
           - type: 'null'
           title: Memory Strategy
           description: Memory management strategy
@@ -10312,12 +11124,14 @@ components:
           - items:
               type: string
             type: array
+            maxItems: 20
           - type: 'null'
           title: Available Tools
           description: List of available tools
         tool_choice:
           anyOf:
           - type: string
+            maxLength: 50
           - type: 'null'
           title: Tool Choice
           description: Tool choice strategy
@@ -10329,12 +11143,14 @@ components:
         safety_level:
           anyOf:
           - type: string
+            maxLength: 20
           - type: 'null'
           title: Safety Level
           description: Safety level
         response_format:
           anyOf:
           - type: string
+            maxLength: 20
           - type: 'null'
           title: Response Format
           description: Response format (json, text, markdown)
@@ -10346,6 +11162,8 @@ components:
         seed:
           anyOf:
           - type: integer
+            maximum: 2147483647.0
+            minimum: 0.0
           - type: 'null'
           title: Seed
           description: Random seed for reproducibility
@@ -10354,6 +11172,7 @@ components:
           - items:
               type: string
             type: array
+            maxItems: 10
           - type: 'null'
           title: Stop Sequences
           description: Stop sequences
@@ -10368,12 +11187,14 @@ components:
         embedding_provider:
           anyOf:
           - type: string
+            maxLength: 50
           - type: 'null'
           title: Embedding Provider
           description: Embedding provider
         embedding_model:
           anyOf:
           - type: string
+            maxLength: 100
           - type: 'null'
           title: Embedding Model
           description: Embedding model
@@ -10387,6 +11208,7 @@ components:
           - items:
               type: string
             type: array
+            maxItems: 10
           - type: 'null'
           title: Tags
           description: Profile tags
@@ -10454,6 +11276,7 @@ components:
         description:
           anyOf:
           - type: string
+            maxLength: 2000
           - type: 'null'
           title: Description
           description: Profile description
@@ -10463,10 +11286,14 @@ components:
           default: custom
         llm_provider:
           type: string
+          maxLength: 50
+          minLength: 1
           title: Llm Provider
           description: LLM provider (openai, anthropic, etc.)
         llm_model:
           type: string
+          maxLength: 100
+          minLength: 1
           title: Llm Model
           description: LLM model name
         temperature:
@@ -10487,6 +11314,7 @@ components:
         top_k:
           anyOf:
           - type: integer
+            maximum: 1000.0
             minimum: 1.0
           - type: 'null'
           title: Top K
@@ -10524,6 +11352,7 @@ components:
         system_prompt:
           anyOf:
           - type: string
+            maxLength: 10000
           - type: 'null'
           title: System Prompt
           description: System prompt template
@@ -10535,6 +11364,7 @@ components:
         memory_strategy:
           anyOf:
           - type: string
+            maxLength: 50
           - type: 'null'
           title: Memory Strategy
           description: Memory management strategy
@@ -10567,12 +11397,14 @@ components:
           - items:
               type: string
             type: array
+            maxItems: 20
           - type: 'null'
           title: Available Tools
           description: List of available tools
         tool_choice:
           anyOf:
           - type: string
+            maxLength: 50
           - type: 'null'
           title: Tool Choice
           description: Tool choice strategy
@@ -10584,12 +11416,14 @@ components:
         safety_level:
           anyOf:
           - type: string
+            maxLength: 20
           - type: 'null'
           title: Safety Level
           description: Safety level
         response_format:
           anyOf:
           - type: string
+            maxLength: 20
           - type: 'null'
           title: Response Format
           description: Response format (json, text, markdown)
@@ -10601,6 +11435,8 @@ components:
         seed:
           anyOf:
           - type: integer
+            maximum: 2147483647.0
+            minimum: 0.0
           - type: 'null'
           title: Seed
           description: Random seed for reproducibility
@@ -10609,6 +11445,7 @@ components:
           - items:
               type: string
             type: array
+            maxItems: 10
           - type: 'null'
           title: Stop Sequences
           description: Stop sequences
@@ -10623,12 +11460,14 @@ components:
         embedding_provider:
           anyOf:
           - type: string
+            maxLength: 50
           - type: 'null'
           title: Embedding Provider
           description: Embedding provider
         embedding_model:
           anyOf:
           - type: string
+            maxLength: 100
           - type: 'null'
           title: Embedding Model
           description: Embedding model
@@ -10642,6 +11481,7 @@ components:
           - items:
               type: string
             type: array
+            maxItems: 10
           - type: 'null'
           title: Tags
           description: Profile tags
@@ -11619,6 +12459,18 @@ components:
           title: Validate Only
           description: Only validate, don't render
           default: false
+        include_performance_metrics:
+          type: boolean
+          title: Include Performance Metrics
+          description: Include detailed performance metrics
+          default: false
+        timeout_ms:
+          type: integer
+          maximum: 60000.0
+          minimum: 1000.0
+          title: Timeout Ms
+          description: Test timeout in milliseconds
+          default: 30000
       type: object
       required:
       - variables
@@ -11647,10 +12499,30 @@ components:
           type: integer
           title: Test Duration Ms
           description: Test execution time
+        template_variables_used:
+          items:
+            type: string
+          type: array
+          title: Template Variables Used
+          description: Template variables actually used
+        security_warnings:
+          items:
+            type: string
+          type: array
+          title: Security Warnings
+          description: Security warnings if any
+        performance_metrics:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          title: Performance Metrics
+          description: Detailed performance metrics
       type: object
       required:
       - validation_result
       - test_duration_ms
+      - template_variables_used
       title: PromptTestResponse
       description: Schema for prompt test response.
     PromptType:
@@ -11836,6 +12708,9 @@ components:
       properties:
         name:
           type: string
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
           title: Name
           description: Unique provider name
         provider_type:
@@ -11843,11 +12718,14 @@ components:
           description: Type of provider
         display_name:
           type: string
+          maxLength: 200
+          minLength: 1
           title: Display Name
           description: Human-readable name
         description:
           anyOf:
           - type: string
+            maxLength: 1000
           - type: 'null'
           title: Description
           description: Provider description
@@ -11859,6 +12737,7 @@ components:
         base_url:
           anyOf:
           - type: string
+            maxLength: 500
           - type: 'null'
           title: Base Url
           description: Base URL for API
@@ -11902,6 +12781,9 @@ components:
       properties:
         name:
           type: string
+          maxLength: 100
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_-]+$
           title: Name
           description: Unique provider name
         provider_type:
@@ -11909,11 +12791,14 @@ components:
           description: Type of provider
         display_name:
           type: string
+          maxLength: 200
+          minLength: 1
           title: Display Name
           description: Human-readable name
         description:
           anyOf:
           - type: string
+            maxLength: 1000
           - type: 'null'
           title: Description
           description: Provider description
@@ -11925,6 +12810,7 @@ components:
         base_url:
           anyOf:
           - type: string
+            maxLength: 500
           - type: 'null'
           title: Base Url
           description: Base URL for API
@@ -12011,11 +12897,14 @@ components:
         display_name:
           anyOf:
           - type: string
+            maxLength: 200
+            minLength: 1
           - type: 'null'
           title: Display Name
         description:
           anyOf:
           - type: string
+            maxLength: 1000
           - type: 'null'
           title: Description
         api_key_required:
@@ -12026,6 +12915,7 @@ components:
         base_url:
           anyOf:
           - type: string
+            maxLength: 500
           - type: 'null'
           title: Base Url
         default_config:
@@ -12050,8 +12940,7 @@ components:
     ReadinessCheckResponse:
       properties:
         status:
-          type: string
-          title: Status
+          $ref: '#/components/schemas/ReadinessStatus'
           description: Readiness status
         service:
           type: string
@@ -12079,6 +12968,13 @@ components:
       - checks
       title: ReadinessCheckResponse
       description: Schema for readiness check response.
+    ReadinessStatus:
+      type: string
+      enum:
+      - ready
+      - not_ready
+      title: ReadinessStatus
+      description: Readiness status enumeration.
     ReductionStrategy:
       type: string
       enum:
@@ -13069,9 +13965,9 @@ components:
           description: Base URL for the remote server (null for built-in servers)
         transport_type:
           type: string
-          pattern: ^(http|sse|stdio)$
+          pattern: ^(http|sse|stdio|websocket)$
           title: Transport Type
-          description: 'Transport type: http, sse, or stdio'
+          description: 'Transport type: http, sse, stdio, or websocket'
           default: http
         oauth_config:
           anyOf:
@@ -13289,9 +14185,9 @@ components:
           description: Base URL for the remote server (null for built-in servers)
         transport_type:
           type: string
-          pattern: ^(http|sse|stdio)$
+          pattern: ^(http|sse|stdio|websocket)$
           title: Transport Type
-          description: 'Transport type: http, sse, or stdio'
+          description: 'Transport type: http, sse, stdio, or websocket'
           default: http
         oauth_config:
           anyOf:
@@ -13424,7 +14320,7 @@ components:
         transport_type:
           anyOf:
           - type: string
-            pattern: ^(http|sse|stdio)$
+            pattern: ^(http|sse|stdio|websocket)$
           - type: 'null'
           title: Transport Type
         oauth_config:
@@ -13603,6 +14499,13 @@ components:
           - type: 'null'
           title: Avatar Url
           description: Avatar URL
+        phone_number:
+          anyOf:
+          - type: string
+            maxLength: 20
+          - type: 'null'
+          title: Phone Number
+          description: Phone number
         password:
           type: string
           maxLength: 128
@@ -13615,22 +14518,35 @@ components:
       - username
       - password
       title: UserCreate
-      description: Schema for user registration.
+      description: Schema for user creation (alias for UserRegistration).
     UserLogin:
       properties:
+        email:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Email
+          description: User email address
         username:
-          type: string
-          maxLength: 50
-          minLength: 3
+          anyOf:
+          - type: string
+            maxLength: 50
+            minLength: 3
+          - type: 'null'
           title: Username
           description: Username
         password:
           type: string
           title: Password
           description: Password
+        remember_me:
+          type: boolean
+          title: Remember Me
+          description: Remember login
+          default: false
       type: object
       required:
-      - username
       - password
       title: UserLogin
       description: Schema for user login.
@@ -13668,6 +14584,13 @@ components:
           - type: 'null'
           title: Avatar Url
           description: Avatar URL
+        phone_number:
+          anyOf:
+          - type: string
+            maxLength: 20
+          - type: 'null'
+          title: Phone Number
+          description: Phone number
         id:
           type: string
           title: Id
@@ -13754,6 +14677,13 @@ components:
       description: Schema for checking user tool access.
     UserUpdate:
       properties:
+        email:
+          anyOf:
+          - type: string
+            format: email
+          - type: 'null'
+          title: Email
+          description: User email address
         full_name:
           anyOf:
           - type: string
@@ -13775,6 +14705,13 @@ components:
           - type: 'null'
           title: Avatar Url
           description: Avatar URL
+        phone_number:
+          anyOf:
+          - type: string
+            maxLength: 20
+          - type: 'null'
+          title: Phone Number
+          description: Phone number
         default_llm_provider:
           anyOf:
           - type: string

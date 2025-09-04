@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
     DateTime,
     Float,
     ForeignKey,
@@ -54,6 +55,61 @@ class PromptCategory(str, Enum):
 
 class Prompt(Base):
     """Prompt model for template management."""
+
+    __table_args__ = (
+        CheckConstraint(
+            'max_length IS NULL OR max_length > 0',
+            name='check_max_length_positive',
+        ),
+        CheckConstraint(
+            'min_length IS NULL OR min_length >= 0',
+            name='check_min_length_non_negative',
+        ),
+        CheckConstraint(
+            'min_length IS NULL OR max_length IS NULL OR min_length < max_length',
+            name='check_min_length_less_than_max',
+        ),
+        CheckConstraint(
+            'version > 0',
+            name='check_version_positive',
+        ),
+        CheckConstraint(
+            'rating IS NULL OR (rating >= 0.0 AND rating <= 5.0)',
+            name='check_rating_range',
+        ),
+        CheckConstraint(
+            'rating_count >= 0',
+            name='check_rating_count_non_negative',
+        ),
+        CheckConstraint(
+            'usage_count >= 0',
+            name='check_usage_count_non_negative',
+        ),
+        CheckConstraint(
+            'total_tokens_used >= 0',
+            name='check_total_tokens_used_non_negative',
+        ),
+        CheckConstraint(
+            'total_cost >= 0.0',
+            name='check_total_cost_non_negative',
+        ),
+        CheckConstraint(
+            'success_rate IS NULL OR (success_rate >= 0.0 AND success_rate <= 1.0)',
+            name='check_success_rate_range',
+        ),
+        CheckConstraint(
+            'avg_response_time_ms IS NULL OR avg_response_time_ms > 0',
+            name='check_avg_response_time_ms_positive',
+        ),
+        CheckConstraint(
+            "content != ''",
+            name='check_content_not_empty',
+        ),
+        CheckConstraint(
+            "name != ''",
+            name='check_name_not_empty',
+        ),
+    )
 
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(

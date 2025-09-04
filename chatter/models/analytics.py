@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date as date_type
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Date, Float, ForeignKey, Integer, String
+from sqlalchemy import JSON, Date, Float, ForeignKey, Integer, String, CheckConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -20,6 +20,53 @@ if TYPE_CHECKING:
 
 class ConversationStats(Base):
     """Model for conversation-level statistics."""
+
+    __table_args__ = (
+        CheckConstraint(
+            'total_messages >= 0',
+            name='check_total_messages_non_negative',
+        ),
+        CheckConstraint(
+            'user_messages >= 0',
+            name='check_user_messages_non_negative',
+        ),
+        CheckConstraint(
+            'assistant_messages >= 0',
+            name='check_assistant_messages_non_negative',
+        ),
+        CheckConstraint(
+            'system_messages >= 0',
+            name='check_system_messages_non_negative',
+        ),
+        CheckConstraint(
+            'tool_messages >= 0',
+            name='check_tool_messages_non_negative',
+        ),
+        CheckConstraint(
+            'total_tokens >= 0',
+            name='check_total_tokens_non_negative',
+        ),
+        CheckConstraint(
+            'prompt_tokens >= 0',
+            name='check_prompt_tokens_non_negative',
+        ),
+        CheckConstraint(
+            'completion_tokens >= 0',
+            name='check_completion_tokens_non_negative',
+        ),
+        CheckConstraint(
+            'total_cost >= 0.0',
+            name='check_total_cost_non_negative',
+        ),
+        CheckConstraint(
+            'error_count >= 0',
+            name='check_error_count_non_negative',
+        ),
+        CheckConstraint(
+            'retry_count >= 0',
+            name='check_retry_count_non_negative',
+        ),
+    )
 
     # Foreign keys
     conversation_id: Mapped[str] = mapped_column(
@@ -140,6 +187,33 @@ class ConversationStats(Base):
 class DocumentStats(Base):
     """Model for document-level statistics."""
 
+    __table_args__ = (
+        CheckConstraint(
+            'view_count >= 0',
+            name='check_view_count_non_negative',
+        ),
+        CheckConstraint(
+            'search_count >= 0',
+            name='check_search_count_non_negative',
+        ),
+        CheckConstraint(
+            'retrieval_count >= 0',
+            name='check_retrieval_count_non_negative',
+        ),
+        CheckConstraint(
+            'unique_users >= 0',
+            name='check_unique_users_non_negative',
+        ),
+        CheckConstraint(
+            'total_chunks_retrieved >= 0',
+            name='check_total_chunks_retrieved_non_negative',
+        ),
+        CheckConstraint(
+            'feedback_count >= 0',
+            name='check_feedback_count_non_negative',
+        ),
+    )
+
     # Foreign keys
     document_id: Mapped[str] = mapped_column(
         String(26),
@@ -221,6 +295,33 @@ class DocumentStats(Base):
 class PromptStats(Base):
     """Model for prompt usage statistics."""
 
+    __table_args__ = (
+        CheckConstraint(
+            'usage_count >= 0',
+            name='check_usage_count_non_negative',
+        ),
+        CheckConstraint(
+            'success_count >= 0',
+            name='check_success_count_non_negative',
+        ),
+        CheckConstraint(
+            'error_count >= 0',
+            name='check_error_count_non_negative',
+        ),
+        CheckConstraint(
+            'total_tokens_used >= 0',
+            name='check_total_tokens_used_non_negative',
+        ),
+        CheckConstraint(
+            'total_cost >= 0.0',
+            name='check_total_cost_non_negative',
+        ),
+        CheckConstraint(
+            'rating_count >= 0',
+            name='check_rating_count_non_negative',
+        ),
+    )
+
     # Foreign keys
     prompt_id: Mapped[str] = mapped_column(
         String(26), ForeignKey(Keys.PROMPTS), nullable=False, index=True
@@ -295,6 +396,29 @@ class PromptStats(Base):
 
 class ProfileStats(Base):
     """Model for profile usage statistics."""
+
+    __table_args__ = (
+        CheckConstraint(
+            'conversations_started >= 0',
+            name='check_conversations_started_non_negative',
+        ),
+        CheckConstraint(
+            'messages_generated >= 0',
+            name='check_messages_generated_non_negative',
+        ),
+        CheckConstraint(
+            'total_tokens_used >= 0',
+            name='check_total_tokens_used_non_negative',
+        ),
+        CheckConstraint(
+            'total_cost >= 0.0',
+            name='check_total_cost_non_negative',
+        ),
+        CheckConstraint(
+            'feedback_count >= 0',
+            name='check_feedback_count_non_negative',
+        ),
+    )
 
     # Foreign keys
     profile_id: Mapped[str] = mapped_column(

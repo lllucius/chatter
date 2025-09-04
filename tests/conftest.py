@@ -19,7 +19,7 @@ from chatter.utils.database import Base, get_session_generator
 
 
 @pytest.fixture
-def app(db_session: AsyncSession):
+async def app(db_session: AsyncSession):
     """
     Create a FastAPI application with test database session override.
     
@@ -37,7 +37,6 @@ def app(db_session: AsyncSession):
         FastAPI application configured for testing
     """
     # Lazy import to avoid hanging during test collection
-
     from chatter.main import create_app
 
     # Create the FastAPI application
@@ -142,23 +141,29 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     Returns:
         AsyncGenerator yielding a database session
     """
-    # Create a session maker
+    # Use the engine to create a connection for this test
+    connection = await db_engine.connect()
+    
+    # Start a transaction that we'll rollback at the end
+    transaction = await connection.begin()
+    
+    # Create session bound to the connection
     session_maker = async_sessionmaker(
-        bind=db_engine,
+        bind=connection,
         class_=AsyncSession,
         expire_on_commit=False,
     )
-
-    # Create a session for the test
-    async with session_maker() as session:
-        # Start a transaction
-        transaction = await session.begin()
-        try:
-            yield session
-        finally:
-            # Always rollback to ensure clean state
-            await transaction.rollback()
-            await session.close()
+    
+    session = session_maker()
+    try:
+        yield session
+    finally:
+        # Close session first
+        await session.close()
+        # Then rollback transaction
+        await transaction.rollback()
+        # Finally close connection
+        await connection.close()
 
 
 @pytest.fixture

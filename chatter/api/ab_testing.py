@@ -19,10 +19,15 @@ from chatter.schemas.ab_testing import (
     ABTestUpdateRequest,
     TestStatus,
 )
-from chatter.services.ab_testing import ABTestManager, MetricType
+from chatter.services.ab_testing import (
+    ABTestManager,
+    MetricType,
+    VariantAllocation,
+)
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,
+    ForbiddenProblem,
     InternalServerProblem,
     NotFoundProblem,
 )
@@ -30,6 +35,65 @@ from chatter.utils.problem import (
 logger = get_logger(__name__)
 router = APIRouter()
 
+
+def _check_test_access(test: ABTestResponse | None, current_user: User) -> None:
+    """Check if user has access to the test.
+
+    Args:
+        test: Test to check access for
+        current_user: Current user
+
+    Raises:
+        NotFoundProblem: If test doesn't exist
+        ForbiddenProblem: If user doesn't have access
+    """
+    if not test:
+        raise NotFoundProblem(detail="A/B test not found")
+
+    # For now, users can only access their own tests
+    # In a production system, you'd implement proper RBAC here
+    if test.created_by != current_user.username:
+        # Allow admins to access all tests (assuming admin role exists)
+        user_roles = getattr(current_user, 'roles', [])
+        if 'admin' not in user_roles and 'ab_testing_admin' not in user_roles:
+            raise ForbiddenProblem(
+                detail="You don't have permission to access this A/B test"
+            )
+
+def _validate_test_operation(test: ABTestResponse, operation: str, current_user: User) -> None:
+    """Validate if user can perform operation on test.
+
+    Args:
+        test: Test to operate on
+        operation: Operation to perform (start, stop, delete, etc.)
+        current_user: Current user
+
+    Raises:
+        ForbiddenProblem: If operation is not allowed
+        BadRequestProblem: If operation is invalid for current test state
+    """
+    _check_test_access(test, current_user)
+
+    # Check operation validity based on test status
+    if operation == "start" and test.status != TestStatus.DRAFT:
+        raise BadRequestProblem(
+            detail=f"Cannot start test in {test.status} status"
+        )
+
+    if operation == "pause" and test.status != TestStatus.RUNNING:
+        raise BadRequestProblem(
+            detail=f"Cannot pause test in {test.status} status"
+        )
+
+    if operation in ["complete", "end"] and test.status not in [TestStatus.RUNNING, TestStatus.PAUSED]:
+        raise BadRequestProblem(
+            detail=f"Cannot complete test in {test.status} status"
+        )
+
+    if operation == "delete" and test.status == TestStatus.RUNNING:
+        raise BadRequestProblem(
+            detail="Cannot delete running test. Pause or complete it first."
+        )
 
 async def get_ab_test_manager() -> ABTestManager:
     """Get A/B test manager instance.
@@ -63,7 +127,15 @@ async def create_ab_test(
         Created test data
     """
     try:
-        # Convert request data to ABTest model format
+        # Validate and sanitize inputs
+        if not test_data.name or len(test_data.name.strip()) == 0:
+            raise BadRequestProblem(detail="Test name is required")
+
+        if len(test_data.name) > 200:
+            raise BadRequestProblem(detail="Test name too long (max 200 characters)")
+
+        if len(test_data.description) > 1000:
+            raise BadRequestProblem(detail="Test description too long (max 1000 characters)")
 
         # Validate variants
         if len(test_data.variants) < 2:
@@ -71,17 +143,40 @@ async def create_ab_test(
                 detail="Test must have at least 2 variants"
             )
 
-        # Create variants
+        if len(test_data.variants) > 10:
+            raise BadRequestProblem(
+                detail="Test cannot have more than 10 variants"
+            )
+
+        # Create variants with validation
         variants = []
+        total_weight = 0
         for i, variant_data in enumerate(test_data.variants):
+            if not variant_data.name or len(variant_data.name.strip()) == 0:
+                raise BadRequestProblem(detail=f"Variant {i+1} name is required")
+
+            if len(variant_data.name) > 100:
+                raise BadRequestProblem(detail=f"Variant {i+1} name too long (max 100 characters)")
+
+            if variant_data.weight < 0:
+                raise BadRequestProblem(detail=f"Variant {i+1} weight cannot be negative")
+
+            total_weight += variant_data.weight
+
             variant_dict = {
-                "name": variant_data.name,
-                "description": variant_data.description,
+                "name": variant_data.name.strip(),
+                "description": variant_data.description[:500],  # Limit description length
                 "weight": variant_data.weight,
                 "configuration": variant_data.configuration,
                 "is_control": (i == 0),  # First variant is control
             }
             variants.append(variant_dict)
+
+        # Validate total weight for weighted allocation
+        if test_data.allocation_strategy == VariantAllocation.WEIGHTED and total_weight <= 0:
+            raise BadRequestProblem(
+                detail="Weighted allocation requires at least one variant with positive weight"
+            )
 
         # Validate metrics
         if not test_data.metrics:
@@ -289,7 +384,7 @@ async def get_ab_test(
                 detail=f"A/B test {test_id} not found"
             )
 
-        # Convert to response format
+        # Convert to response format for access check
         from chatter.schemas.ab_testing import (
             TestVariant as ResponseTestVariant,
         )
@@ -309,7 +404,7 @@ async def get_ab_test(
         metrics = [test.primary_metric.metric_type]
         metrics.extend([m.metric_type for m in test.secondary_metrics])
 
-        return ABTestResponse(
+        test_response = ABTestResponse(
             id=test.id,
             name=test.name,
             description=test.description,
@@ -332,6 +427,11 @@ async def get_ab_test(
             tags=test.tags,
             metadata=test.metadata,
         )
+
+        # Check access permissions
+        _check_test_access(test_response, current_user)
+
+        return test_response
 
     except NotFoundProblem:
         raise
@@ -889,4 +989,74 @@ async def get_ab_test_performance(
         )
         raise InternalServerProblem(
             detail="Failed to get A/B test performance"
+        ) from e
+
+
+@router.get("/{test_id}/recommendations", response_model=dict[str, Any])
+async def get_ab_test_recommendations(
+    test_id: str,
+    current_user: User = Depends(get_current_user),
+    ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
+) -> dict[str, Any]:
+    """Get comprehensive recommendations for an A/B test.
+
+    Args:
+        test_id: A/B test ID
+        current_user: Current authenticated user
+        ab_test_manager: A/B test manager instance
+
+    Returns:
+        Recommendations and insights for the test
+    """
+    try:
+        # Check test exists and user has access
+        test = await ab_test_manager.get_test(test_id)
+        if not test:
+            raise NotFoundProblem(
+                detail="A/B test not found",
+                resource_type="ab_test",
+                resource_id=test_id,
+            )
+
+        # Create response for access check
+        test_response = ABTestResponse(
+            id=test.id,
+            name=test.name,
+            description=test.description,
+            test_type=test.test_type,
+            status=test.status,
+            allocation_strategy=test.allocation_strategy,
+            variants=[],  # Minimal for access check
+            metrics=[test.primary_metric.metric_type],
+            duration_days=test.duration_days or 7,
+            min_sample_size=test.minimum_sample_size,
+            confidence_level=test.confidence_level,
+            target_audience=test.target_users,
+            traffic_percentage=test.traffic_percentage * 100.0,
+            start_date=test.start_date,
+            end_date=test.end_date,
+            participant_count=0,
+            created_at=test.created_at,
+            updated_at=test.updated_at,
+            created_by=test.created_by,
+            tags=test.tags,
+            metadata=test.metadata,
+        )
+
+        _check_test_access(test_response, current_user)
+
+        # Get recommendations
+        recommendations = await ab_test_manager.get_test_recommendations(test_id)
+        return recommendations
+
+    except (NotFoundProblem, ForbiddenProblem):
+        raise
+    except Exception as e:
+        logger.error(
+            "Failed to get A/B test recommendations",
+            test_id=test_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to get A/B test recommendations"
         ) from e

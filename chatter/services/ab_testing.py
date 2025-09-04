@@ -290,6 +290,10 @@ class ABTestManager:
             TestMetric(**metric) for metric in (secondary_metrics or [])
         ]
 
+        # Sanitize and validate target_users
+        if target_users:
+            target_users = self._sanitize_targeting_criteria(target_users)
+
         # Create test
         test = ABTest(
             name=name,
@@ -616,6 +620,51 @@ class ABTestManager:
         )
         return (hash_value % 10000) / 10000.0 < test.traffic_percentage
 
+    def _sanitize_targeting_criteria(self, criteria: dict[str, Any]) -> dict[str, Any]:
+        """Sanitize targeting criteria to prevent injection attacks.
+
+        Args:
+            criteria: Raw targeting criteria
+
+        Returns:
+            Sanitized criteria
+        """
+        if not criteria:
+            return {}
+
+        sanitized = {}
+        for key, value in criteria.items():
+            # Sanitize key - only allow alphanumeric and underscore
+            clean_key = ''.join(c for c in str(key) if c.isalnum() or c == '_')[:50]
+            if not clean_key:
+                continue
+
+            # Sanitize value based on type
+            if isinstance(value, str):
+                # Limit string length and remove potentially harmful characters
+                clean_value = str(value)[:200]
+                # Remove common injection patterns
+                dangerous_patterns = ['<', '>', '"', "'", '`', '\\', 'script', 'eval', 'exec']
+                for pattern in dangerous_patterns:
+                    clean_value = clean_value.replace(pattern, '')
+                sanitized[clean_key] = clean_value
+            elif isinstance(value, int | float | bool):
+                sanitized[clean_key] = value
+            elif isinstance(value, list):
+                # Sanitize list elements
+                clean_list = []
+                for item in value[:10]:  # Limit list size
+                    if isinstance(item, str):
+                        clean_item = str(item)[:100]
+                        for pattern in ['<', '>', '"', "'", '`', '\\']:
+                            clean_item = clean_item.replace(pattern, '')
+                        clean_list.append(clean_item)
+                    elif isinstance(item, int | float | bool):
+                        clean_list.append(item)
+                sanitized[clean_key] = clean_list
+
+        return sanitized
+
     def _matches_targeting_criteria(
         self, test: ABTest, user_attributes: dict[str, Any]
     ) -> bool:
@@ -628,16 +677,19 @@ class ABTestManager:
         Returns:
             True if user matches criteria
         """
+        # Sanitize user attributes to prevent injection
+        safe_attributes = self._sanitize_targeting_criteria(user_attributes)
+
         # Check inclusion criteria
         for key, value in test.target_users.items():
-            if key not in user_attributes:
+            if key not in safe_attributes:
                 return False
-            if user_attributes[key] != value:
+            if safe_attributes[key] != value:
                 return False
 
         # Check exclusion criteria
         for key, value in test.exclude_users.items():
-            if key in user_attributes and user_attributes[key] == value:
+            if key in safe_attributes and safe_attributes[key] == value:
                 return False
 
         return True
@@ -923,7 +975,227 @@ class ABTestManager:
 
         self.results[test_id] = result
 
+        # Check for automatic test stopping if significance is reached
+        await self._check_auto_stop_conditions(test_id, result)
+
         logger.info(f"Analyzed results for test {test_id}")
+
+    async def _check_auto_stop_conditions(self, test_id: str, result: TestResult) -> None:
+        """Check if test should be automatically stopped based on results.
+
+        Args:
+            test_id: Test ID
+            result: Latest test results
+        """
+        test = self.tests.get(test_id)
+        if not test or test.status != TestStatus.RUNNING:
+            return
+
+        # Check if test has been running for minimum duration
+        if test.start_date:
+            from datetime import timedelta
+            min_duration = timedelta(days=1)  # Minimum 1 day
+            if datetime.now(UTC) - test.start_date < min_duration:
+                return
+
+        # Check if we have statistical significance
+        significant_variants = [
+            variant_id for variant_id, is_significant
+            in result.statistical_significance.items()
+            if is_significant
+        ]
+
+        if not significant_variants:
+            return
+
+        # Check if we have sufficient sample size across all variants
+        total_users = sum(
+            data.get("unique_users", 0)
+            for data in result.variant_results.values()
+        )
+
+        if total_users < test.minimum_sample_size * 2:  # Want at least 2x minimum across all variants
+            return
+
+        # Auto-stop conditions met - mark for completion
+        test.metadata = test.metadata or {}
+        test.metadata["auto_stop_triggered"] = True
+        test.metadata["auto_stop_reason"] = "Statistical significance reached"
+        test.metadata["significant_variants"] = significant_variants
+
+        logger.info(
+            f"Auto-stop conditions met for test {test_id}",
+            significant_variants=significant_variants,
+            total_users=total_users,
+        )
+
+    def calculate_required_sample_size(
+        self,
+        effect_size: float,
+        confidence_level: float = 0.95,
+        statistical_power: float = 0.8,
+        baseline_conversion: float = 0.1,
+    ) -> int:
+        """Calculate required sample size for A/B test.
+
+        Args:
+            effect_size: Minimum detectable effect (e.g., 0.05 for 5% improvement)
+            confidence_level: Statistical confidence level (default 0.95)
+            statistical_power: Statistical power (default 0.8)
+            baseline_conversion: Expected baseline conversion rate (default 0.1)
+
+        Returns:
+            Required sample size per variant
+        """
+        import math
+
+        # Z-score for confidence level (two-tailed)
+        z_alpha = 1.96 if confidence_level == 0.95 else 2.576 if confidence_level == 0.99 else 1.645
+
+        # Z-score for statistical power (one-tailed)
+        z_beta = 0.842 if statistical_power == 0.8 else 1.036 if statistical_power == 0.85 else 1.282
+
+        # Expected conversion rates
+        p1 = baseline_conversion
+        p2 = baseline_conversion * (1 + effect_size)
+
+        # Pooled standard deviation
+        p_pooled = (p1 + p2) / 2
+
+        # Sample size calculation (simplified formula for proportions)
+        numerator = (z_alpha * math.sqrt(2 * p_pooled * (1 - p_pooled)) +
+                    z_beta * math.sqrt(p1 * (1 - p1) + p2 * (1 - p2))) ** 2
+        denominator = (p2 - p1) ** 2
+
+        if denominator == 0:
+            return 10000  # Large default if no effect
+
+        sample_size = max(100, int(numerator / denominator))
+
+        logger.info(
+            f"Calculated sample size: {sample_size} per variant",
+            effect_size=effect_size,
+            confidence_level=confidence_level,
+            statistical_power=statistical_power,
+            baseline_conversion=baseline_conversion,
+        )
+
+        return sample_size
+
+    async def get_test_recommendations(self, test_id: str) -> dict[str, Any]:
+        """Get comprehensive recommendations for a test.
+
+        Args:
+            test_id: Test ID
+
+        Returns:
+            Dictionary with recommendations and insights
+        """
+        test = self.tests.get(test_id)
+        if not test:
+            return {"error": "Test not found"}
+
+        results = await self.get_test_results(test_id)
+        recommendations = {
+            "test_id": test_id,
+            "status": test.status.value,
+            "recommendations": [],
+            "insights": [],
+            "next_actions": [],
+        }
+
+        # Check test status and duration
+        if test.status == TestStatus.DRAFT:
+            recommendations["recommendations"].append(
+                "Test is in draft status. Start the test to begin collecting data."
+            )
+
+            # Calculate recommended sample size
+            if test.primary_metric.improvement_threshold > 0:
+                required_size = self.calculate_required_sample_size(
+                    effect_size=test.primary_metric.improvement_threshold,
+                    confidence_level=test.confidence_level,
+                )
+                if required_size > test.minimum_sample_size:
+                    recommendations["recommendations"].append(
+                        f"Consider increasing minimum sample size to {required_size} "
+                        f"for better statistical power (currently {test.minimum_sample_size})"
+                    )
+
+        elif test.status == TestStatus.RUNNING:
+            if results:
+                # Analyze current results
+                total_users = sum(
+                    data.get("unique_users", 0)
+                    for data in results.variant_results.values()
+                )
+
+                if total_users < test.minimum_sample_size:
+                    recommendations["recommendations"].append(
+                        f"Continue collecting data. Current sample: {total_users}, "
+                        f"target: {test.minimum_sample_size}"
+                    )
+
+                # Check for significant results
+                significant_variants = [
+                    variant_id for variant_id, is_significant
+                    in results.statistical_significance.items()
+                    if is_significant
+                ]
+
+                if significant_variants:
+                    recommendations["recommendations"].append(
+                        f"Statistical significance detected for variants: {significant_variants}. "
+                        "Consider stopping the test and implementing the winning variant."
+                    )
+                    recommendations["next_actions"].append("stop_test")
+                else:
+                    recommendations["insights"].append(
+                        "No statistical significance detected yet. Continue monitoring."
+                    )
+
+                # Performance insights
+                if len(results.variant_results) >= 2:
+                    variant_performance = []
+                    for variant_id, data in results.variant_results.items():
+                        metrics = data.get("metrics", {})
+                        primary_metric = metrics.get(test.primary_metric.name, {})
+                        if primary_metric:
+                            variant_performance.append({
+                                "variant": data.get("variant_name", variant_id),
+                                "performance": primary_metric.get("mean", 0),
+                                "sample_size": primary_metric.get("count", 0),
+                            })
+
+                    if variant_performance:
+                        best_variant = max(variant_performance, key=lambda x: x["performance"])
+                        recommendations["insights"].append(
+                            f"Current best performing variant: {best_variant['variant']} "
+                            f"({best_variant['performance']:.3f})"
+                        )
+
+        elif test.status == TestStatus.COMPLETED:
+            if results:
+                # Provide implementation recommendations
+                significant_variants = [
+                    variant_id for variant_id, is_significant
+                    in results.statistical_significance.items()
+                    if is_significant
+                ]
+
+                if significant_variants:
+                    recommendations["recommendations"].append(
+                        "Test completed with significant results. Implement the winning variant "
+                        "and monitor performance in production."
+                    )
+                    recommendations["next_actions"].append("implement_winner")
+                else:
+                    recommendations["recommendations"].append(
+                        "Test completed without significant results. Consider running a longer test "
+                        "or testing larger effect sizes."
+                    )
+
+        return recommendations
 
     async def get_test(self, test_id: str) -> ABTest | None:
         """Get a test by ID."""

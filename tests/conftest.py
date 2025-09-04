@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import (
 from chatter.utils.database import Base, get_session_generator
 
 
-@pytest.fixture
+@pytest.fixture(scope="function") 
 def app(db_session: AsyncSession):
     """
     Create a FastAPI application with test database session override.
@@ -37,16 +37,15 @@ def app(db_session: AsyncSession):
         FastAPI application configured for testing
     """
     # Lazy import to avoid hanging during test collection
-
     from chatter.main import create_app
 
     # Create the FastAPI application
     app = create_app()
 
     # Override the database session dependency
-    async def get_test_session():
+    def get_test_session():
         """Override database session for testing."""
-        yield db_session
+        return db_session
 
     # Replace the production dependency with our test version
     app.dependency_overrides[get_session_generator] = get_test_session
@@ -126,7 +125,7 @@ async def db_setup(db_engine):
     yield
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     """
     Provide a database session with transaction rollback per test.
@@ -142,23 +141,22 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     Returns:
         AsyncGenerator yielding a database session
     """
-    # Create a session maker
+    # Create a session maker bound to the engine
     session_maker = async_sessionmaker(
         bind=db_engine,
         class_=AsyncSession,
         expire_on_commit=False,
     )
-
-    # Create a session for the test
-    async with session_maker() as session:
-        # Start a transaction
-        transaction = await session.begin()
-        try:
-            yield session
-        finally:
-            # Always rollback to ensure clean state
-            await transaction.rollback()
-            await session.close()
+    
+    # Create a session with autoflush disabled for better control
+    session = session_maker()
+    session.info["_in_test"] = True  # Mark session as being used in tests
+    
+    try:
+        yield session
+    finally:
+        await session.rollback()
+        await session.close()
 
 
 @pytest.fixture
@@ -194,12 +192,14 @@ async def auth_headers(client) -> dict[str, str]:
     Returns:
         Dictionary with Authorization header
     """
-    # Register a test user
+    import uuid
+    # Generate unique user data for each test to avoid conflicts
+    unique_id = str(uuid.uuid4())[:8]
     user_data = {
-        "username": "testuser",
-        "email": "test@example.com",
-        "password": "TestPassword123!",
-        "full_name": "Test User",
+        "username": f"testuser_{unique_id}",
+        "email": f"test_{unique_id}@example.com", 
+        "password": "SecureP@ssw0rd!",
+        "full_name": f"Test User {unique_id}",
     }
 
     response = await client.post("/api/v1/auth/register", json=user_data)
@@ -217,7 +217,7 @@ def test_user_data() -> dict:
     return {
         "username": "testuser",
         "email": "test@example.com",
-        "password": "TestPassword123!",
+        "password": "SecureP@ssw0rd!",
         "full_name": "Test User",
     }
 
@@ -226,8 +226,8 @@ def test_user_data() -> dict:
 def test_login_data() -> dict:
     """Test login data."""
     return {
-        "username": "testuser",
-        "password": "TestPassword123!",
+        "username": "testuser", 
+        "password": "SecureP@ssw0rd!",
     }
 
 

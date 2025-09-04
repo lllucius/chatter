@@ -490,7 +490,7 @@ class TestSecurityCompliance:
         """Test password storage uses proper hashing."""
         from chatter.utils.security_enhanced import hash_password
         
-        password = "TestPassword123!"
+        password = "SecureP@ssw0rd!"
         hashed = hash_password(password)
 
         # Should use bcrypt (starts with $2a$, $2b$, or $2y$)
@@ -522,7 +522,7 @@ class TestSecurityCompliance:
         """Test authentication operations resist timing attacks."""
         from chatter.utils.security_enhanced import verify_password, hash_password
         
-        password = "TestPassword123!"
+        password = "SecureP@ssw0rd!"
         correct_hash = hash_password(password)
         
         # Verify correct password
@@ -555,7 +555,7 @@ class TestSecurityPerformance:
         """Test password hashing performance is acceptable."""
         from chatter.utils.security_enhanced import hash_password
         
-        password = "TestPassword123!"
+        password = "SecureP@ssw0rd!"
         
         import time
         start_time = time.time()

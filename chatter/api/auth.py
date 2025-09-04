@@ -5,6 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.auth import AuthService
+from chatter.core.exceptions import AuthenticationError
 from chatter.core.monitoring import (
     log_api_key_created,
     log_login_failure,
@@ -36,7 +37,21 @@ from chatter.utils.problem import AuthenticationProblem
 
 logger = get_logger(__name__)
 router = APIRouter()
-security = HTTPBearer()
+
+
+class CustomHTTPBearer(HTTPBearer):
+    """Custom HTTPBearer that raises AuthenticationError with 401 status."""
+    
+    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials:
+        """Extract credentials and raise 401 for missing/invalid auth."""
+        try:
+            return await super().__call__(request)
+        except Exception:
+            # Convert any authentication failure to 401
+            raise AuthenticationError("Authentication credentials required")
+
+
+security = CustomHTTPBearer()
 
 
 def get_client_ip(request: Request) -> str:
@@ -139,7 +154,7 @@ async def register(
 
         # Log successful registration
         from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-        monitor = await get_security_monitor()
+        monitoring_service = await get_monitoring_service()
         event = SecurityEvent(
             event_type=SecurityEventType.ACCOUNT_CREATED,
             severity=SecurityEventSeverity.LOW,
@@ -249,7 +264,7 @@ async def refresh_token(
         user_id = payload.get("sub") if payload else None
         
         if user_id:
-            monitor = await get_security_monitor()
+            monitoring_service = await get_monitoring_service()
             event = SecurityEvent(
                 event_type=SecurityEventType.TOKEN_REFRESHED,
                 severity=SecurityEventSeverity.LOW,
@@ -397,7 +412,7 @@ async def revoke_api_key(
     
     # Log API key revocation
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.API_KEY_REVOKED,
         severity=SecurityEventSeverity.MEDIUM,
@@ -450,7 +465,7 @@ async def logout(
     
     # Log logout for security monitoring
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.TOKEN_REVOKED,
         severity=SecurityEventSeverity.LOW,
@@ -489,7 +504,7 @@ async def request_password_reset(
     
     # Log password reset request
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.PASSWORD_RESET_REQUESTED,
         severity=SecurityEventSeverity.MEDIUM,
@@ -533,7 +548,7 @@ async def confirm_password_reset(
     
     # Log password reset completion
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.PASSWORD_RESET_COMPLETED,
         severity=SecurityEventSeverity.MEDIUM,
@@ -570,7 +585,7 @@ async def deactivate_account(
     
     # Log account deactivation
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.ACCOUNT_DEACTIVATED,
         severity=SecurityEventSeverity.MEDIUM,

@@ -16,12 +16,27 @@ class TestABTestingIntegration:
         test_data = {
             "name": "Integration Test AB Test",
             "description": "Complete lifecycle test",
+            "test_type": "prompt",
+            "allocation_strategy": "equal",
             "variants": [
-                {"name": "control", "allocation": 50},
-                {"name": "variant_a", "allocation": 50}
+                {
+                    "name": "control",
+                    "description": "Control variant",
+                    "configuration": {"param_a": "value1"},
+                    "weight": 1.0
+                },
+                {
+                    "name": "variant_a", 
+                    "description": "Test variant A",
+                    "configuration": {"param_a": "value2"},
+                    "weight": 1.0
+                }
             ],
-            "target_metric": "conversion_rate",
-            "success_criteria": {"min_improvement": 10.0}
+            "metrics": ["response_time", "user_satisfaction"],
+            "duration_days": 7,
+            "min_sample_size": 100,
+            "confidence_level": 0.95,
+            "traffic_percentage": 100.0
         }
         
         create_response = await client.post("/api/v1/ab-tests/", json=test_data, headers=auth_headers)

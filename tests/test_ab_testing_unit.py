@@ -85,18 +85,45 @@ class TestABTestingUnit:
         """Test successful AB test creation."""
         # Mock the manager
         mock_manager = AsyncMock()
+        
+        from chatter.schemas.ab_testing import TestVariant
+        from chatter.services.ab_testing import TestType, VariantAllocation, MetricType
+        from datetime import datetime, UTC
+        
+        # Create proper test variants
+        test_variants = [
+            TestVariant(
+                name="control",
+                description="Control variant",
+                configuration={},
+                weight=1.0
+            ),
+            TestVariant(
+                name="variant_a", 
+                description="Variant A",
+                configuration={},
+                weight=1.0
+            )
+        ]
+        
         mock_manager.create_test.return_value = ABTestResponse(
             id="test-123",
             name="Test AB Test",
             description="Test description",
+            test_type=TestType.PROMPT,
             status=TestStatus.DRAFT,
+            allocation_strategy=VariantAllocation.EQUAL,
+            variants=test_variants,
+            metrics=[MetricType.CUSTOM],
+            duration_days=30,
+            min_sample_size=100,
+            confidence_level=0.95,
+            traffic_percentage=100.0,
+            tags=[],
+            metadata={},
             created_by="testuser",
-            variants=[
-                {"name": "control", "allocation": 50},
-                {"name": "variant_a", "allocation": 50}
-            ],
-            created_at="2024-01-01T12:00:00Z",
-            updated_at="2024-01-01T12:00:00Z"
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC)
         )
         mock_get_manager.return_value = mock_manager
         

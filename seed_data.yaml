@@ -1,0 +1,704 @@
+# Seed Data Configuration
+# This file defines the sample data used by the database seeding system
+
+# Development Users (known credentials for development)
+development_users:
+  - username: "developer"
+    email: "dev@example.com"
+    full_name: "Development User"
+    password: "dev123!"
+    bio: "Developer account for testing and development"
+    is_superuser: false
+    
+  - username: "tester"
+    email: "test@example.com"
+    full_name: "Test User"
+    password: "test123!"
+    bio: "Quality assurance testing account"
+    is_superuser: false
+    
+  - username: "demo"
+    email: "demo@example.com"
+    full_name: "Demo User"
+    password: "demo123!"
+    bio: "Demonstration account for showcasing features"
+    is_superuser: false
+
+# Chat Profiles for different use cases
+chat_profiles:
+  # Basic profiles (included in minimal mode)
+  basic:
+    - name: "Deterministic/Factual Mode"
+      description: "Low temperature profile for factual, consistent responses"
+      profile_type: "ANALYTICAL"
+      llm_provider: "openai"
+      llm_model: "gpt-4"
+      temperature: 0.1
+      max_tokens: 2048
+      top_p: 0.9
+      system_prompt: "You are a helpful assistant focused on providing accurate, factual information. Be precise and consistent in your responses."
+      
+    - name: "Creative Writing Mode"
+      description: "High temperature profile for creative and diverse responses"
+      profile_type: "CREATIVE"
+      llm_provider: "openai"
+      llm_model: "gpt-4"
+      temperature: 0.9
+      max_tokens: 4096
+      top_p: 0.95
+      system_prompt: "You are a creative writing assistant. Be imaginative, expressive, and help with creative tasks."
+      
+    - name: "Balanced Mode"
+      description: "Balanced temperature for general-purpose conversations"
+      profile_type: "CONVERSATIONAL"
+      llm_provider: "openai"
+      llm_model: "gpt-4"
+      temperature: 0.7
+      max_tokens: 2048
+      top_p: 0.9
+      system_prompt: "You are a helpful assistant for general conversations and tasks."
+
+  # Extended profiles (included in demo mode)
+  extended:
+    - name: "Code Assistant"
+      description: "Specialized profile for programming and development tasks"
+      profile_type: "ANALYTICAL"
+      llm_provider: "openai"
+      llm_model: "gpt-4"
+      temperature: 0.2
+      max_tokens: 4096
+      system_prompt: "You are an expert programming assistant. Provide clear, well-commented code examples and technical explanations."
+      
+    - name: "Research Assistant"
+      description: "Profile optimized for research and analysis tasks"
+      profile_type: "ANALYTICAL"
+      llm_provider: "openai"
+      llm_model: "gpt-4"
+      temperature: 0.3
+      max_tokens: 3072
+      system_prompt: "You are a research assistant. Provide thorough, well-sourced information and analysis."
+      
+    - name: "Educational Tutor"
+      description: "Teaching-focused profile with explanatory approach"
+      profile_type: "CONVERSATIONAL"
+      llm_provider: "openai"
+      llm_model: "gpt-4"
+      temperature: 0.5
+      max_tokens: 2048
+      system_prompt: "You are an educational tutor. Explain concepts clearly, ask clarifying questions, and adapt to the student's level."
+
+# Prompt Templates
+prompt_templates:
+  # Basic templates (included in minimal mode)
+  basic:
+    - name: "Instruction Task Template"
+      description: "Template for giving clear instructions to AI"
+      category: "GENERAL"
+      content: |
+        Please complete the following task with precision and clarity:
+
+        Task: {task}
+
+        Requirements:
+        - {requirements}
+
+        Context: {context}
+
+        Please provide a detailed response that addresses all aspects of the task.
+      variables: ["task", "requirements", "context"]
+      suggested_temperature: 0.3
+      suggested_max_tokens: 1000
+      
+    - name: "Code Review Template"
+      description: "Template for code review and analysis"
+      category: "DEVELOPMENT"
+      content: |
+        Please review the following code:
+
+        Language: {language}
+        Code:
+        ```{language}
+        {code}
+        ```
+
+        Please analyze:
+        1. Code quality and readability
+        2. Potential bugs or issues
+        3. Performance considerations
+        4. Best practices and improvements
+        5. Security considerations
+
+        Provide specific, actionable feedback.
+      variables: ["language", "code"]
+      suggested_temperature: 0.2
+      suggested_max_tokens: 1500
+      
+    - name: "Document Summary Template"
+      description: "Template for summarizing documents"
+      category: "ANALYSIS"
+      content: |
+        Please summarize the following document:
+
+        Document Title: {title}
+        Document Type: {type}
+        Target Audience: {audience}
+
+        Content:
+        {content}
+
+        Please provide:
+        1. Executive summary (2-3 sentences)
+        2. Key points (3-5 bullet points)
+        3. Main conclusions or recommendations
+        4. Action items (if applicable)
+
+        Keep the summary {length} and focused on {focus_area}.
+      variables: ["title", "type", "audience", "content", "length", "focus_area"]
+      suggested_temperature: 0.4
+      suggested_max_tokens: 800
+
+  # Extended templates (included in demo mode)
+  extended:
+    - name: "Meeting Notes Template"
+      description: "Template for processing meeting transcripts"
+      category: "BUSINESS"
+      content: |
+        Please process the following meeting transcript:
+
+        Meeting: {meeting_title}
+        Date: {date}
+        Attendees: {attendees}
+
+        Transcript:
+        {transcript}
+
+        Please provide:
+        1. Meeting summary
+        2. Key decisions made
+        3. Action items with owners
+        4. Follow-up required
+        5. Next steps
+      variables: ["meeting_title", "date", "attendees", "transcript"]
+      suggested_temperature: 0.3
+      suggested_max_tokens: 1200
+      
+    - name: "Email Response Template"
+      description: "Template for drafting professional email responses"
+      category: "COMMUNICATION"
+      content: |
+        Please draft a professional email response:
+
+        Original Email Subject: {original_subject}
+        Sender: {sender}
+        Original Message:
+        {original_message}
+
+        Response Requirements:
+        - Tone: {tone}
+        - Key Points to Address: {key_points}
+        - Call to Action: {call_to_action}
+
+        Please draft a clear, professional response.
+      variables: ["original_subject", "sender", "original_message", "tone", "key_points", "call_to_action"]
+      suggested_temperature: 0.5
+      suggested_max_tokens: 600
+      
+    - name: "Data Analysis Template"
+      description: "Template for analyzing datasets and generating insights"
+      category: "ANALYSIS"
+      content: |
+        Please analyze the following dataset:
+
+        Dataset Description: {dataset_description}
+        Analysis Goal: {analysis_goal}
+        Key Metrics: {key_metrics}
+
+        Data:
+        {data}
+
+        Please provide:
+        1. Data overview and quality assessment
+        2. Key findings and insights
+        3. Trends and patterns identified
+        4. Recommendations based on analysis
+        5. Suggested next steps
+      variables: ["dataset_description", "analysis_goal", "key_metrics", "data"]
+      suggested_temperature: 0.3
+      suggested_max_tokens: 1500
+
+# Sample Conversations
+sample_conversations:
+  - title: "Welcome Conversation"
+    description: "Initial welcome chat introducing platform capabilities"
+    messages:
+      - role: "USER"
+        content: "Hello! Can you help me understand what this platform does?"
+      - role: "ASSISTANT"
+        content: |
+          Welcome to Chatter! I'm an AI assistant built on an advanced platform that supports multiple AI models, document analysis, and intelligent conversations. I can help you with various tasks like:
+
+          🔍 **Answering Questions** - Ask me anything and I'll provide helpful responses
+          📄 **Document Analysis** - Upload documents and I can analyze, summarize, or answer questions about them
+          ✍️ **Creative Writing** - Help with writing tasks, brainstorming, and creative projects
+          💻 **Code Assistance** - Review code, debug issues, and provide programming help
+          🎯 **Task Planning** - Break down complex tasks and provide step-by-step guidance
+
+          What would you like to explore first?
+      - role: "USER"
+        content: "That sounds great! How do I get started with document analysis?"
+      - role: "ASSISTANT"
+        content: |
+          Getting started with document analysis is easy! Here's how:
+
+          **📤 Upload Documents**
+          1. Use the document upload feature to add your files
+          2. Supported formats: PDF, Word, text files, markdown, and more
+          3. Files are automatically processed and indexed for search
+
+          **🔍 Ask Questions**
+          - Once uploaded, you can ask specific questions about your documents
+          - Example: "What are the key points in my quarterly report?"
+          - I'll search through your documents and provide relevant answers
+
+          **📊 Analysis Features**
+          - Document summarization
+          - Key concept extraction
+          - Cross-document insights
+          - Citation tracking
+
+          **💡 Pro Tips**
+          - Upload related documents together for better insights
+          - Use specific questions for more targeted results
+          - Try our document summary templates for consistent analysis
+
+          Would you like to upload a document now, or do you have questions about any specific analysis features?
+
+  - title: "Profile Customization Guide"
+    description: "Conversation explaining how to customize AI behavior"
+    messages:
+      - role: "USER"
+        content: "I noticed there are different chat profiles. How do they work?"
+      - role: "ASSISTANT"
+        content: |
+          Great question! Chat profiles let you customize my behavior for different types of tasks. Think of them as different "modes" I can operate in:
+
+          **🎯 Available Profiles:**
+
+          **Deterministic/Factual Mode** (Temperature: 0.1)
+          - Best for: Research, fact-checking, technical documentation
+          - Behavior: Precise, consistent, focused on accuracy
+
+          **Creative Writing Mode** (Temperature: 0.9)
+          - Best for: Brainstorming, creative writing, idea generation
+          - Behavior: Imaginative, diverse, experimental approaches
+
+          **Balanced Mode** (Temperature: 0.7)
+          - Best for: General conversations, mixed tasks
+          - Behavior: Flexible balance of creativity and accuracy
+
+          **🔧 Customization Options:**
+          - Temperature (creativity vs consistency)
+          - Response length limits
+          - Specialized system prompts
+          - Model selection (GPT-4, Claude, etc.)
+
+          **💡 Usage Tips:**
+          - Switch profiles based on your current task
+          - Create custom profiles for repeated workflows
+          - Combine profiles with prompt templates for powerful automation
+
+          Which type of task are you working on? I can recommend the best profile!
+      - role: "USER"
+        content: "I'm working on a technical specification document. Which profile would be best?"
+      - role: "ASSISTANT"
+        content: |
+          Perfect! For technical specification documents, I'd recommend the **Deterministic/Factual Mode**. Here's why:
+
+          **✅ Why This Profile Works Best:**
+          - **Low temperature (0.1)** ensures consistent, precise language
+          - **Analytical focus** aligns with technical requirements
+          - **Factual emphasis** reduces creative interpretations
+          - **Structured responses** match technical documentation needs
+
+          **📋 Ideal for Technical Specs:**
+          - Requirements documentation
+          - API specifications
+          - System architecture descriptions
+          - Technical procedures and protocols
+          - Integration guidelines
+
+          **🎯 You might also want to use:**
+          - **"Code Review Template"** for technical accuracy
+          - **"Document Summary Template"** for executive summaries
+          - **Custom prompts** for your specific technical domain
+
+          **💡 Pro Tip:** You can switch between profiles during our conversation! Start with Deterministic mode for the technical content, then switch to Balanced mode if you need help with presentation or stakeholder communication.
+
+          Would you like me to switch to Deterministic mode now, or do you have questions about creating a custom profile for your specific technical domain?
+
+# Sample Documents
+sample_documents:
+  - filename: "welcome_guide.md"
+    title: "Platform Welcome Guide"
+    doc_type: "MARKDOWN"
+    content: |
+      # Welcome to Chatter Platform
+
+      ## Overview
+      Chatter is an advanced AI chatbot platform that provides intelligent conversations, document analysis, and customizable AI interactions.
+
+      ## Key Features
+
+      ### 🤖 Multi-Model Support
+      - Work with various AI providers (OpenAI, Anthropic, Google, etc.)
+      - Switch between different models based on your needs
+      - Automatic fallback and load balancing
+
+      ### 📄 Document Intelligence
+      - Upload and chat with your documents
+      - Semantic search across your knowledge base
+      - Cross-document insights and analysis
+      - Support for multiple file formats
+
+      ### 🎯 Custom Profiles
+      - Create specialized AI assistants for different tasks
+      - Adjust temperature, prompts, and behavior
+      - Save and share profile configurations
+      - Template library for common use cases
+
+      ### 📝 Prompt Templates
+      - Pre-built templates for common scenarios
+      - Variable substitution for dynamic prompts
+      - Community template sharing
+      - Custom template creation
+
+      ### 🔍 Vector Search
+      - Advanced semantic search across your knowledge base
+      - Multiple embedding models for different domains
+      - Dimensional reduction for optimal performance
+      - Real-time search and retrieval
+
+      ## Getting Started
+
+      ### 1. Create an Account
+      - Sign up with your email address
+      - Verify your account via email
+      - Set up your profile and preferences
+
+      ### 2. Start a Conversation
+      - Begin chatting with the AI immediately
+      - Try different conversation styles
+      - Experiment with various prompts
+
+      ### 3. Upload Documents
+      - Add documents to your knowledge base
+      - Supported formats: PDF, Word, text, markdown, and more
+      - Documents are automatically processed and indexed
+
+      ### 4. Explore Profiles
+      - Try different chat profiles for various tasks
+      - Create custom profiles for your workflows
+      - Save frequently used configurations
+
+      ### 5. Use Templates
+      - Browse the prompt template library
+      - Use templates for specific tasks
+      - Create and save your own templates
+
+      ## Best Practices
+
+      ### For General Conversations
+      - Start with specific questions
+      - Provide context when needed
+      - Use follow-up questions to drill down
+
+      ### For Document Analysis
+      - Upload related documents together
+      - Use specific queries for better results
+      - Take advantage of cross-document search
+
+      ### For Professional Use
+      - Create dedicated profiles for work tasks
+      - Use templates for consistent results
+      - Organize documents by project or topic
+
+      ## Support and Resources
+
+      ### Documentation
+      - API documentation for developers
+      - User guides and tutorials
+      - Best practices and examples
+
+      ### Community
+      - User forums and discussions
+      - Template sharing community
+      - Feature requests and feedback
+
+      ### Support
+      - Help center and FAQ
+      - Email support for technical issues
+      - Priority support for enterprise users
+
+      ## Security and Privacy
+
+      ### Data Protection
+      - End-to-end encryption for sensitive data
+      - GDPR and privacy compliance
+      - Secure document storage and processing
+
+      ### Access Control
+      - User authentication and authorization
+      - API key management
+      - Audit logging and monitoring
+
+      ### Best Practices
+      - Regular security updates
+      - Data retention policies
+      - Backup and recovery procedures
+
+      Welcome to the future of AI-powered productivity!
+
+  - filename: "api_documentation.md"
+    title: "API Documentation Overview"
+    doc_type: "MARKDOWN"
+    content: |
+      # Chatter API Documentation
+
+      ## Overview
+      The Chatter API provides programmatic access to all platform features including conversations, document management, profile configuration, and more.
+
+      ## Base URL
+      ```
+      https://api.chatter.example.com/v1
+      ```
+
+      ## Authentication
+      All API requests require authentication using JWT tokens or API keys.
+
+      ### JWT Authentication
+      ```bash
+      curl -H "Authorization: Bearer <your-jwt-token>" \
+        https://api.chatter.example.com/v1/conversations
+      ```
+
+      ### API Key Authentication
+      ```bash
+      curl -H "X-API-Key: <your-api-key>" \
+        https://api.chatter.example.com/v1/conversations
+      ```
+
+      ## Core Endpoints
+
+      ### Authentication
+      - `POST /auth/login` - Authenticate user and get JWT token
+      - `POST /auth/refresh` - Refresh JWT token
+      - `POST /auth/logout` - Logout and invalidate token
+      - `POST /auth/register` - Register new user account
+
+      ### Conversations
+      - `GET /conversations` - List user conversations
+      - `POST /conversations` - Create new conversation
+      - `GET /conversations/{id}` - Get specific conversation
+      - `DELETE /conversations/{id}` - Delete conversation
+      - `POST /conversations/{id}/messages` - Send message
+
+      ### Documents
+      - `GET /documents` - List user documents
+      - `POST /documents` - Upload new document
+      - `GET /documents/{id}` - Get document details
+      - `DELETE /documents/{id}` - Delete document
+      - `POST /documents/{id}/search` - Search within document
+
+      ### Profiles
+      - `GET /profiles` - List chat profiles
+      - `POST /profiles` - Create new profile
+      - `GET /profiles/{id}` - Get profile details
+      - `PUT /profiles/{id}` - Update profile
+      - `DELETE /profiles/{id}` - Delete profile
+
+      ### Prompts
+      - `GET /prompts` - List prompt templates
+      - `POST /prompts` - Create new template
+      - `GET /prompts/{id}` - Get template details
+      - `PUT /prompts/{id}` - Update template
+      - `DELETE /prompts/{id}` - Delete template
+
+      ## Rate Limits
+      - **Authenticated users**: 100 requests per minute
+      - **Unauthenticated users**: 10 requests per minute
+      - **Enterprise users**: 1000 requests per minute
+
+      Rate limit headers are included in all responses:
+      ```
+      X-RateLimit-Limit: 100
+      X-RateLimit-Remaining: 99
+      X-RateLimit-Reset: 1640995200
+      ```
+
+      ## Error Handling
+
+      ### HTTP Status Codes
+      - `200` - Success
+      - `201` - Created
+      - `400` - Bad Request (validation error)
+      - `401` - Unauthorized (invalid credentials)
+      - `403` - Forbidden (insufficient permissions)
+      - `404` - Not Found
+      - `429` - Rate Limited
+      - `500` - Internal Server Error
+
+      ### Error Response Format
+      ```json
+      {
+        "error": {
+          "code": "VALIDATION_ERROR",
+          "message": "Invalid request data",
+          "details": {
+            "field": "email",
+            "issue": "Invalid email format"
+          }
+        }
+      }
+      ```
+
+      ## Webhooks
+      Configure webhooks to receive real-time notifications about events:
+
+      ### Supported Events
+      - `conversation.created` - New conversation started
+      - `message.received` - New message in conversation
+      - `document.processed` - Document processing completed
+      - `profile.updated` - Chat profile modified
+
+      ### Webhook Configuration
+      ```bash
+      curl -X POST https://api.chatter.example.com/v1/webhooks \
+        -H "Authorization: Bearer <token>" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "url": "https://your-app.com/webhooks/chatter",
+          "events": ["conversation.created", "message.received"],
+          "secret": "your-webhook-secret"
+        }'
+      ```
+
+      ## SDKs and Libraries
+
+      ### Official SDKs
+      - **Python**: `pip install chatter-sdk`
+      - **JavaScript/TypeScript**: `npm install @chatter/sdk`
+      - **Go**: `go get github.com/chatter/go-sdk`
+
+      ### Community SDKs
+      - **Java**: Available on Maven Central
+      - **Ruby**: Available as gem
+      - **PHP**: Available via Composer
+
+      ## Examples
+
+      ### Start a Conversation
+      ```python
+      import chatter
+
+      client = chatter.Client(api_key="your-api-key")
+
+      # Create conversation
+      conversation = client.conversations.create(
+          title="My First Conversation",
+          profile_id="profile-123"
+      )
+
+      # Send message
+      response = client.conversations.send_message(
+          conversation.id,
+          content="Hello, can you help me with API integration?"
+      )
+
+      print(response.content)
+      ```
+
+      ### Upload and Search Documents
+      ```python
+      # Upload document
+      document = client.documents.upload(
+          file_path="./my-document.pdf",
+          title="Project Requirements"
+      )
+
+      # Wait for processing
+      client.documents.wait_for_processing(document.id)
+
+      # Search document
+      results = client.documents.search(
+          document.id,
+          query="What are the main requirements?"
+      )
+
+      for result in results:
+          print(f"Match: {result.content}")
+      ```
+
+      ## Best Practices
+
+      ### Performance
+      - Use pagination for large result sets
+      - Implement proper error handling and retry logic
+      - Cache frequently accessed data
+      - Use webhooks instead of polling for real-time updates
+
+      ### Security
+      - Store API keys securely (environment variables, secrets management)
+      - Validate webhook signatures
+      - Use HTTPS for all API calls
+      - Implement proper access controls
+
+      ### Integration
+      - Start with small, focused integrations
+      - Test thoroughly in development environment
+      - Monitor API usage and performance
+      - Keep SDKs and libraries up to date
+
+      ## Support
+      - **Documentation**: https://docs.chatter.example.com
+      - **API Reference**: https://api-docs.chatter.example.com
+      - **Community Forum**: https://community.chatter.example.com
+      - **Support Email**: api-support@chatter.example.com
+
+# Test Data (for testing mode)
+test_data:
+  users:
+    - username: "testuser1"
+      email: "testuser1@test.com"
+      password: "testpass1"
+      full_name: "Test User One"
+      
+    - username: "testuser2"
+      email: "testuser2@test.com"
+      password: "testpass2"
+      full_name: "Test User Two"
+
+  # Test conversations with predictable content
+  conversations:
+    - title: "Test Conversation 1"
+      messages:
+        - role: "USER"
+          content: "This is a test message."
+        - role: "ASSISTANT"
+          content: "This is a test response."
+
+# Configuration for different environments
+environments:
+  development:
+    create_sample_conversations: true
+    create_sample_documents: true
+    use_development_passwords: true
+    
+  production:
+    create_sample_conversations: false
+    create_sample_documents: false
+    use_secure_passwords_only: true
+    
+  testing:
+    create_predictable_data: true
+    use_test_credentials: true
+    skip_random_generation: true

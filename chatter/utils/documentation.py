@@ -1,11 +1,14 @@
 """Enhanced API documentation and examples."""
 
+import structlog
 from typing import Any
 
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
 from chatter.utils.versioning import version_manager
+
+logger = structlog.get_logger()
 
 
 class APIDocumentationEnhancer:
@@ -353,8 +356,120 @@ class APIDocumentationEnhancer:
             },
         )
 
+        # Add authentication examples
+        self.add_endpoint_example(
+            "/api/v1/auth/register",
+            "POST",
+            request_example={
+                "username": "developer123",
+                "email": "developer@example.com",
+                "password": "SecurePassword123!",
+                "full_name": "John Developer"
+            },
+            response_example={
+                "id": "usr_abc123",
+                "username": "developer123",
+                "email": "developer@example.com",
+                "full_name": "John Developer",
+                "is_active": True,
+                "created_at": "2025-01-09T00:00:00Z"
+            }
+        )
+
+        # Add document upload examples
+        self.add_endpoint_example(
+            "/api/v1/documents",
+            "POST",
+            request_example={
+                "title": "Project Documentation",
+                "description": "Comprehensive guide for the AI platform",
+                "chunk_size": 1000,
+                "chunk_overlap": 200,
+                "is_public": False
+            },
+            response_example={
+                "id": "doc_xyz789",
+                "title": "Project Documentation",
+                "filename": "project-docs.pdf",
+                "file_size": 2048576,
+                "document_type": "pdf",
+                "status": "processing",
+                "chunk_count": 0,
+                "created_at": "2025-01-09T00:00:00Z"
+            }
+        )
+
+        # Add conversation list examples
+        self.add_endpoint_example(
+            "/api/v1/conversations",
+            "GET",
+            request_example=None,
+            response_example={
+                "conversations": [
+                    {
+                        "id": "conv_123",
+                        "title": "API Development Help",
+                        "message_count": 8,
+                        "total_tokens": 1542,
+                        "created_at": "2025-01-09T00:00:00Z",
+                        "updated_at": "2025-01-09T00:15:00Z"
+                    }
+                ],
+                "total_count": 15,
+                "has_next": True,
+                "has_previous": False
+            }
+        )
+
+        # Add profile examples
+        self.add_endpoint_example(
+            "/api/v1/profiles",
+            "POST",
+            request_example={
+                "name": "Code Assistant",
+                "description": "Helpful assistant for programming tasks",
+                "provider": "openai",
+                "model_name": "gpt-4",
+                "temperature": 0.1,
+                "max_tokens": 2000,
+                "system_prompt": "You are a helpful programming assistant. Provide clear, concise code examples and explanations."
+            },
+            response_example={
+                "id": "prof_abc456",
+                "name": "Code Assistant",
+                "provider": "openai",
+                "model_name": "gpt-4",
+                "temperature": 0.1,
+                "max_tokens": 2000,
+                "is_default": False,
+                "created_at": "2025-01-09T00:00:00Z"
+            }
+        )
+
+        # Add health check examples
+        self.add_endpoint_example(
+            "/api/v1/health",
+            "GET",
+            request_example=None,
+            response_example={
+                "status": "healthy",
+                "timestamp": "2025-01-09T00:00:00Z",
+                "version": "0.1.0",
+                "services": {
+                    "database": {"status": "healthy", "response_time_ms": 12},
+                    "cache": {"status": "healthy", "response_time_ms": 3},
+                    "llm_providers": {"status": "healthy", "response_time_ms": 89}
+                },
+                "system_info": {
+                    "python_version": "3.12.0",
+                    "total_conversations": 1247,
+                    "total_users": 45
+                }
+            }
+        )
+
         # Add more examples as needed
-        print("📝 Enhanced documentation examples loaded successfully")
+        logger.debug("Enhanced documentation examples loaded successfully")
 
         # Chat examples
         self.add_endpoint_example(

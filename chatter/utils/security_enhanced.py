@@ -141,36 +141,6 @@ def verify_api_key_secure(plain_key: str, hashed_key: str) -> bool:
         return False
 
 
-# Legacy API key functions for backward compatibility
-def hash_api_key(api_key: str, salt: str | None = None) -> str:
-    """Legacy API key hashing - use generate_secure_api_key instead."""
-    logger.warning("Using legacy API key hashing - migrate to secure version")
-    if salt is None:
-        salt = settings.secret_key[:16]
-    
-    combined = f"{salt}{api_key}{salt}"
-    return hashlib.sha256(combined.encode()).hexdigest()
-
-
-def verify_api_key(plain_key: str, hashed_key: str, salt: str | None = None) -> bool:
-    """Legacy API key verification - use verify_api_key_secure instead."""
-    try:
-        computed_hash = hash_api_key(plain_key, salt)
-        return computed_hash == hashed_key
-    except Exception as e:
-        logger.warning(f"Legacy API key verification failed: {e}")
-        return False
-
-
-def generate_api_key_hash(length: int = 32) -> tuple[str, str]:
-    """Legacy API key generation - use generate_secure_api_key instead."""
-    logger.warning("Using legacy API key generation - migrate to secure version")
-    alphabet = string.ascii_letters + string.digits + "-_"
-    api_key = ''.join(secrets.choice(alphabet) for _ in range(length))
-    hashed_key = hash_api_key(api_key)
-    return api_key, hashed_key
-
-
 def validate_email_advanced(email: str) -> bool:
     """Advanced email validation with security checks.
     
@@ -484,7 +454,7 @@ def contains_personal_info(password: str, user_data: dict) -> bool:
     return False
 
 
-# Keep existing security functions for compatibility
+# Security utility functions
 def sanitize_log_data(data: Any, max_depth: int = 5) -> Any:
     """Sanitize sensitive data from logs."""
     if max_depth <= 0:
@@ -549,7 +519,7 @@ def mask_sensitive_value(value: str, show_chars: int = 4) -> str:
     return f"{value[:show_chars]}{'*' * (len(value) - show_chars * 2)}{value[-show_chars:]}"
 
 
-# Token functions remain the same for compatibility
+# JWT token functions
 def create_access_token(
     data: dict[str, Any], expires_delta: timedelta | None = None
 ) -> str:
@@ -604,23 +574,6 @@ def verify_token(token: str) -> dict[str, Any] | None:
     except JWTError as e:
         logger.debug("Token verification failed", error=str(e))
         return None
-
-
-# Keep other existing functions for compatibility
-def validate_email(email: str) -> bool:
-    """Basic email validation - use validate_email_advanced for security."""
-    return validate_email_advanced(email)
-
-
-def validate_password_strength(password: str) -> dict[str, Any]:
-    """Basic password validation - use validate_password_advanced for security."""
-    return validate_password_advanced(password)
-
-
-def generate_api_key(length: int = 32) -> str:
-    """Generate a random API key."""
-    alphabet = string.ascii_letters + string.digits
-    return "".join(secrets.choice(alphabet) for _ in range(length))
 
 
 def sanitize_input(input_string: str, max_length: int = 1000) -> str:

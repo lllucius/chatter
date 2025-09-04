@@ -22,7 +22,7 @@ import asyncio
 import time
 from collections import defaultdict, deque
 from datetime import timedelta
-from typing import Any
+from typing import Any, Callable
 
 from fastapi import HTTPException, Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -353,7 +353,7 @@ class UnifiedRateLimitMiddleware(BaseHTTPMiddleware):
         default_limit: int | None = None,
         default_window: int | None = None,
         endpoint_limits: dict[str, tuple[int, int]] | None = None,
-        key_func: callable | None = None,
+        key_func: Callable | None = None,
         skip_paths: list[str] | None = None,
     ):
         """Initialize unified rate limiting middleware.

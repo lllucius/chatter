@@ -12,6 +12,7 @@ import {
   Configuration,
   AuthenticationApi,
   AnalyticsApi,
+  ABTestingApi,
   ChatApi,
   DocumentsApi,
   ProfilesApi,
@@ -48,6 +49,7 @@ export class ChatterSDK {
   // API instances
   public auth: AuthenticationApi;
   public analytics: AnalyticsApi;
+  public abTesting: ABTestingApi;
   public conversations: ChatApi;
   public documents: DocumentsApi;
   public profiles: ProfilesApi;
@@ -75,6 +77,7 @@ export class ChatterSDK {
     // Initialize API instances
     this.auth = new AuthenticationApi(this.configuration);
     this.analytics = new AnalyticsApi(this.configuration);
+    this.abTesting = new ABTestingApi(this.configuration);
     this.conversations = new ChatApi(this.configuration);
     this.documents = new DocumentsApi(this.configuration);
     this.profiles = new ProfilesApi(this.configuration);
@@ -163,6 +166,7 @@ export class ChatterSDK {
   private updateApiInstances() {
     this.auth = new AuthenticationApi(this.configuration);
     this.analytics = new AnalyticsApi(this.configuration);
+    this.abTesting = new ABTestingApi(this.configuration);
     this.conversations = new ChatApi(this.configuration);
     this.documents = new DocumentsApi(this.configuration);
     this.profiles = new ProfilesApi(this.configuration);

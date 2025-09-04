@@ -47,11 +47,6 @@ class StreamingEvent:
             self.timestamp = time.time()
 
 
-# Alias for compatibility with test imports
-StreamEvent = StreamingEvent
-StreamEventType = StreamingEventType
-
-
 class StreamingError(Exception):
     """Exception raised during streaming operations."""
 

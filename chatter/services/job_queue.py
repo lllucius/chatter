@@ -237,8 +237,6 @@ class AdvancedJobQueue:
     ) -> str:
         """Schedule a job for later execution.
 
-        This method is for backwards compatibility with the API.
-
         Args:
             job: Job object (pre-created)
             schedule_at: When to execute the job

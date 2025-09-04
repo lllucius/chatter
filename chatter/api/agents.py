@@ -1,5 +1,6 @@
 """Agent management endpoints with comprehensive validation, caching, and security."""
 
+import re
 from typing import Any
 
 from fastapi import APIRouter, Depends, status, HTTPException
@@ -24,7 +25,7 @@ from chatter.schemas.agents import (
     AgentBulkCreateResponse,
     AgentBulkDeleteRequest,
 )
-from chatter.utils.agent_validation import AgentInputValidator
+from chatter.core.validation import validation_engine, ValidationError, DEFAULT_CONTEXT
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     InternalServerProblem,
@@ -106,13 +107,40 @@ async def create_agent(
         except RateLimitExceeded as e:
             raise InternalServerProblem(detail=str(e))
 
-        # Validate input data using the input validator
-        agent_data.name = AgentInputValidator.validate_agent_name(agent_data.name)
-        agent_data.description = AgentInputValidator.validate_agent_name(agent_data.description)  # Same validation rules
-        agent_data.system_prompt = AgentInputValidator.validate_agent_message(agent_data.system_prompt)
-        agent_data.agent_type = AgentInputValidator.validate_agent_type(agent_data.agent_type)
-        agent_data.temperature = AgentInputValidator.validate_temperature(agent_data.temperature)
-        agent_data.max_tokens = AgentInputValidator.validate_max_tokens(agent_data.max_tokens)
+        # Validate input data using the unified validation system
+        try:
+            # Validate agent name
+            result = validation_engine.validate_input(agent_data.name, "agent_name", DEFAULT_CONTEXT)
+            if not result.is_valid:
+                raise InternalServerProblem(detail=result.errors[0].message)
+            agent_data.name = result.value
+            
+            # Validate description (using same rules as agent name)
+            result = validation_engine.validate_input(agent_data.description, "agent_name", DEFAULT_CONTEXT)
+            if not result.is_valid:
+                raise InternalServerProblem(detail=result.errors[0].message)
+            agent_data.description = result.value
+            
+            # Validate system prompt
+            result = validation_engine.validate_input(agent_data.system_prompt, "message", DEFAULT_CONTEXT)
+            if not result.is_valid:
+                raise InternalServerProblem(detail=result.errors[0].message)
+            agent_data.system_prompt = result.value
+            
+            # Validate agent type - enum validation is handled by Pydantic, keep simple validation
+            if agent_data.agent_type is None:
+                raise InternalServerProblem(detail="Agent type is required")
+                
+            # Validate temperature
+            if not isinstance(agent_data.temperature, (int, float)) or agent_data.temperature < 0.0 or agent_data.temperature > 2.0:
+                raise InternalServerProblem(detail="Temperature must be between 0.0 and 2.0")
+            
+            # Validate max_tokens  
+            if not isinstance(agent_data.max_tokens, int) or agent_data.max_tokens < 1 or agent_data.max_tokens > 32000:
+                raise InternalServerProblem(detail="Max tokens must be between 1 and 32000")
+                
+        except ValidationError as e:
+            raise InternalServerProblem(detail=str(e))
 
         # Add created_by to metadata
         metadata = agent_data.metadata or {}
@@ -196,10 +224,12 @@ async def list_agents(
     """
     try:
         # Validate pagination parameters
-        offset, limit = AgentInputValidator.validate_pagination_params(
-            request.pagination.offset, 
-            request.pagination.limit
-        )
+        offset = max(0, request.pagination.offset) if isinstance(request.pagination.offset, int) else 0
+        limit = request.pagination.limit
+        if not isinstance(limit, int) or limit < 1:
+            limit = 10
+        elif limit > 100:
+            limit = 100
 
         # Get agents with filtering
         agents, total = await agent_manager.list_agents(
@@ -305,7 +335,10 @@ async def get_agent(
     """
     try:
         # Validate agent_id format
-        agent_id = AgentInputValidator.validate_agent_id(agent_id)
+        result = validation_engine.validate_input(agent_id, "agent_id", DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise InternalServerProblem(detail=result.errors[0].message)
+        agent_id = result.value
 
         agent = await agent_manager.get_agent(agent_id)
         if not agent:
@@ -489,10 +522,39 @@ async def interact_with_agent(
             raise InternalServerProblem(detail=str(e))
 
         # Validate inputs
-        agent_id = AgentInputValidator.validate_agent_id(agent_id)
-        conversation_id = AgentInputValidator.validate_conversation_id(interaction_data.conversation_id)
-        message = AgentInputValidator.validate_agent_message(interaction_data.message)
-        context = AgentInputValidator.sanitize_agent_context(interaction_data.context)
+        result = validation_engine.validate_input(agent_id, "agent_id", DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise InternalServerProblem(detail=result.errors[0].message)
+        agent_id = result.value
+        
+        result = validation_engine.validate_input(interaction_data.conversation_id, "conversation_id", DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise InternalServerProblem(detail=result.errors[0].message)
+        conversation_id = result.value
+        
+        result = validation_engine.validate_input(interaction_data.message, "message", DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise InternalServerProblem(detail=result.errors[0].message)
+        message = result.value
+        
+        # Sanitize context 
+        context = interaction_data.context or {}
+        if not isinstance(context, dict):
+            context = {}
+        
+        # Sanitize context keys and values
+        sanitized_context = {}
+        for key, value in context.items():
+            if isinstance(key, str) and len(key) <= 100:
+                if isinstance(value, str) and len(value) <= 1000:
+                    # Remove dangerous patterns
+                    value = re.sub(r"<script.*?>.*?</script>", "", value, flags=re.IGNORECASE)
+                    value = re.sub(r"javascript:", "", value, flags=re.IGNORECASE)
+                    value = re.sub(r"on\w+\s*=", "", value, flags=re.IGNORECASE)
+                    sanitized_context[key] = value
+                elif isinstance(value, (int, float, bool)):
+                    sanitized_context[key] = value
+        context = sanitized_context
 
         # Check if agent exists and user has access
         agent = await agent_manager.get_agent(agent_id)
@@ -564,7 +626,10 @@ async def get_agent_health(
     """
     try:
         # Validate agent_id format
-        agent_id = AgentInputValidator.validate_agent_id(agent_id)
+        result = validation_engine.validate_input(agent_id, "agent_id", DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise InternalServerProblem(detail=result.errors[0].message)
+        agent_id = result.value
 
         agent = await agent_manager.get_agent(agent_id)
         if not agent:
@@ -651,12 +716,44 @@ async def bulk_create_agents(
         for i, agent_data in enumerate(request.agents):
             try:
                 # Validate each agent data
-                agent_data.name = AgentInputValidator.validate_agent_name(agent_data.name)
-                agent_data.description = AgentInputValidator.validate_agent_name(agent_data.description)
-                agent_data.system_prompt = AgentInputValidator.validate_agent_message(agent_data.system_prompt)
-                agent_data.agent_type = AgentInputValidator.validate_agent_type(agent_data.agent_type)
-                agent_data.temperature = AgentInputValidator.validate_temperature(agent_data.temperature)
-                agent_data.max_tokens = AgentInputValidator.validate_max_tokens(agent_data.max_tokens)
+                try:
+                    # Validate agent name
+                    result = validation_engine.validate_input(agent_data.name, "agent_name", DEFAULT_CONTEXT)
+                    if not result.is_valid:
+                        raise ValueError(result.errors[0].message)
+                    agent_data.name = result.value
+                    
+                    # Validate description
+                    result = validation_engine.validate_input(agent_data.description, "agent_name", DEFAULT_CONTEXT)
+                    if not result.is_valid:
+                        raise ValueError(result.errors[0].message)
+                    agent_data.description = result.value
+                    
+                    # Validate system prompt
+                    result = validation_engine.validate_input(agent_data.system_prompt, "message", DEFAULT_CONTEXT)
+                    if not result.is_valid:
+                        raise ValueError(result.errors[0].message)
+                    agent_data.system_prompt = result.value
+                    
+                    # Validate agent type
+                    if agent_data.agent_type is None:
+                        raise ValueError("Agent type is required")
+                        
+                    # Validate temperature
+                    if not isinstance(agent_data.temperature, (int, float)) or agent_data.temperature < 0.0 or agent_data.temperature > 2.0:
+                        raise ValueError("Temperature must be between 0.0 and 2.0")
+                    
+                    # Validate max_tokens  
+                    if not isinstance(agent_data.max_tokens, int) or agent_data.max_tokens < 1 or agent_data.max_tokens > 32000:
+                        raise ValueError("Max tokens must be between 1 and 32000")
+                        
+                except (ValidationError, ValueError) as ve:
+                    failed_creations.append({
+                        "index": i,
+                        "agent_name": getattr(agent_data, 'name', 'Unknown'),
+                        "error": str(ve)
+                    })
+                    continue
 
                 # Add created_by to metadata
                 metadata = agent_data.metadata or {}
@@ -767,7 +864,14 @@ async def bulk_delete_agents(
         for agent_id in request.agent_ids:
             try:
                 # Validate agent_id format
-                agent_id = AgentInputValidator.validate_agent_id(agent_id)
+                result = validation_engine.validate_input(agent_id, "agent_id", DEFAULT_CONTEXT)
+                if not result.is_valid:
+                    failed_deletions.append({
+                        "agent_id": agent_id,
+                        "error": result.errors[0].message
+                    })
+                    continue
+                agent_id = result.value
 
                 # Check if agent exists and user has permission
                 agent = await agent_manager.get_agent(agent_id)

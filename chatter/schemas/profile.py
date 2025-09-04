@@ -13,7 +13,7 @@ from chatter.schemas.common import (
 )
 
 if TYPE_CHECKING:
-    from chatter.utils.validation import SecurityValidator
+    pass
 
 
 class ProfileBase(BaseModel):
@@ -144,9 +144,11 @@ class ProfileBase(BaseModel):
     def validate_text_fields(cls, v: str | None) -> str | None:
         """Validate text fields for security threats."""
         if v is not None:
-            # Lazy import to avoid circular imports
-            from chatter.utils.validation import security_validator
-            security_validator.validate_security(v)
+            # Use unified validation system for security validation
+            from chatter.core.validation import validation_engine, DEFAULT_CONTEXT
+            result = validation_engine.validate_security(v, DEFAULT_CONTEXT)
+            if not result.is_valid:
+                raise ValueError(f"Security validation failed: {result.errors[0].message}")
         return v
     
     @field_validator('llm_provider', 'llm_model', 'embedding_provider', 'embedding_model')
@@ -157,9 +159,11 @@ class ProfileBase(BaseModel):
             # Basic validation for provider/model names
             if not v.replace('-', '').replace('_', '').replace('.', '').isalnum():
                 raise ValueError("Provider/model names can only contain alphanumeric characters, hyphens, underscores, and dots")
-            # Lazy import to avoid circular imports
-            from chatter.utils.validation import security_validator
-            security_validator.validate_security(v)
+            # Use unified validation system for security validation
+            from chatter.core.validation import validation_engine, DEFAULT_CONTEXT
+            result = validation_engine.validate_security(v, DEFAULT_CONTEXT)
+            if not result.is_valid:
+                raise ValueError(f"Security validation failed: {result.errors[0].message}")
         return v
     
     @field_validator('tags')
@@ -167,11 +171,13 @@ class ProfileBase(BaseModel):
     def validate_tags(cls, v: list[str] | None) -> list[str] | None:
         """Validate tags for security."""
         if v:
-            from chatter.utils.validation import security_validator
+            from chatter.core.validation import validation_engine, DEFAULT_CONTEXT
             for tag in v:
                 if len(tag) > 50:
                     raise ValueError("Tag length cannot exceed 50 characters")
-                security_validator.validate_security(tag)
+                result = validation_engine.validate_security(tag, DEFAULT_CONTEXT)
+                if not result.is_valid:
+                    raise ValueError(f"Tag security validation failed: {result.errors[0].message}")
         return v
     
     @field_validator('available_tools')
@@ -179,11 +185,13 @@ class ProfileBase(BaseModel):
     def validate_tools(cls, v: list[str] | None) -> list[str] | None:
         """Validate available tools."""
         if v:
-            from chatter.utils.validation import security_validator
+            from chatter.core.validation import validation_engine, DEFAULT_CONTEXT
             for tool in v:
                 if len(tool) > 100:
                     raise ValueError("Tool name length cannot exceed 100 characters")
-                security_validator.validate_security(tool)
+                result = validation_engine.validate_security(tool, DEFAULT_CONTEXT)
+                if not result.is_valid:
+                    raise ValueError(f"Tool security validation failed: {result.errors[0].message}")
         return v
     
     @field_validator('stop_sequences')
@@ -191,11 +199,13 @@ class ProfileBase(BaseModel):
     def validate_stop_sequences(cls, v: list[str] | None) -> list[str] | None:
         """Validate stop sequences."""
         if v:
-            from chatter.utils.validation import security_validator
+            from chatter.core.validation import validation_engine, DEFAULT_CONTEXT
             for seq in v:
                 if len(seq) > 20:
                     raise ValueError("Stop sequence length cannot exceed 20 characters")
-                security_validator.validate_security(seq)
+                result = validation_engine.validate_security(seq, DEFAULT_CONTEXT)
+                if not result.is_valid:
+                    raise ValueError(f"Stop sequence security validation failed: {result.errors[0].message}")
         return v
     
     @field_validator('temperature')
@@ -466,8 +476,10 @@ class ProfileTestRequest(BaseModel):
     @classmethod
     def validate_test_message(cls, v: str) -> str:
         """Validate test message for security threats."""
-        from chatter.utils.validation import security_validator
-        security_validator.validate_security(v)
+        from chatter.core.validation import validation_engine, DEFAULT_CONTEXT
+        result = validation_engine.validate_security(v, DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise ValueError(f"Test message security validation failed: {result.errors[0].message}")
         return v
 
 

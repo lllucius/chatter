@@ -23,7 +23,7 @@ from chatter.core.workflow_performance import (
     workflow_cache,
 )
 from chatter.core.workflow_templates import WorkflowTemplateManager
-from chatter.core.workflow_validation import WorkflowValidator
+from chatter.core.validation import validation_engine
 from chatter.models.conversation import (
     Conversation,
     Message,
@@ -59,7 +59,6 @@ class WorkflowExecutionService:
         self.llm_service = llm_service
         self.message_service = message_service
         self.template_manager = WorkflowTemplateManager()
-        self.validator = WorkflowValidator()
         self.limit_manager = workflow_limit_manager
 
     async def execute_workflow(
@@ -110,9 +109,11 @@ class WorkflowExecutionService:
 
         try:
             # Validate workflow configuration
-            self.validator.validate_workflow_parameters(
-                workflow_type, **{}
+            result = validation_engine.validate_workflow(
+                {"workflow_type": workflow_type}
             )
+            if not result.is_valid:
+                raise WorkflowExecutionError(f"Workflow validation failed: {result.errors[0].message}")
 
             # Check cache first
             cached_result = None
@@ -287,10 +288,11 @@ class WorkflowExecutionService:
         try:
             # Validate workflow configuration
             try:
-                self.validator.validate_workflow_parameters(
-                    workflow_type,
-                    **{},
+                result = validation_engine.validate_workflow(
+                    {"workflow_type": workflow_type}
                 )
+                if not result.is_valid:
+                    raise WorkflowExecutionError(f"Workflow validation failed: {result.errors[0].message}")
             except Exception as e:
                 raise WorkflowExecutionError(
                     f"Invalid workflow configuration for {workflow_type}: {e}"

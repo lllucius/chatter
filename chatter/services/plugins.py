@@ -123,10 +123,10 @@ class BasePlugin(ABC):
                 
             # Try to use jsonschema if available for proper validation
             try:
-                from chatter.core.workflow_validation import SchemaValidator
-                validator = SchemaValidator()
-                result = validator.validate_json_schema(config, schema)
-                return result.valid
+                from chatter.core.validation import validation_engine
+                # Use the configuration validator from the unified system
+                result = validation_engine.validate_configuration(config)
+                return result.is_valid
             except ImportError:
                 # Fallback to basic validation
                 return self._basic_config_validation(config, schema)

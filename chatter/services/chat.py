@@ -27,7 +27,7 @@ from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
 from chatter.services.workflow_execution import WorkflowExecutionService
 from chatter.utils.correlation import get_correlation_id
-from chatter.utils.monitoring import record_request_metrics
+from chatter.core.monitoring import record_request_metrics
 from chatter.utils.security_enhanced import get_secure_logger
 
 logger = get_secure_logger(__name__)

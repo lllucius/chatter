@@ -82,7 +82,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         # Record metrics
         try:
-            from chatter.utils.monitoring import record_request_metrics
+            from chatter.core.monitoring import record_request_metrics
 
             record_request_metrics(
                 method=request.method,

@@ -15,11 +15,7 @@ from chatter.utils.error_recovery import (
     with_circuit_breaker, 
     RetryStrategy
 )
-from chatter.utils.input_validation import (
-    InputValidator,
-    InputSanitizer,
-    validate_and_sanitize_input
-)
+from chatter.core.validation import validation_engine, DEFAULT_CONTEXT
 from chatter.middleware.security import SecurityHeadersMiddleware
 
 
@@ -36,10 +32,11 @@ class EnhancedUserService:
         """Get user by email with full production enhancements."""
         
         # Input validation and sanitization
-        if not InputValidator.validate_email(email):
-            raise ValueError("Invalid email format")
+        result = validation_engine.validate_input(email, "email", DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise ValueError(f"Invalid email: {result.errors[0].message}")
         
-        safe_email = InputSanitizer.sanitize_sql_input(email)
+        safe_email = result.value
         
         # Simulate database query
         await asyncio.sleep(0.1)  # Simulate DB query time
@@ -58,35 +55,37 @@ class EnhancedUserService:
     async def create_user(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
         """Create user with comprehensive validation."""
         
-        # Comprehensive input sanitization
-        safe_data = validate_and_sanitize_input(
-            user_data,
-            sanitize_html=True,
-            check_sql_injection=True,
-            check_command_injection=True
-        )
+        # Comprehensive input validation using unified system
+        # Validate required fields exist
+        required_fields = ["email", "password", "username"]
+        for field in required_fields:
+            if field not in user_data:
+                raise ValueError(f"Missing required field: {field}")
         
-        # Validate required fields
-        validation_result = InputValidator.validate_json_schema(
-            safe_data, 
-            required_fields=["email", "password", "username"]
-        )
+        # Validate and sanitize email
+        result = validation_engine.validate_input(user_data["email"], "email", DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise ValueError(f"Email validation failed: {result.errors[0].message}")
+        safe_email = result.value
         
-        if not validation_result["valid"]:
-            raise ValueError(f"Validation failed: {validation_result['errors']}")
+        # Validate and sanitize username
+        result = validation_engine.validate_input(user_data["username"], "username", DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise ValueError(f"Username validation failed: {result.errors[0].message}")
+        safe_username = result.value
         
-        # Validate email
-        if not InputValidator.validate_email(safe_data["email"]):
-            raise ValueError("Invalid email format")
+        # Validate password
+        result = validation_engine.validate_input(user_data["password"], "password", DEFAULT_CONTEXT)
+        if not result.is_valid:
+            raise ValueError(f"Password validation failed: {result.errors[0].message}")
+        safe_password = result.value
         
-        # Validate username
-        if not InputValidator.validate_username(safe_data["username"]):
-            raise ValueError("Invalid username format")
-        
-        # Validate password strength
-        password_check = InputValidator.validate_password_strength(safe_data["password"])
-        if not password_check["valid"]:
-            raise ValueError(f"Password validation failed: {', '.join(password_check['errors'])}")
+        safe_data = {
+            "email": safe_email,
+            "username": safe_username,
+            "password": safe_password,
+            **{k: v for k, v in user_data.items() if k not in required_fields}
+        }
         
         # Simulate user creation
         await asyncio.sleep(0.2)

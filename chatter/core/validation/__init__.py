@@ -17,7 +17,7 @@ from .exceptions import (
     BusinessValidationError,
     ConfigurationValidationError,
 )
-from .context import ValidationContext, DEFAULT_CONTEXT, LENIENT_CONTEXT
+from .context import ValidationContext, DEFAULT_CONTEXT
 from .validators import (
     InputValidator,
     SecurityValidator,
@@ -61,5 +61,4 @@ __all__ = [
     'validate_security',
     'validate_business_logic',
     'DEFAULT_CONTEXT',
-    'LENIENT_CONTEXT',
 ]

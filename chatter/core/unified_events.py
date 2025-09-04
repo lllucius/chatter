@@ -15,7 +15,6 @@ from chatter.core.events import (
     create_analytics_event,
     emit_event
 )
-from chatter.core.sse_adapter import setup_sse_integration, sse_forwarder
 from chatter.core.security_adapter import setup_security_integration, security_forwarder
 from chatter.core.audit_adapter import setup_audit_integration, audit_forwarder
 from chatter.utils.logging import get_logger
@@ -46,9 +45,11 @@ class UnifiedEventManager:
         
         try:
             # Set up integration adapters
-            setup_sse_integration()
             setup_security_integration()
             setup_audit_integration(audit_logger)
+            
+            # Set up SSE integration directly
+            self._setup_sse_integration()
             
             # Set up global event monitoring
             self._setup_event_monitoring()
@@ -98,6 +99,130 @@ class UnifiedEventManager:
         except Exception as e:
             logger.error("Error during event manager shutdown", error=str(e))
     
+    def _setup_sse_integration(self):
+        """Set up direct SSE integration with unified events."""
+        
+        def emit_to_sse(event: UnifiedEvent) -> None:
+            """Emit events directly to SSE for real-time delivery."""
+            try:
+                # Only emit real-time events and high/critical priority events to SSE
+                should_emit_to_sse = (
+                    event.category == EventCategory.REALTIME or
+                    event.priority in [EventPriority.HIGH, EventPriority.CRITICAL]
+                )
+                
+                if should_emit_to_sse:
+                    # Import SSE service here to avoid circular imports
+                    from chatter.services.sse_events import sse_service
+                    from chatter.schemas.events import EventType
+                    
+                    # Map event to SSE event type
+                    sse_event_type = self._map_unified_to_sse_event_type(event)
+                    
+                    # Create task to emit through SSE service asynchronously
+                    asyncio.create_task(
+                        sse_service.trigger_event(
+                            event_type=sse_event_type,
+                            data=event.data,
+                            user_id=event.user_id,
+                            metadata={
+                                **event.metadata,
+                                "unified_event_id": event.id,
+                                "category": event.category.value,
+                                "priority": event.priority.value,
+                                "source_system": event.source_system,
+                                "correlation_id": event.correlation_id,
+                                "session_id": event.session_id,
+                            }
+                        )
+                    )
+                    
+            except Exception as e:
+                logger.error(
+                    "Failed to emit event to SSE",
+                    event_id=event.id,
+                    event_type=event.event_type,
+                    error=str(e)
+                )
+        
+        # Register SSE handler for real-time events
+        event_router.add_category_handler(EventCategory.REALTIME, emit_to_sse)
+        
+        # Register SSE handler for high/critical priority events from other categories
+        event_router.add_global_handler(emit_to_sse)
+        
+        logger.debug("Direct SSE integration set up")
+    
+    def _map_unified_to_sse_event_type(self, event: UnifiedEvent):
+        """Map unified event to SSE EventType."""
+        from chatter.schemas.events import EventType
+        
+        # Direct mappings for existing SSE event types
+        sse_type_mapping = {
+            # Document events
+            "document.uploaded": EventType.DOCUMENT_UPLOADED,
+            "document.processing_started": EventType.DOCUMENT_PROCESSING_STARTED,
+            "document.processing_completed": EventType.DOCUMENT_PROCESSING_COMPLETED,
+            "document.processing_failed": EventType.DOCUMENT_PROCESSING_FAILED,
+            "document.processing_progress": EventType.DOCUMENT_PROCESSING_PROGRESS,
+            
+            # Backup events
+            "backup.started": EventType.BACKUP_STARTED,
+            "backup.completed": EventType.BACKUP_COMPLETED,
+            "backup.failed": EventType.BACKUP_FAILED,
+            "backup.progress": EventType.BACKUP_PROGRESS,
+            
+            # Job events
+            "job.started": EventType.JOB_STARTED,
+            "job.completed": EventType.JOB_COMPLETED,
+            "job.failed": EventType.JOB_FAILED,
+            "job.progress": EventType.JOB_PROGRESS,
+            
+            # Tool server events
+            "tool_server.started": EventType.TOOL_SERVER_STARTED,
+            "tool_server.stopped": EventType.TOOL_SERVER_STOPPED,
+            "tool_server.health_changed": EventType.TOOL_SERVER_HEALTH_CHANGED,
+            "tool_server.error": EventType.TOOL_SERVER_ERROR,
+            
+            # Chat events
+            "conversation.started": EventType.CONVERSATION_STARTED,
+            "conversation.ended": EventType.CONVERSATION_ENDED,
+            "message.received": EventType.MESSAGE_RECEIVED,
+            "message.sent": EventType.MESSAGE_SENT,
+            
+            # User events
+            "user.registered": EventType.USER_REGISTERED,
+            "user.updated": EventType.USER_UPDATED,
+            "user.connected": EventType.USER_CONNECTED,
+            "user.disconnected": EventType.USER_DISCONNECTED,
+            "user.status_changed": EventType.USER_STATUS_CHANGED,
+            
+            # Plugin events
+            "plugin.installed": EventType.PLUGIN_INSTALLED,
+            "plugin.activated": EventType.PLUGIN_ACTIVATED,
+            "plugin.deactivated": EventType.PLUGIN_DEACTIVATED,
+            "plugin.error": EventType.PLUGIN_ERROR,
+            
+            # Agent events
+            "agent.created": EventType.AGENT_CREATED,
+            "agent.updated": EventType.AGENT_UPDATED,
+        }
+        
+        # Try direct mapping first
+        if event.event_type in sse_type_mapping:
+            return sse_type_mapping[event.event_type]
+        
+        # Category-based fallback mapping
+        if event.category == EventCategory.SECURITY:
+            return EventType.SYSTEM_ALERT
+        elif event.category == EventCategory.MONITORING:
+            return EventType.SYSTEM_STATUS
+        elif event.category == EventCategory.AUDIT:
+            return EventType.SYSTEM_ALERT
+        else:
+            # Default fallback
+            return EventType.SYSTEM_STATUS
+
     def _setup_event_monitoring(self):
         """Set up monitoring for all events."""
         

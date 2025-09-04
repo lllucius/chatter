@@ -12,9 +12,9 @@ from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-# Import unified event system for integration
+# Import unified event system for integration (optional)
 try:
-    from chatter.core.unified_events import unified_event_manager
+    from chatter.core.events import EventCategory, EventPriority
     UNIFIED_EVENTS_AVAILABLE = True
 except ImportError:
     UNIFIED_EVENTS_AVAILABLE = False
@@ -280,24 +280,6 @@ class SSEEventService:
             )
 
             await self.broadcast_event(event)
-            
-            # Also emit through unified event system if available
-            if UNIFIED_EVENTS_AVAILABLE and unified_event_manager.is_initialized():
-                try:
-                    from chatter.core.unified_events import emit_realtime_event
-                    await emit_realtime_event(
-                        event_type=event_type.value,
-                        data=validated_data,
-                        user_id=user_id,
-                        metadata=metadata or {},
-                        correlation_id=event.id
-                    )
-                except Exception as e:
-                    logger.warning(
-                        "Failed to emit through unified event system",
-                        event_id=event.id,
-                        error=str(e)
-                    )
             
             return event.id
         except Exception as e:

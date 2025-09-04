@@ -27,7 +27,6 @@ from chatter.core.unified_events import (
     shutdown_event_system,
     get_event_stats,
 )
-from chatter.core.sse_adapter import SSEEventEmitter, setup_sse_integration
 from chatter.core.security_adapter import SecurityEventEmitter, setup_security_integration
 from chatter.core.audit_adapter import AuditEventEmitter, setup_audit_integration
 
@@ -300,55 +299,6 @@ class TestUnifiedEventManager:
         assert stats["emitted"] >= 1
 
 
-class TestSSEIntegration:
-    """Test SSE adapter integration."""
-    
-    @pytest.fixture
-    def sse_emitter(self):
-        """Create SSE emitter for testing."""
-        return SSEEventEmitter()
-    
-    @pytest.mark.asyncio
-    async def test_sse_event_conversion(self, sse_emitter):
-        """Test converting unified event to SSE event."""
-        event = create_realtime_event(
-            event_type="document.uploaded",
-            data={"document_id": "doc123", "filename": "test.pdf"},
-            user_id="user123"
-        )
-        
-        # Convert to SSE event
-        sse_event = sse_emitter._convert_to_sse_event(event)
-        
-        assert sse_event.type.value == "document.uploaded"
-        assert sse_event.data["document_id"] == "doc123"
-        assert sse_event.user_id == "user123"
-        assert sse_event.metadata["unified_event_id"] == event.id
-        assert sse_event.metadata["category"] == "realtime"
-    
-    def test_event_type_mapping(self, sse_emitter):
-        """Test mapping of event types to SSE types."""
-        from chatter.schemas.events import EventType
-        
-        # Test known mappings
-        mappings = [
-            ("document.uploaded", EventCategory.REALTIME, EventType.DOCUMENT_UPLOADED),
-            ("backup.started", EventCategory.REALTIME, EventType.BACKUP_STARTED),
-            ("user.connected", EventCategory.REALTIME, EventType.USER_CONNECTED),
-        ]
-        
-        for event_type, category, expected_sse_type in mappings:
-            result = sse_emitter._map_event_type(event_type, category)
-            assert result == expected_sse_type
-        
-        # Test fallback mappings
-        security_result = sse_emitter._map_event_type("unknown.security", EventCategory.SECURITY)
-        assert security_result == EventType.SYSTEM_ALERT
-        
-        monitoring_result = sse_emitter._map_event_type("unknown.monitoring", EventCategory.MONITORING)
-        assert monitoring_result == EventType.SYSTEM_STATUS
-
-
 class TestEventIntegration:
     """Integration tests for the complete event system."""
     
@@ -456,7 +406,6 @@ class TestMinimalIntegration:
     def test_setup_functions(self):
         """Test setup functions don't crash."""
         # These should not raise exceptions
-        setup_sse_integration()
         setup_security_integration()
         setup_audit_integration()
     

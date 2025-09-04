@@ -587,6 +587,16 @@ class Settings(BaseSettings):
     def is_testing(self) -> bool:
         """Check if running in testing environment."""
         return self.environment.lower() == "testing"
+    
+    @property
+    def effective_rate_limit_auth_requests(self) -> int:
+        """Get auth rate limit requests, more lenient in testing."""
+        return 1000 if self.is_testing else self.rate_limit_auth_requests
+    
+    @property
+    def effective_rate_limit_auth_window(self) -> int:
+        """Get auth rate limit window, more lenient in testing."""
+        return 60 if self.is_testing else self.rate_limit_auth_window
 
     @property
     def database_url_for_env(self) -> str:

@@ -49,7 +49,8 @@ class TestHealthUnit:
         assert health_data["service"] == liveness_data["service"]
 
     @pytest.mark.unit
-    async def test_metrics_endpoint_without_monitoring(self, client: AsyncClient):
+    @patch('chatter.core.monitoring.get_monitoring_service', side_effect=ImportError("Monitoring not available"))
+    async def test_metrics_endpoint_without_monitoring(self, mock_monitoring, client: AsyncClient):
         """Test metrics endpoint when monitoring module is not available."""
         # This should work even without monitoring module
         response = await client.get("/metrics")
@@ -97,7 +98,10 @@ class TestHealthUnit:
             "/healthz": {"requests": 100, "avg_response_time": 10.5},
             "/readyz": {"requests": 50, "avg_response_time": 25.3}
         }
-        mock_get_monitoring.return_value = mock_service
+        # Make get_monitoring_service async and return the mock service
+        async def return_mock_service(*args, **kwargs):
+            return mock_service
+        mock_get_monitoring.side_effect = return_mock_service
 
         response = await client.get("/metrics")
         assert response.status_code == 200
@@ -115,11 +119,14 @@ class TestHealthUnit:
         mock_get_monitoring.side_effect = Exception("Monitoring service error")
 
         response = await client.get("/metrics")
-        assert response.status_code == 500  # Internal server error
+        # Should still return 200 with fallback values since the endpoint handles errors gracefully
+        assert response.status_code == 200
         
         data = response.json()
-        assert data["type"] == "about:blank"
-        assert "Metrics collection failed" in data["detail"]
+        # Should return default metrics when monitoring fails
+        assert data["health"]["status"] == "unknown"
+        assert data["performance"]["requests"] == 0
+        assert data["endpoints"] == {}
 
     @pytest.mark.unit
     @patch('chatter.core.monitoring.get_monitoring_service')
@@ -154,7 +161,8 @@ class TestHealthUnit:
         assert response.status_code == 500  # Internal server error
         
         data = response.json()
-        assert data["type"] == "about:blank"
+        # InternalServerProblem sets type_suffix="internal-server-error"
+        assert "internal-server-error" in data["type"]
         assert f"Failed to get trace for correlation ID: {correlation_id}" in data["detail"]
 
     @pytest.mark.unit

@@ -33,6 +33,7 @@ class ModelType(str, Enum):
     """Types of AI models."""
 
     LLM = "llm"
+    CHAT = "chat" 
     EMBEDDING = "embedding"
 
 

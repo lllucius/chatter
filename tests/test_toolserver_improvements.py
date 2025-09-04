@@ -28,9 +28,10 @@ class MockSession:
 def test_crypto_utility():
     """Test basic crypto utility functionality."""
     from chatter.utils.crypto import SecretManager, CryptoError
+    from cryptography.fernet import Fernet
     
-    # Test with fixed key for deterministic results
-    key = "test-key-1234567890123456789012345678"
+    # Generate a proper Fernet key for testing
+    key = Fernet.generate_key().decode()
     secret_manager = SecretManager(key)
     
     # Test encryption/decryption
@@ -60,24 +61,22 @@ def test_crypto_utility():
 def test_rate_limiter():
     """Test rate limiter functionality."""
     import asyncio
-    from chatter.utils.rate_limiter import RateLimiter, RateLimitExceeded
+    from chatter.utils.unified_rate_limiter import get_unified_rate_limiter, RateLimitExceeded
     
     async def run_test():
-        limiter = RateLimiter()
+        # Create a unified rate limiter instance
+        rate_limiter = get_unified_rate_limiter()
         
-        # Test basic rate limiting
-        result = await limiter.check_rate_limit("test-key", limit_per_hour=2)
-        assert result["allowed"] is True
-        assert result["hour_remaining"] == 1
-        
-        # Use another token
-        result = await limiter.check_rate_limit("test-key", limit_per_hour=2)
-        assert result["allowed"] is True
-        assert result["hour_remaining"] == 0
-        
-        # Should exceed limit now
+        # Test basic rate limiting - use the check method
         try:
-            await limiter.check_rate_limit("test-key", limit_per_hour=2)
+            # This should succeed
+            await rate_limiter.check("test-key", limit=2, window=3600)
+            
+            # This should also succeed
+            await rate_limiter.check("test-key", limit=2, window=3600) 
+            
+            # This should fail due to rate limiting
+            await rate_limiter.check("test-key", limit=2, window=3600)
             assert False, "Should have raised RateLimitExceeded"
         except RateLimitExceeded:
             pass  # Expected

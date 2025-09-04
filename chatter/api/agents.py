@@ -35,7 +35,6 @@ from chatter.utils.unified_rate_limiter import get_unified_rate_limiter, RateLim
 
 logger = get_logger(__name__)
 router = APIRouter(
-    prefix="/agents",
     tags=["agents"],
     responses={
         400: {"description": "Bad request"},

@@ -154,7 +154,7 @@ async def register(
 
         # Log successful registration
         from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-        monitor = await get_security_monitor()
+        monitoring_service = await get_monitoring_service()
         event = SecurityEvent(
             event_type=SecurityEventType.ACCOUNT_CREATED,
             severity=SecurityEventSeverity.LOW,
@@ -264,7 +264,7 @@ async def refresh_token(
         user_id = payload.get("sub") if payload else None
         
         if user_id:
-            monitor = await get_security_monitor()
+            monitoring_service = await get_monitoring_service()
             event = SecurityEvent(
                 event_type=SecurityEventType.TOKEN_REFRESHED,
                 severity=SecurityEventSeverity.LOW,
@@ -412,7 +412,7 @@ async def revoke_api_key(
     
     # Log API key revocation
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.API_KEY_REVOKED,
         severity=SecurityEventSeverity.MEDIUM,
@@ -465,7 +465,7 @@ async def logout(
     
     # Log logout for security monitoring
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.TOKEN_REVOKED,
         severity=SecurityEventSeverity.LOW,
@@ -504,7 +504,7 @@ async def request_password_reset(
     
     # Log password reset request
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.PASSWORD_RESET_REQUESTED,
         severity=SecurityEventSeverity.MEDIUM,
@@ -548,7 +548,7 @@ async def confirm_password_reset(
     
     # Log password reset completion
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.PASSWORD_RESET_COMPLETED,
         severity=SecurityEventSeverity.MEDIUM,
@@ -585,7 +585,7 @@ async def deactivate_account(
     
     # Log account deactivation
     from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
-    monitor = await get_security_monitor()
+    monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.ACCOUNT_DEACTIVATED,
         severity=SecurityEventSeverity.MEDIUM,

@@ -197,8 +197,8 @@ async def auth_headers(client) -> dict[str, str]:
     # Register a test user
     user_data = {
         "username": "testuser",
-        "email": "test@example.com",
-        "password": "TestPassword123!",
+        "email": "test@example.com", 
+        "password": "SecureP@ssw0rd!",
         "full_name": "Test User",
     }
 
@@ -217,7 +217,7 @@ def test_user_data() -> dict:
     return {
         "username": "testuser",
         "email": "test@example.com",
-        "password": "TestPassword123!",
+        "password": "SecureP@ssw0rd!",
         "full_name": "Test User",
     }
 
@@ -226,8 +226,8 @@ def test_user_data() -> dict:
 def test_login_data() -> dict:
     """Test login data."""
     return {
-        "username": "testuser",
-        "password": "TestPassword123!",
+        "username": "testuser", 
+        "password": "SecureP@ssw0rd!",
     }
 
 

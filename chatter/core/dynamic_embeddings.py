@@ -281,12 +281,50 @@ class DynamicEmbeddingService:
         query_embedding: list[float],
         limit: int = 5,
     ) -> list:
-        """Search for similar embeddings."""
+        """Search for similar embeddings using pgvector similarity."""
         try:
-            # This would need proper vector similarity search implementation
-            # For now, return empty list as placeholder
-            # TODO: Implement actual vector similarity search using embedding model
-            return []
+            # Get the dynamic embedding table
+            embedding_table = get_dynamic_embedding_table(
+                model_name, dimension
+            )
+            
+            # Build the query with vector similarity
+            from sqlalchemy import text
+            from chatter.models.document import DocumentChunk
+            
+            # Use pgvector's cosine distance operator
+            similarity_query = text(f"""
+                SELECT 
+                    de.chunk_id,
+                    dc.content,
+                    de.embedding <=> :query_embedding AS distance
+                FROM {embedding_table.name} de
+                JOIN document_chunks dc ON de.chunk_id = dc.id
+                ORDER BY de.embedding <=> :query_embedding
+                LIMIT :limit
+            """)
+            
+            # Execute query with parameters
+            result = await self.session.execute(
+                similarity_query, 
+                {
+                    "query_embedding": str(query_embedding), 
+                    "limit": limit
+                }
+            )
+            
+            # Convert results to list
+            similar_embeddings = []
+            for row in result:
+                similar_embeddings.append({
+                    "chunk_id": row.chunk_id,
+                    "content": row.content,
+                    "distance": float(row.distance),
+                    "similarity_score": 1.0 - float(row.distance)  # Convert distance to similarity
+                })
+            
+            return similar_embeddings
+            
         except Exception as e:
             logger.error(f"Failed to search similar embeddings: {e}")
             return []

@@ -83,21 +83,8 @@ class ChatService:
             )
         )
 
-        # Get total count - for now, we'll implement a simple approach
-        # TODO: Add optimized count method to ConversationService
-        from sqlalchemy import func, select
-
-        from chatter.models.conversation import (
-            Conversation as ConversationModel,
-        )
-
-        total_q = select(func.count()).select_from(
-            select(ConversationModel.id)
-            .where(ConversationModel.user_id == user_id)
-            .subquery()
-        )
-        total_result = await self.session.execute(total_q)
-        total = int(total_result.scalar() or 0)
+        # Get total count using optimized method
+        total = await self.conversation_service.get_conversation_count(user_id)
 
         return list(conversations), total
 

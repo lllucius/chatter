@@ -746,9 +746,37 @@ class AuthService:
 
     async def list_api_keys(self, user_id: str) -> list[dict[str, Any]]:
         """List user's API keys."""
-        # TODO: Implement API key listing from database
-        # For now, return empty list
-        return []
+        try:
+            # Get user with API key information
+            from sqlalchemy import select
+            from chatter.models.user import User
+            
+            result = await self.session.execute(
+                select(User).where(User.id == user_id)
+            )
+            user = result.scalar_one_or_none()
+            
+            if not user:
+                return []
+            
+            # Return API key information if exists
+            api_keys = []
+            if user.api_key and user.api_key_name:
+                # Mask the actual API key for security
+                masked_key = user.api_key[:8] + "..." + user.api_key[-4:] if len(user.api_key) > 12 else "***"
+                api_keys.append({
+                    "name": user.api_key_name,
+                    "key_preview": masked_key,
+                    "created_at": user.created_at.isoformat() if user.created_at else None,
+                    "last_used": user.last_login_at.isoformat() if user.last_login_at else None,
+                    "is_active": bool(user.api_key)
+                })
+            
+            return api_keys
+            
+        except Exception as e:
+            logger.error(f"Failed to list API keys for user {user_id}: {e}")
+            return []
 
     async def revoke_token(self, user_id: str) -> bool:
         """Revoke user's current tokens with enhanced security.

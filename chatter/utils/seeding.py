@@ -7,7 +7,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
@@ -765,16 +765,16 @@ async def clear_all_data(confirm: bool = False) -> bool:
     
     async with DatabaseManager() as session:
         # Delete in reverse dependency order to avoid foreign key issues
-        await session.execute("DELETE FROM messages")
-        await session.execute("DELETE FROM conversations")
-        await session.execute("DELETE FROM document_chunks") 
-        await session.execute("DELETE FROM documents")
-        await session.execute("DELETE FROM prompts")
-        await session.execute("DELETE FROM profiles")
-        await session.execute("DELETE FROM embedding_spaces")
-        await session.execute("DELETE FROM model_defs")
-        await session.execute("DELETE FROM providers")
-        await session.execute("DELETE FROM users")
+        await session.execute(text("DELETE FROM messages"))
+        await session.execute(text("DELETE FROM conversations"))
+        await session.execute(text("DELETE FROM document_chunks")) 
+        await session.execute(text("DELETE FROM documents"))
+        await session.execute(text("DELETE FROM prompts"))
+        await session.execute(text("DELETE FROM profiles"))
+        await session.execute(text("DELETE FROM embedding_spaces"))
+        await session.execute(text("DELETE FROM model_defs"))
+        await session.execute(text("DELETE FROM providers"))
+        await session.execute(text("DELETE FROM users"))
         await session.commit()
     
     logger.warning("All database data cleared")

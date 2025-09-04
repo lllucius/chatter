@@ -481,11 +481,12 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
             await self.session.refresh(conversation)
             
             # Add messages
-            for msg_data in conv_data.get("messages", []):
+            for idx, msg_data in enumerate(conv_data.get("messages", [])):
                 message = Message(
                     conversation_id=conversation.id,
                     role=MessageRole[msg_data["role"]],
                     content=msg_data["content"],
+                    sequence_number=idx,
                 )
                 self.session.add(message)
             

@@ -7,7 +7,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
@@ -121,10 +121,11 @@ class DatabaseSeeder:
 
     async def _count_users(self) -> int:
         """Count existing users in database."""
+        from sqlalchemy import func
         result = await self.session.execute(
-            select(User).limit(1)
+            select(func.count(User.id))
         )
-        return 1 if result.scalar_one_or_none() is not None else 0
+        return result.scalar() or 0
 
     async def _seed_minimal_data(self, results: Dict[str, Any], skip_existing: bool):
         """Seed minimal essential data."""
@@ -469,7 +470,7 @@ Please provide a detailed response that addresses all aspects of the task.""",
             {
                 "name": "Code Review Template",
                 "description": "Template for code review and analysis",
-                "category": PromptCategory.DEVELOPMENT,
+                "category": PromptCategory.CODING,
                 "content": """Please review the following code:
 
 Language: {language}
@@ -491,7 +492,7 @@ Provide specific, actionable feedback.""",
             {
                 "name": "Document Summary Template",
                 "description": "Template for summarizing documents",
-                "category": PromptCategory.ANALYSIS,
+                "category": PromptCategory.ANALYTICAL,
                 "content": """Please summarize the following document:
 
 Document Title: {title}
@@ -719,23 +720,202 @@ All API requests require authentication using JWT tokens.
 
     async def _create_demo_embedding_spaces(self, skip_existing: bool = True) -> List[EmbeddingSpace]:
         """Create demo embedding spaces."""
-        # Implementation would create additional embedding spaces
-        return []
+        from sqlalchemy import select
+        from chatter.models.registry import EmbeddingSpace, ModelDef, DistanceMetric, ReductionStrategy
+        
+        # Get the embedding model
+        result = await self.session.execute(
+            select(ModelDef).where(ModelDef.model_name == "text-embedding-ada-002")
+        )
+        embedding_model = result.scalar_one_or_none()
+        if not embedding_model:
+            logger.warning("No embedding model found, skipping embedding space creation")
+            return []
+        
+        spaces_data = [
+            {
+                "name": "default_documents",
+                "description": "Default embedding space for document processing",
+                "distance_metric": DistanceMetric.COSINE,
+                "dimensions": 1536,
+                "reduction_strategy": ReductionStrategy.NONE,
+            },
+            {
+                "name": "conversations",
+                "description": "Embedding space optimized for conversation context",
+                "distance_metric": DistanceMetric.COSINE,
+                "dimensions": 512,
+                "reduction_strategy": ReductionStrategy.PCA,
+            }
+        ]
+        
+        created_spaces = []
+        for space_data in spaces_data:
+            if skip_existing:
+                existing = await self.session.execute(
+                    select(EmbeddingSpace).where(EmbeddingSpace.name == space_data["name"])
+                )
+                if existing.scalar_one_or_none():
+                    continue
+            
+            space = EmbeddingSpace(
+                model_id=embedding_model.id,
+                name=space_data["name"],
+                description=space_data["description"],
+                distance_metric=space_data["distance_metric"],
+                dimensions=space_data["dimensions"],
+                reduction_strategy=space_data["reduction_strategy"],
+                is_default=space_data["name"] == "default_documents",
+            )
+            
+            self.session.add(space)
+            created_spaces.append(space)
+        
+        if created_spaces:
+            await self.session.commit()
+            for space in created_spaces:
+                await self.session.refresh(space)
+        
+        logger.info(f"Created {len(created_spaces)} demo embedding spaces")
+        return created_spaces
 
     async def _create_test_registry_data(self, skip_existing: bool = True):
         """Create test registry data."""
-        # Implementation would create test-specific registry data
+        from chatter.utils.database import _create_default_registry_data
+        
+        # For testing, we use the same default registry data for consistency
+        await _create_default_registry_data(self.session)
+        logger.info("Created test registry data (using defaults)")
+        
+        # Could add additional test-specific providers/models here in the future
         pass
 
     async def _create_test_conversations(self, users: List[User], skip_existing: bool = True):
         """Create test conversations."""
-        # Implementation would create test-specific conversations
-        pass
+        if not users:
+            return 0
+        
+        test_conversations = [
+            {
+                "title": "Test Conversation 1",
+                "description": "First test conversation for automated testing",
+                "messages": [
+                    {"role": MessageRole.USER, "content": "Hello test"},
+                    {"role": MessageRole.ASSISTANT, "content": "Hello! This is a test response."}
+                ]
+            },
+            {
+                "title": "Test Conversation 2", 
+                "description": "Second test conversation for automated testing",
+                "messages": [
+                    {"role": MessageRole.USER, "content": "What is 2+2?"},
+                    {"role": MessageRole.ASSISTANT, "content": "2+2 equals 4."}
+                ]
+            }
+        ]
+        
+        created_count = 0
+        for conv_data in test_conversations:
+            if skip_existing:
+                existing = await self.session.execute(
+                    select(Conversation).where(Conversation.title == conv_data["title"])
+                )
+                if existing.scalar_one_or_none():
+                    continue
+            
+            # Use first user for test conversations
+            user = users[0]
+            
+            conversation = Conversation(
+                user_id=user.id,
+                title=conv_data["title"],
+                description=conv_data["description"],
+                status=ConversationStatus.ACTIVE,
+            )
+            
+            self.session.add(conversation)
+            await self.session.commit()
+            await self.session.refresh(conversation)
+            
+            # Add messages
+            for idx, msg_data in enumerate(conv_data["messages"]):
+                message = Message(
+                    conversation_id=conversation.id,
+                    role=msg_data["role"],
+                    content=msg_data["content"],
+                    sequence_number=idx,
+                )
+                self.session.add(message)
+            
+            await self.session.commit()
+            created_count += 1
+        
+        logger.info(f"Created {created_count} test conversations")
+        return created_count
 
     async def _create_test_documents(self, users: List[User], skip_existing: bool = True):
         """Create test documents."""
-        # Implementation would create test-specific documents
-        pass
+        if not users:
+            return 0
+        
+        test_documents = [
+            {
+                "filename": "test_doc_1.txt",
+                "title": "Test Document 1",
+                "content": "This is the first test document content for automated testing.",
+                "doc_type": DocumentType.TEXT,
+            },
+            {
+                "filename": "test_doc_2.md",
+                "title": "Test Document 2",
+                "content": "# Test Document\n\nThis is a markdown test document.\n\n## Section 1\nTest content here.",
+                "doc_type": DocumentType.MARKDOWN,
+            }
+        ]
+        
+        created_count = 0
+        for doc_data in test_documents:
+            if skip_existing:
+                existing = await self.session.execute(
+                    select(Document).where(Document.filename == doc_data["filename"])
+                )
+                if existing.scalar_one_or_none():
+                    continue
+            
+            user = users[0]
+            
+            document = Document(
+                user_id=user.id,
+                filename=doc_data["filename"],
+                title=doc_data["title"],
+                content=doc_data["content"],
+                document_type=doc_data["doc_type"],
+                file_size=len(doc_data["content"]),
+                status=DocumentStatus.PROCESSED,
+                chunk_count=1,
+            )
+            
+            self.session.add(document)
+            await self.session.commit()
+            await self.session.refresh(document)
+            
+            # Create document chunk
+            chunk = DocumentChunk(
+                document_id=document.id,
+                chunk_index=0,
+                content=doc_data["content"],
+                token_count=len(doc_data["content"].split()),
+                metadata={"title": doc_data["title"]},
+            )
+            
+            self.session.add(chunk)
+            created_count += 1
+        
+        if created_count > 0:
+            await self.session.commit()
+        
+        logger.info(f"Created {created_count} test documents")
+        return created_count
 
 
 # Convenience functions for direct usage
@@ -766,16 +946,37 @@ async def clear_all_data(confirm: bool = False) -> bool:
     
     async with DatabaseManager() as session:
         # Delete in reverse dependency order to avoid foreign key issues
-        await session.execute("DELETE FROM messages")
-        await session.execute("DELETE FROM conversations")
-        await session.execute("DELETE FROM document_chunks") 
-        await session.execute("DELETE FROM documents")
-        await session.execute("DELETE FROM prompts")
-        await session.execute("DELETE FROM profiles")
-        await session.execute("DELETE FROM embedding_spaces")
-        await session.execute("DELETE FROM model_defs")
-        await session.execute("DELETE FROM providers")
-        await session.execute("DELETE FROM users")
+        
+        # Delete messages first (depends on conversations)
+        await session.execute(delete(Message))
+        
+        # Delete conversations (depends on users)
+        await session.execute(delete(Conversation))
+        
+        # Delete document chunks (depends on documents) 
+        await session.execute(delete(DocumentChunk))
+        
+        # Delete documents (depends on users)
+        await session.execute(delete(Document))
+        
+        # Delete prompts (depends on users)
+        await session.execute(delete(Prompt))
+        
+        # Delete profiles (depends on users)
+        await session.execute(delete(Profile))
+        
+        # Delete embedding spaces (depends on model_defs)
+        await session.execute(delete(EmbeddingSpace))
+        
+        # Delete model definitions (depends on providers)
+        await session.execute(delete(ModelDef))
+        
+        # Delete providers
+        await session.execute(delete(Provider))
+        
+        # Delete users last
+        await session.execute(delete(User))
+        
         await session.commit()
     
     logger.warning("All database data cleared")

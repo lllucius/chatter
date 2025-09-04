@@ -42,6 +42,7 @@ import {
   Storage as ModelsIcon,
   Build as ToolsIcon,
   AccountTree as WorkflowIcon,
+  Science as ABTestIcon,
   ExpandLess,
   ExpandMore,
 } from '@mui/icons-material';
@@ -96,6 +97,7 @@ const navSections: NavSection[] = [
       { label: 'Agents', path: '/agents', icon: <AgentIcon /> },
       { label: 'Tools', path: '/tools', icon: <ToolsIcon /> },
       { label: 'Workflows', path: '/workflows', icon: <WorkflowIcon /> },
+      { label: 'A/B Testing', path: '/ab-testing', icon: <ABTestIcon /> },
     ]
   },
   {

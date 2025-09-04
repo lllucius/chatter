@@ -260,6 +260,139 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
         logger.info(f"Created {created_count} basic prompts from configuration")
         return created_count
     
+    async def _create_production_prompts(self, admin_user, skip_existing: bool = True) -> int:
+        """Create production prompts from configuration."""
+        if not admin_user:
+            from sqlalchemy import select
+            from chatter.models.user import User
+            result = await self.session.execute(
+                select(User).where(User.username == "admin")
+            )
+            admin_user = result.scalar_one_or_none()
+            if not admin_user:
+                logger.warning("No admin user found, skipping production prompt creation")
+                return 0
+        
+        prompts_config = self.config.get("production_data", {}).get("prompt_templates", [])
+        if not prompts_config:
+            logger.info("No production prompts in configuration, falling back to basic prompts")
+            return await self._create_basic_prompts(admin_user, skip_existing)
+        
+        created_count = 0
+        for prompt_data in prompts_config:
+            if skip_existing:
+                from sqlalchemy import select
+                from chatter.models.prompt import Prompt
+                existing = await self.session.execute(
+                    select(Prompt).where(Prompt.name == prompt_data["name"])
+                )
+                if existing.scalar_one_or_none():
+                    continue
+            
+            from chatter.models.prompt import Prompt, PromptCategory, PromptType
+            
+            prompt = Prompt(
+                owner_id=admin_user.id,
+                name=prompt_data["name"],
+                description=prompt_data["description"],
+                prompt_type=PromptType.TEMPLATE,
+                category=PromptCategory[prompt_data["category"]],
+                content=prompt_data["content"],
+                variables=prompt_data["variables"],
+                examples=prompt_data.get("examples"),
+                suggested_temperature=prompt_data.get("suggested_temperature"),
+                suggested_max_tokens=prompt_data.get("suggested_max_tokens"),
+                is_public=True,
+            )
+            
+            self.session.add(prompt)
+            created_count += 1
+        
+        if created_count > 0:
+            await self.session.commit()
+        
+        logger.info(f"Created {created_count} production prompts from configuration")
+        return created_count
+
+    async def _create_production_profiles(self, admin_user, skip_existing: bool = True) -> int:
+        """Create production profiles from configuration."""
+        if not admin_user:
+            from sqlalchemy import select
+            from chatter.models.user import User
+            result = await self.session.execute(
+                select(User).where(User.username == "admin")
+            )
+            admin_user = result.scalar_one_or_none()
+            if not admin_user:
+                logger.warning("No admin user found, skipping production profile creation")
+                return 0
+        
+        profiles_config = self.config.get("production_data", {}).get("chat_profiles", [])
+        if not profiles_config:
+            logger.info("No production profiles in configuration, falling back to basic profiles")
+            return await self._create_basic_profiles(admin_user, skip_existing)
+        
+        created_count = 0
+        for profile_data in profiles_config:
+            if skip_existing:
+                from sqlalchemy import select
+                from chatter.models.profile import Profile
+                existing = await self.session.execute(
+                    select(Profile).where(Profile.name == profile_data["name"])
+                )
+                if existing.scalar_one_or_none():
+                    continue
+            
+            from chatter.models.profile import Profile, ProfileType
+            
+            profile = Profile(
+                owner_id=admin_user.id,
+                name=profile_data["name"],
+                description=profile_data["description"],
+                profile_type=ProfileType[profile_data["profile_type"]],
+                llm_provider=profile_data["llm_provider"],
+                llm_model=profile_data["llm_model"],
+                temperature=profile_data["temperature"],
+                max_tokens=profile_data["max_tokens"],
+                top_p=profile_data.get("top_p"),
+                top_k=profile_data.get("top_k"),
+                system_prompt=profile_data.get("system_prompt"),
+                enable_tools=profile_data.get("enable_tools", False),
+                is_public=True,
+                tags=profile_data.get("tags", []),
+            )
+            
+            self.session.add(profile)
+            created_count += 1
+        
+        if created_count > 0:
+            await self.session.commit()
+        
+        logger.info(f"Created {created_count} production profiles from configuration")
+        return created_count
+    
+    async def _seed_production_data(self, results: Dict[str, Any], skip_existing: bool):
+        """Override production seeding to use configuration data."""
+        logger.info("Seeding production data from configuration")
+        
+        # Create admin user
+        admin_user = await self._create_admin_user(skip_existing)
+        if admin_user:
+            results["created"]["admin_user"] = admin_user.username
+        
+        # Create production profiles and prompts from configuration
+        profiles_created = await self._create_production_profiles(admin_user, skip_existing)
+        prompts_created = await self._create_production_prompts(admin_user, skip_existing)
+        
+        results["created"]["profiles"] = profiles_created
+        results["created"]["prompts"] = prompts_created
+        
+        # Create default registry data (providers, models, embedding spaces)
+        await self._create_default_registry_data(skip_existing)
+        results["created"]["registry"] = "default_models"
+        
+        logger.info(f"Production seeding completed: {profiles_created} profiles, {prompts_created} prompts")
+    
     async def _create_demo_prompts(self, skip_existing: bool = True) -> List:
         """Create extended prompts for demo mode."""
         prompts_config = self.config.get("prompt_templates", {}).get("extended", [])

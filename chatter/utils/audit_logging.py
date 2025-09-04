@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 
 from chatter.utils.logging import get_logger
-from chatter.utils.security import sanitize_log_data
+from chatter.utils.security_enhanced import sanitize_log_data
 
 logger = get_logger(__name__)
 

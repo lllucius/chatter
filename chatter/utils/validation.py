@@ -314,77 +314,6 @@ class InputValidator:
             )
 
 
-class RateLimitValidator:
-    """Rate limiting validation (compatibility layer for unified rate limiter)."""
-
-    def __init__(self) -> None:
-        """Initialize rate limit validator."""
-        from chatter.utils.unified_rate_limiter import get_unified_rate_limiter
-        
-        self._unified_limiter = get_unified_rate_limiter()
-
-    def check_rate_limit(
-        self,
-        identifier: str,
-        max_requests: int | None = None,
-        window_seconds: int | None = None,
-    ) -> bool:
-        """Check if request is within rate limits.
-
-        Args:
-            identifier: Unique identifier (IP, user ID, etc.)
-            max_requests: Maximum requests allowed
-            window_seconds: Time window in seconds
-
-        Returns:
-            True if within limits, False otherwise
-        """
-        max_requests = max_requests or settings.rate_limit_requests
-        window_seconds = window_seconds or settings.rate_limit_window
-
-        try:
-            # Use asyncio to run the async rate limiter
-            import asyncio
-            
-            # Try to get the current event loop, create one if needed
-            try:
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-
-            # Run the rate limit check
-            coro = self._unified_limiter.check_rate_limit(
-                key=identifier,
-                limit=max_requests,
-                window=window_seconds,
-                identifier="validation",
-            )
-            
-            # If we're already in an async context, await directly
-            # Otherwise, run in the event loop
-            if loop.is_running():
-                # We're in an async context - create a task
-                task = asyncio.create_task(coro)
-                # This is a sync function, so we can't await
-                # Fall back to the simple check for now
-                return True  # Allow by default in async context
-            else:
-                loop.run_until_complete(coro)
-                return True
-                
-        except Exception as e:
-            # If rate limit exceeded or other error, deny
-            from chatter.utils.unified_rate_limiter import RateLimitExceeded
-            
-            if "Rate limit exceeded" in str(e):
-                return False
-            
-            # For other errors, log and allow (fail open)
-            logger.warning(f"Rate limit validation error: {e}")
-            return True
-
-
 class SecurityValidator:
     """Security-focused validation for potential threats."""
 
@@ -479,7 +408,6 @@ class SecurityValidator:
 
 # Global validator instances
 input_validator = InputValidator()
-rate_limit_validator = RateLimitValidator()
 security_validator = SecurityValidator()
 
 
@@ -499,17 +427,12 @@ async def validate_request_middleware(
     Raises:
         HTTPException: If validation fails
     """
-    # Get client identifier for rate limiting
+    # Get client identifier for monitoring
     client_ip = request.client.host if request.client else "unknown"
     client_id = client_ip
 
-    # Check rate limits
-    if not rate_limit_validator.check_rate_limit(client_id):
-        logger.warning(f"Rate limit exceeded for client: {client_id}")
-        raise HTTPException(
-            status_code=429,
-            detail="Rate limit exceeded. Please try again later.",
-        )
+    # Note: Rate limiting is handled by UnifiedRateLimitMiddleware in main.py
+    # This validation middleware focuses on input validation and security
 
     # Validate request body if present
     if request.method in ["POST", "PUT", "PATCH"]:
@@ -618,7 +541,7 @@ def validate_user_input(data: dict[str, Any]) -> dict[str, Any]:
 
 
 def sanitize_input(text: str) -> str:
-    """Backward compatibility function for sanitizing input.
+    """Sanitize user input text.
 
     Args:
         text: Text to sanitize

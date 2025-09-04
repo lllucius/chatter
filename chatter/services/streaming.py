@@ -11,7 +11,7 @@ from typing import Any
 from chatter.schemas.chat import StreamingChatChunk
 from chatter.utils.correlation import get_correlation_id
 from chatter.utils.monitoring import record_workflow_metrics
-from chatter.utils.security import get_secure_logger
+from chatter.utils.security_enhanced import get_secure_logger
 
 logger = get_secure_logger(__name__)
 
@@ -45,11 +45,6 @@ class StreamingEvent:
         """Set timestamp if not provided."""
         if self.timestamp is None:
             self.timestamp = time.time()
-
-
-# Alias for compatibility with test imports
-StreamEvent = StreamingEvent
-StreamEventType = StreamingEventType
 
 
 class StreamingError(Exception):

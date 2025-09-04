@@ -30,7 +30,7 @@ from chatter.utils.problem import (
     InternalServerProblem,
     NotFoundProblem,
 )
-from chatter.utils.rate_limiter import get_rate_limiter, RateLimitExceeded
+from chatter.utils.unified_rate_limiter import get_unified_rate_limiter, RateLimitExceeded
 
 logger = get_logger(__name__)
 router = APIRouter(
@@ -87,12 +87,21 @@ async def create_agent(
     """
     try:
         # Apply rate limiting for agent creation
-        rate_limiter = get_rate_limiter()
+        rate_limiter = get_unified_rate_limiter()
         try:
+            # Check hourly limit
             await rate_limiter.check_rate_limit(
-                f"create_agent:{current_user.id}",
-                limit_per_hour=10,  # 10 agents per hour
-                limit_per_day=50,   # 50 agents per day
+                key=f"create_agent:{current_user.id}",
+                limit=10,  # 10 agents per hour
+                window=3600,  # 1 hour in seconds
+                identifier="create_agent_hourly",
+            )
+            # Check daily limit
+            await rate_limiter.check_rate_limit(
+                key=f"create_agent:{current_user.id}",
+                limit=50,   # 50 agents per day
+                window=86400,  # 1 day in seconds
+                identifier="create_agent_daily",
             )
         except RateLimitExceeded as e:
             raise InternalServerProblem(detail=str(e))
@@ -460,12 +469,21 @@ async def interact_with_agent(
     """
     try:
         # Apply rate limiting for agent interactions
-        rate_limiter = get_rate_limiter()
+        rate_limiter = get_unified_rate_limiter()
         try:
+            # Check hourly limit
             await rate_limiter.check_rate_limit(
-                f"interact_agent:{current_user.id}:{agent_id}",
-                limit_per_hour=100,  # 100 interactions per hour per agent
-                limit_per_day=1000,  # 1000 interactions per day per agent
+                key=f"interact_agent:{current_user.id}:{agent_id}",
+                limit=100,  # 100 interactions per hour per agent
+                window=3600,  # 1 hour in seconds
+                identifier="interact_agent_hourly",
+            )
+            # Check daily limit
+            await rate_limiter.check_rate_limit(
+                key=f"interact_agent:{current_user.id}:{agent_id}",
+                limit=1000,  # 1000 interactions per day per agent
+                window=86400,  # 1 day in seconds
+                identifier="interact_agent_daily",
             )
         except RateLimitExceeded as e:
             raise InternalServerProblem(detail=str(e))
@@ -608,12 +626,21 @@ async def bulk_create_agents(
     """
     try:
         # Apply rate limiting for bulk operations
-        rate_limiter = get_rate_limiter()
+        rate_limiter = get_unified_rate_limiter()
         try:
+            # Check hourly limit
             await rate_limiter.check_rate_limit(
-                f"bulk_create_agents:{current_user.id}",
-                limit_per_hour=3,  # 3 bulk operations per hour
-                limit_per_day=10,  # 10 bulk operations per day
+                key=f"bulk_create_agents:{current_user.id}",
+                limit=3,  # 3 bulk operations per hour
+                window=3600,  # 1 hour in seconds
+                identifier="bulk_create_hourly",
+            )
+            # Check daily limit
+            await rate_limiter.check_rate_limit(
+                key=f"bulk_create_agents:{current_user.id}",
+                limit=10,  # 10 bulk operations per day
+                window=86400,  # 1 day in seconds
+                identifier="bulk_create_daily",
             )
         except RateLimitExceeded as e:
             raise InternalServerProblem(detail=str(e))
@@ -715,12 +742,21 @@ async def bulk_delete_agents(
     """
     try:
         # Apply rate limiting for bulk operations
-        rate_limiter = get_rate_limiter()
+        rate_limiter = get_unified_rate_limiter()
         try:
+            # Check hourly limit
             await rate_limiter.check_rate_limit(
-                f"bulk_delete_agents:{current_user.id}",
-                limit_per_hour=3,  # 3 bulk operations per hour
-                limit_per_day=10,  # 10 bulk operations per day
+                key=f"bulk_delete_agents:{current_user.id}",
+                limit=3,  # 3 bulk operations per hour
+                window=3600,  # 1 hour in seconds
+                identifier="bulk_delete_hourly",
+            )
+            # Check daily limit
+            await rate_limiter.check_rate_limit(
+                key=f"bulk_delete_agents:{current_user.id}",
+                limit=10,  # 10 bulk operations per day
+                window=86400,  # 1 day in seconds
+                identifier="bulk_delete_daily",
             )
         except RateLimitExceeded as e:
             raise InternalServerProblem(detail=str(e))

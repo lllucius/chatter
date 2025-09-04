@@ -242,7 +242,7 @@ async def refresh_token(
         
         # Log token refresh
         from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
-        from chatter.utils.security import verify_token
+        from chatter.utils.security_enhanced import verify_token
         
         # Extract user ID for logging
         payload = verify_token(token_data.refresh_token)

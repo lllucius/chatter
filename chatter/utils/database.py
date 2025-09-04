@@ -5,32 +5,18 @@ from collections.abc import AsyncGenerator
 
 from sqlalchemy import event, text
 
-# Compatibility layer for SQLAlchemy versions
-try:
-    from sqlalchemy.ext.asyncio import (
-        AsyncEngine,
-        AsyncSession,
-        async_sessionmaker,
-        create_async_engine,
-    )
-except ImportError:
-    # Fallback for older SQLAlchemy versions
-    from sqlalchemy.ext.asyncio import (
-        AsyncEngine,
-        AsyncSession,
-        create_async_engine,
-    )
-    from sqlalchemy.orm import sessionmaker
-
-    async_sessionmaker = sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from chatter.config import settings
 from chatter.models.base import Base
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
-
-# Import QueryOptimizer from database_optimization for backward compatibility
 
 # Global database engine and session maker
 _engine: AsyncEngine | None = None
@@ -331,7 +317,7 @@ async def initialize_default_data() -> None:
     from chatter.models.profile import Profile, ProfileType
     from chatter.models.prompt import Prompt, PromptCategory, PromptType
     from chatter.models.user import User
-    from chatter.utils.security import hash_password
+    from chatter.utils.security_enhanced import hash_password
 
     async with DatabaseManager() as session:
         # Check if this is a virgin database (no users exist)
@@ -929,10 +915,6 @@ class DatabaseManager:
                 leaked_sessions.append(session_info)
 
         return leaked_sessions
-
-
-# Alias for backward compatibility
-DatabaseConnectionManager = DatabaseManager
 
 
 async def execute_query(query: str, **params) -> any:

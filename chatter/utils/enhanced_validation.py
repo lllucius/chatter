@@ -6,7 +6,7 @@ from typing import Any
 from pydantic import BaseModel, validator
 
 from chatter.core.exceptions import ValidationError
-from chatter.utils.security import sanitize_input
+from chatter.utils.security_enhanced import sanitize_input
 
 
 class ValidationConfig:

@@ -28,7 +28,7 @@ from chatter.services.message import MessageService
 from chatter.services.workflow_execution import WorkflowExecutionService
 from chatter.utils.correlation import get_correlation_id
 from chatter.utils.monitoring import record_request_metrics
-from chatter.utils.security import get_secure_logger
+from chatter.utils.security_enhanced import get_secure_logger
 
 logger = get_secure_logger(__name__)
 
@@ -505,80 +505,3 @@ class ChatService:
         except Exception:
             return 50.0  # Default score
 
-    # Workflow compatibility methods for API compatibility
-
-    async def chat_with_workflow(
-        self,
-        user_id: str,
-        chat_request: ChatRequest,
-        workflow_type: str = "basic",
-    ) -> tuple[Conversation, Message]:
-        """Chat with specific workflow type (compatibility wrapper)."""
-        # Create a new chat request with the specified workflow type
-        from chatter.schemas.chat import ChatRequest
-
-        new_request = ChatRequest(
-            message=chat_request.message,
-            conversation_id=chat_request.conversation_id,
-            profile_id=chat_request.profile_id,
-            workflow_type=workflow_type,
-            temperature=chat_request.temperature,
-            max_tokens=chat_request.max_tokens,
-            system_prompt_override=chat_request.system_prompt_override,
-            enable_retrieval=chat_request.enable_retrieval,
-            provider_override=chat_request.provider_override,
-            workflow_config=chat_request.workflow_config,
-        )
-        return await self.chat(user_id, new_request)
-
-    async def chat_with_template(
-        self,
-        user_id: str,
-        chat_request: ChatRequest,
-        template_name: str,
-    ) -> tuple[Conversation, Message]:
-        """Chat with workflow template (compatibility wrapper)."""
-        # For now, use the basic chat with template name in metadata
-        from chatter.schemas.chat import ChatRequest
-
-        workflow_config = chat_request.workflow_config or {}
-        workflow_config["template_name"] = template_name
-
-        new_request = ChatRequest(
-            message=chat_request.message,
-            conversation_id=chat_request.conversation_id,
-            profile_id=chat_request.profile_id,
-            workflow_type="basic",  # Templates can define their own workflow
-            temperature=chat_request.temperature,
-            max_tokens=chat_request.max_tokens,
-            system_prompt_override=chat_request.system_prompt_override,
-            enable_retrieval=chat_request.enable_retrieval,
-            provider_override=chat_request.provider_override,
-            workflow_config=workflow_config,
-        )
-        return await self.chat(user_id, new_request)
-
-    async def chat_workflow_streaming(
-        self,
-        user_id: str,
-        chat_request: ChatRequest,
-        workflow_type: str = "basic",
-    ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Stream chat with specific workflow type (compatibility wrapper)."""
-        # Create a new chat request with the specified workflow type
-        from chatter.schemas.chat import ChatRequest
-
-        new_request = ChatRequest(
-            message=chat_request.message,
-            conversation_id=chat_request.conversation_id,
-            profile_id=chat_request.profile_id,
-            workflow_type=workflow_type,
-            temperature=chat_request.temperature,
-            max_tokens=chat_request.max_tokens,
-            system_prompt_override=chat_request.system_prompt_override,
-            enable_retrieval=chat_request.enable_retrieval,
-            provider_override=chat_request.provider_override,
-            workflow_config=chat_request.workflow_config,
-        )
-        async for chunk in self.chat_streaming(user_id, new_request):
-            yield chunk

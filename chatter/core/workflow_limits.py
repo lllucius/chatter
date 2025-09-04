@@ -11,7 +11,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from chatter.config import settings
-from chatter.utils.security import get_secure_logger
+from chatter.utils.security_enhanced import get_secure_logger
 
 logger = get_secure_logger(__name__)
 

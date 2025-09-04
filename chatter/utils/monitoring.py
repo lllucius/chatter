@@ -886,64 +886,6 @@ class AlertManager:
         return escalated
 
 
-class MonitoringService:
-    """Legacy monitoring service - wraps AdvancedMetricsCollector for backward compatibility."""
-
-    def __init__(self, max_history: int = 10000):
-        """Initialize monitoring service."""
-        self.request_metrics = deque(maxlen=max_history)
-        self.database_metrics = deque(maxlen=max_history)
-        self.error_counts = defaultdict(int)
-        self.start_time = time.time()
-
-        # Use the advanced metrics collector internally
-        self._collector = AdvancedMetricsCollector(max_history)
-
-    def record_request(self, metrics: RequestMetrics) -> None:
-        """Record request metrics."""
-        self.request_metrics.append(metrics)
-        self._collector.record_request(metrics)
-
-    def record_database_query(self, metrics: DatabaseMetrics) -> None:
-        """Record database query metrics."""
-        self.database_metrics.append(metrics)
-        self._collector.record_database_operation(metrics)
-
-    def record_error(
-        self, error_type: str, error_message: str = ""
-    ) -> None:
-        """Record error occurrence."""
-        self.error_counts[error_type] += 1
-        logger.error(f"Error recorded: {error_type} - {error_message}")
-
-    def get_system_health(self) -> dict[str, Any]:
-        """Get system health status."""
-        health = self._collector.get_system_health()
-
-        # Add legacy fields for backward compatibility
-        health["uptime_seconds"] = time.time() - self.start_time
-        health["request_rate"] = len(self.request_metrics) / max(
-            time.time() - self.start_time, 1
-        )
-
-        return health
-
-    def get_performance_stats(self) -> dict[str, Any]:
-        """Get performance statistics."""
-        return self._collector.get_performance_summary()
-
-    def get_error_summary(self) -> dict[str, int]:
-        """Get error count summary."""
-        return dict(self.error_counts)
-
-    def reset_metrics(self) -> None:
-        """Reset all metrics."""
-        self.request_metrics.clear()
-        self.database_metrics.clear()
-        self.error_counts.clear()
-        self.start_time = time.time()
-
-
 class PerformanceTracker:
     """Performance tracking utility."""
 

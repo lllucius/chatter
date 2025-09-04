@@ -405,39 +405,18 @@ async def chat(
         async def generate_stream():
             """Generate streaming chat response chunks."""
             try:
-                if workflow_type == "basic":
-                    # Use existing streaming for plain/basic
-                    async for chunk in chat_service.chat_streaming(
-                        current_user.id, chat_request
-                    ):
-                        # Check if client disconnected
-                        if await request.is_disconnected():
-                            logger.info("Client disconnected during streaming")
-                            break
-                        yield f"data: {json.dumps(chunk)}\n\n"
-                else:
-                    # For workflow-based streaming
-                    if not hasattr(
-                        chat_service, "chat_workflow_streaming"
-                    ):
-                        error_chunk = {
-                            "type": "error",
-                            "error": f"Streaming is not yet supported for workflow '{chat_request.workflow}'.",
-                        }
-                        yield f"data: {json.dumps(error_chunk)}\n\n"
-                    else:
-                        async for (
-                            chunk
-                        ) in chat_service.chat_workflow_streaming(
-                            current_user.id,
-                            chat_request,
-                            workflow_type=workflow_type,
-                        ):
-                            # Check if client disconnected
-                            if await request.is_disconnected():
-                                logger.info("Client disconnected during workflow streaming")
-                                break
-                            yield f"data: {json.dumps(chunk)}\n\n"
+                # Set workflow_type on the request for processing
+                chat_request.workflow_type = workflow_type
+                
+                # Use the main streaming method for all workflow types
+                async for chunk in chat_service.chat_streaming(
+                    current_user.id, chat_request
+                ):
+                    # Check if client disconnected
+                    if await request.is_disconnected():
+                        logger.info("Client disconnected during streaming")
+                        break
+                    yield f"data: {json.dumps(chunk)}\n\n"
             except (NotFoundError, ChatServiceError) as e:
                 error_chunk = {"type": "error", "error": str(e)}
                 yield f"data: {json.dumps(error_chunk)}\n\n"
@@ -456,18 +435,12 @@ async def chat(
 
     # Non-streaming mode
     try:
-        if workflow_type == "basic":
-            conversation, assistant_message = await chat_service.chat(
-                current_user.id, chat_request
-            )
-        else:
-            conversation, assistant_message = (
-                await chat_service.chat_with_workflow(
-                    current_user.id,
-                    chat_request,
-                    workflow_type=workflow_type,
-                )
-            )
+        # Set workflow_type on the request for processing
+        chat_request.workflow_type = workflow_type
+        
+        conversation, assistant_message = await chat_service.chat(
+            current_user.id, chat_request
+        )
 
         return ChatResponse(
             conversation_id=conversation.id,
@@ -560,10 +533,18 @@ async def chat_with_template(
 ) -> ChatResponse:
     """Chat using a specific workflow template."""
     try:
-        conversation, assistant_message = (
-            await chat_service.chat_with_template(
-                current_user.id, chat_request, template_name
-            )
+        # Add template name to system prompt override for template processing
+        template_instruction = f"[TEMPLATE:{template_name}]"
+        if chat_request.system_prompt_override:
+            chat_request.system_prompt_override = f"{template_instruction} {chat_request.system_prompt_override}"
+        else:
+            chat_request.system_prompt_override = template_instruction
+        
+        # Set workflow_type to basic for template processing
+        chat_request.workflow_type = "basic"
+        
+        conversation, assistant_message = await chat_service.chat(
+            current_user.id, chat_request
         )
 
         return ChatResponse(

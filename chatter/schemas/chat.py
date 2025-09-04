@@ -239,6 +239,11 @@ class ChatRequest(BaseModel):
     system_prompt_override: str | None = Field(
         None, description="Override system prompt for this request"
     )
+    
+    # Internal field set by API processing
+    workflow_type: str | None = Field(
+        None, description="Internal workflow type (set by API processing)"
+    )
 
 
 class ChatResponse(BaseModel):

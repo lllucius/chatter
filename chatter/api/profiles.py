@@ -30,13 +30,13 @@ from chatter.utils.problem import (
     RateLimitProblem,
     ValidationProblem,
 )
-from chatter.utils.rate_limiter import RateLimiter, RateLimitExceeded
+from chatter.utils.unified_rate_limiter import get_unified_rate_limiter, RateLimitExceeded
 
 logger = get_logger(__name__)
 router = APIRouter()
 
 # Rate limiter for expensive operations
-rate_limiter = RateLimiter()
+rate_limiter = get_unified_rate_limiter()
 
 
 async def get_profile_service(
@@ -70,10 +70,19 @@ async def create_profile(
         # Rate limiting for profile creation to prevent spam
         rate_limit_key = f"profile_create:{current_user.id}"
         try:
+            # Check hourly limit
             await rate_limiter.check_rate_limit(
                 key=rate_limit_key,
-                limit_per_hour=10,  # Max 10 profile creations per hour
-                limit_per_day=50    # Max 50 profile creations per day
+                limit=10,  # Max 10 profile creations per hour
+                window=3600,  # 1 hour in seconds
+                identifier="profile_create_hourly",
+            )
+            # Check daily limit
+            await rate_limiter.check_rate_limit(
+                key=rate_limit_key,
+                limit=50,    # Max 50 profile creations per day
+                window=86400,  # 1 day in seconds
+                identifier="profile_create_daily",
             )
         except RateLimitExceeded as e:
             logger.warning(
@@ -343,10 +352,19 @@ async def test_profile(
         # Rate limiting for expensive LLM operations
         rate_limit_key = f"profile_test:{current_user.id}"
         try:
+            # Check hourly limit
             await rate_limiter.check_rate_limit(
                 key=rate_limit_key,
-                limit_per_hour=20,  # Max 20 tests per hour per user
-                limit_per_day=100   # Max 100 tests per day per user
+                limit=20,  # Max 20 tests per hour per user
+                window=3600,  # 1 hour in seconds
+                identifier="profile_test_hourly",
+            )
+            # Check daily limit
+            await rate_limiter.check_rate_limit(
+                key=rate_limit_key,
+                limit=100,   # Max 100 tests per day per user
+                window=86400,  # 1 day in seconds
+                identifier="profile_test_daily",
             )
         except RateLimitExceeded as e:
             logger.warning(

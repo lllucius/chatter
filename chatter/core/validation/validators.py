@@ -548,11 +548,20 @@ class WorkflowValidator(BaseValidator):
         from .engine import ValidationResult
         
         errors = []
-        required_fields = ['id', 'name', 'steps']
         
-        for field in required_fields:
-            if field not in config:
-                errors.append(ValidationError(f"Workflow config missing required field: {field}"))
+        # Handle simple workflow type validation (for workflow execution service)
+        if "workflow_type" in config and len(config) == 1:
+            workflow_type = config["workflow_type"]
+            valid_types = ["plain", "rag", "tools", "full"]
+            if workflow_type not in valid_types:
+                errors.append(ValidationError(f"Invalid workflow type: {workflow_type}. Must be one of {valid_types}"))
+        else:
+            # Handle full workflow configuration validation
+            required_fields = ['id', 'name', 'steps']
+            
+            for field in required_fields:
+                if field not in config:
+                    errors.append(ValidationError(f"Workflow config missing required field: {field}"))
                 
         return ValidationResult(
             is_valid=len(errors) == 0,

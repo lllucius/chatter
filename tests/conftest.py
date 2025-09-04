@@ -18,8 +18,8 @@ from sqlalchemy.ext.asyncio import (
 from chatter.utils.database import Base, get_session_generator
 
 
-@pytest.fixture
-async def app(db_session: AsyncSession):
+@pytest.fixture(scope="function") 
+def app(db_session: AsyncSession):
     """
     Create a FastAPI application with test database session override.
     
@@ -43,9 +43,9 @@ async def app(db_session: AsyncSession):
     app = create_app()
 
     # Override the database session dependency
-    async def get_test_session():
+    def get_test_session():
         """Override database session for testing."""
-        yield db_session
+        return db_session
 
     # Replace the production dependency with our test version
     app.dependency_overrides[get_session_generator] = get_test_session
@@ -125,7 +125,7 @@ async def db_setup(db_engine):
     yield
 
 
-@pytest.fixture
+@pytest.fixture(scope="function")
 async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     """
     Provide a database session with transaction rollback per test.
@@ -141,29 +141,22 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     Returns:
         AsyncGenerator yielding a database session
     """
-    # Use the engine to create a connection for this test
-    connection = await db_engine.connect()
-    
-    # Start a transaction that we'll rollback at the end
-    transaction = await connection.begin()
-    
-    # Create session bound to the connection
+    # Create a session maker bound to the engine
     session_maker = async_sessionmaker(
-        bind=connection,
+        bind=db_engine,
         class_=AsyncSession,
         expire_on_commit=False,
     )
     
+    # Create a session with autoflush disabled for better control
     session = session_maker()
+    session.info["_in_test"] = True  # Mark session as being used in tests
+    
     try:
         yield session
     finally:
-        # Close session first
+        await session.rollback()
         await session.close()
-        # Then rollback transaction
-        await transaction.rollback()
-        # Finally close connection
-        await connection.close()
 
 
 @pytest.fixture

@@ -19,10 +19,15 @@ from chatter.schemas.ab_testing import (
     ABTestUpdateRequest,
     TestStatus,
 )
-from chatter.services.ab_testing import ABTestManager, MetricType
+from chatter.services.ab_testing import (
+    ABTestManager,
+    MetricType,
+    VariantAllocation,
+)
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     BadRequestProblem,
+    ForbiddenProblem,
     InternalServerProblem,
     NotFoundProblem,
 )
@@ -30,6 +35,65 @@ from chatter.utils.problem import (
 logger = get_logger(__name__)
 router = APIRouter()
 
+
+def _check_test_access(test: ABTestResponse | None, current_user: User) -> None:
+    """Check if user has access to the test.
+
+    Args:
+        test: Test to check access for
+        current_user: Current user
+
+    Raises:
+        NotFoundProblem: If test doesn't exist
+        ForbiddenProblem: If user doesn't have access
+    """
+    if not test:
+        raise NotFoundProblem(detail="A/B test not found")
+
+    # For now, users can only access their own tests
+    # In a production system, you'd implement proper RBAC here
+    if test.created_by != current_user.username:
+        # Allow admins to access all tests (assuming admin role exists)
+        user_roles = getattr(current_user, 'roles', [])
+        if 'admin' not in user_roles and 'ab_testing_admin' not in user_roles:
+            raise ForbiddenProblem(
+                detail="You don't have permission to access this A/B test"
+            )
+
+def _validate_test_operation(test: ABTestResponse, operation: str, current_user: User) -> None:
+    """Validate if user can perform operation on test.
+
+    Args:
+        test: Test to operate on
+        operation: Operation to perform (start, stop, delete, etc.)
+        current_user: Current user
+
+    Raises:
+        ForbiddenProblem: If operation is not allowed
+        BadRequestProblem: If operation is invalid for current test state
+    """
+    _check_test_access(test, current_user)
+
+    # Check operation validity based on test status
+    if operation == "start" and test.status != TestStatus.DRAFT:
+        raise BadRequestProblem(
+            detail=f"Cannot start test in {test.status} status"
+        )
+
+    if operation == "pause" and test.status != TestStatus.RUNNING:
+        raise BadRequestProblem(
+            detail=f"Cannot pause test in {test.status} status"
+        )
+
+    if operation in ["complete", "end"] and test.status not in [TestStatus.RUNNING, TestStatus.PAUSED]:
+        raise BadRequestProblem(
+            detail=f"Cannot complete test in {test.status} status"
+        )
+
+    if operation == "delete" and test.status == TestStatus.RUNNING:
+        raise BadRequestProblem(
+            detail="Cannot delete running test. Pause or complete it first."
+        )
 
 async def get_ab_test_manager() -> ABTestManager:
     """Get A/B test manager instance.
@@ -63,45 +127,64 @@ async def create_ab_test(
         Created test data
     """
     try:
-        # Convert request data to ABTest model format
+        # Validate and sanitize inputs
+        if not test_data.name or len(test_data.name.strip()) == 0:
+            raise BadRequestProblem(detail="Test name is required")
 
-        from chatter.services.ab_testing import (
-            TestMetric,
-        )
-        from chatter.services.ab_testing import (
-            TestVariant as ServiceTestVariant,
-        )
+        if len(test_data.name) > 200:
+            raise BadRequestProblem(detail="Test name too long (max 200 characters)")
 
-        # Create variants
-        variants = []
-        for i, variant_data in enumerate(test_data.variants):
-            variant = ServiceTestVariant(
-                name=variant_data.name,
-                description=variant_data.description,
-                weight=variant_data.weight,
-                configuration=variant_data.configuration,
-                is_control=(i == 0),  # First variant is control
+        if len(test_data.description) > 1000:
+            raise BadRequestProblem(detail="Test description too long (max 1000 characters)")
+
+        # Validate variants
+        if len(test_data.variants) < 2:
+            raise BadRequestProblem(
+                detail="Test must have at least 2 variants"
             )
-            variants.append(variant)
 
-        # Create primary metric from first metric in list
-        TestMetric(
-            name=test_data.metrics[0].value,
-            metric_type=test_data.metrics[0],
-        )
+        if len(test_data.variants) > 10:
+            raise BadRequestProblem(
+                detail="Test cannot have more than 10 variants"
+            )
 
-        # Create secondary metrics
-        secondary_metrics = []
-        for metric in test_data.metrics[1:]:
-            secondary_metrics.append(
-                TestMetric(
-                    name=metric.value,
-                    metric_type=metric,
-                )
+        # Create variants with validation
+        variants = []
+        total_weight = 0
+        for i, variant_data in enumerate(test_data.variants):
+            if not variant_data.name or len(variant_data.name.strip()) == 0:
+                raise BadRequestProblem(detail=f"Variant {i+1} name is required")
+
+            if len(variant_data.name) > 100:
+                raise BadRequestProblem(detail=f"Variant {i+1} name too long (max 100 characters)")
+
+            if variant_data.weight < 0:
+                raise BadRequestProblem(detail=f"Variant {i+1} weight cannot be negative")
+
+            total_weight += variant_data.weight
+
+            variant_dict = {
+                "name": variant_data.name.strip(),
+                "description": variant_data.description[:500],  # Limit description length
+                "weight": variant_data.weight,
+                "configuration": variant_data.configuration,
+                "is_control": (i == 0),  # First variant is control
+            }
+            variants.append(variant_dict)
+
+        # Validate total weight for weighted allocation
+        if test_data.allocation_strategy == VariantAllocation.WEIGHTED and total_weight <= 0:
+            raise BadRequestProblem(
+                detail="Weighted allocation requires at least one variant with positive weight"
+            )
+
+        # Validate metrics
+        if not test_data.metrics:
+            raise BadRequestProblem(
+                detail="Test must have at least one metric"
             )
 
         # Create test
-
         test_id = await ab_test_manager.create_test(
             name=test_data.name,
             description=test_data.description,
@@ -109,13 +192,17 @@ async def create_ab_test(
             variants=variants,
             primary_metric={
                 "name": test_data.metrics[0].value,
-                "metric_type": test_data.metrics[0].value,
+                "metric_type": test_data.metrics[0],
+                "direction": "increase",  # Default direction
+                "improvement_threshold": 0.05,  # Default 5% improvement
             },
             created_by=current_user.username,
             secondary_metrics=[
                 {
                     "name": metric.value,
-                    "metric_type": metric.value,
+                    "metric_type": metric,
+                    "direction": "increase",
+                    "improvement_threshold": 0.05,
                 }
                 for metric in test_data.metrics[1:]
             ],
@@ -123,6 +210,10 @@ async def create_ab_test(
             traffic_percentage=test_data.traffic_percentage / 100.0,
             duration_days=test_data.duration_days,
             target_users=test_data.target_audience or {},
+            confidence_level=test_data.confidence_level,
+            minimum_sample_size=test_data.min_sample_size,
+            tags=test_data.tags,
+            metadata=test_data.metadata,
         )
         created_test = await ab_test_manager.get_test(test_id)
 
@@ -293,7 +384,7 @@ async def get_ab_test(
                 detail=f"A/B test {test_id} not found"
             )
 
-        # Convert to response format
+        # Convert to response format for access check
         from chatter.schemas.ab_testing import (
             TestVariant as ResponseTestVariant,
         )
@@ -313,7 +404,7 @@ async def get_ab_test(
         metrics = [test.primary_metric.metric_type]
         metrics.extend([m.metric_type for m in test.secondary_metrics])
 
-        return ABTestResponse(
+        test_response = ABTestResponse(
             id=test.id,
             name=test.name,
             description=test.description,
@@ -336,6 +427,11 @@ async def get_ab_test(
             tags=test.tags,
             metadata=test.metadata,
         )
+
+        # Check access permissions
+        _check_test_access(test_response, current_user)
+
+        return test_response
 
     except NotFoundProblem:
         raise
@@ -644,57 +740,98 @@ async def get_ab_test_results(
             )
 
         # Convert results to response format
-
         from chatter.schemas.ab_testing import TestMetric
 
         metrics = []
-        for (
-            variant_name,
-            variant_results,
-        ) in results.variant_results.items():
-            for metric_name, metric_value in variant_results.items():
+        test = await ab_test_manager.get_test(test_id)
+        test_name = test.name if test else "Unknown Test"
+        test_status = test.status if test else TestStatus.COMPLETED
+
+        # Convert variant results to metrics
+        for variant_id, variant_data in results.variant_results.items():
+            variant_name = variant_data.get("variant_name", variant_id)
+            variant_metrics = variant_data.get("metrics", {})
+
+            for metric_name, metric_data in variant_metrics.items():
                 # Map string metric name to MetricType enum
                 try:
                     metric_type = MetricType(metric_name)
                 except ValueError:
                     metric_type = MetricType.CUSTOM
 
+                # Extract confidence interval for this variant and metric
+                confidence_interval = None
+                if (variant_id in results.confidence_intervals and
+                    metric_name in results.confidence_intervals[variant_id]):
+                    ci_data = results.confidence_intervals[variant_id][metric_name]
+                    if isinstance(ci_data, dict) and "lower" in ci_data and "upper" in ci_data:
+                        confidence_interval = [ci_data["lower"], ci_data["upper"]]
+
                 metrics.append(
                     TestMetric(
                         metric_type=metric_type,
                         variant_name=variant_name,
-                        value=float(metric_value),
-                        sample_size=100,  # Placeholder
-                        confidence_interval=None,
+                        value=float(metric_data.get("mean", 0)),
+                        sample_size=int(metric_data.get("count", 0)),
+                        confidence_interval=confidence_interval,
                     )
                 )
 
-        # Convert confidence intervals to expected format
+        # Format confidence intervals properly for response
         confidence_intervals_formatted = {}
-        for (
-            variant_id,
-            intervals,
-        ) in results.confidence_intervals.items():
+        for variant_id, intervals in results.confidence_intervals.items():
             confidence_intervals_formatted[variant_id] = {}
-            for metric, value in intervals.items():
-                # Convert single float to list of floats [lower, upper]
-                confidence_intervals_formatted[variant_id][metric] = [
-                    float(value),
-                    float(value),
-                ]
+            for metric, ci_data in intervals.items():
+                if isinstance(ci_data, dict) and "lower" in ci_data and "upper" in ci_data:
+                    confidence_intervals_formatted[variant_id][metric] = [
+                        float(ci_data["lower"]),
+                        float(ci_data["upper"]),
+                    ]
+                else:
+                    # Fallback for malformed data
+                    confidence_intervals_formatted[variant_id][metric] = [0.0, 0.0]
+
+        # Determine winning variant from statistical significance
+        winning_variant = None
+        for variant_id, is_significant in results.statistical_significance.items():
+            if is_significant and variant_id in results.variant_results:
+                # Check if this variant is better than others
+                variant_data = results.variant_results[variant_id]
+                variant_metrics = variant_data.get("metrics", {})
+                primary_metric_name = test.primary_metric.name if test else None
+                if primary_metric_name and primary_metric_name in variant_metrics:
+                    winning_variant = variant_data.get("variant_name", variant_id)
+                    break
+
+        # Calculate total sample size and duration
+        total_sample_size = sum(
+            data.get("unique_users", 0)
+            for data in results.variant_results.values()
+        )
+
+        duration_days = 7  # Default
+        if test and test.start_date:
+            from datetime import UTC, datetime
+            end_date = test.end_date or datetime.now(UTC)
+            duration_days = (end_date - test.start_date).days
+            if duration_days <= 0:
+                duration_days = 1
 
         return ABTestResultsResponse(
             test_id=test_id,
-            test_name="Test Name",  # Would need to fetch from test
-            status=TestStatus.COMPLETED,  # Would need to fetch from test
+            test_name=test_name,
+            status=test_status,
             metrics=metrics,
             statistical_significance=results.statistical_significance,
             confidence_intervals=confidence_intervals_formatted,
-            winning_variant=None,  # Would be determined from analysis
-            recommendation="Continue monitoring",  # Would be generated
+            winning_variant=winning_variant,
+            recommendation=(
+                results.recommendations[0] if results.recommendations
+                else "Continue monitoring for more data"
+            ),
             generated_at=results.analysis_date,
-            sample_size=100,  # Would need to be calculated
-            duration_days=7,  # Would need to be calculated
+            sample_size=total_sample_size,
+            duration_days=duration_days,
         )
 
     except NotFoundProblem:
@@ -852,4 +989,74 @@ async def get_ab_test_performance(
         )
         raise InternalServerProblem(
             detail="Failed to get A/B test performance"
+        ) from e
+
+
+@router.get("/{test_id}/recommendations", response_model=dict[str, Any])
+async def get_ab_test_recommendations(
+    test_id: str,
+    current_user: User = Depends(get_current_user),
+    ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
+) -> dict[str, Any]:
+    """Get comprehensive recommendations for an A/B test.
+
+    Args:
+        test_id: A/B test ID
+        current_user: Current authenticated user
+        ab_test_manager: A/B test manager instance
+
+    Returns:
+        Recommendations and insights for the test
+    """
+    try:
+        # Check test exists and user has access
+        test = await ab_test_manager.get_test(test_id)
+        if not test:
+            raise NotFoundProblem(
+                detail="A/B test not found",
+                resource_type="ab_test",
+                resource_id=test_id,
+            )
+
+        # Create response for access check
+        test_response = ABTestResponse(
+            id=test.id,
+            name=test.name,
+            description=test.description,
+            test_type=test.test_type,
+            status=test.status,
+            allocation_strategy=test.allocation_strategy,
+            variants=[],  # Minimal for access check
+            metrics=[test.primary_metric.metric_type],
+            duration_days=test.duration_days or 7,
+            min_sample_size=test.minimum_sample_size,
+            confidence_level=test.confidence_level,
+            target_audience=test.target_users,
+            traffic_percentage=test.traffic_percentage * 100.0,
+            start_date=test.start_date,
+            end_date=test.end_date,
+            participant_count=0,
+            created_at=test.created_at,
+            updated_at=test.updated_at,
+            created_by=test.created_by,
+            tags=test.tags,
+            metadata=test.metadata,
+        )
+
+        _check_test_access(test_response, current_user)
+
+        # Get recommendations
+        recommendations = await ab_test_manager.get_test_recommendations(test_id)
+        return recommendations
+
+    except (NotFoundProblem, ForbiddenProblem):
+        raise
+    except Exception as e:
+        logger.error(
+            "Failed to get A/B test recommendations",
+            test_id=test_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to get A/B test recommendations"
         ) from e

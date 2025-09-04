@@ -49,8 +49,12 @@ async def verify_postgresql_setup():
             # Test pgvector extension
             try:
                 await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-                await conn.execute(text("SELECT vector_extension_version()"))
-                print("✅ pgvector extension available")
+                result = await conn.execute(text("SELECT extversion FROM pg_extension WHERE extname = 'vector'"))
+                version = result.scalar()
+                if version:
+                    print(f"✅ pgvector extension available (version {version})")
+                else:
+                    print("⚠️  pgvector extension not found")
             except Exception as e:
                 print(f"⚠️  pgvector extension not available: {e}")
                 print("   This is optional but recommended for vector store tests")

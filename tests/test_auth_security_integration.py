@@ -9,7 +9,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.auth import AuthService
-from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity
+from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity
 from chatter.models.user import User
 from chatter.schemas.auth import UserCreate
 

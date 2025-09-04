@@ -7,7 +7,7 @@ from pydantic import ValidationError
 
 from chatter.schemas.profile import ProfileCreate, ProfileUpdate, ProfileTestRequest
 from chatter.models.profile import ProfileType
-from chatter.utils.rate_limiter import RateLimitExceeded
+from chatter.utils.unified_rate_limiter import RateLimitExceeded
 
 
 class TestProfileSchemaSecurity:

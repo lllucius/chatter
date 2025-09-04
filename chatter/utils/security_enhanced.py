@@ -653,3 +653,74 @@ def generate_secure_secret(length: int = 32) -> str:
 def generate_session_id(length: int = 32) -> str:
     """Generate a secure session ID."""
     return secrets.token_urlsafe(length)
+
+
+class SecureLogger:
+    """Logger wrapper that automatically sanitizes sensitive data."""
+
+    def __init__(self, logger_instance):
+        """Initialize with a logger instance."""
+        self.logger = logger_instance
+
+    def _sanitize_message(
+        self, message: str, *args, **kwargs
+    ) -> tuple[str, tuple, dict]:
+        """Sanitize log message and arguments."""
+        # Sanitize the message
+        sanitized_message = sanitize_string(str(message))
+
+        # Sanitize positional arguments
+        sanitized_args = tuple(sanitize_log_data(arg) for arg in args)
+
+        # Sanitize keyword arguments
+        sanitized_kwargs = sanitize_log_data(kwargs)
+
+        return sanitized_message, sanitized_args, sanitized_kwargs
+
+    def debug(self, message: str, *args, **kwargs):
+        """Log debug message with sanitization."""
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
+        self.logger.debug(msg, *args, **kwargs)
+
+    def info(self, message: str, *args, **kwargs):
+        """Log info message with sanitization."""
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
+        self.logger.info(msg, *args, **kwargs)
+
+    def warning(self, message: str, *args, **kwargs):
+        """Log warning message with sanitization."""
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
+        self.logger.warning(msg, *args, **kwargs)
+
+    def error(self, message: str, *args, **kwargs):
+        """Log error message with sanitization."""
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
+        self.logger.error(msg, *args, **kwargs)
+
+    def critical(self, message: str, *args, **kwargs):
+        """Log critical message with sanitization."""
+        msg, args, kwargs = self._sanitize_message(
+            message, *args, **kwargs
+        )
+        self.logger.critical(msg, *args, **kwargs)
+
+
+def get_secure_logger(name: str):
+    """Get a secure logger that sanitizes sensitive data.
+
+    Args:
+        name: Logger name
+
+    Returns:
+        SecureLogger instance
+    """
+    regular_logger = get_logger(name)
+    return SecureLogger(regular_logger)

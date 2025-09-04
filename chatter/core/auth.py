@@ -19,6 +19,8 @@ from chatter.utils.problem import (
 )
 from chatter.utils.security_enhanced import (
     contains_personal_info,
+    create_access_token,
+    create_refresh_token,
     generate_secure_api_key,
     hash_password,
     validate_email_advanced,
@@ -26,10 +28,6 @@ from chatter.utils.security_enhanced import (
     validate_username_secure,
     verify_api_key_secure,
     verify_password,
-)
-from chatter.utils.security import (
-    create_access_token,
-    create_refresh_token,
     verify_token,
 )
 
@@ -354,14 +352,9 @@ class AuthService:
         for user in users_with_keys:
             if user.api_key:
                 # Try new secure verification first
-                if api_key.startswith("chatter_api_"):
-                    if verify_api_key_secure(api_key, user.api_key):
-                        return user
-                else:
-                    # Fallback to legacy verification for old keys
-                    from chatter.utils.security import verify_api_key
-                    if verify_api_key(api_key, user.api_key):
-                        return user
+                # Use secure API key verification
+                if verify_api_key_secure(api_key, user.api_key):
+                    return user
 
         return None
 

@@ -7,7 +7,7 @@ from typing import Any
 from chatter.config import settings
 from chatter.models.user import User
 from chatter.utils.logging import get_logger
-from chatter.utils.security import create_access_token, create_refresh_token
+from chatter.utils.security_enhanced import create_access_token, create_refresh_token
 
 logger = get_logger(__name__)
 

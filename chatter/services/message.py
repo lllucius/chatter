@@ -14,7 +14,7 @@ from chatter.core.exceptions import (
     ValidationError,
 )
 from chatter.models.conversation import Message, MessageRole
-from chatter.utils.security import get_secure_logger
+from chatter.utils.security_enhanced import get_secure_logger
 
 logger = get_secure_logger(__name__)
 

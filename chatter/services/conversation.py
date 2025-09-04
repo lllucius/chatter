@@ -27,7 +27,7 @@ from chatter.utils.database_optimization import (
     get_conversation_optimized,
     get_user_conversations_optimized,
 )
-from chatter.utils.security import get_secure_logger
+from chatter.utils.security_enhanced import get_secure_logger
 
 logger = get_secure_logger(__name__)
 

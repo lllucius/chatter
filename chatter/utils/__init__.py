@@ -2,7 +2,7 @@
 
 from chatter.utils.database import init_database
 from chatter.utils.logging import get_logger, setup_logging
-from chatter.utils.security import hash_password, verify_password
+from chatter.utils.security_enhanced import hash_password, verify_password
 
 __all__ = [
     "setup_logging",

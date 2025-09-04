@@ -241,4 +241,5 @@ markers = [
     "e2e: marks tests as end-to-end tests",
     "performance: marks tests as performance tests",
     "load: marks tests as load tests",
+    "security: marks tests as security tests",
 ]

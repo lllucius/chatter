@@ -388,7 +388,8 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
         results["created"]["prompts"] = prompts_created
         
         # Create default registry data (providers, models, embedding spaces)
-        await self._create_default_registry_data(skip_existing)
+        from chatter.utils.database import _create_default_registry_data
+        await _create_default_registry_data(self.session)
         results["created"]["registry"] = "default_models"
         
         logger.info(f"Production seeding completed: {profiles_created} profiles, {prompts_created} prompts")
@@ -548,7 +549,7 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
         if created_count > 0:
             await self.session.commit()
         
-        logger.info(f"Created {len(created_count)} sample documents from configuration")
+        logger.info(f"Created {created_count} sample documents from configuration")
         return created_count
     
     async def _create_test_users(self, skip_existing: bool = True) -> List:

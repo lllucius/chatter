@@ -1,10 +1,16 @@
-"""Authentication endpoints."""
+"""Enhanced authentication endpoints with comprehensive security."""
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.auth import AuthService
+from chatter.core.security_monitor import (
+    log_api_key_created,
+    log_login_failure,
+    log_login_success,
+    log_password_change,
+)
 from chatter.models.user import User
 from chatter.schemas.auth import (
     AccountDeactivateResponse,
@@ -31,6 +37,21 @@ from chatter.utils.problem import AuthenticationProblem
 logger = get_logger(__name__)
 router = APIRouter()
 security = HTTPBearer()
+
+
+def get_client_ip(request: Request) -> str:
+    """Get client IP address from request."""
+    # Check for forwarded headers (load balancer/proxy)
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        return forwarded_for.split(",")[0].strip()
+
+    real_ip = request.headers.get("X-Real-IP")
+    if real_ip:
+        return real_ip
+
+    # Fallback to direct connection IP
+    return request.client.host if request.client else "unknown"
 
 
 async def get_auth_service(
@@ -70,42 +91,80 @@ async def get_current_user(
 )
 async def register(
     user_data: UserCreate,
+    request: Request,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
-    """Register a new user.
+    """Register a new user with enhanced security validation.
 
     Args:
         user_data: User registration data
+        request: HTTP request for security logging
         auth_service: Authentication service
 
     Returns:
         User data and authentication tokens
     """
-    user = await auth_service.create_user(user_data)
-    tokens = auth_service.create_tokens(user)
+    client_ip = get_client_ip(request)
+    
+    try:
+        user = await auth_service.create_user(user_data)
+        tokens = auth_service.create_tokens(user)
 
-    return TokenResponse(
-        **tokens, user=UserResponse.model_validate(user)
-    )
+        # Log successful registration
+        from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+        monitor = await get_security_monitor()
+        event = SecurityEvent(
+            event_type=SecurityEventType.ACCOUNT_CREATED,
+            severity=SecurityEventSeverity.LOW,
+            user_id=user.id,
+            ip_address=client_ip,
+            user_agent=request.headers.get("User-Agent"),
+            details={
+                "username": user.username,
+                "email": user.email[:20] + "..." if len(user.email) > 20 else user.email
+            }
+        )
+        await monitor.log_security_event(event)
+
+        return TokenResponse(
+            **tokens, user=UserResponse.model_validate(user)
+        )
+        
+    except Exception as e:
+        # Log failed registration attempt for security monitoring
+        logger.warning(
+            "Registration failed",
+            email=user_data.email[:20] + "..." if len(user_data.email) > 20 else user_data.email,
+            username=user_data.username,
+            ip_address=client_ip,
+            error=str(e)
+        )
+        raise
 
 
 @router.post("/login", response_model=TokenResponse)
 async def login(
     user_data: UserLogin,
+    request: Request,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
-    """Authenticate user and return tokens.
+    """Authenticate user and return tokens with enhanced security.
 
     Args:
         user_data: User login data
+        request: HTTP request for security logging
         auth_service: Authentication service
 
     Returns:
         User data and authentication tokens
     """
+    client_ip = get_client_ip(request)
+    user_agent = request.headers.get("User-Agent")
+    
     # Use email or username for authentication
     identifier = user_data.username or user_data.email
     if not identifier:
+        await log_login_failure("", client_ip, user_agent)
         raise AuthenticationProblem(
             detail="Username or email is required"
         ) from None
@@ -113,11 +172,17 @@ async def login(
     user = await auth_service.authenticate_user(
         identifier, user_data.password
     )
+    
     if not user:
+        # Log failed login attempt
+        await log_login_failure(identifier, client_ip, user_agent)
         raise AuthenticationProblem(
             detail="Invalid username or password"
         ) from None
 
+    # Log successful login
+    await log_login_success(user.id, client_ip, user_agent)
+    
     tokens = auth_service.create_tokens(user)
 
     return TokenResponse(
@@ -128,21 +193,54 @@ async def login(
 @router.post("/refresh", response_model=TokenRefreshResponse)
 async def refresh_token(
     token_data: TokenRefresh,
+    request: Request,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenRefreshResponse:
-    """Refresh access token.
+    """Refresh access token with enhanced security validation.
 
     Args:
         token_data: Refresh token data
+        request: HTTP request for security logging
         auth_service: Authentication service
 
     Returns:
         New access and refresh tokens
     """
-    result = await auth_service.refresh_access_token(
-        token_data.refresh_token
-    )
-    return TokenRefreshResponse(**result)
+    client_ip = get_client_ip(request)
+    
+    try:
+        result = await auth_service.refresh_access_token(
+            token_data.refresh_token
+        )
+        
+        # Log token refresh
+        from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+        from chatter.utils.security import verify_token
+        
+        # Extract user ID for logging
+        payload = verify_token(token_data.refresh_token)
+        user_id = payload.get("sub") if payload else None
+        
+        if user_id:
+            monitor = await get_security_monitor()
+            event = SecurityEvent(
+                event_type=SecurityEventType.TOKEN_REFRESHED,
+                severity=SecurityEventSeverity.LOW,
+                user_id=user_id,
+                ip_address=client_ip,
+                user_agent=request.headers.get("User-Agent")
+            )
+            await monitor.log_security_event(event)
+        
+        return TokenRefreshResponse(**result)
+        
+    except Exception as e:
+        logger.warning(
+            "Token refresh failed",
+            ip_address=client_ip,
+            error=str(e)
+        )
+        raise
 
 
 @router.get("/me", response_model=UserResponse)
@@ -185,24 +283,31 @@ async def update_profile(
 @router.post("/change-password", response_model=PasswordChangeResponse)
 async def change_password(
     password_data: PasswordChange,
+    request: Request,
     current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> PasswordChangeResponse:
-    """Change user password.
+    """Change user password with enhanced security logging.
 
     Args:
         password_data: Password change data
+        request: HTTP request for security logging
         current_user: Current authenticated user
         auth_service: Authentication service
 
     Returns:
         Success message
     """
+    client_ip = get_client_ip(request)
+    
     await auth_service.change_password(
         current_user.id,
         password_data.current_password,
         password_data.new_password,
     )
+
+    # Log password change for security monitoring
+    await log_password_change(current_user.id, client_ip)
 
     return PasswordChangeResponse(
         message="Password changed successfully"
@@ -212,22 +317,29 @@ async def change_password(
 @router.post("/api-key", response_model=APIKeyResponse)
 async def create_api_key(
     key_data: APIKeyCreate,
+    request: Request,
     current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> APIKeyResponse:
-    """Create API key for current user.
+    """Create API key for current user with enhanced security.
 
     Args:
         key_data: API key creation data
+        request: HTTP request for security logging
         current_user: Current authenticated user
         auth_service: Authentication service
 
     Returns:
         Created API key
     """
+    client_ip = get_client_ip(request)
+    
     api_key = await auth_service.create_api_key(
         current_user.id, key_data.name
     )
+
+    # Log API key creation for security monitoring
+    await log_api_key_created(current_user.id, key_data.name, client_ip)
 
     return APIKeyResponse(
         id=current_user.id,
@@ -238,19 +350,36 @@ async def create_api_key(
 
 @router.delete("/api-key", response_model=APIKeyRevokeResponse)
 async def revoke_api_key(
+    request: Request,
     current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> APIKeyRevokeResponse:
-    """Revoke current user's API key.
+    """Revoke current user's API key with security logging.
 
     Args:
+        request: HTTP request for security logging
         current_user: Current authenticated user
         auth_service: Authentication service
 
     Returns:
         Success message
     """
+    client_ip = get_client_ip(request)
+    
     await auth_service.revoke_api_key(current_user.id)
+    
+    # Log API key revocation
+    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    monitor = await get_security_monitor()
+    event = SecurityEvent(
+        event_type=SecurityEventType.API_KEY_REVOKED,
+        severity=SecurityEventSeverity.MEDIUM,
+        user_id=current_user.id,
+        ip_address=client_ip,
+        user_agent=request.headers.get("User-Agent")
+    )
+    await monitor.log_security_event(event)
+    
     return APIKeyRevokeResponse(message="API key revoked successfully")
 
 
@@ -274,19 +403,37 @@ async def list_api_keys(
 
 @router.post("/logout", response_model=LogoutResponse)
 async def logout(
+    request: Request,
     current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> LogoutResponse:
-    """Logout and revoke current token.
+    """Logout and revoke current token with enhanced security.
 
     Args:
+        request: HTTP request for security logging
         current_user: Current authenticated user
         auth_service: Authentication service
 
     Returns:
         Success message
     """
+    client_ip = get_client_ip(request)
+    
     await auth_service.revoke_token(current_user.id)
+    
+    # Log logout for security monitoring
+    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    monitor = await get_security_monitor()
+    event = SecurityEvent(
+        event_type=SecurityEventType.TOKEN_REVOKED,
+        severity=SecurityEventSeverity.LOW,
+        user_id=current_user.id,
+        ip_address=client_ip,
+        user_agent=request.headers.get("User-Agent"),
+        details={"action": "logout"}
+    )
+    await monitor.log_security_event(event)
+    
     return LogoutResponse(message="Logged out successfully")
 
 
@@ -296,18 +443,37 @@ async def logout(
 )
 async def request_password_reset(
     email: str,
+    request: Request,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> PasswordResetRequestResponse:
-    """Request password reset.
+    """Request password reset with enhanced security logging.
 
     Args:
         email: User email
+        request: HTTP request for security logging
         auth_service: Authentication service
 
     Returns:
         Success message
     """
+    client_ip = get_client_ip(request)
+    
     await auth_service.request_password_reset(email)
+    
+    # Log password reset request
+    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    monitor = await get_security_monitor()
+    event = SecurityEvent(
+        event_type=SecurityEventType.PASSWORD_RESET_REQUESTED,
+        severity=SecurityEventSeverity.MEDIUM,
+        ip_address=client_ip,
+        user_agent=request.headers.get("User-Agent"),
+        details={
+            "email": email[:20] + "..." if len(email) > 20 else email
+        }
+    )
+    await monitor.log_security_event(event)
+    
     return PasswordResetRequestResponse(
         message="Password reset email sent if account exists"
     )
@@ -320,19 +486,36 @@ async def request_password_reset(
 async def confirm_password_reset(
     token: str,
     new_password: str,
+    request: Request,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> PasswordResetConfirmResponse:
-    """Confirm password reset.
+    """Confirm password reset with enhanced security logging.
 
     Args:
         token: Reset token
         new_password: New password
+        request: HTTP request for security logging
         auth_service: Authentication service
 
     Returns:
         Success message
     """
+    client_ip = get_client_ip(request)
+    
     await auth_service.confirm_password_reset(token, new_password)
+    
+    # Log password reset completion
+    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    monitor = await get_security_monitor()
+    event = SecurityEvent(
+        event_type=SecurityEventType.PASSWORD_RESET_COMPLETED,
+        severity=SecurityEventSeverity.MEDIUM,
+        ip_address=client_ip,
+        user_agent=request.headers.get("User-Agent"),
+        details={"token_prefix": token[:8] + "..." if len(token) > 8 else token}
+    )
+    await monitor.log_security_event(event)
+    
     return PasswordResetConfirmResponse(
         message="Password reset successfully"
     )
@@ -340,19 +523,36 @@ async def confirm_password_reset(
 
 @router.delete("/account", response_model=AccountDeactivateResponse)
 async def deactivate_account(
+    request: Request,
     current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> AccountDeactivateResponse:
-    """Deactivate current user account.
+    """Deactivate current user account with enhanced security logging.
 
     Args:
+        request: HTTP request for security logging
         current_user: Current authenticated user
         auth_service: Authentication service
 
     Returns:
         Success message
     """
+    client_ip = get_client_ip(request)
+    
     await auth_service.deactivate_user(current_user.id)
+    
+    # Log account deactivation
+    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    monitor = await get_security_monitor()
+    event = SecurityEvent(
+        event_type=SecurityEventType.ACCOUNT_DEACTIVATED,
+        severity=SecurityEventSeverity.MEDIUM,
+        user_id=current_user.id,
+        ip_address=client_ip,
+        user_agent=request.headers.get("User-Agent")
+    )
+    await monitor.log_security_event(event)
+    
     return AccountDeactivateResponse(
         message="Account deactivated successfully"
     )

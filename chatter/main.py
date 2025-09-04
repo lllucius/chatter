@@ -428,6 +428,23 @@ def create_app() -> FastAPI:
 
     # Add exception handlers
     from fastapi.exceptions import RequestValidationError
+    from chatter.core.exceptions import AuthenticationError
+
+    @app.exception_handler(AuthenticationError)
+    async def authentication_exception_handler(
+        request: Request, exc: AuthenticationError
+    ) -> JSONResponse:
+        """Handle AuthenticationError with RFC 9457 format."""
+        logger.error(
+            "Authentication error",
+            url=str(request.url),
+            method=request.method,
+            error=str(exc),
+        )
+        from chatter.utils.problem import AuthenticationProblem
+
+        auth_problem = AuthenticationProblem(detail=str(exc))
+        return auth_problem.to_response(request)
 
     @app.exception_handler(ProblemException)
     async def problem_exception_handler(

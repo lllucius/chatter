@@ -5,6 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.auth import AuthService
+from chatter.core.exceptions import AuthenticationError
 from chatter.core.monitoring import (
     log_api_key_created,
     log_login_failure,
@@ -36,7 +37,21 @@ from chatter.utils.problem import AuthenticationProblem
 
 logger = get_logger(__name__)
 router = APIRouter()
-security = HTTPBearer()
+
+
+class CustomHTTPBearer(HTTPBearer):
+    """Custom HTTPBearer that raises AuthenticationError with 401 status."""
+    
+    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials:
+        """Extract credentials and raise 401 for missing/invalid auth."""
+        try:
+            return await super().__call__(request)
+        except Exception:
+            # Convert any authentication failure to 401
+            raise AuthenticationError("Authentication credentials required")
+
+
+security = CustomHTTPBearer()
 
 
 def get_client_ip(request: Request) -> str:

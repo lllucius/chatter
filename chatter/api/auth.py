@@ -84,6 +84,33 @@ async def get_current_user(
     return await auth_service.get_current_user(credentials.credentials)
 
 
+async def get_current_admin_user(
+    current_user: User = Depends(get_current_user),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> User:
+    """Get current authenticated admin user.
+
+    Args:
+        current_user: Current authenticated user
+        auth_service: Authentication service
+
+    Returns:
+        Current admin user
+
+    Raises:
+        AuthorizationProblem: If user is not an admin
+    """
+    is_admin = await auth_service.is_admin(current_user.id)
+    if not is_admin:
+        from chatter.utils.problem import AuthorizationProblem
+
+        raise AuthorizationProblem(
+            detail="Admin privileges required for this operation"
+        )
+    
+    return current_user
+
+
 @router.post(
     "/register",
     response_model=TokenResponse,

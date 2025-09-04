@@ -17,6 +17,10 @@ export class SSEEventManager {
   private maxReconnectDelay = 30000; // Max 30 seconds
   private isConnected = false;
   private isManuallyDisconnected = false;
+  private connectionStartTime: number | null = null;
+  private eventCount = 0;
+  private lastEventTime: number | null = null;
+  private healthCheckInterval: NodeJS.Timeout | null = null;
 
   /**
    * Connect to the SSE stream using the current authentication from chatterSDK
@@ -33,7 +37,9 @@ export class SSEEventManager {
     }
 
     this.isManuallyDisconnected = false;
+    this.connectionStartTime = Date.now();
     this.createConnection();
+    this.startHealthCheck();
   }
 
   /**
@@ -43,6 +49,7 @@ export class SSEEventManager {
     this.isManuallyDisconnected = true;
     this.isConnected = false;
     this.reconnectAttempts = 0;
+    this.stopHealthCheck();
 
     // Note: With fetch-based approach, we don't have a direct way to cancel
     // The stream will be cancelled when the browser closes the connection
@@ -241,6 +248,16 @@ export class SSEEventManager {
   private emitEvent(event: AnySSEEvent): void {
     console.log('SSE: Received event:', event.type, event.data);
 
+    // Update event tracking
+    this.eventCount++;
+    this.lastEventTime = Date.now();
+
+    // Basic event validation for security
+    if (!this.isValidEvent(event)) {
+      console.warn('SSE: Received invalid event, ignoring:', event);
+      return;
+    }
+
     // Emit to specific event type listeners
     if (this.listeners[event.type]) {
       this.listeners[event.type]!.forEach(listener => {
@@ -265,6 +282,38 @@ export class SSEEventManager {
   }
 
   /**
+   * Validate event structure for security
+   */
+  private isValidEvent(event: any): boolean {
+    // Basic validation to prevent malicious events
+    if (!event || typeof event !== 'object') {
+      return false;
+    }
+
+    // Required fields
+    if (!event.id || !event.type || !event.timestamp) {
+      return false;
+    }
+
+    // Type validation
+    if (typeof event.id !== 'string' || typeof event.type !== 'string' || typeof event.timestamp !== 'string') {
+      return false;
+    }
+
+    // Data should be an object
+    if (event.data && typeof event.data !== 'object') {
+      return false;
+    }
+
+    // Metadata should be an object if present
+    if (event.metadata && typeof event.metadata !== 'object') {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Schedule a reconnection attempt
    */
   private scheduleReconnect(): void {
@@ -274,7 +323,13 @@ export class SSEEventManager {
     }
 
     this.reconnectAttempts++;
-    const delay = Math.min(this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1), this.maxReconnectDelay);
+    
+    // Exponential backoff with jitter
+    const jitter = Math.random() * 1000; // Add up to 1 second of random delay
+    const delay = Math.min(
+      this.reconnectDelay * Math.pow(1.5, this.reconnectAttempts - 1) + jitter,
+      this.maxReconnectDelay
+    );
     
     console.log(`SSE: Scheduling reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
     
@@ -283,6 +338,67 @@ export class SSEEventManager {
         this.createConnection();
       }
     }, delay);
+  }
+
+  /**
+   * Start health check to monitor connection health
+   */
+  private startHealthCheck(): void {
+    this.stopHealthCheck(); // Ensure no duplicate intervals
+    
+    this.healthCheckInterval = setInterval(() => {
+      const now = Date.now();
+      
+      // Check if we haven't received events in a while (but only if connected)
+      if (this.isConnected && this.lastEventTime) {
+        const timeSinceLastEvent = now - this.lastEventTime;
+        const healthCheckTimeout = 60000; // 60 seconds
+        
+        if (timeSinceLastEvent > healthCheckTimeout) {
+          console.warn('SSE: No events received for 60 seconds, connection may be stale');
+          // Could trigger a reconnection here if needed
+        }
+      }
+      
+      // Log connection stats periodically
+      if (this.connectionStartTime) {
+        const connectionDuration = now - this.connectionStartTime;
+        console.debug(`SSE: Connection stats - Duration: ${Math.round(connectionDuration / 1000)}s, Events: ${this.eventCount}`);
+      }
+    }, 30000); // Check every 30 seconds
+  }
+
+  /**
+   * Stop health check
+   */
+  private stopHealthCheck(): void {
+    if (this.healthCheckInterval) {
+      clearInterval(this.healthCheckInterval);
+      this.healthCheckInterval = null;
+    }
+  }
+
+  /**
+   * Get connection statistics
+   */
+  public getConnectionStats(): {
+    isConnected: boolean;
+    connectionDuration: number | null;
+    eventCount: number;
+    reconnectAttempts: number;
+    lastEventTime: number | null;
+  } {
+    const connectionDuration = this.connectionStartTime 
+      ? Date.now() - this.connectionStartTime 
+      : null;
+
+    return {
+      isConnected: this.isConnected,
+      connectionDuration,
+      eventCount: this.eventCount,
+      reconnectAttempts: this.reconnectAttempts,
+      lastEventTime: this.lastEventTime,
+    };
   }
 }
 

@@ -37,7 +37,7 @@ from chatter.services.streaming import (
     stream_workflow,
     streaming_service,
 )
-from chatter.utils.monitoring import record_workflow_metrics
+from chatter.core.monitoring import record_workflow_metrics
 from chatter.utils.security_enhanced import get_secure_logger
 
 logger = get_secure_logger(__name__)

@@ -141,23 +141,17 @@ async def get_metrics() -> MetricsResponse:
     endpoint_stats = {}
     
     try:
-        from chatter.utils.monitoring import metrics_collector
+        from chatter.core.monitoring import get_monitoring_service
 
         # Try to get metrics with individual fallbacks
         try:
-            overall_stats = metrics_collector.get_overall_stats(window_minutes=60)
-            performance_stats.update(overall_stats)
-        except Exception as e:
-            logger.warning(f"Failed to get performance stats: {e}")
-            
-        try:
-            health_data = metrics_collector.get_health_metrics()
+            monitoring_service = await get_monitoring_service()
+            health_data = monitoring_service.get_system_health()
             health_metrics.update(health_data)
-        except Exception as e:
-            logger.warning(f"Failed to get health metrics: {e}")
             
-        try:
-            endpoint_data = metrics_collector.get_endpoint_stats()
+            # Get endpoint stats
+            endpoint_data = monitoring_service.stats_by_endpoint
+            endpoint_stats.update({k: v.__dict__ for k, v in endpoint_data.items()})
             endpoint_stats.update(endpoint_data)
         except Exception as e:
             logger.warning(f"Failed to get endpoint stats: {e}")
@@ -206,9 +200,10 @@ async def get_correlation_trace(
         List of requests associated with the correlation ID
     """
     try:
-        from chatter.utils.monitoring import metrics_collector
+        from chatter.core.monitoring import get_monitoring_service
 
-        trace = metrics_collector.get_correlation_trace(correlation_id)
+        monitoring_service = await get_monitoring_service()
+        trace = monitoring_service.get_correlation_trace(correlation_id)
 
         return CorrelationTraceResponse(
             correlation_id=correlation_id,

@@ -5,7 +5,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.auth import AuthService
-from chatter.core.security_monitor import (
+from chatter.core.monitoring import (
     log_api_key_created,
     log_login_failure,
     log_login_success,
@@ -138,7 +138,7 @@ async def register(
         tokens = auth_service.create_tokens(user)
 
         # Log successful registration
-        from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+        from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
         monitor = await get_security_monitor()
         event = SecurityEvent(
             event_type=SecurityEventType.ACCOUNT_CREATED,
@@ -151,7 +151,7 @@ async def register(
                 "email": user.email[:20] + "..." if len(user.email) > 20 else user.email
             }
         )
-        await monitor.log_security_event(event)
+        await monitoring_service.log_security_event(event)
 
         return TokenResponse(
             **tokens, user=UserResponse.model_validate(user)
@@ -241,7 +241,7 @@ async def refresh_token(
         )
         
         # Log token refresh
-        from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+        from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
         from chatter.utils.security_enhanced import verify_token
         
         # Extract user ID for logging
@@ -257,7 +257,7 @@ async def refresh_token(
                 ip_address=client_ip,
                 user_agent=request.headers.get("User-Agent")
             )
-            await monitor.log_security_event(event)
+            await monitoring_service.log_security_event(event)
         
         return TokenRefreshResponse(**result)
         
@@ -396,7 +396,7 @@ async def revoke_api_key(
     await auth_service.revoke_api_key(current_user.id)
     
     # Log API key revocation
-    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
     monitor = await get_security_monitor()
     event = SecurityEvent(
         event_type=SecurityEventType.API_KEY_REVOKED,
@@ -405,7 +405,7 @@ async def revoke_api_key(
         ip_address=client_ip,
         user_agent=request.headers.get("User-Agent")
     )
-    await monitor.log_security_event(event)
+    await monitoring_service.log_security_event(event)
     
     return APIKeyRevokeResponse(message="API key revoked successfully")
 
@@ -449,7 +449,7 @@ async def logout(
     await auth_service.revoke_token(current_user.id)
     
     # Log logout for security monitoring
-    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
     monitor = await get_security_monitor()
     event = SecurityEvent(
         event_type=SecurityEventType.TOKEN_REVOKED,
@@ -459,7 +459,7 @@ async def logout(
         user_agent=request.headers.get("User-Agent"),
         details={"action": "logout"}
     )
-    await monitor.log_security_event(event)
+    await monitoring_service.log_security_event(event)
     
     return LogoutResponse(message="Logged out successfully")
 
@@ -488,7 +488,7 @@ async def request_password_reset(
     await auth_service.request_password_reset(email)
     
     # Log password reset request
-    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
     monitor = await get_security_monitor()
     event = SecurityEvent(
         event_type=SecurityEventType.PASSWORD_RESET_REQUESTED,
@@ -499,7 +499,7 @@ async def request_password_reset(
             "email": email[:20] + "..." if len(email) > 20 else email
         }
     )
-    await monitor.log_security_event(event)
+    await monitoring_service.log_security_event(event)
     
     return PasswordResetRequestResponse(
         message="Password reset email sent if account exists"
@@ -532,7 +532,7 @@ async def confirm_password_reset(
     await auth_service.confirm_password_reset(token, new_password)
     
     # Log password reset completion
-    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
     monitor = await get_security_monitor()
     event = SecurityEvent(
         event_type=SecurityEventType.PASSWORD_RESET_COMPLETED,
@@ -541,7 +541,7 @@ async def confirm_password_reset(
         user_agent=request.headers.get("User-Agent"),
         details={"token_prefix": token[:8] + "..." if len(token) > 8 else token}
     )
-    await monitor.log_security_event(event)
+    await monitoring_service.log_security_event(event)
     
     return PasswordResetConfirmResponse(
         message="Password reset successfully"
@@ -569,7 +569,7 @@ async def deactivate_account(
     await auth_service.deactivate_user(current_user.id)
     
     # Log account deactivation
-    from chatter.core.security_monitor import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_security_monitor
+    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
     monitor = await get_security_monitor()
     event = SecurityEvent(
         event_type=SecurityEventType.ACCOUNT_DEACTIVATED,
@@ -578,7 +578,7 @@ async def deactivate_account(
         ip_address=client_ip,
         user_agent=request.headers.get("User-Agent")
     )
-    await monitor.log_security_event(event)
+    await monitoring_service.log_security_event(event)
     
     return AccountDeactivateResponse(
         message="Account deactivated successfully"

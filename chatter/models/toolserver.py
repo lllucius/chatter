@@ -7,6 +7,7 @@ from typing import Any
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
     DateTime,
     Float,
     ForeignKey,
@@ -42,6 +43,29 @@ class ToolStatus(str, Enum):
 
 class ToolServer(Base):
     """Tool server model for MCP server configurations."""
+
+    __table_args__ = (
+        CheckConstraint(
+            "name != ''",
+            name='check_name_not_empty',
+        ),
+        CheckConstraint(
+            "display_name != ''",
+            name='check_display_name_not_empty',
+        ),
+        CheckConstraint(
+            'timeout > 0',
+            name='check_timeout_positive',
+        ),
+        CheckConstraint(
+            'consecutive_failures >= 0',
+            name='check_consecutive_failures_non_negative',
+        ),
+        CheckConstraint(
+            'max_failures > 0',
+            name='check_max_failures_positive',
+        ),
+    )
 
     # Server identification
     name: Mapped[str] = mapped_column(
@@ -146,6 +170,33 @@ class ToolServer(Base):
 class ServerTool(Base):
     """Individual tool model for tools provided by servers."""
 
+    # Constraints
+    __table_args__ = (
+        CheckConstraint(
+            "name != ''",
+            name='check_name_not_empty',
+        ),
+        CheckConstraint(
+            "display_name != ''",
+            name='check_display_name_not_empty',
+        ),
+        CheckConstraint(
+            'total_calls >= 0',
+            name='check_total_calls_non_negative',
+        ),
+        CheckConstraint(
+            'total_errors >= 0',
+            name='check_total_errors_non_negative',
+        ),
+        CheckConstraint(
+            'avg_response_time_ms IS NULL OR avg_response_time_ms >= 0.0',
+            name='check_avg_response_time_non_negative',
+        ),
+        UniqueConstraint(
+            "server_id", "name", name="uix_server_tool_name"
+        ),
+    )
+
     # Foreign keys
     server_id: Mapped[str] = mapped_column(
         String(26),
@@ -205,16 +256,20 @@ class ServerTool(Base):
         "ToolUsage", back_populates="tool", cascade="all, delete-orphan"
     )
 
-    # Constraints
-    __table_args__ = (
-        UniqueConstraint(
-            "server_id", "name", name="uix_server_tool_name"
-        ),
-    )
-
 
 class ToolUsage(Base):
     """Tool usage tracking model for analytics."""
+
+    __table_args__ = (
+        CheckConstraint(
+            "tool_name != ''",
+            name='check_tool_name_not_empty',
+        ),
+        CheckConstraint(
+            'response_time_ms IS NULL OR response_time_ms >= 0.0',
+            name='check_response_time_non_negative',
+        ),
+    )
 
     # Foreign keys
     server_id: Mapped[str] = mapped_column(
@@ -290,6 +345,28 @@ class ToolAccessLevel(str, Enum):
 class ToolPermission(Base):
     """Role-based access control for tools."""
 
+    # Constraints - either tool_id or server_id must be set
+    __table_args__ = (
+        CheckConstraint(
+            'rate_limit_per_hour IS NULL OR rate_limit_per_hour > 0',
+            name='check_rate_limit_per_hour_positive',
+        ),
+        CheckConstraint(
+            'rate_limit_per_day IS NULL OR rate_limit_per_day > 0',
+            name='check_rate_limit_per_day_positive',
+        ),
+        CheckConstraint(
+            'usage_count >= 0',
+            name='check_usage_count_non_negative',
+        ),
+        UniqueConstraint(
+            "user_id", "tool_id", name="uix_user_tool_permission"
+        ),
+        UniqueConstraint(
+            "user_id", "server_id", name="uix_user_server_permission"
+        ),
+    )
+
     # Foreign keys
     user_id: Mapped[str] = mapped_column(
         String(26), ForeignKey(Keys.USERS), nullable=False, index=True
@@ -352,16 +429,6 @@ class ToolPermission(Base):
         DateTime(timezone=True), nullable=True
     )
 
-    # Constraints - either tool_id or server_id must be set
-    __table_args__ = (
-        UniqueConstraint(
-            "user_id", "tool_id", name="uix_user_tool_permission"
-        ),
-        UniqueConstraint(
-            "user_id", "server_id", name="uix_user_server_permission"
-        ),
-    )
-
 
 class UserRole(str, Enum):
     """User roles for tool access."""
@@ -375,6 +442,24 @@ class UserRole(str, Enum):
 
 class RoleToolAccess(Base):
     """Default tool access by role."""
+
+    # Constraints
+    __table_args__ = (
+        CheckConstraint(
+            'default_rate_limit_per_hour IS NULL OR default_rate_limit_per_hour > 0',
+            name='check_default_rate_limit_per_hour_positive',
+        ),
+        CheckConstraint(
+            'default_rate_limit_per_day IS NULL OR default_rate_limit_per_day > 0',
+            name='check_default_rate_limit_per_day_positive',
+        ),
+        UniqueConstraint(
+            "role",
+            "tool_pattern",
+            "server_pattern",
+            name="uix_role_tool_access",
+        ),
+    )
 
     # Role configuration
     role: Mapped[UserRole] = mapped_column(
@@ -417,14 +502,4 @@ class RoleToolAccess(Base):
     # Metadata
     created_by: Mapped[str] = mapped_column(
         String(26), ForeignKey(Keys.USERS), nullable=False, index=True
-    )
-
-    # Constraints
-    __table_args__ = (
-        UniqueConstraint(
-            "role",
-            "tool_pattern",
-            "server_pattern",
-            name="uix_role_tool_access",
-        ),
     )

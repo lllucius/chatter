@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 from sqlalchemy import (
     JSON,
     Boolean,
+    CheckConstraint,
     DateTime,
     Float,
     ForeignKey,
@@ -38,6 +39,53 @@ class ProfileType(str, Enum):
 
 class Profile(Base):
     """Profile model for LLM parameter management."""
+
+    __table_args__ = (
+        CheckConstraint(
+            'temperature >= 0.0 AND temperature <= 2.0',
+            name='check_temperature_range',
+        ),
+        CheckConstraint(
+            'top_p IS NULL OR (top_p >= 0.0 AND top_p <= 1.0)',
+            name='check_top_p_range',
+        ),
+        CheckConstraint(
+            'top_k IS NULL OR top_k > 0',
+            name='check_top_k_positive',
+        ),
+        CheckConstraint(
+            'max_tokens > 0',
+            name='check_max_tokens_positive',
+        ),
+        CheckConstraint(
+            'context_window > 0',
+            name='check_context_window_positive',
+        ),
+        CheckConstraint(
+            'retrieval_limit > 0',
+            name='check_retrieval_limit_positive',
+        ),
+        CheckConstraint(
+            'retrieval_score_threshold >= 0.0 AND retrieval_score_threshold <= 1.0',
+            name='check_retrieval_score_threshold_range',
+        ),
+        CheckConstraint(
+            'usage_count >= 0',
+            name='check_usage_count_non_negative',
+        ),
+        CheckConstraint(
+            'total_tokens_used >= 0',
+            name='check_total_tokens_used_non_negative',
+        ),
+        CheckConstraint(
+            'total_cost >= 0.0',
+            name='check_total_cost_non_negative',
+        ),
+        CheckConstraint(
+            "name != ''",
+            name='check_name_not_empty',
+        ),
+    )
 
     # Foreign keys
     owner_id: Mapped[str] = mapped_column(

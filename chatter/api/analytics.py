@@ -698,6 +698,7 @@ async def export_analytics(
 
 @router.get("/health")
 async def get_analytics_health(
+    current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service),
 ) -> dict[str, Any]:
     """Get analytics system health status.
@@ -719,6 +720,7 @@ async def get_analytics_health(
 @router.get("/metrics/summary")
 @rate_limit(max_requests=30, window_seconds=60)  # 30 requests per minute
 async def get_analytics_metrics_summary(
+    current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(get_analytics_service),
 ) -> dict[str, Any]:
     """Get summary of key analytics metrics for monitoring.

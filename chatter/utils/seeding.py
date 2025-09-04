@@ -94,10 +94,14 @@ class DatabaseSeeder:
             # Check if database is virgin (for non-force mode)
             if not force:
                 existing_users = await self._count_users()
-                if existing_users > 0 and mode != SeedingMode.TESTING:
+                if existing_users > 0:
+                    # Testing mode should still respect existing data unless forced
                     logger.info(f"Database has {existing_users} users, skipping seeding")
                     results["skipped"]["reason"] = "Database not empty"
                     return results
+            
+            # Begin transaction for consistent seeding
+            # Note: Individual methods handle their own commits for efficiency
             
             # Seed based on mode
             if mode == SeedingMode.MINIMAL:
@@ -117,6 +121,7 @@ class DatabaseSeeder:
         except Exception as e:
             logger.error("Database seeding failed", error=str(e))
             results["errors"].append(str(e))
+            # Note: Individual methods handle rollback as needed
             raise
 
     async def _count_users(self) -> int:

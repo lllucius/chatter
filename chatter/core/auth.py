@@ -258,11 +258,13 @@ class AuthService:
         """
         # Try cache first for performance
         try:
-            from chatter.services.cache import get_cache_service
+            from chatter.core.cache_factory import get_general_cache
 
-            cache_service = await get_cache_service()
+            cache_service = get_general_cache()
 
-            if cache_service.is_connected():
+            # Check cache health instead of is_connected for unified cache
+            health = await cache_service.health_check()
+            if health.get("status") == "healthy":
                 cache_key = f"user:{user_id}"
                 cached_user = await cache_service.get(cache_key)
                 if cached_user:
@@ -286,14 +288,15 @@ class AuthService:
             try:
                 from datetime import timedelta
 
-                from chatter.services.cache import get_cache_service
+                from chatter.core.cache_factory import get_general_cache
 
-                cache_service = await get_cache_service()
-                if cache_service.is_connected():
+                cache_service = get_general_cache()
+                health = await cache_service.health_check()
+                if health.get("status") == "healthy":
                     cache_key = f"user:{user_id}"
-                    # Cache for 15 minutes
+                    # Cache for 15 minutes  
                     await cache_service.set(
-                        cache_key, "cached", timedelta(minutes=15)
+                        cache_key, "cached", ttl=900  # 15 minutes in seconds
                     )
                     logger.debug("User cached", user_id=user_id)
             except Exception as cache_error:
@@ -811,10 +814,11 @@ class AuthService:
                 reset_token = secrets.token_urlsafe(32)
                 
                 # Store token in cache with expiration (15 minutes)
-                from chatter.services.cache import get_cache_service
-                cache_service = await get_cache_service()
+                from chatter.core.cache_factory import get_general_cache
+                cache_service = get_general_cache()
                 
-                if cache_service and cache_service.is_connected():
+                health = await cache_service.health_check()
+                if cache_service and health.get("status") == "healthy":
                     reset_data = {
                         "user_id": user.id,
                         "email": user.email,
@@ -825,7 +829,7 @@ class AuthService:
                     await cache_service.set(
                         f"password_reset:{reset_token}",
                         reset_data,
-                        timedelta(minutes=15)
+                        ttl=900  # 15 minutes in seconds
                     )
                     
                     # Here you would send the reset email
@@ -868,10 +872,11 @@ class AuthService:
         """
         try:
             # Validate token
-            from chatter.services.cache import get_cache_service
-            cache_service = await get_cache_service()
+            from chatter.core.cache_factory import get_general_cache
+            cache_service = get_general_cache()
             
-            if not cache_service or not cache_service.is_connected():
+            health = await cache_service.health_check()
+            if not cache_service or health.get("status") != "healthy":
                 raise AuthenticationError("Password reset service unavailable") from None
                 
             reset_data = await cache_service.get(f"password_reset:{token}")

@@ -147,11 +147,12 @@ This will:
 
 **Before:**
 ```python
-from chatter.utils.caching import get_registry_cache
+# Legacy cache system - REMOVED
+# from chatter.utils.caching import get_registry_cache
 
-cache = get_registry_cache()
-provider_id = cache.get_default_provider(model_type)
-cache.set_default_provider(model_type, provider_id)
+# cache = get_registry_cache()
+# provider_id = cache.get_default_provider(model_type)
+# cache.set_default_provider(model_type, provider_id)
 ```
 
 **After:**
@@ -184,7 +185,7 @@ await workflow_cache.put(provider, type, config, workflow)
 
 #### Redis Cache Service
 
-**Before:**
+**Compatibility (Still Works):**
 ```python
 from chatter.services.cache import get_cache_service
 
@@ -192,13 +193,15 @@ cache = await get_cache_service()
 await cache.set("key", "value")
 ```
 
-**After:**
+**Recommended (Unified System):**
 ```python
 from chatter.core.cache_factory import get_general_cache
 
 cache = get_general_cache()
 await cache.set("key", "value")
 ```
+
+> **Note:** The legacy `services.cache` module has been updated to use the unified cache system underneath while maintaining backward compatibility. All existing code will continue to work without changes, but new code should use the unified cache factory methods for better features and consistency.
 
 ## Usage Examples
 

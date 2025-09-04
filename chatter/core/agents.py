@@ -20,7 +20,8 @@ from chatter.schemas.agents import (
     AgentStatus,
     AgentType,
 )
-from chatter.services.cache import CacheService
+from chatter.core.cache_factory import get_general_cache, CacheBackend
+from chatter.core.cache_interface import CacheConfig
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -491,9 +492,9 @@ class AgentManager:
         """Initialize the agent manager."""
         self.agents: dict[str, BaseAgent] = {}
         self.registry = AgentRegistry()
-        self.cache = CacheService(
-            key_prefix="agents:",
-            fallback_to_memory=True,
+        self.cache = get_general_cache(
+            backend=CacheBackend.MULTI_TIER,  # Use multi-tier for fallback to memory
+            config=CacheConfig(key_prefix="agents:")
         )
         self.agent_classes: dict[AgentType, type[BaseAgent]] = {
             AgentType.CONVERSATIONAL: ConversationalAgent,

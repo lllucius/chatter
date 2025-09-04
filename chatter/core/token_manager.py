@@ -379,8 +379,8 @@ async def get_token_manager():
     
     if _token_manager is None:
         try:
-            from chatter.services.cache import get_cache_service
-            cache_service = await get_cache_service()
+            from chatter.core.cache_factory import get_general_cache
+            cache_service = get_general_cache()
             _token_manager = TokenManager(cache_service)
         except Exception as e:
             logger.warning(f"Failed to initialize token manager with cache: {e}")

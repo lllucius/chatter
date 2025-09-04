@@ -331,6 +331,29 @@ class Settings(BaseSettings):
     )
 
     # =============================================================================
+    # SERVER-SENT EVENTS (SSE) SETTINGS
+    # =============================================================================
+    
+    sse_keepalive_timeout: int = Field(
+        default=30, description="SSE keepalive timeout in seconds"
+    )
+    sse_max_connections_per_user: int = Field(
+        default=10, description="Maximum SSE connections per user"
+    )
+    sse_max_total_connections: int = Field(
+        default=1000, description="Maximum total SSE connections"
+    )
+    sse_connection_cleanup_interval: int = Field(
+        default=300, description="SSE connection cleanup interval in seconds"
+    )
+    sse_inactive_timeout: int = Field(
+        default=3600, description="SSE connection inactive timeout in seconds"
+    )
+    sse_queue_maxsize: int = Field(
+        default=100, description="Maximum size of SSE event queue per connection"
+    )
+
+    # =============================================================================
     # LOGGING SETTINGS
     # =============================================================================
 

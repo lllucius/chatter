@@ -5,7 +5,8 @@ import json
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
-from chatter.api.auth import get_current_user
+from chatter.api.auth import get_current_user, get_current_admin_user
+from chatter.config import settings
 from chatter.models.user import User
 from chatter.schemas.events import (
     SSEStatsResponse,
@@ -13,6 +14,7 @@ from chatter.schemas.events import (
 )
 from chatter.services.sse_events import EventType, sse_service
 from chatter.utils.logging import get_logger
+from chatter.utils.rate_limiter import get_rate_limiter, RateLimitExceeded
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -42,19 +44,44 @@ async def events_stream(
     Returns:
         StreamingResponse with SSE format
     """
+    # Rate limit SSE connections per user
+    rate_limiter = get_rate_limiter()
+    try:
+        await rate_limiter.check_rate_limit(
+            f"sse_connections:{current_user.id}",
+            limit_per_hour=50,  # Max 50 SSE connections per hour per user
+        )
+    except RateLimitExceeded as e:
+        from chatter.utils.problem import RateLimitProblem
+        raise RateLimitProblem(
+            detail="Too many SSE connection attempts. Please wait before trying again."
+        )
 
     async def generate_events():
         """Generate SSE formatted events."""
-        # Create connection for this user
-        connection_id = sse_service.create_connection(
-            user_id=current_user.id
-        )
+        try:
+            # Create connection for this user
+            connection_id = sse_service.create_connection(
+                user_id=current_user.id
+            )
+        except ValueError as e:
+            logger.warning(
+                "Failed to create SSE connection",
+                user_id=current_user.id,
+                error=str(e),
+            )
+            from chatter.utils.problem import ServiceUnavailableProblem
+            raise ServiceUnavailableProblem(
+                detail="Too many active connections. Please try again later."
+            )
+        
         connection = sse_service.get_connection(connection_id)
 
         if not connection:
             logger.error(
-                "Failed to create SSE connection",
+                "Failed to retrieve SSE connection",
                 user_id=current_user.id,
+                connection_id=connection_id,
             )
             return
 
@@ -105,10 +132,11 @@ async def events_stream(
                 user_id=current_user.id,
                 error=str(e),
             )
+            from datetime import UTC, datetime
             error_event = {
                 "type": "error",
                 "data": {"error": "Stream connection error"},
-                "timestamp": connection.connected_at.isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             }
             yield f"data: {json.dumps(error_event)}\n\n"
         finally:
@@ -121,8 +149,9 @@ async def events_stream(
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "Cache-Control",
+            "Access-Control-Allow-Origin": ", ".join(settings.cors_origins),
+            "Access-Control-Allow-Headers": ", ".join(settings.cors_allow_headers),
+            "Access-Control-Allow-Credentials": str(settings.cors_allow_credentials).lower(),
         },
     )
 
@@ -140,31 +169,17 @@ async def events_stream(
 )
 async def admin_events_stream(
     request: Request,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ) -> StreamingResponse:
     """Stream all system events for admin users.
 
     Args:
         request: FastAPI request object
-        current_user: Current authenticated user (must be admin)
+        current_user: Current authenticated admin user
 
     Returns:
         StreamingResponse with SSE format for all events
     """
-    # Check admin role - only superusers can access admin event stream
-    from chatter.core.auth import AuthService
-    from chatter.utils.database import get_session_maker
-
-    session_maker = get_session_maker()
-    async with session_maker() as session:
-        auth_service = AuthService(session)
-        is_admin = await auth_service.is_admin(current_user.id)
-        if not is_admin:
-            from chatter.utils.problem import AuthorizationProblem
-
-            raise AuthorizationProblem(
-                detail="Admin privileges required for system event stream"
-            )
 
     async def generate_admin_events():
         """Generate SSE formatted events for admin stream."""
@@ -227,10 +242,11 @@ async def admin_events_stream(
                 admin_user_id=current_user.id,
                 error=str(e),
             )
+            from datetime import UTC, datetime
             error_event = {
                 "type": "error",
                 "data": {"error": "Admin stream connection error"},
-                "timestamp": connection.connected_at.isoformat(),
+                "timestamp": datetime.now(UTC).isoformat(),
             }
             yield f"data: {json.dumps(error_event)}\n\n"
         finally:
@@ -243,38 +259,25 @@ async def admin_events_stream(
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "Cache-Control",
+            "Access-Control-Allow-Origin": ", ".join(settings.cors_origins),
+            "Access-Control-Allow-Headers": ", ".join(settings.cors_allow_headers),
+            "Access-Control-Allow-Credentials": str(settings.cors_allow_credentials).lower(),
         },
     )
 
 
 @router.get("/stats", response_model=SSEStatsResponse)
 async def get_sse_stats(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ) -> SSEStatsResponse:
     """Get SSE service statistics.
 
     Args:
-        current_user: Current authenticated user
+        current_user: Current authenticated admin user
 
     Returns:
         SSE service statistics
     """
-    # Check admin role for detailed system statistics
-    from chatter.core.auth import AuthService
-    from chatter.utils.database import get_session_maker
-
-    session_maker = get_session_maker()
-    async with session_maker() as session:
-        auth_service = AuthService(session)
-        is_admin = await auth_service.is_admin(current_user.id)
-        if not is_admin:
-            from chatter.utils.problem import AuthorizationProblem
-
-            raise AuthorizationProblem(
-                detail="Admin privileges required for detailed system statistics"
-            )
 
     stats = sse_service.get_stats()
 
@@ -316,30 +319,16 @@ async def trigger_test_event(
 
 @router.post("/broadcast-test", response_model=TestEventResponse)
 async def trigger_broadcast_test(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ) -> TestEventResponse:
     """Trigger a broadcast test event for all users.
 
     Args:
-        current_user: Current authenticated user
+        current_user: Current authenticated admin user
 
     Returns:
         Success message with event ID
     """
-    # Check admin role for broadcast events
-    from chatter.core.auth import AuthService
-    from chatter.utils.database import get_session_maker
-
-    session_maker = get_session_maker()
-    async with session_maker() as session:
-        auth_service = AuthService(session)
-        is_admin = await auth_service.is_admin(current_user.id)
-        if not is_admin:
-            from chatter.utils.problem import AuthorizationProblem
-
-            raise AuthorizationProblem(
-                detail="Admin privileges required for system broadcast events"
-            )
 
     event_id = await sse_service.trigger_event(
         EventType.SYSTEM_ALERT,

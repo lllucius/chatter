@@ -91,9 +91,9 @@ async def get_provider(
 )
 async def create_provider(
     provider_data: ProviderCreate,
+    request: Request,
     session: AsyncSession = Depends(get_session_generator),
     current_user: User = Depends(get_current_user),
-    request: Request,
 ):
     """Create a new provider."""
     from chatter.utils.audit_logging import get_audit_logger, AuditEventType, AuditResult

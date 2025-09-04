@@ -905,10 +905,11 @@ def health_check() -> None:
 
         # Check Redis connection
         try:
-            from chatter.services.cache import get_cache_service
+            from chatter.core.cache_factory import get_general_cache
 
-            cache_service = await get_cache_service()
-            if cache_service.is_connected():
+            cache_service = get_general_cache()
+            health = await cache_service.health_check()
+            if health.get("status") == "healthy":
                 console.print("✅ Redis Cache: Connected")
             else:
                 console.print("⚠️ Redis Cache: Not available (optional)")

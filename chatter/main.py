@@ -340,9 +340,9 @@ def create_app() -> FastAPI:
     cache_service = None
     if settings.rate_limit_use_cache:
         try:
-            from chatter.services.cache import CacheService
+            from chatter.core.cache_factory import get_general_cache
 
-            cache_service = CacheService()
+            cache_service = get_general_cache()
             # Note: Cache service will connect during first use
         except Exception as e:
             logger.warning(f"Failed to initialize cache for rate limiting: {e}")

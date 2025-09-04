@@ -146,6 +146,15 @@ class MessageService:
                 conversation_id, user_id, include_messages=False
             )
 
+            # Get the next sequence number for this conversation
+            next_seq_query = select(Message.sequence_number).where(
+                Message.conversation_id == conversation_id
+            ).order_by(desc(Message.sequence_number)).limit(1)
+            
+            result = await self.session.execute(next_seq_query)
+            last_sequence = result.scalar()
+            next_sequence = 0 if last_sequence is None else last_sequence + 1
+
             # Create the message
             message = Message(
                 conversation_id=conversation_id,
@@ -156,6 +165,7 @@ class MessageService:
                 output_tokens=output_tokens,
                 cost=cost,
                 provider=provider,
+                sequence_number=next_sequence,
             )
 
             self.session.add(message)

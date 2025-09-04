@@ -14,7 +14,7 @@ from chatter.schemas.events import (
 )
 from chatter.services.sse_events import EventType, sse_service
 from chatter.utils.logging import get_logger
-from chatter.utils.rate_limiter import get_rate_limiter, RateLimitExceeded
+from chatter.utils.unified_rate_limiter import get_unified_rate_limiter, RateLimitExceeded
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -45,11 +45,13 @@ async def events_stream(
         StreamingResponse with SSE format
     """
     # Rate limit SSE connections per user
-    rate_limiter = get_rate_limiter()
+    rate_limiter = get_unified_rate_limiter()
     try:
         await rate_limiter.check_rate_limit(
-            f"sse_connections:{current_user.id}",
-            limit_per_hour=50,  # Max 50 SSE connections per hour per user
+            key=f"sse_connections:{current_user.id}",
+            limit=50,  # Max 50 SSE connections per hour per user
+            window=3600,  # 1 hour in seconds
+            identifier="sse_connections",
         )
     except RateLimitExceeded as e:
         from chatter.utils.problem import RateLimitProblem

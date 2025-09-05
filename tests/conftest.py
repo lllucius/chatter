@@ -4,10 +4,10 @@ import asyncio
 import os
 from collections.abc import AsyncGenerator
 
-# Set up test environment before any other imports
-os.environ.setdefault("DATABASE_URL", "sqlite:///test.db")  # Use SQLite for simpler test isolation
+# Set up test environment before any other imports  
 os.environ.setdefault("SECRET_KEY", "test_secret_key_for_testing")
 os.environ.setdefault("ENVIRONMENT", "testing")
+os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
 os.environ.setdefault("REDIS_ENABLED", "false")  # Disable Redis for tests to avoid connection issues
 os.environ.setdefault("CACHE_BACKEND", "memory")  # Use memory cache instead of Redis
 os.environ.setdefault("CHATTER_ENCRYPTION_KEY", "m7y0DnHHivzNFy4GH8VbiBSrG6r-NAA8KDyfB5CzUEo=")  # Set proper Fernet key for crypto tests
@@ -32,7 +32,6 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.pool import NullPool
 
 from chatter.utils.database import Base, get_session_generator
 
@@ -200,9 +199,10 @@ def app(db_session: AsyncSession):
 @pytest.fixture(scope="function")
 async def db_engine():
     """
-    Create a function-scoped SQLite database engine for testing.
+    Create a function-scoped PostgreSQL database engine for testing.
     
-    Uses SQLite for simple, fast test isolation. Each test gets a fresh database.
+    Uses PostgreSQL test database for realistic testing that matches production.
+    Uses simple table cleanup instead of full schema recreation to avoid transaction issues.
     """
     from chatter.config import settings
     from sqlalchemy import text
@@ -210,27 +210,42 @@ async def db_engine():
     # Import all models to ensure they're registered with Base.metadata
     import chatter.models
     
-    # Use SQLite for tests (simpler and more isolated)
-    db_url = "sqlite+aiosqlite:///test.db"
+    # Use PostgreSQL test database 
+    db_url = settings.database_url_for_env
     
-    # Create async engine for SQLite
+    # Create async engine for PostgreSQL
     engine = create_async_engine(
         db_url,
         echo=False,
-        poolclass=NullPool,  # Use NullPool to avoid connection reuse
+        pool_pre_ping=True,
+        pool_recycle=300,
     )
     
-    # Create all tables
+    # Ensure tables exist (create once, reuse)
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        try:
+            # Try to enable pgvector extension if available (graceful fallback)
+            try:
+                await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            except Exception:
+                # Ignore if pgvector is not available
+                pass
+            
+            # Create all tables if they don't exist (idempotent)
+            await conn.run_sync(Base.metadata.create_all)
+            
+        except Exception as e:
+            print(f"Schema setup error (may be normal if tables exist): {e}")
+            # Don't fail if tables already exist
     
     try:
         yield engine
     finally:
-        # Clean up - drop all tables and dispose engine
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-        await engine.dispose()
+        # Just dispose, don't try to drop tables
+        try:
+            await engine.dispose()
+        except Exception:
+            pass
 
 
 @pytest.fixture(scope="function")
@@ -257,9 +272,10 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     """
     Provide a database session with clean state per test.
     
-    Each test gets a fresh SQLite database, so no cleanup needed.
+    Cleans up test data before each test to ensure isolation.
     """
     import chatter.models
+    from sqlalchemy import text
     
     # Create a session maker bound to the engine
     session_maker = async_sessionmaker(
@@ -273,6 +289,32 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     # Create a new session
     session = session_maker()
     session.info["_in_test"] = True
+    
+    # Clean up any existing data before the test
+    try:
+        # Use a separate connection for cleanup to avoid transaction conflicts
+        async with db_engine.begin() as cleanup_conn:
+            # Get all table names
+            result = await cleanup_conn.execute(text("""
+                SELECT tablename FROM pg_tables 
+                WHERE schemaname = 'public' 
+                AND tablename NOT LIKE 'pg_%'
+                ORDER BY tablename
+            """))
+            table_names = [row[0] for row in result.fetchall()]
+            
+            # Disable foreign key checks temporarily, truncate, then re-enable
+            if table_names:
+                # Truncate all tables
+                for table in table_names:
+                    try:
+                        await cleanup_conn.execute(text(f'TRUNCATE TABLE "{table}" CASCADE;'))
+                    except Exception:
+                        # Table might not exist or have dependencies, ignore
+                        pass
+                        
+    except Exception as e:
+        print(f"Cleanup warning (continuing): {e}")
     
     try:
         yield session

@@ -46,9 +46,9 @@ class CustomHTTPBearer(HTTPBearer):
         """Extract credentials and raise 401 for missing/invalid auth."""
         try:
             return await super().__call__(request)
-        except Exception:
+        except Exception as e:
             # Convert any authentication failure to 401
-            raise AuthenticationError("Authentication credentials required")
+            raise AuthenticationError("Authentication credentials required") from e
 
 
 security = CustomHTTPBearer()

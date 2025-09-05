@@ -396,7 +396,7 @@ class LLMService:
         # Get provider instance
         try:
             provider_instance = await self.get_provider(provider)
-        except Exception:
+        except Exception as e:
             # If provider not found, try to create a simple instance
             if provider.lower() == "openai":
                 api_key = os.getenv("OPENAI_API_KEY", "dummy")
@@ -417,7 +417,7 @@ class LLMService:
             else:
                 raise LLMProviderError(
                     f"Unsupported provider: {provider}"
-                )
+                ) from e
 
         # Generate response with retries
         last_exception = None
@@ -865,7 +865,7 @@ class LLMService:
             except Exception as fallback_error:
                 raise LLMProviderError(
                     f"Both providers failed. Primary: {e}, Fallback: {fallback_error}"
-                )
+                ) from fallback_error
 
     async def generate_with_context(
         self,

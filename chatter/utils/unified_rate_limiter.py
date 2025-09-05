@@ -583,7 +583,7 @@ def rate_limit(
                     retry_after=e.retry_after,
                     limit=e.limit,
                     window=e.window,
-                )
+                ) from e
 
             return await func(*args, **kwargs)
 

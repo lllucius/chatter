@@ -24,7 +24,7 @@ from chatter.schemas.toolserver import (
     ToolServerUpdate,
     ToolUsageCreate,
 )
-from chatter.services.mcp import MCPToolService
+# Moved to function level to avoid circular import: from chatter.services.mcp import MCPToolService
 from chatter.utils.crypto import get_secret_manager
 from chatter.utils.logging import get_logger
 
@@ -47,9 +47,17 @@ class ToolServerService:
             session: Database session
         """
         self.session = session
-        self.mcp_service = MCPToolService()
+        self._mcp_service = None  # Lazy loaded to avoid circular import
         self._health_check_interval = 300  # 5 minutes
         self._last_health_check = {}
+
+    @property
+    def mcp_service(self):
+        """Lazy load MCP service to avoid circular import."""
+        if self._mcp_service is None:
+            from chatter.services.mcp import MCPToolService
+            self._mcp_service = MCPToolService()
+        return self._mcp_service
 
     # CRUD Operations for Tool Servers
 

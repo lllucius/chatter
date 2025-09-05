@@ -306,7 +306,7 @@ class PluginManager:
 
                 manifest = PluginManifest(**manifest_data)
             except Exception as e:
-                raise ValueError(f"Invalid plugin manifest: {str(e)}")
+                raise ValueError(f"Invalid plugin manifest: {str(e)}") from e
 
             # Check if plugin already installed
             for plugin_instance in self.plugins.values():

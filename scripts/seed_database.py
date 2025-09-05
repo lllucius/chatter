@@ -85,7 +85,7 @@ def seed(
         except Exception as e:
             console.print(f"❌ Seeding failed: {e}", style="red")
             logger.error("Seeding failed", error=str(e))
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     
     asyncio.run(_seed())
 
@@ -130,7 +130,7 @@ def clear(
                 
         except Exception as e:
             console.print(f"❌ Clear operation failed: {e}", style="red")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     
     asyncio.run(_clear())
 
@@ -203,7 +203,7 @@ def status():
                     
         except Exception as e:
             console.print(f"❌ Status check failed: {e}", style="red")
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
     
     asyncio.run(_status())
 

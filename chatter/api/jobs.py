@@ -44,10 +44,10 @@ def validate_job_id(job_id: str) -> str:
     try:
         uuid.UUID(job_id)
         return job_id
-    except ValueError:
+    except ValueError as e:
         raise ValidationProblem(
             detail=f"Invalid job ID format: {job_id}. Must be a valid UUID."
-        )
+        ) from e
 
 
 @router.post(

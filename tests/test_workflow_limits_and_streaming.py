@@ -24,6 +24,10 @@ class TestWorkflowLimitManager:
     def setup_method(self):
         """Set up test fixtures."""
         self.limit_manager = WorkflowLimitManager()
+        # Clear any existing state from previous tests
+        self.limit_manager.active_workflows.clear()
+        self.limit_manager.user_workflow_counts.clear()
+        
         self.user_id = "test_user"
         self.workflow_id = "test_workflow"
         self.limits = WorkflowLimits(
@@ -34,6 +38,12 @@ class TestWorkflowLimitManager:
             max_memory_mb=512,
             max_concurrent=5,
         )
+    
+    def teardown_method(self):
+        """Clean up after each test."""
+        # Clear limit manager state to avoid interference between tests
+        self.limit_manager.active_workflows.clear()
+        self.limit_manager.user_workflow_counts.clear()
 
     def test_get_default_limits(self):
         """Test getting default limits from configuration."""
@@ -155,6 +165,14 @@ class TestWorkflowExecutionService:
         """Set up test fixtures."""
         self.llm_service = AsyncMock(spec=LLMService)
         self.message_service = AsyncMock(spec=MessageService)
+        
+        # Add the missing create_message method to the mock
+        mock_message = MagicMock()
+        mock_message.id = "msg_123"
+        mock_message.content = "Test response"
+        self.message_service.create_message = AsyncMock(return_value=mock_message)
+        self.message_service.get_recent_messages = AsyncMock(return_value=[])
+        
         self.workflow_service = WorkflowExecutionService(
             self.llm_service, self.message_service
         )
@@ -170,6 +188,13 @@ class TestWorkflowExecutionService:
         )
         
         self.correlation_id = "corr_123"
+    
+    def teardown_method(self):
+        """Clean up after each test."""
+        # Clear any workflow state that might interfere with other tests
+        if hasattr(self.workflow_service, 'limit_manager'):
+            self.workflow_service.limit_manager.active_workflows.clear()
+            self.workflow_service.limit_manager.user_workflow_counts.clear()
 
     @pytest.mark.asyncio
     async def test_execute_workflow_with_limits(self):

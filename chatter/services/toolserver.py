@@ -24,7 +24,8 @@ from chatter.schemas.toolserver import (
     ToolServerUpdate,
     ToolUsageCreate,
 )
-from chatter.services.mcp import MCPToolService
+from chatter.core.dependencies import get_tool_service
+from chatter.services.mcp import OAuthConfig, RemoteMCPServer
 from chatter.utils.crypto import get_secret_manager
 from chatter.utils.logging import get_logger
 
@@ -47,7 +48,7 @@ class ToolServerService:
             session: Database session
         """
         self.session = session
-        self.mcp_service = MCPToolService()
+        self.mcp_service = get_tool_service()
         self._health_check_interval = 300  # 5 minutes
         self._last_health_check = {}
 
@@ -944,8 +945,6 @@ class ToolServerService:
                 and server.oauth_client_secret
                 and server.oauth_token_url
             ):
-                from chatter.services.mcp import OAuthConfig
-                
                 # Decrypt the client secret
                 secret_manager = get_secret_manager()
                 try:
@@ -967,8 +966,6 @@ class ToolServerService:
                 )
 
             # Create remote server config
-            from chatter.services.mcp import RemoteMCPServer
-
             remote_server = RemoteMCPServer(
                 name=server.name,
                 base_url=server.base_url,

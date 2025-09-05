@@ -162,6 +162,15 @@ def register_lazy_loaders() -> None:
         "workflow_manager", lambda: _lazy_import_workflow_manager()
     )
 
+    # Interface-based loaders for breaking circular dependencies
+    container.register_lazy_loader(
+        "tool_service_impl", lambda: _lazy_import_tool_service_impl()
+    )
+
+    container.register_lazy_loader(
+        "tool_server_manager_impl", lambda: _lazy_import_tool_server_manager_impl()
+    )
+
 
 def _lazy_import_builtin_tools():
     """Lazy import of BuiltInTools to avoid circular imports."""
@@ -198,6 +207,20 @@ def _lazy_import_workflow_manager():
     return workflow_manager
 
 
+def _lazy_import_tool_service_impl():
+    """Lazy import of tool service implementation."""
+    from chatter.services.mcp import MCPToolService
+    return MCPToolService()
+
+
+def _lazy_import_tool_server_manager_impl():
+    """Lazy import of tool server manager implementation."""
+    from chatter.services.toolserver import ToolServerService  
+    # Note: ToolServerService requires a session parameter
+    # For now, return the class to be instantiated later
+    return ToolServerService
+
+
 # Initialize lazy loaders on module import
 register_lazy_loaders()
 
@@ -226,6 +249,16 @@ def get_model_registry():
 def get_workflow_manager():
     """Get workflow manager with dependency injection."""
     return container.get_lazy("workflow_manager")
+
+
+def get_tool_service():
+    """Get tool service implementation with dependency injection."""
+    return container.get_lazy("tool_service_impl")
+
+
+def get_tool_server_manager():
+    """Get tool server manager with dependency injection."""
+    return container.get_lazy("tool_server_manager_impl")
 
 
 class CircularDependencyDetector:

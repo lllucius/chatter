@@ -534,13 +534,16 @@ class MCPToolService:
         """Track tool usage in the database."""
         try:
             from chatter.schemas.toolserver import ToolUsageCreate
-            from chatter.services.toolserver import ToolServerService
+            from chatter.core.dependencies import get_tool_server_manager
             from chatter.utils.database import get_session_maker
 
+            # Get tool server manager class via dependency injection
+            tool_server_class = get_tool_server_manager()
+            
             # Get database session
             async_session = get_session_maker()
             async with async_session() as session:
-                tool_server_service = ToolServerService(session)
+                tool_server_service = tool_server_class(session)
 
                 # Find server by name
                 server = await tool_server_service.get_server_by_name(

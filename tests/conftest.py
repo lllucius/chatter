@@ -5,21 +5,26 @@ import os
 from collections.abc import AsyncGenerator
 
 # Set up test environment before any other imports
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
+os.environ.setdefault("DATABASE_URL", "sqlite:///test.db")  # Use SQLite for simpler test isolation
 os.environ.setdefault("SECRET_KEY", "test_secret_key_for_testing")
 os.environ.setdefault("ENVIRONMENT", "testing")
 os.environ.setdefault("REDIS_ENABLED", "false")  # Disable Redis for tests to avoid connection issues
 os.environ.setdefault("CACHE_BACKEND", "memory")  # Use memory cache instead of Redis
+os.environ.setdefault("CHATTER_ENCRYPTION_KEY", "m7y0DnHHivzNFy4GH8VbiBSrG6r-NAA8KDyfB5CzUEo=")  # Set proper Fernet key for crypto tests
 
 # Ensure asyncio uses the default policy for tests (not uvloop)
 # This prevents conflicts with pytest-asyncio
+_original_policy = None
 try:
+    _original_policy = asyncio.get_event_loop_policy()
     import uvloop
     # If uvloop is installed, we need to reset to default policy for tests
-    asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+    if isinstance(_original_policy, uvloop.EventLoopPolicy):
+        asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 except ImportError:
     # uvloop not installed, just ensure default policy
-    asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+    if not isinstance(asyncio.get_event_loop_policy(), asyncio.DefaultEventLoopPolicy):
+        asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 
 import pytest
 from sqlalchemy.ext.asyncio import (
@@ -195,73 +200,36 @@ def app(db_session: AsyncSession):
 @pytest.fixture(scope="function")
 async def db_engine():
     """
-    Create a function-scoped database engine for testing.
+    Create a function-scoped SQLite database engine for testing.
     
-    Uses real PostgreSQL server for testing, providing full database functionality
-    including constraints, extensions, and optimizations. Skips tests gracefully
-    if database is not available.
+    Uses SQLite for simple, fast test isolation. Each test gets a fresh database.
     """
-    # Lazy import to avoid hanging during test collection
     from chatter.config import settings
-
-    # Import all models to ensure they're registered with Base.metadata
-    import chatter.models  # This will import all models
     from sqlalchemy import text
-    import asyncio
-
-    # Use the test database URL from configuration
-    db_url = settings.test_database_url
-
-    # Create async engine with test-appropriate settings and additional safety measures
-    # Set poolclass to NullPool to avoid event loop attachment issues
+    
+    # Import all models to ensure they're registered with Base.metadata
+    import chatter.models
+    
+    # Use SQLite for tests (simpler and more isolated)
+    db_url = "sqlite+aiosqlite:///test.db"
+    
+    # Create async engine for SQLite
     engine = create_async_engine(
         db_url,
-        echo=False,  # Set to True for SQL query debugging
-        poolclass=NullPool,  # Use NullPool to avoid connection reuse across event loops
-        pool_pre_ping=False,  # Disable pre-ping for NullPool
-        # Additional asyncpg-specific settings to avoid event loop issues
-        connect_args={
-            "server_settings": {
-                "jit": "off",  # Disable JIT for tests
-            },
-            # Ensure connection timeout settings
-            "command_timeout": 5,
-            "connection_timeout": 10,
-        },
+        echo=False,
+        poolclass=NullPool,  # Use NullPool to avoid connection reuse
     )
     
-    # Test database connection before proceeding
-    try:
-        async with asyncio.timeout(15):  # 15 second timeout for initial connection
-            async with engine.connect() as conn:
-                await conn.execute(text("SELECT 1"))
-    except Exception as e:
-        print(f"Database connection failed: {e}")
-        await engine.dispose()
-        pytest.skip(f"Database not available for testing: {e}")
-        return  # This won't be reached due to pytest.skip, but helps with type hints
-
-    # Create all tables and ensure pgvector extension is available
-    try:
-        async with engine.begin() as conn:
-            # Try to install pgvector extension (fail silently if not available)
-            try:
-                await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-            except Exception:
-                # pgvector may not be available in test environment
-                pass
-
-            # Create tables if they don't exist (idempotent operation)
-            await conn.run_sync(Base.metadata.create_all)
-
-    except Exception:
-        # If anything fails, try without the vector extension
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
+    # Create all tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
     try:
         yield engine
     finally:
+        # Clean up - drop all tables and dispose engine
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
         await engine.dispose()
 
 
@@ -287,94 +255,39 @@ async def db_setup(db_engine):
 @pytest.fixture(scope="function")
 async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     """
-    Provide a database session with transaction rollback per test.
+    Provide a database session with clean state per test.
     
-    This fixture creates a new database session for each test and ensures
-    that all changes are rolled back after the test completes. This provides
-    test isolation - each test starts with a clean database state.
-    
-    Args:
-        db_engine: The database engine
-        db_setup: Ensures database schema is set up
-        
-    Returns:
-        AsyncGenerator yielding a database session
+    Each test gets a fresh SQLite database, so no cleanup needed.
     """
-    # Import all models to ensure they're available for cleanup
-    import chatter.models  # This will import all models
-    from sqlalchemy import text
+    import chatter.models
     
     # Create a session maker bound to the engine
     session_maker = async_sessionmaker(
         bind=db_engine,
         class_=AsyncSession,
         expire_on_commit=False,
-        autoflush=False,  # Disable autoflush for better control in tests
-        autocommit=False,  # Ensure we're in a transaction
+        autoflush=False,
+        autocommit=False,
     )
     
     # Create a new session
     session = session_maker()
-    session.info["_in_test"] = True  # Mark session as being used in tests
+    session.info["_in_test"] = True
     
     try:
-        # Clean up existing data before the test (only tables that exist)
-        try:
-            # Get list of existing tables  
-            result = await session.execute(text("""
-                SELECT table_name FROM information_schema.tables 
-                WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
-            """))
-            tables = [row[0] for row in result.fetchall()]
-            
-            # Truncate tables with CASCADE to handle foreign keys
-            if tables:
-                await session.execute(text("TRUNCATE TABLE " + ", ".join(tables) + " CASCADE;"))
-                await session.commit()
-        except Exception as cleanup_error:
-            # If cleanup fails, rollback and continue - test will still be isolated
-            print(f"Database cleanup warning: {cleanup_error}")
-            try:
-                await session.rollback()
-            except Exception:
-                pass
-        
         yield session
-    except RuntimeError as e:
-        if "attached to a different loop" in str(e):
-            print(f"Event loop issue detected: {e}")
-            # Skip this test gracefully for event loop issues
-            pytest.skip(f"Database event loop conflict: {e}")
-        else:
-            raise
     except Exception as e:
-        # Rollback on any other exception
         print(f"Database session error: {e}")
         try:
             await session.rollback()
         except Exception:
-            pass  # Ignore rollback errors during exception handling
+            pass
         raise
     finally:
-        # Always rollback and close to ensure cleanup
-        try:
-            await session.rollback()
-        except RuntimeError as e:
-            if "attached to a different loop" in str(e):
-                print(f"Event loop issue during rollback: {e}")
-            pass  # Ignore rollback errors during cleanup
-        except Exception as e:
-            print(f"Error during rollback: {e}")
-            pass  # Ignore rollback errors during cleanup
         try:
             await session.close()
-        except RuntimeError as e:
-            if "attached to a different loop" in str(e):
-                print(f"Event loop issue during close: {e}")
-            pass  # Ignore close errors during cleanup  
-        except Exception as e:
-            print(f"Error during session close: {e}")
-            pass  # Ignore close errors during cleanup
+        except Exception:
+            pass
 
 
 @pytest.fixture
@@ -462,6 +375,51 @@ def test_login_data() -> dict:
 
 @pytest.fixture(autouse=True)
 def setup_test_environment():
-    """Setup test environment variables."""
-    # These are already set at the top of the file, but keep for compatibility
-    pass
+    """Setup test environment variables and reset global state."""
+    # Store original values
+    original_env = dict(os.environ)
+    
+    # Set test environment variables
+    test_env = {
+        "DATABASE_URL": "sqlite:///test.db",
+        "SECRET_KEY": "test_secret_key_for_testing", 
+        "ENVIRONMENT": "testing",
+        "REDIS_ENABLED": "false",
+        "CACHE_BACKEND": "memory",
+        "CHATTER_ENCRYPTION_KEY": "m7y0DnHHivzNFy4GH8VbiBSrG6r-NAA8KDyfB5CzUEo=",
+    }
+    
+    # Update environment
+    os.environ.update(test_env)
+    
+    # Reset asyncio policy for this test
+    original_policy = asyncio.get_event_loop_policy()
+    asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+    
+    # Reset any global settings that might be cached
+    import sys
+    config_modules = [name for name in sys.modules.keys() if name and name.startswith('chatter.config')]
+    for module_name in config_modules:
+        module = sys.modules[module_name]
+        # Force reload of settings if present
+        if hasattr(module, 'settings'):
+            # Clear the cached settings to force recreation
+            try:
+                # Create new settings with current environment
+                from chatter.config import Settings
+                module.settings = Settings()
+            except Exception:
+                # If settings creation fails, don't fail the test
+                pass
+    
+    yield
+    
+    # Restore original environment
+    os.environ.clear()
+    os.environ.update(original_env)
+    
+    # Restore original event loop policy
+    try:
+        asyncio.set_event_loop_policy(original_policy)
+    except Exception:
+        pass

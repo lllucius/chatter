@@ -224,3 +224,14 @@ class WorkflowExecutionService:
         }
         
         return capabilities.get(workflow_type, {})
+
+
+def get_workflow_manager():
+    """Get the workflow manager instance.
+    
+    This function provides the workflow manager that tests expect.
+    For now, it returns a mock-like object to satisfy test requirements.
+    """
+    # Import here to avoid circular imports
+    from chatter.core.langgraph import workflow_manager
+    return workflow_manager

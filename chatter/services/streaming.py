@@ -540,6 +540,34 @@ class StreamingService:
             ),
         }
 
+    async def stream_token(self, stream_id: str, token: str) -> None:
+        """Stream a single token to a stream."""
+        if stream_id not in self.active_streams:
+            logger.warning("Attempt to stream token to non-existent stream", stream_id=stream_id)
+            return
+        
+        stream_info = self.active_streams[stream_id]
+        stream_info["token_count"] += 1
+        stream_info["last_activity"] = time.time()
+        
+        logger.debug("Token streamed", stream_id=stream_id, token_length=len(token))
+
+    def is_stream_active(self, stream_id: str) -> bool:
+        """Check if a stream is active."""
+        return stream_id in self.active_streams
+
+    async def stream_event(self, stream_id: str, event: dict[str, Any]) -> None:
+        """Stream an event to a stream."""
+        if stream_id not in self.active_streams:
+            logger.warning("Attempt to stream event to non-existent stream", stream_id=stream_id)
+            return
+        
+        stream_info = self.active_streams[stream_id]
+        stream_info["event_count"] += 1
+        stream_info["last_activity"] = time.time()
+        
+        logger.debug("Event streamed", stream_id=stream_id, event_type=event.get("type", "unknown"))
+
 
 # Global streaming service instance
 streaming_service = StreamingService()

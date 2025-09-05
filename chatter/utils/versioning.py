@@ -204,6 +204,54 @@ class APIVersionManager:
 
         return "active"
 
+    def deprecate_endpoint(
+        self, path: str, method: str, deprecated_in: APIVersion
+    ) -> None:
+        """Mark an endpoint as deprecated in a specific version.
+        
+        Args:
+            path: Endpoint path
+            method: HTTP method
+            deprecated_in: Version where endpoint was deprecated
+        """
+        endpoint_key = f"{method.upper()}:{path}"
+        endpoint = self.endpoints.get(endpoint_key)
+        
+        if endpoint:
+            endpoint.deprecated_in = deprecated_in
+        else:
+            logger.warning(f"Endpoint {endpoint_key} not found for deprecation")
+    
+    def get_endpoint_info(
+        self, path: str, method: str
+    ) -> EndpointVersioning | None:
+        """Get detailed endpoint versioning information.
+        
+        Args:
+            path: Endpoint path
+            method: HTTP method
+            
+        Returns:
+            Endpoint versioning info or None if not found
+        """
+        endpoint_key = f"{method.upper()}:{path}"
+        return self.endpoints.get(endpoint_key)
+    
+    def get_endpoints_for_version(self, version: APIVersion) -> list[EndpointVersioning]:
+        """Get all endpoints available in a specific version.
+        
+        Args:
+            version: API version
+            
+        Returns:
+            List of endpoint versioning information
+        """
+        available_endpoints = []
+        for endpoint in self.endpoints.values():
+            if self.is_endpoint_available(endpoint.path, endpoint.method, version):
+                available_endpoints.append(endpoint)
+        return available_endpoints
+
 
 def extract_version_from_request(request: Request) -> APIVersion:
     """Extract API version from request.

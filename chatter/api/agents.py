@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse
 
 from chatter.api.auth import get_current_user
 from chatter.core.agents import AgentManager
+from chatter.services.agents import AgentService
 from chatter.models.user import User
 from chatter.schemas.agents import (
     AgentCreateRequest,

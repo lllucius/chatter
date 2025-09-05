@@ -56,6 +56,7 @@ class VersionStatus(str, Enum):
 
     ACTIVE = "active"
     SUNSET = "sunset"
+    DEPRECATED = "deprecated"
 
 
 class EndpointChange(str, Enum):
@@ -85,5 +86,6 @@ class EndpointVersioning(BaseModel):
     path: str
     method: str
     introduced_in: APIVersion
+    deprecated_in: APIVersion | None = None
     removed_in: APIVersion | None = None
     changes: dict[APIVersion, list[str]] = {}

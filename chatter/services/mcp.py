@@ -194,6 +194,12 @@ class MCPToolService:
 
         return base_connection
 
+    async def add_server(
+        self, server_config: RemoteMCPServer
+    ) -> bool:
+        """Add a remote MCP server configuration."""
+        return await self.add_remote_server(server_config)
+
     async def add_remote_server(
         self, server_config: RemoteMCPServer
     ) -> bool:
@@ -724,6 +730,29 @@ class MCPToolService:
         self._client = None
 
         logger.info("MCP service cleanup completed")
+
+    def list_servers(self) -> dict[str, RemoteMCPServer]:
+        """List all configured MCP servers."""
+        return self.servers.copy()
+
+    async def get_server_info(self, server_name: str) -> dict[str, Any] | None:
+        """Get detailed information about a specific server."""
+        if server_name not in self.servers:
+            return None
+        
+        server_config = self.servers[server_name]
+        retry_count = self._connection_retry_counts.get(server_name, 0)
+        tools_count = len(self.tools_cache.get(server_name, []))
+        
+        return {
+            "name": server_name,
+            "url": str(server_config.base_url),
+            "transport": server_config.transport_type,
+            "enabled": server_config.enabled,
+            "healthy": self._is_server_healthy(server_name),
+            "tools_count": tools_count,
+            "retry_count": retry_count,
+        }
 
 
 class BuiltInTools:

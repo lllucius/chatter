@@ -14,8 +14,10 @@ async def e2e_client(app, db_session: AsyncSession) -> AsyncClient:
     """
     Async HTTP client configured for E2E testing with real database.
     """
+    from httpx import ASGITransport
+    
     async with AsyncClient(
-        app=app, 
+        transport=ASGITransport(app=app),
         base_url="http://testserver",
         timeout=30.0  # Longer timeout for E2E tests
     ) as client:

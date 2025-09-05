@@ -21,6 +21,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.pool import NullPool
 
 from chatter.utils.database import Base, get_session_generator
 
@@ -200,12 +201,12 @@ async def db_engine():
     db_url = settings.test_database_url
 
     # Create async engine with test-appropriate settings
+    # Set poolclass to NullPool to avoid event loop attachment issues
     engine = create_async_engine(
         db_url,
         echo=False,  # Set to True for SQL query debugging
-        pool_size=5,
-        max_overflow=10,
-        pool_pre_ping=True,
+        poolclass=NullPool,  # Use NullPool to avoid connection reuse across event loops
+        pool_pre_ping=False,  # Disable pre-ping for NullPool
     )
 
     # Create all tables and ensure pgvector extension is available
@@ -219,14 +220,15 @@ async def db_engine():
                 # pgvector may not be available in test environment
                 pass
 
-        # Delete everything
-        with engine.connect() as conn:
-            conn.execute(text("DROP SCHEMA public CASCADE;"))
-            conn.execute(text("CREATE SCHEMA public;"))
-            conn.commit()
+            # Delete everything and recreate schema in async context
+            try:
+                await conn.execute(text("DROP SCHEMA public CASCADE;"))
+                await conn.execute(text("CREATE SCHEMA public;"))
+            except Exception:
+                # Schema might not exist or other issues
+                pass
 
-        # Create tables in a separate transaction
-        async with engine.begin() as conn:
+            # Create tables in the same transaction
             await conn.run_sync(Base.metadata.create_all)
 
     except Exception:
@@ -280,17 +282,35 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
         bind=db_engine,
         class_=AsyncSession,
         expire_on_commit=False,
+        autoflush=False,  # Disable autoflush for better control in tests
+        autocommit=False,  # Ensure we're in a transaction
     )
     
-    # Create a session with autoflush disabled for better control
+    # Create a new session
     session = session_maker()
     session.info["_in_test"] = True  # Mark session as being used in tests
     
     try:
+        # Don't manually start a transaction here - let SQLAlchemy handle it
+        # The session will automatically start a transaction when needed
         yield session
+    except Exception:
+        # Rollback on any exception
+        try:
+            await session.rollback()
+        except Exception:
+            pass  # Ignore rollback errors during exception handling
+        raise
     finally:
-        await session.rollback()
-        await session.close()
+        # Always rollback and close to ensure cleanup
+        try:
+            await session.rollback()
+        except Exception:
+            pass  # Ignore rollback errors during cleanup
+        try:
+            await session.close()
+        except Exception:
+            pass  # Ignore close errors during cleanup
 
 
 @pytest.fixture
@@ -327,17 +347,20 @@ async def auth_headers(client) -> dict[str, str]:
         Dictionary with Authorization header
     """
     import uuid
-    import hashlib
-    # Generate unique user data for each test to avoid conflicts
-    # Create a hash-based suffix to avoid sequential patterns
-    unique_base = str(uuid.uuid4())
-    # Use first 8 chars of hash to avoid sequential patterns in UUIDs
-    unique_id = hashlib.md5(unique_base.encode()).hexdigest()[:8]
+    import string
+    import random
+    
+    # Generate a more username-friendly unique identifier
+    # Use only lowercase letters and numbers, starting with a letter
+    unique_base = str(uuid.uuid4()).replace('-', '')[:8]
+    # Ensure it starts with a letter and only contains alphanumeric characters
+    safe_id = 'user' + ''.join(c for c in unique_base if c.isalnum()).lower()
+    
     user_data = {
-        "username": f"alice{unique_id}",
-        "email": f"alice{unique_id}@example.com", 
+        "username": safe_id,
+        "email": f"{safe_id}@example.com", 
         "password": "SecureP@ssw0rd!",
-        "full_name": f"Alice {unique_id}",
+        "full_name": f"Test User {safe_id}",
     }
 
     response = await client.post("/api/v1/auth/register", json=user_data)

@@ -84,8 +84,12 @@ class TestSecretManager:
 
     def test_encrypt_with_different_managers_incompatible(self):
         """Test that data encrypted with one manager can't be decrypted with another."""
-        manager1 = SecretManager()
-        manager2 = SecretManager()
+        # Create managers with different keys
+        key1 = Fernet.generate_key().decode()
+        key2 = Fernet.generate_key().decode()
+        
+        manager1 = SecretManager(key=key1)
+        manager2 = SecretManager(key=key2)
         
         test_data = "secret data"
         encrypted = manager1.encrypt(test_data)

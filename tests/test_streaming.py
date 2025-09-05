@@ -43,13 +43,13 @@ class TestStreamingEvent:
     def test_streaming_event_data_creation(self):
         """Test creating StreamingEvent."""
         event_data = StreamingEvent(
-            event_type=StreamingEventType.TOKEN,
+            type=StreamingEventType.TOKEN,
             content="Hello",
             metadata={"token_id": 123},
             timestamp=1234567890.0
         )
         
-        assert event_data.event_type == StreamingEventType.TOKEN
+        assert event_data.type == StreamingEventType.TOKEN
         assert event_data.content == "Hello"
         assert event_data.metadata == {"token_id": 123}
         assert event_data.timestamp == 1234567890.0

@@ -121,15 +121,8 @@ class BasePlugin(ABC):
                 # No schema defined, accept any configuration
                 return True
                 
-            # Try to use jsonschema if available for proper validation
-            try:
-                from chatter.core.validation import validation_engine
-                # Use the configuration validator from the unified system
-                result = validation_engine.validate_configuration(config)
-                return result.is_valid
-            except ImportError:
-                # Fallback to basic validation
-                return self._basic_config_validation(config, schema)
+            # Use basic validation with our schema since validation engine doesn't handle custom schemas
+            return self._basic_config_validation(config, schema)
                 
         except Exception as e:
             self.logger.error(f"Configuration validation error: {e}")

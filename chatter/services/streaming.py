@@ -32,6 +32,7 @@ class StreamingEventType(str, Enum):
 
 
 @dataclass
+@dataclass
 class StreamingEvent:
     """Internal streaming event representation."""
 

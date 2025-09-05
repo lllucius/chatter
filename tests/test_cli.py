@@ -279,7 +279,7 @@ class TestCLICommands:
     @patch('chatter.cli.asyncio.run')
     def test_health_command(self, mock_asyncio_run):
         """Test health check command."""
-        result = self.runner.invoke(app, ["health"])
+        result = self.runner.invoke(app, ["health", "check"])
         assert result.exit_code == 0
         mock_asyncio_run.assert_called_once()
 
@@ -301,36 +301,56 @@ class TestCLICommands:
 class TestHealthCheck:
     """Test health check functionality."""
 
-    @pytest.mark.asyncio
-    @patch('chatter.cli.get_api_client')
-    async def test_health_check_success(self, mock_get_client):
+    @patch('chatter.cli.check_database_connection')
+    @patch('chatter.cli.console')
+    def test_health_check_success(self, mock_console, mock_db_check):
         """Test successful health check."""
-        mock_client = MagicMock()
-        mock_client.request = AsyncMock(return_value={
-            "status": "ok",
-            "version": "1.0.0",
-            "timestamp": "2024-01-01T00:00:00Z"
-        })
-        mock_client.close = AsyncMock()
-        mock_get_client.return_value = mock_client
+        # Mock successful database connection
+        mock_db_check.return_value = True
         
-        with patch('chatter.cli.console') as mock_console:
-            await health_check()
+        # Mock cache service
+        with patch('chatter.core.cache_factory.get_general_cache') as mock_get_cache:
+            mock_cache = MagicMock()
+            mock_cache.health_check = AsyncMock(return_value={"status": "healthy"})
+            mock_get_cache.return_value = mock_cache
             
-            mock_client.request.assert_called_once_with("GET", "/health")
-            mock_console.print.assert_any_call("🏥 [bold green]Chatter API Health Status[/bold green]")
+            # Mock other services to avoid complex imports
+            with patch('chatter.services.dynamic_vector_store.DynamicVectorStoreService'), \
+                 patch('chatter.services.llm.LLMService'), \
+                 patch('chatter.utils.database.get_session_maker'):
+                
+                # Call the actual health check function in sync context
+                health_check()
+                
+                # Verify database check was called
+                mock_db_check.assert_called_once()
+                
+                # Verify console output
+                mock_console.print.assert_any_call("🔍 Performing health checks...")
+                mock_console.print.assert_any_call("✅ Database: Connected")
 
-    @pytest.mark.asyncio
-    @patch('chatter.cli.get_api_client')
-    async def test_health_check_failure(self, mock_get_client):
+    @patch('chatter.cli.check_database_connection')
+    @patch('chatter.cli.console')
+    def test_health_check_failure(self, mock_console, mock_db_check):
         """Test health check failure."""
-        mock_client = MagicMock()
-        mock_client.request = AsyncMock(side_effect=Exception("Connection failed"))
-        mock_client.close = AsyncMock()
-        mock_get_client.return_value = mock_client
+        # Mock failed database connection
+        mock_db_check.side_effect = Exception("Connection failed")
         
-        # Should not raise exception, but handle gracefully
-        await health_check()
+        # Mock other services to avoid complex imports 
+        with patch('chatter.core.cache_factory.get_general_cache') as mock_get_cache:
+            mock_cache = MagicMock()
+            mock_cache.health_check = AsyncMock(side_effect=Exception("Cache failed"))
+            mock_get_cache.return_value = mock_cache
+            
+            with patch('chatter.services.dynamic_vector_store.DynamicVectorStoreService'), \
+                 patch('chatter.services.llm.LLMService'), \
+                 patch('chatter.utils.database.get_session_maker'):
+                
+                # Should not raise exception, but handle gracefully
+                health_check()
+                
+                # Verify error handling
+                mock_console.print.assert_any_call("❌ Database: Error - Connection failed")
 
 
 class TestDatabaseCommands:

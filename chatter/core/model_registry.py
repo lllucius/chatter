@@ -317,8 +317,18 @@ class ModelRegistryService:
             ModelDef.is_default.desc(), ModelDef.display_name
         )
 
-        # Get total count
-        count_query = select(func.count()).select_from(query.subquery())
+        # Get total count efficiently using the same filters
+        count_query = select(func.count(ModelDef.id))
+        
+        if provider_id:
+            count_query = count_query.where(ModelDef.provider_id == provider_id)
+        
+        if model_type:
+            count_query = count_query.where(ModelDef.model_type == model_type)
+            
+        if params.active_only:
+            count_query = count_query.where(ModelDef.is_active)
+            
         total = await self.session.scalar(count_query)
 
         # Apply pagination
@@ -485,8 +495,15 @@ class ModelRegistryService:
             EmbeddingSpace.display_name,
         )
 
-        # Get total count
-        count_query = select(func.count()).select_from(query.subquery())
+        # Get total count efficiently using the same filters
+        count_query = select(func.count(EmbeddingSpace.id))
+        
+        if model_id:
+            count_query = count_query.where(EmbeddingSpace.model_id == model_id)
+            
+        if params.active_only:
+            count_query = count_query.where(EmbeddingSpace.is_active)
+            
         total = await self.session.scalar(count_query)
 
         # Apply pagination

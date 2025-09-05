@@ -43,8 +43,11 @@ class TestBasePlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
-                pass
+            async def shutdown(self):
+                return True
+            
+            def get_capabilities(self):
+                return []
             
             async def health_check(self):
                 return {"status": "healthy"}
@@ -53,7 +56,7 @@ class TestBasePlugin:
         plugin = TestPlugin(config)
         
         assert plugin.config == config
-        assert plugin.enabled is True
+        assert hasattr(plugin, 'logger')
         assert plugin.logger is not None
 
     def test_base_plugin_default_config(self):
@@ -63,8 +66,11 @@ class TestBasePlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
-                pass
+            async def shutdown(self):
+                return True
+            
+            def get_capabilities(self):
+                return []
             
             async def health_check(self):
                 return {"status": "healthy"}
@@ -72,7 +78,9 @@ class TestBasePlugin:
         plugin = TestPlugin()
         
         assert plugin.config == {}
-        assert plugin.enabled is True
+        # Remove reference to nonexistent 'enabled' attribute
+        assert hasattr(plugin, 'logger')
+        assert plugin.logger is not None
 
     @pytest.mark.asyncio
     async def test_base_plugin_get_configuration_schema(self):
@@ -82,8 +90,11 @@ class TestBasePlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
-                pass
+            async def shutdown(self):
+                return True
+            
+            def get_capabilities(self):
+                return []
             
             async def health_check(self):
                 return {"status": "healthy"}
@@ -106,8 +117,11 @@ class TestBasePlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
-                pass
+            async def shutdown(self):
+                return True
+            
+            def get_capabilities(self):
+                return []
             
             async def health_check(self):
                 return {"status": "healthy"}
@@ -126,8 +140,11 @@ class TestBasePlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
-                pass
+            async def shutdown(self):
+                return True
+            
+            def get_capabilities(self):
+                return []
             
             async def health_check(self):
                 return {"status": "healthy"}
@@ -162,8 +179,11 @@ class TestBasePlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
-                pass
+            async def shutdown(self):
+                return True
+            
+            def get_capabilities(self):
+                return []
             
             async def health_check(self):
                 return {"status": "healthy"}
@@ -206,8 +226,11 @@ class TestBasePlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
-                pass
+            async def shutdown(self):
+                return True
+            
+            def get_capabilities(self):
+                return []
             
             async def health_check(self):
                 return {"status": "healthy"}
@@ -231,7 +254,7 @@ class TestToolPlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
+            async def shutdown(self):
                 pass
             
             async def health_check(self):
@@ -252,7 +275,7 @@ class TestToolPlugin:
                 async def initialize(self):
                     pass
                 
-                async def cleanup(self):
+                async def shutdown(self):
                     pass
                 
                 async def health_check(self):
@@ -267,7 +290,7 @@ class TestToolPlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
+            async def shutdown(self):
                 pass
             
             async def health_check(self):
@@ -297,7 +320,7 @@ class TestWorkflowPlugin:
             async def initialize(self):
                 pass
             
-            async def cleanup(self):
+            async def shutdown(self):
                 pass
             
             async def health_check(self):
@@ -318,7 +341,7 @@ class TestWorkflowPlugin:
                 async def initialize(self):
                     pass
                 
-                async def cleanup(self):
+                async def shutdown(self):
                     pass
                 
                 async def health_check(self):
@@ -365,7 +388,7 @@ class TestFilePlugin(ToolPlugin):
     async def initialize(self):
         pass
     
-    async def cleanup(self):
+    async def shutdown(self):
         pass
     
     async def health_check(self):
@@ -785,7 +808,7 @@ class LifecycleTestPlugin(ToolPlugin):
     async def initialize(self):
         self.initialized = True
     
-    async def cleanup(self):
+    async def shutdown(self):
         self.cleaned_up = True
     
     async def health_check(self):
@@ -852,7 +875,7 @@ class Plugin1(ToolPlugin):
     async def initialize(self):
         pass
     
-    async def cleanup(self):
+    async def shutdown(self):
         pass
     
     async def health_check(self):
@@ -871,7 +894,7 @@ class Plugin2(ToolPlugin):
     async def initialize(self):
         pass
     
-    async def cleanup(self):
+    async def shutdown(self):
         pass
     
     async def health_check(self):

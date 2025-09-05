@@ -226,7 +226,7 @@ async def db_engine():
             },
             # Ensure connection timeout settings
             "command_timeout": 5,
-            "connection_timeout": 10,
+            #"connection_timeout": 10,
         },
     )
     

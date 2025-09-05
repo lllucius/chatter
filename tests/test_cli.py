@@ -16,9 +16,9 @@ from typer.testing import CliRunner
 from chatter.cli import (
     APIClient,
     app,
-    check_health,
+    health_check,
     get_api_client,
-    init_database_command,
+    db_init,
 )
 from chatter.config import settings
 
@@ -284,7 +284,7 @@ class TestCLICommands:
         mock_asyncio_run.assert_called_once()
 
     @patch('chatter.cli.asyncio.run')
-    def test_db_init_command(self, mock_asyncio_run):
+    def test_db_init(self, mock_asyncio_run):
         """Test database initialization command."""
         result = self.runner.invoke(app, ["db", "init"])
         assert result.exit_code == 0
@@ -303,7 +303,7 @@ class TestHealthCheck:
 
     @pytest.mark.asyncio
     @patch('chatter.cli.get_api_client')
-    async def test_check_health_success(self, mock_get_client):
+    async def test_health_check_success(self, mock_get_client):
         """Test successful health check."""
         mock_client = MagicMock()
         mock_client.request = AsyncMock(return_value={
@@ -315,14 +315,14 @@ class TestHealthCheck:
         mock_get_client.return_value = mock_client
         
         with patch('chatter.cli.console') as mock_console:
-            await check_health()
+            await health_check()
             
             mock_client.request.assert_called_once_with("GET", "/health")
             mock_console.print.assert_any_call("🏥 [bold green]Chatter API Health Status[/bold green]")
 
     @pytest.mark.asyncio
     @patch('chatter.cli.get_api_client')
-    async def test_check_health_failure(self, mock_get_client):
+    async def test_health_check_failure(self, mock_get_client):
         """Test health check failure."""
         mock_client = MagicMock()
         mock_client.request = AsyncMock(side_effect=Exception("Connection failed"))
@@ -330,51 +330,51 @@ class TestHealthCheck:
         mock_get_client.return_value = mock_client
         
         # Should not raise exception, but handle gracefully
-        await check_health()
+        await health_check()
 
 
 class TestDatabaseCommands:
     """Test database management commands."""
 
     @pytest.mark.asyncio
-    @patch('chatter.cli.init_database')
+    @patch('chatter.cli.db_init')
     @patch('chatter.cli.check_database_connection')
-    async def test_init_database_command_success(self, mock_check_db, mock_init_db):
+    async def test_db_init_success(self, mock_check_db, mock_init_db):
         """Test successful database initialization."""
         mock_check_db.return_value = True
         mock_init_db.return_value = None
         
         with patch('chatter.cli.console') as mock_console:
-            await init_database_command()
+            await db_init()
             
             mock_check_db.assert_called_once()
             mock_init_db.assert_called_once()
             mock_console.print.assert_any_call("🗄️  [bold]Database Initialization[/bold]")
 
     @pytest.mark.asyncio
-    @patch('chatter.cli.init_database')
+    @patch('chatter.cli.db_init')
     @patch('chatter.cli.check_database_connection')
-    async def test_init_database_command_connection_failure(self, mock_check_db, mock_init_db):
+    async def test_db_init_connection_failure(self, mock_check_db, mock_init_db):
         """Test database initialization with connection failure."""
         mock_check_db.return_value = False
         
         with patch('chatter.cli.console') as mock_console:
-            await init_database_command()
+            await db_init()
             
             mock_check_db.assert_called_once()
             mock_init_db.assert_not_called()
             mock_console.print.assert_any_call("❌ Could not connect to database.")
 
     @pytest.mark.asyncio
-    @patch('chatter.cli.init_database')
+    @patch('chatter.cli.db_init')
     @patch('chatter.cli.check_database_connection')
-    async def test_init_database_command_init_failure(self, mock_check_db, mock_init_db):
+    async def test_db_init_init_failure(self, mock_check_db, mock_init_db):
         """Test database initialization with init failure."""
         mock_check_db.return_value = True
         mock_init_db.side_effect = Exception("Init failed")
         
         with patch('chatter.cli.console') as mock_console:
-            await init_database_command()
+            await db_init()
             
             mock_check_db.assert_called_once()
             mock_init_db.assert_called_once()

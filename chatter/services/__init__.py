@@ -55,11 +55,6 @@ try:
 except ImportError:
     sse_service = None
 
-try:
-    from .workflow_execution_simplified import SimplifiedWorkflowExecutionService as WorkflowExecutionService
-except ImportError:
-    WorkflowExecutionService = None
-
 __all__ = [
     "ab_test_manager",
     "ConversationService",

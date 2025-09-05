@@ -238,11 +238,13 @@ filterwarnings = [
     "ignore::RuntimeWarning",
 ]
 markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests as integration tests",
-    "unit: marks tests as unit tests",
+    "contract: marks tests as contract tests",
+    "database: marks tests as database tests",
     "e2e: marks tests as end-to-end tests",
-    "performance: marks tests as performance tests",
+    "integration: marks tests as integration tests",
     "load: marks tests as load tests",
+    "performance: marks tests as performance tests",
     "security: marks tests as security tests",
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "unit: marks tests as unit tests",
 ]

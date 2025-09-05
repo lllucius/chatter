@@ -113,7 +113,9 @@ def app(db_session: AsyncSession):
         tags=["Authentication"],
     )
     app.include_router(
-        chat.router, prefix=f"{settings.api_prefix}/chat", tags=["Chat"]
+        chat.router,
+        prefix=f"{settings.api_prefix}/chat",
+        tags=["Chat"]
     )
     app.include_router(
         documents.router,
@@ -216,6 +218,12 @@ async def db_engine():
             except Exception:
                 # pgvector may not be available in test environment
                 pass
+
+        # Delete everything
+        with engine.connect() as conn:
+            conn.execute(text("DROP SCHEMA public CASCADE;"))
+            conn.execute(text("CREATE SCHEMA public;"))
+            conn.commit()
 
         # Create tables in a separate transaction
         async with engine.begin() as conn:
@@ -326,8 +334,8 @@ async def auth_headers(client) -> dict[str, str]:
     # Use first 8 chars of hash to avoid sequential patterns in UUIDs
     unique_id = hashlib.md5(unique_base.encode()).hexdigest()[:8]
     user_data = {
-        "username": f"alice_{unique_id}",
-        "email": f"alice_{unique_id}@example.com", 
+        "username": f"alice{unique_id}",
+        "email": f"alice{unique_id}@example.com", 
         "password": "SecureP@ssw0rd!",
         "full_name": f"Alice {unique_id}",
     }

@@ -11,7 +11,7 @@ from chatter.core.workflow_limits import (
     WorkflowResourceLimitError,
     WorkflowResourceUsage,
 )
-from chatter.services.workflow_execution_simplified import SimplifiedWorkflowExecutionService as WorkflowExecutionService
+from chatter.services.workflow_execution import WorkflowExecutionService as WorkflowExecutionService
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
 from chatter.models.conversation import Conversation, Message, MessageRole

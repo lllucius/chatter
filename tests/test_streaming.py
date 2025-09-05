@@ -9,7 +9,7 @@ import pytest
 from chatter.schemas.chat import StreamingChatChunk
 from chatter.services.streaming import (
     StreamingError,
-    StreamingEventData,
+    StreamingEvent,
     StreamingEventType,
     StreamingService,
 )
@@ -37,12 +37,12 @@ class TestStreamingEventType:
             assert len(event_type.value) > 0
 
 
-class TestStreamingEventData:
-    """Test StreamingEventData dataclass."""
+class TestStreamingEvent:
+    """Test StreamingEvent dataclass."""
 
     def test_streaming_event_data_creation(self):
-        """Test creating StreamingEventData."""
-        event_data = StreamingEventData(
+        """Test creating StreamingEvent."""
+        event_data = StreamingEvent(
             event_type=StreamingEventType.TOKEN,
             content="Hello",
             metadata={"token_id": 123},
@@ -55,8 +55,8 @@ class TestStreamingEventData:
         assert event_data.timestamp == 1234567890.0
 
     def test_streaming_event_data_minimal(self):
-        """Test creating StreamingEventData with minimal fields."""
-        event_data = StreamingEventData(
+        """Test creating StreamingEvent with minimal fields."""
+        event_data = StreamingEvent(
             event_type=StreamingEventType.START
         )
         
@@ -68,7 +68,7 @@ class TestStreamingEventData:
     def test_streaming_event_data_auto_timestamp(self):
         """Test that timestamp is automatically set if not provided."""
         before = time.time()
-        event_data = StreamingEventData(
+        event_data = StreamingEvent(
             event_type=StreamingEventType.COMPLETE
         )
         after = time.time()
@@ -76,7 +76,7 @@ class TestStreamingEventData:
         assert before <= event_data.timestamp <= after
 
     def test_streaming_event_data_with_metadata(self):
-        """Test StreamingEventData with complex metadata."""
+        """Test StreamingEvent with complex metadata."""
         metadata = {
             "tool_name": "calculator",
             "input": {"a": 1, "b": 2},
@@ -84,7 +84,7 @@ class TestStreamingEventData:
             "execution_time": 0.5
         }
         
-        event_data = StreamingEventData(
+        event_data = StreamingEvent(
             event_type=StreamingEventType.TOOL_CALL_END,
             content="Tool execution completed",
             metadata=metadata
@@ -245,7 +245,7 @@ class TestStreamingService:
         
         # Create async generator for streaming
         async def stream_events():
-            event_data = StreamingEventData(
+            event_data = StreamingEvent(
                 event_type=StreamingEventType.TOKEN,
                 content="Hello",
                 metadata={"token_id": 1}
@@ -604,7 +604,7 @@ class TestStreamingServiceIntegration:
         # Start event
         async for event in self.service.stream_event(
             stream_id, 
-            StreamingEventData(
+            StreamingEvent(
                 event_type=StreamingEventType.START,
                 content="Starting chat completion"
             )

@@ -154,10 +154,10 @@ class TestEventsUnit:
         # Mock rate limiter to raise exception
         mock_rate_limiter = AsyncMock()
         mock_rate_limiter.check_rate_limit.side_effect = RateLimitExceeded(
-            key="test_key",
+            message="Rate limit exceeded",
             limit=50,
             window=3600,
-            current_count=51
+            remaining=0
         )
         mock_get_rate_limiter.return_value = mock_rate_limiter
         

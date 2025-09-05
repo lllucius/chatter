@@ -21,10 +21,10 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
-from chatter.models.user import User  # Import User from correct module
 
 if TYPE_CHECKING:
     from chatter.models.profile import Profile
+    from chatter.models.user import User
 
 
 class MessageRole(str, Enum):
@@ -158,10 +158,10 @@ class Conversation(Base):
     )
 
     # Relationships
-    user: Mapped[User] = relationship(
+    user: Mapped["User"] = relationship(
         "User", back_populates="conversations"
     )
-    profile: Mapped[Profile | None] = relationship(
+    profile: Mapped["Profile | None"] = relationship(
         "Profile", back_populates="conversations"
     )
     messages: Mapped[list[Message]] = relationship(

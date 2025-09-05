@@ -182,7 +182,7 @@ class Document(Base):
     )
 
     # Relationships
-    owner: Mapped[User] = relationship(
+    owner: Mapped["User"] = relationship(
         "User", back_populates="documents"
     )
     chunks: Mapped[list[DocumentChunk]] = relationship(

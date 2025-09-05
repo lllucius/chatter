@@ -197,6 +197,10 @@ async def db_engine():
     # Lazy import to avoid hanging during test collection
     from chatter.config import settings
 
+    # Import all models to ensure they're registered with Base.metadata
+    import chatter.models  # This will import all models
+    from sqlalchemy import text
+
     # Use the test database URL from configuration
     db_url = settings.test_database_url
 
@@ -214,21 +218,12 @@ async def db_engine():
         async with engine.begin() as conn:
             # Try to install pgvector extension (fail silently if not available)
             try:
-                from sqlalchemy import text
                 await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
             except Exception:
                 # pgvector may not be available in test environment
                 pass
 
-            # Delete everything and recreate schema in async context
-            try:
-                await conn.execute(text("DROP SCHEMA public CASCADE;"))
-                await conn.execute(text("CREATE SCHEMA public;"))
-            except Exception:
-                # Schema might not exist or other issues
-                pass
-
-            # Create tables in the same transaction
+            # Create tables if they don't exist (idempotent operation)
             await conn.run_sync(Base.metadata.create_all)
 
     except Exception:
@@ -277,6 +272,10 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     Returns:
         AsyncGenerator yielding a database session
     """
+    # Import all models to ensure they're available for cleanup
+    import chatter.models  # This will import all models
+    from sqlalchemy import text
+    
     # Create a session maker bound to the engine
     session_maker = async_sessionmaker(
         bind=db_engine,
@@ -291,8 +290,23 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     session.info["_in_test"] = True  # Mark session as being used in tests
     
     try:
-        # Don't manually start a transaction here - let SQLAlchemy handle it
-        # The session will automatically start a transaction when needed
+        # Clean up existing data before the test (only tables that exist)
+        try:
+            # Get list of existing tables  
+            result = await session.execute(text("""
+                SELECT table_name FROM information_schema.tables 
+                WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+            """))
+            tables = [row[0] for row in result.fetchall()]
+            
+            # Truncate tables with CASCADE to handle foreign keys
+            if tables:
+                await session.execute(text("TRUNCATE TABLE " + ", ".join(tables) + " CASCADE;"))
+                await session.commit()
+        except Exception:
+            # If cleanup fails, rollback and continue - test will still be isolated
+            await session.rollback()
+        
         yield session
     except Exception:
         # Rollback on any exception

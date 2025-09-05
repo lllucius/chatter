@@ -72,16 +72,16 @@ def run_command(
 
         return success, result.stdout, result.stderr
 
-    except subprocess.TimeoutExpired:
+    except subprocess.TimeoutExpired as e:
         print(f"❌ {description} timed out after {timeout} seconds")
         if check:
-            raise ProcessError(cmd, -1, "", f"Timeout after {timeout} seconds")
+            raise ProcessError(cmd, -1, "", f"Timeout after {timeout} seconds") from e
         return False, "", f"Timeout after {timeout} seconds"
 
-    except FileNotFoundError:
+    except FileNotFoundError as e:
         print(f"❌ {description} failed: Command not found: {cmd[0]}")
         if check:
-            raise ProcessError(cmd, -1, "", f"Command not found: {cmd[0]}")
+            raise ProcessError(cmd, -1, "", f"Command not found: {cmd[0]}") from e
         return False, "", f"Command not found: {cmd[0]}"
 
 

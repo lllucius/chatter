@@ -486,8 +486,8 @@ class MessageService:
 
             return stats
 
-        except NotFoundError:
-            raise AuthorizationError("Access denied to conversation")
+        except NotFoundError as e:
+            raise AuthorizationError("Access denied to conversation") from e
         except Exception as e:
             logger.error(
                 "Failed to get message statistics",
@@ -553,8 +553,8 @@ class MessageService:
 
             return deleted_count
 
-        except NotFoundError:
-            raise AuthorizationError("Access denied to conversation")
+        except NotFoundError as e:
+            raise AuthorizationError("Access denied to conversation") from e
         except Exception as e:
             logger.error(
                 "Failed to bulk delete messages",

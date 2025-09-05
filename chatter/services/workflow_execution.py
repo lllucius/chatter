@@ -22,7 +22,7 @@ from chatter.core.workflow_performance import (
     performance_monitor,
     workflow_cache,
 )
-from chatter.core.workflow_templates import WorkflowTemplateManager
+from chatter.core.unified_template_manager import unified_template_manager
 from chatter.core.validation import validation_engine
 from chatter.models.conversation import (
     Conversation,
@@ -58,7 +58,7 @@ class WorkflowExecutionService:
         """Initialize workflow execution service."""
         self.llm_service = llm_service
         self.message_service = message_service
-        self.template_manager = WorkflowTemplateManager()
+        self.template_manager = unified_template_manager
         self.limit_manager = workflow_limit_manager
 
     async def execute_workflow(

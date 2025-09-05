@@ -504,11 +504,9 @@ async def get_workflow_templates(
 ) -> WorkflowTemplatesResponse:
     """Get available workflow templates."""
     try:
-        from chatter.core.workflow_templates import (
-            WorkflowTemplateManager,
-        )
+        from chatter.core.unified_template_manager import unified_template_manager
 
-        templates_data = WorkflowTemplateManager.get_template_info()
+        templates_data = await unified_template_manager.get_template_info()
 
         # Convert to structured response
         templates = {}

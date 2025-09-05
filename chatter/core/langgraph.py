@@ -63,10 +63,16 @@ class LangGraphWorkflowManager:
     def __init__(self) -> None:
         """Initialize the workflow manager."""
         self.checkpointer = None
-        self._setup_checkpointer()
+        
+        # Lazy initialization flag to avoid async setup at import time
+        self._initialized = False
 
-    def _setup_checkpointer(self) -> None:
-        """Setup checkpointer for conversation state persistence."""
+    def _ensure_initialized(self) -> None:
+        """Ensure the workflow manager is initialized."""
+        if self._initialized:
+            return
+            
+        # Initialize checkpointer
         try:
             if settings.langgraph_checkpoint_store == "postgres":
                 # Use PostgreSQL checkpointer for production
@@ -89,14 +95,17 @@ class LangGraphWorkflowManager:
             try:
                 self.checkpointer = MemorySaver()
                 logger.info(
-                    "LangGraph Memory checkpointer initialized as fallback"
+                    "LangGraph Memory checkpointer initialized (fallback)"
                 )
             except Exception as fallback_error:
                 logger.error(
                     "Failed to initialize any checkpointer",
                     error=str(fallback_error),
                 )
+                # Use a no-op checkpointer as last resort
                 self.checkpointer = None
+        
+        self._initialized = True
 
     def create_workflow(
         self,
@@ -467,6 +476,7 @@ class LangGraphWorkflowManager:
             workflow.add_edge("call_model", END)
 
         # Compile with checkpointer
+        self._ensure_initialized()
         app = workflow.compile(
             checkpointer=self.checkpointer,
             interrupt_before=[],
@@ -529,6 +539,7 @@ class LangGraphWorkflowManager:
         self, workflow: Pregel, thread_id: str
     ) -> ConversationState | None:
         """Get conversation history for a thread."""
+        self._ensure_initialized()
         if not self.checkpointer:
             return None
 

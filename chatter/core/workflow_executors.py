@@ -225,7 +225,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
         finally:
             # Clean up resource tracking
             if user_id:
-                self.limit_manager.end_workflow_tracking(workflow_id)
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
                 
     async def execute_streaming(
         self,
@@ -312,7 +312,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
         finally:
             # Clean up resource tracking
             if user_id:
-                self.limit_manager.end_workflow_tracking(workflow_id)
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
 
 
 class RAGWorkflowExecutor(BaseWorkflowExecutor):
@@ -405,7 +405,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
         finally:
             # Clean up resource tracking
             if user_id:
-                self.limit_manager.end_workflow_tracking(workflow_id)
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
                 
     async def execute_streaming(
         self,
@@ -500,7 +500,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
         finally:
             # Clean up resource tracking
             if user_id:
-                self.limit_manager.end_workflow_tracking(workflow_id)
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
 
 
 class ToolsWorkflowExecutor(BaseWorkflowExecutor):
@@ -593,7 +593,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
         finally:
             # Clean up resource tracking
             if user_id:
-                self.limit_manager.end_workflow_tracking(workflow_id)
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
                 
     async def execute_streaming(
         self,
@@ -688,7 +688,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
         finally:
             # Clean up resource tracking
             if user_id:
-                self.limit_manager.end_workflow_tracking(workflow_id)
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
 
 
 class FullWorkflowExecutor(BaseWorkflowExecutor):
@@ -786,7 +786,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
         finally:
             # Clean up resource tracking
             if user_id:
-                self.limit_manager.end_workflow_tracking(workflow_id)
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
                 
     async def execute_streaming(
         self,
@@ -886,7 +886,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
         finally:
             # Clean up resource tracking
             if user_id:
-                self.limit_manager.end_workflow_tracking(workflow_id)
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
 
 
 class WorkflowExecutorFactory:

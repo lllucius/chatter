@@ -155,6 +155,14 @@ class TestWorkflowExecutionService:
         """Set up test fixtures."""
         self.llm_service = AsyncMock(spec=LLMService)
         self.message_service = AsyncMock(spec=MessageService)
+        
+        # Add the missing create_message method to the mock
+        mock_message = MagicMock()
+        mock_message.id = "msg_123"
+        mock_message.content = "Test response"
+        self.message_service.create_message = AsyncMock(return_value=mock_message)
+        self.message_service.get_recent_messages = AsyncMock(return_value=[])
+        
         self.workflow_service = WorkflowExecutionService(
             self.llm_service, self.message_service
         )

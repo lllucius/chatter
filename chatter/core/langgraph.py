@@ -750,6 +750,20 @@ class LangGraphWorkflowManager:
             )
             return ""
 
+    def get_retriever(self, workspace_id: str) -> Any | None:
+        """Get retriever for a workspace - placeholder implementation.
+        
+        Args:
+            workspace_id: Workspace identifier
+            
+        Returns:
+            Retriever instance or None if not available
+        """
+        # TODO: Implement actual retriever logic based on workspace
+        # For now, return None to avoid breaking existing workflows
+        logger.debug(f"get_retriever called for workspace: {workspace_id}")
+        return None
+
 
 # Global workflow manager instance
 workflow_manager = LangGraphWorkflowManager()

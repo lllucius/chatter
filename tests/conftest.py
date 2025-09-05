@@ -21,6 +21,7 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.pool import NullPool
 
 from chatter.utils.database import Base, get_session_generator
 
@@ -200,12 +201,12 @@ async def db_engine():
     db_url = settings.test_database_url
 
     # Create async engine with test-appropriate settings
+    # Set poolclass to NullPool to avoid event loop attachment issues
     engine = create_async_engine(
         db_url,
         echo=False,  # Set to True for SQL query debugging
-        pool_size=5,
-        max_overflow=10,
-        pool_pre_ping=True,
+        poolclass=NullPool,  # Use NullPool to avoid connection reuse across event loops
+        pool_pre_ping=False,  # Disable pre-ping for NullPool
     )
 
     # Create all tables and ensure pgvector extension is available
@@ -219,14 +220,15 @@ async def db_engine():
                 # pgvector may not be available in test environment
                 pass
 
-        # Delete everything
-        with engine.connect() as conn:
-            conn.execute(text("DROP SCHEMA public CASCADE;"))
-            conn.execute(text("CREATE SCHEMA public;"))
-            conn.commit()
+            # Delete everything and recreate schema in async context
+            try:
+                await conn.execute(text("DROP SCHEMA public CASCADE;"))
+                await conn.execute(text("CREATE SCHEMA public;"))
+            except Exception:
+                # Schema might not exist or other issues
+                pass
 
-        # Create tables in a separate transaction
-        async with engine.begin() as conn:
+            # Create tables in the same transaction
             await conn.run_sync(Base.metadata.create_all)
 
     except Exception:
@@ -280,6 +282,7 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
         bind=db_engine,
         class_=AsyncSession,
         expire_on_commit=False,
+        autoflush=False,  # Disable autoflush for better control in tests
     )
     
     # Create a session with autoflush disabled for better control
@@ -287,10 +290,23 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     session.info["_in_test"] = True  # Mark session as being used in tests
     
     try:
+        # Start a transaction to ensure isolation
+        await session.begin()
         yield session
-    finally:
+    except Exception:
+        # Rollback on any exception
         await session.rollback()
-        await session.close()
+        raise
+    finally:
+        # Always rollback and close to ensure cleanup
+        try:
+            await session.rollback()
+        except Exception:
+            pass  # Ignore rollback errors during cleanup
+        try:
+            await session.close()
+        except Exception:
+            pass  # Ignore close errors during cleanup
 
 
 @pytest.fixture

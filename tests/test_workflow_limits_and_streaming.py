@@ -11,7 +11,7 @@ from chatter.core.workflow_limits import (
     WorkflowResourceLimitError,
     WorkflowResourceUsage,
 )
-from chatter.services.workflow_execution import WorkflowExecutionService
+from chatter.services.workflow_execution_simplified import SimplifiedWorkflowExecutionService as WorkflowExecutionService
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
 from chatter.models.conversation import Conversation, Message, MessageRole
@@ -292,7 +292,7 @@ class TestWorkflowExecutionService:
         self.workflow_service.limit_manager.user_workflow_counts[user_id] = 1
         
         # Second concurrent workflow should fail
-        from chatter.services.workflow_execution import WorkflowExecutionError
+        from chatter.core.workflow_executors import WorkflowExecutionError
         with pytest.raises(WorkflowExecutionError) as exc_info:
             await self.workflow_service.execute_workflow(
                 self.conversation,

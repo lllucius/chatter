@@ -23,8 +23,10 @@ async def service(db_session: AsyncSession) -> ModelRegistryService:
 @pytest.fixture
 async def sample_provider(service: ModelRegistryService) -> str:
     """Create a sample provider."""
+    import uuid
+    unique_id = str(uuid.uuid4())[:8]
     provider_data = ProviderCreate(
-        name="test_provider",
+        name=f"test_provider_{unique_id}",
         provider_type=ProviderType.OPENAI,
         display_name="Test Provider",
         description="Test provider for unit tests",
@@ -38,9 +40,11 @@ async def sample_llm_model(
     service: ModelRegistryService, sample_provider: str
 ) -> str:
     """Create a sample LLM model."""
+    import uuid
+    unique_id = str(uuid.uuid4())[:8]
     model_data = ModelDefCreate(
         provider_id=sample_provider,
-        name="test_llm",
+        name=f"test_llm_{unique_id}",
         model_type=ModelType.LLM,
         display_name="Test LLM",
         model_name="gpt-4",
@@ -56,9 +60,11 @@ async def sample_embedding_model(
     service: ModelRegistryService, sample_provider: str
 ) -> str:
     """Create a sample embedding model."""
+    import uuid
+    unique_id = str(uuid.uuid4())[:8]
     model_data = ModelDefCreate(
         provider_id=sample_provider,
-        name="test_embedding",
+        name=f"test_embedding_{unique_id}",
         model_type=ModelType.EMBEDDING,
         display_name="Test Embedding",
         model_name="text-embedding-ada-002",
@@ -129,9 +135,11 @@ class TestValidationImprovements:
         self, service: ModelRegistryService
     ):
         """Test that creating model validates provider exists."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         model_data = ModelDefCreate(
             provider_id="nonexistent",
-            name="test_model",
+            name=f"test_model_{unique_id}",
             model_type=ModelType.LLM,
             display_name="Test Model",
             model_name="gpt-4",
@@ -151,9 +159,11 @@ class TestValidationImprovements:
         provider.is_active = False
         await service.session.commit()
 
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         model_data = ModelDefCreate(
             provider_id=sample_provider,
-            name="test_model",
+            name=f"test_model_{unique_id}",
             model_type=ModelType.LLM,
             display_name="Test Model",
             model_name="gpt-4",
@@ -263,16 +273,19 @@ class TestBusinessLogicImprovements:
         self, service: ModelRegistryService
     ):
         """Test that different providers can be default for different model types."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
+        
         # Create two providers
         provider1_data = ProviderCreate(
-            name="provider1",
+            name=f"provider1_{unique_id}",
             provider_type=ProviderType.OPENAI,
             display_name="Provider 1",
         )
         provider1 = await service.create_provider(provider1_data)
 
         provider2_data = ProviderCreate(
-            name="provider2",
+            name=f"provider2_{unique_id}",
             provider_type=ProviderType.ANTHROPIC,
             display_name="Provider 2",
         )
@@ -281,7 +294,7 @@ class TestBusinessLogicImprovements:
         # Create LLM model for provider1
         llm_data = ModelDefCreate(
             provider_id=provider1.id,
-            name="llm1",
+            name=f"llm1_{unique_id}",
             model_type=ModelType.LLM,
             display_name="LLM 1",
             model_name="gpt-4",
@@ -291,7 +304,7 @@ class TestBusinessLogicImprovements:
         # Create embedding model for provider2
         embedding_data = ModelDefCreate(
             provider_id=provider2.id,
-            name="embedding1",
+            name=f"embedding1_{unique_id}",
             model_type=ModelType.EMBEDDING,
             display_name="Embedding 1",
             model_name="text-embedding-ada-002",
@@ -320,10 +333,12 @@ class TestTransactionManagement:
         self, service: ModelRegistryService, sample_provider: str
     ):
         """Test that model creation rolls back properly on error."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         # Create a model with invalid data to trigger an error
         model_data = ModelDefCreate(
             provider_id=sample_provider,
-            name="test_model",
+            name=f"test_model_{unique_id}",
             model_type=ModelType.LLM,
             display_name="Test Model",
             model_name="gpt-4",

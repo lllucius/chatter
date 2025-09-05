@@ -284,8 +284,8 @@ class EnhancedInMemoryCache(CacheInterface):
             else:
                 try:
                     new_value = int(current_value) + delta
-                except (ValueError, TypeError):
-                    raise ValueError(f"Cannot increment non-numeric value: {current_value}")
+                except (ValueError, TypeError) as e:
+                    raise ValueError(f"Cannot increment non-numeric value: {current_value}") from e
             
             # Set value directly without using async set method to avoid deadlock
             ttl = self.config.default_ttl

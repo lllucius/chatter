@@ -104,7 +104,7 @@ async def create_agent(
                 identifier="create_agent_daily",
             )
         except RateLimitExceeded as e:
-            raise InternalServerProblem(detail=str(e))
+            raise InternalServerProblem(detail=str(e)) from e
 
         # Validate input data using the unified validation system
         try:
@@ -139,7 +139,7 @@ async def create_agent(
                 raise InternalServerProblem(detail="Max tokens must be between 1 and 32000")
                 
         except ValidationError as e:
-            raise InternalServerProblem(detail=str(e))
+            raise InternalServerProblem(detail=str(e)) from e
 
         # Add created_by to metadata
         metadata = agent_data.metadata or {}
@@ -174,7 +174,7 @@ async def create_agent(
             )
         except ValueError as e:
             logger.error("Invalid agent configuration", error=str(e))
-            raise InternalServerProblem(detail=f"Invalid agent configuration: {str(e)}")
+            raise InternalServerProblem(detail=f"Invalid agent configuration: {str(e)}") from e
 
         # Get the created agent
         agent = await agent_manager.get_agent(agent_id)
@@ -381,8 +381,8 @@ async def update_agent(
         import uuid
         try:
             uuid.UUID(agent_id)
-        except ValueError:
-            raise NotFoundProblem(detail=f"Invalid agent ID format: {agent_id}")
+        except ValueError as e:
+            raise NotFoundProblem(detail=f"Invalid agent ID format: {agent_id}") from e
 
         # First check if agent exists
         agent = await agent_manager.get_agent(agent_id)
@@ -438,8 +438,8 @@ async def delete_agent(
         import uuid
         try:
             uuid.UUID(agent_id)
-        except ValueError:
-            raise NotFoundProblem(detail=f"Invalid agent ID format: {agent_id}")
+        except ValueError as e:
+            raise NotFoundProblem(detail=f"Invalid agent ID format: {agent_id}") from e
 
         # Check if agent exists and user has permission to delete
         agent = await agent_manager.get_agent(agent_id)
@@ -518,7 +518,7 @@ async def interact_with_agent(
                 identifier="interact_agent_daily",
             )
         except RateLimitExceeded as e:
-            raise InternalServerProblem(detail=str(e))
+            raise InternalServerProblem(detail=str(e)) from e
 
         # Validate inputs
         result = validation_engine.validate_input(agent_id, "agent_id", DEFAULT_CONTEXT)
@@ -707,7 +707,7 @@ async def bulk_create_agents(
                 identifier="bulk_create_daily",
             )
         except RateLimitExceeded as e:
-            raise InternalServerProblem(detail=str(e))
+            raise InternalServerProblem(detail=str(e)) from e
 
         created_agents = []
         failed_creations = []
@@ -855,7 +855,7 @@ async def bulk_delete_agents(
                 identifier="bulk_delete_daily",
             )
         except RateLimitExceeded as e:
-            raise InternalServerProblem(detail=str(e))
+            raise InternalServerProblem(detail=str(e)) from e
 
         deleted_agents = []
         failed_deletions = []

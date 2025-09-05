@@ -90,10 +90,10 @@ class MessageService:
 
             return messages
 
-        except NotFoundError:
+        except NotFoundError as e:
             raise AuthorizationError(
                 "Access denied to conversation messages"
-            )
+            ) from e
         except Exception as e:
             logger.error(
                 "Failed to get conversation messages",
@@ -187,8 +187,8 @@ class MessageService:
 
             return message
 
-        except NotFoundError:
-            raise AuthorizationError("Access denied to conversation")
+        except NotFoundError as e:
+            raise AuthorizationError("Access denied to conversation") from e
         except Exception as e:
             logger.error(
                 "Failed to add message to conversation",
@@ -197,7 +197,7 @@ class MessageService:
                 role=role.value if role else None,
                 error=str(e),
             )
-            raise ValidationError(f"Failed to add message: {e}")
+            raise ValidationError(f"Failed to add message: {e}") from e
 
     async def delete_message(
         self, conversation_id: str, message_id: str, user_id: str
@@ -322,8 +322,8 @@ class MessageService:
 
             return messages
 
-        except NotFoundError:
-            raise AuthorizationError("Access denied to conversation")
+        except NotFoundError as e:
+            raise AuthorizationError("Access denied to conversation") from e
         except Exception as e:
             logger.error(
                 "Failed to get recent messages",
@@ -391,8 +391,8 @@ class MessageService:
 
             return messages
 
-        except NotFoundError:
-            raise AuthorizationError("Access denied to conversation")
+        except NotFoundError as e:
+            raise AuthorizationError("Access denied to conversation") from e
         except Exception as e:
             logger.error(
                 "Failed to search messages",

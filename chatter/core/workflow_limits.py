@@ -190,11 +190,11 @@ class WorkflowLimitManager:
         try:
             async with asyncio.timeout(timeout_seconds):
                 yield
-        except asyncio.TimeoutError:
+        except asyncio.TimeoutError as e:
             raise WorkflowTimeoutError(
                 f"Workflow {timeout_type} timed out after {timeout_seconds} seconds",
                 timeout_type
-            )
+            ) from e
 
     @asynccontextmanager
     async def step_timeout_context(self, workflow_id: str, limits: WorkflowLimits):

@@ -57,7 +57,7 @@ async def events_stream(
         from chatter.utils.problem import RateLimitProblem
         raise RateLimitProblem(
             detail="Too many SSE connection attempts. Please wait before trying again."
-        )
+        ) from e
 
     async def generate_events():
         """Generate SSE formatted events."""
@@ -75,7 +75,7 @@ async def events_stream(
             from chatter.utils.problem import ServiceUnavailableProblem
             raise ServiceUnavailableProblem(
                 detail="Too many active connections. Please try again later."
-            )
+            ) from e
         
         connection = sse_service.get_connection(connection_id)
 

@@ -13,6 +13,10 @@ from dataclasses import dataclass, field
 
 from pydantic import BaseModel, Field
 
+from chatter.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
 
 class EventCategory(str, Enum):
     """High-level categories for all events in the system."""
@@ -191,7 +195,7 @@ class EventRouter:
             try:
                 handler(event)
             except Exception as e:
-                print(f"Error in global handler: {e}")  # Use proper logging
+                logger.error("Error in global handler", error=str(e), event_id=event.event_id, event_type=event.event_type)
                 success = False
         
         # Call category-specific handlers
@@ -200,7 +204,7 @@ class EventRouter:
                 try:
                     handler(event)
                 except Exception as e:
-                    print(f"Error in category handler: {e}")  # Use proper logging
+                    logger.error("Error in category handler", error=str(e), event_id=event.event_id, event_type=event.event_type, category=event.category)
                     success = False
         
         # Call type-specific handlers
@@ -209,7 +213,7 @@ class EventRouter:
                 try:
                     handler(event)
                 except Exception as e:
-                    print(f"Error in type handler: {e}")  # Use proper logging
+                    logger.error("Error in type handler", error=str(e), event_id=event.event_id, event_type=event.event_type)
                     success = False
         
         # Route to category emitters
@@ -220,7 +224,7 @@ class EventRouter:
                     if not emitter_success:
                         success = False
                 except Exception as e:
-                    print(f"Error in emitter: {e}")  # Use proper logging
+                    logger.error("Error in emitter", error=str(e), event_id=event.event_id, event_type=event.event_type, category=event.category)
                     success = False
         
         return success

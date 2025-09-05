@@ -70,7 +70,7 @@ def get_engine() -> AsyncEngine:
                     )
             except Exception as e:
                 # Ignore event listener setup errors (e.g., in tests with mocked engines)
-                logger.debug(f"Could not set up query logging: {e}")
+                logger.debug("Could not set up query logging", error=str(e))
 
     return _engine
 

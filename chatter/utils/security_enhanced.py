@@ -97,7 +97,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
             plain_password.encode(), hashed_password.encode()
         )
     except Exception as e:
-        logger.warning(f"Password verification failed: {e}")
+        logger.warning("Password verification failed", error=str(e))
         return False
 
 
@@ -137,7 +137,7 @@ def verify_api_key_secure(plain_key: str, hashed_key: str) -> bool:
     try:
         return bcrypt.checkpw(plain_key.encode(), hashed_key.encode())
     except Exception as e:
-        logger.warning(f"API key verification failed: {e}")
+        logger.warning("API key verification failed", error=str(e))
         return False
 
 
@@ -160,7 +160,7 @@ def validate_email_advanced(email: str) -> bool:
     # Check for disposable email domains
     domain = email.split('@')[1].lower()
     if domain in DISPOSABLE_DOMAINS:
-        logger.info(f"Blocked disposable email domain: {domain}")
+        logger.info("Blocked disposable email domain", domain=domain)
         return False
     
     # Check for suspicious patterns

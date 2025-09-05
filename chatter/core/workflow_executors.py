@@ -343,7 +343,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
             # Get retriever from workflow manager
             workflow_manager = get_workflow_manager()
             retriever = workflow_manager.get_retriever(
-                conversation.workspace_id if conversation.workspace_id else "default"
+                getattr(conversation, "workspace_id", "default")
             )
             
             # Create RAG workflow
@@ -428,7 +428,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
             # Get retriever from workflow manager
             workflow_manager = get_workflow_manager()
             retriever = workflow_manager.get_retriever(
-                conversation.workspace_id if conversation.workspace_id else "default"
+                getattr(conversation, "workspace_id", "default")
             )
             
             # Create streaming RAG workflow
@@ -531,7 +531,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
             # Get tools from workflow manager
             workflow_manager = get_workflow_manager()
             tools = workflow_manager.get_tools(
-                conversation.workspace_id if conversation.workspace_id else "default"
+                getattr(conversation, "workspace_id", "default")
             )
             
             # Create tools workflow
@@ -616,7 +616,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
             # Get tools from workflow manager
             workflow_manager = get_workflow_manager()
             tools = workflow_manager.get_tools(
-                conversation.workspace_id if conversation.workspace_id else "default"
+                getattr(conversation, "workspace_id", "default")
             )
             
             # Create streaming tools workflow
@@ -719,10 +719,10 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
             # Get tools and retriever from workflow manager
             workflow_manager = get_workflow_manager()
             tools = workflow_manager.get_tools(
-                conversation.workspace_id if conversation.workspace_id else "default"
+                getattr(conversation, "workspace_id", "default")
             )
             retriever = workflow_manager.get_retriever(
-                conversation.workspace_id if conversation.workspace_id else "default"
+                getattr(conversation, "workspace_id", "default")
             )
             
             # Create full workflow
@@ -809,10 +809,10 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
             # Get tools and retriever from workflow manager
             workflow_manager = get_workflow_manager()
             tools = workflow_manager.get_tools(
-                conversation.workspace_id if conversation.workspace_id else "default"
+                getattr(conversation, "workspace_id", "default")
             )
             retriever = workflow_manager.get_retriever(
-                conversation.workspace_id if conversation.workspace_id else "default"
+                getattr(conversation, "workspace_id", "default")
             )
             
             # Create streaming full workflow

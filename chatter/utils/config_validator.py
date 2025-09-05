@@ -30,7 +30,7 @@ def validate_startup_configuration() -> None:
         }
         
         # Validate configuration
-        result = engine.validate_config(config_dict, context)
+        result = engine.validate_configuration(config_dict, context)
         
         if not result.is_valid:
             error_msg = f"Configuration validation failed: {result.errors}"

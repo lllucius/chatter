@@ -258,7 +258,7 @@ class TestUnifiedEventManager:
         
         success2 = await manager.emit_security_event(
             "test.security",
-            {"threat": "test threat"}
+            {"message": "security alert - test threat detected"}
         )
         
         success3 = await manager.emit_audit_event(
@@ -329,7 +329,7 @@ class TestEventIntegration:
             
             await manager.emit_security_event(
                 "auth.login_failure",
-                {"ip_address": "192.168.1.1", "reason": "invalid_password"},
+                {"message": "Login failure from 192.168.1.1", "ip_address": "192.168.1.1", "reason": "invalid_password"},
                 user_id="user456"
             )
             
@@ -380,7 +380,7 @@ class TestEventIntegration:
             
             success2 = await emit_security_event(
                 "test.security",
-                {"alert": "test"}
+                {"message": "security test alert"}
             )
             
             success3 = await emit_audit_event(

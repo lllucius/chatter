@@ -4,10 +4,10 @@ import asyncio
 import os
 from collections.abc import AsyncGenerator
 
-# Set up test environment before any other imports
-os.environ.setdefault("DATABASE_URL", "sqlite:///test.db")  # Use SQLite for simpler test isolation
+# Set up test environment before any other imports  
 os.environ.setdefault("SECRET_KEY", "test_secret_key_for_testing")
 os.environ.setdefault("ENVIRONMENT", "testing")
+os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
 os.environ.setdefault("REDIS_ENABLED", "false")  # Disable Redis for tests to avoid connection issues
 os.environ.setdefault("CACHE_BACKEND", "memory")  # Use memory cache instead of Redis
 os.environ.setdefault("CHATTER_ENCRYPTION_KEY", "m7y0DnHHivzNFy4GH8VbiBSrG6r-NAA8KDyfB5CzUEo=")  # Set proper Fernet key for crypto tests
@@ -32,7 +32,6 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.pool import NullPool
 
 from chatter.utils.database import Base, get_session_generator
 
@@ -200,9 +199,10 @@ def app(db_session: AsyncSession):
 @pytest.fixture(scope="function")
 async def db_engine():
     """
-    Create a function-scoped SQLite database engine for testing.
+    Create a function-scoped PostgreSQL database engine for testing.
     
-    Uses SQLite for simple, fast test isolation. Each test gets a fresh database.
+    Uses PostgreSQL test database for realistic testing that matches production.
+    Each test gets a clean database state.
     """
     from chatter.config import settings
     from sqlalchemy import text
@@ -210,27 +210,49 @@ async def db_engine():
     # Import all models to ensure they're registered with Base.metadata
     import chatter.models
     
-    # Use SQLite for tests (simpler and more isolated)
-    db_url = "sqlite+aiosqlite:///test.db"
+    # Use PostgreSQL test database 
+    db_url = settings.database_url_for_env
     
-    # Create async engine for SQLite
+    # Create async engine for PostgreSQL
     engine = create_async_engine(
         db_url,
         echo=False,
-        poolclass=NullPool,  # Use NullPool to avoid connection reuse
+        pool_pre_ping=True,
+        pool_recycle=300,
+        pool_size=1,  # Use single connection to avoid contention
+        max_overflow=0,
     )
     
-    # Create all tables
+    # Create all tables for each test
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+        try:
+            # First clean up any existing tables (execute statements separately)
+            await conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE;"))
+            await conn.execute(text("CREATE SCHEMA public;"))
+            await conn.execute(text("GRANT ALL ON SCHEMA public TO public;"))
+            
+            # Try to enable pgvector extension if available (graceful fallback)
+            try:
+                await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+            except Exception:
+                # Ignore if pgvector is not available
+                pass
+            
+            # Create all tables in a clean transaction
+            await conn.run_sync(Base.metadata.create_all)
+            
+        except Exception as e:
+            print(f"Schema creation error: {e}")
+            raise
     
     try:
         yield engine
     finally:
-        # Clean up - drop all tables and dispose engine
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.drop_all)
-        await engine.dispose()
+        # Clean dispose
+        try:
+            await engine.dispose()
+        except Exception:
+            pass
 
 
 @pytest.fixture(scope="function")
@@ -257,7 +279,7 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     """
     Provide a database session with clean state per test.
     
-    Each test gets a fresh SQLite database, so no cleanup needed.
+    Each test gets a clean database with fresh schema.
     """
     import chatter.models
     

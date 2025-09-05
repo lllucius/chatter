@@ -178,13 +178,15 @@ class TestValidationImprovements:
         self, service: ModelRegistryService
     ):
         """Test that creating embedding space validates model exists."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         space_data = EmbeddingSpaceCreate(
             model_id="nonexistent",
-            name="test_space",
+            name=f"test_space_{unique_id}",
             display_name="Test Space",
             base_dimensions=1536,
             effective_dimensions=1536,
-            table_name="test_embeddings",
+            table_name=f"test_embeddings_{unique_id}",
         )
         
         with pytest.raises(ValidationError) as exc_info:
@@ -196,13 +198,15 @@ class TestValidationImprovements:
         self, service: ModelRegistryService, sample_llm_model: str
     ):
         """Test that creating embedding space validates model is embedding type."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         space_data = EmbeddingSpaceCreate(
             model_id=sample_llm_model,
-            name="test_space",
+            name=f"test_space_{unique_id}",
             display_name="Test Space",
             base_dimensions=1536,
             effective_dimensions=1536,
-            table_name="test_embeddings",
+            table_name=f"test_embeddings_{unique_id}",
         )
         
         with pytest.raises(ValidationError) as exc_info:
@@ -219,13 +223,15 @@ class TestValidationImprovements:
         model.is_active = False
         await service.session.commit()
 
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         space_data = EmbeddingSpaceCreate(
             model_id=sample_embedding_model,
-            name="test_space",
+            name=f"test_space_{unique_id}",
             display_name="Test Space",
             base_dimensions=1536,
             effective_dimensions=1536,
-            table_name="test_embeddings",
+            table_name=f"test_embeddings_{unique_id}",
         )
         
         with pytest.raises(ValidationError) as exc_info:
@@ -237,13 +243,15 @@ class TestValidationImprovements:
         self, service: ModelRegistryService, sample_embedding_model: str
     ):
         """Test that creating embedding space validates dimensions match."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         space_data = EmbeddingSpaceCreate(
             model_id=sample_embedding_model,
-            name="test_space",
+            name=f"test_space_{unique_id}",
             display_name="Test Space",
             base_dimensions=512,  # Different from model's 1536
             effective_dimensions=512,
-            table_name="test_embeddings",
+            table_name=f"test_embeddings_{unique_id}",
         )
         
         with pytest.raises(ValidationError) as exc_info:

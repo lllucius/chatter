@@ -19,12 +19,14 @@ class TestModelValidation:
 
     def test_validate_model_consistency_embedding_without_dimensions(self, mock_service):
         """Test that embedding models must have dimensions."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         model = ModelDef(
-            name="test_embedding",
+            name=f"test_embedding_{unique_id}",
             model_type=ModelType.EMBEDDING,
             display_name="Test Embedding",
             model_name="text-embedding-ada-002",
-            provider_id="test_provider",
+            provider_id=f"test_provider_{unique_id}",
             # Missing dimensions
         )
         
@@ -37,12 +39,14 @@ class TestModelValidation:
 
     def test_validate_model_consistency_llm_with_dimensions(self, mock_service):
         """Test that LLM models should not have dimensions."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         model = ModelDef(
-            name="test_llm",
+            name=f"test_llm_{unique_id}",
             model_type=ModelType.LLM,
             display_name="Test LLM",
             model_name="gpt-4",
-            provider_id="test_provider",
+            provider_id=f"test_provider_{unique_id}",
             dimensions=1536,  # Should not have dimensions
         )
         
@@ -54,12 +58,14 @@ class TestModelValidation:
 
     def test_validate_model_consistency_negative_max_tokens(self, mock_service):
         """Test that max_tokens must be positive."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         model = ModelDef(
-            name="test_llm",
+            name=f"test_llm_{unique_id}",
             model_type=ModelType.LLM,
             display_name="Test LLM",
             model_name="gpt-4",
-            provider_id="test_provider",
+            provider_id=f"test_provider_{unique_id}",
             max_tokens=-100,  # Invalid
         )
         
@@ -71,12 +77,14 @@ class TestModelValidation:
 
     def test_validate_model_consistency_batch_settings_conflict(self, mock_service):
         """Test that max_batch_size requires supports_batch."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         model = ModelDef(
-            name="test_embedding",
+            name=f"test_embedding_{unique_id}",
             model_type=ModelType.EMBEDDING,
             display_name="Test Embedding",
             model_name="text-embedding-ada-002",
-            provider_id="test_provider",
+            provider_id=f"test_provider_{unique_id}",
             dimensions=1536,
             max_batch_size=100,
             supports_batch=False,  # Conflict
@@ -90,12 +98,14 @@ class TestModelValidation:
 
     def test_validate_model_consistency_valid_embedding_model(self, mock_service):
         """Test that valid embedding model passes validation."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         model = ModelDef(
-            name="test_embedding",
+            name=f"test_embedding_{unique_id}",
             model_type=ModelType.EMBEDDING,
             display_name="Test Embedding",
             model_name="text-embedding-ada-002",
-            provider_id="test_provider",
+            provider_id=f"test_provider_{unique_id}",
             dimensions=1536,
             supports_batch=True,
             max_batch_size=100,
@@ -107,12 +117,14 @@ class TestModelValidation:
 
     def test_validate_model_consistency_valid_llm_model(self, mock_service):
         """Test that valid LLM model passes validation."""
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         model = ModelDef(
-            name="test_llm",
+            name=f"test_llm_{unique_id}",
             model_type=ModelType.LLM,
             display_name="Test LLM",
             model_name="gpt-4",
-            provider_id="test_provider",
+            provider_id=f"test_provider_{unique_id}",
             max_tokens=4096,
             context_length=8192,
         )
@@ -193,12 +205,14 @@ if __name__ == "__main__":
             print(f"✅ Validation correctly failed: {e}")
         
         # Test valid LLM model
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         llm_model = ModelDef(
-            name="test_llm",
+            name=f"test_llm_{unique_id}",
             model_type=ModelType.LLM,
             display_name="Test LLM",
             model_name="gpt-4",
-            provider_id="test",
+            provider_id=f"test_{unique_id}",
             max_tokens=4096,
         )
         

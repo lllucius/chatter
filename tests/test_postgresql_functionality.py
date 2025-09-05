@@ -31,11 +31,16 @@ class TestPostgreSQLDatabase:
         """Test that PostgreSQL session properly handles transactions."""
         # Test transaction isolation
         from chatter.models.user import User
+        import uuid
 
-        # Create a user
+        # Create a user with unique name
+        unique_id = str(uuid.uuid4())[:8]
+        test_username = f"test_user_{unique_id}"
+        test_email = f"test_{unique_id}@example.com"
+        
         user = User(
-            username="test_user",
-            email="test@example.com",
+            username=test_username,
+            email=test_email,
             hashed_password="hashed_password",
             full_name="Test User"
         )
@@ -43,7 +48,7 @@ class TestPostgreSQLDatabase:
         await db_session.flush()  # Flush but don't commit
 
         # User should exist in this session
-        result = await db_session.execute(text("SELECT COUNT(*) FROM users WHERE username = 'test_user'"))
+        result = await db_session.execute(text(f"SELECT COUNT(*) FROM users WHERE username = '{test_username}'"))
         count = result.scalar()
         assert count == 1
 

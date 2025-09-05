@@ -270,10 +270,12 @@ class TestAuthServiceUnit:
     async def test_create_user(self, db_session: AsyncSession):
         """Test creating a user through AuthService."""
         auth_service = AuthService(db_session)
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
 
         user_data = UserCreate(
-            username="testuser",
-            email="test@example.com",
+            username=f"testuser_{unique_id}",
+            email=f"test_{unique_id}@example.com",
             password="SecurePassword123!",
             full_name="Test User",
         )

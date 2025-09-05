@@ -23,13 +23,15 @@ from chatter.utils.problem import (
     ProblemException,
 )
 
-# Set up uvloop for better async performance
-try:
-    import uvloop
+# Set up uvloop for better async performance (not in testing)
+import os
+if os.environ.get("ENVIRONMENT") != "testing":
+    try:
+        import uvloop
 
-    asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-except ImportError:
-    pass  # uvloop not available
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    except ImportError:
+        pass  # uvloop not available
 
 # Set up logging
 logger = get_logger(__name__)

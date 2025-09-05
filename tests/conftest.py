@@ -283,19 +283,23 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
         class_=AsyncSession,
         expire_on_commit=False,
         autoflush=False,  # Disable autoflush for better control in tests
+        autocommit=False,  # Ensure we're in a transaction
     )
     
-    # Create a session with autoflush disabled for better control
+    # Create a new session
     session = session_maker()
     session.info["_in_test"] = True  # Mark session as being used in tests
     
     try:
-        # Start a transaction to ensure isolation
-        await session.begin()
+        # Don't manually start a transaction here - let SQLAlchemy handle it
+        # The session will automatically start a transaction when needed
         yield session
     except Exception:
         # Rollback on any exception
-        await session.rollback()
+        try:
+            await session.rollback()
+        except Exception:
+            pass  # Ignore rollback errors during exception handling
         raise
     finally:
         # Always rollback and close to ensure cleanup
@@ -343,17 +347,20 @@ async def auth_headers(client) -> dict[str, str]:
         Dictionary with Authorization header
     """
     import uuid
-    import hashlib
-    # Generate unique user data for each test to avoid conflicts
-    # Create a hash-based suffix to avoid sequential patterns
-    unique_base = str(uuid.uuid4())
-    # Use first 8 chars of hash to avoid sequential patterns in UUIDs
-    unique_id = hashlib.md5(unique_base.encode()).hexdigest()[:8]
+    import string
+    import random
+    
+    # Generate a more username-friendly unique identifier
+    # Use only lowercase letters and numbers, starting with a letter
+    unique_base = str(uuid.uuid4()).replace('-', '')[:8]
+    # Ensure it starts with a letter and only contains alphanumeric characters
+    safe_id = 'user' + ''.join(c for c in unique_base if c.isalnum()).lower()
+    
     user_data = {
-        "username": f"alice{unique_id}",
-        "email": f"alice{unique_id}@example.com", 
+        "username": safe_id,
+        "email": f"{safe_id}@example.com", 
         "password": "SecureP@ssw0rd!",
-        "full_name": f"Alice {unique_id}",
+        "full_name": f"Test User {safe_id}",
     }
 
     response = await client.post("/api/v1/auth/register", json=user_data)

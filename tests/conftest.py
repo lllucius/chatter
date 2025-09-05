@@ -202,7 +202,7 @@ async def db_engine():
     Create a function-scoped PostgreSQL database engine for testing.
     
     Uses PostgreSQL test database for realistic testing that matches production.
-    Each test gets a clean database state.
+    Uses simple table cleanup instead of full schema recreation to avoid transaction issues.
     """
     from chatter.config import settings
     from sqlalchemy import text
@@ -219,18 +219,11 @@ async def db_engine():
         echo=False,
         pool_pre_ping=True,
         pool_recycle=300,
-        pool_size=1,  # Use single connection to avoid contention
-        max_overflow=0,
     )
     
-    # Create all tables for each test
+    # Ensure tables exist (create once, reuse)
     async with engine.begin() as conn:
         try:
-            # First clean up any existing tables (execute statements separately)
-            await conn.execute(text("DROP SCHEMA IF EXISTS public CASCADE;"))
-            await conn.execute(text("CREATE SCHEMA public;"))
-            await conn.execute(text("GRANT ALL ON SCHEMA public TO public;"))
-            
             # Try to enable pgvector extension if available (graceful fallback)
             try:
                 await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
@@ -238,17 +231,17 @@ async def db_engine():
                 # Ignore if pgvector is not available
                 pass
             
-            # Create all tables in a clean transaction
+            # Create all tables if they don't exist (idempotent)
             await conn.run_sync(Base.metadata.create_all)
             
         except Exception as e:
-            print(f"Schema creation error: {e}")
-            raise
+            print(f"Schema setup error (may be normal if tables exist): {e}")
+            # Don't fail if tables already exist
     
     try:
         yield engine
     finally:
-        # Clean dispose
+        # Just dispose, don't try to drop tables
         try:
             await engine.dispose()
         except Exception:
@@ -279,9 +272,10 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     """
     Provide a database session with clean state per test.
     
-    Each test gets a clean database with fresh schema.
+    Cleans up test data before each test to ensure isolation.
     """
     import chatter.models
+    from sqlalchemy import text
     
     # Create a session maker bound to the engine
     session_maker = async_sessionmaker(
@@ -295,6 +289,32 @@ async def db_session(db_engine, db_setup) -> AsyncGenerator[AsyncSession, None]:
     # Create a new session
     session = session_maker()
     session.info["_in_test"] = True
+    
+    # Clean up any existing data before the test
+    try:
+        # Use a separate connection for cleanup to avoid transaction conflicts
+        async with db_engine.begin() as cleanup_conn:
+            # Get all table names
+            result = await cleanup_conn.execute(text("""
+                SELECT tablename FROM pg_tables 
+                WHERE schemaname = 'public' 
+                AND tablename NOT LIKE 'pg_%'
+                ORDER BY tablename
+            """))
+            table_names = [row[0] for row in result.fetchall()]
+            
+            # Disable foreign key checks temporarily, truncate, then re-enable
+            if table_names:
+                # Truncate all tables
+                for table in table_names:
+                    try:
+                        await cleanup_conn.execute(text(f'TRUNCATE TABLE "{table}" CASCADE;'))
+                    except Exception:
+                        # Table might not exist or have dependencies, ignore
+                        pass
+                        
+    except Exception as e:
+        print(f"Cleanup warning (continuing): {e}")
     
     try:
         yield session

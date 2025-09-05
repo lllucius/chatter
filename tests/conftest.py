@@ -13,7 +13,13 @@ os.environ.setdefault("CACHE_BACKEND", "memory")  # Use memory cache instead of 
 
 # Ensure asyncio uses the default policy for tests (not uvloop)
 # This prevents conflicts with pytest-asyncio
-asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+try:
+    import uvloop
+    # If uvloop is installed, we need to reset to default policy for tests
+    asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
+except ImportError:
+    # uvloop not installed, just ensure default policy
+    asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 
 import pytest
 from sqlalchemy.ext.asyncio import (
@@ -211,6 +217,15 @@ async def db_engine():
         echo=False,  # Set to True for SQL query debugging
         poolclass=NullPool,  # Use NullPool to avoid connection reuse across event loops
         pool_pre_ping=False,  # Disable pre-ping for NullPool
+        # Additional asyncpg-specific settings to avoid event loop issues
+        connect_args={
+            "server_settings": {
+                "jit": "off",  # Disable JIT for tests
+            },
+            # Ensure connection timeout settings
+            "command_timeout": 5,
+            "connection_timeout": 10,
+        },
     )
 
     # Create all tables and ensure pgvector extension is available

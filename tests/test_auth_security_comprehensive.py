@@ -224,9 +224,11 @@ class TestAuthServiceSecurity:
         auth_service = AuthService(db_session)
 
         # Test disposable email rejection
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         with pytest.raises(Exception) as exc_info:
             await auth_service.create_user(UserCreate(
-                username="testuser",
+                username=f"testuser_{unique_id}",
                 email="test@10minutemail.com",
                 password="ValidPass123!",
                 full_name="Test User"
@@ -234,20 +236,22 @@ class TestAuthServiceSecurity:
         assert "disposable email" in str(exc_info.value).lower()
 
         # Test prohibited username rejection
+        unique_id = str(uuid.uuid4())[:8]
         with pytest.raises(Exception) as exc_info:
             await auth_service.create_user(UserCreate(
                 username="admin",
-                email="test@example.com",
+                email=f"test_{unique_id}@example.com",
                 password="ValidPass123!",
                 full_name="Test User"
             ))
         assert "prohibited" in str(exc_info.value).lower()
 
         # Test weak password rejection
+        unique_id = str(uuid.uuid4())[:8]
         with pytest.raises(Exception) as exc_info:
             await auth_service.create_user(UserCreate(
-                username="testuser",
-                email="test@example.com",
+                username=f"testuser_{unique_id}",
+                email=f"test_{unique_id}@example.com",
                 password="123456",
                 full_name="Test User"
             ))

@@ -111,10 +111,12 @@ class TestSchemaModelConsistency:
     def test_user_model_can_store_phone_number(self):
         """Test that User model can store phone_number (will fail initially)."""
         # This test will fail until we add phone_number to the model
+        import uuid
+        unique_id = str(uuid.uuid4())[:8]
         try:
             user = User(
-                email="test@example.com",
-                username="testuser",
+                email=f"test_{unique_id}@example.com",
+                username=f"testuser_{unique_id}",
                 hashed_password="hashedpass",
                 phone_number="+1234567890"
             )

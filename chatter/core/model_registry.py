@@ -737,9 +737,10 @@ class ModelRegistryService:
         # Use performance metrics
         async with self.metrics.measure_query("get_default_provider"):
             # Find provider that has default models of the specified type
+            # Use explicit join condition to avoid JSON comparison issues
             result = await self.session.execute(
                 select(Provider)
-                .join(ModelDef)
+                .join(ModelDef, Provider.id == ModelDef.provider_id)
                 .where(
                     ModelDef.model_type == model_type,
                     ModelDef.is_default,
@@ -747,7 +748,8 @@ class ModelRegistryService:
                     Provider.is_active,
                     Provider.is_default
                 )
-                .distinct()
+                .distinct(Provider.id)  # DISTINCT on ID only to avoid JSON comparison
+                .limit(1)  # We only need one result
             )
             provider = result.scalar_one_or_none()
 

@@ -361,8 +361,8 @@ class TestAuthDatabaseIntegration:
         assert user.username == test_user_data["username"]
         assert user.email == test_user_data["email"]
         assert user.full_name == test_user_data["full_name"]
-        assert user.password_hash is not None
-        assert user.password_hash != test_user_data["password"]  # Should be hashed
+        assert user.hashed_password is not None
+        assert user.hashed_password != test_user_data["password"]  # Should be hashed
         assert user.created_at is not None
         assert user.updated_at is not None
 

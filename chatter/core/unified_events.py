@@ -65,9 +65,13 @@ class UnifiedEventManager:
             await self.emit_system_event(
                 event_type="system.event_manager_initialized",
                 data={
-                    "manager": "UnifiedEventManager",
-                    "integrations": ["sse", "security", "audit"],
-                    "status": "ready"
+                    "message": "Unified event management system initialized successfully",
+                    "severity": "info",
+                    "details": {
+                        "manager": "UnifiedEventManager",
+                        "integrations": ["sse", "security", "audit"],
+                        "status": "ready"
+                    }
                 }
             )
             
@@ -86,8 +90,12 @@ class UnifiedEventManager:
             await self.emit_system_event(
                 event_type="system.event_manager_shutdown",
                 data={
-                    "manager": "UnifiedEventManager",
-                    "stats": self._event_stats
+                    "message": "Unified event management system shutting down",
+                    "severity": "info",
+                    "details": {
+                        "manager": "UnifiedEventManager",
+                        "stats": self._event_stats
+                    }
                 }
             )
             

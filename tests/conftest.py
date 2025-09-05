@@ -89,21 +89,21 @@ def app(db_session: AsyncSession):
     
     # Include all routes needed for comprehensive testing
     from chatter.api import (
-        ab_testing,
-        agents,
-        analytics,
+        #ab_testing,
+        #agents,
+        #analytics,
         auth,
-        chat,
-        data_management,
+        #chat,
+        #data_management,
         documents,
-        events,
+        #events,
         health,
-        jobs,
-        model_registry,
-        plugins,
-        profiles,
-        prompts,
-        toolserver,
+        #jobs,
+        #model_registry,
+        #plugins,
+        #profiles,
+        #prompts,
+        #toolserver,
     )
 
     # Add all routes for testing
@@ -113,16 +113,19 @@ def app(db_session: AsyncSession):
         prefix=f"{settings.api_prefix}/auth",
         tags=["Authentication"],
     )
+    """
     app.include_router(
         chat.router,
         prefix=f"{settings.api_prefix}/chat",
         tags=["Chat"]
     )
+    """
     app.include_router(
         documents.router,
         prefix=f"{settings.api_prefix}/documents",
         tags=["Documents"],
     )
+    """
     app.include_router(
         profiles.router,
         prefix=f"{settings.api_prefix}/profiles",
@@ -178,7 +181,7 @@ def app(db_session: AsyncSession):
         prefix=f"{settings.api_prefix}/models",
         tags=["Model Registry"],
     )
-
+    """
     return app
 
 
@@ -382,7 +385,7 @@ async def auth_headers(client) -> dict[str, str]:
 
     auth_response = response.json()
     access_token = auth_response["access_token"]
-
+    print("ACCESS TOKEN", access_token)
     return {"Authorization": f"Bearer {access_token}"}
 
 

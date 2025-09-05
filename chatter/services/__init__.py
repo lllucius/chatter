@@ -56,7 +56,7 @@ except ImportError:
     sse_service = None
 
 try:
-    from .workflow_execution import WorkflowExecutionService
+    from .workflow_execution_simplified import SimplifiedWorkflowExecutionService as WorkflowExecutionService
 except ImportError:
     WorkflowExecutionService = None
 

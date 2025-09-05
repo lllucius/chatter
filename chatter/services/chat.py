@@ -25,7 +25,7 @@ from chatter.schemas.chat import (
 from chatter.services.conversation import ConversationService
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
-from chatter.services.workflow_execution import WorkflowExecutionService
+from chatter.services.workflow_execution_simplified import SimplifiedWorkflowExecutionService
 from chatter.utils.correlation import get_correlation_id
 from chatter.core.monitoring import record_request_metrics
 from chatter.utils.security_enhanced import get_secure_logger
@@ -44,7 +44,7 @@ class ChatService:
     This is a much smaller, focused service that delegates to:
     - ConversationService: CRUD operations for conversations
     - MessageService: CRUD operations for messages
-    - WorkflowExecutionService: Workflow execution and streaming
+    - SimplifiedWorkflowExecutionService: Workflow execution and streaming
     - LLMService: LLM provider interactions
     """
 
@@ -58,7 +58,7 @@ class ChatService:
         # Initialize specialized services
         self.conversation_service = ConversationService(session)
         self.message_service = MessageService(session)
-        self.workflow_service = WorkflowExecutionService(
+        self.workflow_service = SimplifiedWorkflowExecutionService(
             llm_service, self.message_service
         )
 

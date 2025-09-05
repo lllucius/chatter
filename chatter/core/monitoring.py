@@ -21,9 +21,9 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional
 from uuid import uuid4
 
-import logging
+from chatter.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 # ============================================================================
@@ -533,7 +533,7 @@ class MonitoringService:
             await self._analyze_security_patterns(event)
             
         except Exception as e:
-            logger.error("Failed to log security event", error=str(e))
+            logger.error(f"Failed to log security event: {e}")
     
     def add_security_alert_handler(self, handler: callable):
         """Add alert handler function."""
@@ -785,13 +785,13 @@ class MonitoringService:
         try:
             # Store individual event
             event_key = f"security_event:{event.event_id}"
-            await self.cache.set(event_key, event.to_dict(), timedelta(days=7))
+            await self.cache.set(event_key, event.to_dict(), int(timedelta(days=7).total_seconds()))
             
             # Update event type counters
             await self._update_security_counters(event)
             
         except Exception as e:
-            logger.error("Failed to store security event", error=str(e))
+            logger.error(f"Failed to store security event: {e}")
     
     async def _update_security_counters(self, event: SecurityEvent):
         """Update security event counters for analysis."""
@@ -821,7 +821,7 @@ class MonitoringService:
                 await self.cache.set(key, current_count + 1, expire_time)
                 
         except Exception as e:
-            logger.debug("Failed to update security counters", error=str(e))
+            logger.debug(f"Failed to update security counters: {e}")
     
     async def _analyze_security_patterns(self, event: SecurityEvent):
         """Analyze security patterns and trigger alerts."""
@@ -840,7 +840,7 @@ class MonitoringService:
                 await self._check_api_key_anomalies(event)
                 
         except Exception as e:
-            logger.error("Security pattern analysis failed", error=str(e))
+            logger.error(f"Security pattern analysis failed: {e}")
     
     async def _check_brute_force_patterns(self, event: SecurityEvent):
         """Check for brute force attack patterns."""
@@ -955,17 +955,17 @@ class MonitoringService:
             # Store alert
             if self.cache:
                 alert_key = f"security_alert:{alert.event_id}"
-                await self.cache.set(alert_key, alert.to_dict(), timedelta(days=30))
+                await self.cache.set(alert_key, alert.to_dict(), int(timedelta(days=30).total_seconds()))
             
             # Call alert handlers
             for handler in self._alert_handlers:
                 try:
                     await handler(alert)
                 except Exception as e:
-                    logger.error("Alert handler failed", error=str(e))
+                    logger.error(f"Alert handler failed: {e}")
                     
         except Exception as e:
-            logger.error("Failed to trigger security alert", error=str(e))
+            logger.error(f"Failed to trigger security alert: {e}")
 
 
 # ============================================================================

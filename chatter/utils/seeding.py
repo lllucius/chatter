@@ -680,7 +680,7 @@ All API requests require authentication using JWT tokens.
             user = users[0]
             
             document = Document(
-                user_id=user.id,
+                owner_id=user.id,
                 filename=doc_data["filename"],
                 title=doc_data["title"],
                 content=doc_data["content"],
@@ -890,7 +890,7 @@ All API requests require authentication using JWT tokens.
             user = users[0]
             
             document = Document(
-                user_id=user.id,
+                owner_id=user.id,
                 filename=doc_data["filename"],
                 title=doc_data["title"],
                 content=doc_data["content"],

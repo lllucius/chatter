@@ -1,11 +1,11 @@
 """Advanced workflow features including conditional and composite workflows."""
 
-# Simple logger fallback
-import logging
 from typing import Any, Literal
 from uuid import uuid4
 
-logger = logging.getLogger(__name__)
+from chatter.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 ExecutionStrategy = Literal["sequential", "parallel", "conditional"]
 
@@ -157,7 +157,7 @@ class AdvancedWorkflowManager:
             )
             return workflow
         except Exception as e:
-            logger.error(f"Failed to create workflow: {e}")
+            logger.error("Failed to create workflow", error=str(e))
             return None
 
     async def create_composite_workflow(
@@ -332,7 +332,9 @@ class AdvancedWorkflowManager:
         )
 
         logger.info(
-            f"Registered conditional workflow configuration '{config_name}' with conditions: {list(conditions.keys())}"
+            "Registered conditional workflow configuration",
+            config_name=config_name,
+            conditions=list(conditions.keys())
         )
 
     async def create_workflow_from_template(

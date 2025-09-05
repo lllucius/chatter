@@ -86,15 +86,94 @@ def app(db_session: AsyncSession):
     # Replace the production dependency with our test version
     app.dependency_overrides[get_session_generator] = get_test_session
     
-    # Only include minimal routes for testing to avoid import issues
-    from chatter.api import auth, health
+    # Include all routes needed for comprehensive testing
+    from chatter.api import (
+        ab_testing,
+        agents,
+        analytics,
+        auth,
+        chat,
+        data_management,
+        documents,
+        events,
+        health,
+        jobs,
+        model_registry,
+        plugins,
+        profiles,
+        prompts,
+        toolserver,
+    )
 
-    # Add minimal routes for testing
+    # Add all routes for testing
     app.include_router(health.router, tags=["Health"])
     app.include_router(
         auth.router,
         prefix=f"{settings.api_prefix}/auth",
         tags=["Authentication"],
+    )
+    app.include_router(
+        chat.router, prefix=f"{settings.api_prefix}/chat", tags=["Chat"]
+    )
+    app.include_router(
+        documents.router,
+        prefix=f"{settings.api_prefix}/documents",
+        tags=["Documents"],
+    )
+    app.include_router(
+        profiles.router,
+        prefix=f"{settings.api_prefix}/profiles",
+        tags=["Profiles"],
+    )
+    app.include_router(
+        prompts.router,
+        prefix=f"{settings.api_prefix}/prompts",
+        tags=["Prompts"],
+    )
+    app.include_router(
+        analytics.router,
+        prefix=f"{settings.api_prefix}/analytics",
+        tags=["Analytics"],
+    )
+    app.include_router(
+        toolserver.router,
+        prefix=f"{settings.api_prefix}/toolservers",
+        tags=["Tool Servers"],
+    )
+    app.include_router(
+        agents.router,
+        prefix=f"{settings.api_prefix}/agents",
+        tags=["Agents"],
+    )
+    app.include_router(
+        ab_testing.router,
+        prefix=f"{settings.api_prefix}/ab-tests",
+        tags=["A/B Testing"],
+    )
+    app.include_router(
+        events.router,
+        prefix=f"{settings.api_prefix}/events",
+        tags=["Events"],
+    )
+    app.include_router(
+        plugins.router,
+        prefix=f"{settings.api_prefix}/plugins",
+        tags=["Plugins"],
+    )
+    app.include_router(
+        jobs.router,
+        prefix=f"{settings.api_prefix}/jobs",
+        tags=["Jobs"],
+    )
+    app.include_router(
+        data_management.router,
+        prefix=f"{settings.api_prefix}/data",
+        tags=["Data Management"],
+    )
+    app.include_router(
+        model_registry.router,
+        prefix=f"{settings.api_prefix}/models",
+        tags=["Model Registry"],
     )
 
     return app
@@ -240,13 +319,17 @@ async def auth_headers(client) -> dict[str, str]:
         Dictionary with Authorization header
     """
     import uuid
+    import hashlib
     # Generate unique user data for each test to avoid conflicts
-    unique_id = str(uuid.uuid4())[:8]
+    # Create a hash-based suffix to avoid sequential patterns
+    unique_base = str(uuid.uuid4())
+    # Use first 8 chars of hash to avoid sequential patterns in UUIDs
+    unique_id = hashlib.md5(unique_base.encode()).hexdigest()[:8]
     user_data = {
-        "username": f"testuser_{unique_id}",
-        "email": f"test_{unique_id}@example.com", 
+        "username": f"alice_{unique_id}",
+        "email": f"alice_{unique_id}@example.com", 
         "password": "SecureP@ssw0rd!",
-        "full_name": f"Test User {unique_id}",
+        "full_name": f"Alice {unique_id}",
     }
 
     response = await client.post("/api/v1/auth/register", json=user_data)
@@ -262,10 +345,10 @@ async def auth_headers(client) -> dict[str, str]:
 def test_user_data() -> dict:
     """Test user data for registration."""
     return {
-        "username": "testuser",
-        "email": "test@example.com",
+        "username": "alice",
+        "email": "alice@example.com",
         "password": "SecureP@ssw0rd!",
-        "full_name": "Test User",
+        "full_name": "Alice User",
     }
 
 
@@ -273,7 +356,7 @@ def test_user_data() -> dict:
 def test_login_data() -> dict:
     """Test login data."""
     return {
-        "username": "testuser", 
+        "username": "alice", 
         "password": "SecureP@ssw0rd!",
     }
 

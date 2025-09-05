@@ -67,16 +67,16 @@ def test_rate_limiter():
         # Create a unified rate limiter instance
         rate_limiter = get_unified_rate_limiter()
         
-        # Test basic rate limiting - use the check method
+        # Test basic rate limiting - use the check_rate_limit method
         try:
             # This should succeed
-            await rate_limiter.check("test-key", limit=2, window=3600)
+            await rate_limiter.check_rate_limit("test-key", limit=2, window=3600)
             
             # This should also succeed
-            await rate_limiter.check("test-key", limit=2, window=3600) 
+            await rate_limiter.check_rate_limit("test-key", limit=2, window=3600) 
             
             # This should fail due to rate limiting
-            await rate_limiter.check("test-key", limit=2, window=3600)
+            await rate_limiter.check_rate_limit("test-key", limit=2, window=3600)
             assert False, "Should have raised RateLimitExceeded"
         except RateLimitExceeded:
             pass  # Expected

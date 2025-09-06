@@ -45,7 +45,7 @@ class PromptService:
         Raises:
             PromptError: If prompt creation fails
         """
-        from chatter.utils.prompt_audit import PromptAuditLogger
+        from chatter.utils.audit_logging import PromptAuditLogger
         
         try:
             # Check for duplicate prompt names for this user
@@ -134,7 +134,7 @@ class PromptService:
         Returns:
             Prompt if found and accessible, None otherwise
         """
-        from chatter.utils.prompt_audit import PromptAuditLogger
+        from chatter.utils.audit_logging import PromptAuditLogger
         
         try:
             result = await self.session.execute(
@@ -506,7 +506,7 @@ class PromptService:
             )
 
             # Audit log the test
-            from chatter.utils.prompt_audit import PromptAuditLogger
+            from chatter.utils.audit_logging import PromptAuditLogger
             PromptAuditLogger.log_prompt_tested(
                 prompt_id=prompt_id,
                 user_id=user_id,

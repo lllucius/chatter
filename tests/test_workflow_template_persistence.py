@@ -28,6 +28,29 @@ class TestWorkflowTemplatePersistence:
         return session
 
     @pytest.fixture
+    def mock_db_template(self):
+        """Mock database template for testing."""
+        db_template = MagicMock()
+        db_template.to_unified_template.return_value = {
+            "name": "test_template",
+            "workflow_type": "plain",
+            "description": "Test template description",
+            "default_params": {"system_message": "Test system message"},
+            "required_tools": [],
+            "required_retrievers": [],
+        }
+        return db_template
+
+    def _setup_mock_template_query(self, mock_session, db_template=None, return_none=False):
+        """Helper to setup mock database query responses."""
+        if return_none:
+            mock_session.execute.return_value.scalar_one_or_none.return_value = None
+            mock_session.execute.return_value.scalars.return_value.all.return_value = []
+        else:
+            mock_session.execute.return_value.scalar_one_or_none.return_value = db_template
+            mock_session.execute.return_value.scalars.return_value.all.return_value = [db_template] if db_template else []
+
+    @pytest.fixture
     def template_manager(self, mock_session):
         """Template manager with mocked database session."""
         return UnifiedTemplateManager(session=mock_session)
@@ -36,73 +59,74 @@ class TestWorkflowTemplatePersistence:
         """Test initialization with database session."""
         manager = UnifiedTemplateManager(session=mock_session)
         assert manager.session == mock_session
-        assert len(manager.builtin_templates) > 0
         assert manager.builder_history == []
 
     def test_init_without_session(self):
-        """Test initialization without database session."""
-        manager = UnifiedTemplateManager()
-        assert manager.session is None
-        assert len(manager.builtin_templates) > 0
-        assert manager.builder_history == []
+        """Test initialization without database session raises error."""
+        with pytest.raises(ValueError, match="Database session is required"):
+            UnifiedTemplateManager()
 
     @pytest.mark.asyncio
-    async def test_builtin_template_retrieval(self, template_manager):
-        """Test retrieval of built-in templates."""
-        # Test getting a built-in template
-        template = await template_manager.get_template("general_chat")
-        assert template.name == "general_chat"
+    async def test_template_retrieval_from_db(self, template_manager, mock_session, mock_db_template):
+        """Test retrieval of templates from database."""
+        # Setup mock to return a template
+        self._setup_mock_template_query(mock_session, mock_db_template)
+        
+        # Test getting a template
+        template = await template_manager.get_template("test_template")
+        assert template.name == "test_template"
         assert template.workflow_type == "plain"
-        assert template.description == "General conversation assistant"
+        assert template.description == "Test template description"
 
     @pytest.mark.asyncio
-    async def test_list_builtin_templates(self, template_manager):
-        """Test listing built-in templates."""
-        templates = await template_manager.list_templates(include_custom=False)
-        assert "general_chat" in templates
-        assert "customer_support" in templates
-        assert "code_assistant" in templates
-        assert len(templates) > 0
+    async def test_list_templates_from_db(self, template_manager, mock_session, mock_db_template):
+        """Test listing templates from database."""
+        # Setup mock to return templates
+        self._setup_mock_template_query(mock_session, mock_db_template)
+        
+        templates = await template_manager.list_templates()
+        assert "test_template" in templates
 
     @pytest.mark.asyncio
-    async def test_get_template_info_builtin_only(self, template_manager):
-        """Test getting template info for built-in templates."""
+    async def test_get_template_info_from_db(self, template_manager, mock_session, mock_db_template):
+        """Test getting template info from database."""
+        # Setup mock to return templates
+        self._setup_mock_template_query(mock_session, mock_db_template)
+        
         info = await template_manager.get_template_info()
-        assert "general_chat" in info
-        assert info["general_chat"]["is_builtin"] is True
-        assert info["general_chat"]["is_custom"] is False
+        assert "test_template" in info
+        assert info["test_template"]["is_builtin"] is False
+        assert info["test_template"]["is_custom"] is True
 
     @pytest.mark.asyncio
-    async def test_template_not_found(self, template_manager):
+    async def test_template_not_found(self, template_manager, mock_session):
         """Test error handling when template is not found."""
+        # Setup mock to return no templates
+        self._setup_mock_template_query(mock_session, return_none=True)
+        
         with pytest.raises(WorkflowConfigurationError) as exc_info:
             await template_manager.get_template("nonexistent_template")
         assert "not found" in str(exc_info.value)
 
     @pytest.mark.asyncio
-    async def test_validate_builtin_template(self, template_manager):
-        """Test validation of built-in templates."""
-        template = await template_manager.get_template("general_chat")
+    async def test_validate_template(self, template_manager):
+        """Test validation of templates."""
+        template = WorkflowTemplate(
+            name="test_template",
+            workflow_type="plain",
+            description="Test template description",
+            default_params={"system_message": "Test system message"},
+        )
         result = await template_manager.validate_template(template)
         assert result.valid is True
         assert len(result.errors) == 0
 
     @pytest.mark.asyncio
-    async def test_create_custom_template_without_db(self):
-        """Test creating custom template without database session."""
-        manager = UnifiedTemplateManager(session=None)
-        
-        spec = TemplateSpec(
-            name="test_template",
-            description="Test template",
-            workflow_type="plain",
-            default_params={"system_message": "Test message"},
-        )
-        
-        # Should work but not persist to database
-        template = await manager.create_custom_template(spec, "user123")
-        assert template.name == "test_template"
-        assert len(manager.builder_history) == 1
+    async def test_create_custom_template_requires_db(self):
+        """Test that creating custom template requires database session."""
+        # Creating manager without session should raise error
+        with pytest.raises(ValueError, match="Database session is required"):
+            UnifiedTemplateManager(session=None)
 
     @pytest.mark.asyncio
     async def test_create_custom_template_with_db(self, template_manager, mock_session):
@@ -165,11 +189,22 @@ class TestWorkflowTemplatePersistence:
         assert category.value == "custom"
 
     @pytest.mark.asyncio
-    async def test_template_requirements_validation(self, template_manager):
+    async def test_template_requirements_validation(self, template_manager, mock_session, mock_db_template):
         """Test template requirements validation."""
+        # Setup mock template with required tools
+        mock_db_template.to_unified_template.return_value = {
+            "name": "test_template",
+            "workflow_type": "tools",
+            "description": "Test template with tools",
+            "default_params": {"system_message": "Test system message"},
+            "required_tools": ["required_tool_1", "required_tool_2"],
+            "required_retrievers": [],
+        }
+        self._setup_mock_template_query(mock_session, mock_db_template)
+        
         # Test with missing tools
         result = await template_manager.validate_template_requirements(
-            "code_assistant",
+            "test_template",
             available_tools=["some_other_tool"],
             available_retrievers=[],
         )
@@ -179,18 +214,17 @@ class TestWorkflowTemplatePersistence:
         assert result.missing_tools is not None
         assert len(result.missing_tools) > 0
 
-    def test_stats_without_db(self):
-        """Test stats retrieval without database."""
-        manager = UnifiedTemplateManager(session=None)
-        stats = manager.get_stats()
+    def test_stats_with_session(self, template_manager):
+        """Test stats retrieval with database session."""
+        stats = template_manager.get_stats()
         
         assert "builtin_templates_count" in stats
         assert "custom_templates_count" in stats
         assert "total_templates" in stats
         assert "builder_actions" in stats
         assert "template_types" in stats
-        assert stats["builtin_templates_count"] > 0
-        assert stats["custom_templates_count"] == 0  # No DB access
+        assert stats["builtin_templates_count"] == 0  # No longer tracked separately
+        assert stats["custom_templates_count"] == 0  # Would need async DB query
 
 
 @pytest.mark.integration
@@ -199,19 +233,28 @@ class TestWorkflowTemplateIntegration:
 
     @pytest.mark.asyncio
     async def test_end_to_end_template_lifecycle(self):
-        """Test complete template lifecycle without real database."""
-        # This test would require a real database connection in a full integration test
-        # For now, we'll test the logical flow with mocks
+        """Test complete template lifecycle with mock database."""
+        # Create mock session
+        mock_session = AsyncMock(spec=AsyncSession)
+        mock_session.execute = AsyncMock()
+        mock_session.commit = AsyncMock()
+        mock_session.rollback = AsyncMock()
+        mock_session.add = MagicMock()
+        mock_session.refresh = AsyncMock()
         
-        manager = UnifiedTemplateManager(session=None)
+        # Setup mock to return no existing templates initially
+        mock_session.execute.return_value.scalar_one_or_none.return_value = None
+        mock_session.execute.return_value.scalars.return_value.all.return_value = []
         
-        # 1. List initial templates
-        initial_templates = await manager.list_templates(include_custom=False)
-        assert len(initial_templates) > 0
+        manager = UnifiedTemplateManager(session=mock_session)
         
-        # 2. Get template info
+        # 1. List initial templates (should be empty)
+        initial_templates = await manager.list_templates()
+        assert len(initial_templates) == 0
+        
+        # 2. Get template info (should be empty)
         info = await manager.get_template_info()
-        assert len(info) == len(initial_templates)
+        assert len(info) == 0
         
         # 3. Create custom template spec
         spec = TemplateSpec(
@@ -223,7 +266,6 @@ class TestWorkflowTemplateIntegration:
                 "max_documents": 10,
             },
             required_retrievers=["test_retriever"],
-            base_template="document_qa",
         )
         
         # 4. Create template
@@ -234,7 +276,21 @@ class TestWorkflowTemplateIntegration:
         validation = await manager.validate_template(template)
         assert validation.valid is True
         
-        # 6. Build workflow spec
+        # 6. Build workflow spec (mock the template retrieval)
+        mock_db_template = MagicMock()
+        mock_db_template.to_unified_template.return_value = {
+            "name": "integration_test_template",
+            "workflow_type": "rag",
+            "description": "Integration test template",
+            "default_params": {
+                "system_message": "Integration test system message",
+                "max_documents": 10,
+            },
+            "required_tools": [],
+            "required_retrievers": ["test_retriever"],
+        }
+        mock_session.execute.return_value.scalar_one_or_none.return_value = mock_db_template
+        
         workflow_spec = await manager.build_workflow_spec(
             "integration_test_template",
             overrides={"parameters": {"temperature": 0.7}},

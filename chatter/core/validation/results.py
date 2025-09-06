@@ -1,0 +1,40 @@
+"""Validation result classes."""
+
+from typing import Any
+
+from .exceptions import ValidationError
+
+
+class ValidationResult:
+    """Result of a validation operation."""
+
+    def __init__(
+        self,
+        is_valid: bool = True,
+        value: Any = None,
+        errors: list[ValidationError] | None = None,
+        warnings: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ):
+        self.is_valid = is_valid
+        self.value = value
+        self.errors = errors or []
+        self.warnings = warnings or []
+        self.metadata = metadata or {}
+
+    def add_error(self, error: ValidationError):
+        """Add a validation error."""
+        self.errors.append(error)
+        self.is_valid = False
+
+    def add_warning(self, warning: str):
+        """Add a validation warning."""
+        self.warnings.append(warning)
+
+    def merge(self, other: 'ValidationResult'):
+        """Merge another validation result into this one."""
+        if not other.is_valid:
+            self.is_valid = False
+        self.errors.extend(other.errors)
+        self.warnings.extend(other.warnings)
+        self.metadata.update(other.metadata)

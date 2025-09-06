@@ -3,16 +3,16 @@
 import re
 import uuid
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Callable
 from urllib.parse import urlparse
 
 from .context import ValidationContext
-from .engine import ValidationResult
 from .exceptions import (
     BusinessValidationError,
     SecurityValidationError,
     ValidationError,
 )
+from .results import ValidationResult
 
 
 class BaseValidator(ABC):
@@ -48,7 +48,7 @@ class ValidationRule:
         allowed_chars: str | None = None,
         forbidden_patterns: list[str] | None = None,
         sanitize: bool = False,
-        custom_validator: callable | None = None,
+        custom_validator: Callable | None = None,
     ):
         self.name = name
         self.pattern = pattern

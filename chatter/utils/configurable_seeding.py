@@ -332,7 +332,7 @@ class ConfigurableSeeder(DatabaseSeeder):
         results["created"]["workflow_templates"] = workflow_templates_created
         
         # Create default registry data (providers, models, embedding spaces)
-        from chatter.utils.database import _create_default_registry_data
+        from chatter.utils.seeding import _create_default_registry_data
         await _create_default_registry_data(self.session)
         results["created"]["registry"] = "default_models"
         

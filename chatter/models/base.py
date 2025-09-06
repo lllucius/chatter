@@ -103,3 +103,5 @@ class Keys(str, Enum):
     PROVIDERS = "providers.id"
     MODEL_DEFS = "model_defs.id"
     EMBEDDING_SPACES = "embedding_spaces.id"
+    WORKFLOW_TEMPLATES = "workflow_templates.id"
+    TEMPLATE_SPECS = "template_specs.id"

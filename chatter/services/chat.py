@@ -118,7 +118,7 @@ class ChatService:
         # Initialize specialized services
         self.conversation_service = ConversationService(session)
         self.message_service = MessageService(session)
-        self.workflow_service = WorkflowExecutionService(llm_service, self.message_service)
+        self.workflow_service = WorkflowExecutionService(llm_service, self.message_service, session)
         
         # Initialize analytics service
         self.analytics = ChatAnalyticsService(self)

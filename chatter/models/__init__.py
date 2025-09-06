@@ -27,6 +27,12 @@ from chatter.models.registry import (
 )
 from chatter.models.toolserver import ServerTool, ToolServer, ToolUsage
 from chatter.models.user import User
+from chatter.models.workflow import (
+    TemplateCategory,
+    TemplateSpec,
+    WorkflowTemplate,
+    WorkflowType,
+)
 
 __all__ = [
     "User",
@@ -54,4 +60,8 @@ __all__ = [
     "ReductionStrategy",
     "AgentDB",
     "AgentInteractionDB",
+    "WorkflowTemplate",
+    "TemplateSpec", 
+    "WorkflowType",
+    "TemplateCategory",
 ]

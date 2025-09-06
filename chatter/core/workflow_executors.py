@@ -27,7 +27,6 @@ from chatter.core.workflow_performance import (
     performance_monitor,
     workflow_cache,
 )
-from chatter.core.unified_template_manager import unified_template_manager
 from chatter.models.conversation import (
     Conversation,
     Message,
@@ -55,11 +54,11 @@ class WorkflowExecutionError(Exception):
 class BaseWorkflowExecutor(ABC):
     """Base class for workflow executors using strategy pattern."""
     
-    def __init__(self, llm_service: LLMService, message_service: MessageService):
+    def __init__(self, llm_service: LLMService, message_service: MessageService, template_manager):
         """Initialize base workflow executor."""
         self.llm_service = llm_service
         self.message_service = message_service
-        self.template_manager = unified_template_manager
+        self.template_manager = template_manager
         self.limit_manager = workflow_limit_manager
         
     @property
@@ -904,14 +903,15 @@ class WorkflowExecutorFactory:
         self, 
         workflow_type: str, 
         llm_service: LLMService, 
-        message_service: MessageService
+        message_service: MessageService,
+        template_manager
     ) -> BaseWorkflowExecutor:
         """Create a workflow executor for the specified type."""
         if workflow_type not in self._executors:
             raise ValueError(f"Unsupported workflow type: {workflow_type}")
         
         executor_class = self._executors[workflow_type]
-        return executor_class(llm_service, message_service)
+        return executor_class(llm_service, message_service, template_manager)
     
     @classmethod
     def get_supported_types(cls) -> list[str]:

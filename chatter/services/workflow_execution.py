@@ -11,7 +11,9 @@ import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from chatter.core.unified_template_manager import unified_template_manager
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from chatter.core.unified_template_manager import get_template_manager_with_session
 from chatter.core.workflow_executors import (
     WorkflowExecutorFactory,
     WorkflowExecutionError,
@@ -43,12 +45,13 @@ class WorkflowExecutionService:
     def __init__(
         self, 
         llm_service: LLMService, 
-        message_service: MessageService
+        message_service: MessageService,
+        session: AsyncSession
     ):
         """Initialize simplified workflow execution service."""
         self.llm_service = llm_service
         self.message_service = message_service
-        self.template_manager = unified_template_manager
+        self.template_manager = get_template_manager_with_session(session)
         self.limit_manager = workflow_limit_manager
         self.executor_factory = WorkflowExecutorFactory()
 
@@ -79,7 +82,7 @@ class WorkflowExecutionService:
         
         # Get appropriate executor
         executor = self.executor_factory.create_executor(
-            workflow_type, self.llm_service, self.message_service
+            workflow_type, self.llm_service, self.message_service, self.template_manager
         )
         
         # Execute workflow
@@ -114,7 +117,7 @@ class WorkflowExecutionService:
         
         # Get appropriate executor
         executor = self.executor_factory.create_executor(
-            workflow_type, self.llm_service, self.message_service
+            workflow_type, self.llm_service, self.message_service, self.template_manager
         )
         
         # Execute workflow with streaming

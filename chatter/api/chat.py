@@ -287,12 +287,14 @@ async def get_available_tools(
 @router.get("/templates", response_model=WorkflowTemplatesResponse)
 async def get_workflow_templates(
     current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> WorkflowTemplatesResponse:
     """Get available workflow templates."""
     try:
-        from chatter.core.unified_template_manager import unified_template_manager
+        from chatter.core.unified_template_manager import get_template_manager_with_session
 
-        templates_data = await unified_template_manager.get_template_info()
+        template_manager = get_template_manager_with_session(session)
+        templates_data = await template_manager.get_template_info(owner_id=current_user.id)
         templates = {
             name: WorkflowTemplateInfo(**template_info)
             for name, template_info in templates_data.items()

@@ -135,6 +135,14 @@ class User(Base):
         "Prompt", back_populates="owner", cascade="all, delete-orphan"
     )
 
+    workflow_templates: Mapped[list["WorkflowTemplate"]] = relationship(
+        "WorkflowTemplate", back_populates="owner", cascade="all, delete-orphan"
+    )
+
+    template_specs: Mapped[list["TemplateSpec"]] = relationship(
+        "TemplateSpec", back_populates="owner", cascade="all, delete-orphan"
+    )
+
     default_profile: Mapped[Optional["Profile"]] = relationship(
         "Profile", foreign_keys=[default_profile_id], post_update=True
     )

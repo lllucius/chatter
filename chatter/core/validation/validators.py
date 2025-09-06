@@ -233,9 +233,12 @@ class SecurityValidator(BaseValidator):
         self.supported_rules = ["security_check", "xss_check", "sql_injection_check", "path_traversal_check"]
         
         self.sql_injection_patterns = [
-            r"(\%27)|(\')|(\-\-)|(%23)|(#)",
+            r"(\%27)|(\')\s*;\s*",  # Quote followed by semicolon (more specific)
             r"((\\%3D)|(=))[^\n]*((\\%27)|(\')|(\-\-)|(%23)|(#))",
-            r"/\*(.|\n)*?\*/",
+            r"/\*(.|\n)*?\*/\s*;\s*",  # SQL comments followed by semicolon
+            r"union\s+select",  # UNION SELECT attacks
+            r"drop\s+table",  # DROP TABLE attacks
+            r"insert\s+into",  # INSERT INTO attacks (when not legitimate)
         ]
         
         self.xss_patterns = [

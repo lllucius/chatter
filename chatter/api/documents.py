@@ -36,6 +36,7 @@ from chatter.schemas.document import (
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
+    BadRequestProblem,
     InternalServerProblem,
     NotFoundProblem,
     ProblemException,

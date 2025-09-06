@@ -139,7 +139,7 @@ class ProfileBase(BaseModel):
         None, description="Additional metadata"
     )
 
-    @field_validator('name', 'description', 'system_prompt')
+    @field_validator('name', 'description')
     @classmethod
     def validate_text_fields(cls, v: str | None) -> str | None:
         """Validate text fields for security threats."""
@@ -147,6 +147,18 @@ class ProfileBase(BaseModel):
             # Use unified validation system for security validation
             from chatter.core.validation import validation_engine, DEFAULT_CONTEXT
             result = validation_engine.validate_security(v, DEFAULT_CONTEXT)
+            if not result.is_valid:
+                raise ValueError(f"Security validation failed: {result.errors[0].message}")
+        return v
+        
+    @field_validator('system_prompt')
+    @classmethod
+    def validate_system_prompt(cls, v: str | None) -> str | None:
+        """Validate system prompt - less strict than other text fields."""
+        if v is not None:
+            # Only check for XSS attacks, not SQL injection for system prompts
+            from chatter.core.validation import validation_engine, DEFAULT_CONTEXT
+            result = validation_engine.validate_rule(v, "xss_check", DEFAULT_CONTEXT)
             if not result.is_valid:
                 raise ValueError(f"Security validation failed: {result.errors[0].message}")
         return v

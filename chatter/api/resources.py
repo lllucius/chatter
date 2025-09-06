@@ -56,9 +56,9 @@ class ConversationResourceHandler:
                 ConversationResponse.model_validate(conv)
                 for conv in conversations
             ],
-            total_count=total,
-            page_size=limit,
-            page_offset=offset,
+            total=total,
+            limit=limit,
+            offset=offset,
         )
     
     async def get_conversation(

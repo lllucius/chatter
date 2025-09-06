@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
@@ -9,6 +10,7 @@ from sqlalchemy import (
     JSON,
     Boolean,
     CheckConstraint,
+    DateTime,
 )
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
@@ -158,6 +160,14 @@ class Conversation(Base):
     extra_metadata: Mapped[dict[str, Any] | None] = mapped_column(
         "extra_metadata", JSON, nullable=True
     )
+    workflow_config: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON, nullable=True
+    )
+    
+    # Timing information
+    last_message_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
 
     # Relationships
     user: Mapped[User] = relationship(
@@ -202,6 +212,10 @@ class Conversation(Base):
             "total_cost": self.total_cost,
             "tags": self.tags,
             "extra_metadata": self.extra_metadata,
+            "workflow_config": self.workflow_config,
+            "last_message_at": (
+                self.last_message_at.isoformat() if self.last_message_at else None
+            ),
             "created_at": (
                 self.created_at.isoformat() if self.created_at else None
             ),

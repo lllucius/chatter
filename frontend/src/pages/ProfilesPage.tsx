@@ -87,7 +87,7 @@ const ProfilesPage: React.FC = () => {
       const response = await chatterSDK.profiles.listProfilesApiV1ProfilesGet({});
       setProfiles(response.data.profiles);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load profiles');
+      toastService.error(err, 'Failed to load profiles');
     } finally {
       setLoading(false);
     }
@@ -160,7 +160,7 @@ const ProfilesPage: React.FC = () => {
       }
       setDialogOpen(false);
     } catch (err: any) {
-      setDialogError(err.response?.data?.detail || 'Failed to save profile');
+      toastService.error(err, 'Failed to save profile');
     } finally {
       setSaving(false);
     }

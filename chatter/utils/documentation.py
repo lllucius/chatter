@@ -14,6 +14,87 @@ logger = structlog.get_logger()
 API_V1_PREFIX = "/api/v1"
 EXAMPLE_TIMESTAMP = "2025-01-09T00:00:00Z"
 
+# Chat endpoint documentation template
+CHAT_ENDPOINT_DOCS = """
+## Workflow Types
+
+This endpoint supports multiple workflow types through the `workflow` parameter:
+
+### Plain Chat (`plain`)
+Basic conversation without tools or retrieval.
+```json
+{
+    "message": "Hello, how are you?",
+    "workflow": "plain"
+}
+```
+
+### RAG Workflow (`rag`)
+Retrieval-Augmented Generation with document search.
+```json
+{
+    "message": "What are the latest sales figures?",
+    "workflow": "rag",
+    "enable_retrieval": true
+}
+```
+
+### Tools Workflow (`tools`)
+Function calling with available tools.
+```json
+{
+    "message": "Calculate the square root of 144",
+    "workflow": "tools"
+}
+```
+
+### Full Workflow (`full`)
+Combination of RAG and tools for complex tasks.
+```json
+{
+    "message": "Find recent customer feedback and create a summary report",
+    "workflow": "full",
+    "enable_retrieval": true
+}
+```
+
+## Streaming
+
+Set `stream: true` to receive real-time responses:
+```json
+{
+    "message": "Tell me a story",
+    "workflow": "plain",
+    "stream": true
+}
+```
+
+Streaming responses use Server-Sent Events (SSE) format with event types:
+- `token`: Content chunks
+- `node_start`: Workflow node started
+- `node_complete`: Workflow node completed
+- `usage`: Final usage statistics
+- `error`: Error occurred
+
+## Templates
+
+Use pre-configured templates for common scenarios:
+```json
+{
+    "message": "I need help with my order",
+    "workflow_template": "customer_support"
+}
+```
+
+Available templates:
+- `customer_support`: Customer service with knowledge base
+- `code_assistant`: Programming help with code tools
+- `research_assistant`: Document research and analysis
+- `general_chat`: General conversation
+- `document_qa`: Document question answering
+- `data_analyst`: Data analysis with computation tools
+"""
+
 # Common response headers for all endpoints
 STANDARD_RESPONSE_HEADERS = {
     "x-correlation-id": {
@@ -174,89 +255,8 @@ class APIDocumentationEnhancer:
 
     def _enhance_chat_endpoint_docs(self, operation: dict) -> None:
         """Enhance chat endpoint documentation with workflow examples."""
-        # Add comprehensive description
-        enhanced_description = """
-        ## Workflow Types
-
-        This endpoint supports multiple workflow types through the `workflow` parameter:
-
-        ### Plain Chat (`plain`)
-        Basic conversation without tools or retrieval.
-        ```json
-        {
-            "message": "Hello, how are you?",
-            "workflow": "plain"
-        }
-        ```
-
-        ### RAG Workflow (`rag`)
-        Retrieval-Augmented Generation with document search.
-        ```json
-        {
-            "message": "What are the latest sales figures?",
-            "workflow": "rag",
-            "enable_retrieval": true
-        }
-        ```
-
-        ### Tools Workflow (`tools`)
-        Function calling with available tools.
-        ```json
-        {
-            "message": "Calculate the square root of 144",
-            "workflow": "tools"
-        }
-        ```
-
-        ### Full Workflow (`full`)
-        Combination of RAG and tools for complex tasks.
-        ```json
-        {
-            "message": "Find recent customer feedback and create a summary report",
-            "workflow": "full",
-            "enable_retrieval": true
-        }
-        ```
-
-        ## Streaming
-
-        Set `stream: true` to receive real-time responses:
-        ```json
-        {
-            "message": "Tell me a story",
-            "workflow": "plain",
-            "stream": true
-        }
-        ```
-
-        Streaming responses use Server-Sent Events (SSE) format with event types:
-        - `token`: Content chunks
-        - `node_start`: Workflow node started
-        - `node_complete`: Workflow node completed
-        - `usage`: Final usage statistics
-        - `error`: Error occurred
-
-        ## Templates
-
-        Use pre-configured templates for common scenarios:
-        ```json
-        {
-            "message": "I need help with my order",
-            "workflow_template": "customer_support"
-        }
-        ```
-
-        Available templates:
-        - `customer_support`: Customer service with knowledge base
-        - `code_assistant`: Programming help with code tools
-        - `research_assistant`: Document research and analysis
-        - `general_chat`: General conversation
-        - `document_qa`: Document question answering
-        - `data_analyst`: Data analysis with computation tools
-        """
-
         current_desc = operation.get("description", "")
-        operation["description"] = current_desc + enhanced_description
+        operation["description"] = current_desc + CHAT_ENDPOINT_DOCS
 
     def generate_examples(self) -> None:
         """Generate common examples for standard endpoints."""

@@ -127,23 +127,42 @@ class UnifiedEventManager:
                     # Map event to SSE event type
                     sse_event_type = self._map_unified_to_sse_event_type(event)
                     
-                    # Create task to emit through SSE service asynchronously
-                    asyncio.create_task(
-                        sse_service.trigger_event(
-                            event_type=sse_event_type,
-                            data=event.data,
-                            user_id=event.user_id,
-                            metadata={
-                                **event.metadata,
-                                "unified_event_id": event.id,
-                                "category": event.category.value,
-                                "priority": event.priority.value,
-                                "source_system": event.source_system,
-                                "correlation_id": event.correlation_id,
-                                "session_id": event.session_id,
-                            }
-                        )
-                    )
+                    # Create task to emit through SSE service asynchronously with error handling
+                    async def emit_to_sse_with_recovery():
+                        try:
+                            await sse_service.trigger_event(
+                                event_type=sse_event_type,
+                                data=event.data,
+                                user_id=event.user_id,
+                                metadata={
+                                    **event.metadata,
+                                    "unified_event_id": event.id,
+                                    "category": event.category.value,
+                                    "priority": event.priority.value,
+                                    "source_system": event.source_system,
+                                    "correlation_id": event.correlation_id,
+                                    "session_id": event.session_id,
+                                }
+                            )
+                        except Exception as sse_error:
+                            logger.error(
+                                "Failed to emit event to SSE, event lost",
+                                event_id=event.id,
+                                event_type=event.event_type,
+                                sse_error=str(sse_error)
+                            )
+                            # For critical events, we could implement fallback mechanisms here
+                            if event.priority == EventPriority.CRITICAL:
+                                # Log critical event failure for manual review
+                                logger.critical(
+                                    "CRITICAL EVENT LOST - manual review required",
+                                    event_id=event.id,
+                                    event_type=event.event_type,
+                                    event_data=event.data,
+                                    error=str(sse_error)
+                                )
+                    
+                    asyncio.create_task(emit_to_sse_with_recovery())
                     
             except Exception as e:
                 logger.error(
@@ -453,6 +472,32 @@ class UnifiedEventManager:
     def is_initialized(self) -> bool:
         """Check if the event manager is initialized."""
         return self._initialized
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get health status of the event system."""
+        stats = self.get_stats()
+        
+        # Calculate error rate
+        total_events = stats.get("emitted", 0)
+        errors = stats.get("errors", 0)
+        error_rate = (errors / total_events * 100) if total_events > 0 else 0
+        
+        # Determine health status
+        if error_rate > 10:
+            health = "unhealthy"
+        elif error_rate > 5:
+            health = "degraded"
+        else:
+            health = "healthy"
+        
+        return {
+            "health": health,
+            "initialized": self._initialized,
+            "error_rate_percent": round(error_rate, 2),
+            "total_events": total_events,
+            "total_errors": errors,
+            "event_stats": stats
+        }
 
 
 # Global unified event manager instance

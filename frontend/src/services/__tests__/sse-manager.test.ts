@@ -2,6 +2,7 @@
  * Tests for SSE Event Manager Service
  */
 
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { SSEEventManager } from '../sse-manager';
 import { chatterSDK } from '../chatter-sdk';
 import { AnySSEEvent, SSEEventType } from '../sse-types';
@@ -68,11 +69,13 @@ class MockEventSource implements EventSource {
 }
 
 // Mock chatterSDK
-jest.mock('../chatter-sdk', () => ({
+vi.mock('../chatter-sdk', () => ({
   chatterSDK: {
-    isAuthenticated: jest.fn(() => true),
-    getBaseURL: jest.fn(() => 'http://localhost:8000'),
-    getAuthHeaders: jest.fn(() => ({ Authorization: 'Bearer test-token' }))
+    isAuthenticated: vi.fn(() => true),
+    getBaseURL: vi.fn(() => 'http://localhost:8000'),
+    getAuthHeaders: vi.fn(() => ({ Authorization: 'Bearer test-token' })),
+    getToken: vi.fn(() => 'test-token'),
+    baseURL: 'http://localhost:8000'
   }
 }));
 
@@ -85,22 +88,22 @@ describe('SSEEventManager', () => {
 
   beforeEach(() => {
     sseManager = new SSEEventManager();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
     // Reset authentication mock
-    (chatterSDK.isAuthenticated as jest.Mock).mockReturnValue(true);
+    (chatterSDK.isAuthenticated as vi.Mock).mockReturnValue(true);
   });
 
   afterEach(() => {
     sseManager.disconnect();
-    jest.clearAllTimers();
+    vi.clearAllTimers();
   });
 
   describe('Connection Management', () => {
     test('should not connect when not authenticated', () => {
-      (chatterSDK.isAuthenticated as jest.Mock).mockReturnValue(false);
+      (chatterSDK.isAuthenticated as vi.Mock).mockReturnValue(false);
       
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
       sseManager.connect();
       
       expect(consoleSpy).toHaveBeenCalledWith('SSE: Not authenticated. Please login first.');
@@ -121,7 +124,7 @@ describe('SSEEventManager', () => {
 
     test('should not create multiple connections', () => {
       sseManager.connect();
-      const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
       
       sseManager.connect(); // Second call
       
@@ -139,7 +142,7 @@ describe('SSEEventManager', () => {
 
   describe('Event Listening', () => {
     test('should register event listeners', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       sseManager.addEventListener(SSEEventType.CHAT_MESSAGE_CHUNK, listener);
       
       // Verify listener is registered (internal state)
@@ -147,7 +150,7 @@ describe('SSEEventManager', () => {
     });
 
     test('should remove event listeners', () => {
-      const listener = jest.fn();
+      const listener = vi.fn();
       sseManager.addEventListener(SSEEventType.CHAT_MESSAGE_CHUNK, listener);
       sseManager.removeEventListener(SSEEventType.CHAT_MESSAGE_CHUNK, listener);
       
@@ -156,8 +159,8 @@ describe('SSEEventManager', () => {
     });
 
     test('should handle multiple listeners for same event', () => {
-      const listener1 = jest.fn();
-      const listener2 = jest.fn();
+      const listener1 = vi.fn();
+      const listener2 = vi.fn();
       
       sseManager.addEventListener(SSEEventType.CHAT_MESSAGE_CHUNK, listener1);
       sseManager.addEventListener(SSEEventType.CHAT_MESSAGE_CHUNK, listener2);
@@ -175,7 +178,7 @@ describe('SSEEventManager', () => {
     });
 
     test('should process chat message chunk events', (done) => {
-      const listener = jest.fn((event: AnySSEEvent) => {
+      const listener = vi.fn((event: AnySSEEvent) => {
         expect(event.type).toBe(SSEEventType.CHAT_MESSAGE_CHUNK);
         expect(event.data.content).toBe('Hello world');
         done();
@@ -195,7 +198,7 @@ describe('SSEEventManager', () => {
     });
 
     test('should process workflow status events', (done) => {
-      const listener = jest.fn((event: AnySSEEvent) => {
+      const listener = vi.fn((event: AnySSEEvent) => {
         expect(event.type).toBe(SSEEventType.WORKFLOW_STATUS);
         expect(event.data.status).toBe('completed');
         done();
@@ -217,7 +220,7 @@ describe('SSEEventManager', () => {
     });
 
     test('should process document processing events', (done) => {
-      const listener = jest.fn((event: AnySSEEvent) => {
+      const listener = vi.fn((event: AnySSEEvent) => {
         expect(event.type).toBe(SSEEventType.DOCUMENT_PROCESSING);
         expect(event.data.documentId).toBe('doc-456');
         done();
@@ -272,7 +275,7 @@ describe('SSEEventManager', () => {
 
   describe('Reconnection Logic', () => {
     test('should attempt reconnection on connection loss', () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
       sseManager.connect();
       
       // Simulate connection loss
@@ -280,11 +283,11 @@ describe('SSEEventManager', () => {
       eventSource.dispatchEvent(new Event('error'));
       
       // Should start reconnection process
-      jest.advanceTimersByTime(1000); // Initial reconnect delay
+      vi.advanceTimersByTime(1000); // Initial reconnect delay
       
       expect(true).toBe(true); // Placeholder - actual implementation would verify reconnection
       
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
   });
 
@@ -292,7 +295,7 @@ describe('SSEEventManager', () => {
     test('should handle malformed messages gracefully', (done) => {
       sseManager.connect();
       
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
       
       setTimeout(() => {
         const eventSource = (sseManager as any).eventSource as MockEventSource;
@@ -317,7 +320,7 @@ describe('SSEEventManager', () => {
     test('should handle connection errors', () => {
       sseManager.connect();
       
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
       
       // Simulate connection error
       const eventSource = (sseManager as any).eventSource as MockEventSource;

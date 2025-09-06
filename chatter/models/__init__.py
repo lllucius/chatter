@@ -1,5 +1,6 @@
 """Database models for Chatter application."""
 
+from chatter.models.agent_db import AgentDB, AgentInteractionDB
 from chatter.models.analytics import (
     ConversationStats,
     DocumentStats,
@@ -51,4 +52,6 @@ __all__ = [
     "ModelType",
     "DistanceMetric",
     "ReductionStrategy",
+    "AgentDB",
+    "AgentInteractionDB",
 ]

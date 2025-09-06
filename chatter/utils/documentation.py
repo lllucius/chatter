@@ -1,8 +1,8 @@
 """Enhanced API documentation and examples."""
 
-import structlog
 from typing import Any
 
+import structlog
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 

@@ -158,9 +158,12 @@ const ConversationsPage: React.FC = () => {
     }
 
     try {
-      // Note: This endpoint might not exist in the current API
-      // await api.deleteConversation(conversationId);
-      // For now, just remove from local state
+      // Use the available delete conversation API
+      await chatterSDK.chat.deleteConversationApiV1ChatConversationsConversationIdDelete({
+        conversationId: conversationId
+      });
+      
+      // Refresh the conversations list after successful deletion
       conversationsApi.reset();
       conversationsApi.execute();
     } catch (err: any) {

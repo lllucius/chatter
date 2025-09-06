@@ -703,6 +703,110 @@ environments:
     use_test_credentials: true
     skip_random_generation: true
 
+# Workflow Templates
+workflow_templates:
+  # Basic templates (included in minimal mode)
+  basic:
+    - name: "general_chat"
+      workflow_type: "plain"
+      category: "general"
+      description: "General conversation assistant"
+      default_params:
+        enable_memory: true
+        memory_window: 20
+        system_message: "You are a helpful, harmless, and honest AI assistant. Engage in natural conversation while being informative and supportive."
+
+    - name: "document_qa"
+      workflow_type: "rag"
+      category: "research"
+      description: "Document question answering with retrieval"
+      default_params:
+        enable_memory: false  # Each question should be independent
+        max_documents: 15
+        similarity_threshold: 0.7
+        system_message: "You are a document analysis assistant. Answer questions based solely on the provided documents. Be precise and cite specific sections when possible."
+      required_retrievers: ["document_store"]
+
+    - name: "code_assistant"
+      workflow_type: "tools"
+      category: "programming"
+      description: "Programming assistant with code tools"
+      default_params:
+        enable_memory: true
+        memory_window: 100
+        max_tool_calls: 10
+        system_message: "You are an expert programming assistant. Help users with coding tasks, debugging, code review, and software development best practices. Use available tools to execute code, run tests, and access documentation when needed."
+      required_tools: ["execute_code", "search_docs", "generate_tests"]
+
+  # Extended templates (included in demo mode)
+  extended:
+    - name: "customer_support"
+      workflow_type: "full"
+      category: "customer_support"
+      description: "Customer support with knowledge base and tools"
+      default_params:
+        enable_memory: true
+        memory_window: 50
+        max_tool_calls: 5
+        system_message: "You are a helpful customer support assistant. Use the knowledge base to find relevant information and available tools to help resolve customer issues. Always be polite, professional, and thorough in your responses."
+      required_tools: ["search_kb", "create_ticket", "escalate"]
+      required_retrievers: ["support_docs"]
+
+    - name: "research_assistant"
+      workflow_type: "rag"
+      category: "research"
+      description: "Research assistant with document retrieval"
+      default_params:
+        enable_memory: true
+        memory_window: 30
+        max_documents: 10
+        system_message: "You are a research assistant. Use the provided documents to answer questions accurately and thoroughly. Always cite your sources and explain your reasoning. If information is not available in the documents, clearly state this limitation."
+      required_retrievers: ["research_docs"]
+
+    - name: "data_analyst"
+      workflow_type: "tools"
+      category: "data_analysis"
+      description: "Data analysis assistant with computation tools"
+      default_params:
+        enable_memory: true
+        memory_window: 50
+        max_tool_calls: 15
+        system_message: "You are a data analyst assistant. Help users analyze data, create visualizations, and derive insights. Use computational tools to perform calculations and generate charts."
+      required_tools: ["execute_python", "create_chart", "analyze_data"]
+
+    - name: "blog_writing_assistant"
+      workflow_type: "tools"
+      category: "creative"
+      description: "Blog writing assistant with research and editing tools"
+      default_params:
+        enable_memory: true
+        memory_window: 40
+        max_tool_calls: 8
+        system_message: "You are a professional blog writing assistant. Help create engaging, well-researched blog posts with proper structure, compelling headlines, and SEO optimization."
+      required_tools: ["web_search", "grammar_check", "seo_analyzer"]
+
+    - name: "meeting_summarizer"
+      workflow_type: "rag"
+      category: "business"
+      description: "Meeting transcript summarizer and action item extractor"
+      default_params:
+        enable_memory: false
+        max_documents: 5
+        system_message: "You are a meeting summarizer. Analyze meeting transcripts to create concise summaries, identify key decisions, extract action items, and highlight important discussion points."
+      required_retrievers: ["meeting_transcripts"]
+
+    - name: "learning_tutor"
+      workflow_type: "full"
+      category: "educational"
+      description: "Personalized learning tutor with assessment tools"
+      default_params:
+        enable_memory: true
+        memory_window: 100
+        max_tool_calls: 12
+        system_message: "You are a personalized learning tutor. Adapt your teaching style to the student's needs, provide clear explanations, create practice problems, and track learning progress."
+      required_tools: ["create_quiz", "check_answers", "progress_tracker"]
+      required_retrievers: ["learning_materials"]
+
 # Production-ready initialization data (from utils/database.py)
 # This data should be used for minimal/production seeding modes
 production_data:
@@ -979,3 +1083,36 @@ production_data:
       system_prompt: "You are a methodical assistant that breaks down complex problems into clear steps, shows your reasoning process, and provides structured solutions."
       enable_tools: true
       tags: ["reasoning", "methodical", "step-by-step"]
+
+  # Core workflow templates for production deployment
+  workflow_templates:
+    - name: "general_chat"
+      workflow_type: "plain"
+      category: "general"
+      description: "General conversation assistant"
+      default_params:
+        enable_memory: true
+        memory_window: 20
+        system_message: "You are a helpful, harmless, and honest AI assistant. Engage in natural conversation while being informative and supportive."
+
+    - name: "document_qa"
+      workflow_type: "rag"
+      category: "research"
+      description: "Document question answering with retrieval"
+      default_params:
+        enable_memory: false
+        max_documents: 15
+        similarity_threshold: 0.7
+        system_message: "You are a document analysis assistant. Answer questions based solely on the provided documents. Be precise and cite specific sections when possible."
+      required_retrievers: ["document_store"]
+
+    - name: "code_assistant"
+      workflow_type: "tools"
+      category: "programming"
+      description: "Programming assistant with code tools"
+      default_params:
+        enable_memory: true
+        memory_window: 100
+        max_tool_calls: 10
+        system_message: "You are an expert programming assistant. Help users with coding tasks, debugging, code review, and software development best practices. Use available tools to execute code, run tests, and access documentation when needed."
+      required_tools: ["execute_code", "search_docs", "generate_tests"]

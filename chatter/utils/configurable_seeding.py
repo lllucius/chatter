@@ -279,7 +279,7 @@ class ConfigurableSeeder(DatabaseSeeder):
             return []
         
         count = await self._create_configured_entities("profiles", "chat_profiles", "extended", admin_user, skip_existing)
-        return [] if count == 0 else [f"Created {count} demo profiles"]  # Return placeholder for compatibility
+        return [] if count == 0 else [f"Created {count} demo profiles"]  # Return creation status message
     
     async def _create_demo_prompts(self, skip_existing: bool = True) -> List:
         """Create extended prompts for demo mode."""
@@ -295,7 +295,7 @@ class ConfigurableSeeder(DatabaseSeeder):
             return []
         
         count = await self._create_configured_entities("prompts", "prompt_templates", "extended", admin_user, skip_existing)
-        return [] if count == 0 else [f"Created {count} demo prompts"]  # Return placeholder for compatibility
+        return [] if count == 0 else [f"Created {count} demo prompts"]  # Return creation status message
     
     async def _create_demo_workflow_templates(self, skip_existing: bool = True) -> List:
         """Create extended workflow templates for demo mode."""
@@ -311,7 +311,7 @@ class ConfigurableSeeder(DatabaseSeeder):
             return []
         
         count = await self._create_configured_entities("workflow_templates", "workflow_templates", "extended", admin_user, skip_existing)
-        return [] if count == 0 else [f"Created {count} demo workflow templates"]  # Return placeholder for compatibility
+        return [] if count == 0 else [f"Created {count} demo workflow templates"]  # Return creation status message
     
     async def _seed_production_data(self, results: Dict[str, Any], skip_existing: bool):
         """Override production seeding to use configuration data."""

@@ -751,18 +751,57 @@ class LangGraphWorkflowManager:
             return ""
 
     def get_retriever(self, workspace_id: str) -> Any | None:
-        """Get retriever for a workspace - placeholder implementation.
+        """Get retriever for a workspace based on user documents.
         
         Args:
-            workspace_id: Workspace identifier
+            workspace_id: Workspace identifier (interpreted as user_id)
             
         Returns:
             Retriever instance or None if not available
         """
-        # TODO: Implement actual retriever logic based on workspace
-        # For now, return None to avoid breaking existing workflows
-        logger.debug(f"get_retriever called for workspace: {workspace_id}")
-        return None
+        try:
+            from chatter.core.vector_store import vector_store_manager
+            from chatter.services.embeddings import EmbeddingService
+            from chatter.config import settings
+            
+            # Create embedding service
+            embedding_service = EmbeddingService()
+            
+            # Get default embeddings for the user's workspace
+            embeddings = embedding_service.get_default_embeddings()
+            if embeddings is None:
+                logger.warning(f"No embeddings available for workspace: {workspace_id}")
+                return None
+            
+            # Create user-specific collection name
+            collection_name = f"documents_{workspace_id}"
+            
+            # Get vector store for the workspace
+            vector_store = vector_store_manager.create_store(
+                store_type="pgvector",
+                embeddings=embeddings,
+                collection_name=collection_name
+            )
+            
+            # Return retriever with default search parameters
+            retriever = vector_store.as_retriever(
+                search_type="similarity",
+                search_kwargs={"k": 5}  # Return top 5 relevant documents
+            )
+            
+            logger.debug(
+                f"Created retriever for workspace: {workspace_id}, "
+                f"collection: {collection_name}"
+            )
+            return retriever
+            
+        except Exception as e:
+            logger.error(
+                "Failed to create retriever for workspace",
+                workspace_id=workspace_id,
+                error=str(e),
+            )
+            return None
 
 
 # Global workflow manager instance

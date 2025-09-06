@@ -864,34 +864,56 @@ async def get_ab_test_metrics(
         Current test metrics
     """
     try:
-        # This would need to be implemented in the AB test manager
-        # For now, return a placeholder response
+        # Get test results from AB test manager
+        test_result = await ab_test_manager.get_test_results(test_id)
+        test_performance = await ab_test_manager.get_test_performance(test_id)
+        
+        if not test_result or not test_performance:
+            # If no test results, return empty metrics
+            return ABTestMetricsResponse(
+                test_id=test_id,
+                metrics=[],
+                participant_count=0,
+                last_updated=datetime.now(UTC),
+            )
 
         from chatter.schemas.ab_testing import TestMetric
 
-        # Placeholder metrics
-        metrics = [
-            TestMetric(
-                metric_type=MetricType.RESPONSE_TIME,
-                variant_name="control",
-                value=1.5,
-                sample_size=50,
-                confidence_interval=None,
-            ),
-            TestMetric(
-                metric_type=MetricType.RESPONSE_TIME,
-                variant_name="variant_a",
-                value=1.2,
-                sample_size=50,
-                confidence_interval=None,
-            ),
-        ]
+        # Build metrics from test results
+        metrics = []
+        for variant_name, variant_data in test_result.variant_results.items():
+            for metric_name, metric_value in variant_data.items():
+                # Convert metric name to MetricType enum
+                try:
+                    metric_type = MetricType(metric_name.lower())
+                except ValueError:
+                    # Skip unknown metric types
+                    continue
+                
+                # Get sample size from variant data or use 0 as default
+                sample_size = variant_data.get("sample_size", 0)
+                
+                # Get confidence interval if available
+                confidence_interval = None
+                if (variant_name in test_result.confidence_intervals and 
+                    metric_name in test_result.confidence_intervals[variant_name]):
+                    ci_data = test_result.confidence_intervals[variant_name][metric_name]
+                    if isinstance(ci_data, dict) and "lower" in ci_data and "upper" in ci_data:
+                        confidence_interval = (ci_data["lower"], ci_data["upper"])
+
+                metrics.append(TestMetric(
+                    metric_type=metric_type,
+                    variant_name=variant_name,
+                    value=float(metric_value) if isinstance(metric_value, (int, float)) else 0.0,
+                    sample_size=int(sample_size) if isinstance(sample_size, (int, float)) else 0,
+                    confidence_interval=confidence_interval,
+                ))
 
         return ABTestMetricsResponse(
             test_id=test_id,
             metrics=metrics,
-            participant_count=100,
-            last_updated=datetime.now(UTC),
+            participant_count=test_performance.get("total_participants", 0),
+            last_updated=test_result.analysis_date,
         )
 
     except Exception as e:

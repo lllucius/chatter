@@ -467,33 +467,29 @@ class UnifiedTemplateManager:
         Raises:
             WorkflowConfigurationError: If trying to remove built-in template
         """
-        if name in self.builtin_templates and not custom_only:
-            raise WorkflowConfigurationError(
-                f"Cannot remove built-in template: {name}"
+        # Built-in templates are now stored in database with is_builtin=True
+        # The database constraints will prevent removal of builtin templates
+            
+        try:
+            from chatter.models.workflow import WorkflowTemplate as DBWorkflowTemplate
+            
+            query = select(DBWorkflowTemplate).where(
+                DBWorkflowTemplate.name == name,
+                DBWorkflowTemplate.owner_id == owner_id
             )
             
-        if self.session:
-            try:
-                from chatter.models.workflow import WorkflowTemplate as DBWorkflowTemplate
-                
-                query = select(DBWorkflowTemplate).where(
-                    DBWorkflowTemplate.name == name,
-                    DBWorkflowTemplate.owner_id == owner_id
-                )
-                
-                result = await self.session.execute(query)
-                db_template = result.scalar_one_or_none()
-                
-                if db_template:
-                    await self.session.delete(db_template)
-                    await self.session.commit()
-                    logger.info(f"Removed custom template from database: {name}")
-                    return True
-            except Exception as e:
-                logger.error(f"Failed to remove template from database: {e}")
-                if self.session:
-                    await self.session.rollback()
-                raise WorkflowConfigurationError(f"Failed to remove template: {str(e)}")
+            result = await self.session.execute(query)
+            db_template = result.scalar_one_or_none()
+            
+            if db_template:
+                await self.session.delete(db_template)
+                await self.session.commit()
+                logger.info(f"Removed template from database: {name}")
+                return True
+        except Exception as e:
+            logger.error(f"Failed to remove template from database: {e}")
+            await self.session.rollback()
+            raise WorkflowConfigurationError(f"Failed to remove template: {str(e)}")
         
         return False
 

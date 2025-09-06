@@ -87,7 +87,7 @@ const AgentsPage: React.FC = () => {
       setTotal(response.data.total);
       setTotalPages(Math.ceil(response.data.total / perPage));
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load agents');
+      toastService.error(err, 'Failed to load agents');
     } finally {
       setLoading(false);
     }
@@ -137,7 +137,7 @@ const AgentsPage: React.FC = () => {
       }
       setDialogOpen(false);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to save agent');
+      toastService.error(err, 'Failed to save agent');
     } finally {
       setSaving(false);
     }
@@ -151,8 +151,8 @@ const AgentsPage: React.FC = () => {
     try {
       await chatterSDK.agents.deleteAgentApiV1AgentsAgentIdDelete({ agentId });
       setAgents(prev => prev.filter(a => a.id !== agentId));
-    } catch {
-      setError('Failed to delete agent');
+    } catch (err: any) {
+      toastService.error(err, 'Failed to delete agent');
     }
   };
 

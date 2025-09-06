@@ -139,19 +139,19 @@ const ModelManagementPage: React.FC = () => {
     [models]
   );
 
-  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+  const showToast = (messageOrError: string | any, type: 'success' | 'error' | 'info' | 'warning' = 'info', fallback?: string) => {
     switch (type) {
       case 'success':
-        toastService.success(message);
+        toastService.success(messageOrError);
         break;
       case 'error':
-        toastService.error(message);
+        toastService.error(messageOrError, fallback);
         break;
       case 'warning':
-        toastService.warning(message);
+        toastService.warning(messageOrError, fallback);
         break;
       default:
-        toastService.info(message);
+        toastService.info(messageOrError);
     }
   };
 
@@ -295,8 +295,7 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      const errorMessage = e?.response?.data?.detail || e?.message || 'Failed to create provider';
-      setError(errorMessage);
+      showToast(e, 'error', 'Failed to create provider');
     }
   };
 
@@ -310,8 +309,7 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      const errorMessage = e?.response?.data?.detail || e?.message || 'Failed to create model';
-      setError(errorMessage);
+      showToast(e, 'error', 'Failed to create model');
     }
   };
 
@@ -325,8 +323,7 @@ const ModelManagementPage: React.FC = () => {
       loadData();
     } catch (e: any) {
       console.error(e);
-      const errorMessage = e?.response?.data?.detail || e?.message || 'Failed to create embedding space';
-      setError(errorMessage);
+      showToast(e, 'error', 'Failed to create embedding space');
     }
   };
 

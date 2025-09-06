@@ -126,7 +126,7 @@ const ChatPage: React.FC = () => {
         setSelectedProfile(profilesResponse.data.profiles[0].id);
       }
     } catch (err: any) {
-      toastService.error('Failed to load chat data');
+      toastService.error(err, 'Failed to load chat data');
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -166,7 +166,7 @@ const ChatPage: React.FC = () => {
       }
       return response.data;
     } catch (err: any) {
-      toastService.error('Failed to start new conversation');
+      toastService.error(err, 'Failed to start new conversation');
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -198,7 +198,7 @@ const ChatPage: React.FC = () => {
       // Scroll to bottom after messages are set
       setTimeout(() => scrollToBottom(), 100);
     } catch (err: any) {
-      toastService.error('Failed to load conversation');
+      toastService.error(err, 'Failed to load conversation');
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -446,7 +446,7 @@ const ChatPage: React.FC = () => {
         }
       }
     } catch (err: any) {
-      toastService.error('Failed to send message');
+      toastService.error(err, 'Failed to send message');
       console.error(err);
 
       const errorMessage: ChatMessage = {
@@ -559,7 +559,7 @@ const ChatPage: React.FC = () => {
         setMessages(prev => [...prev, assistantMessage]);
       }
     } catch (err: any) {
-      toastService.error('Failed to regenerate message');
+      toastService.error(err, 'Failed to regenerate message');
       console.error(err);
     } finally {
       setLoading(false);

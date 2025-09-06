@@ -27,7 +27,7 @@ class MockSession:
 
 def test_crypto_utility():
     """Test basic crypto utility functionality."""
-    from chatter.utils.crypto import SecretManager, CryptoError
+    from chatter.utils.security_enhanced import SecretManager, CryptoError
     from cryptography.fernet import Fernet
     
     # Generate a proper Fernet key for testing

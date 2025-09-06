@@ -1,5 +1,6 @@
 """Enhanced database seeding with YAML configuration support."""
 
+import hashlib
 import yaml
 from pathlib import Path
 from typing import Dict, List, Any, Optional
@@ -413,10 +414,24 @@ class ConfigurableSeeder(DatabaseSeeder):
             document = Document(
                 owner_id=user.id,
                 filename=doc_data["filename"],
+                original_filename=doc_data["filename"],
                 title=doc_data["title"],
                 content=doc_data["content"],
                 document_type=DocumentType[doc_data["doc_type"]],
                 file_size=len(doc_data["content"]),
+                status=DocumentStatus.PROCESSED,
+                chunk_count=1,
+            )
+            document = Document(
+                owner_id=user.id,
+                filename=doc_data["filename"],
+                original_filename=doc_data.get("original_filename") or doc_data["filename"],
+                file_hash=hashlib.sha256(doc_data["content"].encode("utf-8")).hexdigest(),
+                file_size=len(doc_data["content"]),
+                mime_type="text/markdown",
+                document_type=DocumentType[doc_data["doc_type"]],
+                title=doc_data["title"],
+                content=doc_data["content"],
                 status=DocumentStatus.PROCESSED,
                 chunk_count=1,
             )
@@ -430,6 +445,7 @@ class ConfigurableSeeder(DatabaseSeeder):
                 document_id=document.id,
                 chunk_index=0,
                 content=doc_data["content"],
+                content_hash=hashlib.sha256(doc_data["content"].encode("utf-8")).hexdigest(),
                 token_count=len(doc_data["content"].split()),
                 metadata={"title": doc_data["title"]},
             )

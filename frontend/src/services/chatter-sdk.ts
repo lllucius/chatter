@@ -387,7 +387,7 @@ export class ChatterSDK {
    * Chat streaming helper method using native fetch for proper streaming support
    */
   async chatStream(chatRequest: ChatRequest): Promise<ReadableStreamDefaultReader<Uint8Array>> {
-    const response = await fetch(`${this.baseURL}/api/v1/chat/chat/stream`, {
+    const response = await fetch(`${this.baseURL}/api/v1/chat/chat`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

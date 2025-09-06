@@ -23,6 +23,7 @@ from chatter.models.registry import (
     ReductionStrategy,
 )
 from chatter.models.user import User
+from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType
 from chatter.utils.database import DatabaseManager
 from chatter.utils.logging import get_logger
 from chatter.utils.security_enhanced import hash_password
@@ -153,6 +154,10 @@ class DatabaseSeeder:
         prompt_count = await self._create_basic_prompts(admin_user, skip_existing)
         results["created"]["prompts"] = prompt_count
 
+        # Create basic workflow templates
+        workflow_template_count = await self._create_basic_workflow_templates(admin_user, skip_existing)
+        results["created"]["workflow_templates"] = workflow_template_count
+
     async def _seed_development_data(self, results: Dict[str, Any], skip_existing: bool):
         """Seed development-friendly data set."""
         logger.info("Seeding development data")
@@ -187,6 +192,10 @@ class DatabaseSeeder:
         # Additional prompts
         extra_prompts = await self._create_demo_prompts(skip_existing)
         results["created"]["prompts"] += len(extra_prompts)
+        
+        # Additional workflow templates
+        extra_workflow_templates = await self._create_demo_workflow_templates(skip_existing)
+        results["created"]["workflow_templates"] += len(extra_workflow_templates)
         
         # Sample embedding spaces
         embedding_spaces = await self._create_demo_embedding_spaces(skip_existing)
@@ -546,6 +555,219 @@ Keep the summary {length} and focused on {focus_area}.""",
         
         logger.info(f"Created {created_count} basic prompts")
         return created_count
+
+    async def _create_basic_workflow_templates(self, admin_user: User, skip_existing: bool = True) -> int:
+        """Create basic workflow templates."""
+        if not admin_user:
+            logger.warning("No admin user provided, skipping basic workflow templates")
+            return 0
+
+        templates_data = [
+            {
+                "name": "general_chat",
+                "workflow_type": WorkflowType.PLAIN,
+                "category": TemplateCategory.GENERAL,
+                "description": "General conversation assistant",
+                "default_params": {
+                    "enable_memory": True,
+                    "memory_window": 20,
+                    "system_message": "You are a helpful, harmless, and honest AI assistant. Engage in natural conversation while being informative and supportive.",
+                },
+            },
+            {
+                "name": "document_qa",
+                "workflow_type": WorkflowType.RAG,
+                "category": TemplateCategory.RESEARCH,
+                "description": "Document question answering with retrieval",
+                "default_params": {
+                    "enable_memory": False,  # Each question should be independent
+                    "max_documents": 15,
+                    "similarity_threshold": 0.7,
+                    "system_message": "You are a document analysis assistant. Answer questions based solely on the provided documents. Be precise and cite specific sections when possible.",
+                },
+                "required_retrievers": ["document_store"],
+            },
+            {
+                "name": "code_assistant",
+                "workflow_type": WorkflowType.TOOLS,
+                "category": TemplateCategory.PROGRAMMING,
+                "description": "Programming assistant with code tools",
+                "default_params": {
+                    "enable_memory": True,
+                    "memory_window": 100,
+                    "max_tool_calls": 10,
+                    "system_message": "You are an expert programming assistant. Help users with coding tasks, debugging, code review, and software development best practices. Use available tools to execute code, run tests, and access documentation when needed.",
+                },
+                "required_tools": ["execute_code", "search_docs", "generate_tests"],
+            },
+        ]
+        
+        created_count = 0
+        for template_data in templates_data:
+            if skip_existing:
+                existing = await self.session.execute(
+                    select(WorkflowTemplate).where(
+                        WorkflowTemplate.name == template_data["name"],
+                        WorkflowTemplate.is_builtin == True
+                    )
+                )
+                if existing.scalar_one_or_none():
+                    continue
+
+            workflow_template = WorkflowTemplate(
+                owner_id=admin_user.id,
+                name=template_data["name"],
+                description=template_data["description"],
+                workflow_type=template_data["workflow_type"],
+                category=template_data["category"],
+                default_params=template_data["default_params"],
+                required_tools=template_data.get("required_tools"),
+                required_retrievers=template_data.get("required_retrievers"),
+                is_builtin=True,
+                is_public=True,  # Built-in templates are public by default
+                version=1,
+                is_latest=True,
+            )
+            
+            self.session.add(workflow_template)
+            created_count += 1
+        
+        if created_count > 0:
+            await self.session.commit()
+        
+        logger.info(f"Created {created_count} basic workflow templates")
+        return created_count
+
+    async def _create_demo_workflow_templates(self, skip_existing: bool = True) -> List[WorkflowTemplate]:
+        """Create demo workflow templates."""
+        # Get admin user
+        result = await self.session.execute(
+            select(User).where(User.username == "admin")
+        )
+        admin_user = result.scalar_one_or_none()
+        if not admin_user:
+            logger.warning("No admin user found for demo workflow templates")
+            return []
+
+        extended_templates_data = [
+            {
+                "name": "customer_support",
+                "workflow_type": WorkflowType.FULL,
+                "category": TemplateCategory.CUSTOMER_SUPPORT,
+                "description": "Customer support with knowledge base and tools",
+                "default_params": {
+                    "enable_memory": True,
+                    "memory_window": 50,
+                    "max_tool_calls": 5,
+                    "system_message": "You are a helpful customer support assistant. Use the knowledge base to find relevant information and available tools to help resolve customer issues. Always be polite, professional, and thorough in your responses.",
+                },
+                "required_tools": ["search_kb", "create_ticket", "escalate"],
+                "required_retrievers": ["support_docs"],
+            },
+            {
+                "name": "research_assistant",
+                "workflow_type": WorkflowType.RAG,
+                "category": TemplateCategory.RESEARCH,
+                "description": "Research assistant with document retrieval",
+                "default_params": {
+                    "enable_memory": True,
+                    "memory_window": 30,
+                    "max_documents": 10,
+                    "system_message": "You are a research assistant. Use the provided documents to answer questions accurately and thoroughly. Always cite your sources and explain your reasoning. If information is not available in the documents, clearly state this limitation.",
+                },
+                "required_retrievers": ["research_docs"],
+            },
+            {
+                "name": "data_analyst",
+                "workflow_type": WorkflowType.TOOLS,
+                "category": TemplateCategory.DATA_ANALYSIS,
+                "description": "Data analysis assistant with computation tools",
+                "default_params": {
+                    "enable_memory": True,
+                    "memory_window": 50,
+                    "max_tool_calls": 15,
+                    "system_message": "You are a data analyst assistant. Help users analyze data, create visualizations, and derive insights. Use computational tools to perform calculations and generate charts.",
+                },
+                "required_tools": ["execute_python", "create_chart", "analyze_data"],
+            },
+            {
+                "name": "blog_writing_assistant",
+                "workflow_type": WorkflowType.TOOLS,
+                "category": TemplateCategory.CREATIVE,
+                "description": "Blog writing assistant with research and editing tools",
+                "default_params": {
+                    "enable_memory": True,
+                    "memory_window": 40,
+                    "max_tool_calls": 8,
+                    "system_message": "You are a professional blog writing assistant. Help create engaging, well-researched blog posts with proper structure, compelling headlines, and SEO optimization.",
+                },
+                "required_tools": ["web_search", "grammar_check", "seo_analyzer"],
+            },
+            {
+                "name": "meeting_summarizer",
+                "workflow_type": WorkflowType.RAG,
+                "category": TemplateCategory.BUSINESS,
+                "description": "Meeting transcript summarizer and action item extractor",
+                "default_params": {
+                    "enable_memory": False,
+                    "max_documents": 5,
+                    "system_message": "You are a meeting summarizer. Analyze meeting transcripts to create concise summaries, identify key decisions, extract action items, and highlight important discussion points.",
+                },
+                "required_retrievers": ["meeting_transcripts"],
+            },
+            {
+                "name": "learning_tutor",
+                "workflow_type": WorkflowType.FULL,
+                "category": TemplateCategory.EDUCATIONAL,
+                "description": "Personalized learning tutor with assessment tools",
+                "default_params": {
+                    "enable_memory": True,
+                    "memory_window": 100,
+                    "max_tool_calls": 12,
+                    "system_message": "You are a personalized learning tutor. Adapt your teaching style to the student's needs, provide clear explanations, create practice problems, and track learning progress.",
+                },
+                "required_tools": ["create_quiz", "check_answers", "progress_tracker"],
+                "required_retrievers": ["learning_materials"],
+            },
+        ]
+        
+        created_templates = []
+        for template_data in extended_templates_data:
+            if skip_existing:
+                existing = await self.session.execute(
+                    select(WorkflowTemplate).where(
+                        WorkflowTemplate.name == template_data["name"],
+                        WorkflowTemplate.owner_id == admin_user.id
+                    )
+                )
+                if existing.scalar_one_or_none():
+                    continue
+
+            workflow_template = WorkflowTemplate(
+                owner_id=admin_user.id,
+                name=template_data["name"],
+                description=template_data["description"],
+                workflow_type=template_data["workflow_type"],
+                category=template_data["category"],
+                default_params=template_data["default_params"],
+                required_tools=template_data.get("required_tools"),
+                required_retrievers=template_data.get("required_retrievers"),
+                is_builtin=False,
+                is_public=True,  # Demo templates are public
+                version=1,
+                is_latest=True,
+            )
+            
+            self.session.add(workflow_template)
+            created_templates.append(workflow_template)
+        
+        if created_templates:
+            await self.session.commit()
+            for template in created_templates:
+                await self.session.refresh(template)
+        
+        logger.info(f"Created {len(created_templates)} demo workflow templates")
+        return created_templates
 
     async def _create_sample_conversations(self, users: List[User], skip_existing: bool = True) -> int:
         """Create sample conversations."""

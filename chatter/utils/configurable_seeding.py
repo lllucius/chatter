@@ -383,16 +383,18 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
         # Create production profiles and prompts from configuration
         profiles_created = await self._create_production_profiles(admin_user, skip_existing)
         prompts_created = await self._create_production_prompts(admin_user, skip_existing)
+        workflow_templates_created = await self._create_production_workflow_templates(admin_user, skip_existing)
         
         results["created"]["profiles"] = profiles_created
         results["created"]["prompts"] = prompts_created
+        results["created"]["workflow_templates"] = workflow_templates_created
         
         # Create default registry data (providers, models, embedding spaces)
         from chatter.utils.database import _create_default_registry_data
         await _create_default_registry_data(self.session)
         results["created"]["registry"] = "default_models"
         
-        logger.info(f"Production seeding completed: {profiles_created} profiles, {prompts_created} prompts")
+        logger.info(f"Production seeding completed: {profiles_created} profiles, {prompts_created} prompts, {workflow_templates_created} workflow templates")
     
     async def _create_demo_prompts(self, skip_existing: bool = True) -> List:
         """Create extended prompts for demo mode."""
@@ -596,6 +598,180 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
         
         logger.info(f"Created {len(created_users)} test users from configuration")
         return created_users
+
+    async def _create_basic_workflow_templates(self, admin_user, skip_existing: bool = True) -> int:
+        """Create basic workflow templates from configuration."""
+        if not admin_user:
+            from sqlalchemy import select
+            from chatter.models.user import User
+            result = await self.session.execute(
+                select(User).where(User.username == "admin")
+            )
+            admin_user = result.scalar_one_or_none()
+            if not admin_user:
+                logger.warning("No admin user found, skipping basic workflow template creation")
+                return 0
+        
+        templates_config = self.config.get("workflow_templates", {}).get("basic", [])
+        if not templates_config:
+            logger.info("No basic workflow templates in configuration, using defaults")
+            return await super()._create_basic_workflow_templates(admin_user, skip_existing)
+        
+        created_count = 0
+        for template_data in templates_config:
+            if skip_existing:
+                from sqlalchemy import select
+                from chatter.models.workflow import WorkflowTemplate
+                existing = await self.session.execute(
+                    select(WorkflowTemplate).where(
+                        WorkflowTemplate.name == template_data["name"],
+                        WorkflowTemplate.is_builtin == True
+                    )
+                )
+                if existing.scalar_one_or_none():
+                    continue
+            
+            from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType
+            
+            workflow_template = WorkflowTemplate(
+                owner_id=admin_user.id,
+                name=template_data["name"],
+                description=template_data["description"],
+                workflow_type=WorkflowType(template_data["workflow_type"]),
+                category=TemplateCategory(template_data["category"]),
+                default_params=template_data["default_params"],
+                required_tools=template_data.get("required_tools"),
+                required_retrievers=template_data.get("required_retrievers"),
+                is_builtin=True,
+                is_public=True,  # Built-in templates are public by default
+                version=1,
+                is_latest=True,
+            )
+            
+            self.session.add(workflow_template)
+            created_count += 1
+        
+        if created_count > 0:
+            await self.session.commit()
+        
+        logger.info(f"Created {created_count} basic workflow templates from configuration")
+        return created_count
+
+    async def _create_production_workflow_templates(self, admin_user, skip_existing: bool = True) -> int:
+        """Create production workflow templates from configuration."""
+        if not admin_user:
+            from sqlalchemy import select
+            from chatter.models.user import User
+            result = await self.session.execute(
+                select(User).where(User.username == "admin")
+            )
+            admin_user = result.scalar_one_or_none()
+            if not admin_user:
+                logger.warning("No admin user found, skipping production workflow template creation")
+                return 0
+        
+        templates_config = self.config.get("production_data", {}).get("workflow_templates", [])
+        if not templates_config:
+            logger.info("No production workflow templates in configuration, falling back to basic templates")
+            return await self._create_basic_workflow_templates(admin_user, skip_existing)
+        
+        created_count = 0
+        for template_data in templates_config:
+            if skip_existing:
+                from sqlalchemy import select
+                from chatter.models.workflow import WorkflowTemplate
+                existing = await self.session.execute(
+                    select(WorkflowTemplate).where(
+                        WorkflowTemplate.name == template_data["name"],
+                        WorkflowTemplate.is_builtin == True
+                    )
+                )
+                if existing.scalar_one_or_none():
+                    continue
+            
+            from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType
+            
+            workflow_template = WorkflowTemplate(
+                owner_id=admin_user.id,
+                name=template_data["name"],
+                description=template_data["description"],
+                workflow_type=WorkflowType(template_data["workflow_type"]),
+                category=TemplateCategory(template_data["category"]),
+                default_params=template_data["default_params"],
+                required_tools=template_data.get("required_tools"),
+                required_retrievers=template_data.get("required_retrievers"),
+                is_builtin=True,
+                is_public=True,  # Production templates are public by default
+                version=1,
+                is_latest=True,
+            )
+            
+            self.session.add(workflow_template)
+            created_count += 1
+        
+        if created_count > 0:
+            await self.session.commit()
+        
+        logger.info(f"Created {created_count} production workflow templates from configuration")
+        return created_count
+
+    async def _create_demo_workflow_templates(self, skip_existing: bool = True) -> List:
+        """Create extended workflow templates for demo mode."""
+        templates_config = self.config.get("workflow_templates", {}).get("extended", [])
+        if not templates_config:
+            return []
+        
+        # Get admin user
+        from sqlalchemy import select
+        from chatter.models.user import User
+        result = await self.session.execute(
+            select(User).where(User.username == "admin")
+        )
+        admin_user = result.scalar_one_or_none()
+        if not admin_user:
+            logger.warning("No admin user found for demo workflow templates")
+            return []
+        
+        created_templates = []
+        for template_data in templates_config:
+            if skip_existing:
+                from chatter.models.workflow import WorkflowTemplate
+                existing = await self.session.execute(
+                    select(WorkflowTemplate).where(
+                        WorkflowTemplate.name == template_data["name"],
+                        WorkflowTemplate.owner_id == admin_user.id
+                    )
+                )
+                if existing.scalar_one_or_none():
+                    continue
+            
+            from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType
+            
+            workflow_template = WorkflowTemplate(
+                owner_id=admin_user.id,
+                name=template_data["name"],
+                description=template_data["description"],
+                workflow_type=WorkflowType(template_data["workflow_type"]),
+                category=TemplateCategory(template_data["category"]),
+                default_params=template_data["default_params"],
+                required_tools=template_data.get("required_tools"),
+                required_retrievers=template_data.get("required_retrievers"),
+                is_builtin=False,
+                is_public=True,  # Demo templates are public
+                version=1,
+                is_latest=True,
+            )
+            
+            self.session.add(workflow_template)
+            created_templates.append(workflow_template)
+        
+        if created_templates:
+            await self.session.commit()
+            for template in created_templates:
+                await self.session.refresh(template)
+        
+        logger.info(f"Created {len(created_templates)} demo workflow templates from configuration")
+        return created_templates
 
 
 # Enhanced convenience function

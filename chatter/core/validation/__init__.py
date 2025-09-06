@@ -18,6 +18,7 @@ from .exceptions import (
     SecurityValidationError,
     ValidationError,
 )
+from .results import ValidationResult
 from .validators import (
     AgentValidator,
     BusinessValidator,
@@ -59,6 +60,7 @@ def validate_business_logic(
 
 __all__ = [
     'ValidationEngine',
+    'ValidationResult',
     'ValidationError',
     'SecurityValidationError',
     'BusinessValidationError',

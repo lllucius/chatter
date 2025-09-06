@@ -45,6 +45,7 @@ import {
   Refresh as RefreshIcon,
   MoreVert as MoreVertIcon,
   Edit as EditIcon,
+  DeleteSweep as BulkDeleteIcon,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
@@ -55,7 +56,7 @@ import CustomScrollbar from '../components/CustomScrollbar';
 const AdministrationPage: React.FC = () => {
   const { isConnected, on } = useSSE();
   
-  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users'>('backups');
+  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users' | 'bulk'>('backups');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'user' | 'backup' | 'plugin' | 'job'>('user');
   const [loading, setLoading] = useState(false);
@@ -125,6 +126,17 @@ const AdministrationPage: React.FC = () => {
     jobKwargs: '',
     scheduleAt: '',
     maxRetries: 3,
+  });
+
+  // Bulk operations state
+  const [bulkOperationData, setBulkOperationData] = useState({
+    operationType: 'conversations' as 'conversations' | 'documents' | 'prompts',
+    filters: {
+      olderThan: '',
+      userId: '',
+      status: '',
+    },
+    dryRun: true,
   });
 
   const addNotification = useCallback((notification: Omit<typeof notifications[0], 'id' | 'timestamp'>) => {
@@ -318,6 +330,75 @@ const AdministrationPage: React.FC = () => {
         break;
       default:
         toastService.info(message);
+    }
+  };
+
+  // Bulk operations functions
+  const performBulkOperation = async () => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      const filters: any = {};
+      
+      // Build filters based on form data
+      if (bulkOperationData.filters.olderThan) {
+        filters.created_before = bulkOperationData.filters.olderThan;
+      }
+      if (bulkOperationData.filters.userId) {
+        filters.user_id = bulkOperationData.filters.userId;
+      }
+      if (bulkOperationData.filters.status) {
+        filters.status = bulkOperationData.filters.status;
+      }
+
+      let result;
+      switch (bulkOperationData.operationType) {
+        case 'conversations':
+          result = await chatterSDK.dataManagement.bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(
+            { 
+              filters,
+              dry_run: bulkOperationData.dryRun
+            }
+          );
+          break;
+        case 'documents':
+          result = await chatterSDK.dataManagement.bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(
+            { 
+              filters,
+              dry_run: bulkOperationData.dryRun
+            }
+          );
+          break;
+        case 'prompts':
+          result = await chatterSDK.dataManagement.bulkDeletePromptsApiV1DataBulkDeletePromptsPost(
+            { 
+              filters,
+              dry_run: bulkOperationData.dryRun
+            }
+          );
+          break;
+      }
+
+      const operation = bulkOperationData.dryRun ? 'Preview' : 'Deleted';
+      showToast(
+        `${operation}: ${result?.data.affected_count || 0} ${bulkOperationData.operationType}`, 
+        bulkOperationData.dryRun ? 'info' : 'success'
+      );
+
+      addNotification({
+        title: 'Bulk Operation Complete',
+        message: `${operation} ${result?.data.affected_count || 0} ${bulkOperationData.operationType}`,
+        type: bulkOperationData.dryRun ? 'info' : 'success'
+      });
+
+    } catch (error: any) {
+      console.error('Bulk operation failed:', error);
+      const message = error.response?.data?.detail || error.message || 'Bulk operation failed';
+      setError(message);
+      showToast(message, 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -632,6 +713,7 @@ const AdministrationPage: React.FC = () => {
         <Tab value="jobs" icon={<JobIcon />} iconPosition="start" label="Background Jobs" />
         <Tab value="plugins" icon={<PluginIcon />} iconPosition="start" label="Plugins" />
         <Tab value="users" icon={<UsersIcon />} iconPosition="start" label="User Management" />
+        <Tab value="bulk" icon={<BulkDeleteIcon />} iconPosition="start" label="Bulk Operations" />
       </Tabs>
 
       {/* Backups Tab */}
@@ -880,6 +962,136 @@ const AdministrationPage: React.FC = () => {
               </ListItem>
             ))}
           </List>
+        </Box>
+      )}
+
+      {/* Bulk Operations Tab */}
+      {activeTab === 'bulk' && (
+        <Box>
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            <strong>Warning:</strong> Bulk operations can delete large amounts of data permanently. Always test with "Dry Run" first.
+          </Alert>
+          
+          <Box sx={{ mb: 3, p: 3, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+            <Typography variant="h6" gutterBottom>
+              Bulk Delete Configuration
+            </Typography>
+            
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth sx={{ mb: 2 }}>
+                  <InputLabel>Operation Type</InputLabel>
+                  <Select
+                    value={bulkOperationData.operationType}
+                    label="Operation Type"
+                    onChange={(e) => setBulkOperationData(prev => ({
+                      ...prev,
+                      operationType: e.target.value as any
+                    }))}
+                  >
+                    <MenuItem value="conversations">Delete Conversations</MenuItem>
+                    <MenuItem value="documents">Delete Documents</MenuItem>
+                    <MenuItem value="prompts">Delete Prompts</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  fullWidth
+                  label="Created Before (YYYY-MM-DD)"
+                  type="date"
+                  value={bulkOperationData.filters.olderThan}
+                  onChange={(e) => setBulkOperationData(prev => ({
+                    ...prev,
+                    filters: { ...prev.filters, olderThan: e.target.value }
+                  }))}
+                  sx={{ mb: 2 }}
+                  InputLabelProps={{ shrink: true }}
+                />
+
+                <TextField
+                  fullWidth
+                  label="User ID (optional)"
+                  value={bulkOperationData.filters.userId}
+                  onChange={(e) => setBulkOperationData(prev => ({
+                    ...prev,
+                    filters: { ...prev.filters, userId: e.target.value }
+                  }))}
+                  sx={{ mb: 2 }}
+                />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={bulkOperationData.dryRun}
+                      onChange={(e) => setBulkOperationData(prev => ({
+                        ...prev,
+                        dryRun: e.target.checked
+                      }))}
+                      color="warning"
+                    />
+                  }
+                  label="Dry Run (Preview Only)"
+                />
+              </Grid>
+
+              <Grid item xs={12} md={6}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Operation Summary
+                </Typography>
+                <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                  <Typography variant="body2" gutterBottom>
+                    <strong>Type:</strong> {bulkOperationData.operationType}
+                  </Typography>
+                  <Typography variant="body2" gutterBottom>
+                    <strong>Mode:</strong> {bulkOperationData.dryRun ? 'Preview (Safe)' : 'Delete (Permanent)'}
+                  </Typography>
+                  <Typography variant="body2" gutterBottom>
+                    <strong>Filters:</strong>
+                  </Typography>
+                  <Box component="ul" sx={{ pl: 2, mt: 1 }}>
+                    {bulkOperationData.filters.olderThan && (
+                      <Typography component="li" variant="body2">
+                        Created before: {bulkOperationData.filters.olderThan}
+                      </Typography>
+                    )}
+                    {bulkOperationData.filters.userId && (
+                      <Typography component="li" variant="body2">
+                        User ID: {bulkOperationData.filters.userId}
+                      </Typography>
+                    )}
+                    {!bulkOperationData.filters.olderThan && !bulkOperationData.filters.userId && (
+                      <Typography component="li" variant="body2" color="text.secondary">
+                        No filters applied (affects all data)
+                      </Typography>
+                    )}
+                  </Box>
+                </Box>
+              </Grid>
+            </Grid>
+
+            <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+              <Button
+                variant="contained"
+                color={bulkOperationData.dryRun ? "info" : "error"}
+                onClick={performBulkOperation}
+                disabled={loading}
+                startIcon={loading ? <CircularProgress size={20} /> : <BulkDeleteIcon />}
+              >
+                {loading ? 'Processing...' : bulkOperationData.dryRun ? 'Preview Changes' : 'Execute Delete'}
+              </Button>
+              
+              <Button
+                variant="outlined"
+                onClick={() => setBulkOperationData(prev => ({
+                  ...prev,
+                  filters: { olderThan: '', userId: '', status: '' },
+                  dryRun: true
+                }))}
+              >
+                Reset Filters
+              </Button>
+            </Box>
+          </Box>
         </Box>
       )}
 

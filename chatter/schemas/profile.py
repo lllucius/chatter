@@ -178,8 +178,8 @@ class ProfileBase(BaseModel):
                 validation_engine,
             )
 
-            result = validation_engine.validate_rule(
-                v, "xss_check", DEFAULT_CONTEXT
+            result = validation_engine.validate_security(
+                v, DEFAULT_CONTEXT
             )
             if not result.is_valid:
                 raise ValueError(

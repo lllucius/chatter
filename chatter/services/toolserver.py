@@ -25,7 +25,7 @@ from chatter.schemas.toolserver import (
     ToolUsageCreate,
 )
 # Moved to function level to avoid circular import: from chatter.services.mcp import MCPToolService
-from chatter.utils.crypto import get_secret_manager
+from chatter.utils.security_enhanced import get_secret_manager
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)

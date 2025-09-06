@@ -6,7 +6,7 @@ import unittest.mock
 import pytest
 from cryptography.fernet import Fernet
 
-from chatter.utils.crypto import (
+from chatter.utils.security_enhanced import (
     CryptoError,
     SecretManager,
     get_secret_manager,
@@ -295,7 +295,7 @@ class TestSecurityBestPractices:
 
         assert key1 != key2
 
-    @unittest.mock.patch("chatter.utils.crypto.logger")
+    @unittest.mock.patch("chatter.utils.security_enhanced.logger")
     def test_warning_logged_when_using_derived_key(self, mock_logger):
         """Test that a warning is logged when using derived key."""
         with unittest.mock.patch.dict(os.environ, {

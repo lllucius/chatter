@@ -79,13 +79,13 @@ class EnhancedInMemoryCache(CacheInterface):
             logger.debug("Cache hit", key=key)
             return value
     
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    async def set(self, key: str, value: Any, ttl: Optional[int | timedelta] = None) -> bool:
         """Set value in cache.
         
         Args:
             key: Cache key
             value: Value to cache
-            ttl: Time-to-live in seconds
+            ttl: Time-to-live in seconds (int) or as timedelta object
             
         Returns:
             True if successful, False otherwise
@@ -99,8 +99,14 @@ class EnhancedInMemoryCache(CacheInterface):
                 # Use default TTL if not specified
                 ttl = ttl or self.config.default_ttl
                 
+                # Convert timedelta to seconds if needed
+                if isinstance(ttl, timedelta):
+                    ttl_seconds = int(ttl.total_seconds())
+                else:
+                    ttl_seconds = ttl
+                
                 # Calculate expiry time
-                expiry_time = datetime.now() + timedelta(seconds=ttl)
+                expiry_time = datetime.now() + timedelta(seconds=ttl_seconds)
                 
                 # Check if we need to evict items
                 if key not in self._cache and len(self._cache) >= self.config.max_size:
@@ -116,7 +122,7 @@ class EnhancedInMemoryCache(CacheInterface):
                 logger.debug(
                     "Cache set",
                     key=key,
-                    ttl=ttl,
+                    ttl=ttl_seconds,
                     cache_size=len(self._cache)
                 )
                 

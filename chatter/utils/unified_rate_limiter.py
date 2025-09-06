@@ -100,10 +100,10 @@ class SlidingWindowRateLimiter:
             return
 
         try:
-            # Store with expiration slightly longer than window
-            expire = timedelta(seconds=self.window_seconds + 60)
+            # Store with expiration slightly longer than window (convert to seconds)
+            expire_seconds = self.window_seconds + 60
             await self.cache_service.set(
-                f"rate_limit:{key}", requests, expire
+                f"rate_limit:{key}", requests, expire_seconds
             )
         except Exception as e:
             logger.warning(f"Cache set error for rate limit key {key}: {e}")

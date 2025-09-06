@@ -158,13 +158,13 @@ class EnhancedRedisCache(CacheInterface):
             self._update_stats(error=True)
             return None
     
-    async def set(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    async def set(self, key: str, value: Any, ttl: Optional[int | timedelta] = None) -> bool:
         """Set value in cache.
         
         Args:
             key: Cache key
             value: Value to cache
-            ttl: Time-to-live in seconds
+            ttl: Time-to-live in seconds (int) or as timedelta object
             
         Returns:
             True if successful, False otherwise
@@ -180,12 +180,18 @@ class EnhancedRedisCache(CacheInterface):
             # Use default TTL if not specified
             ttl = ttl or self.config.default_ttl
             
-            if ttl > 0:
-                await self.redis.setex(prefixed_key, ttl, serialized_value)
+            # Convert timedelta to seconds if needed
+            if isinstance(ttl, timedelta):
+                ttl_seconds = int(ttl.total_seconds())
+            else:
+                ttl_seconds = ttl
+            
+            if ttl_seconds > 0:
+                await self.redis.setex(prefixed_key, ttl_seconds, serialized_value)
             else:
                 await self.redis.set(prefixed_key, serialized_value)
             
-            logger.debug("Redis cache set", key=key, ttl=ttl)
+            logger.debug("Redis cache set", key=key, ttl=ttl_seconds)
             return True
             
         except Exception as e:

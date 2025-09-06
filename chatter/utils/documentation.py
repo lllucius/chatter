@@ -315,7 +315,7 @@ class APIDocumentationEnhancer:
         """Add chat endpoint examples."""
         # Basic chat workflow
         self.add_endpoint_example(
-            f"{API_V1_PREFIX}/chat",
+            f"{API_V1_PREFIX}/chat/chat",
             "POST",
             request_example={
                 "message": "What are the latest customer satisfaction metrics?",
@@ -333,7 +333,7 @@ class APIDocumentationEnhancer:
 
         # Streaming chat example
         self.add_endpoint_example(
-            f"{API_V1_PREFIX}/chat/stream",
+            f"{API_V1_PREFIX}/chat/chat",
             "POST",
             request_example={
                 "message": "Write a Python function to calculate fibonacci numbers",

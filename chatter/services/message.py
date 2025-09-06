@@ -15,16 +15,18 @@ from chatter.core.exceptions import (
 )
 from chatter.models.conversation import Message, MessageRole
 from chatter.utils.security_enhanced import get_secure_logger
+from chatter.utils.performance import QueryOptimizer, get_performance_monitor
 
 logger = get_secure_logger(__name__)
 
 
 class MessageService:
-    """Service for managing messages within conversations."""
+    """Service for managing messages within conversations with performance optimization."""
 
     def __init__(self, session: AsyncSession):
-        """Initialize message service."""
+        """Initialize message service with performance monitoring."""
         self.session = session
+        self.performance_monitor = get_performance_monitor()
 
     async def get_conversation_messages(
         self,
@@ -34,7 +36,7 @@ class MessageService:
         offset: int = 0,
         include_system: bool = True,
     ) -> Sequence[Message]:
-        """Get messages for a conversation with access control.
+        """Get messages for a conversation with access control and optimization.
 
         Args:
             conversation_id: Conversation ID
@@ -49,55 +51,63 @@ class MessageService:
         Raises:
             AuthorizationError: If user doesn't have access to conversation
         """
-        try:
-            # First verify user has access to conversation
-            from chatter.services.conversation import (
-                ConversationService,
-            )
+        async with self.performance_monitor.measure_query("get_conversation_messages"):
+            try:
+                # First verify user has access to conversation
+                from chatter.services.conversation import (
+                    ConversationService,
+                )
 
-            conv_service = ConversationService(self.session)
-            await conv_service.get_conversation(
-                conversation_id, user_id, include_messages=False
-            )
+                conv_service = ConversationService(self.session)
+                await conv_service.get_conversation(
+                    conversation_id, user_id, include_messages=False
+                )
 
-            # Build query for messages
-            query = (
-                select(Message)
-                .where(Message.conversation_id == conversation_id)
-                .order_by(Message.created_at)
-            )
+                # Build optimized query for messages
+                query = (
+                    select(Message)
+                    .where(Message.conversation_id == conversation_id)
+                    .order_by(Message.created_at)
+                )
 
-            if not include_system:
-                query = query.where(Message.role != MessageRole.SYSTEM)
+                # Apply query optimization with eager loading
+                query = QueryOptimizer.optimize_message_query(
+                    query,
+                    include_conversation=False,  # We already validated access
+                    include_user=False,  # Not needed for basic message retrieval
+                )
 
-            if offset > 0:
-                query = query.offset(offset)
+                if not include_system:
+                    query = query.where(Message.role != MessageRole.SYSTEM)
 
-            if limit is not None:
-                query = query.limit(limit)
+                if offset > 0:
+                    query = query.offset(offset)
 
-            result = await self.session.execute(query)
-            messages = result.scalars().all()
+                if limit is not None:
+                    query = query.limit(limit)
 
-            logger.debug(
-                "Retrieved conversation messages",
-                conversation_id=conversation_id,
-                user_id=user_id,
-                message_count=len(messages),
-                limit=limit,
-                offset=offset,
-            )
+                result = await self.session.execute(query)
+                messages = result.scalars().all()
 
-            return messages
+                logger.debug(
+                    "Retrieved conversation messages",
+                    conversation_id=conversation_id,
+                    user_id=user_id,
+                    message_count=len(messages),
+                    limit=limit,
+                    offset=offset,
+                )
 
-        except NotFoundError as e:
-            raise AuthorizationError(
-                "Access denied to conversation messages"
-            ) from e
-        except Exception as e:
-            logger.error(
-                "Failed to get conversation messages",
-                conversation_id=conversation_id,
+                return messages
+
+            except NotFoundError as e:
+                raise AuthorizationError(
+                    "Access denied to conversation messages"
+                ) from e
+            except Exception as e:
+                logger.error(
+                    "Failed to get conversation messages",
+                    conversation_id=conversation_id,
                 user_id=user_id,
                 error=str(e),
             )
@@ -135,68 +145,70 @@ class MessageService:
             AuthorizationError: If user doesn't have access to conversation
             ValidationError: If message data is invalid
         """
-        try:
-            # Verify user has access to conversation
-            from chatter.services.conversation import (
-                ConversationService,
-            )
+        async with self.performance_monitor.measure_query("add_message_to_conversation"):
+            try:
+                # Verify user has access to conversation
+                from chatter.services.conversation import (
+                    ConversationService,
+                )
 
-            conv_service = ConversationService(self.session)
-            conversation = await conv_service.get_conversation(
-                conversation_id, user_id, include_messages=False
-            )
+                conv_service = ConversationService(self.session)
+                conversation = await conv_service.get_conversation(
+                    conversation_id, user_id, include_messages=False
+                )
 
-            # Get the next sequence number for this conversation
-            next_seq_query = select(Message.sequence_number).where(
-                Message.conversation_id == conversation_id
-            ).order_by(desc(Message.sequence_number)).limit(1)
-            
-            result = await self.session.execute(next_seq_query)
-            last_sequence = result.scalar()
-            next_sequence = 0 if last_sequence is None else last_sequence + 1
+                # Get the next sequence number for this conversation
+                next_seq_query = select(Message.sequence_number).where(
+                    Message.conversation_id == conversation_id
+                ).order_by(desc(Message.sequence_number)).limit(1)
+                
+                result = await self.session.execute(next_seq_query)
+                last_sequence = result.scalar()
+                next_sequence = 0 if last_sequence is None else last_sequence + 1
 
-            # Create the message
-            message = Message(
-                conversation_id=conversation_id,
-                role=role,
-                content=content,
-                metadata=metadata or {},
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-                cost=cost,
-                provider=provider,
-                sequence_number=next_sequence,
-            )
+                # Create the message
+                message = Message(
+                    conversation_id=conversation_id,
+                    role=role,
+                    content=content,
+                    metadata=metadata or {},
+                    input_tokens=input_tokens,
+                    output_tokens=output_tokens,
+                    cost=cost,
+                    provider=provider,
+                    sequence_number=next_sequence,
+                )
 
-            self.session.add(message)
-            await self.session.flush()
-            await self.session.refresh(message)
+                self.session.add(message)
+                await self.session.flush()
+                await self.session.refresh(message)
 
-            # Update conversation's updated_at timestamp
-            conversation.updated_at = message.created_at
-            await self.session.flush()
+                # Update conversation's updated_at timestamp
+                conversation.updated_at = message.created_at
+                await self.session.flush()
 
-            logger.info(
-                "Added message to conversation",
-                conversation_id=conversation_id,
-                message_id=message.id,
-                role=role.value,
-                user_id=user_id,
-                content_length=len(content),
-            )
+                logger.info(
+                    "Added message to conversation",
+                    conversation_id=conversation_id,
+                    message_id=message.id,
+                    role=role.value,
+                    user_id=user_id,
+                    content_length=len(content),
+                )
 
-            return message
+                return message
 
-        except NotFoundError as e:
-            raise AuthorizationError("Access denied to conversation") from e
-        except Exception as e:
-            logger.error(
-                "Failed to add message to conversation",
-                conversation_id=conversation_id,
-                user_id=user_id,
-                role=role.value if role else None,
-                error=str(e),
-            )
+            except NotFoundError as e:
+                raise AuthorizationError("Access denied to conversation") from e
+            except Exception as e:
+                logger.error(
+                    "Failed to add message to conversation",
+                    conversation_id=conversation_id,
+                    user_id=user_id,
+                    role=role.value if role else None,
+                    error=str(e),
+                )
+                raise
             raise ValidationError(f"Failed to add message: {e}") from e
 
     async def delete_message(

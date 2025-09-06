@@ -545,7 +545,7 @@ class AnalyticsService:
             error_messages_result = await self.session.execute(
                 select(
                     func.count(Message.id).label("total_errors"),
-                    func.count(distinct(Message.id)).filter(Message.error_message.is_not(None)).label("messages_with_errors"),
+                    func.count(func.distinct(Message.id)).filter(Message.error_message.is_not(None)).label("messages_with_errors"),
                     func.sum(Message.retry_count).label("total_retries"),
                     func.avg(Message.retry_count).label("avg_retries")
                 )
@@ -562,6 +562,7 @@ class AnalyticsService:
             
             total_errors = int(error_row.messages_with_errors or 0)
             total_retries = int(error_row.total_retries or 0)
+            total_messages = int(error_row.total_errors or 0)  # Get total message count from the first result
             
             # Calculate error rate
             if total_messages > 0:
@@ -679,13 +680,32 @@ class AnalyticsService:
                 "errors_by_type": errors_by_type,
                 "performance_by_model": performance_by_model,
                 "performance_by_provider": performance_by_provider,
+                "database_response_time_ms": 0.0,  # TODO: Implement database response time tracking
+                "vector_search_time_ms": 0.0,  # TODO: Implement vector search time tracking
+                "embedding_generation_time_ms": 0.0,  # TODO: Implement embedding generation time tracking
             }
 
         except Exception as e:
             logger.error(
                 "Failed to get performance metrics", error=str(e)
             )
-            return {}
+            # Return default values to prevent Pydantic validation errors
+            return {
+                "avg_response_time_ms": 0.0,
+                "median_response_time_ms": 0.0,
+                "p95_response_time_ms": 0.0,
+                "p99_response_time_ms": 0.0,
+                "requests_per_minute": 0.0,
+                "tokens_per_minute": 0.0,
+                "total_errors": 0,
+                "error_rate": 0.0,
+                "errors_by_type": {},
+                "performance_by_model": {},
+                "performance_by_provider": {},
+                "database_response_time_ms": 0.0,
+                "vector_search_time_ms": 0.0,
+                "embedding_generation_time_ms": 0.0,
+            }
 
     async def get_document_analytics(
         self, user_id: str, time_range: AnalyticsTimeRange | None = None
@@ -878,6 +898,9 @@ class AnalyticsService:
             Dictionary with system analytics
         """
         try:
+            # Default time filter for last 24 hours for API metrics
+            time_filter = Message.created_at >= datetime.now(UTC) - timedelta(hours=24)
+            
             # User activity
             user_activity_result = await self.session.execute(
                 select(
@@ -984,11 +1007,30 @@ class AnalyticsService:
                 **system_health,
                 **api_metrics,
                 "storage_usage_bytes": storage_usage,
+                "vector_database_size_bytes": 0,  # TODO: Implement vector DB size calculation
+                "cache_hit_rate": 0.0,  # TODO: Implement cache hit rate calculation
             }
 
         except Exception as e:
             logger.error("Failed to get system analytics", error=str(e))
-            return {}
+            # Return default values to prevent Pydantic validation errors
+            return {
+                "total_users": 0,
+                "active_users_today": 0,
+                "active_users_week": 0,
+                "active_users_month": 0,
+                "system_uptime_seconds": 0.0,
+                "avg_cpu_usage": 0.0,
+                "avg_memory_usage": 0.0,
+                "database_connections": 0,
+                "total_api_requests": 0,
+                "requests_per_endpoint": {},
+                "avg_api_response_time": 0.0,
+                "api_error_rate": 0.0,
+                "storage_usage_bytes": 0,
+                "vector_database_size_bytes": 0,
+                "cache_hit_rate": 0.0,
+            }
 
     async def get_tool_server_analytics(
         self,

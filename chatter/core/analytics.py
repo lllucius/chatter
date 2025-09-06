@@ -3,7 +3,7 @@
 import asyncio
 import time
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, Optional, Union
 
 from sqlalchemy import and_, desc, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +17,9 @@ from chatter.models.document import Document, DocumentStatus
 from chatter.models.user import User
 from chatter.schemas.analytics import AnalyticsTimeRange
 from chatter.utils.logging import get_logger
+from chatter.utils.performance import get_performance_monitor
+from chatter.core.cache_factory import CacheFactory
+from chatter.core.cache_interface import CacheInterface
 
 logger = get_logger(__name__)
 
@@ -31,9 +34,165 @@ class AnalyticsService:
             session: Database session
         """
         self.session = session
+        self.performance_monitor = get_performance_monitor()
+        self.cache_factory = CacheFactory()
+        self._cache_instance: Optional[CacheInterface] = None
+
+    def _get_cache_instance(self) -> Optional[CacheInterface]:
+        """Get a cache instance for hit rate calculation."""
+        if self._cache_instance is None:
+            try:
+                # Try to get a general cache instance
+                from chatter.core.cache_factory import CacheType, CacheBackend
+                self._cache_instance = self.cache_factory.get_cache(
+                    CacheType.GENERAL, CacheBackend.REDIS
+                )
+            except Exception as e:
+                logger.debug(f"Could not get cache instance: {e}")
+                # Try in-memory cache as fallback
+                try:
+                    self._cache_instance = self.cache_factory.get_cache(
+                        CacheType.GENERAL, CacheBackend.MEMORY
+                    )
+                except Exception as e2:
+                    logger.debug(f"Could not get fallback cache instance: {e2}")
+        return self._cache_instance
+
+    async def _get_database_response_time(self) -> float:
+        """Get average database response time from performance monitor."""
+        try:
+            summary = self.performance_monitor.get_performance_summary()
+            
+            # Calculate weighted average of database operations
+            db_operations = [
+                "get_conversation_stats", "get_usage_metrics", 
+                "get_performance_metrics", "get_document_analytics"
+            ]
+            
+            total_time = 0.0
+            total_count = 0
+            
+            for operation in db_operations:
+                if operation in summary:
+                    op_data = summary[operation]
+                    total_time += op_data.get('avg_ms', 0) * op_data.get('count', 0)
+                    total_count += op_data.get('count', 0)
+            
+            return total_time / total_count if total_count > 0 else 0.0
+            
+        except Exception as e:
+            logger.debug(f"Could not get database response time: {e}")
+            return 0.0
+
+    async def _get_vector_search_time(self) -> float:
+        """Get average vector search time from performance monitor."""
+        try:
+            summary = self.performance_monitor.get_performance_summary()
+            
+            # Look for vector search related operations
+            vector_operations = [
+                op for op in summary.keys() 
+                if any(term in op.lower() for term in ['vector', 'search', 'similarity', 'embedding'])
+            ]
+            
+            if not vector_operations:
+                return 0.0
+                
+            total_time = 0.0
+            total_count = 0
+            
+            for operation in vector_operations:
+                op_data = summary[operation]
+                total_time += op_data.get('avg_ms', 0) * op_data.get('count', 0)
+                total_count += op_data.get('count', 0)
+            
+            return total_time / total_count if total_count > 0 else 0.0
+            
+        except Exception as e:
+            logger.debug(f"Could not get vector search time: {e}")
+            return 0.0
+
+    async def _get_embedding_generation_time(self) -> float:
+        """Get average embedding generation time from performance monitor."""
+        try:
+            summary = self.performance_monitor.get_performance_summary()
+            
+            # Look for embedding generation related operations
+            embedding_operations = [
+                op for op in summary.keys() 
+                if any(term in op.lower() for term in ['embed', 'generate', 'encode'])
+            ]
+            
+            if not embedding_operations:
+                return 0.0
+                
+            total_time = 0.0
+            total_count = 0
+            
+            for operation in embedding_operations:
+                op_data = summary[operation]
+                total_time += op_data.get('avg_ms', 0) * op_data.get('count', 0)
+                total_count += op_data.get('count', 0)
+            
+            return total_time / total_count if total_count > 0 else 0.0
+            
+        except Exception as e:
+            logger.debug(f"Could not get embedding generation time: {e}")
+            return 0.0
+
+    async def _get_vector_database_size(self) -> int:
+        """Get vector database size in bytes."""
+        try:
+            # Query document chunks table for vector data size estimation
+            # This gives us an approximate size based on stored embeddings
+            vector_count_result = await self.session.execute(
+                select(
+                    func.count(Document.id).label('doc_count'),
+                    func.sum(Document.chunk_count).label('total_chunks')
+                ).where(Document.status == DocumentStatus.PROCESSED)
+            )
+            
+            result = vector_count_result.first()
+            if result:
+                doc_count = result.doc_count or 0
+                total_chunks = result.total_chunks or 0
+                
+                # Estimate: typical embedding dimension is 1536 (OpenAI), 
+                # stored as float32 (4 bytes each) + metadata overhead
+                # This is a rough approximation
+                bytes_per_vector = 1536 * 4  # 6KB per vector
+                metadata_overhead = 1024  # 1KB overhead per vector
+                
+                estimated_size = total_chunks * (bytes_per_vector + metadata_overhead)
+                return int(estimated_size)
+            
+            return 0
+            
+        except Exception as e:
+            logger.debug(f"Could not get vector database size: {e}")
+            return 0
+
+    async def _get_cache_hit_rate(self) -> float:
+        """Get cache hit rate from cache instance."""
+        try:
+            cache = self._get_cache_instance()
+            if cache and hasattr(cache, 'get_stats'):
+                stats = await cache.get_stats()
+                if stats and hasattr(stats, 'hit_rate'):
+                    return stats.hit_rate
+                elif stats and hasattr(stats, 'cache_hits') and hasattr(stats, 'total_requests'):
+                    # Calculate hit rate if not directly available
+                    total_requests = stats.total_requests
+                    return (stats.cache_hits / total_requests) if total_requests > 0 else 0.0
+            
+            return 0.0
+            
+        except Exception as e:
+            logger.debug(f"Could not get cache hit rate: {e}")
+            return 0.0
 
     async def get_conversation_stats(
-        self, user_id: str, time_range: AnalyticsTimeRange | None = None
+        self, user_id: str, time_range: Optional[AnalyticsTimeRange] = None
     ) -> dict[str, Any]:
         """Get conversation statistics.
 
@@ -235,7 +394,7 @@ class AnalyticsService:
             }
 
     async def get_usage_metrics(
-        self, user_id: str, time_range: AnalyticsTimeRange | None = None
+        self, user_id: str, time_range: Optional[AnalyticsTimeRange] = None
     ) -> dict[str, Any]:
         """Get usage metrics.
 
@@ -477,7 +636,7 @@ class AnalyticsService:
             }
 
     async def get_performance_metrics(
-        self, user_id: str, time_range: AnalyticsTimeRange | None = None
+        self, user_id: str, time_range: Optional[AnalyticsTimeRange] = None
     ) -> dict[str, Any]:
         """Get performance metrics.
 
@@ -716,9 +875,9 @@ class AnalyticsService:
                 "errors_by_type": errors_by_type,
                 "performance_by_model": performance_by_model,
                 "performance_by_provider": performance_by_provider,
-                "database_response_time_ms": 0.0,  # TODO: Implement database response time tracking
-                "vector_search_time_ms": 0.0,  # TODO: Implement vector search time tracking
-                "embedding_generation_time_ms": 0.0,  # TODO: Implement embedding generation time tracking
+                "database_response_time_ms": await self._get_database_response_time(),
+                "vector_search_time_ms": await self._get_vector_search_time(),
+                "embedding_generation_time_ms": await self._get_embedding_generation_time(),
             }
 
         except Exception as e:
@@ -744,7 +903,7 @@ class AnalyticsService:
             }
 
     async def get_document_analytics(
-        self, user_id: str, time_range: AnalyticsTimeRange | None = None
+        self, user_id: str, time_range: Optional[AnalyticsTimeRange] = None
     ) -> dict[str, Any]:
         """Get document analytics.
 
@@ -1083,8 +1242,8 @@ class AnalyticsService:
                 **system_health,
                 **api_metrics,
                 "storage_usage_bytes": storage_usage,
-                "vector_database_size_bytes": 0,  # TODO: Implement vector DB size calculation
-                "cache_hit_rate": 0.0,  # TODO: Implement cache hit rate calculation
+                "vector_database_size_bytes": await self._get_vector_database_size(),
+                "cache_hit_rate": await self._get_cache_hit_rate(),
             }
 
         except Exception as e:
@@ -1110,8 +1269,8 @@ class AnalyticsService:
 
     async def get_tool_server_analytics(
         self,
-        user_id: str | None = None,
-        time_range: AnalyticsTimeRange | None = None,
+        user_id: Optional[str] = None,
+        time_range: Optional[AnalyticsTimeRange] = None,
     ) -> dict[str, Any]:
         """Get tool server analytics.
 
@@ -1523,7 +1682,7 @@ class AnalyticsService:
 
     def _build_time_filter_for_table(
         self,
-        time_range: AnalyticsTimeRange | None,
+        time_range: Optional[AnalyticsTimeRange],
         table_class,
         date_column,
     ):
@@ -1565,7 +1724,7 @@ class AnalyticsService:
         return date_column >= start_time
 
     async def get_dashboard_data(
-        self, user_id: str, time_range: AnalyticsTimeRange | None = None
+        self, user_id: str, time_range: Optional[AnalyticsTimeRange] = None
     ) -> dict[str, Any]:
         """Get comprehensive dashboard data.
 
@@ -1603,7 +1762,7 @@ class AnalyticsService:
 
     def _build_time_filter(
         self,
-        time_range: AnalyticsTimeRange | None,
+        time_range: Optional[AnalyticsTimeRange],
         table_alias: str = "Conversation",
     ):
         """Build time filter for queries.
@@ -1648,7 +1807,7 @@ class AnalyticsService:
         return time_field >= start_time
 
     def _get_time_range_minutes(
-        self, time_range: AnalyticsTimeRange | None
+        self, time_range: Optional[AnalyticsTimeRange]
     ) -> float:
         """Get time range in minutes.
 
@@ -1680,7 +1839,7 @@ class AnalyticsService:
             return 60 * 24 * 7  # Default 7 days
 
     def _apply_query_optimizations(
-        self, query, limit: int | None = None
+        self, query, limit: Optional[int] = None
     ):
         """Apply query optimizations like limits and hints.
 
@@ -1747,8 +1906,8 @@ class AnalyticsService:
     async def get_user_analytics(
         self,
         user_id: str,
-        start_date: datetime | None = None,
-        end_date: datetime | None = None,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
     ) -> dict[str, Any]:
         """Get analytics for a specific user."""
         try:
@@ -1854,8 +2013,8 @@ class AnalyticsService:
     async def export_analytics(
         self,
         export_format: str,
-        date_range: tuple[datetime, datetime] | None = None,
-        filters: dict[str, Any] | None = None,
+        date_range: Optional[tuple[datetime, datetime]] = None,
+        filters: Optional[dict[str, Any]] = None,
     ) -> dict[str, Any] | Any:
         """Export analytics data in specified format."""
         try:

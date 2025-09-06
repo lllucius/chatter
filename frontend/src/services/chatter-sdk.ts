@@ -286,6 +286,9 @@ export class ChatterSDK {
       });
       return response.data;
     } catch (error: any) {
+      if (error.response?.data?.detail) {
+        throw new Error(error.response.data.detail);
+      }
       throw error;
     }
   }

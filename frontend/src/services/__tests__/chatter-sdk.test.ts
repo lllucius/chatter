@@ -470,6 +470,62 @@ describe('ChatterSDK', () => {
     });
   });
 
+  describe('Password Management', () => {
+    beforeEach(() => {
+      chatterSDK.setAuth('password-test-token');
+    });
+
+    test('should change password successfully', async () => {
+      const mockChangePasswordResponse = { success: true };
+      const mockChangePassword = jest.fn().mockResolvedValue({ data: mockChangePasswordResponse });
+      (chatterSDK as any).auth = { changePasswordApiV1AuthChangePasswordPost: mockChangePassword };
+
+      const passwordData = {
+        current_password: 'oldpass123',
+        new_password: 'newpass123'
+      };
+
+      const result = await chatterSDK.changePassword(passwordData);
+
+      expect(mockChangePassword).toHaveBeenCalledWith({
+        passwordChange: passwordData,
+      });
+      expect(result).toEqual(mockChangePasswordResponse);
+    });
+
+    test('should handle password change error with detail', async () => {
+      const mockError = {
+        response: {
+          data: { detail: 'New password must be different from current password' }
+        }
+      };
+      const mockChangePassword = jest.fn().mockRejectedValue(mockError);
+      (chatterSDK as any).auth = { changePasswordApiV1AuthChangePasswordPost: mockChangePassword };
+
+      const passwordData = {
+        current_password: 'samepass123',
+        new_password: 'samepass123'
+      };
+
+      await expect(chatterSDK.changePassword(passwordData))
+        .rejects.toThrow('New password must be different from current password');
+    });
+
+    test('should handle password change error without detail', async () => {
+      const mockError = new Error('Generic network error');
+      const mockChangePassword = jest.fn().mockRejectedValue(mockError);
+      (chatterSDK as any).auth = { changePasswordApiV1AuthChangePasswordPost: mockChangePassword };
+
+      const passwordData = {
+        current_password: 'oldpass123',
+        new_password: 'newpass123'
+      };
+
+      await expect(chatterSDK.changePassword(passwordData))
+        .rejects.toThrow('Generic network error');
+    });
+  });
+
   describe('Storage Management', () => {
     test('should handle corrupted stored data', () => {
       mockLocalStorage.setItem('chatter_auth', 'invalid-json{');

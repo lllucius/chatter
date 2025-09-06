@@ -41,14 +41,18 @@ router = APIRouter()
 
 class CustomHTTPBearer(HTTPBearer):
     """Custom HTTPBearer that raises AuthenticationError with 401 status."""
-    
-    async def __call__(self, request: Request) -> HTTPAuthorizationCredentials:
+
+    async def __call__(
+        self, request: Request
+    ) -> HTTPAuthorizationCredentials:
         """Extract credentials and raise 401 for missing/invalid auth."""
         try:
             return await super().__call__(request)
         except Exception as e:
             # Convert any authentication failure to 401
-            raise AuthenticationError("Authentication credentials required") from e
+            raise AuthenticationError(
+                "Authentication credentials required"
+            ) from e
 
 
 security = CustomHTTPBearer()
@@ -122,7 +126,7 @@ async def get_current_admin_user(
         raise AuthorizationProblem(
             detail="Admin privileges required for this operation"
         )
-    
+
     return current_user
 
 
@@ -147,13 +151,19 @@ async def register(
         User data and authentication tokens
     """
     client_ip = get_client_ip(request)
-    
+
     try:
         user = await auth_service.create_user(user_data)
         tokens = auth_service.create_tokens(user)
 
         # Log successful registration
-        from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
+        from chatter.core.monitoring import (
+            SecurityEvent,
+            SecurityEventSeverity,
+            SecurityEventType,
+            get_monitoring_service,
+        )
+
         monitoring_service = await get_monitoring_service()
         event = SecurityEvent(
             event_type=SecurityEventType.ACCOUNT_CREATED,
@@ -163,23 +173,31 @@ async def register(
             user_agent=request.headers.get("User-Agent"),
             details={
                 "username": user.username,
-                "email": user.email[:20] + "..." if len(user.email) > 20 else user.email
-            }
+                "email": (
+                    user.email[:20] + "..."
+                    if len(user.email) > 20
+                    else user.email
+                ),
+            },
         )
         await monitoring_service.log_security_event(event)
 
         return TokenResponse(
             **tokens, user=UserResponse.model_validate(user)
         )
-        
+
     except Exception as e:
         # Log failed registration attempt for security monitoring
         logger.warning(
             "Registration failed",
-            email=user_data.email[:20] + "..." if len(user_data.email) > 20 else user_data.email,
+            email=(
+                user_data.email[:20] + "..."
+                if len(user_data.email) > 20
+                else user_data.email
+            ),
             username=user_data.username,
             ip_address=client_ip,
-            error=str(e)
+            error=str(e),
         )
         raise
 
@@ -202,7 +220,7 @@ async def login(
     """
     client_ip = get_client_ip(request)
     user_agent = request.headers.get("User-Agent")
-    
+
     # Use email or username for authentication
     identifier = user_data.username or user_data.email
     if not identifier:
@@ -214,7 +232,7 @@ async def login(
     user = await auth_service.authenticate_user(
         identifier, user_data.password
     )
-    
+
     if not user:
         # Log failed login attempt
         await log_login_failure(identifier, client_ip, user_agent)
@@ -224,7 +242,7 @@ async def login(
 
     # Log successful login
     await log_login_success(user.id, client_ip, user_agent)
-    
+
     tokens = auth_service.create_tokens(user)
 
     return TokenResponse(
@@ -249,20 +267,25 @@ async def refresh_token(
         New access and refresh tokens
     """
     client_ip = get_client_ip(request)
-    
+
     try:
         result = await auth_service.refresh_access_token(
             token_data.refresh_token
         )
-        
+
         # Log token refresh
-        from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
+        from chatter.core.monitoring import (
+            SecurityEvent,
+            SecurityEventSeverity,
+            SecurityEventType,
+            get_monitoring_service,
+        )
         from chatter.utils.security_enhanced import verify_token
-        
+
         # Extract user ID for logging
         payload = verify_token(token_data.refresh_token)
         user_id = payload.get("sub") if payload else None
-        
+
         if user_id:
             monitoring_service = await get_monitoring_service()
             event = SecurityEvent(
@@ -270,17 +293,15 @@ async def refresh_token(
                 severity=SecurityEventSeverity.LOW,
                 user_id=user_id,
                 ip_address=client_ip,
-                user_agent=request.headers.get("User-Agent")
+                user_agent=request.headers.get("User-Agent"),
             )
             await monitoring_service.log_security_event(event)
-        
+
         return TokenRefreshResponse(**result)
-        
+
     except Exception as e:
         logger.warning(
-            "Token refresh failed",
-            ip_address=client_ip,
-            error=str(e)
+            "Token refresh failed", ip_address=client_ip, error=str(e)
         )
         raise
 
@@ -341,7 +362,7 @@ async def change_password(
         Success message
     """
     client_ip = get_client_ip(request)
-    
+
     await auth_service.change_password(
         current_user.id,
         password_data.current_password,
@@ -375,7 +396,7 @@ async def create_api_key(
         Created API key
     """
     client_ip = get_client_ip(request)
-    
+
     api_key = await auth_service.create_api_key(
         current_user.id, key_data.name
     )
@@ -407,21 +428,27 @@ async def revoke_api_key(
         Success message
     """
     client_ip = get_client_ip(request)
-    
+
     await auth_service.revoke_api_key(current_user.id)
-    
+
     # Log API key revocation
-    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
+    from chatter.core.monitoring import (
+        SecurityEvent,
+        SecurityEventSeverity,
+        SecurityEventType,
+        get_monitoring_service,
+    )
+
     monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.API_KEY_REVOKED,
         severity=SecurityEventSeverity.MEDIUM,
         user_id=current_user.id,
         ip_address=client_ip,
-        user_agent=request.headers.get("User-Agent")
+        user_agent=request.headers.get("User-Agent"),
     )
     await monitoring_service.log_security_event(event)
-    
+
     return APIKeyRevokeResponse(message="API key revoked successfully")
 
 
@@ -460,11 +487,17 @@ async def logout(
         Success message
     """
     client_ip = get_client_ip(request)
-    
+
     await auth_service.revoke_token(current_user.id)
-    
+
     # Log logout for security monitoring
-    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
+    from chatter.core.monitoring import (
+        SecurityEvent,
+        SecurityEventSeverity,
+        SecurityEventType,
+        get_monitoring_service,
+    )
+
     monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.TOKEN_REVOKED,
@@ -472,10 +505,10 @@ async def logout(
         user_id=current_user.id,
         ip_address=client_ip,
         user_agent=request.headers.get("User-Agent"),
-        details={"action": "logout"}
+        details={"action": "logout"},
     )
     await monitoring_service.log_security_event(event)
-    
+
     return LogoutResponse(message="Logged out successfully")
 
 
@@ -499,11 +532,17 @@ async def request_password_reset(
         Success message
     """
     client_ip = get_client_ip(request)
-    
+
     await auth_service.request_password_reset(email)
-    
+
     # Log password reset request
-    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
+    from chatter.core.monitoring import (
+        SecurityEvent,
+        SecurityEventSeverity,
+        SecurityEventType,
+        get_monitoring_service,
+    )
+
     monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.PASSWORD_RESET_REQUESTED,
@@ -512,10 +551,10 @@ async def request_password_reset(
         user_agent=request.headers.get("User-Agent"),
         details={
             "email": email[:20] + "..." if len(email) > 20 else email
-        }
+        },
     )
     await monitoring_service.log_security_event(event)
-    
+
     return PasswordResetRequestResponse(
         message="Password reset email sent if account exists"
     )
@@ -543,21 +582,31 @@ async def confirm_password_reset(
         Success message
     """
     client_ip = get_client_ip(request)
-    
+
     await auth_service.confirm_password_reset(token, new_password)
-    
+
     # Log password reset completion
-    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
+    from chatter.core.monitoring import (
+        SecurityEvent,
+        SecurityEventSeverity,
+        SecurityEventType,
+        get_monitoring_service,
+    )
+
     monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.PASSWORD_RESET_COMPLETED,
         severity=SecurityEventSeverity.MEDIUM,
         ip_address=client_ip,
         user_agent=request.headers.get("User-Agent"),
-        details={"token_prefix": token[:8] + "..." if len(token) > 8 else token}
+        details={
+            "token_prefix": (
+                token[:8] + "..." if len(token) > 8 else token
+            )
+        },
     )
     await monitoring_service.log_security_event(event)
-    
+
     return PasswordResetConfirmResponse(
         message="Password reset successfully"
     )
@@ -580,21 +629,27 @@ async def deactivate_account(
         Success message
     """
     client_ip = get_client_ip(request)
-    
+
     await auth_service.deactivate_user(current_user.id)
-    
+
     # Log account deactivation
-    from chatter.core.monitoring import SecurityEvent, SecurityEventType, SecurityEventSeverity, get_monitoring_service
+    from chatter.core.monitoring import (
+        SecurityEvent,
+        SecurityEventSeverity,
+        SecurityEventType,
+        get_monitoring_service,
+    )
+
     monitoring_service = await get_monitoring_service()
     event = SecurityEvent(
         event_type=SecurityEventType.ACCOUNT_DEACTIVATED,
         severity=SecurityEventSeverity.MEDIUM,
         user_id=current_user.id,
         ip_address=client_ip,
-        user_agent=request.headers.get("User-Agent")
+        user_agent=request.headers.get("User-Agent"),
     )
     await monitoring_service.log_security_event(event)
-    
+
     return AccountDeactivateResponse(
         message="Account deactivated successfully"
     )

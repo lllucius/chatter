@@ -26,11 +26,13 @@ class TypeScriptSDKGenerator(SDKGenerator):
         try:
             ensure_command_available(
                 "openapi-generator-cli",
-                "npm install -g @openapitools/openapi-generator-cli"
+                "npm install -g @openapitools/openapi-generator-cli",
             )
         except Exception as e:
             print(f"❌ {e}")
-            print("⚠️  OpenAPI generator not available, creating mock SDK for testing")
+            print(
+                "⚠️  OpenAPI generator not available, creating mock SDK for testing"
+            )
             return self._create_mock_typescript_sdk()
 
         # Prepare output directory
@@ -43,6 +45,7 @@ class TypeScriptSDKGenerator(SDKGenerator):
             print(f"❌ Failed to generate OpenAPI spec: {e}")
             # Use mock spec for testing
             from scripts.sdk.base import MockOpenAPISpec
+
             spec = MockOpenAPISpec.get_mock_spec()
             print("⚠️  Using mock OpenAPI spec for testing")
 
@@ -57,9 +60,7 @@ class TypeScriptSDKGenerator(SDKGenerator):
 
         # Generate SDK
         success = self.run_generator_command(
-            "typescript-axios",
-            spec_path,
-            config_path
+            "typescript-axios", spec_path, config_path
         )
 
         if not success:
@@ -83,11 +84,13 @@ class TypeScriptSDKGenerator(SDKGenerator):
         missing_files = verify_files_exist(
             self.config.output_dir,
             expected_files,
-            "TypeScript SDK files"
+            "TypeScript SDK files",
         )
 
         if missing_files:
-            print(f"❌ Validation failed: {len(missing_files)} missing files")
+            print(
+                f"❌ Validation failed: {len(missing_files)} missing files"
+            )
             return False
 
         # Additional validation: check if TypeScript files are syntactically valid
@@ -124,7 +127,7 @@ class TypeScriptSDKGenerator(SDKGenerator):
             "types": "index.ts",
             "repository": {
                 "type": "git",
-                "url": self.config.npm_repository
+                "url": self.config.npm_repository,
             },
             "keywords": [
                 "api",
@@ -132,20 +135,21 @@ class TypeScriptSDKGenerator(SDKGenerator):
                 "chatbot",
                 "ai",
                 "typescript",
-                "axios"
+                "axios",
             ],
             "author": self.config.package_author,
             "license": "MIT",
-            "dependencies": {
-                "axios": "^1.11.0"
-            },
+            "dependencies": {"axios": "^1.11.0"},
             "devDependencies": {
                 "typescript": "^4.9.5",
-                "@types/node": "^16.18.126"
-            }
+                "@types/node": "^16.18.126",
+            },
         }
 
-        save_json(package_json_content, self.config.output_dir / "package.json")
+        save_json(
+            package_json_content,
+            self.config.output_dir / "package.json",
+        )
 
     def _create_index_file(self) -> None:
         """Create main index.ts file that exports everything."""
@@ -273,7 +277,9 @@ The SDK is generated as part of the development workflow and should not be manua
             )
 
             if not check_command_available("tsc"):
-                print("⚠️  TypeScript compiler not available, skipping syntax validation")
+                print(
+                    "⚠️  TypeScript compiler not available, skipping syntax validation"
+                )
                 return True
 
             # Run TypeScript compiler in dry-run mode
@@ -281,18 +287,22 @@ The SDK is generated as part of the development workflow and should not be manua
                 ["tsc", "--noEmit", "--skipLibCheck", "index.ts"],
                 "TypeScript syntax validation",
                 cwd=self.config.output_dir,
-                check=False
+                check=False,
             )
 
             if not success:
-                print(f"❌ TypeScript syntax validation failed: {stderr}")
+                print(
+                    f"❌ TypeScript syntax validation failed: {stderr}"
+                )
                 return False
 
             return True
 
         except Exception as e:
             print(f"⚠️  Could not validate TypeScript syntax: {e}")
-            return True  # Don't fail generation due to validation issues
+            return (
+                True  # Don't fail generation due to validation issues
+            )
 
     def _create_mock_typescript_sdk(self) -> bool:
         """Create a minimal mock TypeScript SDK for testing."""
@@ -429,7 +439,9 @@ export class Configuration {
 }
 '''
 
-        save_text(config_content, self.config.output_dir / "configuration.ts")
+        save_text(
+            config_content, self.config.output_dir / "configuration.ts"
+        )
 
 
 def main():
@@ -447,7 +459,9 @@ def main():
     if success:
         # Validate generated SDK
         if generator.validate():
-            print("\n🎉 TypeScript SDK generated and validated successfully!")
+            print(
+                "\n🎉 TypeScript SDK generated and validated successfully!"
+            )
         else:
             print("\n⚠️  TypeScript SDK generated but validation failed")
     else:
@@ -465,4 +479,5 @@ def main():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

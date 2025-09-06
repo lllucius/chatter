@@ -61,7 +61,7 @@ __all__ = [
     "AgentDB",
     "AgentInteractionDB",
     "WorkflowTemplate",
-    "TemplateSpec", 
+    "TemplateSpec",
     "WorkflowType",
     "TemplateCategory",
 ]

@@ -1,12 +1,9 @@
 """Analytics and statistics endpoints."""
 
-import time
-from collections import defaultdict
 from datetime import UTC, datetime
-from functools import wraps
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -37,7 +34,9 @@ async def get_analytics_service(
 
 
 @router.get("/conversations", response_model=ConversationStatsResponse)
-@rate_limit(max_requests=20, window_seconds=60)  # 20 requests per minute
+@rate_limit(
+    max_requests=20, window_seconds=60
+)  # 20 requests per minute
 async def get_conversation_stats(
     start_date: datetime | None = Query(
         None, description="Start date for analytics"
@@ -67,8 +66,9 @@ async def get_conversation_stats(
     """
     try:
         # Create time range object
-        from chatter.schemas.analytics import AnalyticsTimeRange
         from pydantic import ValidationError
+
+        from chatter.schemas.analytics import AnalyticsTimeRange
 
         try:
             time_range = AnalyticsTimeRange(
@@ -78,6 +78,7 @@ async def get_conversation_stats(
             )
         except ValidationError as ve:
             from chatter.utils.problem import BadRequestProblem
+
             raise BadRequestProblem(
                 detail=f"Invalid time range parameters: {ve}"
             ) from ve
@@ -407,7 +408,9 @@ async def get_system_analytics(
 
 
 @router.get("/dashboard", response_model=DashboardResponse)
-@rate_limit(max_requests=10, window_seconds=60)  # 10 dashboard requests per minute
+@rate_limit(
+    max_requests=10, window_seconds=60
+)  # 10 dashboard requests per minute
 async def get_dashboard(
     start_date: datetime | None = Query(
         None, description="Start date for analytics"
@@ -558,8 +561,11 @@ async def get_user_analytics(
     try:
         # Authorization check: users can only access their own analytics
         # unless they are admin (assuming is_admin field exists)
-        if current_user.id != user_id and not getattr(current_user, 'is_admin', False):
+        if current_user.id != user_id and not getattr(
+            current_user, 'is_admin', False
+        ):
             from chatter.utils.problem import ForbiddenProblem
+
             raise ForbiddenProblem(
                 detail="Access denied: You can only view your own analytics"
             )
@@ -567,9 +573,8 @@ async def get_user_analytics(
         # Validate user_id format (assuming it follows ULID format)
         if not user_id or len(user_id) != 26:
             from chatter.utils.problem import BadRequestProblem
-            raise BadRequestProblem(
-                detail="Invalid user ID format"
-            )
+
+            raise BadRequestProblem(detail="Invalid user ID format")
 
         # Create time range object
         from chatter.schemas.analytics import AnalyticsTimeRange
@@ -592,7 +597,9 @@ async def get_user_analytics(
 
 
 @router.post("/export")
-@rate_limit(max_requests=5, window_seconds=300)  # 5 exports per 5 minutes
+@rate_limit(
+    max_requests=5, window_seconds=300
+)  # 5 exports per 5 minutes
 async def export_analytics(
     format: str = Query(
         "json", description="Export format (json, csv, xlsx)"
@@ -642,19 +649,20 @@ async def export_analytics(
                 end_date=end_date,
                 period=period,
             )
-            
+
             # Validate the export request
             from chatter.schemas.analytics import AnalyticsExportRequest
-            
-            export_request = AnalyticsExportRequest(
+
+            AnalyticsExportRequest(
                 metrics=metrics,
                 time_range=time_range,
                 format=format,
-                include_raw_data=False
+                include_raw_data=False,
             )
-            
+
         except ValidationError as ve:
             from chatter.utils.problem import BadRequestProblem
+
             raise BadRequestProblem(
                 detail=f"Invalid export parameters: {ve}"
             ) from ve
@@ -699,10 +707,12 @@ async def export_analytics(
 @router.get("/health")
 async def get_analytics_health(
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service),
+    analytics_service: AnalyticsService = Depends(
+        get_analytics_service
+    ),
 ) -> dict[str, Any]:
     """Get analytics system health status.
-    
+
     Returns:
         Health check results for analytics system
     """
@@ -718,20 +728,26 @@ async def get_analytics_health(
 
 
 @router.get("/metrics/summary")
-@rate_limit(max_requests=30, window_seconds=60)  # 30 requests per minute
+@rate_limit(
+    max_requests=30, window_seconds=60
+)  # 30 requests per minute
 async def get_analytics_metrics_summary(
     current_user: User = Depends(get_current_user),
-    analytics_service: AnalyticsService = Depends(get_analytics_service),
+    analytics_service: AnalyticsService = Depends(
+        get_analytics_service
+    ),
 ) -> dict[str, Any]:
     """Get summary of key analytics metrics for monitoring.
-    
+
     Returns:
         Summary of analytics metrics
     """
     try:
         return await analytics_service.get_analytics_metrics_summary()
     except Exception as e:
-        logger.error("Failed to get analytics metrics summary", error=str(e))
+        logger.error(
+            "Failed to get analytics metrics summary", error=str(e)
+        )
         raise InternalServerProblem(
             detail="Failed to get analytics metrics summary"
         ) from e

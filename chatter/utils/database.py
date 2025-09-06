@@ -4,7 +4,6 @@ import asyncio
 from collections.abc import AsyncGenerator
 
 from sqlalchemy import event, text
-
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -51,6 +50,7 @@ def get_engine() -> AsyncEngine:
         # Add query logging event listener
         if settings.debug_database_queries:
             try:
+
                 @event.listens_for(
                     _engine.sync_engine, "before_cursor_execute"
                 )
@@ -68,9 +68,12 @@ def get_engine() -> AsyncEngine:
                         statement=statement,
                         parameters=parameters,
                     )
+
             except Exception as e:
                 # Ignore event listener setup errors (e.g., in tests with mocked engines)
-                logger.debug("Could not set up query logging", error=str(e))
+                logger.debug(
+                    "Could not set up query logging", error=str(e)
+                )
 
     return _engine
 
@@ -88,7 +91,6 @@ def get_session_maker() -> async_sessionmaker[AsyncSession]:
         )
 
     return _session_maker
-
 
 
 async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
@@ -152,7 +154,10 @@ async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
                 try:
                     # Only attempt close if the session is not in an active transaction
                     # and we actually own the session lifecycle
-                    if hasattr(session, '_connection') and session._connection is not None:
+                    if (
+                        hasattr(session, '_connection')
+                        and session._connection is not None
+                    ):
                         # Check if we're in a transaction - but be more defensive
                         in_transaction = False
                         try:
@@ -171,10 +176,12 @@ async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
                         pass
                 except Exception as cleanup_error:
                     # Log but don't re-raise cleanup errors to avoid masking original issues
-                    logger.debug("Session cleanup skipped due to error", error=str(cleanup_error))
+                    logger.debug(
+                        "Session cleanup skipped due to error",
+                        error=str(cleanup_error),
+                    )
         except Exception as e:
             logger.debug("Error in final session cleanup", error=str(e))
-
 
 
 async def init_database() -> None:
@@ -284,17 +291,19 @@ class DatabaseManager:
             except Exception as e:
                 if attempt == max_retries - 1:
                     raise e
-                await asyncio.sleep(0.1 * (2 ** attempt))
+                await asyncio.sleep(0.1 * (2**attempt))
 
-    async def get_connection_with_timeout(self, timeout_seconds: int = 30):
+    async def get_connection_with_timeout(
+        self, timeout_seconds: int = 30
+    ):
         """Get connection with timeout."""
         return await asyncio.wait_for(
-            self._attempt_connection(),
-            timeout=timeout_seconds
+            self._attempt_connection(), timeout=timeout_seconds
         )
 
     async def transaction(self, session: AsyncSession):
         """Context manager for database transactions."""
+
         class TransactionContext:
             def __init__(self, session):
                 self.session = session
@@ -311,14 +320,19 @@ class DatabaseManager:
 
         return TransactionContext(session)
 
-    async def detect_connection_leaks(self, max_age_seconds: int = 1800):
+    async def detect_connection_leaks(
+        self, max_age_seconds: int = 1800
+    ):
         """Detect connection leaks based on session age."""
         import time
+
         current_time = time.time()
         leaked_sessions = []
 
-        for session_id, session_info in self.active_sessions.items():
-            session_age = current_time - session_info.get('created_at', current_time)
+        for _session_id, session_info in self.active_sessions.items():
+            session_age = current_time - session_info.get(
+                'created_at', current_time
+            )
             if session_age > max_age_seconds:
                 leaked_sessions.append(session_info)
 
@@ -357,7 +371,7 @@ async def health_check(session: AsyncSession | None = None) -> dict:
             # Use the provided session
             await session.execute(text("SELECT 1"))
             is_connected = True
-            
+
             # Test query performance with a simple query
             await session.execute(text("SELECT 1"))
         else:

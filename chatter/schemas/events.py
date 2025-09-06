@@ -215,16 +215,17 @@ class SystemEvent(BaseModel):
 # INPUT VALIDATION SCHEMAS
 # =============================================================================
 
+
 class ValidatedEventData(BaseModel):
     """Base class for validated event data."""
-    
+
     class Config:
         extra = "forbid"  # Forbid extra fields for security
 
 
 class BackupEventData(ValidatedEventData):
     """Validated data for backup events."""
-    
+
     backup_id: str = Field(..., min_length=1, max_length=255)
     status: str | None = Field(None, max_length=100)
     progress: float | None = Field(None, ge=0.0, le=100.0)
@@ -234,7 +235,7 @@ class BackupEventData(ValidatedEventData):
 
 class JobEventData(ValidatedEventData):
     """Validated data for job events."""
-    
+
     job_id: str = Field(..., min_length=1, max_length=255)
     job_name: str = Field(..., min_length=1, max_length=255)
     status: str | None = Field(None, max_length=100)
@@ -244,7 +245,7 @@ class JobEventData(ValidatedEventData):
 
 class DocumentEventData(ValidatedEventData):
     """Validated data for document events."""
-    
+
     document_id: str = Field(..., min_length=1, max_length=255)
     filename: str | None = Field(None, max_length=500)
     status: str = Field(..., max_length=100)
@@ -255,9 +256,11 @@ class DocumentEventData(ValidatedEventData):
 
 class SystemEventData(ValidatedEventData):
     """Validated data for system events."""
-    
+
     message: str = Field(..., min_length=1, max_length=1000)
-    severity: str | None = Field(None, pattern=r"^(info|warning|error|critical)$")
+    severity: str | None = Field(
+        None, pattern=r"^(info|warning|error|critical)$"
+    )
     details: dict[str, Any] | None = None
     test: bool | None = None
     broadcast: bool | None = None
@@ -266,7 +269,7 @@ class SystemEventData(ValidatedEventData):
 
 class ToolServerEventData(ValidatedEventData):
     """Validated data for tool server events."""
-    
+
     server_id: str = Field(..., min_length=1, max_length=255)
     server_name: str = Field(..., min_length=1, max_length=255)
     health_status: str | None = Field(None, max_length=100)
@@ -276,7 +279,7 @@ class ToolServerEventData(ValidatedEventData):
 
 class UserEventData(ValidatedEventData):
     """Validated data for user events."""
-    
+
     user_id: str = Field(..., min_length=1, max_length=255)
     status: str | None = Field(None, max_length=100)
     details: dict[str, Any] | None = None
@@ -289,30 +292,25 @@ EVENT_DATA_VALIDATORS = {
     EventType.BACKUP_COMPLETED: BackupEventData,
     EventType.BACKUP_FAILED: BackupEventData,
     EventType.BACKUP_PROGRESS: BackupEventData,
-    
     # Job events
     EventType.JOB_STARTED: JobEventData,
     EventType.JOB_COMPLETED: JobEventData,
     EventType.JOB_FAILED: JobEventData,
     EventType.JOB_PROGRESS: JobEventData,
-    
     # Document events
     EventType.DOCUMENT_UPLOADED: DocumentEventData,
     EventType.DOCUMENT_PROCESSING_STARTED: DocumentEventData,
     EventType.DOCUMENT_PROCESSING_COMPLETED: DocumentEventData,
     EventType.DOCUMENT_PROCESSING_FAILED: DocumentEventData,
     EventType.DOCUMENT_PROCESSING_PROGRESS: DocumentEventData,
-    
     # Tool server events
     EventType.TOOL_SERVER_STARTED: ToolServerEventData,
     EventType.TOOL_SERVER_STOPPED: ToolServerEventData,
     EventType.TOOL_SERVER_HEALTH_CHANGED: ToolServerEventData,
     EventType.TOOL_SERVER_ERROR: ToolServerEventData,
-    
     # System events
     EventType.SYSTEM_ALERT: SystemEventData,
     EventType.SYSTEM_STATUS: SystemEventData,
-    
     # User events
     EventType.USER_REGISTERED: UserEventData,
     EventType.USER_UPDATED: UserEventData,
@@ -322,21 +320,23 @@ EVENT_DATA_VALIDATORS = {
 }
 
 
-def validate_event_data(event_type: EventType, data: dict[str, Any]) -> dict[str, Any]:
+def validate_event_data(
+    event_type: EventType, data: dict[str, Any]
+) -> dict[str, Any]:
     """Validate event data against the appropriate schema.
-    
+
     Args:
         event_type: Type of event
         data: Event data to validate
-        
+
     Returns:
         Validated and sanitized event data
-        
+
     Raises:
         ValidationError: If data is invalid
     """
     validator_class = EVENT_DATA_VALIDATORS.get(event_type)
-    
+
     if validator_class:
         # Validate using the specific schema
         validated_data = validator_class(**data)
@@ -345,17 +345,20 @@ def validate_event_data(event_type: EventType, data: dict[str, Any]) -> dict[str
         # For event types without specific validators, do basic validation
         if not isinstance(data, dict):
             raise ValueError("Event data must be a dictionary")
-        
+
         # Sanitize string values to prevent injection attacks
         sanitized_data = {}
         for key, value in data.items():
             if isinstance(value, str):
                 # Basic sanitization - remove potentially dangerous characters
                 import re
+
                 if len(value) > 2000:  # Limit string length
                     value = value[:2000]
                 # Remove control characters except newlines and tabs
-                value = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', value)
+                value = re.sub(
+                    r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', value
+                )
             sanitized_data[key] = value
-        
+
         return sanitized_data

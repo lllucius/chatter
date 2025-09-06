@@ -117,7 +117,9 @@ class AdvancedJobQueue:
         tags: list[str] | None = None,
         metadata: dict[str, Any] | None = None,
         schedule_at: datetime | None = None,
-        created_by_user_id: str | None = None,  # Add user ID for security
+        created_by_user_id: (
+            str | None
+        ) = None,  # Add user ID for security
     ) -> str:
         """Add a job to the queue.
 
@@ -146,7 +148,7 @@ class AdvancedJobQueue:
         if len(self.jobs) >= self.max_jobs:
             # Clean up old completed/failed jobs to make room
             await self._cleanup_old_jobs()
-            
+
             # Check again after cleanup
             if len(self.jobs) >= self.max_jobs:
                 raise ValueError(
@@ -362,7 +364,9 @@ class AdvancedJobQueue:
 
         # Apply user filter first (security)
         if user_id:
-            jobs = [job for job in jobs if job.created_by_user_id == user_id]
+            jobs = [
+                job for job in jobs if job.created_by_user_id == user_id
+            ]
 
         if status:
             jobs = [job for job in jobs if job.status == status]
@@ -381,11 +385,11 @@ class AdvancedJobQueue:
 
     def get_user_job(self, job_id: str, user_id: str) -> Job | None:
         """Get a job by ID, but only if it belongs to the user.
-        
+
         Args:
             job_id: Job ID
             user_id: User ID
-            
+
         Returns:
             Job if found and belongs to user, None otherwise
         """
@@ -396,11 +400,11 @@ class AdvancedJobQueue:
 
     async def cancel_user_job(self, job_id: str, user_id: str) -> bool:
         """Cancel a job, but only if it belongs to the user.
-        
+
         Args:
             job_id: Job ID
             user_id: User ID
-            
+
         Returns:
             True if cancelled, False if not found or not owned by user
         """
@@ -915,42 +919,50 @@ class AdvancedJobQueue:
 
     async def _cleanup_old_jobs(self, max_age_hours: int = 24) -> int:
         """Clean up old completed/failed jobs to free up memory.
-        
+
         Args:
             max_age_hours: Remove jobs older than this many hours
-            
+
         Returns:
             Number of jobs removed
         """
         from datetime import timedelta
-        
+
         cutoff_time = datetime.now(UTC) - timedelta(hours=max_age_hours)
         jobs_to_remove = []
-        
+
         for job_id, job in self.jobs.items():
             # Remove old completed or failed jobs
-            if (job.status in [JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED] and
-                job.completed_at and job.completed_at < cutoff_time):
+            if (
+                job.status
+                in [
+                    JobStatus.COMPLETED,
+                    JobStatus.FAILED,
+                    JobStatus.CANCELLED,
+                ]
+                and job.completed_at
+                and job.completed_at < cutoff_time
+            ):
                 jobs_to_remove.append(job_id)
-        
+
         # Remove the jobs
         for job_id in jobs_to_remove:
             del self.jobs[job_id]
             # Also remove from results if present
             if job_id in self.results:
                 del self.results[job_id]
-        
+
         if jobs_to_remove:
             logger.info(f"Cleaned up {len(jobs_to_remove)} old jobs")
-        
+
         return len(jobs_to_remove)
 
     async def cleanup_jobs(self, force: bool = False) -> dict[str, int]:
         """Manually trigger job cleanup.
-        
+
         Args:
             force: If True, remove all completed/failed jobs regardless of age
-            
+
         Returns:
             Cleanup statistics
         """
@@ -958,14 +970,18 @@ class AdvancedJobQueue:
             # Remove all completed/failed/cancelled jobs
             jobs_to_remove = []
             for job_id, job in self.jobs.items():
-                if job.status in [JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED]:
+                if job.status in [
+                    JobStatus.COMPLETED,
+                    JobStatus.FAILED,
+                    JobStatus.CANCELLED,
+                ]:
                     jobs_to_remove.append(job_id)
-            
+
             for job_id in jobs_to_remove:
                 del self.jobs[job_id]
                 if job_id in self.results:
                     del self.results[job_id]
-            
+
             logger.info(f"Force cleaned up {len(jobs_to_remove)} jobs")
             return {"removed": len(jobs_to_remove), "type": "force"}
         else:

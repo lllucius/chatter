@@ -194,6 +194,7 @@ class DocumentService:
 
             # Start background processing (non-blocking)
             import asyncio
+
             asyncio.create_task(
                 self._process_document_async(document.id, file_path)
             )
@@ -249,7 +250,7 @@ class DocumentService:
                     .where(Document.id == document_id)
                     .values(
                         view_count=Document.view_count + 1,
-                        last_accessed_at=datetime.now(UTC)
+                        last_accessed_at=datetime.now(UTC),
                     )
                 )
                 await self.session.commit()
@@ -643,7 +644,11 @@ class DocumentService:
             return False
 
     async def get_document_chunks(
-        self, document_id: str, user_id: str, limit: int | None = None, offset: int | None = None
+        self,
+        document_id: str,
+        user_id: str,
+        limit: int | None = None,
+        offset: int | None = None,
     ) -> tuple[list[DocumentChunk], int]:
         """Get chunks for a document with optional pagination.
 
@@ -671,7 +676,9 @@ class DocumentService:
 
             # Get total count first
             count_query = select(func.count()).select_from(
-                select(DocumentChunk).where(DocumentChunk.document_id == document_id).subquery()
+                select(DocumentChunk)
+                .where(DocumentChunk.document_id == document_id)
+                .subquery()
             )
             count_result = await self.session.execute(count_query)
             total_count = count_result.scalar() or 0

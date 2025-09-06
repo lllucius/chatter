@@ -25,13 +25,12 @@ logger = get_logger(__name__)
 
 # Import new workflow components with graceful fallback
 try:
-    from chatter.core.monitoring import get_monitoring_service
     from chatter.core.workflow_security import workflow_security_manager
 
-    METRICS_ENABLED = True
+    METRICS_ENABLED = False  # Metrics not currently implemented
     SECURITY_ENABLED = True
 except ImportError:
-    logger.warning("Workflow metrics or security modules not available")
+    logger.warning("Workflow security module not available")
     METRICS_ENABLED = False
     SECURITY_ENABLED = False
 
@@ -63,7 +62,7 @@ class LangGraphWorkflowManager:
     def __init__(self) -> None:
         """Initialize the workflow manager."""
         self.checkpointer = None
-        
+
         # Lazy initialization flag to avoid async setup at import time
         self._initialized = False
 
@@ -71,7 +70,7 @@ class LangGraphWorkflowManager:
         """Ensure the workflow manager is initialized."""
         if self._initialized:
             return
-            
+
         # Initialize checkpointer
         try:
             if settings.langgraph_checkpoint_store == "postgres":
@@ -104,7 +103,7 @@ class LangGraphWorkflowManager:
                 )
                 # Use a no-op checkpointer as last resort
                 self.checkpointer = None
-        
+
         self._initialized = True
 
     def create_workflow(
@@ -159,10 +158,9 @@ class LangGraphWorkflowManager:
                     "enable_memory": enable_memory,
                     "memory_window": memory_window,
                     "has_retriever": retriever is not None,
-                    "has_tools": tools is not None
-                    and len(tools) > 0,
-                    }
-                }
+                    "has_tools": tools is not None and len(tools) > 0,
+                },
+            }
         use_retriever = mode in ("rag", "full")
         use_tools = mode in ("tools", "full")
 
@@ -356,7 +354,7 @@ class LangGraphWorkflowManager:
                     if SECURITY_ENABLED and user_id:
                         authorized = workflow_security_manager.authorize_tool_execution(
                             user_id=user_id,
-                            workflow_id=workflow_metrics_id or "",
+                            workflow_id="",
                             workflow_type=mode,
                             tool_name=tool_name,
                             method=None,
@@ -393,9 +391,13 @@ class LangGraphWorkflowManager:
                     if METRICS_ENABLED and workflow_tracking_config:
                         try:
                             # This would be handled in a background task or defer
-                            logger.debug("Tool execution completed - metrics tracking deferred")
+                            logger.debug(
+                                "Tool execution completed - metrics tracking deferred"
+                            )
                         except Exception as e:
-                            logger.debug(f"Failed to defer workflow metrics: {e}")
+                            logger.debug(
+                                f"Failed to defer workflow metrics: {e}"
+                            )
                 except Exception as e:
                     error_msg = str(e)
                     logger.error(
@@ -414,9 +416,13 @@ class LangGraphWorkflowManager:
                     if METRICS_ENABLED and workflow_tracking_config:
                         try:
                             # This would be handled in a background task or defer
-                            logger.debug("Tool execution failed - metrics tracking deferred")
+                            logger.debug(
+                                "Tool execution failed - metrics tracking deferred"
+                            )
                         except Exception as e:
-                            logger.debug(f"Failed to defer workflow metrics: {e}")
+                            logger.debug(
+                                f"Failed to defer workflow metrics: {e}"
+                            )
 
             # Returning ToolMessage(s) appends to state["messages"] via add_messages
             return {"messages": tool_messages}
@@ -752,49 +758,52 @@ class LangGraphWorkflowManager:
 
     def get_retriever(self, workspace_id: str) -> Any | None:
         """Get retriever for a workspace based on user documents.
-        
+
         Args:
             workspace_id: Workspace identifier (interpreted as user_id)
-            
+
         Returns:
             Retriever instance or None if not available
         """
         try:
             from chatter.core.vector_store import vector_store_manager
             from chatter.services.embeddings import EmbeddingService
-            from chatter.config import settings
-            
+
             # Create embedding service
             embedding_service = EmbeddingService()
-            
+
             # Get default embeddings for the user's workspace
             embeddings = embedding_service.get_default_embeddings()
             if embeddings is None:
-                logger.warning(f"No embeddings available for workspace: {workspace_id}")
+                logger.warning(
+                    f"No embeddings available for workspace: {workspace_id}"
+                )
                 return None
-            
+
             # Create user-specific collection name
             collection_name = f"documents_{workspace_id}"
-            
+
             # Get vector store for the workspace
             vector_store = vector_store_manager.create_store(
                 store_type="pgvector",
                 embeddings=embeddings,
-                collection_name=collection_name
+                collection_name=collection_name,
             )
-            
+
             # Return retriever with default search parameters
             retriever = vector_store.as_retriever(
                 search_type="similarity",
-                search_kwargs={"k": 5}  # Return top 5 relevant documents
+                search_kwargs={
+                    "k": 5
+                },  # Return top 5 relevant documents
             )
-            
+
             logger.debug(
                 f"Created retriever for workspace: {workspace_id}, "
                 f"collection: {collection_name}"
             )
             return retriever
-            
+
         except Exception as e:
             logger.error(
                 "Failed to create retriever for workspace",

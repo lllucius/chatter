@@ -12,8 +12,7 @@ from scripts.utils.subprocess import run_command  # noqa: E402
 
 
 def generate_documentation(
-    output_dir: Path,
-    docs_format: str = "all"
+    output_dir: Path, docs_format: str = "all"
 ) -> tuple[bool, list[str]]:
     """
     Generate OpenAPI documentation.
@@ -37,9 +36,7 @@ def generate_documentation(
     ]
 
     success, stdout, stderr = run_command(
-        cmd,
-        "OpenAPI documentation generation",
-        check=False
+        cmd, "OpenAPI documentation generation", check=False
     )
 
     if not success:
@@ -95,7 +92,8 @@ def generate_python_sdk() -> tuple[bool, list[str]]:
                 # Get list of generated files
                 if config.output_dir.exists():
                     generated_files = [
-                        str(f) for f in config.output_dir.rglob("*")
+                        str(f)
+                        for f in config.output_dir.rglob("*")
                         if f.is_file() and not f.name.startswith(".")
                     ]
             else:
@@ -138,7 +136,8 @@ def generate_typescript_sdk() -> tuple[bool, list[str]]:
                 # Get list of generated files
                 if config.output_dir.exists():
                     generated_files = [
-                        str(f) for f in config.output_dir.rglob("*")
+                        str(f)
+                        for f in config.output_dir.rglob("*")
                         if f.is_file() and not f.name.startswith(".")
                     ]
             else:
@@ -172,7 +171,7 @@ def print_summary(
     args: argparse.Namespace,
     docs_files: list[str],
     python_files: list[str],
-    typescript_files: list[str]
+    typescript_files: list[str],
 ) -> None:
     """Print generation summary."""
     print("\n" + "=" * 60)
@@ -181,38 +180,58 @@ def print_summary(
         print("🎉 Workflow completed successfully!")
 
         if not args.sdk_only and not args.ts_only and docs_files:
-            print(f"\n📚 Documentation generated ({len(docs_files)} files):")
-            print(f"   📁 Location: {Path(args.output_dir) / 'docs' / 'api'}")
+            print(
+                f"\n📚 Documentation generated ({len(docs_files)} files):"
+            )
+            print(
+                f"   📁 Location: {Path(args.output_dir) / 'docs' / 'api'}"
+            )
             print(f"   🔗 Formats: {args.docs_format}")
 
         if not args.docs_only:
             if not args.ts_only and python_files:
                 project_root = Path(__file__).parent.parent
-                print(f"\n🐍 Python SDK generated ({len(python_files)} files):")
-                print(f"   📁 Location: {project_root / 'sdk' / 'python'}")
+                print(
+                    f"\n🐍 Python SDK generated ({len(python_files)} files):"
+                )
+                print(
+                    f"   📁 Location: {project_root / 'sdk' / 'python'}"
+                )
                 print("   📦 Package: chatter-sdk")
 
             if typescript_files:
                 project_root = Path(__file__).parent.parent
-                print(f"\n📦 TypeScript SDK generated ({len(typescript_files)} files):")
-                print(f"   📁 Location: {project_root / 'frontend' / 'src' / 'sdk'}")
+                print(
+                    f"\n📦 TypeScript SDK generated ({len(typescript_files)} files):"
+                )
+                print(
+                    f"   📁 Location: {project_root / 'frontend' / 'src' / 'sdk'}"
+                )
                 print("   📦 Package: chatter-sdk (TypeScript)")
 
         print("\n📋 Next steps:")
         if not args.docs_only:
             if not args.ts_only and python_files:
                 project_root = Path(__file__).parent.parent
-                print(f"   • Test the Python SDK: cd {project_root / 'sdk' / 'python'} && pip install -e .")
-                print("   • Run Python examples: python examples/basic_usage.py")
+                print(
+                    f"   • Test the Python SDK: cd {project_root / 'sdk' / 'python'} && pip install -e ."
+                )
+                print(
+                    "   • Run Python examples: python examples/basic_usage.py"
+                )
             if typescript_files:
-                print("   • Test the TypeScript SDK: cd frontend && npm start")
+                print(
+                    "   • Test the TypeScript SDK: cd frontend && npm start"
+                )
         if not args.sdk_only and not args.ts_only and docs_files:
             print("   • View docs: python -m chatter docs serve")
         print("   • Package for release: python -m build")
 
     else:
         print("❌ Workflow completed with errors!")
-        print("   Please check the error messages above and fix any issues.")
+        print(
+            "   Please check the error messages above and fix any issues."
+        )
 
 
 def main():
@@ -223,38 +242,38 @@ def main():
     parser.add_argument(
         "--docs-only",
         action="store_true",
-        help="Generate only documentation, skip SDK"
+        help="Generate only documentation, skip SDK",
     )
     parser.add_argument(
         "--sdk-only",
         action="store_true",
-        help="Generate only SDK, skip documentation"
+        help="Generate only SDK, skip documentation",
     )
     parser.add_argument(
         "--ts-only",
         action="store_true",
-        help="Generate only TypeScript SDK, skip Python SDK and documentation"
+        help="Generate only TypeScript SDK, skip Python SDK and documentation",
     )
     parser.add_argument(
         "--python-only",
         action="store_true",
-        help="Generate only Python SDK, skip TypeScript SDK and documentation"
+        help="Generate only Python SDK, skip TypeScript SDK and documentation",
     )
     parser.add_argument(
         "--output-dir",
         default="./",
-        help="Base output directory (default: current directory)"
+        help="Base output directory (default: current directory)",
     )
     parser.add_argument(
         "--docs-format",
         choices=["json", "yaml", "all"],
         default="all",
-        help="Documentation format to generate"
+        help="Documentation format to generate",
     )
     parser.add_argument(
         "--clean",
         action="store_true",
-        help="Clean output directories before generating"
+        help="Clean output directories before generating",
     )
 
     args = parser.parse_args()
@@ -263,7 +282,9 @@ def main():
     project_root = Path(__file__).parent.parent
     output_path = Path(args.output_dir)
 
-    print("🚀 Starting Chatter Documentation and SDK Generation Workflow")
+    print(
+        "🚀 Starting Chatter Documentation and SDK Generation Workflow"
+    )
     print(f"📁 Project root: {project_root}")
     print(f"📂 Output directory: {output_path}")
 
@@ -278,7 +299,9 @@ def main():
 
     # Generate documentation
     if not args.sdk_only and not args.ts_only and not args.python_only:
-        docs_success, docs_files = generate_documentation(output_path, args.docs_format)
+        docs_success, docs_files = generate_documentation(
+            output_path, args.docs_format
+        )
         success = success and docs_success
 
     # Generate SDKs
@@ -294,7 +317,9 @@ def main():
             success = success and ts_success
 
     # Print summary
-    print_summary(success, args, docs_files, python_files, typescript_files)
+    print_summary(
+        success, args, docs_files, python_files, typescript_files
+    )
 
     return 0 if success else 1
 

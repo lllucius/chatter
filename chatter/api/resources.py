@@ -1,12 +1,6 @@
 """Resource-based handlers for conversation and message operations."""
 
-from typing import Any
-
-from fastapi import Depends, HTTPException, Request
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from chatter.api.auth import get_current_user
-from chatter.api.dependencies import ConversationId, MessageId, PaginationLimit, PaginationOffset
+from chatter.api.dependencies import ConversationId, MessageId
 from chatter.core.exceptions import NotFoundError
 from chatter.models.user import User
 from chatter.schemas.chat import (
@@ -25,10 +19,10 @@ from chatter.utils.problem import NotFoundProblem
 
 class ConversationResourceHandler:
     """Resource handler for conversation CRUD operations."""
-    
+
     def __init__(self, chat_service: ChatService):
         self.chat_service = chat_service
-    
+
     async def create_conversation(
         self,
         conversation_data: ConversationCreate,
@@ -39,7 +33,7 @@ class ConversationResourceHandler:
             current_user.id, conversation_data
         )
         return ConversationResponse.model_validate(conversation)
-    
+
     async def list_conversations(
         self,
         current_user: User,
@@ -47,10 +41,12 @@ class ConversationResourceHandler:
         offset: int,
     ) -> ConversationSearchResponse:
         """List conversations for current user."""
-        conversations, total = await self.chat_service.list_conversations(
-            current_user.id, limit, offset
+        conversations, total = (
+            await self.chat_service.list_conversations(
+                current_user.id, limit, offset
+            )
         )
-        
+
         return ConversationSearchResponse(
             conversations=[
                 ConversationResponse.model_validate(conv)
@@ -60,7 +56,7 @@ class ConversationResourceHandler:
             limit=limit,
             offset=offset,
         )
-    
+
     async def get_conversation(
         self,
         conversation_id: ConversationId,
@@ -69,26 +65,34 @@ class ConversationResourceHandler:
     ) -> ConversationWithMessages:
         """Get conversation details with optional messages."""
         conversation = await self.chat_service.get_conversation(
-            conversation_id, current_user.id, include_messages=include_messages
+            conversation_id,
+            current_user.id,
+            include_messages=include_messages,
         )
-        
+
         if not conversation:
             raise NotFoundProblem(
                 detail="Conversation not found",
                 resource_type="conversation",
             )
-        
+
         # Convert to response format
-        conversation_response = ConversationResponse.model_validate(conversation)
-        messages = [
-            MessageResponse.model_validate(m) for m in conversation.messages
-        ] if include_messages else []
-        
-        return ConversationWithMessages(
-            **conversation_response.model_dump(), 
-            messages=messages
+        conversation_response = ConversationResponse.model_validate(
+            conversation
         )
-    
+        messages = (
+            [
+                MessageResponse.model_validate(m)
+                for m in conversation.messages
+            ]
+            if include_messages
+            else []
+        )
+
+        return ConversationWithMessages(
+            **conversation_response.model_dump(), messages=messages
+        )
+
     async def update_conversation(
         self,
         conversation_id: ConversationId,
@@ -106,7 +110,7 @@ class ConversationResourceHandler:
                 detail="Conversation not found",
                 resource_type="conversation",
             ) from e
-    
+
     async def delete_conversation(
         self,
         conversation_id: ConversationId,
@@ -129,10 +133,10 @@ class ConversationResourceHandler:
 
 class MessageResourceHandler:
     """Resource handler for message CRUD operations."""
-    
+
     def __init__(self, chat_service: ChatService):
         self.chat_service = chat_service
-    
+
     async def get_conversation_messages(
         self,
         conversation_id: ConversationId,
@@ -145,7 +149,7 @@ class MessageResourceHandler:
             conversation_id, current_user.id, limit, offset
         )
         return [MessageResponse.model_validate(msg) for msg in messages]
-    
+
     async def delete_message(
         self,
         conversation_id: ConversationId,

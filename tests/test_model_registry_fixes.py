@@ -1,7 +1,7 @@
 """Tests for model registry API fixes."""
 
 import pytest
-from fastapi import HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.exceptions import ValidationError
@@ -24,6 +24,7 @@ async def service(db_session: AsyncSession) -> ModelRegistryService:
 async def sample_provider(service: ModelRegistryService) -> str:
     """Create a sample provider."""
     import uuid
+
     unique_id = str(uuid.uuid4())[:8]
     provider_data = ProviderCreate(
         name=f"test_provider_{unique_id}",
@@ -41,6 +42,7 @@ async def sample_llm_model(
 ) -> str:
     """Create a sample LLM model."""
     import uuid
+
     unique_id = str(uuid.uuid4())[:8]
     model_data = ModelDefCreate(
         provider_id=sample_provider,
@@ -61,6 +63,7 @@ async def sample_embedding_model(
 ) -> str:
     """Create a sample embedding model."""
     import uuid
+
     unique_id = str(uuid.uuid4())[:8]
     model_data = ModelDefCreate(
         provider_id=sample_provider,
@@ -80,15 +83,22 @@ class TestDefaultProviderLogic:
     """Test default provider logic fixes."""
 
     async def test_set_default_provider_with_model_type(
-        self, service: ModelRegistryService, sample_provider: str, sample_llm_model: str
+        self,
+        service: ModelRegistryService,
+        sample_provider: str,
+        sample_llm_model: str,
     ):
         """Test setting default provider for specific model type."""
         # Set as default for LLM
-        success = await service.set_default_provider(sample_provider, ModelType.LLM)
+        success = await service.set_default_provider(
+            sample_provider, ModelType.LLM
+        )
         assert success
 
         # Verify it's set as default for LLM
-        default_provider = await service.get_default_provider(ModelType.LLM)
+        default_provider = await service.get_default_provider(
+            ModelType.LLM
+        )
         assert default_provider is not None
         assert default_provider.id == sample_provider
 
@@ -97,14 +107,18 @@ class TestDefaultProviderLogic:
     ):
         """Test that setting default fails if provider has no models of that type."""
         # Try to set as default for EMBEDDING when it has no embedding models
-        success = await service.set_default_provider(sample_provider, ModelType.EMBEDDING)
+        success = await service.set_default_provider(
+            sample_provider, ModelType.EMBEDDING
+        )
         assert not success
 
     async def test_set_default_provider_nonexistent_fails(
         self, service: ModelRegistryService
     ):
         """Test that setting default fails for nonexistent provider."""
-        success = await service.set_default_provider("nonexistent", ModelType.LLM)
+        success = await service.set_default_provider(
+            "nonexistent", ModelType.LLM
+        )
         assert not success
 
     async def test_get_default_provider_by_model_type(
@@ -116,15 +130,19 @@ class TestDefaultProviderLogic:
     ):
         """Test getting default provider filtered by model type."""
         # Set as default for LLM
-        await service.set_default_provider(sample_provider, ModelType.LLM)
-        
+        await service.set_default_provider(
+            sample_provider, ModelType.LLM
+        )
+
         # Should find default for LLM
         llm_default = await service.get_default_provider(ModelType.LLM)
         assert llm_default is not None
         assert llm_default.id == sample_provider
 
         # Should not find default for EMBEDDING (we haven't set one)
-        embedding_default = await service.get_default_provider(ModelType.EMBEDDING)
+        embedding_default = await service.get_default_provider(
+            ModelType.EMBEDDING
+        )
         assert embedding_default is None
 
 
@@ -136,6 +154,7 @@ class TestValidationImprovements:
     ):
         """Test that creating model validates provider exists."""
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
         model_data = ModelDefCreate(
             provider_id="nonexistent",
@@ -144,11 +163,13 @@ class TestValidationImprovements:
             display_name="Test Model",
             model_name="gpt-4",
         )
-        
+
         with pytest.raises(ValidationError) as exc_info:
             await service.create_model(model_data)
-        
-        assert "Provider with ID nonexistent not found" in str(exc_info.value)
+
+        assert "Provider with ID nonexistent not found" in str(
+            exc_info.value
+        )
 
     async def test_create_model_validates_provider_active(
         self, service: ModelRegistryService, sample_provider: str
@@ -160,6 +181,7 @@ class TestValidationImprovements:
         await service.session.commit()
 
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
         model_data = ModelDefCreate(
             provider_id=sample_provider,
@@ -168,10 +190,10 @@ class TestValidationImprovements:
             display_name="Test Model",
             model_name="gpt-4",
         )
-        
+
         with pytest.raises(ValidationError) as exc_info:
             await service.create_model(model_data)
-        
+
         assert "is not active" in str(exc_info.value)
 
     async def test_create_embedding_space_validates_model_exists(
@@ -179,6 +201,7 @@ class TestValidationImprovements:
     ):
         """Test that creating embedding space validates model exists."""
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
         space_data = EmbeddingSpaceCreate(
             model_id="nonexistent",
@@ -188,17 +211,20 @@ class TestValidationImprovements:
             effective_dimensions=1536,
             table_name=f"test_embeddings_{unique_id}",
         )
-        
+
         with pytest.raises(ValidationError) as exc_info:
             await service.create_embedding_space(space_data)
-        
-        assert "Model with ID nonexistent not found" in str(exc_info.value)
+
+        assert "Model with ID nonexistent not found" in str(
+            exc_info.value
+        )
 
     async def test_create_embedding_space_validates_model_type(
         self, service: ModelRegistryService, sample_llm_model: str
     ):
         """Test that creating embedding space validates model is embedding type."""
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
         space_data = EmbeddingSpaceCreate(
             model_id=sample_llm_model,
@@ -208,10 +234,10 @@ class TestValidationImprovements:
             effective_dimensions=1536,
             table_name=f"test_embeddings_{unique_id}",
         )
-        
+
         with pytest.raises(ValidationError) as exc_info:
             await service.create_embedding_space(space_data)
-        
+
         assert "is not an embedding model" in str(exc_info.value)
 
     async def test_create_embedding_space_validates_model_active(
@@ -224,6 +250,7 @@ class TestValidationImprovements:
         await service.session.commit()
 
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
         space_data = EmbeddingSpaceCreate(
             model_id=sample_embedding_model,
@@ -233,10 +260,10 @@ class TestValidationImprovements:
             effective_dimensions=1536,
             table_name=f"test_embeddings_{unique_id}",
         )
-        
+
         with pytest.raises(ValidationError) as exc_info:
             await service.create_embedding_space(space_data)
-        
+
         assert "is not active" in str(exc_info.value)
 
     async def test_create_embedding_space_validates_dimensions(
@@ -244,6 +271,7 @@ class TestValidationImprovements:
     ):
         """Test that creating embedding space validates dimensions match."""
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
         space_data = EmbeddingSpaceCreate(
             model_id=sample_embedding_model,
@@ -253,10 +281,10 @@ class TestValidationImprovements:
             effective_dimensions=512,
             table_name=f"test_embeddings_{unique_id}",
         )
-        
+
         with pytest.raises(ValidationError) as exc_info:
             await service.create_embedding_space(space_data)
-        
+
         assert "do not match model dimensions" in str(exc_info.value)
 
 
@@ -271,8 +299,10 @@ class TestBusinessLogicImprovements:
     ):
         """Test that setting default provider also sets a model as default."""
         # Set provider as default for LLM
-        await service.set_default_provider(sample_provider, ModelType.LLM)
-        
+        await service.set_default_provider(
+            sample_provider, ModelType.LLM
+        )
+
         # Verify the model is also set as default
         model = await service.get_model(sample_llm_model)
         assert model.is_default
@@ -282,8 +312,9 @@ class TestBusinessLogicImprovements:
     ):
         """Test that different providers can be default for different model types."""
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
-        
+
         # Create two providers
         provider1_data = ProviderCreate(
             name=f"provider1_{unique_id}",
@@ -322,15 +353,19 @@ class TestBusinessLogicImprovements:
 
         # Set provider1 as default for LLM
         await service.set_default_provider(provider1.id, ModelType.LLM)
-        
+
         # Set provider2 as default for EMBEDDING
-        await service.set_default_provider(provider2.id, ModelType.EMBEDDING)
+        await service.set_default_provider(
+            provider2.id, ModelType.EMBEDDING
+        )
 
         # Verify both defaults are set correctly
         llm_default = await service.get_default_provider(ModelType.LLM)
         assert llm_default.id == provider1.id
 
-        embedding_default = await service.get_default_provider(ModelType.EMBEDDING)
+        embedding_default = await service.get_default_provider(
+            ModelType.EMBEDDING
+        )
         assert embedding_default.id == provider2.id
 
 
@@ -342,6 +377,7 @@ class TestTransactionManagement:
     ):
         """Test that model creation rolls back properly on error."""
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
         # Create a model with invalid data to trigger an error
         model_data = ModelDefCreate(
@@ -351,15 +387,19 @@ class TestTransactionManagement:
             display_name="Test Model",
             model_name="gpt-4",
         )
-        
+
         # First create should succeed
         model = await service.create_model(model_data)
         assert model is not None
 
         # Second create with same name should fail and not leave partial data
-        with pytest.raises(Exception):  # Could be IntegrityError or ValidationError
+        with pytest.raises(
+            (ValueError, IntegrityError)
+        ):  # Could be IntegrityError or ValidationError
             await service.create_model(model_data)
 
         # Verify no partial data was left
         models = await service.list_models(provider_id=sample_provider)
-        assert len(models[0]) == 1  # Should still be just the first model
+        assert (
+            len(models[0]) == 1
+        )  # Should still be just the first model

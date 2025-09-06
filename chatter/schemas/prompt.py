@@ -110,61 +110,94 @@ class PromptCreate(PromptBase):
         # Validate template format
         valid_formats = ["f-string", "jinja2", "mustache", "simple"]
         if self.template_format not in valid_formats:
-            raise ValueError(f"Invalid template format. Must be one of: {valid_formats}")
-        
+            raise ValueError(
+                f"Invalid template format. Must be one of: {valid_formats}"
+            )
+
         # Validate content length constraints
         if self.min_length is not None and self.max_length is not None:
             if self.min_length > self.max_length:
-                raise ValueError("min_length cannot be greater than max_length")
-                
+                raise ValueError(
+                    "min_length cannot be greater than max_length"
+                )
+
         # Validate content against length constraints
-        if self.min_length is not None and len(self.content) < self.min_length:
-            raise ValueError(f"Content length ({len(self.content)}) is less than minimum ({self.min_length})")
-        if self.max_length is not None and len(self.content) > self.max_length:
-            raise ValueError(f"Content length ({len(self.content)}) exceeds maximum ({self.max_length})")
-        
+        if (
+            self.min_length is not None
+            and len(self.content) < self.min_length
+        ):
+            raise ValueError(
+                f"Content length ({len(self.content)}) is less than minimum ({self.min_length})"
+            )
+        if (
+            self.max_length is not None
+            and len(self.content) > self.max_length
+        ):
+            raise ValueError(
+                f"Content length ({len(self.content)}) exceeds maximum ({self.max_length})"
+            )
+
         # Validate template syntax
-        from chatter.utils.template_security import SecureTemplateRenderer
+        from chatter.utils.template_security import (
+            SecureTemplateRenderer,
+        )
+
         validation = SecureTemplateRenderer.validate_template_syntax(
             self.content, self.template_format
         )
         if not validation['valid']:
-            raise ValueError(f"Invalid template syntax: {'; '.join(validation['errors'])}")
-        
+            raise ValueError(
+                f"Invalid template syntax: {'; '.join(validation['errors'])}"
+            )
+
         # Auto-extract variables from template if not provided
         if self.variables is None:
             self.variables = validation['variables']
-        
+
         # Validate required variables against template variables
         if self.required_variables is not None:
             template_vars = set(validation['variables'])
             required_vars = set(self.required_variables)
             missing_vars = required_vars - template_vars
             if missing_vars:
-                raise ValueError(f"Required variables not found in template: {missing_vars}")
-                
+                raise ValueError(
+                    f"Required variables not found in template: {missing_vars}"
+                )
+
         # Validate chain configuration
         if self.is_chain and self.chain_steps is None:
-            raise ValueError("chain_steps must be provided when is_chain is True")
-        
+            raise ValueError(
+                "chain_steps must be provided when is_chain is True"
+            )
+
         # Validate JSON schemas if provided
         if self.input_schema is not None:
             try:
                 import jsonschema
-                jsonschema.Draft7Validator.check_schema(self.input_schema)
+
+                jsonschema.Draft7Validator.check_schema(
+                    self.input_schema
+                )
             except ImportError:
                 pass  # Skip validation if jsonschema not available
             except Exception as e:
-                raise ValueError(f"Invalid input schema: {str(e)}") from e
-                
+                raise ValueError(
+                    f"Invalid input schema: {str(e)}"
+                ) from e
+
         if self.output_schema is not None:
             try:
                 import jsonschema
-                jsonschema.Draft7Validator.check_schema(self.output_schema)
+
+                jsonschema.Draft7Validator.check_schema(
+                    self.output_schema
+                )
             except ImportError:
                 pass  # Skip validation if jsonschema not available
             except Exception as e:
-                raise ValueError(f"Invalid output schema: {str(e)}") from e
+                raise ValueError(
+                    f"Invalid output schema: {str(e)}"
+                ) from e
 
 
 class PromptUpdate(BaseModel):
@@ -253,55 +286,90 @@ class PromptUpdate(BaseModel):
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
-    
+
     def model_post_init(self, __context: Any) -> None:
         """Validate that at least one field is provided for update."""
         # Get all field values excluding None
         non_none_fields = {
-            field: value for field, value in self.model_dump().items() 
+            field: value
+            for field, value in self.model_dump().items()
             if value is not None
         }
-        
+
         if not non_none_fields:
-            raise ValueError("At least one field must be provided for update")
-        
+            raise ValueError(
+                "At least one field must be provided for update"
+            )
+
         # Validate template format if provided
         if self.template_format is not None:
             valid_formats = ["f-string", "jinja2", "mustache", "simple"]
             if self.template_format not in valid_formats:
-                raise ValueError(f"Invalid template format. Must be one of: {valid_formats}")
-        
+                raise ValueError(
+                    f"Invalid template format. Must be one of: {valid_formats}"
+                )
+
         # Validate content length constraints
         if self.min_length is not None and self.max_length is not None:
             if self.min_length > self.max_length:
-                raise ValueError("min_length cannot be greater than max_length")
-                
+                raise ValueError(
+                    "min_length cannot be greater than max_length"
+                )
+
         # Validate content against length constraints if both content and constraints provided
         if self.content is not None:
-            if self.min_length is not None and len(self.content) < self.min_length:
-                raise ValueError(f"Content length ({len(self.content)}) is less than minimum ({self.min_length})")
-            if self.max_length is not None and len(self.content) > self.max_length:
-                raise ValueError(f"Content length ({len(self.content)}) exceeds maximum ({self.max_length})")
-        
+            if (
+                self.min_length is not None
+                and len(self.content) < self.min_length
+            ):
+                raise ValueError(
+                    f"Content length ({len(self.content)}) is less than minimum ({self.min_length})"
+                )
+            if (
+                self.max_length is not None
+                and len(self.content) > self.max_length
+            ):
+                raise ValueError(
+                    f"Content length ({len(self.content)}) exceeds maximum ({self.max_length})"
+                )
+
         # Validate template syntax if content and format are provided
-        if self.content is not None and self.template_format is not None:
-            from chatter.utils.template_security import SecureTemplateRenderer
-            validation = SecureTemplateRenderer.validate_template_syntax(
-                self.content, self.template_format
+        if (
+            self.content is not None
+            and self.template_format is not None
+        ):
+            from chatter.utils.template_security import (
+                SecureTemplateRenderer,
+            )
+
+            validation = (
+                SecureTemplateRenderer.validate_template_syntax(
+                    self.content, self.template_format
+                )
             )
             if not validation['valid']:
-                raise ValueError(f"Invalid template syntax: {'; '.join(validation['errors'])}")
-        
+                raise ValueError(
+                    f"Invalid template syntax: {'; '.join(validation['errors'])}"
+                )
+
         # Validate required variables against template variables
-        if (self.required_variables is not None and 
-            self.variables is not None):
-            missing_vars = set(self.required_variables) - set(self.variables)
+        if (
+            self.required_variables is not None
+            and self.variables is not None
+        ):
+            missing_vars = set(self.required_variables) - set(
+                self.variables
+            )
             if missing_vars:
-                raise ValueError(f"Required variables not in variables list: {missing_vars}")
-                
+                raise ValueError(
+                    f"Required variables not in variables list: {missing_vars}"
+                )
+
         # Validate chain configuration
         if self.is_chain is True and self.chain_steps is None:
-            raise ValueError("chain_steps must be provided when is_chain is True")
+            raise ValueError(
+                "chain_steps must be provided when is_chain is True"
+            )
 
 
 class PromptResponse(BaseModel):
@@ -497,17 +565,23 @@ class PromptTestRequest(BaseModel):
         False, description="Include detailed performance metrics"
     )
     timeout_ms: int = Field(
-        30000, ge=1000, le=60000, description="Test timeout in milliseconds"
+        30000,
+        ge=1000,
+        le=60000,
+        description="Test timeout in milliseconds",
     )
-    
+
     def model_post_init(self, __context: Any) -> None:
         """Validate test request data."""
         # Validate variable count
         if len(self.variables) > 100:
             raise ValueError("Too many variables (max 100)")
-        
+
         # Validate variable names and values
-        from chatter.utils.template_security import SecureTemplateRenderer
+        from chatter.utils.template_security import (
+            SecureTemplateRenderer,
+        )
+
         try:
             SecureTemplateRenderer._sanitize_variables(self.variables)
         except ValueError as e:

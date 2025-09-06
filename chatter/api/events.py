@@ -5,7 +5,7 @@ import json
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
-from chatter.api.auth import get_current_user, get_current_admin_user
+from chatter.api.auth import get_current_admin_user, get_current_user
 from chatter.config import settings
 from chatter.models.user import User
 from chatter.schemas.events import (
@@ -14,7 +14,10 @@ from chatter.schemas.events import (
 )
 from chatter.services.sse_events import EventType, sse_service
 from chatter.utils.logging import get_logger
-from chatter.utils.unified_rate_limiter import get_unified_rate_limiter, RateLimitExceeded
+from chatter.utils.unified_rate_limiter import (
+    RateLimitExceeded,
+    get_unified_rate_limiter,
+)
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -55,6 +58,7 @@ async def events_stream(
         )
     except RateLimitExceeded as e:
         from chatter.utils.problem import RateLimitProblem
+
         raise RateLimitProblem(
             detail="Too many SSE connection attempts. Please wait before trying again."
         ) from e
@@ -73,10 +77,11 @@ async def events_stream(
                 error=str(e),
             )
             from chatter.utils.problem import ServiceUnavailableProblem
+
             raise ServiceUnavailableProblem(
                 detail="Too many active connections. Please try again later."
             ) from e
-        
+
         connection = sse_service.get_connection(connection_id)
 
         if not connection:
@@ -135,6 +140,7 @@ async def events_stream(
                 error=str(e),
             )
             from datetime import UTC, datetime
+
             error_event = {
                 "type": "error",
                 "data": {"error": "Stream connection error"},
@@ -151,9 +157,15 @@ async def events_stream(
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": ", ".join(settings.cors_origins),
-            "Access-Control-Allow-Headers": ", ".join(settings.cors_allow_headers),
-            "Access-Control-Allow-Credentials": str(settings.cors_allow_credentials).lower(),
+            "Access-Control-Allow-Origin": ", ".join(
+                settings.cors_origins
+            ),
+            "Access-Control-Allow-Headers": ", ".join(
+                settings.cors_allow_headers
+            ),
+            "Access-Control-Allow-Credentials": str(
+                settings.cors_allow_credentials
+            ).lower(),
         },
     )
 
@@ -213,7 +225,9 @@ async def admin_events_stream(
             async for event in connection.get_events():
                 # Check if client disconnected
                 if await request.is_disconnected():
-                    logger.info("Admin client disconnected from SSE stream")
+                    logger.info(
+                        "Admin client disconnected from SSE stream"
+                    )
                     break
 
                 # Skip keepalive events for admin stream too
@@ -245,6 +259,7 @@ async def admin_events_stream(
                 error=str(e),
             )
             from datetime import UTC, datetime
+
             error_event = {
                 "type": "error",
                 "data": {"error": "Admin stream connection error"},
@@ -261,9 +276,15 @@ async def admin_events_stream(
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": ", ".join(settings.cors_origins),
-            "Access-Control-Allow-Headers": ", ".join(settings.cors_allow_headers),
-            "Access-Control-Allow-Credentials": str(settings.cors_allow_credentials).lower(),
+            "Access-Control-Allow-Origin": ", ".join(
+                settings.cors_origins
+            ),
+            "Access-Control-Allow-Headers": ", ".join(
+                settings.cors_allow_headers
+            ),
+            "Access-Control-Allow-Credentials": str(
+                settings.cors_allow_credentials
+            ).lower(),
         },
     )
 

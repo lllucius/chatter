@@ -16,6 +16,12 @@ from langchain_core.messages import (
 from langchain_openai import ChatOpenAI
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from chatter.core.dependencies import (
+    get_builtin_tools,
+    get_mcp_service,
+    get_model_registry,
+    get_orchestrator,
+)
 from chatter.models.registry import ModelType, ProviderType
 from chatter.utils.database import get_session_maker
 from chatter.utils.logging import get_logger
@@ -26,15 +32,6 @@ if TYPE_CHECKING:
     from chatter.models.profile import Profile
 
 logger = get_logger(__name__)
-
-
-# Import dependency injection functions
-from chatter.core.dependencies import (
-    get_builtin_tools,
-    get_mcp_service,
-    get_model_registry,
-    get_orchestrator,
-)
 
 
 class LLMProviderError(Exception):

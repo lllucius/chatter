@@ -5,7 +5,15 @@ from __future__ import annotations
 from datetime import date as date_type
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Date, Float, ForeignKey, Integer, String, CheckConstraint
+from sqlalchemy import (
+    JSON,
+    CheckConstraint,
+    Date,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys

@@ -36,7 +36,9 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 
-def _check_test_access(test: ABTestResponse | None, current_user: User) -> None:
+def _check_test_access(
+    test: ABTestResponse | None, current_user: User
+) -> None:
     """Check if user has access to the test.
 
     Args:
@@ -55,12 +57,18 @@ def _check_test_access(test: ABTestResponse | None, current_user: User) -> None:
     if test.created_by != current_user.username:
         # Allow admins to access all tests (assuming admin role exists)
         user_roles = getattr(current_user, 'roles', [])
-        if 'admin' not in user_roles and 'ab_testing_admin' not in user_roles:
+        if (
+            'admin' not in user_roles
+            and 'ab_testing_admin' not in user_roles
+        ):
             raise ForbiddenProblem(
                 detail="You don't have permission to access this A/B test"
             )
 
-def _validate_test_operation(test: ABTestResponse, operation: str, current_user: User) -> None:
+
+def _validate_test_operation(
+    test: ABTestResponse, operation: str, current_user: User
+) -> None:
     """Validate if user can perform operation on test.
 
     Args:
@@ -85,7 +93,10 @@ def _validate_test_operation(test: ABTestResponse, operation: str, current_user:
             detail=f"Cannot pause test in {test.status} status"
         )
 
-    if operation in ["complete", "end"] and test.status not in [TestStatus.RUNNING, TestStatus.PAUSED]:
+    if operation in ["complete", "end"] and test.status not in [
+        TestStatus.RUNNING,
+        TestStatus.PAUSED,
+    ]:
         raise BadRequestProblem(
             detail=f"Cannot complete test in {test.status} status"
         )
@@ -94,6 +105,7 @@ def _validate_test_operation(test: ABTestResponse, operation: str, current_user:
         raise BadRequestProblem(
             detail="Cannot delete running test. Pause or complete it first."
         )
+
 
 async def get_ab_test_manager() -> ABTestManager:
     """Get A/B test manager instance.
@@ -132,10 +144,14 @@ async def create_ab_test(
             raise BadRequestProblem(detail="Test name is required")
 
         if len(test_data.name) > 200:
-            raise BadRequestProblem(detail="Test name too long (max 200 characters)")
+            raise BadRequestProblem(
+                detail="Test name too long (max 200 characters)"
+            )
 
         if len(test_data.description) > 1000:
-            raise BadRequestProblem(detail="Test description too long (max 1000 characters)")
+            raise BadRequestProblem(
+                detail="Test description too long (max 1000 characters)"
+            )
 
         # Validate variants
         if len(test_data.variants) < 2:
@@ -152,20 +168,31 @@ async def create_ab_test(
         variants = []
         total_weight = 0
         for i, variant_data in enumerate(test_data.variants):
-            if not variant_data.name or len(variant_data.name.strip()) == 0:
-                raise BadRequestProblem(detail=f"Variant {i+1} name is required")
+            if (
+                not variant_data.name
+                or len(variant_data.name.strip()) == 0
+            ):
+                raise BadRequestProblem(
+                    detail=f"Variant {i+1} name is required"
+                )
 
             if len(variant_data.name) > 100:
-                raise BadRequestProblem(detail=f"Variant {i+1} name too long (max 100 characters)")
+                raise BadRequestProblem(
+                    detail=f"Variant {i+1} name too long (max 100 characters)"
+                )
 
             if variant_data.weight < 0:
-                raise BadRequestProblem(detail=f"Variant {i+1} weight cannot be negative")
+                raise BadRequestProblem(
+                    detail=f"Variant {i+1} weight cannot be negative"
+                )
 
             total_weight += variant_data.weight
 
             variant_dict = {
                 "name": variant_data.name.strip(),
-                "description": variant_data.description[:500],  # Limit description length
+                "description": variant_data.description[
+                    :500
+                ],  # Limit description length
                 "weight": variant_data.weight,
                 "configuration": variant_data.configuration,
                 "is_control": (i == 0),  # First variant is control
@@ -173,7 +200,10 @@ async def create_ab_test(
             variants.append(variant_dict)
 
         # Validate total weight for weighted allocation
-        if test_data.allocation_strategy == VariantAllocation.WEIGHTED and total_weight <= 0:
+        if (
+            test_data.allocation_strategy == VariantAllocation.WEIGHTED
+            and total_weight <= 0
+        ):
             raise BadRequestProblem(
                 detail="Weighted allocation requires at least one variant with positive weight"
             )
@@ -761,11 +791,23 @@ async def get_ab_test_results(
 
                 # Extract confidence interval for this variant and metric
                 confidence_interval = None
-                if (variant_id in results.confidence_intervals and
-                    metric_name in results.confidence_intervals[variant_id]):
-                    ci_data = results.confidence_intervals[variant_id][metric_name]
-                    if isinstance(ci_data, dict) and "lower" in ci_data and "upper" in ci_data:
-                        confidence_interval = [ci_data["lower"], ci_data["upper"]]
+                if (
+                    variant_id in results.confidence_intervals
+                    and metric_name
+                    in results.confidence_intervals[variant_id]
+                ):
+                    ci_data = results.confidence_intervals[variant_id][
+                        metric_name
+                    ]
+                    if (
+                        isinstance(ci_data, dict)
+                        and "lower" in ci_data
+                        and "upper" in ci_data
+                    ):
+                        confidence_interval = [
+                            ci_data["lower"],
+                            ci_data["upper"],
+                        ]
 
                 metrics.append(
                     TestMetric(
@@ -779,28 +821,49 @@ async def get_ab_test_results(
 
         # Format confidence intervals properly for response
         confidence_intervals_formatted = {}
-        for variant_id, intervals in results.confidence_intervals.items():
+        for (
+            variant_id,
+            intervals,
+        ) in results.confidence_intervals.items():
             confidence_intervals_formatted[variant_id] = {}
             for metric, ci_data in intervals.items():
-                if isinstance(ci_data, dict) and "lower" in ci_data and "upper" in ci_data:
-                    confidence_intervals_formatted[variant_id][metric] = [
+                if (
+                    isinstance(ci_data, dict)
+                    and "lower" in ci_data
+                    and "upper" in ci_data
+                ):
+                    confidence_intervals_formatted[variant_id][
+                        metric
+                    ] = [
                         float(ci_data["lower"]),
                         float(ci_data["upper"]),
                     ]
                 else:
                     # Fallback for malformed data
-                    confidence_intervals_formatted[variant_id][metric] = [0.0, 0.0]
+                    confidence_intervals_formatted[variant_id][
+                        metric
+                    ] = [0.0, 0.0]
 
         # Determine winning variant from statistical significance
         winning_variant = None
-        for variant_id, is_significant in results.statistical_significance.items():
+        for (
+            variant_id,
+            is_significant,
+        ) in results.statistical_significance.items():
             if is_significant and variant_id in results.variant_results:
                 # Check if this variant is better than others
                 variant_data = results.variant_results[variant_id]
                 variant_metrics = variant_data.get("metrics", {})
-                primary_metric_name = test.primary_metric.name if test else None
-                if primary_metric_name and primary_metric_name in variant_metrics:
-                    winning_variant = variant_data.get("variant_name", variant_id)
+                primary_metric_name = (
+                    test.primary_metric.name if test else None
+                )
+                if (
+                    primary_metric_name
+                    and primary_metric_name in variant_metrics
+                ):
+                    winning_variant = variant_data.get(
+                        "variant_name", variant_id
+                    )
                     break
 
         # Calculate total sample size and duration
@@ -812,6 +875,7 @@ async def get_ab_test_results(
         duration_days = 7  # Default
         if test and test.start_date:
             from datetime import UTC, datetime
+
             end_date = test.end_date or datetime.now(UTC)
             duration_days = (end_date - test.start_date).days
             if duration_days <= 0:
@@ -826,7 +890,8 @@ async def get_ab_test_results(
             confidence_intervals=confidence_intervals_formatted,
             winning_variant=winning_variant,
             recommendation=(
-                results.recommendations[0] if results.recommendations
+                results.recommendations[0]
+                if results.recommendations
                 else "Continue monitoring for more data"
             ),
             generated_at=results.analysis_date,
@@ -866,8 +931,10 @@ async def get_ab_test_metrics(
     try:
         # Get test results from AB test manager
         test_result = await ab_test_manager.get_test_results(test_id)
-        test_performance = await ab_test_manager.get_test_performance(test_id)
-        
+        test_performance = await ab_test_manager.get_test_performance(
+            test_id
+        )
+
         if not test_result or not test_performance:
             # If no test results, return empty metrics
             return ABTestMetricsResponse(
@@ -881,7 +948,10 @@ async def get_ab_test_metrics(
 
         # Build metrics from test results
         metrics = []
-        for variant_name, variant_data in test_result.variant_results.items():
+        for (
+            variant_name,
+            variant_data,
+        ) in test_result.variant_results.items():
             for metric_name, metric_value in variant_data.items():
                 # Convert metric name to MetricType enum
                 try:
@@ -889,30 +959,54 @@ async def get_ab_test_metrics(
                 except ValueError:
                     # Skip unknown metric types
                     continue
-                
+
                 # Get sample size from variant data or use 0 as default
                 sample_size = variant_data.get("sample_size", 0)
-                
+
                 # Get confidence interval if available
                 confidence_interval = None
-                if (variant_name in test_result.confidence_intervals and 
-                    metric_name in test_result.confidence_intervals[variant_name]):
-                    ci_data = test_result.confidence_intervals[variant_name][metric_name]
-                    if isinstance(ci_data, dict) and "lower" in ci_data and "upper" in ci_data:
-                        confidence_interval = (ci_data["lower"], ci_data["upper"])
+                if (
+                    variant_name in test_result.confidence_intervals
+                    and metric_name
+                    in test_result.confidence_intervals[variant_name]
+                ):
+                    ci_data = test_result.confidence_intervals[
+                        variant_name
+                    ][metric_name]
+                    if (
+                        isinstance(ci_data, dict)
+                        and "lower" in ci_data
+                        and "upper" in ci_data
+                    ):
+                        confidence_interval = (
+                            ci_data["lower"],
+                            ci_data["upper"],
+                        )
 
-                metrics.append(TestMetric(
-                    metric_type=metric_type,
-                    variant_name=variant_name,
-                    value=float(metric_value) if isinstance(metric_value, (int, float)) else 0.0,
-                    sample_size=int(sample_size) if isinstance(sample_size, (int, float)) else 0,
-                    confidence_interval=confidence_interval,
-                ))
+                metrics.append(
+                    TestMetric(
+                        metric_type=metric_type,
+                        variant_name=variant_name,
+                        value=(
+                            float(metric_value)
+                            if isinstance(metric_value, int | float)
+                            else 0.0
+                        ),
+                        sample_size=(
+                            int(sample_size)
+                            if isinstance(sample_size, int | float)
+                            else 0
+                        ),
+                        confidence_interval=confidence_interval,
+                    )
+                )
 
         return ABTestMetricsResponse(
             test_id=test_id,
             metrics=metrics,
-            participant_count=test_performance.get("total_participants", 0),
+            participant_count=test_performance.get(
+                "total_participants", 0
+            ),
             last_updated=test_result.analysis_date,
         )
 
@@ -1068,7 +1162,9 @@ async def get_ab_test_recommendations(
         _check_test_access(test_response, current_user)
 
         # Get recommendations
-        recommendations = await ab_test_manager.get_test_recommendations(test_id)
+        recommendations = (
+            await ab_test_manager.get_test_recommendations(test_id)
+        )
         return recommendations
 
     except (NotFoundProblem, ForbiddenProblem):

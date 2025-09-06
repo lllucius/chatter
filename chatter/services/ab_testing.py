@@ -181,7 +181,9 @@ class ABTestManager:
         self.tests: dict[str, ABTest] = {}
         self.assignments: dict[str, TestAssignment] = {}
         # Add index for faster user assignment lookups
-        self.user_assignments: dict[str, dict[str, TestAssignment]] = {}  # user_id -> {test_id: assignment}
+        self.user_assignments: dict[str, dict[str, TestAssignment]] = (
+            {}
+        )  # user_id -> {test_id: assignment}
         self.events: list[TestEvent] = []
         self.results: dict[str, TestResult] = {}
         self.max_events = 100000  # Limit event storage
@@ -201,20 +203,28 @@ class ABTestManager:
         if not test.variants:
             errors.append("Test must have at least one variant")
         elif len(test.variants) < 2:
-            errors.append("Test must have at least two variants for comparison")
+            errors.append(
+                "Test must have at least two variants for comparison"
+            )
 
         # Check for control variant
         control_count = sum(1 for v in test.variants if v.is_control)
         if control_count == 0:
-            errors.append("Test should have exactly one control variant")
+            errors.append(
+                "Test should have exactly one control variant"
+            )
         elif control_count > 1:
             errors.append("Test cannot have multiple control variants")
 
         # Validate variant weights for weighted allocation
         if test.allocation_strategy == VariantAllocation.WEIGHTED:
-            total_weight = sum(v.weight for v in test.variants if v.active)
+            total_weight = sum(
+                v.weight for v in test.variants if v.active
+            )
             if total_weight <= 0:
-                errors.append("Weighted allocation requires at least one variant with positive weight")
+                errors.append(
+                    "Weighted allocation requires at least one variant with positive weight"
+                )
 
         # Validate sample size requirements
         if test.minimum_sample_size < 10:
@@ -222,11 +232,15 @@ class ABTestManager:
 
         # Validate confidence level
         if not (0.5 <= test.confidence_level <= 0.99):
-            errors.append("Confidence level must be between 0.5 and 0.99")
+            errors.append(
+                "Confidence level must be between 0.5 and 0.99"
+            )
 
         # Validate traffic percentage
         if not (0.0 <= test.traffic_percentage <= 1.0):
-            errors.append("Traffic percentage must be between 0.0 and 1.0")
+            errors.append(
+                "Traffic percentage must be between 0.0 and 1.0"
+            )
 
         # Validate duration
         if test.duration_days and test.duration_days <= 0:
@@ -292,7 +306,9 @@ class ABTestManager:
 
         # Sanitize and validate target_users
         if target_users:
-            target_users = self._sanitize_targeting_criteria(target_users)
+            target_users = self._sanitize_targeting_criteria(
+                target_users
+            )
 
         # Create test
         test = ABTest(
@@ -620,7 +636,9 @@ class ABTestManager:
         )
         return (hash_value % 10000) / 10000.0 < test.traffic_percentage
 
-    def _sanitize_targeting_criteria(self, criteria: dict[str, Any]) -> dict[str, Any]:
+    def _sanitize_targeting_criteria(
+        self, criteria: dict[str, Any]
+    ) -> dict[str, Any]:
         """Sanitize targeting criteria to prevent injection attacks.
 
         Args:
@@ -635,7 +653,9 @@ class ABTestManager:
         sanitized = {}
         for key, value in criteria.items():
             # Sanitize key - only allow alphanumeric and underscore
-            clean_key = ''.join(c for c in str(key) if c.isalnum() or c == '_')[:50]
+            clean_key = ''.join(
+                c for c in str(key) if c.isalnum() or c == '_'
+            )[:50]
             if not clean_key:
                 continue
 
@@ -644,7 +664,17 @@ class ABTestManager:
                 # Limit string length and remove potentially harmful characters
                 clean_value = str(value)[:200]
                 # Remove common injection patterns
-                dangerous_patterns = ['<', '>', '"', "'", '`', '\\', 'script', 'eval', 'exec']
+                dangerous_patterns = [
+                    '<',
+                    '>',
+                    '"',
+                    "'",
+                    '`',
+                    '\\',
+                    'script',
+                    'eval',
+                    'exec',
+                ]
                 for pattern in dangerous_patterns:
                     clean_value = clean_value.replace(pattern, '')
                 sanitized[clean_key] = clean_value
@@ -678,7 +708,9 @@ class ABTestManager:
             True if user matches criteria
         """
         # Sanitize user attributes to prevent injection
-        safe_attributes = self._sanitize_targeting_criteria(user_attributes)
+        safe_attributes = self._sanitize_targeting_criteria(
+            user_attributes
+        )
 
         # Check inclusion criteria
         for key, value in test.target_users.items():
@@ -808,9 +840,22 @@ class ABTestManager:
                         "count": len(metric_values),
                         "sum": sum(metric_values),
                         "std": (
-                            (sum((x - sum(metric_values) / len(metric_values))**2 for x in metric_values) / len(metric_values))**0.5
-                            if len(metric_values) > 1 else 0.0
-                        )
+                            (
+                                sum(
+                                    (
+                                        x
+                                        - sum(metric_values)
+                                        / len(metric_values)
+                                    )
+                                    ** 2
+                                    for x in metric_values
+                                )
+                                / len(metric_values)
+                            )
+                            ** 0.5
+                            if len(metric_values) > 1
+                            else 0.0
+                        ),
                     }
 
                 # Calculate secondary metrics as well
@@ -822,13 +867,27 @@ class ABTestManager:
                     ]
                     if secondary_values:
                         metrics[secondary_metric.name] = {
-                            "mean": sum(secondary_values) / len(secondary_values),
+                            "mean": sum(secondary_values)
+                            / len(secondary_values),
                             "count": len(secondary_values),
                             "sum": sum(secondary_values),
                             "std": (
-                                (sum((x - sum(secondary_values) / len(secondary_values))**2 for x in secondary_values) / len(secondary_values))**0.5
-                                if len(secondary_values) > 1 else 0.0
-                            )
+                                (
+                                    sum(
+                                        (
+                                            x
+                                            - sum(secondary_values)
+                                            / len(secondary_values)
+                                        )
+                                        ** 2
+                                        for x in secondary_values
+                                    )
+                                    / len(secondary_values)
+                                )
+                                ** 0.5
+                                if len(secondary_values) > 1
+                                else 0.0
+                            ),
                         }
 
             variant_results[variant.id] = {
@@ -864,18 +923,28 @@ class ABTestManager:
 
             # Perform statistical tests for each variant vs control
             if control_variant and test_variants:
-                control_metrics = variant_results[control_variant].get("metrics", {})
+                control_metrics = variant_results[control_variant].get(
+                    "metrics", {}
+                )
 
                 for variant_id in test_variants:
-                    variant_metrics = variant_results[variant_id].get("metrics", {})
+                    variant_metrics = variant_results[variant_id].get(
+                        "metrics", {}
+                    )
 
                     # Test primary metric
                     primary_metric_name = test.primary_metric.name
-                    if (primary_metric_name in control_metrics and
-                        primary_metric_name in variant_metrics):
+                    if (
+                        primary_metric_name in control_metrics
+                        and primary_metric_name in variant_metrics
+                    ):
 
-                        control_data = control_metrics[primary_metric_name]
-                        variant_data = variant_metrics[primary_metric_name]
+                        control_data = control_metrics[
+                            primary_metric_name
+                        ]
+                        variant_data = variant_metrics[
+                            primary_metric_name
+                        ]
 
                         # Simple two-sample test approximation
                         # In production, use scipy.stats.ttest_ind or similar
@@ -889,8 +958,16 @@ class ABTestManager:
                         # Calculate confidence intervals (95% CI approximation)
                         if control_count > 1 and variant_count > 1:
                             # Simple t-test approximation
-                            control_se = control_std / (control_count ** 0.5) if control_count > 0 else 0
-                            variant_se = variant_std / (variant_count ** 0.5) if variant_count > 0 else 0
+                            control_se = (
+                                control_std / (control_count**0.5)
+                                if control_count > 0
+                                else 0
+                            )
+                            variant_se = (
+                                variant_std / (variant_count**0.5)
+                                if variant_count > 0
+                                else 0
+                            )
 
                             # 95% CI (using z-score approximation of 1.96)
                             z_score = 1.96
@@ -899,39 +976,75 @@ class ABTestManager:
 
                             confidence_intervals[control_variant] = {
                                 primary_metric_name: {
-                                    "lower": control_mean - control_margin,
-                                    "upper": control_mean + control_margin,
+                                    "lower": control_mean
+                                    - control_margin,
+                                    "upper": control_mean
+                                    + control_margin,
                                 }
                             }
 
                             confidence_intervals[variant_id] = {
                                 primary_metric_name: {
-                                    "lower": variant_mean - variant_margin,
-                                    "upper": variant_mean + variant_margin,
+                                    "lower": variant_mean
+                                    - variant_margin,
+                                    "upper": variant_mean
+                                    + variant_margin,
                                 }
                             }
 
                             # Simple significance test: check if confidence intervals overlap
-                            control_upper = control_mean + control_margin
-                            control_lower = control_mean - control_margin
-                            variant_upper = variant_mean + variant_margin
-                            variant_lower = variant_mean - variant_margin
+                            control_upper = (
+                                control_mean + control_margin
+                            )
+                            control_lower = (
+                                control_mean - control_margin
+                            )
+                            variant_upper = (
+                                variant_mean + variant_margin
+                            )
+                            variant_lower = (
+                                variant_mean - variant_margin
+                            )
 
                             # Non-overlapping intervals suggest significance
-                            intervals_overlap = not (control_upper < variant_lower or variant_upper < control_lower)
+                            intervals_overlap = not (
+                                control_upper < variant_lower
+                                or variant_upper < control_lower
+                            )
 
                             # Also check minimum sample size and effect size
-                            min_sample_met = (control_count >= test.minimum_sample_size and
-                                            variant_count >= test.minimum_sample_size)
+                            min_sample_met = (
+                                control_count
+                                >= test.minimum_sample_size
+                                and variant_count
+                                >= test.minimum_sample_size
+                            )
 
                             # Check if difference meets improvement threshold
-                            if test.primary_metric.direction == "increase":
-                                meets_threshold = (variant_mean - control_mean) / control_mean >= test.primary_metric.improvement_threshold if control_mean > 0 else False
+                            if (
+                                test.primary_metric.direction
+                                == "increase"
+                            ):
+                                meets_threshold = (
+                                    (variant_mean - control_mean)
+                                    / control_mean
+                                    >= test.primary_metric.improvement_threshold
+                                    if control_mean > 0
+                                    else False
+                                )
                             else:
-                                meets_threshold = (control_mean - variant_mean) / control_mean >= test.primary_metric.improvement_threshold if control_mean > 0 else False
+                                meets_threshold = (
+                                    (control_mean - variant_mean)
+                                    / control_mean
+                                    >= test.primary_metric.improvement_threshold
+                                    if control_mean > 0
+                                    else False
+                                )
 
                             statistical_significance[variant_id] = (
-                                not intervals_overlap and min_sample_met and meets_threshold
+                                not intervals_overlap
+                                and min_sample_met
+                                and meets_threshold
                             )
                         else:
                             # Insufficient data
@@ -948,7 +1061,9 @@ class ABTestManager:
                 # Also set significance for control
                 if control_variant:
                     if control_variant not in statistical_significance:
-                        statistical_significance[control_variant] = True  # Control is baseline
+                        statistical_significance[control_variant] = (
+                            True  # Control is baseline
+                        )
 
         # Generate recommendations
         recommendations = []
@@ -980,7 +1095,9 @@ class ABTestManager:
 
         logger.info(f"Analyzed results for test {test_id}")
 
-    async def _check_auto_stop_conditions(self, test_id: str, result: TestResult) -> None:
+    async def _check_auto_stop_conditions(
+        self, test_id: str, result: TestResult
+    ) -> None:
         """Check if test should be automatically stopped based on results.
 
         Args:
@@ -994,14 +1111,15 @@ class ABTestManager:
         # Check if test has been running for minimum duration
         if test.start_date:
             from datetime import timedelta
+
             min_duration = timedelta(days=1)  # Minimum 1 day
             if datetime.now(UTC) - test.start_date < min_duration:
                 return
 
         # Check if we have statistical significance
         significant_variants = [
-            variant_id for variant_id, is_significant
-            in result.statistical_significance.items()
+            variant_id
+            for variant_id, is_significant in result.statistical_significance.items()
             if is_significant
         ]
 
@@ -1014,13 +1132,17 @@ class ABTestManager:
             for data in result.variant_results.values()
         )
 
-        if total_users < test.minimum_sample_size * 2:  # Want at least 2x minimum across all variants
+        if (
+            total_users < test.minimum_sample_size * 2
+        ):  # Want at least 2x minimum across all variants
             return
 
         # Auto-stop conditions met - mark for completion
         test.metadata = test.metadata or {}
         test.metadata["auto_stop_triggered"] = True
-        test.metadata["auto_stop_reason"] = "Statistical significance reached"
+        test.metadata["auto_stop_reason"] = (
+            "Statistical significance reached"
+        )
         test.metadata["significant_variants"] = significant_variants
 
         logger.info(
@@ -1050,10 +1172,18 @@ class ABTestManager:
         import math
 
         # Z-score for confidence level (two-tailed)
-        z_alpha = 1.96 if confidence_level == 0.95 else 2.576 if confidence_level == 0.99 else 1.645
+        z_alpha = (
+            1.96
+            if confidence_level == 0.95
+            else 2.576 if confidence_level == 0.99 else 1.645
+        )
 
         # Z-score for statistical power (one-tailed)
-        z_beta = 0.842 if statistical_power == 0.8 else 1.036 if statistical_power == 0.85 else 1.282
+        z_beta = (
+            0.842
+            if statistical_power == 0.8
+            else 1.036 if statistical_power == 0.85 else 1.282
+        )
 
         # Expected conversion rates
         p1 = baseline_conversion
@@ -1063,8 +1193,10 @@ class ABTestManager:
         p_pooled = (p1 + p2) / 2
 
         # Sample size calculation (simplified formula for proportions)
-        numerator = (z_alpha * math.sqrt(2 * p_pooled * (1 - p_pooled)) +
-                    z_beta * math.sqrt(p1 * (1 - p1) + p2 * (1 - p2))) ** 2
+        numerator = (
+            z_alpha * math.sqrt(2 * p_pooled * (1 - p_pooled))
+            + z_beta * math.sqrt(p1 * (1 - p1) + p2 * (1 - p2))
+        ) ** 2
         denominator = (p2 - p1) ** 2
 
         if denominator == 0:
@@ -1082,7 +1214,9 @@ class ABTestManager:
 
         return sample_size
 
-    async def get_test_recommendations(self, test_id: str) -> dict[str, Any]:
+    async def get_test_recommendations(
+        self, test_id: str
+    ) -> dict[str, Any]:
         """Get comprehensive recommendations for a test.
 
         Args:
@@ -1138,8 +1272,8 @@ class ABTestManager:
 
                 # Check for significant results
                 significant_variants = [
-                    variant_id for variant_id, is_significant
-                    in results.statistical_significance.items()
+                    variant_id
+                    for variant_id, is_significant in results.statistical_significance.items()
                     if is_significant
                 ]
 
@@ -1157,18 +1291,34 @@ class ABTestManager:
                 # Performance insights
                 if len(results.variant_results) >= 2:
                     variant_performance = []
-                    for variant_id, data in results.variant_results.items():
+                    for (
+                        variant_id,
+                        data,
+                    ) in results.variant_results.items():
                         metrics = data.get("metrics", {})
-                        primary_metric = metrics.get(test.primary_metric.name, {})
+                        primary_metric = metrics.get(
+                            test.primary_metric.name, {}
+                        )
                         if primary_metric:
-                            variant_performance.append({
-                                "variant": data.get("variant_name", variant_id),
-                                "performance": primary_metric.get("mean", 0),
-                                "sample_size": primary_metric.get("count", 0),
-                            })
+                            variant_performance.append(
+                                {
+                                    "variant": data.get(
+                                        "variant_name", variant_id
+                                    ),
+                                    "performance": primary_metric.get(
+                                        "mean", 0
+                                    ),
+                                    "sample_size": primary_metric.get(
+                                        "count", 0
+                                    ),
+                                }
+                            )
 
                     if variant_performance:
-                        best_variant = max(variant_performance, key=lambda x: x["performance"])
+                        best_variant = max(
+                            variant_performance,
+                            key=lambda x: x["performance"],
+                        )
                         recommendations["insights"].append(
                             f"Current best performing variant: {best_variant['variant']} "
                             f"({best_variant['performance']:.3f})"
@@ -1178,8 +1328,8 @@ class ABTestManager:
             if results:
                 # Provide implementation recommendations
                 significant_variants = [
-                    variant_id for variant_id, is_significant
-                    in results.statistical_significance.items()
+                    variant_id
+                    for variant_id, is_significant in results.statistical_significance.items()
                     if is_significant
                 ]
 
@@ -1188,7 +1338,9 @@ class ABTestManager:
                         "Test completed with significant results. Implement the winning variant "
                         "and monitor performance in production."
                     )
-                    recommendations["next_actions"].append("implement_winner")
+                    recommendations["next_actions"].append(
+                        "implement_winner"
+                    )
                 else:
                     recommendations["recommendations"].append(
                         "Test completed without significant results. Consider running a longer test "
@@ -1247,9 +1399,13 @@ class ABTestManager:
                 del self.assignments[assignment_id]
 
             # Clean up events
-            self.events = [e for e in self.events if e.test_id != test_id]
+            self.events = [
+                e for e in self.events if e.test_id != test_id
+            ]
 
-            logger.info(f"Deleted test {test_id} and cleaned up {len(assignments_to_remove)} assignments")
+            logger.info(
+                f"Deleted test {test_id} and cleaned up {len(assignments_to_remove)} assignments"
+            )
             return True
         return False
 

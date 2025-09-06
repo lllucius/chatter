@@ -11,7 +11,9 @@ import time
 from pathlib import Path
 
 
-def run_command(cmd: list[str], cwd: str | None = None, capture_output: bool = False) -> subprocess.CompletedProcess:
+def run_command(
+    cmd: list[str], cwd: str | None = None, capture_output: bool = False
+) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
     print(f"Running: {' '.join(cmd)}")
     try:
@@ -20,7 +22,7 @@ def run_command(cmd: list[str], cwd: str | None = None, capture_output: bool = F
             cwd=cwd,
             capture_output=capture_output,
             text=True,
-            check=False
+            check=False,
         )
         return result
     except Exception as e:
@@ -28,7 +30,9 @@ def run_command(cmd: list[str], cwd: str | None = None, capture_output: bool = F
         sys.exit(1)
 
 
-def run_unit_tests(verbose: bool = False, coverage: bool = True) -> bool:
+def run_unit_tests(
+    verbose: bool = False, coverage: bool = True
+) -> bool:
     """Run unit tests with coverage."""
     print("🔬 Running unit tests...")
 
@@ -89,26 +93,42 @@ def run_performance_tests(verbose: bool = False) -> bool:
     return result.returncode == 0
 
 
-def run_load_tests(duration: int = 60, users: int = 10, host: str = "http://localhost:8000") -> bool:
+def run_load_tests(
+    duration: int = 60,
+    users: int = 10,
+    host: str = "http://localhost:8000",
+) -> bool:
     """Run load tests with Locust."""
-    print(f"🔥 Running load tests for {duration}s with {users} users...")
+    print(
+        f"🔥 Running load tests for {duration}s with {users} users..."
+    )
 
     # Check if locust is installed
-    locust_check = run_command(["locust", "--version"], capture_output=True)
+    locust_check = run_command(
+        ["locust", "--version"], capture_output=True
+    )
     if locust_check.returncode != 0:
-        print("❌ Locust not installed. Install with: pip install locust")
+        print(
+            "❌ Locust not installed. Install with: pip install locust"
+        )
         return False
 
     cmd = [
         "locust",
-        "-f", "tests/load/locust_scenarios.py",
-        "--host", host,
-        "--users", str(users),
-        "--spawn-rate", str(min(users, 5)),
-        "--run-time", f"{duration}s",
+        "-f",
+        "tests/load/locust_scenarios.py",
+        "--host",
+        host,
+        "--users",
+        str(users),
+        "--spawn-rate",
+        str(min(users, 5)),
+        "--run-time",
+        f"{duration}s",
         "--headless",
         "--print-stats",
-        "--html", "reports/load_test_report.html"
+        "--html",
+        "reports/load_test_report.html",
     ]
 
     # Create reports directory
@@ -167,7 +187,9 @@ def run_linting() -> bool:
 
     # Run isort (import sorting)
     print("Running isort import check...")
-    result = run_command(["isort", "--check-only", "chatter/", "tests/"])
+    result = run_command(
+        ["isort", "--check-only", "chatter/", "tests/"]
+    )
     if result.returncode != 0:
         print("💡 Run 'isort chatter/ tests/' to fix imports")
         success = False
@@ -192,13 +214,15 @@ def generate_test_report() -> None:
 
     # Run tests with detailed output
     cmd = [
-        "python", "-m", "pytest",
+        "python",
+        "-m",
+        "pytest",
         "--cov=chatter",
         "--cov-report=html:reports/coverage",
         "--cov-report=xml:reports/coverage.xml",
         "--junit-xml=reports/junit.xml",
         "--html=reports/test_report.html",
-        "--self-contained-html"
+        "--self-contained-html",
     ]
 
     result = run_command(cmd)
@@ -212,30 +236,88 @@ def generate_test_report() -> None:
 
 def main():
     """Main test automation script."""
-    parser = argparse.ArgumentParser(description="Chatter Test Automation")
-    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
-    parser.add_argument("--quick", action="store_true", help="Run quick tests only")
-    parser.add_argument("--full", action="store_true", help="Run full test suite")
-    parser.add_argument("--unit", action="store_true", help="Run unit tests only")
-    parser.add_argument("--integration", action="store_true", help="Run integration tests only")
-    parser.add_argument("--e2e", action="store_true", help="Run E2E tests only")
-    parser.add_argument("--performance", action="store_true", help="Run performance tests only")
-    parser.add_argument("--load", action="store_true", help="Run load tests")
-    parser.add_argument("--frontend", action="store_true", help="Run frontend tests only")
-    parser.add_argument("--lint", action="store_true", help="Run linting only")
-    parser.add_argument("--type-check", action="store_true", help="Run type checking only")
-    parser.add_argument("--report", action="store_true", help="Generate test report")
-    parser.add_argument("--load-duration", type=int, default=60, help="Load test duration in seconds")
-    parser.add_argument("--load-users", type=int, default=10, help="Number of load test users")
-    parser.add_argument("--load-host", default="http://localhost:8000", help="Load test target host")
+    parser = argparse.ArgumentParser(
+        description="Chatter Test Automation"
+    )
+    parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Verbose output"
+    )
+    parser.add_argument(
+        "--quick", action="store_true", help="Run quick tests only"
+    )
+    parser.add_argument(
+        "--full", action="store_true", help="Run full test suite"
+    )
+    parser.add_argument(
+        "--unit", action="store_true", help="Run unit tests only"
+    )
+    parser.add_argument(
+        "--integration",
+        action="store_true",
+        help="Run integration tests only",
+    )
+    parser.add_argument(
+        "--e2e", action="store_true", help="Run E2E tests only"
+    )
+    parser.add_argument(
+        "--performance",
+        action="store_true",
+        help="Run performance tests only",
+    )
+    parser.add_argument(
+        "--load", action="store_true", help="Run load tests"
+    )
+    parser.add_argument(
+        "--frontend",
+        action="store_true",
+        help="Run frontend tests only",
+    )
+    parser.add_argument(
+        "--lint", action="store_true", help="Run linting only"
+    )
+    parser.add_argument(
+        "--type-check",
+        action="store_true",
+        help="Run type checking only",
+    )
+    parser.add_argument(
+        "--report", action="store_true", help="Generate test report"
+    )
+    parser.add_argument(
+        "--load-duration",
+        type=int,
+        default=60,
+        help="Load test duration in seconds",
+    )
+    parser.add_argument(
+        "--load-users",
+        type=int,
+        default=10,
+        help="Number of load test users",
+    )
+    parser.add_argument(
+        "--load-host",
+        default="http://localhost:8000",
+        help="Load test target host",
+    )
 
     args = parser.parse_args()
 
-    if not any([
-        args.quick, args.full, args.unit, args.integration, args.e2e,
-        args.performance, args.load, args.frontend, args.lint,
-        args.type_check, args.report
-    ]):
+    if not any(
+        [
+            args.quick,
+            args.full,
+            args.unit,
+            args.integration,
+            args.e2e,
+            args.performance,
+            args.load,
+            args.frontend,
+            args.lint,
+            args.type_check,
+            args.report,
+        ]
+    ):
         # Default: run quick tests
         args.quick = True
 
@@ -271,7 +353,7 @@ def main():
         success &= run_load_tests(
             duration=args.load_duration,
             users=args.load_users,
-            host=args.load_host
+            host=args.load_host,
         )
 
     if args.report:

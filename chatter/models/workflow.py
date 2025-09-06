@@ -10,13 +10,15 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
     String,
     Text,
 )
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -105,7 +107,9 @@ class WorkflowTemplate(Base):
     )
 
     # Template metadata
-    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(
+        String(255), nullable=False, index=True
+    )
     description: Mapped[str] = mapped_column(Text, nullable=False)
     workflow_type: Mapped[WorkflowType] = mapped_column(
         SQLEnum(WorkflowType),
@@ -132,7 +136,10 @@ class WorkflowTemplate(Base):
 
     # Template source tracking
     base_template_id: Mapped[str | None] = mapped_column(
-        String(26), ForeignKey("workflow_templates.id"), nullable=True, index=True
+        String(26),
+        ForeignKey("workflow_templates.id"),
+        nullable=True,
+        index=True,
     )
     is_builtin: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False, index=True
@@ -211,10 +218,14 @@ class WorkflowTemplate(Base):
     )
 
     @validates("default_params")
-    def _set_config_hash(self, key: str, value: dict[str, Any]) -> dict[str, Any]:
+    def _set_config_hash(
+        self, key: str, value: dict[str, Any]
+    ) -> dict[str, Any]:
         """Set config hash when default_params is updated."""
         config_str = f"{self.name}:{self.workflow_type}:{str(value)}"
-        self.config_hash = hashlib.sha256(config_str.encode("utf-8")).hexdigest()
+        self.config_hash = hashlib.sha256(
+            config_str.encode("utf-8")
+        ).hexdigest()
         return value
 
     def __repr__(self) -> str:
@@ -300,7 +311,9 @@ class TemplateSpec(Base):
     )
 
     # Spec metadata
-    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(
+        String(255), nullable=False, index=True
+    )
     description: Mapped[str] = mapped_column(Text, nullable=False)
     workflow_type: Mapped[WorkflowType] = mapped_column(
         SQLEnum(WorkflowType),

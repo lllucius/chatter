@@ -68,6 +68,7 @@ def train_truncated_svd(
     # Sample texts if needed
     if sample_size and len(texts) > sample_size:
         import random
+
         texts = random.sample(texts, sample_size)
         logger.info(f"Sampled {len(texts)} texts for training")
 
@@ -77,32 +78,47 @@ def train_truncated_svd(
     batch_size = 50  # Process in batches to avoid memory issues
 
     for i in range(0, len(texts), batch_size):
-        batch = texts[i:i + batch_size]
+        batch = texts[i : i + batch_size]
         batch_embeddings = embeddings_provider.embed_documents(batch)
         embeddings.extend(batch_embeddings)
 
         if (i // batch_size + 1) % 10 == 0:
-            logger.info(f"Processed {i + len(batch)} / {len(texts)} texts")
+            logger.info(
+                f"Processed {i + len(batch)} / {len(texts)} texts"
+            )
 
     # Convert to numpy array
     X = np.array(embeddings)
     logger.info(f"Training data shape: {X.shape}")
 
     # Train TruncatedSVD
-    logger.info(f"Training TruncatedSVD with target dimension {target_dim}")
+    logger.info(
+        f"Training TruncatedSVD with target dimension {target_dim}"
+    )
     svd = TruncatedSVD(n_components=target_dim, random_state=42)
     svd.fit(X)
 
     # Log explained variance
     explained_variance_ratio = svd.explained_variance_ratio_.sum()
-    logger.info(f"Explained variance ratio: {explained_variance_ratio:.4f}")
+    logger.info(
+        f"Explained variance ratio: {explained_variance_ratio:.4f}"
+    )
 
     # Save the model
     if not output_path:
-        output_path = f"svd_{provider}_{X.shape[1]}_to_{target_dim}.joblib"
+        output_path = (
+            f"svd_{provider}_{X.shape[1]}_to_{target_dim}.joblib"
+        )
 
     # Ensure output directory exists
-    os.makedirs(os.path.dirname(output_path) if os.path.dirname(output_path) else ".", exist_ok=True)
+    os.makedirs(
+        (
+            os.path.dirname(output_path)
+            if os.path.dirname(output_path)
+            else "."
+        ),
+        exist_ok=True,
+    )
 
     joblib.dump(svd, output_path)
     logger.info(f"Saved TruncatedSVD model to {output_path}")
@@ -112,35 +128,35 @@ def train_truncated_svd(
 
 def main():
     """Main function for training script."""
-    parser = argparse.ArgumentParser(description="Train dimensional reduction for embeddings")
+    parser = argparse.ArgumentParser(
+        description="Train dimensional reduction for embeddings"
+    )
     parser.add_argument(
         "--corpus",
         type=str,
         required=True,
-        help="Path to training corpus file (one text per line)"
+        help="Path to training corpus file (one text per line)",
     )
     parser.add_argument(
         "--provider",
         type=str,
         default="openai",
         choices=["openai", "google", "cohere"],
-        help="Embedding provider to use"
+        help="Embedding provider to use",
     )
     parser.add_argument(
         "--target-dim",
         type=int,
         default=1536,
-        help="Target dimension after reduction"
+        help="Target dimension after reduction",
     )
     parser.add_argument(
         "--sample-size",
         type=int,
-        help="Maximum number of texts to use for training"
+        help="Maximum number of texts to use for training",
     )
     parser.add_argument(
-        "--output",
-        type=str,
-        help="Output path for the trained model"
+        "--output", type=str, help="Output path for the trained model"
     )
 
     args = parser.parse_args()
@@ -174,7 +190,9 @@ def main():
         print("Training completed successfully!")
         print(f"Model saved to: {model_path}")
         print()
-        print("To use this model, set the following environment variables:")
+        print(
+            "To use this model, set the following environment variables:"
+        )
         print("EMBEDDING_REDUCTION_ENABLED=true")
         print("EMBEDDING_REDUCTION_STRATEGY=reducer")
         print(f"EMBEDDING_REDUCTION_TARGET_DIM={args.target_dim}")

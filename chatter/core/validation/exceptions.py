@@ -1,18 +1,18 @@
 """Unified validation exceptions hierarchy."""
 
-from typing import Any, List, Dict, Optional
+from typing import Any
 
 
 class ValidationError(Exception):
     """Base validation error."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        field: Optional[str] = None,
+        self,
+        message: str,
+        field: str | None = None,
         value: Any = None,
-        code: Optional[str] = None,
-        context: Optional[Dict[str, Any]] = None
+        code: str | None = None,
+        context: dict[str, Any] | None = None,
     ):
         super().__init__(message)
         self.message = message
@@ -20,7 +20,7 @@ class ValidationError(Exception):
         self.value = value
         self.code = code
         self.context = context or {}
-        
+
     def __str__(self) -> str:
         if self.field:
             return f"Validation error for field '{self.field}': {self.message}"
@@ -29,12 +29,9 @@ class ValidationError(Exception):
 
 class SecurityValidationError(ValidationError):
     """Security-related validation error."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        threat_type: Optional[str] = None,
-        **kwargs
+        self, message: str, threat_type: str | None = None, **kwargs
     ):
         super().__init__(message, **kwargs)
         self.threat_type = threat_type
@@ -43,12 +40,9 @@ class SecurityValidationError(ValidationError):
 
 class BusinessValidationError(ValidationError):
     """Business logic validation error."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        rule_name: Optional[str] = None,
-        **kwargs
+        self, message: str, rule_name: str | None = None, **kwargs
     ):
         super().__init__(message, **kwargs)
         self.rule_name = rule_name
@@ -57,12 +51,9 @@ class BusinessValidationError(ValidationError):
 
 class ConfigurationValidationError(ValidationError):
     """Configuration validation error."""
-    
+
     def __init__(
-        self, 
-        message: str, 
-        config_key: Optional[str] = None,
-        **kwargs
+        self, message: str, config_key: str | None = None, **kwargs
     ):
         super().__init__(message, **kwargs)
         self.config_key = config_key
@@ -71,17 +62,17 @@ class ConfigurationValidationError(ValidationError):
 
 class ValidationErrors(Exception):
     """Container for multiple validation errors."""
-    
-    def __init__(self, errors: List[ValidationError]):
+
+    def __init__(self, errors: list[ValidationError]):
         self.errors = errors
         message = f"Multiple validation errors ({len(errors)})"
         super().__init__(message)
-        
+
     def __str__(self) -> str:
         error_messages = [str(error) for error in self.errors]
         return "\n".join(error_messages)
-        
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format for API responses."""
         return {
             "type": "validation_errors",
@@ -92,8 +83,8 @@ class ValidationErrors(Exception):
                     "message": error.message,
                     "code": error.code,
                     "value": error.value,
-                    "context": error.context
+                    "context": error.context,
                 }
                 for error in self.errors
-            ]
+            ],
         }

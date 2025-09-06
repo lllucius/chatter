@@ -14,11 +14,13 @@ logger = get_logger(__name__)
 
 # Import unified event system for integration (optional)
 try:
-    from chatter.core.events import EventCategory, EventPriority
+    # EventCategory and EventPriority not needed but importing for future use
     UNIFIED_EVENTS_AVAILABLE = True
 except ImportError:
     UNIFIED_EVENTS_AVAILABLE = False
-    logger.debug("Unified events system not available, using legacy SSE only")
+    logger.debug(
+        "Unified events system not available, using legacy SSE only"
+    )
 
 
 class SSEConnection:
@@ -30,7 +32,9 @@ class SSEConnection:
         self.connected_at = datetime.now(UTC)
         self.last_activity = datetime.now(UTC)
         # Bounded queue to prevent memory issues with slow clients
-        self._queue: asyncio.Queue[Event] = asyncio.Queue(maxsize=settings.sse_queue_maxsize)
+        self._queue: asyncio.Queue[Event] = asyncio.Queue(
+            maxsize=settings.sse_queue_maxsize
+        )
         self._closed = False
         self._dropped_events = 0
 
@@ -51,7 +55,9 @@ class SSEConnection:
                     dropped_events=self._dropped_events,
                 )
                 # Optionally, we could drop oldest events instead
-                if self._dropped_events % 10 == 0:  # Log every 10th drop
+                if (
+                    self._dropped_events % 10 == 0
+                ):  # Log every 10th drop
                     logger.error(
                         "Client appears to be slow, many events dropped",
                         connection_id=self.connection_id,
@@ -70,7 +76,8 @@ class SSEConnection:
             try:
                 # Wait for an event with configurable timeout
                 event = await asyncio.wait_for(
-                    self._queue.get(), timeout=float(settings.sse_keepalive_timeout)
+                    self._queue.get(),
+                    timeout=float(settings.sse_keepalive_timeout),
                 )
                 yield event
             except TimeoutError:
@@ -107,7 +114,9 @@ class SSEEventService:
         )  # user_id -> connection_ids
         self._cleanup_task: asyncio.Task | None = None
         # Connection limits from configuration
-        self.max_connections_per_user = settings.sse_max_connections_per_user
+        self.max_connections_per_user = (
+            settings.sse_max_connections_per_user
+        )
         self.max_total_connections = settings.sse_max_total_connections
 
     async def start(self) -> None:
@@ -143,7 +152,7 @@ class SSEEventService:
                 max_connections=self.max_total_connections,
             )
             raise ValueError("Maximum number of connections reached")
-        
+
         # Check per-user connection limit
         if user_id and user_id in self.user_connections:
             user_connection_count = len(self.user_connections[user_id])
@@ -154,8 +163,10 @@ class SSEEventService:
                     user_connections=user_connection_count,
                     max_per_user=self.max_connections_per_user,
                 )
-                raise ValueError("Maximum number of connections per user reached")
-        
+                raise ValueError(
+                    "Maximum number of connections per user reached"
+                )
+
         connection_id = str(uuid.uuid4())
         connection = SSEConnection(connection_id, user_id)
 
@@ -171,7 +182,11 @@ class SSEEventService:
             connection_id=connection_id,
             user_id=user_id,
             total_connections=len(self.connections),
-            user_connections=len(self.user_connections.get(user_id, [])) if user_id else 0,
+            user_connections=(
+                len(self.user_connections.get(user_id, []))
+                if user_id
+                else 0
+            ),
         )
 
         return connection_id
@@ -217,11 +232,13 @@ class SSEEventService:
         # Send event to connections efficiently without building lists
         send_count = 0
         error_count = 0
-        
+
         if event.user_id:
             # Send to specific user's connections
             if event.user_id in self.user_connections:
-                connection_ids = list(self.user_connections[event.user_id])  # Create snapshot
+                connection_ids = list(
+                    self.user_connections[event.user_id]
+                )  # Create snapshot
                 for connection_id in connection_ids:
                     connection = self.connections.get(connection_id)
                     if connection:
@@ -238,7 +255,9 @@ class SSEEventService:
                             )
         else:
             # Broadcast to all connections (stream without building list)
-            connection_items = list(self.connections.items())  # Snapshot for safety
+            connection_items = list(
+                self.connections.items()
+            )  # Snapshot for safety
             for connection_id, connection in connection_items:
                 try:
                     await connection.send_event(event)
@@ -251,7 +270,7 @@ class SSEEventService:
                         event_type=event.type.value,
                         error=str(e),
                     )
-        
+
         if send_count > 0 or error_count > 0:
             logger.debug(
                 "Event broadcast complete",
@@ -271,7 +290,7 @@ class SSEEventService:
         try:
             # Validate and sanitize event data
             validated_data = validate_event_data(event_type, data)
-            
+
             event = Event(
                 type=event_type,
                 data=validated_data,
@@ -280,7 +299,7 @@ class SSEEventService:
             )
 
             await self.broadcast_event(event)
-            
+
             return event.id
         except Exception as e:
             logger.error(
@@ -307,7 +326,9 @@ class SSEEventService:
         """Periodically clean up inactive connections."""
         while True:
             try:
-                await asyncio.sleep(settings.sse_connection_cleanup_interval)
+                await asyncio.sleep(
+                    settings.sse_connection_cleanup_interval
+                )
 
                 now = datetime.now(UTC)
                 inactive_connections = []

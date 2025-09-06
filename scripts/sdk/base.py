@@ -44,10 +44,13 @@ class SDKGenerator(ABC):
         try:
             # Import here to avoid circular dependencies
             from scripts.generate_openapi import generate_openapi_spec
+
             return generate_openapi_spec()
         except ImportError:
             # Fallback to mock spec if dependencies are not available
-            print("⚠️  Backend dependencies not available, using mock OpenAPI spec")
+            print(
+                "⚠️  Backend dependencies not available, using mock OpenAPI spec"
+            )
             return MockOpenAPISpec.get_mock_spec()
 
     def save_temp_openapi_spec(self, spec: dict[str, Any]) -> Path:
@@ -74,7 +77,7 @@ class SDKGenerator(ABC):
         generator_type: str,
         spec_path: Path,
         config_path: Path,
-        additional_args: list[str] = None
+        additional_args: list[str] = None,
     ) -> bool:
         """
         Run the OpenAPI generator command.
@@ -91,10 +94,14 @@ class SDKGenerator(ABC):
         cmd = [
             "openapi-generator-cli",
             "generate",
-            "-i", str(spec_path),
-            "-g", generator_type,
-            "-o", str(self.config.output_dir),
-            "-c", str(config_path),
+            "-i",
+            str(spec_path),
+            "-g",
+            generator_type,
+            "-o",
+            str(self.config.output_dir),
+            "-c",
+            str(config_path),
             "--skip-validate-spec",
         ]
 
@@ -106,7 +113,7 @@ class SDKGenerator(ABC):
                 cmd,
                 f"{generator_type} SDK generation",
                 cwd=self.config.project_root,
-                timeout=300
+                timeout=300,
             )
             return success
         except ProcessError as e:
@@ -116,7 +123,9 @@ class SDKGenerator(ABC):
 
             # For testing, create minimal mock files if generation fails
             if "Command not found" in str(e):
-                print("⚠️  Generator tool not found, creating minimal mock SDK for testing")
+                print(
+                    "⚠️  Generator tool not found, creating minimal mock SDK for testing"
+                )
                 return self._create_mock_sdk()
 
             return False
@@ -140,10 +149,13 @@ class MockOpenAPISpec:
             "info": {
                 "title": "Chatter API",
                 "version": "0.1.0",
-                "description": "Chatter AI Chatbot API"
+                "description": "Chatter AI Chatbot API",
             },
             "servers": [
-                {"url": "http://localhost:8000", "description": "Development server"}
+                {
+                    "url": "http://localhost:8000",
+                    "description": "Development server",
+                }
             ],
             "paths": {
                 "/api/v1/health": {
@@ -158,14 +170,18 @@ class MockOpenAPISpec:
                                         "schema": {
                                             "type": "object",
                                             "properties": {
-                                                "status": {"type": "string"},
-                                                "timestamp": {"type": "string"}
-                                            }
+                                                "status": {
+                                                    "type": "string"
+                                                },
+                                                "timestamp": {
+                                                    "type": "string"
+                                                },
+                                            },
                                         }
                                     }
-                                }
+                                },
                             }
-                        }
+                        },
                     }
                 }
             },
@@ -175,11 +191,11 @@ class MockOpenAPISpec:
                         "type": "object",
                         "properties": {
                             "status": {"type": "string"},
-                            "timestamp": {"type": "string"}
-                        }
+                            "timestamp": {"type": "string"},
+                        },
                     }
                 }
-            }
+            },
         }
 
     def _create_mock_sdk(self) -> bool:

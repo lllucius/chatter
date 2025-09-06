@@ -10,13 +10,15 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
     String,
     Text,
 )
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -284,12 +286,14 @@ class Prompt(Base):
 
         Returns:
             Rendered prompt string
-            
+
         Raises:
             ValueError: If template rendering fails or variables are invalid
         """
-        from chatter.utils.template_security import SecureTemplateRenderer
-        
+        from chatter.utils.template_security import (
+            SecureTemplateRenderer,
+        )
+
         if self.template_format == "f-string":
             return SecureTemplateRenderer.render_secure_f_string(
                 self.content, kwargs
@@ -304,8 +308,13 @@ class Prompt(Base):
             )
         else:
             # Simple string replacement for basic templates
-            from chatter.utils.template_security import SecureTemplateRenderer
-            sanitized_vars = SecureTemplateRenderer._sanitize_variables(kwargs)
+            from chatter.utils.template_security import (
+                SecureTemplateRenderer,
+            )
+
+            sanitized_vars = SecureTemplateRenderer._sanitize_variables(
+                kwargs
+            )
             result = self.content
             for key, value in sanitized_vars.items():
                 result = result.replace(f"{{{key}}}", value)
@@ -320,8 +329,10 @@ class Prompt(Base):
         Returns:
             Validation result with errors and warnings
         """
-        from chatter.utils.template_security import SecureTemplateRenderer
-        
+        from chatter.utils.template_security import (
+            SecureTemplateRenderer,
+        )
+
         result = {
             "valid": True,
             "errors": [],
@@ -332,18 +343,20 @@ class Prompt(Base):
 
         try:
             # First validate template syntax and extract expected variables
-            template_validation = SecureTemplateRenderer.validate_template_syntax(
-                self.content, self.template_format
+            template_validation = (
+                SecureTemplateRenderer.validate_template_syntax(
+                    self.content, self.template_format
+                )
             )
-            
+
             # If template syntax is invalid, return early
             if not template_validation['valid']:
                 result['valid'] = False
                 result['errors'].extend(template_validation['errors'])
                 return result
-            
+
             expected_variables = set(template_validation['variables'])
-            
+
             # Validate variable names and values using secure renderer
             try:
                 SecureTemplateRenderer._sanitize_variables(kwargs)
@@ -367,7 +380,7 @@ class Prompt(Base):
                 expected_from_config = set(self.variables)
             else:
                 expected_from_config = expected_variables
-                
+
             for var in kwargs:
                 if var not in expected_from_config:
                     result["warnings"].append(
@@ -385,14 +398,17 @@ class Prompt(Base):
                         # Check if there's a schema for this variable
                         if (
                             "properties" in self.input_schema
-                            and var_name in self.input_schema["properties"]
+                            and var_name
+                            in self.input_schema["properties"]
                         ):
-                            var_schema = self.input_schema["properties"][
-                                var_name
-                            ]
+                            var_schema = self.input_schema[
+                                "properties"
+                            ][var_name]
 
                             try:
-                                jsonschema.validate(var_value, var_schema)
+                                jsonschema.validate(
+                                    var_value, var_schema
+                                )
                             except jsonschema.ValidationError as ve:
                                 result["valid"] = False
                                 result["errors"].append(
@@ -409,7 +425,9 @@ class Prompt(Base):
                         and self.input_schema["type"] == "object"
                     ):
                         try:
-                            jsonschema.validate(kwargs, self.input_schema)
+                            jsonschema.validate(
+                                kwargs, self.input_schema
+                            )
                         except jsonschema.ValidationError as ve:
                             result["valid"] = False
                             result["errors"].append(

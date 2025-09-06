@@ -3,35 +3,42 @@
 import re
 from typing import Any
 
-from fastapi import APIRouter, Depends, status, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, status
 
 from chatter.api.auth import get_current_user
 from chatter.core.agents import AgentManager
+from chatter.core.validation import (
+    DEFAULT_CONTEXT,
+    ValidationError,
+    validation_engine,
+)
 from chatter.models.user import User
 from chatter.schemas.agents import (
+    AgentBulkCreateRequest,
+    AgentBulkCreateResponse,
+    AgentBulkDeleteRequest,
     AgentCreateRequest,
     AgentDeleteResponse,
     AgentGetRequest,
+    AgentHealthResponse,
     AgentInteractRequest,
     AgentInteractResponse,
     AgentListRequest,
     AgentListResponse,
     AgentResponse,
     AgentStatsResponse,
+    AgentStatus,
     AgentUpdateRequest,
-    AgentHealthResponse,
-    AgentBulkCreateRequest,
-    AgentBulkCreateResponse,
-    AgentBulkDeleteRequest,
 )
-from chatter.core.validation import validation_engine, ValidationError, DEFAULT_CONTEXT
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
     InternalServerProblem,
     NotFoundProblem,
 )
-from chatter.utils.unified_rate_limiter import get_unified_rate_limiter, RateLimitExceeded
+from chatter.utils.unified_rate_limiter import (
+    RateLimitExceeded,
+    get_unified_rate_limiter,
+)
 
 logger = get_logger(__name__)
 router = APIRouter(
@@ -99,7 +106,7 @@ async def create_agent(
             # Check daily limit
             await rate_limiter.check_rate_limit(
                 key=f"create_agent:{current_user.id}",
-                limit=50,   # 50 agents per day
+                limit=50,  # 50 agents per day
                 window=86400,  # 1 day in seconds
                 identifier="create_agent_daily",
             )
@@ -109,42 +116,68 @@ async def create_agent(
         # Validate input data using the unified validation system
         try:
             # Validate agent name
-            result = validation_engine.validate_input(agent_data.name, "agent_name", DEFAULT_CONTEXT)
+            result = validation_engine.validate_input(
+                agent_data.name, "agent_name", DEFAULT_CONTEXT
+            )
             if not result.is_valid:
-                raise InternalServerProblem(detail=result.errors[0].message)
+                raise InternalServerProblem(
+                    detail=result.errors[0].message
+                )
             agent_data.name = result.value
-            
+
             # Validate description (using same rules as agent name)
-            result = validation_engine.validate_input(agent_data.description, "agent_name", DEFAULT_CONTEXT)
+            result = validation_engine.validate_input(
+                agent_data.description, "agent_name", DEFAULT_CONTEXT
+            )
             if not result.is_valid:
-                raise InternalServerProblem(detail=result.errors[0].message)
+                raise InternalServerProblem(
+                    detail=result.errors[0].message
+                )
             agent_data.description = result.value
-            
+
             # Validate system prompt
-            result = validation_engine.validate_input(agent_data.system_prompt, "message", DEFAULT_CONTEXT)
+            result = validation_engine.validate_input(
+                agent_data.system_prompt, "message", DEFAULT_CONTEXT
+            )
             if not result.is_valid:
-                raise InternalServerProblem(detail=result.errors[0].message)
+                raise InternalServerProblem(
+                    detail=result.errors[0].message
+                )
             agent_data.system_prompt = result.value
-            
+
             # Validate agent type - enum validation is handled by Pydantic, keep simple validation
             if agent_data.agent_type is None:
-                raise InternalServerProblem(detail="Agent type is required")
-                
+                raise InternalServerProblem(
+                    detail="Agent type is required"
+                )
+
             # Validate temperature
-            if not isinstance(agent_data.temperature, (int, float)) or agent_data.temperature < 0.0 or agent_data.temperature > 2.0:
-                raise InternalServerProblem(detail="Temperature must be between 0.0 and 2.0")
-            
-            # Validate max_tokens  
-            if not isinstance(agent_data.max_tokens, int) or agent_data.max_tokens < 1 or agent_data.max_tokens > 32000:
-                raise InternalServerProblem(detail="Max tokens must be between 1 and 32000")
-                
+            if (
+                not isinstance(agent_data.temperature, int | float)
+                or agent_data.temperature < 0.0
+                or agent_data.temperature > 2.0
+            ):
+                raise InternalServerProblem(
+                    detail="Temperature must be between 0.0 and 2.0"
+                )
+
+            # Validate max_tokens
+            if (
+                not isinstance(agent_data.max_tokens, int)
+                or agent_data.max_tokens < 1
+                or agent_data.max_tokens > 32000
+            ):
+                raise InternalServerProblem(
+                    detail="Max tokens must be between 1 and 32000"
+                )
+
         except ValidationError as e:
             raise InternalServerProblem(detail=str(e)) from e
 
         # Add created_by to metadata
         metadata = agent_data.metadata or {}
         metadata["created_by"] = current_user.id
-        
+
         # Create agent with enhanced error handling
         try:
             agent_id = await agent_manager.create_agent(
@@ -174,7 +207,9 @@ async def create_agent(
             )
         except ValueError as e:
             logger.error("Invalid agent configuration", error=str(e))
-            raise InternalServerProblem(detail=f"Invalid agent configuration: {str(e)}") from e
+            raise InternalServerProblem(
+                detail=f"Invalid agent configuration: {str(e)}"
+            ) from e
 
         # Get the created agent
         agent = await agent_manager.get_agent(agent_id)
@@ -184,26 +219,30 @@ async def create_agent(
                 detail="Failed to retrieve created agent"
             )
 
-        logger.info("Agent created successfully", 
-                   agent_id=agent_id, 
-                   agent_name=agent_data.name,
-                   created_by=current_user.id)
+        logger.info(
+            "Agent created successfully",
+            agent_id=agent_id,
+            agent_name=agent_data.name,
+            created_by=current_user.id,
+        )
 
         return AgentResponse.model_validate(agent.profile.model_dump())
 
     except InternalServerProblem:
         raise
     except Exception as e:
-        logger.error("Failed to create agent", error=str(e), exc_info=True)
+        logger.error(
+            "Failed to create agent", error=str(e), exc_info=True
+        )
         raise InternalServerProblem(
             detail="Failed to create agent"
         ) from e
 
 
 @router.get(
-    "/", 
+    "/",
     response_model=AgentListResponse,
-    summary="List agents", 
+    summary="List agents",
     description="List all agents with optional filtering and pagination. Users can only see their own agents.",
 )
 async def list_agents(
@@ -223,7 +262,11 @@ async def list_agents(
     """
     try:
         # Validate pagination parameters
-        offset = max(0, request.pagination.offset) if isinstance(request.pagination.offset, int) else 0
+        offset = (
+            max(0, request.pagination.offset)
+            if isinstance(request.pagination.offset, int)
+            else 0
+        )
         limit = request.pagination.limit
         if not isinstance(limit, int) or limit < 1:
             limit = 10
@@ -254,20 +297,28 @@ async def list_agents(
         agent_responses = []
         for agent in agents:
             try:
-                agent_responses.append(AgentResponse.model_validate(agent.model_dump()))
+                agent_responses.append(
+                    AgentResponse.model_validate(agent.model_dump())
+                )
             except Exception as e:
-                logger.warning(f"Failed to serialize agent {agent.id}: {e}")
+                logger.warning(
+                    f"Failed to serialize agent {agent.id}: {e}"
+                )
                 continue
 
         # Calculate pagination info
         current_page = (offset // limit) + 1 if limit > 0 else 1
-        total_pages = (total + limit - 1) // limit if limit > 0 else 1  # Ceiling division
+        total_pages = (
+            (total + limit - 1) // limit if limit > 0 else 1
+        )  # Ceiling division
 
-        logger.info("Listed agents", 
-                   count=len(agent_responses), 
-                   total=total,
-                   page=current_page,
-                   user_id=current_user.id)
+        logger.info(
+            "Listed agents",
+            count=len(agent_responses),
+            total=total,
+            page=current_page,
+            user_id=current_user.id,
+        )
 
         return AgentListResponse(
             agents=agent_responses,
@@ -278,7 +329,11 @@ async def list_agents(
         )
 
     except Exception as e:
-        logger.error("Failed to list agents", error=str(e), user_id=current_user.id)
+        logger.error(
+            "Failed to list agents",
+            error=str(e),
+            user_id=current_user.id,
+        )
         raise InternalServerProblem(
             detail="Failed to list agents"
         ) from e
@@ -315,7 +370,7 @@ async def get_agent_templates(
 
 
 @router.get(
-    "/stats/overview", 
+    "/stats/overview",
     response_model=AgentStatsResponse,
     summary="Get agent statistics",
     description="Get comprehensive statistics about all agents for the current user.",
@@ -364,7 +419,9 @@ async def get_agent(
     """
     try:
         # Validate agent_id format
-        result = validation_engine.validate_input(agent_id, "agent_id", DEFAULT_CONTEXT)
+        result = validation_engine.validate_input(
+            agent_id, "agent_id", DEFAULT_CONTEXT
+        )
         if not result.is_valid:
             raise InternalServerProblem(detail=result.errors[0].message)
         agent_id = result.value
@@ -374,7 +431,11 @@ async def get_agent(
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         # Check if user has access to this agent (basic ownership check)
-        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+        if (
+            hasattr(agent.profile, 'created_by')
+            and agent.profile.created_by != current_user.id
+            and current_user.id != "system"
+        ):
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         return AgentResponse.model_validate(agent.profile.model_dump())
@@ -409,10 +470,13 @@ async def update_agent(
     try:
         # Validate agent_id format (UUID)
         import uuid
+
         try:
             uuid.UUID(agent_id)
         except ValueError as e:
-            raise NotFoundProblem(detail=f"Invalid agent ID format: {agent_id}") from e
+            raise NotFoundProblem(
+                detail=f"Invalid agent ID format: {agent_id}"
+            ) from e
 
         # First check if agent exists
         agent = await agent_manager.get_agent(agent_id)
@@ -420,21 +484,31 @@ async def update_agent(
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         # Check if user has permission to update this agent
-        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+        if (
+            hasattr(agent.profile, 'created_by')
+            and agent.profile.created_by != current_user.id
+            and current_user.id != "system"
+        ):
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         # Update agent using the agent manager
-        success = await agent_manager.update_agent(agent_id, agent_data.model_dump(exclude_unset=True))
-        
+        success = await agent_manager.update_agent(
+            agent_id, agent_data.model_dump(exclude_unset=True)
+        )
+
         if not success:
             raise InternalServerProblem(detail="Failed to update agent")
 
         # Get updated agent
         updated_agent = await agent_manager.get_agent(agent_id)
         if not updated_agent:
-            raise InternalServerProblem(detail="Failed to retrieve updated agent")
+            raise InternalServerProblem(
+                detail="Failed to retrieve updated agent"
+            )
 
-        return AgentResponse.model_validate(updated_agent.profile.model_dump())
+        return AgentResponse.model_validate(
+            updated_agent.profile.model_dump()
+        )
 
     except NotFoundProblem:
         raise
@@ -466,10 +540,13 @@ async def delete_agent(
     try:
         # Validate agent_id format (UUID)
         import uuid
+
         try:
             uuid.UUID(agent_id)
         except ValueError as e:
-            raise NotFoundProblem(detail=f"Invalid agent ID format: {agent_id}") from e
+            raise NotFoundProblem(
+                detail=f"Invalid agent ID format: {agent_id}"
+            ) from e
 
         # Check if agent exists and user has permission to delete
         agent = await agent_manager.get_agent(agent_id)
@@ -477,7 +554,11 @@ async def delete_agent(
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         # Check if user has permission to delete this agent
-        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+        if (
+            hasattr(agent.profile, 'created_by')
+            and agent.profile.created_by != current_user.id
+            and current_user.id != "system"
+        ):
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         success = await agent_manager.delete_agent(agent_id)
@@ -502,7 +583,7 @@ async def delete_agent(
 
 
 @router.post(
-    "/{agent_id}/interact", 
+    "/{agent_id}/interact",
     response_model=AgentInteractResponse,
     summary="Interact with agent",
     description="Send a message to an agent and receive a response. Rate limited per user per agent.",
@@ -551,37 +632,54 @@ async def interact_with_agent(
             raise InternalServerProblem(detail=str(e)) from e
 
         # Validate inputs
-        result = validation_engine.validate_input(agent_id, "agent_id", DEFAULT_CONTEXT)
+        result = validation_engine.validate_input(
+            agent_id, "agent_id", DEFAULT_CONTEXT
+        )
         if not result.is_valid:
             raise InternalServerProblem(detail=result.errors[0].message)
         agent_id = result.value
-        
-        result = validation_engine.validate_input(interaction_data.conversation_id, "conversation_id", DEFAULT_CONTEXT)
+
+        result = validation_engine.validate_input(
+            interaction_data.conversation_id,
+            "conversation_id",
+            DEFAULT_CONTEXT,
+        )
         if not result.is_valid:
             raise InternalServerProblem(detail=result.errors[0].message)
         conversation_id = result.value
-        
-        result = validation_engine.validate_input(interaction_data.message, "message", DEFAULT_CONTEXT)
+
+        result = validation_engine.validate_input(
+            interaction_data.message, "message", DEFAULT_CONTEXT
+        )
         if not result.is_valid:
             raise InternalServerProblem(detail=result.errors[0].message)
         message = result.value
-        
-        # Sanitize context 
+
+        # Sanitize context
         context = interaction_data.context or {}
         if not isinstance(context, dict):
             context = {}
-        
+
         # Sanitize context keys and values
         sanitized_context = {}
         for key, value in context.items():
             if isinstance(key, str) and len(key) <= 100:
                 if isinstance(value, str) and len(value) <= 1000:
                     # Remove dangerous patterns
-                    value = re.sub(r"<script.*?>.*?</script>", "", value, flags=re.IGNORECASE)
-                    value = re.sub(r"javascript:", "", value, flags=re.IGNORECASE)
-                    value = re.sub(r"on\w+\s*=", "", value, flags=re.IGNORECASE)
+                    value = re.sub(
+                        r"<script.*?>.*?</script>",
+                        "",
+                        value,
+                        flags=re.IGNORECASE,
+                    )
+                    value = re.sub(
+                        r"javascript:", "", value, flags=re.IGNORECASE
+                    )
+                    value = re.sub(
+                        r"on\w+\s*=", "", value, flags=re.IGNORECASE
+                    )
                     sanitized_context[key] = value
-                elif isinstance(value, (int, float, bool)):
+                elif isinstance(value, int | float | bool):
                     sanitized_context[key] = value
         context = sanitized_context
 
@@ -591,13 +689,18 @@ async def interact_with_agent(
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         # Check if user has permission to interact with this agent
-        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+        if (
+            hasattr(agent.profile, 'created_by')
+            and agent.profile.created_by != current_user.id
+            and current_user.id != "system"
+        ):
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         # Add user context to interaction
         context["user_id"] = current_user.id
 
         from datetime import UTC, datetime
+
         start_time = datetime.now(UTC)
 
         response = await agent_manager.send_message_to_agent(
@@ -655,7 +758,9 @@ async def get_agent_health(
     """
     try:
         # Validate agent_id format
-        result = validation_engine.validate_input(agent_id, "agent_id", DEFAULT_CONTEXT)
+        result = validation_engine.validate_input(
+            agent_id, "agent_id", DEFAULT_CONTEXT
+        )
         if not result.is_valid:
             raise InternalServerProblem(detail=result.errors[0].message)
         agent_id = result.value
@@ -665,14 +770,18 @@ async def get_agent_health(
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         # Check if user has access to this agent
-        if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
+        if (
+            hasattr(agent.profile, 'created_by')
+            and agent.profile.created_by != current_user.id
+            and current_user.id != "system"
+        ):
             raise NotFoundProblem(detail=f"Agent {agent_id} not found")
 
         # Calculate health metrics
         health_status = "healthy"
         if agent.profile.status != AgentStatus.ACTIVE:
             health_status = "unhealthy"
-        
+
         # Get performance metrics
         metrics = agent.performance_metrics
         last_interaction = None
@@ -682,7 +791,9 @@ async def get_agent_health(
             for conv_history in agent.conversation_history.values():
                 all_interactions.extend(conv_history)
             if all_interactions:
-                last_interaction = max(all_interactions, key=lambda x: x.timestamp).timestamp
+                last_interaction = max(
+                    all_interactions, key=lambda x: x.timestamp
+                ).timestamp
 
         return AgentHealthResponse(
             agent_id=agent_id,
@@ -697,12 +808,20 @@ async def get_agent_health(
         raise
     except Exception as e:
         logger.error(
-            "Failed to get agent health", agent_id=agent_id, error=str(e)
+            "Failed to get agent health",
+            agent_id=agent_id,
+            error=str(e),
         )
-        raise InternalServerProblem(detail="Failed to get agent health") from e
+        raise InternalServerProblem(
+            detail="Failed to get agent health"
+        ) from e
 
 
-@router.post("/bulk", response_model=AgentBulkCreateResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/bulk",
+    response_model=AgentBulkCreateResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def bulk_create_agents(
     request: AgentBulkCreateRequest,
     current_user: User = Depends(get_current_user),
@@ -747,41 +866,69 @@ async def bulk_create_agents(
                 # Validate each agent data
                 try:
                     # Validate agent name
-                    result = validation_engine.validate_input(agent_data.name, "agent_name", DEFAULT_CONTEXT)
+                    result = validation_engine.validate_input(
+                        agent_data.name, "agent_name", DEFAULT_CONTEXT
+                    )
                     if not result.is_valid:
                         raise ValueError(result.errors[0].message)
                     agent_data.name = result.value
-                    
+
                     # Validate description
-                    result = validation_engine.validate_input(agent_data.description, "agent_name", DEFAULT_CONTEXT)
+                    result = validation_engine.validate_input(
+                        agent_data.description,
+                        "agent_name",
+                        DEFAULT_CONTEXT,
+                    )
                     if not result.is_valid:
                         raise ValueError(result.errors[0].message)
                     agent_data.description = result.value
-                    
+
                     # Validate system prompt
-                    result = validation_engine.validate_input(agent_data.system_prompt, "message", DEFAULT_CONTEXT)
+                    result = validation_engine.validate_input(
+                        agent_data.system_prompt,
+                        "message",
+                        DEFAULT_CONTEXT,
+                    )
                     if not result.is_valid:
                         raise ValueError(result.errors[0].message)
                     agent_data.system_prompt = result.value
-                    
+
                     # Validate agent type
                     if agent_data.agent_type is None:
                         raise ValueError("Agent type is required")
-                        
+
                     # Validate temperature
-                    if not isinstance(agent_data.temperature, (int, float)) or agent_data.temperature < 0.0 or agent_data.temperature > 2.0:
-                        raise ValueError("Temperature must be between 0.0 and 2.0")
-                    
-                    # Validate max_tokens  
-                    if not isinstance(agent_data.max_tokens, int) or agent_data.max_tokens < 1 or agent_data.max_tokens > 32000:
-                        raise ValueError("Max tokens must be between 1 and 32000")
-                        
+                    if (
+                        not isinstance(
+                            agent_data.temperature, int | float
+                        )
+                        or agent_data.temperature < 0.0
+                        or agent_data.temperature > 2.0
+                    ):
+                        raise ValueError(
+                            "Temperature must be between 0.0 and 2.0"
+                        )
+
+                    # Validate max_tokens
+                    if (
+                        not isinstance(agent_data.max_tokens, int)
+                        or agent_data.max_tokens < 1
+                        or agent_data.max_tokens > 32000
+                    ):
+                        raise ValueError(
+                            "Max tokens must be between 1 and 32000"
+                        )
+
                 except (ValidationError, ValueError) as ve:
-                    failed_creations.append({
-                        "index": i,
-                        "agent_name": getattr(agent_data, 'name', 'Unknown'),
-                        "error": str(ve)
-                    })
+                    failed_creations.append(
+                        {
+                            "index": i,
+                            "agent_name": getattr(
+                                agent_data, 'name', 'Unknown'
+                            ),
+                            "error": str(ve),
+                        }
+                    )
                     continue
 
                 # Add created_by to metadata
@@ -820,21 +967,34 @@ async def bulk_create_agents(
                 # Get the created agent
                 agent = await agent_manager.get_agent(agent_id)
                 if agent:
-                    created_agents.append(AgentResponse.model_validate(agent.profile.model_dump()))
+                    created_agents.append(
+                        AgentResponse.model_validate(
+                            agent.profile.model_dump()
+                        )
+                    )
 
             except Exception as e:
-                failed_creations.append({
-                    "index": i,
-                    "name": getattr(agent_data, 'name', f'Agent {i}'),
-                    "error": str(e)
-                })
-                logger.warning(f"Failed to create agent {i} in bulk operation", error=str(e))
+                failed_creations.append(
+                    {
+                        "index": i,
+                        "name": getattr(
+                            agent_data, 'name', f'Agent {i}'
+                        ),
+                        "error": str(e),
+                    }
+                )
+                logger.warning(
+                    f"Failed to create agent {i} in bulk operation",
+                    error=str(e),
+                )
 
-        logger.info("Bulk agent creation completed",
-                   total_requested=len(request.agents),
-                   created=len(created_agents),
-                   failed=len(failed_creations),
-                   user_id=current_user.id)
+        logger.info(
+            "Bulk agent creation completed",
+            total_requested=len(request.agents),
+            created=len(created_agents),
+            failed=len(failed_creations),
+            user_id=current_user.id,
+        )
 
         return AgentBulkCreateResponse(
             created=created_agents,
@@ -846,8 +1006,14 @@ async def bulk_create_agents(
     except InternalServerProblem:
         raise
     except Exception as e:
-        logger.error("Failed to bulk create agents", error=str(e), user_id=current_user.id)
-        raise InternalServerProblem(detail="Failed to bulk create agents") from e
+        logger.error(
+            "Failed to bulk create agents",
+            error=str(e),
+            user_id=current_user.id,
+        )
+        raise InternalServerProblem(
+            detail="Failed to bulk create agents"
+        ) from e
 
 
 @router.delete("/bulk", response_model=dict[str, Any])
@@ -893,30 +1059,42 @@ async def bulk_delete_agents(
         for agent_id in request.agent_ids:
             try:
                 # Validate agent_id format
-                result = validation_engine.validate_input(agent_id, "agent_id", DEFAULT_CONTEXT)
+                result = validation_engine.validate_input(
+                    agent_id, "agent_id", DEFAULT_CONTEXT
+                )
                 if not result.is_valid:
-                    failed_deletions.append({
-                        "agent_id": agent_id,
-                        "error": result.errors[0].message
-                    })
+                    failed_deletions.append(
+                        {
+                            "agent_id": agent_id,
+                            "error": result.errors[0].message,
+                        }
+                    )
                     continue
                 agent_id = result.value
 
                 # Check if agent exists and user has permission
                 agent = await agent_manager.get_agent(agent_id)
                 if not agent:
-                    failed_deletions.append({
-                        "agent_id": agent_id,
-                        "error": "Agent not found"
-                    })
+                    failed_deletions.append(
+                        {
+                            "agent_id": agent_id,
+                            "error": "Agent not found",
+                        }
+                    )
                     continue
 
                 # Check if user has permission to delete this agent
-                if hasattr(agent.profile, 'created_by') and agent.profile.created_by != current_user.id and current_user.id != "system":
-                    failed_deletions.append({
-                        "agent_id": agent_id,
-                        "error": "Permission denied"
-                    })
+                if (
+                    hasattr(agent.profile, 'created_by')
+                    and agent.profile.created_by != current_user.id
+                    and current_user.id != "system"
+                ):
+                    failed_deletions.append(
+                        {
+                            "agent_id": agent_id,
+                            "error": "Permission denied",
+                        }
+                    )
                     continue
 
                 # Delete the agent
@@ -924,23 +1102,29 @@ async def bulk_delete_agents(
                 if success:
                     deleted_agents.append(agent_id)
                 else:
-                    failed_deletions.append({
-                        "agent_id": agent_id,
-                        "error": "Deletion failed"
-                    })
+                    failed_deletions.append(
+                        {
+                            "agent_id": agent_id,
+                            "error": "Deletion failed",
+                        }
+                    )
 
             except Exception as e:
-                failed_deletions.append({
-                    "agent_id": agent_id,
-                    "error": str(e)
-                })
-                logger.warning(f"Failed to delete agent {agent_id} in bulk operation", error=str(e))
+                failed_deletions.append(
+                    {"agent_id": agent_id, "error": str(e)}
+                )
+                logger.warning(
+                    f"Failed to delete agent {agent_id} in bulk operation",
+                    error=str(e),
+                )
 
-        logger.info("Bulk agent deletion completed",
-                   total_requested=len(request.agent_ids),
-                   deleted=len(deleted_agents),
-                   failed=len(failed_deletions),
-                   user_id=current_user.id)
+        logger.info(
+            "Bulk agent deletion completed",
+            total_requested=len(request.agent_ids),
+            deleted=len(deleted_agents),
+            failed=len(failed_deletions),
+            user_id=current_user.id,
+        )
 
         return {
             "deleted": deleted_agents,
@@ -952,5 +1136,11 @@ async def bulk_delete_agents(
     except InternalServerProblem:
         raise
     except Exception as e:
-        logger.error("Failed to bulk delete agents", error=str(e), user_id=current_user.id)
-        raise InternalServerProblem(detail="Failed to bulk delete agents") from e
+        logger.error(
+            "Failed to bulk delete agents",
+            error=str(e),
+            user_id=current_user.id,
+        )
+        raise InternalServerProblem(
+            detail="Failed to bulk delete agents"
+        ) from e

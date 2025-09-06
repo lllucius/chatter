@@ -7,10 +7,6 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from chatter.schemas.common import (
-    ListRequestBase,
-)
-
 
 class JobStatus(str, Enum):
     """Job execution status."""
@@ -58,9 +54,11 @@ class Job(BaseModel):
     result: Any = None  # Job execution result
     progress: int = 0  # Progress percentage (0-100)
     progress_message: str | None = None  # Progress description
-    
+
     # User ownership for security
-    created_by_user_id: str | None = None  # ID of user who created the job
+    created_by_user_id: str | None = (
+        None  # ID of user who created the job
+    )
 
 
 class JobResult(BaseModel):
@@ -153,7 +151,7 @@ class JobListRequest(BaseModel):
     function_name: str | None = Field(
         None, description="Filter by function name"
     )
-    
+
     # Date filtering
     created_after: datetime | None = Field(
         None, description="Filter jobs created after this date"
@@ -161,17 +159,18 @@ class JobListRequest(BaseModel):
     created_before: datetime | None = Field(
         None, description="Filter jobs created before this date"
     )
-    
+
     # Tag filtering
     tags: list[str] | None = Field(
-        None, description="Filter by job tags (any of the provided tags)"
+        None,
+        description="Filter by job tags (any of the provided tags)",
     )
-    
+
     # Search
     search: str | None = Field(
         None, description="Search in job names and metadata"
     )
-    
+
     # Pagination
     limit: int = Field(
         20, ge=1, le=100, description="Maximum number of results"
@@ -179,11 +178,9 @@ class JobListRequest(BaseModel):
     offset: int = Field(
         0, ge=0, description="Number of results to skip"
     )
-    
+
     # Sorting
-    sort_by: str = Field(
-        "created_at", description="Field to sort by"
-    )
+    sort_by: str = Field("created_at", description="Field to sort by")
     sort_order: str = Field(
         "desc", pattern="^(asc|desc)$", description="Sort order"
     )
@@ -194,11 +191,13 @@ class JobListResponse(BaseModel):
 
     jobs: list[JobResponse] = Field(..., description="List of jobs")
     total: int = Field(..., description="Total number of jobs")
-    
+
     # Pagination information
     limit: int = Field(..., description="Maximum results per page")
     offset: int = Field(..., description="Number of results skipped")
-    has_more: bool = Field(..., description="Whether more results exist")
+    has_more: bool = Field(
+        ..., description="Whether more results exist"
+    )
 
 
 class JobActionResponse(BaseModel):

@@ -3,7 +3,13 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from chatter.schemas.common import GetRequestBase
 
@@ -370,9 +376,7 @@ class AnalyticsTimeRange(BaseModel):
         """Validate that start_date is before end_date when both are provided."""
         if self.start_date and self.end_date:
             if self.start_date >= self.end_date:
-                raise ValueError(
-                    "start_date must be before end_date"
-                )
+                raise ValueError("start_date must be before end_date")
             # Warn about very large date ranges (more than 1 year)
             delta = self.end_date - self.start_date
             if delta.days > 365:
@@ -463,12 +467,17 @@ class AnalyticsExportRequest(BaseModel):
         """Validate metrics list."""
         if not v:
             raise ValueError("At least one metric must be specified")
-        
+
         valid_metrics = {
-            "conversations", "usage", "performance", "documents", 
-            "system", "toolservers", "custom"
+            "conversations",
+            "usage",
+            "performance",
+            "documents",
+            "system",
+            "toolservers",
+            "custom",
         }
-        
+
         for metric in v:
             if metric not in valid_metrics:
                 raise ValueError(

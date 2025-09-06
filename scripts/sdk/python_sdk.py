@@ -30,19 +30,21 @@ class PythonSDKGenerator(SDKGenerator):
         try:
             ensure_command_available(
                 "openapi-python-client",
-                "pip install openapi-python-client"
+                "pip install openapi-python-client",
             )
         except Exception:
             # Fallback to openapi-generator-cli
             try:
                 ensure_command_available(
                     "openapi-generator-cli",
-                    "npm install -g @openapitools/openapi-generator-cli"
+                    "npm install -g @openapitools/openapi-generator-cli",
                 )
                 return self._generate_with_openapi_generator()
             except Exception as e:
                 print(f"❌ {e}")
-                print("⚠️  No OpenAPI generators available, creating mock SDK for testing")
+                print(
+                    "⚠️  No OpenAPI generators available, creating mock SDK for testing"
+                )
                 return self._create_mock_python_sdk()
 
         return self._generate_with_python_client()
@@ -59,6 +61,7 @@ class PythonSDKGenerator(SDKGenerator):
             print(f"❌ Failed to generate OpenAPI spec: {e}")
             # Use mock spec for testing
             from scripts.sdk.base import MockOpenAPISpec
+
             spec = MockOpenAPISpec.get_mock_spec()
             print("⚠️  Using mock OpenAPI spec for testing")
 
@@ -69,9 +72,11 @@ class PythonSDKGenerator(SDKGenerator):
         cmd = [
             "openapi-python-client",
             "generate",
-            "--path", str(spec_path),
-            "--output-path", str(self.config.output_dir),
-            "--overwrite"
+            "--path",
+            str(spec_path),
+            "--output-path",
+            str(self.config.output_dir),
+            "--overwrite",
         ]
 
         try:
@@ -79,7 +84,7 @@ class PythonSDKGenerator(SDKGenerator):
                 cmd,
                 "Python SDK generation (openapi-python-client)",
                 cwd=self.config.project_root,
-                timeout=300
+                timeout=300,
             )
 
             if not success:
@@ -112,6 +117,7 @@ class PythonSDKGenerator(SDKGenerator):
         except Exception as e:
             print(f"❌ Failed to generate OpenAPI spec: {e}")
             from scripts.sdk.base import MockOpenAPISpec
+
             spec = MockOpenAPISpec.get_mock_spec()
             print("⚠️  Using mock OpenAPI spec for testing")
 
@@ -123,14 +129,11 @@ class PythonSDKGenerator(SDKGenerator):
         # Generate SDK
         additional_args = [
             "--additional-properties",
-            f"pythonPackageName={self.config.package_name}"
+            f"pythonPackageName={self.config.package_name}",
         ]
 
         success = self.run_generator_command(
-            "python",
-            spec_path,
-            config_path,
-            additional_args
+            "python", spec_path, config_path, additional_args
         )
 
         if not success:
@@ -152,13 +155,13 @@ class PythonSDKGenerator(SDKGenerator):
 
         expected_files = self.get_expected_files()
         missing_files = verify_files_exist(
-            self.config.output_dir,
-            expected_files,
-            "Python SDK files"
+            self.config.output_dir, expected_files, "Python SDK files"
         )
 
         if missing_files:
-            print(f"❌ Validation failed: {len(missing_files)} missing files")
+            print(
+                f"❌ Validation failed: {len(missing_files)} missing files"
+            )
             return False
 
         # Additional validation: check if Python files can be imported
@@ -446,10 +449,14 @@ This project is licensed under the MIT License - see the LICENSE file for detail
                     ast.parse(content)
 
                 except SyntaxError as e:
-                    print(f"❌ Syntax error in {py_file.relative_to(self.config.output_dir)}: {e}")
+                    print(
+                        f"❌ Syntax error in {py_file.relative_to(self.config.output_dir)}: {e}"
+                    )
                     return False
                 except Exception as e:
-                    print(f"⚠️  Could not validate {py_file.relative_to(self.config.output_dir)}: {e}")
+                    print(
+                        f"⚠️  Could not validate {py_file.relative_to(self.config.output_dir)}: {e}"
+                    )
                     continue
 
             print(f"✅ Validated {len(python_files)} Python files")
@@ -457,7 +464,9 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
         except Exception as e:
             print(f"⚠️  Could not validate Python syntax: {e}")
-            return True  # Don't fail generation due to validation issues
+            return (
+                True  # Don't fail generation due to validation issues
+            )
 
     def _create_mock_python_sdk(self) -> bool:
         """Create a minimal mock Python SDK for testing."""
@@ -599,7 +608,10 @@ pydantic>=2.0.0
 typing-extensions>=4.0.0
 '''
 
-        save_text(requirements_content, self.config.output_dir / "requirements.txt")
+        save_text(
+            requirements_content,
+            self.config.output_dir / "requirements.txt",
+        )
 
 
 def main():
@@ -617,7 +629,9 @@ def main():
     if success:
         # Validate generated SDK
         if generator.validate():
-            print("\n🎉 Python SDK generated and validated successfully!")
+            print(
+                "\n🎉 Python SDK generated and validated successfully!"
+            )
         else:
             print("\n⚠️  Python SDK generated but validation failed")
     else:
@@ -635,4 +649,5 @@ def main():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

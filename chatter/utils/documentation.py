@@ -247,11 +247,16 @@ class APIDocumentationEnhancer:
         """
         for path_item in schema.get("paths", {}).values():
             for operation in path_item.values():
-                if isinstance(operation, dict) and "responses" in operation:
+                if (
+                    isinstance(operation, dict)
+                    and "responses" in operation
+                ):
                     for response in operation["responses"].values():
                         if "headers" not in response:
                             response["headers"] = {}
-                        response["headers"].update(STANDARD_RESPONSE_HEADERS)
+                        response["headers"].update(
+                            STANDARD_RESPONSE_HEADERS
+                        )
 
     def _enhance_chat_endpoint_docs(self, operation: dict) -> None:
         """Enhance chat endpoint documentation with workflow examples."""
@@ -267,7 +272,9 @@ class APIDocumentationEnhancer:
         self._add_health_examples()
         self._add_conversation_examples()
 
-        logger.debug("Enhanced documentation examples loaded successfully")
+        logger.debug(
+            "Enhanced documentation examples loaded successfully"
+        )
 
     def _add_auth_examples(self) -> None:
         """Add authentication endpoint examples."""
@@ -439,7 +446,9 @@ class APIDocumentationEnhancer:
             response_example={
                 "success": False,
                 "message": "Conversation not found",
-                "errors": ["Conversation with ID '01ARZ3NDEKTSV4RRFFQ69G5FAV' does not exist"],
+                "errors": [
+                    "Conversation with ID '01ARZ3NDEKTSV4RRFFQ69G5FAV' does not exist"
+                ],
                 "metadata": {
                     "timestamp": EXAMPLE_TIMESTAMP,
                     "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -459,7 +468,7 @@ class APIDocumentationEnhancer:
                 "description": "Comprehensive guide for the AI platform",
                 "chunk_size": 1000,
                 "chunk_overlap": 200,
-                "is_public": False
+                "is_public": False,
             },
             response_example={
                 "id": "doc_xyz789",
@@ -469,8 +478,8 @@ class APIDocumentationEnhancer:
                 "document_type": "pdf",
                 "status": "processing",
                 "chunk_count": 0,
-                "created_at": EXAMPLE_TIMESTAMP
-            }
+                "created_at": EXAMPLE_TIMESTAMP,
+            },
         )
 
     def _add_conversation_examples(self) -> None:
@@ -487,13 +496,13 @@ class APIDocumentationEnhancer:
                         "message_count": 8,
                         "total_tokens": 1542,
                         "created_at": EXAMPLE_TIMESTAMP,
-                        "updated_at": EXAMPLE_TIMESTAMP
+                        "updated_at": EXAMPLE_TIMESTAMP,
                     }
                 ],
                 "total_count": 15,
                 "has_next": True,
-                "has_previous": False
-            }
+                "has_previous": False,
+            },
         )
 
     def _add_profile_examples(self) -> None:
@@ -508,7 +517,7 @@ class APIDocumentationEnhancer:
                 "model_name": "gpt-4",
                 "temperature": 0.1,
                 "max_tokens": 2000,
-                "system_prompt": "You are a helpful programming assistant. Provide clear, concise code examples and explanations."
+                "system_prompt": "You are a helpful programming assistant. Provide clear, concise code examples and explanations.",
             },
             response_example={
                 "id": "prof_abc456",
@@ -518,8 +527,8 @@ class APIDocumentationEnhancer:
                 "temperature": 0.1,
                 "max_tokens": 2000,
                 "is_default": False,
-                "created_at": EXAMPLE_TIMESTAMP
-            }
+                "created_at": EXAMPLE_TIMESTAMP,
+            },
         )
 
     def _add_health_examples(self) -> None:
@@ -533,16 +542,25 @@ class APIDocumentationEnhancer:
                 "timestamp": EXAMPLE_TIMESTAMP,
                 "version": "0.1.0",
                 "services": {
-                    "database": {"status": "healthy", "response_time_ms": 12},
-                    "cache": {"status": "healthy", "response_time_ms": 3},
-                    "llm_providers": {"status": "healthy", "response_time_ms": 89}
+                    "database": {
+                        "status": "healthy",
+                        "response_time_ms": 12,
+                    },
+                    "cache": {
+                        "status": "healthy",
+                        "response_time_ms": 3,
+                    },
+                    "llm_providers": {
+                        "status": "healthy",
+                        "response_time_ms": 89,
+                    },
                 },
                 "system_info": {
                     "python_version": "3.12.0",
                     "total_conversations": 1247,
-                    "total_users": 45
-                }
-            }
+                    "total_users": 45,
+                },
+            },
         )
 
 

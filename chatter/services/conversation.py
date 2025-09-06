@@ -122,7 +122,9 @@ class ConversationService:
                 user_id=user_id,
                 error=str(e),
             )
-            raise ValidationError(f"Failed to create conversation: {e}") from e
+            raise ValidationError(
+                f"Failed to create conversation: {e}"
+            ) from e
 
     async def get_conversation(
         self,
@@ -303,7 +305,9 @@ class ConversationService:
                 user_id=user_id,
                 error=str(e),
             )
-            raise ValidationError(f"Failed to update conversation: {e}") from e
+            raise ValidationError(
+                f"Failed to update conversation: {e}"
+            ) from e
 
     async def delete_conversation(
         self, conversation_id: str, user_id: str

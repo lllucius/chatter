@@ -62,7 +62,9 @@ class ModelRegistryService:
         """
         self.session = session
         # Import here to avoid circular imports
-        from chatter.core.unified_model_registry_cache import get_registry_cache
+        from chatter.core.unified_model_registry_cache import (
+            get_registry_cache,
+        )
         from chatter.utils.performance import get_performance_metrics
 
         self.cache = get_registry_cache()
@@ -110,9 +112,9 @@ class ModelRegistryService:
             total = await self.session.scalar(count_query)
 
             # Apply pagination
-            query = query.offset((params.page - 1) * params.per_page).limit(
-                params.per_page
-            )
+            query = query.offset(
+                (params.page - 1) * params.per_page
+            ).limit(params.per_page)
             result = await self.session.execute(query)
             providers = result.scalars().all()
 
@@ -180,7 +182,10 @@ class ModelRegistryService:
         # Validate that we're not trying to update critical read-only fields
         if 'name' in update_data or 'provider_type' in update_data:
             from chatter.core.exceptions import ValidationError
-            raise ValidationError("Cannot update provider name or type after creation")
+
+            raise ValidationError(
+                "Cannot update provider name or type after creation"
+            )
 
         for field, value in update_data.items():
             setattr(provider, field, value)
@@ -231,7 +236,7 @@ class ModelRegistryService:
             select(ModelDef).where(
                 ModelDef.provider_id == provider_id,
                 ModelDef.model_type == model_type,
-                ModelDef.is_active
+                ModelDef.is_active,
             )
         )
         if not models_of_type.scalars().first():
@@ -241,13 +246,17 @@ class ModelRegistryService:
         # First, unset current default for this model type by finding
         # all providers that have default models of this type
         current_default_models = await self.session.execute(
-            select(ModelDef.provider_id).where(
+            select(ModelDef.provider_id)
+            .where(
                 ModelDef.model_type == model_type,
                 ModelDef.is_default,
-                ModelDef.is_active
-            ).distinct()
+                ModelDef.is_active,
+            )
+            .distinct()
         )
-        current_provider_ids = [row[0] for row in current_default_models.fetchall()]
+        current_provider_ids = [
+            row[0] for row in current_default_models.fetchall()
+        ]
 
         if current_provider_ids:
             await self.session.execute(
@@ -269,17 +278,19 @@ class ModelRegistryService:
                 ModelDef.provider_id == provider_id,
                 ModelDef.model_type == model_type,
                 ModelDef.is_default,
-                ModelDef.is_active
+                ModelDef.is_active,
             )
         )
         if not default_model.scalars().first():
             # Set the first active model as default
             first_model = await self.session.execute(
-                select(ModelDef).where(
+                select(ModelDef)
+                .where(
                     ModelDef.provider_id == provider_id,
                     ModelDef.model_type == model_type,
-                    ModelDef.is_active
-                ).limit(1)
+                    ModelDef.is_active,
+                )
+                .limit(1)
             )
             if first_model_obj := first_model.scalar_one_or_none():
                 await self.session.execute(
@@ -319,16 +330,20 @@ class ModelRegistryService:
 
         # Get total count efficiently using the same filters
         count_query = select(func.count(ModelDef.id))
-        
+
         if provider_id:
-            count_query = count_query.where(ModelDef.provider_id == provider_id)
-        
+            count_query = count_query.where(
+                ModelDef.provider_id == provider_id
+            )
+
         if model_type:
-            count_query = count_query.where(ModelDef.model_type == model_type)
-            
+            count_query = count_query.where(
+                ModelDef.model_type == model_type
+            )
+
         if params.active_only:
             count_query = count_query.where(ModelDef.is_active)
-            
+
         total = await self.session.scalar(count_query)
 
         # Apply pagination
@@ -371,12 +386,18 @@ class ModelRegistryService:
         provider = await self.get_provider(model_data.provider_id)
         if not provider:
             from chatter.core.exceptions import ValidationError
-            raise ValidationError(f"Provider with ID {model_data.provider_id} not found")
+
+            raise ValidationError(
+                f"Provider with ID {model_data.provider_id} not found"
+            )
 
         # Validate that provider is active
         if not provider.is_active:
             from chatter.core.exceptions import ValidationError
-            raise ValidationError(f"Provider {provider.name} is not active")
+
+            raise ValidationError(
+                f"Provider {provider.name} is not active"
+            )
 
         model = ModelDef(**model_data.model_dump())
 
@@ -399,21 +420,32 @@ class ModelRegistryService:
         update_data = model_data.model_dump(exclude_unset=True)
 
         # Validate that we're not trying to update critical read-only fields
-        if 'name' in update_data or 'model_type' in update_data or 'provider_id' in update_data:
+        if (
+            'name' in update_data
+            or 'model_type' in update_data
+            or 'provider_id' in update_data
+        ):
             from chatter.core.exceptions import ValidationError
-            raise ValidationError("Cannot update model name, type, or provider after creation")
+
+            raise ValidationError(
+                "Cannot update model name, type, or provider after creation"
+            )
 
         # Validate dimension changes for embedding models
-        if 'dimensions' in update_data and model.model_type == ModelType.EMBEDDING:
+        if (
+            'dimensions' in update_data
+            and model.model_type == ModelType.EMBEDDING
+        ):
             # Check if there are existing embedding spaces using this model
             existing_spaces = await self.session.execute(
                 select(EmbeddingSpace).where(
                     EmbeddingSpace.model_id == model_id,
-                    EmbeddingSpace.is_active
+                    EmbeddingSpace.is_active,
                 )
             )
             if existing_spaces.scalars().first():
                 from chatter.core.exceptions import ValidationError
+
                 raise ValidationError(
                     "Cannot change dimensions of embedding model that has active embedding spaces"
                 )
@@ -497,13 +529,15 @@ class ModelRegistryService:
 
         # Get total count efficiently using the same filters
         count_query = select(func.count(EmbeddingSpace.id))
-        
+
         if model_id:
-            count_query = count_query.where(EmbeddingSpace.model_id == model_id)
-            
+            count_query = count_query.where(
+                EmbeddingSpace.model_id == model_id
+            )
+
         if params.active_only:
             count_query = count_query.where(EmbeddingSpace.is_active)
-            
+
         total = await self.session.scalar(count_query)
 
         # Apply pagination
@@ -515,37 +549,56 @@ class ModelRegistryService:
 
         return spaces, total or 0
 
-    async def _validate_model_consistency(self, model: ModelDef) -> None:
+    async def _validate_model_consistency(
+        self, model: ModelDef
+    ) -> None:
         """Validate that model configuration is consistent."""
         # Embedding models must have dimensions
-        if model.model_type == ModelType.EMBEDDING and not model.dimensions:
+        if (
+            model.model_type == ModelType.EMBEDDING
+            and not model.dimensions
+        ):
             from chatter.core.exceptions import ValidationError
-            raise ValidationError("Embedding models must specify dimensions")
+
+            raise ValidationError(
+                "Embedding models must specify dimensions"
+            )
 
         # LLM models should not have dimensions
         if model.model_type == ModelType.LLM and model.dimensions:
             from chatter.core.exceptions import ValidationError
-            raise ValidationError("LLM models should not specify dimensions")
+
+            raise ValidationError(
+                "LLM models should not specify dimensions"
+            )
 
         # Validate token limits are reasonable
         if model.max_tokens and model.max_tokens <= 0:
             from chatter.core.exceptions import ValidationError
+
             raise ValidationError("max_tokens must be positive")
 
         if model.context_length and model.context_length <= 0:
             from chatter.core.exceptions import ValidationError
+
             raise ValidationError("context_length must be positive")
 
         # Validate batch settings
         if model.max_batch_size and model.max_batch_size <= 0:
             from chatter.core.exceptions import ValidationError
+
             raise ValidationError("max_batch_size must be positive")
 
         if model.max_batch_size and not model.supports_batch:
             from chatter.core.exceptions import ValidationError
-            raise ValidationError("max_batch_size specified but supports_batch is False")
 
-    async def _validate_deactivation_allowed(self, model: ModelDef) -> None:
+            raise ValidationError(
+                "max_batch_size specified but supports_batch is False"
+            )
+
+    async def _validate_deactivation_allowed(
+        self, model: ModelDef
+    ) -> None:
         """Validate that model can be deactivated."""
         if not model.is_active:
             return  # Already inactive
@@ -556,13 +609,14 @@ class ModelRegistryService:
                 ModelDef.provider_id == model.provider_id,
                 ModelDef.model_type == model.model_type,
                 ModelDef.is_active,
-                ModelDef.id != model.id
+                ModelDef.id != model.id,
             )
         )
         count = active_models.scalar() or 0
 
         if count == 0:
             from chatter.core.exceptions import ValidationError
+
             raise ValidationError(
                 f"Cannot deactivate the last active {model.model_type} model for provider {model.provider.name}"
             )
@@ -616,19 +670,30 @@ class ModelRegistryService:
         model = await self.get_model(space_data.model_id)
         if not model:
             from chatter.core.exceptions import ValidationError
-            raise ValidationError(f"Model with ID {space_data.model_id} not found")
+
+            raise ValidationError(
+                f"Model with ID {space_data.model_id} not found"
+            )
 
         if model.model_type != ModelType.EMBEDDING:
             from chatter.core.exceptions import ValidationError
-            raise ValidationError(f"Model {model.name} is not an embedding model")
+
+            raise ValidationError(
+                f"Model {model.name} is not an embedding model"
+            )
 
         if not model.is_active:
             from chatter.core.exceptions import ValidationError
+
             raise ValidationError(f"Model {model.name} is not active")
 
         # Validate dimensions match
-        if model.dimensions and space_data.base_dimensions != model.dimensions:
+        if (
+            model.dimensions
+            and space_data.base_dimensions != model.dimensions
+        ):
             from chatter.core.exceptions import ValidationError
+
             raise ValidationError(
                 f"Base dimensions {space_data.base_dimensions} do not match model dimensions {model.dimensions}"
             )
@@ -742,7 +807,9 @@ class ModelRegistryService:
     ) -> Provider | None:
         """Get the default provider for a model type with caching."""
         # Check cache first
-        cached_provider_id = await self.cache.get_default_provider(model_type)
+        cached_provider_id = await self.cache.get_default_provider(
+            model_type
+        )
         if cached_provider_id:
             provider = await self.get_provider(cached_provider_id)
             if provider and provider.is_active:
@@ -763,16 +830,20 @@ class ModelRegistryService:
                     ModelDef.is_default,
                     ModelDef.is_active,
                     Provider.is_active,
-                    Provider.is_default
+                    Provider.is_default,
                 )
-                .distinct(Provider.id)  # DISTINCT on ID only to avoid JSON comparison
+                .distinct(
+                    Provider.id
+                )  # DISTINCT on ID only to avoid JSON comparison
                 .limit(1)  # We only need one result
             )
             provider = result.scalar_one_or_none()
 
             # Cache the result
             if provider:
-                await self.cache.set_default_provider(model_type, provider.id)
+                await self.cache.set_default_provider(
+                    model_type, provider.id
+                )
 
             return provider
 

@@ -154,6 +154,7 @@ ignore = [
     "E501",
     "B008",
     "C901",
+    "I001",  # Let isort handle import formatting
 ]
 
 [tool.ruff.lint.pyupgrade]

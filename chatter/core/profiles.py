@@ -23,7 +23,7 @@ logger = get_logger(__name__)
 
 class ProfileService:
     """Service for profile management operations."""
-    
+
     # Cache for expensive provider lookups (TTL: 10 minutes)
     _provider_cache = {}
     _provider_cache_timestamp = 0
@@ -72,24 +72,35 @@ class ProfileService:
 
             # Validate LLM provider against available providers
             try:
-                available_providers_info = await self.get_available_providers()
-                available_providers = available_providers_info.get("providers", {})
-                
+                available_providers_info = (
+                    await self.get_available_providers()
+                )
+                available_providers = available_providers_info.get(
+                    "providers", {}
+                )
+
                 if profile_data.llm_provider not in available_providers:
                     logger.warning(
                         "LLM provider not available",
                         provider=profile_data.llm_provider,
-                        available_providers=list(available_providers.keys()),
+                        available_providers=list(
+                            available_providers.keys()
+                        ),
                     )
                     raise ProfileError(
                         f"LLM provider '{profile_data.llm_provider}' is not available. "
                         f"Available providers: {', '.join(available_providers.keys())}"
                     ) from None
-                
+
                 # Validate model against provider's available models
-                provider_info = available_providers[profile_data.llm_provider]
+                provider_info = available_providers[
+                    profile_data.llm_provider
+                ]
                 available_models = provider_info.get("models", [])
-                if available_models and profile_data.llm_model not in available_models:
+                if (
+                    available_models
+                    and profile_data.llm_model not in available_models
+                ):
                     logger.warning(
                         "LLM model not available for provider",
                         provider=profile_data.llm_provider,
@@ -100,7 +111,7 @@ class ProfileService:
                         f"Model '{profile_data.llm_model}' is not available for provider '{profile_data.llm_provider}'. "
                         f"Available models: {', '.join(available_models)}"
                     ) from None
-                    
+
             except ProfileError:
                 raise
             except Exception as e:
@@ -108,7 +119,7 @@ class ProfileService:
                     "Could not validate provider/model availability",
                     error=str(e),
                     provider=profile_data.llm_provider,
-                    model=profile_data.llm_model
+                    model=profile_data.llm_model,
                 )
                 # Continue with creation but log the issue
 
@@ -251,7 +262,7 @@ class ProfileService:
                     "llm_provider": list_request.llm_provider,
                     "tags": list_request.tags,
                     "is_public": list_request.is_public,
-                }
+                },
             )
 
             return list(profiles), total_count
@@ -470,27 +481,40 @@ class ProfileService:
             ):
                 # In a test mode, indicate that retrieval would be performed
                 # In production, this would integrate with the document service
-                result["retrieval_results"] = [
-                    {
-                        "document_id": "test_doc_1",
-                        "chunk_text": f"This is simulated retrieval content for test message: {test_request.test_message[:50]}...",
-                        "similarity_score": 0.85,
-                        "metadata": {"source": "test_document", "page": 1}
-                    }
-                ] if test_request.test_message else []
+                result["retrieval_results"] = (
+                    [
+                        {
+                            "document_id": "test_doc_1",
+                            "chunk_text": f"This is simulated retrieval content for test message: {test_request.test_message[:50]}...",
+                            "similarity_score": 0.85,
+                            "metadata": {
+                                "source": "test_document",
+                                "page": 1,
+                            },
+                        }
+                    ]
+                    if test_request.test_message
+                    else []
+                )
 
             # Add tools used if enabled
             if test_request.include_tools and profile.enable_tools:
                 # In a test mode, indicate that tools would be used
                 # In production, this would integrate with MCP service for tool calling
-                result["tools_used"] = [
-                    {
-                        "tool_name": "search_tool",
-                        "description": "Would search knowledge base",
-                        "parameters": {"query": test_request.test_message},
-                        "status": "simulated"
-                    }
-                ] if test_request.test_message else []
+                result["tools_used"] = (
+                    [
+                        {
+                            "tool_name": "search_tool",
+                            "description": "Would search knowledge base",
+                            "parameters": {
+                                "query": test_request.test_message
+                            },
+                            "status": "simulated",
+                        }
+                    ]
+                    if test_request.test_message
+                    else []
+                )
 
             logger.info(
                 "Profile test completed",
@@ -722,7 +746,7 @@ class ProfileService:
 
     async def get_available_providers(self) -> dict[str, Any]:
         """Get available LLM providers and their information.
-        
+
         Uses caching to avoid expensive provider lookups on every request.
 
         Returns:
@@ -730,15 +754,16 @@ class ProfileService:
         """
         try:
             current_time = time.time()
-            
+
             # Check if cache is valid
             if (
-                self._provider_cache 
-                and (current_time - self._provider_cache_timestamp) < self._provider_cache_ttl
+                self._provider_cache
+                and (current_time - self._provider_cache_timestamp)
+                < self._provider_cache_ttl
             ):
                 logger.debug("Returning cached provider information")
                 return self._provider_cache
-            
+
             logger.debug("Fetching fresh provider information")
             providers = {}
 
@@ -752,13 +777,15 @@ class ProfileService:
 
             result = {
                 "providers": providers,
-                "default_provider": getattr(settings, 'default_llm_provider', 'openai'),
+                "default_provider": getattr(
+                    settings, 'default_llm_provider', 'openai'
+                ),
             }
-            
+
             # Update cache
             self._provider_cache = result
             self._provider_cache_timestamp = current_time
-            
+
             return result
 
         except Exception as e:

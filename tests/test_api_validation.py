@@ -1,7 +1,8 @@
 """Unit tests for API validation functions that don't require database."""
 
-import pytest
 from uuid import uuid4
+
+import pytest
 
 from chatter.api.chat import _map_workflow_type, _validate_uuid
 from chatter.utils.problem import BadRequestProblem
@@ -52,7 +53,7 @@ class TestUUIDValidation:
         """Test validation fails for invalid UUID format."""
         with pytest.raises(BadRequestProblem) as exc_info:
             _validate_uuid("not-a-uuid", "test_field")
-        
+
         assert "Invalid test_field format" in str(exc_info.value.detail)
         assert "must be a valid UUID" in str(exc_info.value.detail)
 
@@ -71,10 +72,10 @@ class TestUUIDValidation:
         malformed_uuids = [
             "123e4567-e89b-12d3-a456-42661417400",  # Missing character
             "123e4567-e89b-12d3-a456-42661417400g",  # Invalid character
-            "not-a-uuid-at-all",                     # Completely invalid
-            "123-456-789",                           # Wrong format
+            "not-a-uuid-at-all",  # Completely invalid
+            "123-456-789",  # Wrong format
         ]
-        
+
         for malformed_uuid in malformed_uuids:
             with pytest.raises(BadRequestProblem):
                 _validate_uuid(malformed_uuid, "test_field")

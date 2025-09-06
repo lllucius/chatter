@@ -60,13 +60,13 @@ export type WorkflowNodeType =
   | 'retrieval'
   | 'conditional';
 
-export interface WorkflowNodeData {
+export interface WorkflowNodeData extends Record<string, unknown> {
   label: string;
   nodeType: WorkflowNodeType;
   config?: Record<string, any>;
 }
 
-export interface WorkflowEdgeData {
+export interface WorkflowEdgeData extends Record<string, unknown> {
   condition?: string;
   label?: string;
 }

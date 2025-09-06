@@ -77,7 +77,7 @@ const PromptsPage: React.FC = () => {
       const data = response.data;
       setPrompts(data.prompts);
     } catch (err: any) {
-      toastService.error(err.response?.data?.detail || 'Failed to load prompts');
+      toastService.error(err, 'Failed to load prompts');
     } finally {
       setLoading(false);
     }
@@ -122,7 +122,7 @@ const PromptsPage: React.FC = () => {
       }
       setDialogOpen(false);
     } catch (err: any) {
-      toastService.error(err.response?.data?.detail || 'Failed to save prompt');
+      toastService.error(err, 'Failed to save prompt');
     } finally {
       setSaving(false);
     }

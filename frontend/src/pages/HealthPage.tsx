@@ -34,6 +34,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
+import { toastService } from '../services/toast-service';
 import { ToolServerResponse } from '../sdk';
 
 const HealthPage: React.FC = () => {
@@ -57,7 +58,7 @@ const HealthPage: React.FC = () => {
       setHealth(healthResponse.data);
       setToolServers(toolServerResponse.data);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load health data');
+      toastService.error(err, 'Failed to load health data');
     } finally {
       setLoading(false);
     }

@@ -694,13 +694,50 @@ const WorkflowManagementPage: React.FC = () => {
         <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
           <WorkflowEditor 
             onSave={(workflow) => {
-              console.log('Saving workflow:', workflow);
-              // TODO: Implement workflow saving
-              setBuilderDialogOpen(false);
+              try {
+                // Save workflow to localStorage for persistence
+                const savedWorkflows = JSON.parse(localStorage.getItem('customWorkflows') || '[]');
+                const existingIndex = savedWorkflows.findIndex((w: any) => w.metadata.name === workflow.metadata.name);
+                
+                if (existingIndex >= 0) {
+                  savedWorkflows[existingIndex] = workflow;
+                } else {
+                  savedWorkflows.push(workflow);
+                }
+                
+                localStorage.setItem('customWorkflows', JSON.stringify(savedWorkflows));
+                
+                // Update local state to reflect the saved workflow  
+                setCustomWorkflow({
+                  name: workflow.metadata.name,
+                  description: workflow.metadata.description,
+                  type: 'sequential', // Map from workflow structure
+                  steps: workflow.nodes.filter(node => node.type !== 'start').map(node => ({
+                    id: node.id,
+                    type: node.type,
+                    config: node.data.config || {},
+                  }))
+                });
+                
+                toastService.success('Workflow saved successfully');
+                setBuilderDialogOpen(false);
+              } catch (error) {
+                console.error('Error saving workflow:', error);
+                toastService.error('Failed to save workflow');
+              }
             }}
             onWorkflowChange={(workflow) => {
-              console.log('Workflow changed:', workflow);
-              // TODO: Update workflow state
+              // Update the current workflow state as user makes changes
+              setCustomWorkflow({
+                name: workflow.metadata.name,
+                description: workflow.metadata.description,
+                type: 'sequential',
+                steps: workflow.nodes.filter(node => node.type !== 'start').map(node => ({
+                  id: node.id,
+                  type: node.type,
+                  config: node.data.config || {},
+                }))
+              });
             }}
           />
         </DialogContent>

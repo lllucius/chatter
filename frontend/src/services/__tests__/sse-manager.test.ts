@@ -107,18 +107,18 @@ describe('SSEEventManager', () => {
       sseManager.connect();
       
       expect(consoleSpy).toHaveBeenCalledWith('SSE: Not authenticated. Please login first.');
-      expect(sseManager.isConnected()).toBe(false);
+      expect(sseManager.connected).toBe(false);
       
       consoleSpy.mockRestore();
     });
 
     test('should connect when authenticated', () => {
       sseManager.connect();
-      expect(sseManager.isConnected()).toBe(false); // Initially connecting
+      expect(sseManager.connected).toBe(false); // Initially connecting
       
       // Wait for connection to open
       setTimeout(() => {
-        expect(sseManager.isConnected()).toBe(true);
+        expect(sseManager.connected).toBe(true);
       }, 20);
     });
 
@@ -136,7 +136,7 @@ describe('SSEEventManager', () => {
       sseManager.connect();
       sseManager.disconnect();
       
-      expect(sseManager.isConnected()).toBe(false);
+      expect(sseManager.connected).toBe(false);
     });
   });
 
@@ -246,10 +246,10 @@ describe('SSEEventManager', () => {
     test('should track connection metrics', () => {
       sseManager.connect();
       
-      const metrics = sseManager.getConnectionMetrics();
-      expect(metrics.connectionStartTime).toBeDefined();
-      expect(metrics.eventCount).toBe(0);
-      expect(metrics.isConnected).toBe(false); // Initially
+      const stats = sseManager.getConnectionStats();
+      expect(stats.connectionDuration).toBeDefined();
+      expect(stats.eventCount).toBe(0);
+      expect(stats.isConnected).toBe(false); // Initially
     });
 
     test('should increment event count on messages', (done) => {
@@ -285,7 +285,9 @@ describe('SSEEventManager', () => {
       // Should start reconnection process
       vi.advanceTimersByTime(1000); // Initial reconnect delay
       
-      expect(true).toBe(true); // Placeholder - actual implementation would verify reconnection
+      // Verify that reconnection attempts are tracked
+      const stats = sseManager.getConnectionStats();
+      expect(stats.reconnectAttempts).toBeGreaterThan(0);
       
       vi.useRealTimers();
     });
@@ -341,7 +343,7 @@ describe('SSEEventManager', () => {
       sseManager.disconnect();
       
       // Should clean up health check interval and close connection
-      expect(sseManager.isConnected()).toBe(false);
+      expect(sseManager.connected).toBe(false);
     });
   });
 });

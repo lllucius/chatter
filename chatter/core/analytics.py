@@ -218,7 +218,21 @@ class AnalyticsService:
             logger.error(
                 "Failed to get conversation stats", error=str(e)
             )
-            return {}
+            # Return default values to prevent validation errors
+            return {
+                "total_conversations": 0,
+                "conversations_by_status": {},
+                "total_messages": 0,
+                "messages_by_role": {},
+                "avg_messages_per_conversation": 0.0,
+                "total_tokens_used": 0,
+                "total_cost": 0.0,
+                "avg_response_time_ms": 0.0,
+                "conversations_by_date": {},
+                "most_active_hours": {},
+                "popular_models": {},
+                "popular_providers": {},
+            }
 
     async def get_usage_metrics(
         self, user_id: str, time_range: AnalyticsTimeRange | None = None
@@ -443,7 +457,24 @@ class AnalyticsService:
 
         except Exception as e:
             logger.error("Failed to get usage metrics", error=str(e))
-            return {}
+            # Return default values to prevent validation errors
+            return {
+                "total_prompt_tokens": 0,
+                "total_completion_tokens": 0,
+                "total_tokens": 0,
+                "tokens_by_model": {},
+                "tokens_by_provider": {},
+                "total_cost": 0.0,
+                "cost_by_model": {},
+                "cost_by_provider": {},
+                "daily_usage": {},
+                "daily_cost": {},
+                "avg_response_time": 0.0,
+                "response_times_by_model": {},
+                "active_days": 0,
+                "peak_usage_hour": 0,
+                "conversations_per_day": 0.0,
+            }
 
     async def get_performance_metrics(
         self, user_id: str, time_range: AnalyticsTimeRange | None = None
@@ -889,7 +920,25 @@ class AnalyticsService:
             logger.error(
                 "Failed to get document analytics", error=str(e)
             )
-            return {}
+            # Return default values to prevent validation errors
+            return {
+                "total_documents": 0,
+                "documents_by_status": {},
+                "documents_by_type": {},
+                "avg_processing_time_seconds": 0.0,
+                "processing_success_rate": 0.0,
+                "total_chunks": 0,
+                "avg_chunks_per_document": 0.0,
+                "total_storage_bytes": 0,
+                "avg_document_size_bytes": 0.0,
+                "storage_by_type": {},
+                "total_searches": 0,
+                "avg_search_results": 0.0,
+                "popular_search_terms": {},
+                "total_views": 0,
+                "most_viewed_documents": [],
+                "documents_by_access_level": {"private": 0, "public": 0, "shared": 0},
+            }
 
     async def get_system_analytics(self) -> dict[str, Any]:
         """Get system-wide analytics.
@@ -1424,7 +1473,26 @@ class AnalyticsService:
             logger.error(
                 "Failed to get tool server analytics", error=str(e)
             )
-            return {}
+            # Return default values to prevent validation errors
+            return {
+                "total_servers": 0,
+                "active_servers": 0,
+                "total_tools": 0,
+                "enabled_tools": 0,
+                "total_calls_today": 0,
+                "total_calls_week": 0,
+                "total_calls_month": 0,
+                "total_errors_today": 0,
+                "overall_success_rate": 1.0,
+                "avg_response_time_ms": 0.0,
+                "p95_response_time_ms": 0.0,
+                "server_metrics": [],
+                "top_tools": [],
+                "failing_tools": [],
+                "daily_usage": {},
+                "daily_errors": {},
+                "generated_at": datetime.now(UTC),
+            }
 
     def _build_time_filter_for_table(
         self,
@@ -1521,7 +1589,15 @@ class AnalyticsService:
 
         except Exception as e:
             logger.error("Failed to get dashboard data", error=str(e))
-            return {}
+            # Return default values to prevent validation errors
+            return {
+                "conversation_stats": {},
+                "usage_metrics": {},
+                "performance_metrics": {},
+                "document_analytics": {},
+                "system_health": {},
+                "generated_at": datetime.now(UTC),
+            }
 
     def _build_time_filter(
         self,

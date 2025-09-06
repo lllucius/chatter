@@ -25,14 +25,12 @@ logger = get_logger(__name__)
 
 # Import new workflow components with graceful fallback
 try:
-    from chatter.core.monitoring import get_monitoring_service
     from chatter.core.workflow_security import workflow_security_manager
 
-    METRICS_ENABLED = True
     SECURITY_ENABLED = True
 except ImportError:
-    logger.warning("Workflow metrics or security modules not available")
-    METRICS_ENABLED = False
+    logger.warning("Workflow security module not available")
+    SECURITY_ENABLED = False
     SECURITY_ENABLED = False
 
 
@@ -355,7 +353,7 @@ class LangGraphWorkflowManager:
                     if SECURITY_ENABLED and user_id:
                         authorized = workflow_security_manager.authorize_tool_execution(
                             user_id=user_id,
-                            workflow_id=workflow_metrics_id or "",
+                            workflow_id="",
                             workflow_type=mode,
                             tool_name=tool_name,
                             method=None,

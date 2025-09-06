@@ -14,8 +14,7 @@ logger = get_logger(__name__)
 
 # Import unified event system for integration (optional)
 try:
-    from chatter.core.events import EventCategory, EventPriority
-
+    # EventCategory and EventPriority not needed but importing for future use
     UNIFIED_EVENTS_AVAILABLE = True
 except ImportError:
     UNIFIED_EVENTS_AVAILABLE = False

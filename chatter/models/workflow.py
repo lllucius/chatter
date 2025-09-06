@@ -10,15 +10,13 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
-)
-from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
     String,
     Text,
 )
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,

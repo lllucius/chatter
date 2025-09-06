@@ -25,7 +25,7 @@ class BaseValidator(ABC):
     @abstractmethod
     def validate(
         self, value: Any, rule: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate a value according to the specified rule."""
         pass
 
@@ -143,9 +143,8 @@ class InputValidator(BaseValidator):
 
     def validate(
         self, value: Any, rule: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate input according to the specified rule."""
-        from .engine import ValidationResult
 
         if rule not in self.rules:
             return ValidationResult(
@@ -302,10 +301,8 @@ class SecurityValidator(BaseValidator):
 
     def validate(
         self, value: Any, rule: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate input for security threats."""
-        from .engine import ValidationResult
-
         if not isinstance(value, str):
             return ValidationResult(is_valid=True, value=value)
 
@@ -410,9 +407,8 @@ class BusinessValidator(BaseValidator):
         value: Any,
         rule: str | list[str],
         context: ValidationContext,
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate business logic rules."""
-        from .engine import ValidationResult
 
         # Handle multiple rules
         if isinstance(rule, list):
@@ -431,9 +427,8 @@ class BusinessValidator(BaseValidator):
 
     def _validate_single_rule(
         self, value: Any, rule: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate a single business rule."""
-        from .engine import ValidationResult
 
         if rule == "model_consistency":
             return self._validate_model_consistency(value, context)
@@ -453,9 +448,8 @@ class BusinessValidator(BaseValidator):
 
     def _validate_model_consistency(
         self, data: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate model configuration consistency."""
-        from .engine import ValidationResult
 
         errors = []
         model_type = data.get("model_type")
@@ -497,9 +491,8 @@ class BusinessValidator(BaseValidator):
 
     def _validate_embedding_space(
         self, data: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate embedding space consistency."""
-        from .engine import ValidationResult
 
         errors = []
         model_dimensions = data.get("model_dimensions")
@@ -531,9 +524,8 @@ class BusinessValidator(BaseValidator):
 
     def _validate_provider_rules(
         self, data: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate provider-specific rules."""
-        from .engine import BusinessValidationError, ValidationResult
 
         errors = []
         provider_name = data.get("name", "").lower()
@@ -603,9 +595,8 @@ class ConfigValidator(BaseValidator):
 
     def validate(
         self, value: Any, rule: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate configuration settings."""
-        from .engine import ValidationResult
 
         if rule == "database_config":
             return self._validate_database_config(value, context)
@@ -618,9 +609,8 @@ class ConfigValidator(BaseValidator):
 
     def _validate_database_config(
         self, config: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate database configuration."""
-        from .engine import ValidationResult
 
         errors = []
         database_url = config.get('DATABASE_URL', '')
@@ -649,9 +639,8 @@ class ConfigValidator(BaseValidator):
 
     def _validate_api_keys(
         self, config: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate API keys."""
-        from .engine import ValidationResult
 
         errors = []
 
@@ -675,9 +664,8 @@ class ConfigValidator(BaseValidator):
 
     def _validate_security_config(
         self, config: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate security configuration."""
-        from .engine import ValidationResult
 
         errors = []
         secret_key = config.get('SECRET_KEY', '')
@@ -709,9 +697,8 @@ class WorkflowValidator(BaseValidator):
 
     def validate(
         self, value: Any, rule: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate workflow configurations."""
-        from .engine import ValidationResult
 
         if rule == "workflow_config":
             return self._validate_workflow_config(value, context)
@@ -724,9 +711,8 @@ class WorkflowValidator(BaseValidator):
 
     def _validate_workflow_config(
         self, config: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate workflow configuration."""
-        from .engine import ValidationResult
 
         errors = []
 
@@ -758,9 +744,8 @@ class WorkflowValidator(BaseValidator):
 
     def _validate_workflow_request(
         self, request: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate workflow request."""
-        from .engine import ValidationResult
 
         errors = []
         message = request.get('message', '')
@@ -781,9 +766,8 @@ class WorkflowValidator(BaseValidator):
 
     def _validate_workflow_parameters(
         self, params: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate workflow parameters."""
-        from .engine import ValidationResult
 
         errors = []
 
@@ -830,9 +814,8 @@ class AgentValidator(BaseValidator):
 
     def validate(
         self, value: Any, rule: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate agent-specific input."""
-        from .engine import ValidationResult
 
         if rule == "agent_id":
             return self._validate_agent_id(value, context)
@@ -847,9 +830,8 @@ class AgentValidator(BaseValidator):
 
     def _validate_agent_id(
         self, agent_id: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate agent ID."""
-        from .engine import ValidationResult
 
         if not agent_id or not isinstance(agent_id, str):
             return ValidationResult(
@@ -870,9 +852,8 @@ class AgentValidator(BaseValidator):
 
     def _validate_conversation_id(
         self, conversation_id: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate conversation ID."""
-        from .engine import ValidationResult
 
         if not conversation_id or not isinstance(conversation_id, str):
             return ValidationResult(
@@ -895,9 +876,8 @@ class AgentValidator(BaseValidator):
 
     def _validate_agent_name(
         self, name: str, context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate agent name."""
-        from .engine import ValidationResult
 
         if not name or not isinstance(name, str):
             return ValidationResult(
@@ -927,9 +907,8 @@ class AgentValidator(BaseValidator):
 
     def _validate_agent_input(
         self, data: dict[str, Any], context: ValidationContext
-    ) -> 'ValidationResult':
+    ) -> ValidationResult:
         """Validate agent input data."""
-        from .engine import ValidationResult
 
         errors = []
 

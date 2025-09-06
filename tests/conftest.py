@@ -4,6 +4,15 @@ import asyncio
 import os
 from collections.abc import AsyncGenerator
 
+import pytest
+from sqlalchemy.ext.asyncio import (
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
+
+from chatter.utils.database import Base, get_session_generator
+
 # Set up test environment before any other imports
 os.environ.setdefault("SECRET_KEY", "test_secret_key_for_testing")
 os.environ.setdefault("ENVIRONMENT", "testing")
@@ -38,15 +47,6 @@ except ImportError:
         asyncio.get_event_loop_policy(), asyncio.DefaultEventLoopPolicy
     ):
         asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
-
-import pytest
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
-
-from chatter.utils.database import Base, get_session_generator
 
 
 @pytest.fixture(scope="function")

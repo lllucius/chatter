@@ -284,7 +284,7 @@ class DynamicEmbeddingService:
         """Search for similar embeddings using pgvector similarity."""
         try:
             # Get the dynamic embedding table
-            embedding_table = get_dynamic_embedding_table(
+            embedding_table = get_embedding_model(
                 model_name, dimension
             )
 

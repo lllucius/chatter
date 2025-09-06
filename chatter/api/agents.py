@@ -27,6 +27,7 @@ from chatter.schemas.agents import (
     AgentListResponse,
     AgentResponse,
     AgentStatsResponse,
+    AgentStatus,
     AgentUpdateRequest,
 )
 from chatter.utils.logging import get_logger

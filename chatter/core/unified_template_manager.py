@@ -16,6 +16,8 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from chatter.models.workflow import TemplateCategory
+
 
 class WorkflowConfigurationError(Exception):
     """Workflow configuration error."""
@@ -398,8 +400,6 @@ class UnifiedTemplateManager:
         self, name: str, workflow_type: str
     ) -> TemplateCategory:
         """Determine template category based on name and type."""
-        from chatter.models.workflow import TemplateCategory
-
         name_lower = name.lower()
         if "support" in name_lower or "customer" in name_lower:
             return TemplateCategory.CUSTOMER_SUPPORT

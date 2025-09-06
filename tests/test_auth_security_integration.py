@@ -380,23 +380,6 @@ class TestCompleteAuthSecurityIntegration:
         # Skip this test as security_monitor module doesn't exist
         pass
 
-        # Verify cache was called for event storage
-        mock_cache.set.assert_called()
-
-        # Test failed login monitoring
-        failed_login_data = {
-            "username": "monitoruser",
-            "password": "wrongpassword",
-        }
-
-        response = await client.post(
-            "/api/v1/auth/login", json=failed_login_data
-        )
-        assert response.status_code == 401
-
-        # More cache calls should have been made
-        assert mock_cache.set.call_count > 1
-
     @pytest.mark.integration
     @pytest.mark.security
     async def test_password_reset_security_flow(

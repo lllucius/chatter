@@ -284,7 +284,7 @@ class TestEventsIntegration:
         tasks = []
 
         # Add stats requests
-        for i in range(2):
+        for _ in range(2):
             task = asyncio.create_task(
                 client.get("/api/v1/events/stats", headers=auth_headers)
             )

@@ -22,10 +22,10 @@ class ValidatedUUID(str):
             try:
                 UUID(v)
                 return v
-            except ValueError:
+            except ValueError as e:
                 raise BadRequestProblem(
                     detail="Invalid UUID format: must be a valid UUID"
-                )
+                ) from e
         raise BadRequestProblem(
             detail="Invalid UUID format: must be a string"
         )

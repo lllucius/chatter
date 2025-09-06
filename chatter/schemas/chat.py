@@ -107,6 +107,18 @@ class ConversationUpdate(BaseModel):
     status: ConversationStatus | None = Field(
         None, description="Conversation status"
     )
+    temperature: float | None = Field(
+        None, ge=0.0, le=2.0, description="Temperature setting"
+    )
+    max_tokens: int | None = Field(
+        None, ge=1, description="Max tokens setting"
+    )
+    workflow_config: dict[str, Any] | None = Field(
+        None, description="Workflow configuration"
+    )
+    metadata: dict[str, Any] | None = Field(
+        None, description="Additional metadata"
+    )
 
 
 class ConversationResponse(ConversationBase):
@@ -254,6 +266,9 @@ class ChatRequest(BaseModel):
     )
     system_prompt_override: str | None = Field(
         None, description="Override system prompt for this request"
+    )
+    workflow_config: dict[str, Any] | None = Field(
+        None, description="Workflow configuration"
     )
 
     # Internal field set by API processing

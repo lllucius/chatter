@@ -83,6 +83,18 @@ class ConversationCreate(ConversationBase):
     enable_retrieval: bool = Field(
         default=False, description="Enable document retrieval"
     )
+    temperature: float | None = Field(
+        None, ge=0.0, le=2.0, description="Temperature setting"
+    )
+    max_tokens: int | None = Field(
+        None, ge=1, description="Max tokens setting"
+    )
+    workflow_config: dict[str, Any] | None = Field(
+        None, description="Workflow configuration"
+    )
+    metadata: dict[str, Any] | None = Field(
+        None, description="Additional metadata"
+    )
 
 
 class ConversationUpdate(BaseModel):

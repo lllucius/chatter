@@ -23,6 +23,7 @@ import {
   PluginsApi,
   HealthApi,
   JobsApi,
+  EventsApi,
   UserLogin,
   UserCreate,
   ChatRequest,
@@ -61,6 +62,7 @@ export class ChatterSDK {
   public health: HealthApi;
   public jobs: JobsApi;
   public modelRegistry: ModelRegistryApi;
+  public events: EventsApi;
 
   constructor(baseURL: string = 'http://localhost:8000') {
     this.baseURL = baseURL;
@@ -89,6 +91,7 @@ export class ChatterSDK {
     this.health = new HealthApi(this.configuration);
     this.jobs = new JobsApi(this.configuration);
     this.modelRegistry = new ModelRegistryApi(this.configuration);
+    this.events = new EventsApi(this.configuration);
 
     // Keep auth in sync across tabs/windows
     window.addEventListener('storage', this.onStorageChange);
@@ -178,6 +181,7 @@ export class ChatterSDK {
     this.health = new HealthApi(this.configuration);
     this.jobs = new JobsApi(this.configuration);
     this.modelRegistry = new ModelRegistryApi(this.configuration);
+    this.events = new EventsApi(this.configuration);
   }
 
   /**
@@ -244,6 +248,137 @@ export class ChatterSDK {
         this.logout();
         window.location.href = '/login';
       }
+      throw error;
+    }
+  }
+
+  /**
+   * Update user profile helper method
+   */
+  async updateProfile(profileData: {
+    full_name?: string;
+    email?: string;
+  }) {
+    try {
+      const response = await this.auth.updateProfileApiV1AuthMePut({
+        userUpdate: profileData,
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        this.logout();
+        window.location.href = '/login';
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Change password helper method
+   */
+  async changePassword(passwordData: {
+    current_password: string;
+    new_password: string;
+  }) {
+    try {
+      const response = await this.auth.changePasswordApiV1AuthChangePasswordPost({
+        passwordChange: passwordData,
+      });
+      return response.data;
+    } catch (error: any) {
+      throw error;
+    }
+  }
+
+  /**
+   * Request password reset helper method
+   */
+  async requestPasswordReset(email: string) {
+    try {
+      const response = await this.auth.requestPasswordResetApiV1AuthPasswordResetRequestPost({
+        body: { email },
+      });
+      return response.data;
+    } catch (error: any) {
+      throw error;
+    }
+  }
+
+  /**
+   * Confirm password reset helper method
+   */
+  async confirmPasswordReset(resetData: {
+    token: string;
+    new_password: string;
+  }) {
+    try {
+      const response = await this.auth.confirmPasswordResetApiV1AuthPasswordResetConfirmPost({
+        body: resetData,
+      });
+      return response.data;
+    } catch (error: any) {
+      throw error;
+    }
+  }
+
+  /**
+   * Create API key helper method
+   */
+  async createApiKey(keyData: {
+    name: string;
+    permissions?: string[];
+    expires_in_days?: number;
+  }) {
+    try {
+      const response = await this.auth.createApiKeyApiV1AuthApiKeyPost({
+        aPIKeyCreate: keyData,
+      });
+      return response.data;
+    } catch (error: any) {
+      throw error;
+    }
+  }
+
+  /**
+   * List API keys helper method
+   */
+  async listApiKeys() {
+    try {
+      const response = await this.auth.listApiKeysApiV1AuthApiKeysGet();
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        this.logout();
+        window.location.href = '/login';
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Revoke API key helper method
+   */
+  async revokeApiKey(keyId: string) {
+    try {
+      const response = await this.auth.revokeApiKeyApiV1AuthApiKeyDelete({
+        keyId: keyId,
+      });
+      return response.data;
+    } catch (error: any) {
+      throw error;
+    }
+  }
+
+  /**
+   * Deactivate account helper method
+   */
+  async deactivateAccount() {
+    try {
+      const response = await this.auth.deactivateAccountApiV1AuthAccountDelete();
+      // After account deactivation, logout user
+      this.logout();
+      return response.data;
+    } catch (error: any) {
       throw error;
     }
   }

@@ -68,6 +68,7 @@ import {
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { WorkflowTemplateInfo, AvailableToolsResponse, ChatRequest } from '../sdk';
+import WorkflowEditor from '../components/workflow/WorkflowEditor';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -681,17 +682,27 @@ const WorkflowManagementPage: React.FC = () => {
       <Dialog 
         open={builderDialogOpen} 
         onClose={() => setBuilderDialogOpen(false)}
-        maxWidth="lg"
+        maxWidth="xl"
         fullWidth
+        PaperProps={{
+          sx: { height: '90vh' }
+        }}
       >
         <DialogTitle>
-          Create Custom Workflow
+          Visual Workflow Builder
         </DialogTitle>
-        <DialogContent>
-          <Alert severity="info" sx={{ mb: 2 }}>
-            Advanced workflow builder is coming soon. This will provide a visual interface
-            for creating complex, multi-step workflows with conditional logic.
-          </Alert>
+        <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
+          <WorkflowEditor 
+            onSave={(workflow) => {
+              console.log('Saving workflow:', workflow);
+              // TODO: Implement workflow saving
+              setBuilderDialogOpen(false);
+            }}
+            onWorkflowChange={(workflow) => {
+              console.log('Workflow changed:', workflow);
+              // TODO: Update workflow state
+            }}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setBuilderDialogOpen(false)}>

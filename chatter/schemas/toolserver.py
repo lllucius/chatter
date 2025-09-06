@@ -3,7 +3,13 @@
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    HttpUrl,
+    model_validator,
+)
 
 from chatter.models.toolserver import (
     ServerStatus,
@@ -81,21 +87,29 @@ class ToolServerCreate(ToolServerBase):
         """Validate server configuration based on transport type."""
         if self.transport_type == "stdio":
             if not self.base_url:
-                raise ValueError("stdio transport requires base_url for command specification")
-        
+                raise ValueError(
+                    "stdio transport requires base_url for command specification"
+                )
+
         if self.transport_type in ["http", "sse", "websocket"]:
             if not self.base_url:
-                raise ValueError(f"{self.transport_type} transport requires base_url")
-        
+                raise ValueError(
+                    f"{self.transport_type} transport requires base_url"
+                )
+
         if self.oauth_config:
             # Validate OAuth config completeness
-            if not all([
-                self.oauth_config.client_id,
-                self.oauth_config.client_secret,
-                self.oauth_config.token_url
-            ]):
-                raise ValueError("OAuth config requires client_id, client_secret, and token_url")
-        
+            if not all(
+                [
+                    self.oauth_config.client_id,
+                    self.oauth_config.client_secret,
+                    self.oauth_config.token_url,
+                ]
+            ):
+                raise ValueError(
+                    "OAuth config requires client_id, client_secret, and token_url"
+                )
+
         return self
 
 

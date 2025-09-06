@@ -23,14 +23,16 @@ from chatter.schemas.profile import (
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
-    BadRequestProblem,
     InternalServerProblem,
     NotFoundProblem,
     ProblemException,
     RateLimitProblem,
     ValidationProblem,
 )
-from chatter.utils.unified_rate_limiter import get_unified_rate_limiter, RateLimitExceeded
+from chatter.utils.unified_rate_limiter import (
+    RateLimitExceeded,
+    get_unified_rate_limiter,
+)
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -80,18 +82,18 @@ async def create_profile(
             # Check daily limit
             await rate_limiter.check_rate_limit(
                 key=rate_limit_key,
-                limit=50,    # Max 50 profile creations per day
+                limit=50,  # Max 50 profile creations per day
                 window=86400,  # 1 day in seconds
                 identifier="profile_create_daily",
             )
         except RateLimitExceeded as e:
             logger.warning(
                 "Rate limit exceeded for profile creation",
-                user_id=current_user.id
+                user_id=current_user.id,
             )
             raise RateLimitProblem(
                 detail="Profile creation rate limit exceeded. You can create up to 10 profiles per hour and 50 per day.",
-                retry_after=3600  # Suggest retry after 1 hour
+                retry_after=3600,  # Suggest retry after 1 hour
             ) from e
 
         profile = await profile_service.create_profile(
@@ -102,7 +104,7 @@ async def create_profile(
     except ProfileError as e:
         raise ValidationProblem(
             detail=f"Profile creation failed: {str(e)}",
-            validation_errors=[{"field": "profile", "message": str(e)}]
+            validation_errors=[{"field": "profile", "message": str(e)}],
         ) from None
     except ProblemException:
         raise
@@ -268,7 +270,7 @@ async def update_profile(
     except ProfileError as e:
         raise ValidationProblem(
             detail=f"Profile update failed: {str(e)}",
-            validation_errors=[{"field": "profile", "message": str(e)}]
+            validation_errors=[{"field": "profile", "message": str(e)}],
         ) from None
     except ProblemException:
         raise
@@ -362,7 +364,7 @@ async def test_profile(
             # Check daily limit
             await rate_limiter.check_rate_limit(
                 key=rate_limit_key,
-                limit=100,   # Max 100 tests per day per user
+                limit=100,  # Max 100 tests per day per user
                 window=86400,  # 1 day in seconds
                 identifier="profile_test_daily",
             )
@@ -370,11 +372,11 @@ async def test_profile(
             logger.warning(
                 "Rate limit exceeded for profile test",
                 user_id=current_user.id,
-                profile_id=profile_id
+                profile_id=profile_id,
             )
             raise RateLimitProblem(
                 detail="Profile testing rate limit exceeded. You can test up to 20 profiles per hour and 100 per day.",
-                retry_after=1800  # Suggest retry after 30 minutes
+                retry_after=1800,  # Suggest retry after 30 minutes
             ) from e
 
         result = await profile_service.test_profile(
@@ -386,7 +388,7 @@ async def test_profile(
     except ProfileError as e:
         raise ValidationProblem(
             detail=f"Profile test failed: {str(e)}",
-            validation_errors=[{"field": "profile", "message": str(e)}]
+            validation_errors=[{"field": "profile", "message": str(e)}],
         ) from None
     except ProblemException:
         raise
@@ -431,7 +433,7 @@ async def clone_profile(
     except ProfileError as e:
         raise ValidationProblem(
             detail=f"Profile cloning failed: {str(e)}",
-            validation_errors=[{"field": "profile", "message": str(e)}]
+            validation_errors=[{"field": "profile", "message": str(e)}],
         ) from None
     except Exception as e:
         logger.error(

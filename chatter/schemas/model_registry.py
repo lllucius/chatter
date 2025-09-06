@@ -23,7 +23,7 @@ class ProviderBase(BaseModel):
         description="Unique provider name",
         min_length=1,
         max_length=100,
-        pattern=r"^[a-zA-Z0-9_-]+$"
+        pattern=r"^[a-zA-Z0-9_-]+$",
     )
     provider_type: ProviderType = Field(
         ..., description="Type of provider"
@@ -32,20 +32,16 @@ class ProviderBase(BaseModel):
         ...,
         description="Human-readable name",
         min_length=1,
-        max_length=200
+        max_length=200,
     )
     description: str | None = Field(
-        None,
-        description="Provider description",
-        max_length=1000
+        None, description="Provider description", max_length=1000
     )
     api_key_required: bool = Field(
         True, description="Whether API key is required"
     )
     base_url: str | None = Field(
-        None,
-        description="Base URL for API",
-        max_length=500
+        None, description="Base URL for API", max_length=500
     )
     default_config: dict[str, Any] = Field(
         default_factory=dict, description="Default configuration"
@@ -67,20 +63,10 @@ class ProviderCreate(ProviderBase):
 class ProviderUpdate(BaseModel):
     """Schema for updating a provider."""
 
-    display_name: str | None = Field(
-        None,
-        min_length=1,
-        max_length=200
-    )
-    description: str | None = Field(
-        None,
-        max_length=1000
-    )
+    display_name: str | None = Field(None, min_length=1, max_length=200)
+    description: str | None = Field(None, max_length=1000)
     api_key_required: bool | None = None
-    base_url: str | None = Field(
-        None,
-        max_length=500
-    )
+    base_url: str | None = Field(None, max_length=500)
     default_config: dict[str, Any] | None = None
     is_active: bool | None = None
     is_default: bool | None = None
@@ -106,58 +92,41 @@ class ModelDefBase(BaseModel):
         description="Model name",
         min_length=1,
         max_length=100,
-        pattern=r"^[a-zA-Z0-9_-]+$"
+        pattern=r"^[a-zA-Z0-9_-]+$",
     )
     model_type: ModelType = Field(..., description="Type of model")
     display_name: str = Field(
         ...,
         description="Human-readable name",
         min_length=1,
-        max_length=200
+        max_length=200,
     )
     description: str | None = Field(
-        None,
-        description="Model description",
-        max_length=1000
+        None, description="Model description", max_length=1000
     )
     model_name: str = Field(
         ...,
         description="Actual model name for API calls",
         min_length=1,
-        max_length=200
+        max_length=200,
     )
     max_tokens: int | None = Field(
-        None,
-        description="Maximum tokens",
-        gt=0,
-        le=1000000
+        None, description="Maximum tokens", gt=0, le=1000000
     )
     context_length: int | None = Field(
-        None,
-        description="Context length",
-        gt=0,
-        le=10000000
+        None, description="Context length", gt=0, le=10000000
     )
     dimensions: int | None = Field(
-        None,
-        description="Embedding dimensions",
-        gt=0,
-        le=10000
+        None, description="Embedding dimensions", gt=0, le=10000
     )
     chunk_size: int | None = Field(
-        None,
-        description="Default chunk size",
-        gt=0,
-        le=100000
+        None, description="Default chunk size", gt=0, le=100000
     )
     supports_batch: bool = Field(
         False, description="Whether model supports batch operations"
     )
     max_batch_size: int | None = Field(
-        None,
-        description="Maximum batch size",
-        gt=0,
-        le=10000
+        None, description="Maximum batch size", gt=0, le=10000
     )
     default_config: dict[str, Any] = Field(
         default_factory=dict, description="Default configuration"
@@ -177,46 +146,15 @@ class ModelDefCreate(ModelDefBase):
 class ModelDefUpdate(BaseModel):
     """Schema for updating a model definition."""
 
-    display_name: str | None = Field(
-        None,
-        min_length=1,
-        max_length=200
-    )
-    description: str | None = Field(
-        None,
-        max_length=1000
-    )
-    model_name: str | None = Field(
-        None,
-        min_length=1,
-        max_length=200
-    )
-    max_tokens: int | None = Field(
-        None,
-        gt=0,
-        le=1000000
-    )
-    context_length: int | None = Field(
-        None,
-        gt=0,
-        le=10000000
-    )
-    dimensions: int | None = Field(
-        None,
-        gt=0,
-        le=10000
-    )
-    chunk_size: int | None = Field(
-        None,
-        gt=0,
-        le=100000
-    )
+    display_name: str | None = Field(None, min_length=1, max_length=200)
+    description: str | None = Field(None, max_length=1000)
+    model_name: str | None = Field(None, min_length=1, max_length=200)
+    max_tokens: int | None = Field(None, gt=0, le=1000000)
+    context_length: int | None = Field(None, gt=0, le=10000000)
+    dimensions: int | None = Field(None, gt=0, le=10000)
+    chunk_size: int | None = Field(None, gt=0, le=100000)
     supports_batch: bool | None = None
-    max_batch_size: int | None = Field(
-        None,
-        gt=0,
-        le=10000
-    )
+    max_batch_size: int | None = Field(None, gt=0, le=10000)
     default_config: dict[str, Any] | None = None
     is_active: bool | None = None
     is_default: bool | None = None
@@ -249,43 +187,34 @@ class EmbeddingSpaceBase(BaseModel):
         description="Unique space name",
         min_length=1,
         max_length=100,
-        pattern=r"^[a-zA-Z0-9_-]+$"
+        pattern=r"^[a-zA-Z0-9_-]+$",
     )
     display_name: str = Field(
         ...,
         description="Human-readable name",
         min_length=1,
-        max_length=200
+        max_length=200,
     )
     description: str | None = Field(
-        None,
-        description="Space description",
-        max_length=1000
+        None, description="Space description", max_length=1000
     )
     base_dimensions: int = Field(
-        ...,
-        description="Original model dimensions",
-        gt=0,
-        le=10000
+        ..., description="Original model dimensions", gt=0, le=10000
     )
     effective_dimensions: int = Field(
         ...,
         description="Effective dimensions after reduction",
         gt=0,
-        le=10000
+        le=10000,
     )
     reduction_strategy: ReductionStrategy = Field(
         ReductionStrategy.NONE, description="Reduction strategy"
     )
     reducer_path: str | None = Field(
-        None,
-        description="Path to reducer file",
-        max_length=500
+        None, description="Path to reducer file", max_length=500
     )
     reducer_version: str | None = Field(
-        None,
-        description="Reducer version/hash",
-        max_length=100
+        None, description="Reducer version/hash", max_length=100
     )
     normalize_vectors: bool = Field(
         True, description="Whether to normalize vectors"
@@ -298,12 +227,10 @@ class EmbeddingSpaceBase(BaseModel):
         description="Database table name",
         min_length=1,
         max_length=100,
-        pattern=r"^[a-zA-Z0-9_]+$"
+        pattern=r"^[a-zA-Z0-9_]+$",
     )
     index_type: str = Field(
-        "hnsw",
-        description="Index type",
-        max_length=50
+        "hnsw", description="Index type", max_length=50
     )
     index_config: dict[str, Any] = Field(
         default_factory=dict, description="Index configuration"

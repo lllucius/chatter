@@ -287,14 +287,14 @@ class DynamicEmbeddingService:
             embedding_table = get_dynamic_embedding_table(
                 model_name, dimension
             )
-            
+
             # Build the query with vector similarity
             from sqlalchemy import text
-            from chatter.models.document import DocumentChunk
-            
+
             # Use pgvector's cosine distance operator
-            similarity_query = text(f"""
-                SELECT 
+            similarity_query = text(
+                f"""
+                SELECT
                     de.chunk_id,
                     dc.content,
                     de.embedding <=> :query_embedding AS distance
@@ -302,29 +302,35 @@ class DynamicEmbeddingService:
                 JOIN document_chunks dc ON de.chunk_id = dc.id
                 ORDER BY de.embedding <=> :query_embedding
                 LIMIT :limit
-            """)
-            
+            """
+            )
+
             # Execute query with parameters
             result = await self.session.execute(
-                similarity_query, 
+                similarity_query,
                 {
-                    "query_embedding": str(query_embedding), 
-                    "limit": limit
-                }
+                    "query_embedding": str(query_embedding),
+                    "limit": limit,
+                },
             )
-            
+
             # Convert results to list
             similar_embeddings = []
             for row in result:
-                similar_embeddings.append({
-                    "chunk_id": row.chunk_id,
-                    "content": row.content,
-                    "distance": float(row.distance),
-                    "similarity_score": 1.0 - float(row.distance)  # Convert distance to similarity
-                })
-            
+                similar_embeddings.append(
+                    {
+                        "chunk_id": row.chunk_id,
+                        "content": row.content,
+                        "distance": float(row.distance),
+                        "similarity_score": 1.0
+                        - float(
+                            row.distance
+                        ),  # Convert distance to similarity
+                    }
+                )
+
             return similar_embeddings
-            
+
         except Exception as e:
             logger.error(f"Failed to search similar embeddings: {e}")
             return []
@@ -396,17 +402,27 @@ class EmbeddingModelManager:
                 vector_available = False
                 if PGVECTOR_AVAILABLE:
                     try:
-                        await self.session.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
+                        await self.session.execute(
+                            text(
+                                "CREATE EXTENSION IF NOT EXISTS vector;"
+                            )
+                        )
                         await self.session.commit()
                         vector_available = True
                     except Exception as e:
-                        logger.warning(f"Could not create vector extension: {e}")
+                        logger.warning(
+                            f"Could not create vector extension: {e}"
+                        )
                         # Rollback the failed transaction
                         await self.session.rollback()
                         vector_available = False
 
                 # Update the SQL to use TEXT if vector is not available
-                embedding_type = f"VECTOR({dimension})" if vector_available else "TEXT"
+                embedding_type = (
+                    f"VECTOR({dimension})"
+                    if vector_available
+                    else "TEXT"
+                )
                 create_sql = f"""
                 CREATE TABLE IF NOT EXISTS {table_name} (
                     id SERIAL PRIMARY KEY,

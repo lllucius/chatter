@@ -4,8 +4,8 @@ Consolidated module for all database query optimization, performance monitoring,
 and index management functionality.
 """
 
-import time
 import re
+import time
 from collections.abc import AsyncGenerator, Sequence
 from contextlib import asynccontextmanager
 from typing import Any
@@ -18,18 +18,16 @@ from sqlalchemy.sql import Select
 # Import all models that we optimize queries for
 from chatter.models.conversation import Conversation, Message
 from chatter.models.document import Document
-from chatter.models.user import User
 from chatter.models.registry import ModelDef, ModelType, Provider
+from chatter.models.user import User
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
 
-
-
 class QueryOptimizer:
     """Unified database query optimization and analysis utility.
-    
+
     Combines both static query optimization methods and session-based
     optimizations for comprehensive database performance improvement.
     """
@@ -41,11 +39,11 @@ class QueryOptimizer:
             session: Database session (optional for static methods)
         """
         self.session = session
-    
+
     # ========================================================================
     # Static Query Optimization Methods (from database_optimization.py)
     # ========================================================================
-    
+
     @staticmethod
     def optimize_conversation_query(
         query: Select[tuple[Conversation]],
@@ -167,17 +165,17 @@ class QueryOptimizer:
             query = query.options(selectinload(Document.chunks))
 
         return query
-    
+
     # ========================================================================
     # Query Analysis Methods (from database_optimization.py)
     # ========================================================================
-    
+
     def analyze_query(self, query: str) -> dict[str, Any]:
         """Analyze SQL query and extract information.
-        
+
         Args:
             query: SQL query string to analyze
-            
+
         Returns:
             Dictionary with query analysis results
         """
@@ -201,20 +199,25 @@ class QueryOptimizer:
             "has_wildcards": "*" in query,
             "has_joins": "join" in query_lower,
             "has_subqueries": "(" in query and "select" in query_lower,
-            "has_aggregates": any(agg in query_lower for agg in ["count", "sum", "avg", "max", "min"]),
+            "has_aggregates": any(
+                agg in query_lower
+                for agg in ["count", "sum", "avg", "max", "min"]
+            ),
             "has_order_by": "order by" in query_lower,
             "has_group_by": "group by" in query_lower,
-            "has_limit": "limit" in query_lower
+            "has_limit": "limit" in query_lower,
         }
 
         return analysis
 
-    def analyze_execution_plan(self, explain_result: list) -> dict[str, Any]:
+    def analyze_execution_plan(
+        self, explain_result: list
+    ) -> dict[str, Any]:
         """Analyze query execution plan.
-        
+
         Args:
             explain_result: List containing execution plan from EXPLAIN
-            
+
         Returns:
             Dictionary with execution plan analysis
         """
@@ -246,17 +249,19 @@ class QueryOptimizer:
             "node_type": node_type,
             "has_sequential_scan": has_sequential_scan,
             "has_index_scan": has_index_scan,
-            "performance_score": performance_score
+            "performance_score": performance_score,
         }
 
         return analysis
 
-    def calculate_performance_score(self, stats: dict[str, Any]) -> float:
+    def calculate_performance_score(
+        self, stats: dict[str, Any]
+    ) -> float:
         """Calculate query performance score.
-        
+
         Args:
             stats: Dictionary with query execution statistics
-            
+
         Returns:
             Performance score between 0 and 1 (higher is better)
         """
@@ -292,10 +297,10 @@ class QueryOptimizer:
 
     def get_optimization_suggestions(self, query: str) -> list[str]:
         """Get optimization suggestions for a query.
-        
+
         Args:
             query: SQL query string to analyze
-            
+
         Returns:
             List of optimization suggestions
         """
@@ -304,54 +309,84 @@ class QueryOptimizer:
 
         # Check for common anti-patterns
         if "select *" in query_lower:
-            suggestions.append("Avoid SELECT * - specify only needed columns")
+            suggestions.append(
+                "Avoid SELECT * - specify only needed columns"
+            )
 
         if "like '%" in query_lower:
-            suggestions.append("Leading wildcard in LIKE can't use indexes effectively")
+            suggestions.append(
+                "Leading wildcard in LIKE can't use indexes effectively"
+            )
 
         if "or" in query_lower:
-            suggestions.append("Consider splitting OR conditions into separate queries with UNION")
+            suggestions.append(
+                "Consider splitting OR conditions into separate queries with UNION"
+            )
 
         if "order by" in query_lower and "limit" not in query_lower:
-            suggestions.append("Consider adding LIMIT when using ORDER BY to reduce sorting overhead")
+            suggestions.append(
+                "Consider adding LIMIT when using ORDER BY to reduce sorting overhead"
+            )
 
         if "where" not in query_lower and "from" in query_lower:
-            suggestions.append("Query lacks WHERE clause - consider if you need all rows")
+            suggestions.append(
+                "Query lacks WHERE clause - consider if you need all rows"
+            )
 
         if len(query_lower.split("join")) > 3:
-            suggestions.append("Complex joins detected - consider breaking into smaller queries")
+            suggestions.append(
+                "Complex joins detected - consider breaking into smaller queries"
+            )
 
         # Suggest indexes for WHERE conditions
-        where_match = re.search(r'\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)', query_lower)
+        where_match = re.search(
+            r'\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)',
+            query_lower,
+        )
         if where_match:
             where_clause = where_match.group(1)
             column_matches = re.findall(r'\b(\w+)\s*=', where_clause)
             if column_matches:
-                suggestions.append(f"Consider adding indexes on columns: {', '.join(set(column_matches))}")
+                suggestions.append(
+                    f"Consider adding indexes on columns: {', '.join(set(column_matches))}"
+                )
 
         return suggestions
 
-    def suggest_caching(self, query: str, execution_count: int, avg_execution_time_ms: float) -> dict[str, Any]:
+    def suggest_caching(
+        self,
+        query: str,
+        execution_count: int,
+        avg_execution_time_ms: float,
+    ) -> dict[str, Any]:
         """Suggest query caching based on usage patterns.
-        
+
         Args:
             query: SQL query string
             execution_count: Number of times query has been executed
             avg_execution_time_ms: Average execution time in milliseconds
-            
+
         Returns:
             Dictionary with caching recommendation
         """
         # Calculate caching score based on frequency and execution time
-        frequency_score = min(execution_count / 50, 1.0)  # Normalize to 0-1
-        time_score = min(avg_execution_time_ms / 100, 1.0)  # Normalize to 0-1
+        frequency_score = min(
+            execution_count / 50, 1.0
+        )  # Normalize to 0-1
+        time_score = min(
+            avg_execution_time_ms / 100, 1.0
+        )  # Normalize to 0-1
 
         # Queries with low variability are good candidates for caching
         query_lower = query.lower()
         has_parameters = "%" in query or "?" in query or "$" in query
 
         # Calculate final caching score
-        cache_score = (frequency_score * 0.4 + time_score * 0.4 + (0.2 if has_parameters else 0.0))
+        cache_score = (
+            frequency_score * 0.4
+            + time_score * 0.4
+            + (0.2 if has_parameters else 0.0)
+        )
 
         should_cache = cache_score > 0.6
 
@@ -368,18 +403,22 @@ class QueryOptimizer:
 
         # Generate reason
         if should_cache:
-            reason = f"High frequency ({execution_count} executions) and "
+            reason = (
+                f"High frequency ({execution_count} executions) and "
+            )
             reason += f"execution time ({avg_execution_time_ms:.1f}ms) suggest caching would be beneficial"
         else:
             reason = "Low frequency or fast execution time - caching may not provide significant benefit"
 
         return {
             "should_cache": should_cache,
-            "cache_duration_seconds": cache_duration if should_cache else 0,
+            "cache_duration_seconds": (
+                cache_duration if should_cache else 0
+            ),
             "cache_score": cache_score,
-            "reason": reason
+            "reason": reason,
         }
-    
+
     # ========================================================================
     # Session-based Model Registry Optimizations (existing methods)
     # ========================================================================
@@ -406,7 +445,7 @@ class QueryOptimizer:
         """
         if not self.session:
             raise ValueError("Session required for model operations")
-            
+
         # Build filter conditions
         conditions = []
         if provider_id:
@@ -435,7 +474,9 @@ class QueryOptimizer:
         if where_clause is not None:
             data_query = data_query.where(where_clause)
 
-        data_query = data_query.offset((page - 1) * per_page).limit(per_page)
+        data_query = data_query.offset((page - 1) * per_page).limit(
+            per_page
+        )
 
         result = await self.session.execute(data_query)
         models = result.scalars().all()
@@ -462,7 +503,7 @@ class QueryOptimizer:
         """
         if not self.session:
             raise ValueError("Session required for provider operations")
-            
+
         # Build filter conditions
         conditions = []
         if provider_type:
@@ -487,7 +528,9 @@ class QueryOptimizer:
         if where_clause is not None:
             data_query = data_query.where(where_clause)
 
-        data_query = data_query.offset((page - 1) * per_page).limit(per_page)
+        data_query = data_query.offset((page - 1) * per_page).limit(
+            per_page
+        )
 
         result = await self.session.execute(data_query)
         providers = result.scalars().all()
@@ -507,7 +550,7 @@ class QueryOptimizer:
         """
         if not self.session:
             raise ValueError("Session required for provider operations")
-            
+
         # Single optimized query using EXISTS subquery
         query = (
             select(Provider)
@@ -521,7 +564,7 @@ class QueryOptimizer:
                         ModelDef.is_default,
                     )
                     .distinct()
-                )
+                ),
             )
             .order_by(Provider.is_default.desc())
             .limit(1)
@@ -543,7 +586,7 @@ class QueryOptimizer:
         """
         if not self.session:
             raise ValueError("Session required for provider operations")
-            
+
         if not provider_ids:
             return {}
 
@@ -552,11 +595,11 @@ class QueryOptimizer:
             select(
                 ModelDef.provider_id,
                 ModelDef.model_type,
-                func.count(ModelDef.id).label('count')
+                func.count(ModelDef.id).label('count'),
             )
             .where(
                 ModelDef.provider_id.in_(provider_ids),
-                ModelDef.is_active
+                ModelDef.is_active,
             )
             .group_by(ModelDef.provider_id, ModelDef.model_type)
         )
@@ -575,17 +618,19 @@ class QueryOptimizer:
             counts[provider_id][model_type] = count
 
         return counts
-    
+
     # ========================================================================
     # Index Recommendation Methods (consolidated from both modules)
     # ========================================================================
-    
-    def recommend_indexes(self, queries: list[str]) -> list[dict[str, Any]]:
+
+    def recommend_indexes(
+        self, queries: list[str]
+    ) -> list[dict[str, Any]]:
         """Recommend indexes based on query patterns.
-        
+
         Args:
             queries: List of SQL query strings to analyze
-            
+
         Returns:
             List of index recommendations
         """
@@ -602,12 +647,17 @@ class QueryOptimizer:
             table = from_match.group(1)
 
             # Extract WHERE clause columns
-            where_match = re.search(r'\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)', query_lower)
+            where_match = re.search(
+                r'\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)',
+                query_lower,
+            )
             if where_match:
                 where_clause = where_match.group(1)
 
                 # Find column references in WHERE clause
-                column_matches = re.findall(r'\b(\w+)\s*=', where_clause)
+                column_matches = re.findall(
+                    r'\b(\w+)\s*=', where_clause
+                )
                 for column in column_matches:
                     if table not in table_columns:
                         table_columns[table] = set()
@@ -621,21 +671,25 @@ class QueryOptimizer:
         for table, columns in table_columns.items():
             for column in columns:
                 key = f"{table}.{column}"
-                if column_usage.get(key, 0) >= 2:  # Used in multiple queries
-                    recommendations.append({
-                        "table": table,
-                        "columns": [column],
-                        "type": "btree",
-                        "reason": f"Column '{column}' is frequently used in WHERE clauses",
-                        "usage_count": column_usage[key]
-                    })
+                if (
+                    column_usage.get(key, 0) >= 2
+                ):  # Used in multiple queries
+                    recommendations.append(
+                        {
+                            "table": table,
+                            "columns": [column],
+                            "type": "btree",
+                            "reason": f"Column '{column}' is frequently used in WHERE clauses",
+                            "usage_count": column_usage[key],
+                        }
+                    )
 
         return recommendations
 
 
 class PerformanceMonitor:
     """Enhanced performance tracking and monitoring for database operations.
-    
+
     Tracks query execution times, identifies slow queries, and provides
     comprehensive performance analytics across all database operations.
     """
@@ -647,7 +701,9 @@ class PerformanceMonitor:
         self.slow_query_threshold_ms = 1000  # 1 second
 
     @asynccontextmanager
-    async def measure_query(self, operation: str) -> AsyncGenerator[None, None]:
+    async def measure_query(
+        self, operation: str
+    ) -> AsyncGenerator[None, None]:
         """Context manager to measure query execution time.
 
         Args:
@@ -657,7 +713,9 @@ class PerformanceMonitor:
         try:
             yield
         finally:
-            duration = (time.time() - start_time) * 1000  # Convert to milliseconds
+            duration = (
+                time.time() - start_time
+            ) * 1000  # Convert to milliseconds
 
             # Track metrics
             if operation not in self.query_times:
@@ -669,7 +727,9 @@ class PerformanceMonitor:
 
             # Keep only last 100 measurements
             if len(self.query_times[operation]) > 100:
-                self.query_times[operation] = self.query_times[operation][-100:]
+                self.query_times[operation] = self.query_times[
+                    operation
+                ][-100:]
 
             # Log slow queries with more context
             if duration > self.slow_query_threshold_ms:
@@ -677,8 +737,9 @@ class PerformanceMonitor:
                     "Slow query detected",
                     operation=operation,
                     duration_ms=duration,
-                    avg_duration_ms=sum(self.query_times[operation]) / len(self.query_times[operation]),
-                    count=self.query_counts[operation]
+                    avg_duration_ms=sum(self.query_times[operation])
+                    / len(self.query_times[operation]),
+                    count=self.query_counts[operation],
                 )
 
     def get_performance_summary(self) -> dict[str, Any]:
@@ -697,17 +758,29 @@ class PerformanceMonitor:
             avg_ms = sum(times) / len(times)
             min_ms = min(times)
             max_ms = max(times)
-            
+
             # Percentile calculations
             sorted_times = sorted(times)
             count = len(sorted_times)
             p50_ms = sorted_times[count // 2] if count > 0 else 0
-            p95_ms = sorted_times[int(count * 0.95)] if count > 20 else max_ms
-            p99_ms = sorted_times[int(count * 0.99)] if count > 100 else max_ms
-            
+            p95_ms = (
+                sorted_times[int(count * 0.95)]
+                if count > 20
+                else max_ms
+            )
+            p99_ms = (
+                sorted_times[int(count * 0.99)]
+                if count > 100
+                else max_ms
+            )
+
             # Performance assessment
-            slow_queries = sum(1 for t in times if t > self.slow_query_threshold_ms)
-            performance_grade = self._calculate_performance_grade(avg_ms, p95_ms, slow_queries, count)
+            slow_queries = sum(
+                1 for t in times if t > self.slow_query_threshold_ms
+            )
+            performance_grade = self._calculate_performance_grade(
+                avg_ms, p95_ms, slow_queries, count
+            )
 
             summary[operation] = {
                 'count': self.query_counts[operation],
@@ -719,16 +792,27 @@ class PerformanceMonitor:
                 'p99_ms': round(p99_ms, 2),
                 'slow_queries': slow_queries,
                 'performance_grade': performance_grade,
-                'throughput_per_sec': round(count / (sum(times) / 1000), 2) if times else 0
+                'throughput_per_sec': (
+                    round(count / (sum(times) / 1000), 2)
+                    if times
+                    else 0
+                ),
             }
 
         return summary
-    
-    def _calculate_performance_grade(self, avg_ms: float, p95_ms: float, 
-                                   slow_queries: int, total_queries: int) -> str:
+
+    def _calculate_performance_grade(
+        self,
+        avg_ms: float,
+        p95_ms: float,
+        slow_queries: int,
+        total_queries: int,
+    ) -> str:
         """Calculate performance grade based on query metrics."""
-        slow_query_ratio = slow_queries / total_queries if total_queries > 0 else 0
-        
+        slow_query_ratio = (
+            slow_queries / total_queries if total_queries > 0 else 0
+        )
+
         if avg_ms < 50 and p95_ms < 200 and slow_query_ratio < 0.01:
             return "A"
         elif avg_ms < 100 and p95_ms < 500 and slow_query_ratio < 0.05:
@@ -739,53 +823,94 @@ class PerformanceMonitor:
             return "D"
         else:
             return "F"
-    
+
     def get_slow_query_analysis(self) -> dict[str, Any]:
         """Analyze slow queries and provide optimization recommendations."""
         slow_operations = []
-        
+
         for operation, times in self.query_times.items():
-            slow_count = sum(1 for t in times if t > self.slow_query_threshold_ms)
+            slow_count = sum(
+                1 for t in times if t > self.slow_query_threshold_ms
+            )
             if slow_count > 0:
-                avg_slow_time = sum(t for t in times if t > self.slow_query_threshold_ms) / slow_count
-                slow_operations.append({
-                    'operation': operation,
-                    'slow_query_count': slow_count,
-                    'avg_slow_time_ms': round(avg_slow_time, 2),
-                    'slow_query_ratio': round(slow_count / len(times), 3),
-                    'recommendations': self._get_optimization_recommendations(operation, avg_slow_time)
-                })
-        
+                avg_slow_time = (
+                    sum(
+                        t
+                        for t in times
+                        if t > self.slow_query_threshold_ms
+                    )
+                    / slow_count
+                )
+                slow_operations.append(
+                    {
+                        'operation': operation,
+                        'slow_query_count': slow_count,
+                        'avg_slow_time_ms': round(avg_slow_time, 2),
+                        'slow_query_ratio': round(
+                            slow_count / len(times), 3
+                        ),
+                        'recommendations': self._get_optimization_recommendations(
+                            operation, avg_slow_time
+                        ),
+                    }
+                )
+
         return {
-            'slow_operations': sorted(slow_operations, key=lambda x: x['avg_slow_time_ms'], reverse=True),
-            'total_slow_queries': sum(op['slow_query_count'] for op in slow_operations)
+            'slow_operations': sorted(
+                slow_operations,
+                key=lambda x: x['avg_slow_time_ms'],
+                reverse=True,
+            ),
+            'total_slow_queries': sum(
+                op['slow_query_count'] for op in slow_operations
+            ),
         }
-    
-    def _get_optimization_recommendations(self, operation: str, avg_time_ms: float) -> list[str]:
+
+    def _get_optimization_recommendations(
+        self, operation: str, avg_time_ms: float
+    ) -> list[str]:
         """Get optimization recommendations for slow operations."""
         recommendations = []
-        
+
         if "list_" in operation:
-            recommendations.append("Consider adding database indexes on filter columns")
-            recommendations.append("Implement query result caching for frequently accessed lists")
+            recommendations.append(
+                "Consider adding database indexes on filter columns"
+            )
+            recommendations.append(
+                "Implement query result caching for frequently accessed lists"
+            )
             if avg_time_ms > 2000:
-                recommendations.append("Consider implementing pagination with smaller page sizes")
-        
+                recommendations.append(
+                    "Consider implementing pagination with smaller page sizes"
+                )
+
         if "get_" in operation and avg_time_ms > 500:
-            recommendations.append("Review eager loading strategy to avoid N+1 queries")
-            recommendations.append("Consider caching frequently accessed entities")
-        
+            recommendations.append(
+                "Review eager loading strategy to avoid N+1 queries"
+            )
+            recommendations.append(
+                "Consider caching frequently accessed entities"
+            )
+
         if avg_time_ms > 5000:
-            recommendations.append("This query is extremely slow - urgent optimization needed")
-            recommendations.append("Consider query rewrite or data denormalization")
-        
+            recommendations.append(
+                "This query is extremely slow - urgent optimization needed"
+            )
+            recommendations.append(
+                "Consider query rewrite or data denormalization"
+            )
+
         return recommendations
 
 
 class BulkOperations:
     """Efficient bulk database operations with performance monitoring."""
 
-    def __init__(self, session: AsyncSession, performance_monitor: PerformanceMonitor | None = None):
+    def __init__(
+        self,
+        session: AsyncSession,
+        performance_monitor: PerformanceMonitor | None = None,
+    ):
         """Initialize bulk operations.
 
         Args:
@@ -793,7 +918,9 @@ class BulkOperations:
             performance_monitor: Optional performance monitor for tracking
         """
         self.session = session
-        self.performance_monitor = performance_monitor or _performance_monitor
+        self.performance_monitor = (
+            performance_monitor or _performance_monitor
+        )
 
     async def bulk_update_model_status(
         self,
@@ -812,7 +939,9 @@ class BulkOperations:
         if not model_ids:
             return 0
 
-        async with self.performance_monitor.measure_query("bulk_update_model_status"):
+        async with self.performance_monitor.measure_query(
+            "bulk_update_model_status"
+        ):
             result = await self.session.execute(
                 update(ModelDef)
                 .where(ModelDef.id.in_(model_ids))
@@ -839,7 +968,9 @@ class BulkOperations:
         if not provider_ids:
             return 0
 
-        async with self.performance_monitor.measure_query("bulk_update_provider_status"):
+        async with self.performance_monitor.measure_query(
+            "bulk_update_provider_status"
+        ):
             result = await self.session.execute(
                 update(Provider)
                 .where(Provider.id.in_(provider_ids))
@@ -864,7 +995,9 @@ class BulkOperations:
         if not model_data_list:
             return []
 
-        async with self.performance_monitor.measure_query("bulk_create_models"):
+        async with self.performance_monitor.measure_query(
+            "bulk_create_models"
+        ):
             # Validate all models first
             created_ids = []
             models_to_create = []
@@ -884,7 +1017,7 @@ class BulkOperations:
 
 class DatabaseIndexManager:
     """Comprehensive database index management and recommendations.
-    
+
     Consolidates index recommendations from both query analysis and
     predefined performance optimizations.
     """
@@ -901,77 +1034,64 @@ class DatabaseIndexManager:
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_models_provider_type_active
                ON model_defs(provider_id, model_type, is_active)
                -- Optimizes model listing filtered by provider and type""",
-
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_models_default_type
                ON model_defs(model_type, is_default) WHERE is_active = true
                -- Optimizes finding default models by type""",
-
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_models_list_query
                ON model_defs(provider_id, model_type, is_active, is_default, display_name)
                -- Covers common model listing queries""",
-
             # Provider queries optimization
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_providers_type_active
                ON providers(provider_type, is_active)
                -- Optimizes provider filtering""",
-
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_providers_list_query
                ON providers(provider_type, is_active, is_default, display_name)
                -- Covers common provider listing queries""",
-
             # Conversation optimization indexes
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_conversations_user_status_updated
                ON conversations(user_id, status, updated_at DESC)
                -- Optimizes user conversation listing""",
-
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_conversations_search
                ON conversations USING GIN(to_tsvector('english', title))
                -- Enables full-text search on conversation titles""",
-
-            # Message optimization indexes  
+            # Message optimization indexes
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_messages_conversation_created
                ON messages(conversation_id, created_at DESC)
                -- Optimizes message ordering within conversations""",
-
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_messages_search
                ON messages USING GIN(to_tsvector('english', content))
                -- Enables full-text search on message content""",
-
             # Document optimization indexes
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_documents_owner_created
                ON documents(owner_id, created_at DESC)
                -- Optimizes user document listing""",
-
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_document_chunks_document_vector
                ON document_chunks(document_id) INCLUDE (embedding_vector)
                -- Optimizes vector similarity searches""",
-
             # User and profile indexes
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_users_email_unique
                ON users(email) WHERE email IS NOT NULL
                -- Ensures fast user lookup by email""",
-
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_profiles_user_active
                ON profiles(user_id, is_active)
                -- Optimizes active profile lookup""",
-
             # Audit and monitoring indexes
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_logs_timestamp_type
                ON audit_logs(timestamp DESC, event_type)
                -- Optimizes audit log queries""",
-
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_logs_user_timestamp
                ON audit_logs(user_id, timestamp DESC)
                -- Optimizes user-specific audit queries""",
-
             """CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_audit_logs_resource
                ON audit_logs(resource_type, resource_id)
                -- Optimizes resource-specific audit queries""",
         ]
 
     @staticmethod
-    async def apply_recommended_indexes(session: AsyncSession, 
-                                      performance_monitor: PerformanceMonitor | None = None) -> dict[str, Any]:
+    async def apply_recommended_indexes(
+        session: AsyncSession,
+        performance_monitor: PerformanceMonitor | None = None,
+    ) -> dict[str, Any]:
         """Apply recommended indexes to the database with comprehensive tracking.
 
         Args:
@@ -984,34 +1104,56 @@ class DatabaseIndexManager:
         monitor = performance_monitor or _performance_monitor
         applied = []
         failed = []
-        indexes = DatabaseIndexManager.get_comprehensive_index_recommendations()
+        indexes = (
+            DatabaseIndexManager.get_comprehensive_index_recommendations()
+        )
 
         async with monitor.measure_query("apply_database_indexes"):
             for index_sql in indexes:
                 try:
                     # Extract index name for logging
                     index_name_match = re.search(r'idx_\w+', index_sql)
-                    index_name = index_name_match.group(0) if index_name_match else "unknown"
-                    
+                    index_name = (
+                        index_name_match.group(0)
+                        if index_name_match
+                        else "unknown"
+                    )
+
                     start_time = time.time()
                     await session.execute(index_sql)
                     duration = time.time() - start_time
-                    
-                    applied.append({
-                        "name": index_name,
-                        "sql": index_sql[:100] + "..." if len(index_sql) > 100 else index_sql,
-                        "duration_ms": round(duration * 1000, 2)
-                    })
-                    
-                    logger.info(f"Applied index: {index_name} in {duration:.2f}s")
-                    
+
+                    applied.append(
+                        {
+                            "name": index_name,
+                            "sql": (
+                                index_sql[:100] + "..."
+                                if len(index_sql) > 100
+                                else index_sql
+                            ),
+                            "duration_ms": round(duration * 1000, 2),
+                        }
+                    )
+
+                    logger.info(
+                        f"Applied index: {index_name} in {duration:.2f}s"
+                    )
+
                 except Exception as e:
-                    failed.append({
-                        "name": index_name if 'index_name' in locals() else "unknown",
-                        "error": str(e),
-                        "sql": index_sql[:100] + "..."
-                    })
-                    logger.warning(f"Failed to apply index {index_name if 'index_name' in locals() else 'unknown'}: {e}")
+                    failed.append(
+                        {
+                            "name": (
+                                index_name
+                                if 'index_name' in locals()
+                                else "unknown"
+                            ),
+                            "error": str(e),
+                            "sql": index_sql[:100] + "...",
+                        }
+                    )
+                    logger.warning(
+                        f"Failed to apply index {index_name if 'index_name' in locals() else 'unknown'}: {e}"
+                    )
 
             await session.commit()
 
@@ -1020,83 +1162,106 @@ class DatabaseIndexManager:
             "failed_count": len(failed),
             "applied_indexes": applied,
             "failed_indexes": failed,
-            "total_indexes": len(indexes)
+            "total_indexes": len(indexes),
         }
 
     @staticmethod
     def analyze_query_for_indexes(query: str) -> list[dict[str, Any]]:
         """Analyze a specific query and recommend indexes.
-        
+
         Args:
             query: SQL query string to analyze
-            
+
         Returns:
             List of specific index recommendations for this query
         """
         recommendations = []
         query_lower = query.lower()
-        
+
         # Extract table and conditions
         table_match = re.search(r'\bfrom\s+(\w+)', query_lower)
         if not table_match:
             return recommendations
-            
+
         table = table_match.group(1)
-        
+
         # Analyze WHERE conditions
-        where_match = re.search(r'\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)', query_lower)
+        where_match = re.search(
+            r'\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)',
+            query_lower,
+        )
         if where_match:
             where_clause = where_match.group(1)
-            
+
             # Find equality conditions
             eq_columns = re.findall(r'\b(\w+)\s*=', where_clause)
-            
+
             # Find range conditions
             range_columns = re.findall(r'\b(\w+)\s*[<>]', where_clause)
-            
+
             # Find IN conditions
             in_columns = re.findall(r'\b(\w+)\s+in\s*\(', where_clause)
-            
-            all_columns = list(set(eq_columns + range_columns + in_columns))
-            
+
+            all_columns = list(
+                set(eq_columns + range_columns + in_columns)
+            )
+
             if all_columns:
-                recommendations.append({
-                    "table": table,
-                    "columns": all_columns,
-                    "type": "btree",
-                    "reason": f"WHERE clause filtering on: {', '.join(all_columns)}",
-                    "priority": "high" if len(all_columns) <= 3 else "medium"
-                })
-        
+                recommendations.append(
+                    {
+                        "table": table,
+                        "columns": all_columns,
+                        "type": "btree",
+                        "reason": f"WHERE clause filtering on: {', '.join(all_columns)}",
+                        "priority": (
+                            "high"
+                            if len(all_columns) <= 3
+                            else "medium"
+                        ),
+                    }
+                )
+
         # Analyze ORDER BY
-        order_match = re.search(r'\border\s+by\s+([^)]+?)(?:\s+(?:limit|group\s+by)|$)', query_lower)
+        order_match = re.search(
+            r'\border\s+by\s+([^)]+?)(?:\s+(?:limit|group\s+by)|$)',
+            query_lower,
+        )
         if order_match:
             order_clause = order_match.group(1)
             order_columns = re.findall(r'\b(\w+)', order_clause)
-            
+
             if order_columns:
-                recommendations.append({
-                    "table": table,
-                    "columns": order_columns,
-                    "type": "btree",
-                    "reason": f"ORDER BY optimization for: {', '.join(order_columns)}",
-                    "priority": "medium"
-                })
-        
+                recommendations.append(
+                    {
+                        "table": table,
+                        "columns": order_columns,
+                        "type": "btree",
+                        "reason": f"ORDER BY optimization for: {', '.join(order_columns)}",
+                        "priority": "medium",
+                    }
+                )
+
         return recommendations
 
 
 # ============================================================================
-# Specialized Query Services (from database_optimization.py) 
+# Specialized Query Services (from database_optimization.py)
 # ============================================================================
+
 
 class ConversationQueryService:
     """Specialized service for optimized conversation queries with performance monitoring."""
 
-    def __init__(self, session: AsyncSession, performance_monitor: PerformanceMonitor | None = None):
+    def __init__(
+        self,
+        session: AsyncSession,
+        performance_monitor: PerformanceMonitor | None = None,
+    ):
         """Initialize with database session and optional performance monitor."""
         self.session = session
-        self.performance_monitor = performance_monitor or _performance_monitor
+        self.performance_monitor = (
+            performance_monitor or _performance_monitor
+        )
 
     async def get_conversation_with_recent_messages(
         self,
@@ -1114,7 +1279,9 @@ class ConversationQueryService:
         Returns:
             Conversation with recent messages or None
         """
-        async with self.performance_monitor.measure_query("get_conversation_with_recent_messages"):
+        async with self.performance_monitor.measure_query(
+            "get_conversation_with_recent_messages"
+        ):
             # First, get the conversation with user and profile
             conv_query = select(Conversation).where(
                 Conversation.id == conversation_id
@@ -1175,7 +1342,9 @@ class ConversationQueryService:
         Returns:
             List of conversations
         """
-        async with self.performance_monitor.measure_query("get_conversations_for_user"):
+        async with self.performance_monitor.measure_query(
+            "get_conversations_for_user"
+        ):
             query = (
                 select(Conversation)
                 .where(
@@ -1218,7 +1387,8 @@ class ConversationQueryService:
                     select(Message)
                     .where(Message.conversation_id.in_(conv_ids))
                     .order_by(
-                        Message.conversation_id, Message.created_at.desc()
+                        Message.conversation_id,
+                        Message.created_at.desc(),
                     )
                     .distinct(Message.conversation_id)
                 )
@@ -1253,7 +1423,9 @@ class ConversationQueryService:
         Returns:
             List of matching conversations
         """
-        async with self.performance_monitor.measure_query("search_conversations"):
+        async with self.performance_monitor.measure_query(
+            "search_conversations"
+        ):
             # Search in conversation title or message content
             query = (
                 select(Conversation)
@@ -1267,7 +1439,9 @@ class ConversationQueryService:
                         Conversation.user_id == user_id,
                         Conversation.status != "deleted",
                         or_(
-                            Conversation.title.ilike(f"%{search_term}%"),
+                            Conversation.title.ilike(
+                                f"%{search_term}%"
+                            ),
                             Message.content.ilike(f"%{search_term}%"),
                         ),
                     )
@@ -1291,6 +1465,7 @@ class ConversationQueryService:
 # ============================================================================
 # Utility Functions (from database_optimization.py)
 # ============================================================================
+
 
 async def get_conversation_optimized(
     session: AsyncSession,
@@ -1318,7 +1493,9 @@ async def get_conversation_optimized(
             conversation_id, message_limit, user_id
         )
     else:
-        async with _performance_monitor.measure_query("get_conversation_optimized"):
+        async with _performance_monitor.measure_query(
+            "get_conversation_optimized"
+        ):
             query = select(Conversation).where(
                 Conversation.id == conversation_id
             )
@@ -1380,7 +1557,7 @@ def get_performance_metrics() -> PerformanceMonitor:
 # Keep backward compatibility alias
 def get_performance_monitor() -> PerformanceMonitor:
     """Get the global performance monitor instance.
-    
+
     Returns:
         PerformanceMonitor instance
     """

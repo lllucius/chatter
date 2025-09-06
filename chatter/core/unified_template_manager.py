@@ -1,6 +1,6 @@
 """Unified template manager for workflow templates.
 
-This module consolidates the WorkflowTemplateManager, CustomWorkflowBuilder, 
+This module consolidates the WorkflowTemplateManager, CustomWorkflowBuilder,
 and TemplateRegistry classes into a single unified interface to eliminate
 code duplication and provide a consistent API. Now includes database persistence
 for custom templates and specs.
@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,12 +19,14 @@ from sqlalchemy.orm import selectinload
 
 class WorkflowConfigurationError(Exception):
     """Workflow configuration error."""
+
     pass
 
 
 def get_secure_logger(name: str):
     """Get a simple logger - placeholder for security logger."""
     import logging
+
     return logging.getLogger(name)
 
 
@@ -46,7 +48,7 @@ class WorkflowTemplate:
 @dataclass
 class TemplateSpec:
     """Specification for creating custom templates."""
-    
+
     name: str
     description: str
     workflow_type: str
@@ -59,7 +61,7 @@ class TemplateSpec:
 @dataclass
 class ValidationResult:
     """Result of template validation."""
-    
+
     valid: bool
     errors: list[str]
     warnings: list[str]
@@ -70,7 +72,7 @@ class ValidationResult:
 
 class UnifiedTemplateManager:
     """Consolidated template manager combining all template operations.
-    
+
     This class replaces WorkflowTemplateManager, CustomWorkflowBuilder,
     and TemplateRegistry to provide a single interface for all template
     operations including built-in templates, custom template creation,
@@ -78,49 +80,55 @@ class UnifiedTemplateManager:
     for custom templates and specs.
     """
 
-    def __init__(self, session: Optional[AsyncSession] = None):
+    def __init__(self, session: AsyncSession | None = None):
         """Initialize unified template manager.
-        
+
         Args:
             session: Database session for template persistence (required)
         """
         if not session:
-            raise ValueError("Database session is required for template operations")
+            raise ValueError(
+                "Database session is required for template operations"
+            )
         self.session = session
         self.builder_history: list[dict[str, Any]] = []
-        
-    async def _get_templates_from_db(self, owner_id: Optional[str] = None) -> dict[str, WorkflowTemplate]:
+
+    async def _get_templates_from_db(
+        self, owner_id: str | None = None
+    ) -> dict[str, WorkflowTemplate]:
         """Load templates from database.
-        
+
         Args:
             owner_id: Optional user ID to filter templates by owner
-            
+
         Returns:
             Dictionary of templates
         """
         if not self.session:
             return {}
-            
+
         try:
-            from chatter.models.workflow import WorkflowTemplate as DBWorkflowTemplate
-            
+            from chatter.models.workflow import (
+                WorkflowTemplate as DBWorkflowTemplate,
+            )
+
             query = select(DBWorkflowTemplate).options(
                 selectinload(DBWorkflowTemplate.owner)
             )
-            
+
             if owner_id:
                 # Get user's private templates + all public templates (including builtin)
                 query = query.where(
-                    (DBWorkflowTemplate.owner_id == owner_id) | 
-                    (DBWorkflowTemplate.is_public == True)
+                    (DBWorkflowTemplate.owner_id == owner_id)
+                    | (DBWorkflowTemplate.is_public)
                 )
             else:
                 # Only get public templates (including builtin)
-                query = query.where(DBWorkflowTemplate.is_public == True)
-                
+                query = query.where(DBWorkflowTemplate.is_public)
+
             result = await self.session.execute(query)
             db_templates = result.scalars().all()
-            
+
             # Convert DB models to in-memory format
             templates = {}
             for db_template in db_templates:
@@ -131,16 +139,23 @@ class UnifiedTemplateManager:
                     description=template_data["description"],
                     default_params=template_data["default_params"],
                     required_tools=template_data["required_tools"],
-                    required_retrievers=template_data["required_retrievers"],
+                    required_retrievers=template_data[
+                        "required_retrievers"
+                    ],
                 )
-            
+
             return templates
-            
+
         except Exception as e:
-            logger.warning(f"Failed to load custom templates from database: {e}")
+            logger.warning(
+                f"Failed to load custom templates from database: {e}"
+            )
             return {}
+
     # Core operations (from WorkflowTemplateManager)
-    async def get_template(self, name: str, owner_id: Optional[str] = None) -> WorkflowTemplate:
+    async def get_template(
+        self, name: str, owner_id: str | None = None
+    ) -> WorkflowTemplate:
         """Get a workflow template by name.
 
         Args:
@@ -154,44 +169,56 @@ class UnifiedTemplateManager:
             WorkflowConfigurationError: If template is not found
         """
         try:
-            from chatter.models.workflow import WorkflowTemplate as DBWorkflowTemplate
-            
-            query = select(DBWorkflowTemplate).where(DBWorkflowTemplate.name == name)
-            
+            from chatter.models.workflow import (
+                WorkflowTemplate as DBWorkflowTemplate,
+            )
+
+            query = select(DBWorkflowTemplate).where(
+                DBWorkflowTemplate.name == name
+            )
+
             # If owner_id provided, include their private templates
             if owner_id:
                 query = query.where(
-                    (DBWorkflowTemplate.owner_id == owner_id) | 
-                    (DBWorkflowTemplate.is_public == True)
+                    (DBWorkflowTemplate.owner_id == owner_id)
+                    | (DBWorkflowTemplate.is_public)
                 )
             else:
                 # Only public templates
-                query = query.where(DBWorkflowTemplate.is_public == True)
-            
+                query = query.where(DBWorkflowTemplate.is_public)
+
             result = await self.session.execute(query)
             db_template = result.scalar_one_or_none()
-            
+
             if db_template:
                 template_data = db_template.to_unified_template()
-                logger.debug(f"Retrieved template from database: {name}")
+                logger.debug(
+                    f"Retrieved template from database: {name}"
+                )
                 return WorkflowTemplate(
                     name=template_data["name"],
                     workflow_type=template_data["workflow_type"],
                     description=template_data["description"],
                     default_params=template_data["default_params"],
                     required_tools=template_data["required_tools"],
-                    required_retrievers=template_data["required_retrievers"],
+                    required_retrievers=template_data[
+                        "required_retrievers"
+                    ],
                 )
         except Exception as e:
-            logger.warning(f"Error retrieving template from database: {e}")
-        
+            logger.warning(
+                f"Error retrieving template from database: {e}"
+            )
+
         # Template not found
         available = await self.list_templates(owner_id=owner_id)
         raise WorkflowConfigurationError(
             f"Template '{name}' not found. Available templates: {', '.join(available)}"
         )
 
-    async def list_templates(self, include_custom: bool = True, owner_id: Optional[str] = None) -> list[str]:
+    async def list_templates(
+        self, include_custom: bool = True, owner_id: str | None = None
+    ) -> list[str]:
         """List available template names.
 
         Args:
@@ -208,7 +235,9 @@ class UnifiedTemplateManager:
             logger.warning(f"Error loading templates: {e}")
             return []
 
-    async def get_template_info(self, owner_id: Optional[str] = None) -> dict[str, dict[str, Any]]:
+    async def get_template_info(
+        self, owner_id: str | None = None
+    ) -> dict[str, dict[str, Any]]:
         """Get information about all available templates.
 
         Args:
@@ -218,7 +247,7 @@ class UnifiedTemplateManager:
             Dictionary mapping template names to their information
         """
         info = {}
-        
+
         # Get all templates from database
         try:
             templates = await self._get_templates_from_db(owner_id)
@@ -228,18 +257,21 @@ class UnifiedTemplateManager:
                     "workflow_type": template.workflow_type,
                     "description": template.description,
                     "required_tools": template.required_tools or [],
-                    "required_retrievers": template.required_retrievers or [],
+                    "required_retrievers": template.required_retrievers
+                    or [],
                     "default_params": template.default_params,
                     "is_custom": True,  # All templates are now stored in DB
                     "is_builtin": False,  # Builtin is now determined by DB flag
                 }
         except Exception as e:
             logger.warning(f"Error loading template info: {e}")
-        
+
         return info
 
     # Custom template features (from CustomWorkflowBuilder)
-    async def create_custom_template(self, spec: TemplateSpec, owner_id: str) -> WorkflowTemplate:
+    async def create_custom_template(
+        self, spec: TemplateSpec, owner_id: str
+    ) -> WorkflowTemplate:
         """Create a custom workflow template.
 
         Args:
@@ -253,15 +285,17 @@ class UnifiedTemplateManager:
             WorkflowConfigurationError: If template creation fails
         """
         logger.debug(f"Creating custom template: {spec.name}")
-        
+
         # Start with base template if provided
         if spec.base_template:
             base = await self.get_template(spec.base_template, owner_id)
             default_params = base.default_params.copy()
             default_params.update(spec.default_params)
-            
+
             required_tools = spec.required_tools or base.required_tools
-            required_retrievers = spec.required_retrievers or base.required_retrievers
+            required_retrievers = (
+                spec.required_retrievers or base.required_retrievers
+            )
         else:
             default_params = spec.default_params
             required_tools = spec.required_tools
@@ -278,7 +312,9 @@ class UnifiedTemplateManager:
         )
 
         # Validate template
-        validation_result = await self.validate_template(custom_template)
+        validation_result = await self.validate_template(
+            custom_template
+        )
         if not validation_result.valid:
             raise WorkflowConfigurationError(
                 f"Template validation failed: {', '.join(validation_result.errors)}"
@@ -287,11 +323,18 @@ class UnifiedTemplateManager:
         # Save to database if session available
         if self.session:
             try:
-                from chatter.models.workflow import WorkflowTemplate as DBWorkflowTemplate, TemplateCategory, WorkflowType
-                
+                from chatter.models.workflow import (
+                    WorkflowTemplate as DBWorkflowTemplate,
+                )
+                from chatter.models.workflow import (
+                    WorkflowType,
+                )
+
                 # Determine category based on name/type
-                category = self._determine_template_category(spec.name, spec.workflow_type)
-                
+                category = self._determine_template_category(
+                    spec.name, spec.workflow_type
+                )
+
                 db_template = DBWorkflowTemplate(
                     owner_id=owner_id,
                     name=spec.name,
@@ -304,54 +347,75 @@ class UnifiedTemplateManager:
                     is_builtin=False,
                     is_public=False,  # Default to private
                 )
-                
+
                 if spec.base_template:
                     # Try to find the base template ID
                     from sqlalchemy import select
+
                     base_query = select(DBWorkflowTemplate).where(
                         DBWorkflowTemplate.name == spec.base_template
                     )
                     base_result = await self.session.execute(base_query)
                     base_db_template = base_result.scalar_one_or_none()
                     if base_db_template:
-                        db_template.base_template_id = base_db_template.id
-                
+                        db_template.base_template_id = (
+                            base_db_template.id
+                        )
+
                 self.session.add(db_template)
                 await self.session.commit()
                 await self.session.refresh(db_template)
-                
-                logger.info(f"Saved custom template to database: {spec.name} (ID: {db_template.id})")
-                
+
+                logger.info(
+                    f"Saved custom template to database: {spec.name} (ID: {db_template.id})"
+                )
+
             except Exception as e:
-                logger.error(f"Failed to save custom template to database: {e}")
+                logger.error(
+                    f"Failed to save custom template to database: {e}"
+                )
                 if self.session:
                     await self.session.rollback()
-                raise WorkflowConfigurationError(f"Failed to save template: {str(e)}")
+                raise WorkflowConfigurationError(
+                    f"Failed to save template: {str(e)}"
+                )
 
         # Record in builder history
-        self.builder_history.append({
-            "action": "create_custom_template",
-            "template_name": spec.name,
-            "base_template": spec.base_template,
-            "owner_id": owner_id,
-            "timestamp": asyncio.get_event_loop().time(),
-        })
+        self.builder_history.append(
+            {
+                "action": "create_custom_template",
+                "template_name": spec.name,
+                "base_template": spec.base_template,
+                "owner_id": owner_id,
+                "timestamp": asyncio.get_event_loop().time(),
+            }
+        )
 
         logger.info(f"Created custom template: {spec.name}")
         return custom_template
-        
-    def _determine_template_category(self, name: str, workflow_type: str) -> "TemplateCategory":
+
+    def _determine_template_category(
+        self, name: str, workflow_type: str
+    ) -> TemplateCategory:
         """Determine template category based on name and type."""
         from chatter.models.workflow import TemplateCategory
-        
+
         name_lower = name.lower()
         if "support" in name_lower or "customer" in name_lower:
             return TemplateCategory.CUSTOMER_SUPPORT
-        elif "code" in name_lower or "programming" in name_lower or "dev" in name_lower:
+        elif (
+            "code" in name_lower
+            or "programming" in name_lower
+            or "dev" in name_lower
+        ):
             return TemplateCategory.PROGRAMMING
         elif "research" in name_lower or "document" in name_lower:
             return TemplateCategory.RESEARCH
-        elif "data" in name_lower or "analyst" in name_lower or "analytics" in name_lower:
+        elif (
+            "data" in name_lower
+            or "analyst" in name_lower
+            or "analytics" in name_lower
+        ):
             return TemplateCategory.DATA_ANALYSIS
         elif "creative" in name_lower or "writing" in name_lower:
             return TemplateCategory.CREATIVE
@@ -363,10 +427,10 @@ class UnifiedTemplateManager:
             return TemplateCategory.CUSTOM
 
     async def build_workflow_spec(
-        self, 
-        name: str, 
+        self,
+        name: str,
         overrides: dict[str, Any] | None = None,
-        owner_id: Optional[str] = None
+        owner_id: str | None = None,
     ) -> dict[str, Any]:
         """Build a complete workflow specification from template and customizations.
 
@@ -396,20 +460,30 @@ class UnifiedTemplateManager:
                 spec["parameters"].update(overrides["parameters"])
 
             if "additional_tools" in overrides:
-                spec["required_tools"].extend(overrides["additional_tools"])
+                spec["required_tools"].extend(
+                    overrides["additional_tools"]
+                )
 
             if "additional_retrievers" in overrides:
-                spec["required_retrievers"].extend(overrides["additional_retrievers"])
+                spec["required_retrievers"].extend(
+                    overrides["additional_retrievers"]
+                )
 
             # Apply other overrides
             for key, value in overrides.items():
-                if key not in ["parameters", "additional_tools", "additional_retrievers"]:
+                if key not in [
+                    "parameters",
+                    "additional_tools",
+                    "additional_retrievers",
+                ]:
                     spec[key] = value
 
         return spec
 
     # Registry features (from TemplateRegistry)
-    async def register_template(self, template: WorkflowTemplate, owner_id: str) -> None:
+    async def register_template(
+        self, template: WorkflowTemplate, owner_id: str
+    ) -> None:
         """Register a new template in the registry.
 
         Args:
@@ -425,10 +499,17 @@ class UnifiedTemplateManager:
 
         if self.session:
             try:
-                from chatter.models.workflow import WorkflowTemplate as DBWorkflowTemplate, WorkflowType
-                
-                category = self._determine_template_category(template.name, template.workflow_type)
-                
+                from chatter.models.workflow import (
+                    WorkflowTemplate as DBWorkflowTemplate,
+                )
+                from chatter.models.workflow import (
+                    WorkflowType,
+                )
+
+                category = self._determine_template_category(
+                    template.name, template.workflow_type
+                )
+
                 db_template = DBWorkflowTemplate(
                     owner_id=owner_id,
                     name=template.name,
@@ -441,19 +522,29 @@ class UnifiedTemplateManager:
                     is_builtin=False,
                     is_public=False,
                 )
-                
+
                 self.session.add(db_template)
                 await self.session.commit()
-                logger.info(f"Registered template in database: {template.name}")
+                logger.info(
+                    f"Registered template in database: {template.name}"
+                )
             except Exception as e:
-                logger.error(f"Failed to register template in database: {e}")
+                logger.error(
+                    f"Failed to register template in database: {e}"
+                )
                 if self.session:
                     await self.session.rollback()
-                raise WorkflowConfigurationError(f"Failed to register template: {str(e)}")
+                raise WorkflowConfigurationError(
+                    f"Failed to register template: {str(e)}"
+                )
         else:
-            logger.info(f"Registered template in memory: {template.name}")
+            logger.info(
+                f"Registered template in memory: {template.name}"
+            )
 
-    async def remove_template(self, name: str, owner_id: str, custom_only: bool = True) -> bool:
+    async def remove_template(
+        self, name: str, owner_id: str, custom_only: bool = True
+    ) -> bool:
         """Remove a template from the registry.
 
         Args:
@@ -469,32 +560,40 @@ class UnifiedTemplateManager:
         """
         # Built-in templates are now stored in database with is_builtin=True
         # The database constraints will prevent removal of builtin templates
-            
+
         try:
-            from chatter.models.workflow import WorkflowTemplate as DBWorkflowTemplate
-            
+            from chatter.models.workflow import (
+                WorkflowTemplate as DBWorkflowTemplate,
+            )
+
             query = select(DBWorkflowTemplate).where(
                 DBWorkflowTemplate.name == name,
-                DBWorkflowTemplate.owner_id == owner_id
+                DBWorkflowTemplate.owner_id == owner_id,
             )
-            
+
             result = await self.session.execute(query)
             db_template = result.scalar_one_or_none()
-            
+
             if db_template:
                 await self.session.delete(db_template)
                 await self.session.commit()
                 logger.info(f"Removed template from database: {name}")
                 return True
         except Exception as e:
-            logger.error(f"Failed to remove template from database: {e}")
+            logger.error(
+                f"Failed to remove template from database: {e}"
+            )
             await self.session.rollback()
-            raise WorkflowConfigurationError(f"Failed to remove template: {str(e)}")
-        
+            raise WorkflowConfigurationError(
+                f"Failed to remove template: {str(e)}"
+            )
+
         return False
 
     # Unified validation (consolidates scattered validation)
-    async def validate_template(self, template: WorkflowTemplate) -> ValidationResult:
+    async def validate_template(
+        self, template: WorkflowTemplate
+    ) -> ValidationResult:
         """Validate a workflow template.
 
         Args:
@@ -505,7 +604,7 @@ class UnifiedTemplateManager:
         """
         errors = []
         warnings = []
-        
+
         # Check required fields
         if not template.name:
             errors.append("Template name is required")
@@ -538,7 +637,7 @@ class UnifiedTemplateManager:
         # We don't have workflow_spec available here, so skip this check for now
         # if not workflow_spec.get('workflow_type'):
         #     validation_errors.append("workflow_type is required")
-        
+
         if validation_errors:
             errors.extend(validation_errors)
 
@@ -554,7 +653,7 @@ class UnifiedTemplateManager:
         template_name: str,
         available_tools: list[str] | None = None,
         available_retrievers: list[str] | None = None,
-        owner_id: Optional[str] = None,
+        owner_id: str | None = None,
     ) -> ValidationResult:
         """Validate if template requirements can be satisfied.
 
@@ -583,9 +682,11 @@ class UnifiedTemplateManager:
                 if tool not in available_tools
             ]
             if missing_tools:
-                errors.append(f"Missing required tools: {', '.join(missing_tools)}")
+                errors.append(
+                    f"Missing required tools: {', '.join(missing_tools)}"
+                )
 
-        # Check retriever requirements  
+        # Check retriever requirements
         if template.required_retrievers:
             available_retrievers = available_retrievers or []
             missing_retrievers = [
@@ -594,7 +695,9 @@ class UnifiedTemplateManager:
                 if retriever not in available_retrievers
             ]
             if missing_retrievers:
-                errors.append(f"Missing required retrievers: {', '.join(missing_retrievers)}")
+                errors.append(
+                    f"Missing required retrievers: {', '.join(missing_retrievers)}"
+                )
 
         requirements_met = len(errors) == 0
 
@@ -604,7 +707,9 @@ class UnifiedTemplateManager:
             warnings=warnings,
             requirements_met=requirements_met,
             missing_tools=missing_tools if missing_tools else None,
-            missing_retrievers=missing_retrievers if missing_retrievers else None,
+            missing_retrievers=(
+                missing_retrievers if missing_retrievers else None
+            ),
         )
 
     # Workflow creation (from WorkflowTemplateManager)
@@ -616,7 +721,7 @@ class UnifiedTemplateManager:
         overrides: dict[str, Any] | None = None,
         retriever: Any = None,
         tools: list[Any] | None = None,
-        owner_id: Optional[str] = None,
+        owner_id: str | None = None,
     ) -> Any:
         """Create a workflow from a template.
 
@@ -671,10 +776,14 @@ class UnifiedTemplateManager:
             workflow_type=template.workflow_type,
         )
 
-        return await llm_service.create_langgraph_workflow(**workflow_kwargs)
+        return await llm_service.create_langgraph_workflow(
+            **workflow_kwargs
+        )
 
     # Import/Export functionality
-    async def export_template(self, name: str, owner_id: Optional[str] = None) -> dict[str, Any] | None:
+    async def export_template(
+        self, name: str, owner_id: str | None = None
+    ) -> dict[str, Any] | None:
         """Export a template as a dictionary.
 
         Args:
@@ -697,7 +806,9 @@ class UnifiedTemplateManager:
         except WorkflowConfigurationError:
             return None
 
-    async def import_template(self, template_data: dict[str, Any], owner_id: str) -> WorkflowTemplate:
+    async def import_template(
+        self, template_data: dict[str, Any], owner_id: str
+    ) -> WorkflowTemplate:
         """Import a template from dictionary data.
 
         Args:
@@ -716,14 +827,18 @@ class UnifiedTemplateManager:
             description=template_data["description"],
             default_params=template_data.get("default_params", {}),
             required_tools=template_data.get("required_tools"),
-            required_retrievers=template_data.get("required_retrievers"),
+            required_retrievers=template_data.get(
+                "required_retrievers"
+            ),
         )
 
         await self.register_template(template, owner_id)
         return template
 
     # Additional utility methods
-    async def get_templates_by_type(self, workflow_type: str, owner_id: Optional[str] = None) -> list[WorkflowTemplate]:
+    async def get_templates_by_type(
+        self, workflow_type: str, owner_id: str | None = None
+    ) -> list[WorkflowTemplate]:
         """Get all templates of a specific workflow type.
 
         Args:
@@ -734,7 +849,7 @@ class UnifiedTemplateManager:
             List of templates matching the workflow type
         """
         templates = []
-        
+
         # Check templates from database
         try:
             all_templates = await self._get_templates_from_db(owner_id)
@@ -743,10 +858,12 @@ class UnifiedTemplateManager:
                     templates.append(template)
         except Exception as e:
             logger.warning(f"Error loading templates by type: {e}")
-        
+
         return templates
 
-    async def get_custom_templates(self, owner_id: Optional[str] = None) -> dict[str, WorkflowTemplate]:
+    async def get_custom_templates(
+        self, owner_id: str | None = None
+    ) -> dict[str, WorkflowTemplate]:
         """Get all templates (formerly custom templates).
 
         Args:
@@ -765,7 +882,7 @@ class UnifiedTemplateManager:
         """
         return self.builder_history.copy()
 
-    def get_stats(self, owner_id: Optional[str] = None) -> dict[str, Any]:
+    def get_stats(self, owner_id: str | None = None) -> dict[str, Any]:
         """Get template manager statistics.
 
         Args:
@@ -776,7 +893,7 @@ class UnifiedTemplateManager:
         """
         # This is a synchronous method, so we can't easily get DB stats here
         # In a real implementation, this would be refactored to be async
-        
+
         # For now, return basic stats - this could be enhanced to query the DB
         return {
             "builtin_templates_count": 0,  # No longer tracked separately
@@ -786,12 +903,15 @@ class UnifiedTemplateManager:
             "template_types": {},  # Would need async DB query
         }
 
-def get_template_manager_with_session(session: AsyncSession) -> UnifiedTemplateManager:
+
+def get_template_manager_with_session(
+    session: AsyncSession,
+) -> UnifiedTemplateManager:
     """Get a template manager instance with database session.
-    
+
     Args:
         session: Database session for template persistence
-        
+
     Returns:
         UnifiedTemplateManager instance with database support
     """

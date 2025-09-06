@@ -101,7 +101,7 @@ class BasePlugin(ABC):
         return {
             "type": "object",
             "properties": {},
-            "additionalProperties": True
+            "additionalProperties": True,
         }
 
     async def validate_configuration(
@@ -117,24 +117,30 @@ class BasePlugin(ABC):
         """
         try:
             schema = await self.get_configuration_schema()
-            if not schema or schema == {"type": "object", "properties": {}, "additionalProperties": True}:
+            if not schema or schema == {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": True,
+            }:
                 # No schema defined, accept any configuration
                 return True
-                
+
             # Use basic validation with our schema since validation engine doesn't handle custom schemas
             return self._basic_config_validation(config, schema)
-                
+
         except Exception as e:
             self.logger.error(f"Configuration validation error: {e}")
             return False
 
-    def _basic_config_validation(self, config: dict[str, Any], schema: dict[str, Any]) -> bool:
+    def _basic_config_validation(
+        self, config: dict[str, Any], schema: dict[str, Any]
+    ) -> bool:
         """Basic configuration validation fallback.
-        
+
         Args:
             config: Configuration to validate
             schema: JSON schema
-            
+
         Returns:
             True if valid, False otherwise
         """
@@ -143,34 +149,58 @@ class BasePlugin(ABC):
             required = schema.get('required', [])
             for field in required:
                 if field not in config:
-                    self.logger.error(f"Required configuration field '{field}' is missing")
+                    self.logger.error(
+                        f"Required configuration field '{field}' is missing"
+                    )
                     return False
-            
+
             # Check property types
             properties = schema.get('properties', {})
             for field, value in config.items():
                 if field in properties:
                     expected_type = properties[field].get('type')
-                    if expected_type == 'string' and not isinstance(value, str):
-                        self.logger.error(f"Configuration field '{field}' must be a string")
+                    if expected_type == 'string' and not isinstance(
+                        value, str
+                    ):
+                        self.logger.error(
+                            f"Configuration field '{field}' must be a string"
+                        )
                         return False
-                    elif expected_type == 'number' and not isinstance(value, (int, float)):
-                        self.logger.error(f"Configuration field '{field}' must be a number")
+                    elif expected_type == 'number' and not isinstance(
+                        value, int | float
+                    ):
+                        self.logger.error(
+                            f"Configuration field '{field}' must be a number"
+                        )
                         return False
-                    elif expected_type == 'object' and not isinstance(value, dict):
-                        self.logger.error(f"Configuration field '{field}' must be an object")
+                    elif expected_type == 'object' and not isinstance(
+                        value, dict
+                    ):
+                        self.logger.error(
+                            f"Configuration field '{field}' must be an object"
+                        )
                         return False
-                    elif expected_type == 'array' and not isinstance(value, list):
-                        self.logger.error(f"Configuration field '{field}' must be an array")
+                    elif expected_type == 'array' and not isinstance(
+                        value, list
+                    ):
+                        self.logger.error(
+                            f"Configuration field '{field}' must be an array"
+                        )
                         return False
-                    elif expected_type == 'boolean' and not isinstance(value, bool):
-                        self.logger.error(f"Configuration field '{field}' must be a boolean")
+                    elif expected_type == 'boolean' and not isinstance(
+                        value, bool
+                    ):
+                        self.logger.error(
+                            f"Configuration field '{field}' must be a boolean"
+                        )
                         return False
-            
+
             return True
-            
+
         except Exception as e:
-            self.logger.error(f"Basic configuration validation error: {e}")
+            self.logger.error(
+                f"Basic configuration validation error: {e}"
+            )
             return False
 
 
@@ -237,9 +267,10 @@ class PluginManager:
             Path(settings.document_storage_path) / "plugins"
         )
         self._ensure_directories()
-        
+
         # Add concurrency control
         import asyncio
+
         self._operation_lock = asyncio.Lock()
         self._plugin_locks: dict[str, asyncio.Lock] = {}
 
@@ -249,15 +280,16 @@ class PluginManager:
 
     def _get_plugin_lock(self, plugin_id: str) -> "asyncio.Lock":
         """Get or create a lock for a specific plugin.
-        
+
         Args:
             plugin_id: Plugin ID
-            
+
         Returns:
             Asyncio lock for the plugin
         """
         if plugin_id not in self._plugin_locks:
             import asyncio
+
             self._plugin_locks[plugin_id] = asyncio.Lock()
         return self._plugin_locks[plugin_id]
 
@@ -294,12 +326,14 @@ class PluginManager:
                 )
 
             try:
-                with open(manifest_path, 'r', encoding='utf-8') as f:
+                with open(manifest_path, encoding='utf-8') as f:
                     manifest_data = json.load(f)
 
                 manifest = PluginManifest(**manifest_data)
             except Exception as e:
-                raise ValueError(f"Invalid plugin manifest: {str(e)}") from e
+                raise ValueError(
+                    f"Invalid plugin manifest: {str(e)}"
+                ) from e
 
             # Check if plugin already installed
             for plugin_instance in self.plugins.values():
@@ -316,29 +350,39 @@ class PluginManager:
 
             # Prepare installation path with atomic operation
             plugin_install_path = self.plugins_directory / manifest.name
-            temp_install_path = self.plugins_directory / f".temp_{manifest.name}_{hash(str(plugin_path))}"
-            
+            temp_install_path = (
+                self.plugins_directory
+                / f".temp_{manifest.name}_{hash(str(plugin_path))}"
+            )
+
             try:
                 # Remove any existing temp directory
                 if temp_install_path.exists():
                     import shutil
+
                     shutil.rmtree(temp_install_path)
 
                 # Copy to temporary location first
                 import shutil
+
                 shutil.copytree(plugin_path, temp_install_path)
 
                 # Atomic move to final location
                 if plugin_install_path.exists():
                     shutil.rmtree(plugin_install_path)
-                shutil.move(str(temp_install_path), str(plugin_install_path))
+                shutil.move(
+                    str(temp_install_path), str(plugin_install_path)
+                )
 
             except Exception as e:
                 # Cleanup on failure
                 if temp_install_path.exists():
                     import shutil
+
                     shutil.rmtree(temp_install_path)
-                raise ValueError(f"Failed to install plugin files: {str(e)}")
+                raise ValueError(
+                    f"Failed to install plugin files: {str(e)}"
+                )
 
             # Create plugin instance
             try:
@@ -373,8 +417,11 @@ class PluginManager:
                 # Rollback installation on instance creation failure
                 if plugin_install_path.exists():
                     import shutil
+
                     shutil.rmtree(plugin_install_path)
-                raise ValueError(f"Failed to create plugin instance: {str(e)}")
+                raise ValueError(
+                    f"Failed to create plugin instance: {str(e)}"
+                )
 
     async def uninstall_plugin(self, plugin_id: str) -> bool:
         """Uninstall a plugin.
@@ -431,7 +478,9 @@ class PluginManager:
 
             # Check if plugin is in error state and clear it
             if plugin_instance.status == PluginStatus.ERROR:
-                logger.info(f"Attempting to enable plugin {plugin_id} from error state")
+                logger.info(
+                    f"Attempting to enable plugin {plugin_id} from error state"
+                )
 
             try:
                 # Validate configuration before enabling
@@ -439,35 +488,53 @@ class PluginManager:
                     temp_plugin = None
                     try:
                         # Load plugin class for validation
-                        plugin_class = await self._load_plugin_class(plugin_instance)
-                        temp_plugin = plugin_class(plugin_instance.configuration)
-                        
-                        if not await temp_plugin.validate_configuration(plugin_instance.configuration):
-                            raise ValueError("Configuration validation failed")
+                        plugin_class = await self._load_plugin_class(
+                            plugin_instance
+                        )
+                        temp_plugin = plugin_class(
+                            plugin_instance.configuration
+                        )
+
+                        if not await temp_plugin.validate_configuration(
+                            plugin_instance.configuration
+                        ):
+                            raise ValueError(
+                                "Configuration validation failed"
+                            )
                     finally:
                         # Clean up temporary plugin if created
-                        if temp_plugin and hasattr(temp_plugin, 'shutdown'):
+                        if temp_plugin and hasattr(
+                            temp_plugin, 'shutdown'
+                        ):
                             try:
                                 await temp_plugin.shutdown()
                             except Exception:
                                 pass  # Ignore cleanup errors
 
                 # Load plugin module
-                plugin_class = await self._load_plugin_class(plugin_instance)
+                plugin_class = await self._load_plugin_class(
+                    plugin_instance
+                )
 
                 # Create plugin instance
                 plugin = plugin_class(plugin_instance.configuration)
 
                 # Initialize plugin with timeout
                 import asyncio
+
                 try:
                     initialization_result = await asyncio.wait_for(
-                        plugin.initialize(), timeout=60.0  # 60 second timeout
+                        plugin.initialize(),
+                        timeout=60.0,  # 60 second timeout
                     )
                     if not initialization_result:
-                        raise RuntimeError("Plugin initialization returned False")
-                except asyncio.TimeoutError:
-                    raise RuntimeError("Plugin initialization timed out")
+                        raise RuntimeError(
+                            "Plugin initialization returned False"
+                        )
+                except TimeoutError:
+                    raise RuntimeError(
+                        "Plugin initialization timed out"
+                    )
 
                 # Store loaded plugin
                 self.loaded_plugins[plugin_id] = plugin
@@ -523,7 +590,9 @@ class PluginManager:
                 return False
 
             if plugin_instance.status != PluginStatus.ACTIVE:
-                logger.debug(f"Plugin {plugin_id} not active, current status: {plugin_instance.status}")
+                logger.debug(
+                    f"Plugin {plugin_id} not active, current status: {plugin_instance.status}"
+                )
                 return True
 
             try:
@@ -532,12 +601,19 @@ class PluginManager:
                 if plugin:
                     # Shutdown plugin with timeout
                     import asyncio
+
                     try:
-                        await asyncio.wait_for(plugin.shutdown(), timeout=30.0)  # 30 second timeout
-                    except asyncio.TimeoutError:
-                        logger.warning(f"Plugin {plugin_id} shutdown timed out")
+                        await asyncio.wait_for(
+                            plugin.shutdown(), timeout=30.0
+                        )  # 30 second timeout
+                    except TimeoutError:
+                        logger.warning(
+                            f"Plugin {plugin_id} shutdown timed out"
+                        )
                     except Exception as e:
-                        logger.warning(f"Error during plugin {plugin_id} shutdown: {e}")
+                        logger.warning(
+                            f"Error during plugin {plugin_id} shutdown: {e}"
+                        )
 
                     # Remove from loaded plugins
                     del self.loaded_plugins[plugin_id]
@@ -564,11 +640,11 @@ class PluginManager:
                 # Still mark as inactive even if shutdown failed
                 plugin_instance.status = PluginStatus.INACTIVE
                 plugin_instance.last_updated = datetime.now(UTC)
-                
+
                 # Clean up loaded plugin even if shutdown failed
                 if plugin_id in self.loaded_plugins:
                     del self.loaded_plugins[plugin_id]
-                
+
                 return True  # Return True because plugin is effectively disabled
 
         if plugin_instance.status != PluginStatus.ACTIVE:
@@ -717,7 +793,9 @@ class PluginManager:
         logger.info(f"Configured plugin {plugin_id}")
         return True
 
-    async def health_check_plugins(self, auto_disable_unhealthy: bool = False) -> dict[str, dict[str, Any]]:
+    async def health_check_plugins(
+        self, auto_disable_unhealthy: bool = False
+    ) -> dict[str, dict[str, Any]]:
         """Perform health check on all active plugins with enhanced handling.
 
         Args:
@@ -732,22 +810,25 @@ class PluginManager:
         for plugin_id, plugin in self.loaded_plugins.items():
             try:
                 import asyncio
+
                 # Add timeout to health checks
-                health = await asyncio.wait_for(plugin.health_check(), timeout=30.0)
+                health = await asyncio.wait_for(
+                    plugin.health_check(), timeout=30.0
+                )
                 results[plugin_id] = health
-                
+
                 # Check if plugin reports as unhealthy
                 if not health.get("healthy", True):
                     unhealthy_plugins.append(plugin_id)
-                    
-            except asyncio.TimeoutError:
+
+            except TimeoutError:
                 results[plugin_id] = {
                     "healthy": False,
                     "error": "Health check timed out",
                     "timestamp": datetime.now(UTC).isoformat(),
                 }
                 unhealthy_plugins.append(plugin_id)
-                
+
             except Exception as e:
                 results[plugin_id] = {
                     "healthy": False,
@@ -758,78 +839,91 @@ class PluginManager:
 
         # Auto-disable unhealthy plugins if requested
         if auto_disable_unhealthy and unhealthy_plugins:
-            logger.warning(f"Auto-disabling unhealthy plugins: {unhealthy_plugins}")
+            logger.warning(
+                f"Auto-disabling unhealthy plugins: {unhealthy_plugins}"
+            )
             for plugin_id in unhealthy_plugins:
                 try:
                     await self.disable_plugin(plugin_id)
                     if plugin_id in results:
                         results[plugin_id]["auto_disabled"] = True
                 except Exception as e:
-                    logger.error(f"Failed to auto-disable plugin {plugin_id}: {e}")
+                    logger.error(
+                        f"Failed to auto-disable plugin {plugin_id}: {e}"
+                    )
 
         return results
 
-    async def check_plugin_dependencies(self, plugin_id: str) -> dict[str, Any]:
+    async def check_plugin_dependencies(
+        self, plugin_id: str
+    ) -> dict[str, Any]:
         """Check if plugin dependencies are satisfied.
-        
+
         Args:
             plugin_id: Plugin ID
-            
+
         Returns:
             Dependency check results
         """
         plugin_instance = self.plugins.get(plugin_id)
         if not plugin_instance:
             return {"error": "Plugin not found"}
-        
+
         manifest = plugin_instance.manifest
         results = {
             "plugin_id": plugin_id,
             "plugin_name": manifest.name,
             "dependencies": [],
-            "all_satisfied": True
+            "all_satisfied": True,
         }
-        
+
         for dependency in manifest.dependencies:
             dep_result = {
                 "name": dependency,
                 "satisfied": False,
-                "error": None
+                "error": None,
             }
-            
+
             try:
                 # Basic check - try to parse as package requirement
                 import re
-                match = re.match(r"([a-zA-Z0-9_\-\.]+)(.*)$", dependency)
+
+                match = re.match(
+                    r"([a-zA-Z0-9_\-\.]+)(.*)$", dependency
+                )
                 if match:
                     package_name = match.group(1)
-                    version_spec = match.group(2)
-                    
+                    match.group(2)
+
                     # Try to import the package
                     try:
                         __import__(package_name.replace("-", "_"))
                         dep_result["satisfied"] = True
                     except ImportError:
-                        dep_result["error"] = f"Package {package_name} not installed"
+                        dep_result["error"] = (
+                            f"Package {package_name} not installed"
+                        )
                         results["all_satisfied"] = False
                 else:
                     dep_result["error"] = "Invalid dependency format"
                     results["all_satisfied"] = False
-                    
+
             except Exception as e:
                 dep_result["error"] = str(e)
                 results["all_satisfied"] = False
-            
+
             results["dependencies"].append(dep_result)
-        
+
         return results
 
-    async def bulk_enable_plugins(self, plugin_ids: list[str]) -> dict[str, bool]:
+    async def bulk_enable_plugins(
+        self, plugin_ids: list[str]
+    ) -> dict[str, bool]:
         """Enable multiple plugins.
-        
+
         Args:
             plugin_ids: List of plugin IDs to enable
-            
+
         Returns:
             Dictionary mapping plugin ID to success status
         """
@@ -838,25 +932,33 @@ class PluginManager:
             try:
                 results[plugin_id] = await self.enable_plugin(plugin_id)
             except Exception as e:
-                logger.error(f"Failed to enable plugin {plugin_id}: {e}")
+                logger.error(
+                    f"Failed to enable plugin {plugin_id}: {e}"
+                )
                 results[plugin_id] = False
         return results
 
-    async def bulk_disable_plugins(self, plugin_ids: list[str]) -> dict[str, bool]:
+    async def bulk_disable_plugins(
+        self, plugin_ids: list[str]
+    ) -> dict[str, bool]:
         """Disable multiple plugins.
-        
+
         Args:
             plugin_ids: List of plugin IDs to disable
-            
+
         Returns:
             Dictionary mapping plugin ID to success status
         """
         results = {}
         for plugin_id in plugin_ids:
             try:
-                results[plugin_id] = await self.disable_plugin(plugin_id)
+                results[plugin_id] = await self.disable_plugin(
+                    plugin_id
+                )
             except Exception as e:
-                logger.error(f"Failed to disable plugin {plugin_id}: {e}")
+                logger.error(
+                    f"Failed to disable plugin {plugin_id}: {e}"
+                )
                 results[plugin_id] = False
         return results
 
@@ -877,7 +979,9 @@ class PluginManager:
             plugin_path = plugin_path.resolve()
             if not str(plugin_path).startswith(str(Path.cwd())):
                 # Allow only plugins within current working directory
-                logger.warning(f"Plugin path outside allowed directory: {plugin_path}")
+                logger.warning(
+                    f"Plugin path outside allowed directory: {plugin_path}"
+                )
         except (OSError, ValueError) as e:
             raise ValueError(f"Invalid plugin path: {e}")
 
@@ -887,75 +991,121 @@ class PluginManager:
             raise ValueError(
                 f"Entry point not found: {manifest.entry_point}"
             )
-        
+
         # Prevent directory traversal in entry point
-        if ".." in manifest.entry_point or manifest.entry_point.startswith("/"):
-            raise ValueError(f"Invalid entry point path: {manifest.entry_point}")
+        if (
+            ".." in manifest.entry_point
+            or manifest.entry_point.startswith("/")
+        ):
+            raise ValueError(
+                f"Invalid entry point path: {manifest.entry_point}"
+            )
 
         # Validate Python version requirement properly
         try:
-            import packaging.version
             import re
+
+            import packaging.version
+
             # Extract version from requirement string like ">=3.11" or ">=3.11.0"
-            version_match = re.match(r">=(\d+\.\d+(?:\.\d+)?)", manifest.python_version)
+            version_match = re.match(
+                r">=(\d+\.\d+(?:\.\d+)?)", manifest.python_version
+            )
             if not version_match:
-                raise ValueError(f"Invalid Python version format: {manifest.python_version}")
-            
-            required_version = packaging.version.Version(version_match.group(1))
-            current_version = packaging.version.Version(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
-            
+                raise ValueError(
+                    f"Invalid Python version format: {manifest.python_version}"
+                )
+
+            required_version = packaging.version.Version(
+                version_match.group(1)
+            )
+            current_version = packaging.version.Version(
+                f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+            )
+
             if current_version < required_version:
-                raise ValueError(f"Plugin requires Python {manifest.python_version}, but running {current_version}")
-                
+                raise ValueError(
+                    f"Plugin requires Python {manifest.python_version}, but running {current_version}"
+                )
+
         except ImportError:
             # Fallback to basic validation if packaging not available
             if not manifest.python_version.startswith(">=3.11"):
-                logger.warning(f"Plugin requires {manifest.python_version}")
+                logger.warning(
+                    f"Plugin requires {manifest.python_version}"
+                )
 
         # Validate plugin dependencies
         for dependency in manifest.dependencies:
             if not self._is_safe_dependency(dependency):
-                raise ValueError(f"Unsafe dependency detected: {dependency}")
+                raise ValueError(
+                    f"Unsafe dependency detected: {dependency}"
+                )
 
         # Check for required capabilities and validate permissions
         for capability in manifest.capabilities:
             for permission in capability.required_permissions:
                 if not self._validate_permission(permission):
-                    raise ValueError(f"Permission '{permission}' is not supported or allowed")
+                    raise ValueError(
+                        f"Permission '{permission}' is not supported or allowed"
+                    )
 
     def _is_safe_dependency(self, dependency: str) -> bool:
         """Check if a dependency is safe to install.
-        
+
         Args:
             dependency: Package dependency string
-            
+
         Returns:
             True if dependency is safe, False otherwise
         """
         # Basic checks for suspicious packages
         unsafe_patterns = [
-            "subprocess", "os.system", "eval", "exec", "import",
-            "__import__", "open", "file", "input", "raw_input"
+            "subprocess",
+            "os.system",
+            "eval",
+            "exec",
+            "import",
+            "__import__",
+            "open",
+            "file",
+            "input",
+            "raw_input",
         ]
-        
+
         dependency_lower = dependency.lower()
         for pattern in unsafe_patterns:
             if pattern in dependency_lower:
-                logger.warning(f"Potentially unsafe dependency: {dependency}")
+                logger.warning(
+                    f"Potentially unsafe dependency: {dependency}"
+                )
                 return False
-        
+
         # Check for reasonable package names (basic validation)
-        if len(dependency) > 100 or not dependency.replace("-", "").replace("_", "").replace(".", "").replace(">=", "").replace("<=", "").replace("==", "").replace("!=", "").replace(">", "").replace("<", "").replace(" ", "").isalnum():
+        if (
+            len(dependency) > 100
+            or not dependency.replace("-", "")
+            .replace("_", "")
+            .replace(".", "")
+            .replace(">=", "")
+            .replace("<=", "")
+            .replace("==", "")
+            .replace("!=", "")
+            .replace(">", "")
+            .replace("<", "")
+            .replace(" ", "")
+            .isalnum()
+        ):
             return False
-            
+
         return True
 
     def _validate_permission(self, permission: str) -> bool:
         """Validate if a permission is supported and allowed.
-        
+
         Args:
             permission: Permission string to validate
-            
+
         Returns:
             True if permission is valid, False otherwise
         """
@@ -964,14 +1114,14 @@ class PluginManager:
             "tool_execution",
             "network_access",
             "file_read",
-            "file_write", 
+            "file_write",
             "api_access",
             "database_read",
             "database_write",
             "workflow_create",
-            "workflow_execute"
+            "workflow_execute",
         }
-        
+
         return permission in allowed_permissions
 
     async def _load_plugin_class(
@@ -998,11 +1148,15 @@ class PluginManager:
             # Resolve paths to prevent traversal attacks
             installation_path = installation_path.resolve()
             entry_point_path = entry_point_path.resolve()
-            
+
             # Ensure entry point is within installation directory
-            if not str(entry_point_path).startswith(str(installation_path)):
-                raise ImportError(f"Entry point outside plugin directory: {entry_point_path}")
-                
+            if not str(entry_point_path).startswith(
+                str(installation_path)
+            ):
+                raise ImportError(
+                    f"Entry point outside plugin directory: {entry_point_path}"
+                )
+
         except (OSError, ValueError) as e:
             raise ImportError(f"Invalid plugin paths: {e}")
 
@@ -1011,26 +1165,50 @@ class PluginManager:
             file_size = entry_point_path.stat().st_size
             max_size = 10 * 1024 * 1024  # 10MB limit
             if file_size > max_size:
-                raise ImportError(f"Plugin file too large: {file_size} bytes (max {max_size})")
+                raise ImportError(
+                    f"Plugin file too large: {file_size} bytes (max {max_size})"
+                )
         except OSError as e:
             raise ImportError(f"Cannot access plugin file: {e}")
 
         # Create a restricted module namespace
         restricted_builtins = {
-            '__builtins__': {
-                k: v for k, v in __builtins__.items() 
-                if k not in ['eval', 'exec', '__import__', 'open', 'input', 'compile']
-            } if isinstance(__builtins__, dict) else {
-                k: getattr(__builtins__, k) for k in dir(__builtins__)
-                if k not in ['eval', 'exec', '__import__', 'open', 'input', 'compile']
-            }
+            '__builtins__': (
+                {
+                    k: v
+                    for k, v in __builtins__.items()
+                    if k
+                    not in [
+                        'eval',
+                        'exec',
+                        '__import__',
+                        'open',
+                        'input',
+                        'compile',
+                    ]
+                }
+                if isinstance(__builtins__, dict)
+                else {
+                    k: getattr(__builtins__, k)
+                    for k in dir(__builtins__)
+                    if k
+                    not in [
+                        'eval',
+                        'exec',
+                        '__import__',
+                        'open',
+                        'input',
+                        'compile',
+                    ]
+                }
+            )
         }
 
         try:
             # Load module dynamically with restricted environment
             spec = importlib.util.spec_from_file_location(
-                f"plugin_{manifest.name}_{hash(str(entry_point_path))}", 
-                entry_point_path
+                f"plugin_{manifest.name}_{hash(str(entry_point_path))}",
+                entry_point_path,
             )
 
             if not spec or not spec.loader:
@@ -1039,24 +1217,26 @@ class PluginManager:
                 )
 
             module = importlib.util.module_from_spec(spec)
-            
+
             # Set restricted builtins
             for name, value in restricted_builtins.items():
                 setattr(module, name, value)
-                
+
             # Execute module with timeout protection
             try:
-                import signal
                 import platform
-                
+                import signal
+
                 def timeout_handler(signum, frame):
                     raise TimeoutError("Plugin loading timeout")
-                
+
                 # Only use signal-based timeout on Unix systems
                 if platform.system() != 'Windows':
-                    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+                    old_handler = signal.signal(
+                        signal.SIGALRM, timeout_handler
+                    )
                     signal.alarm(30)  # 30 second timeout
-                
+
                     try:
                         spec.loader.exec_module(module)
                     finally:
@@ -1065,7 +1245,7 @@ class PluginManager:
                 else:
                     # On Windows, just execute without signal-based timeout
                     spec.loader.exec_module(module)
-                    
+
             except (TimeoutError, OSError):
                 raise ImportError("Plugin loading timed out or failed")
             except Exception as e:
@@ -1078,18 +1258,26 @@ class PluginManager:
 
         # Find plugin class
         plugin_class = None
-        valid_base_classes = (BasePlugin, ToolPlugin, WorkflowPlugin, IntegrationPlugin)
-        
+        valid_base_classes = (
+            BasePlugin,
+            ToolPlugin,
+            WorkflowPlugin,
+            IntegrationPlugin,
+        )
+
         for name, obj in inspect.getmembers(module):
             if (
                 inspect.isclass(obj)
                 and issubclass(obj, BasePlugin)
-                and obj not in valid_base_classes  # Exclude base classes
+                and obj
+                not in valid_base_classes  # Exclude base classes
                 and not name.startswith('_')  # Exclude private classes
             ):
                 if plugin_class is not None:
                     # Multiple plugin classes found, be more specific
-                    self.logger.warning(f"Multiple plugin classes found in {manifest.entry_point}, using {obj.__name__}")
+                    self.logger.warning(
+                        f"Multiple plugin classes found in {manifest.entry_point}, using {obj.__name__}"
+                    )
                 plugin_class = obj
 
         if not plugin_class:
@@ -1099,10 +1287,16 @@ class PluginManager:
             )
 
         # Validate plugin class has required methods
-        required_methods = ['initialize', 'shutdown', 'get_capabilities']
+        required_methods = [
+            'initialize',
+            'shutdown',
+            'get_capabilities',
+        ]
         for method in required_methods:
             if not hasattr(plugin_class, method):
-                raise ImportError(f"Plugin class missing required method: {method}")
+                raise ImportError(
+                    f"Plugin class missing required method: {method}"
+                )
 
         return plugin_class
 

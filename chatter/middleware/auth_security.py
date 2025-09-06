@@ -1,16 +1,12 @@
 """Enhanced authentication middleware with rate limiting and security features."""
 
-import asyncio
-from datetime import datetime, timedelta, UTC
-from typing import Any
+from datetime import UTC, datetime, timedelta
 
 from fastapi import Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
-from chatter.config import settings
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import RateLimitProblem
 from chatter.utils.unified_rate_limiter import get_unified_rate_limiter
 
 logger = get_logger(__name__)
@@ -22,29 +18,25 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
         super().__init__(app)
         self.rate_limiter = get_unified_rate_limiter()
-        
+
         # Rate limiting configurations
         self.rate_limits = {
-            "login": {
-                "per_minute": 5,
-                "per_hour": 20,
-                "per_day": 100
-            },
+            "login": {"per_minute": 5, "per_hour": 20, "per_day": 100},
             "register": {
                 "per_minute": 2,
                 "per_hour": 10,
-                "per_day": 20
+                "per_day": 20,
             },
             "password_reset": {
                 "per_minute": 1,
                 "per_hour": 5,
-                "per_day": 10
+                "per_day": 10,
             },
             "refresh": {
                 "per_minute": 10,
                 "per_hour": 100,
-                "per_day": 500
-            }
+                "per_day": 500,
+            },
         }
 
     async def dispatch(self, request: Request, call_next):
@@ -65,18 +57,20 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
         path = str(request.url.path)
         auth_paths = [
             "/api/v1/auth/login",
-            "/api/v1/auth/register", 
+            "/api/v1/auth/register",
             "/api/v1/auth/refresh",
             "/api/v1/auth/password-reset",
-            "/api/v1/auth/change-password"
+            "/api/v1/auth/change-password",
         ]
-        return any(path.startswith(auth_path) for auth_path in auth_paths)
+        return any(
+            path.startswith(auth_path) for auth_path in auth_paths
+        )
 
     async def _apply_auth_rate_limiting(self, request: Request):
         """Apply appropriate rate limiting based on endpoint."""
         client_ip = self._get_client_ip(request)
         path = str(request.url.path)
-        
+
         # Determine endpoint type
         endpoint_type = None
         if "/login" in path:
@@ -90,15 +84,19 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
 
         if endpoint_type and endpoint_type in self.rate_limits:
             limits = self.rate_limits[endpoint_type]
-            
+
             # Apply IP-based rate limiting
-            await self._check_ip_rate_limits(client_ip, endpoint_type, limits)
-            
+            await self._check_ip_rate_limits(
+                client_ip, endpoint_type, limits
+            )
+
             # Apply additional user-based limiting for login attempts
             if endpoint_type == "login":
                 await self._check_login_user_rate_limits(request)
 
-    async def _check_ip_rate_limits(self, client_ip: str, endpoint_type: str, limits: dict):
+    async def _check_ip_rate_limits(
+        self, client_ip: str, endpoint_type: str, limits: dict
+    ):
         """Check IP-based rate limits."""
         # Per-minute limit
         if "per_minute" in limits:
@@ -106,7 +104,7 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
                 key=f"auth_{endpoint_type}_ip:{client_ip}",
                 limit=limits["per_minute"],
                 window=60,
-                identifier=f"{endpoint_type}_per_minute"
+                identifier=f"{endpoint_type}_per_minute",
             )
 
         # Per-hour limit
@@ -115,7 +113,7 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
                 key=f"auth_{endpoint_type}_ip:{client_ip}",
                 limit=limits["per_hour"],
                 window=3600,
-                identifier=f"{endpoint_type}_per_hour"
+                identifier=f"{endpoint_type}_per_hour",
             )
 
         # Per-day limit
@@ -124,33 +122,38 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
                 key=f"auth_{endpoint_type}_ip:{client_ip}",
                 limit=limits["per_day"],
                 window=86400,
-                identifier=f"{endpoint_type}_per_day"
+                identifier=f"{endpoint_type}_per_day",
             )
 
     async def _check_login_user_rate_limits(self, request: Request):
         """Check user-specific rate limits for login attempts."""
         try:
             # Extract user identifier from request body
-            user_identifier = await self._extract_user_identifier(request)
+            user_identifier = await self._extract_user_identifier(
+                request
+            )
             if user_identifier:
                 # More restrictive user-specific limits
                 await self.rate_limiter.check_rate_limit(
                     key=f"auth_login_user:{user_identifier}",
                     limit=10,  # 10 attempts per hour per user
                     window=3600,
-                    identifier="login_user_per_hour"
+                    identifier="login_user_per_hour",
                 )
         except Exception as e:
             # Don't fail if we can't extract user identifier
             logger.debug(f"Could not extract user identifier: {e}")
 
-    async def _extract_user_identifier(self, request: Request) -> str | None:
+    async def _extract_user_identifier(
+        self, request: Request
+    ) -> str | None:
         """Extract user identifier from login request."""
         try:
             # Read request body safely
             body = await request.body()
             if body:
                 import json
+
                 data = json.loads(body)
                 return data.get("username") or data.get("email")
         except Exception:
@@ -182,14 +185,26 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
                 "status": 429,
                 "detail": "Too many requests. Please try again later.",
                 "instance": f"/auth/rate-limit/{datetime.now(UTC).isoformat()}",
-                "retry_after": getattr(exception, 'retry_after', 60)
+                "retry_after": getattr(exception, 'retry_after', 60),
             },
             headers={
-                "Retry-After": str(getattr(exception, 'retry_after', 60)),
-                "X-RateLimit-Limit": str(getattr(exception, 'limit', 'unknown')),
-                "X-RateLimit-Remaining": str(getattr(exception, 'remaining', 0)),
-                "X-RateLimit-Reset": str(int((datetime.now(UTC) + timedelta(seconds=60)).timestamp()))
-            }
+                "Retry-After": str(
+                    getattr(exception, 'retry_after', 60)
+                ),
+                "X-RateLimit-Limit": str(
+                    getattr(exception, 'limit', 'unknown')
+                ),
+                "X-RateLimit-Remaining": str(
+                    getattr(exception, 'remaining', 0)
+                ),
+                "X-RateLimit-Reset": str(
+                    int(
+                        (
+                            datetime.now(UTC) + timedelta(seconds=60)
+                        ).timestamp()
+                    )
+                ),
+            },
         )
 
 

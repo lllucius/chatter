@@ -2,10 +2,13 @@
 
 import uuid
 from typing import Any
-from fastapi import APIRouter, Depends, status, HTTPException
+
+from fastapi import APIRouter, Depends, status
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
+from chatter.schemas.jobs import JobPriority  # Add JobPriority import
+from chatter.schemas.jobs import JobStatus  # Add JobStatus import
 from chatter.schemas.jobs import (
     JobActionResponse,
     JobCreateRequest,
@@ -13,8 +16,6 @@ from chatter.schemas.jobs import (
     JobListResponse,
     JobResponse,
     JobStatsResponse,
-    JobStatus,  # Add JobStatus import
-    JobPriority,  # Add JobPriority import  
 )
 from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger
@@ -31,13 +32,13 @@ router = APIRouter()
 
 def validate_job_id(job_id: str) -> str:
     """Validate that job_id is a valid UUID format.
-    
+
     Args:
         job_id: The job ID to validate
-        
+
     Returns:
         The validated job ID
-        
+
     Raises:
         ValidationProblem: If job_id is not a valid UUID
     """
@@ -71,7 +72,7 @@ async def create_job(
         if job_data.function_name not in job_queue.job_handlers:
             raise ValidationProblem(
                 detail=f"Unknown function: {job_data.function_name}. "
-                       f"Available functions: {list(job_queue.job_handlers.keys())}"
+                f"Available functions: {list(job_queue.job_handlers.keys())}"
             )
 
         if job_data.schedule_at:
@@ -150,7 +151,9 @@ async def list_jobs(
         jobs = list(job_queue.jobs.values())
 
         # Apply user filter first (security) - users can only see their own jobs
-        jobs = [j for j in jobs if j.created_by_user_id == current_user.id]
+        jobs = [
+            j for j in jobs if j.created_by_user_id == current_user.id
+        ]
 
         # Apply other filters
         if request.status is not None:
@@ -168,15 +171,22 @@ async def list_jobs(
 
         # Apply date filters
         if request.created_after is not None:
-            jobs = [j for j in jobs if j.created_at >= request.created_after]
+            jobs = [
+                j for j in jobs if j.created_at >= request.created_after
+            ]
 
         if request.created_before is not None:
-            jobs = [j for j in jobs if j.created_at <= request.created_before]
+            jobs = [
+                j
+                for j in jobs
+                if j.created_at <= request.created_before
+            ]
 
         # Apply tag filter (any of the provided tags)
         if request.tags:
             jobs = [
-                j for j in jobs 
+                j
+                for j in jobs
                 if any(tag in j.tags for tag in request.tags)
             ]
 
@@ -184,10 +194,15 @@ async def list_jobs(
         if request.search:
             search_lower = request.search.lower()
             jobs = [
-                j for j in jobs
-                if (search_lower in j.name.lower() or
-                    any(search_lower in str(v).lower() 
-                        for v in j.metadata.values()))
+                j
+                for j in jobs
+                if (
+                    search_lower in j.name.lower()
+                    or any(
+                        search_lower in str(v).lower()
+                        for v in j.metadata.values()
+                    )
+                )
             ]
 
         # Total count before pagination
@@ -205,14 +220,16 @@ async def list_jobs(
                 JobPriority.CRITICAL: 4,
                 JobPriority.HIGH: 3,
                 JobPriority.NORMAL: 2,
-                JobPriority.LOW: 1
+                JobPriority.LOW: 1,
             }
             jobs.sort(
                 key=lambda x: priority_order.get(x.priority, 0),
-                reverse=reverse_sort
+                reverse=reverse_sort,
             )
         elif request.sort_by == "status":
-            jobs.sort(key=lambda x: x.status.value, reverse=reverse_sort)
+            jobs.sort(
+                key=lambda x: x.status.value, reverse=reverse_sort
+            )
 
         # Apply pagination
         start_idx = request.offset
@@ -248,7 +265,7 @@ async def list_jobs(
             total=total_jobs,
             limit=request.limit,
             offset=request.offset,
-            has_more=has_more
+            has_more=has_more,
         )
 
     except Exception as e:
@@ -273,7 +290,7 @@ async def get_job(
     try:
         # Validate job ID format
         validate_job_id(job_id)
-        
+
         # Get job with user security check
         job = job_queue.get_user_job(job_id, current_user.id)
         if not job:
@@ -321,9 +338,11 @@ async def cancel_job(
     try:
         # Validate job ID format
         validate_job_id(job_id)
-        
+
         # Use user-specific cancel method for security
-        success = await job_queue.cancel_user_job(job_id, current_user.id)
+        success = await job_queue.cancel_user_job(
+            job_id, current_user.id
+        )
 
         if not success:
             raise NotFoundProblem(detail=f"Job {job_id} not found")
@@ -360,16 +379,41 @@ async def get_job_stats(
     try:
         # Get stats filtered by user
         all_jobs = list(job_queue.jobs.values())
-        user_jobs = [job for job in all_jobs if job.created_by_user_id == current_user.id]
-        
+        user_jobs = [
+            job
+            for job in all_jobs
+            if job.created_by_user_id == current_user.id
+        ]
+
         stats = {
             "total_jobs": len(user_jobs),
-            "pending_jobs": len([j for j in user_jobs if j.status == JobStatus.PENDING]),
-            "running_jobs": len([j for j in user_jobs if j.status == JobStatus.RUNNING]),
-            "completed_jobs": len([j for j in user_jobs if j.status == JobStatus.COMPLETED]),
-            "failed_jobs": len([j for j in user_jobs if j.status == JobStatus.FAILED]),
-            "queue_size": len([j for j in user_jobs if j.status in [JobStatus.PENDING, JobStatus.RETRYING]]),
-            "active_workers": len([j for j in user_jobs if j.status == JobStatus.RUNNING]),
+            "pending_jobs": len(
+                [j for j in user_jobs if j.status == JobStatus.PENDING]
+            ),
+            "running_jobs": len(
+                [j for j in user_jobs if j.status == JobStatus.RUNNING]
+            ),
+            "completed_jobs": len(
+                [
+                    j
+                    for j in user_jobs
+                    if j.status == JobStatus.COMPLETED
+                ]
+            ),
+            "failed_jobs": len(
+                [j for j in user_jobs if j.status == JobStatus.FAILED]
+            ),
+            "queue_size": len(
+                [
+                    j
+                    for j in user_jobs
+                    if j.status
+                    in [JobStatus.PENDING, JobStatus.RETRYING]
+                ]
+            ),
+            "active_workers": len(
+                [j for j in user_jobs if j.status == JobStatus.RUNNING]
+            ),
         }
 
         return JobStatsResponse(
@@ -395,14 +439,14 @@ async def cleanup_jobs(
     current_user: User = Depends(get_current_user),
 ) -> dict[str, Any]:
     """Clean up old completed jobs to free up memory.
-    
+
     Note: This is a system-wide cleanup operation that affects all users.
     Only completed, failed, or cancelled jobs older than 24 hours are removed.
-    
+
     Args:
         force: If True, remove all completed/failed jobs regardless of age
         current_user: Current authenticated user
-        
+
     Returns:
         Cleanup statistics
     """
@@ -410,13 +454,13 @@ async def cleanup_jobs(
         # For now, any authenticated user can trigger cleanup
         # In production, you might want to restrict this to admin users
         cleanup_stats = await job_queue.cleanup_jobs(force=force)
-        
+
         return {
             "success": True,
             "message": f"Cleanup completed. Removed {cleanup_stats['removed']} jobs.",
-            "statistics": cleanup_stats
+            "statistics": cleanup_stats,
         }
-        
+
     except Exception as e:
         logger.error("Failed to cleanup jobs", error=str(e))
         raise InternalServerProblem(

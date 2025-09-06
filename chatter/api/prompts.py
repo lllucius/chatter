@@ -403,5 +403,3 @@ async def clone_prompt(
         raise InternalServerProblem(
             detail="Prompt cloning failed"
         ) from None
-
-

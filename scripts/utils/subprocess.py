@@ -8,12 +8,20 @@ from pathlib import Path
 class ProcessError(Exception):
     """Exception raised when a subprocess fails."""
 
-    def __init__(self, command: list[str], returncode: int, stdout: str, stderr: str):
+    def __init__(
+        self,
+        command: list[str],
+        returncode: int,
+        stdout: str,
+        stderr: str,
+    ):
         self.command = command
         self.returncode = returncode
         self.stdout = stdout
         self.stderr = stderr
-        super().__init__(f"Command failed with exit code {returncode}: {' '.join(command)}")
+        super().__init__(
+            f"Command failed with exit code {returncode}: {' '.join(command)}"
+        )
 
 
 def run_command(
@@ -22,7 +30,7 @@ def run_command(
     cwd: Path | None = None,
     capture_output: bool = True,
     check: bool = True,
-    timeout: int | None = None
+    timeout: int | None = None,
 ) -> tuple[bool, str, str]:
     """
     Run a command and return success status with output.
@@ -52,7 +60,7 @@ def run_command(
             capture_output=capture_output,
             text=True,
             cwd=str(cwd) if cwd else None,
-            timeout=timeout
+            timeout=timeout,
         )
 
         success = result.returncode == 0
@@ -60,7 +68,9 @@ def run_command(
         if success:
             print(f"✅ {description} completed successfully")
         else:
-            print(f"❌ {description} failed with exit code {result.returncode}")
+            print(
+                f"❌ {description} failed with exit code {result.returncode}"
+            )
             if capture_output:
                 if result.stdout:
                     print(f"   stdout: {result.stdout}")
@@ -68,20 +78,26 @@ def run_command(
                     print(f"   stderr: {result.stderr}")
 
         if check and not success:
-            raise ProcessError(cmd, result.returncode, result.stdout, result.stderr)
+            raise ProcessError(
+                cmd, result.returncode, result.stdout, result.stderr
+            )
 
         return success, result.stdout, result.stderr
 
     except subprocess.TimeoutExpired as e:
         print(f"❌ {description} timed out after {timeout} seconds")
         if check:
-            raise ProcessError(cmd, -1, "", f"Timeout after {timeout} seconds") from e
+            raise ProcessError(
+                cmd, -1, "", f"Timeout after {timeout} seconds"
+            ) from e
         return False, "", f"Timeout after {timeout} seconds"
 
     except FileNotFoundError as e:
         print(f"❌ {description} failed: Command not found: {cmd[0]}")
         if check:
-            raise ProcessError(cmd, -1, "", f"Command not found: {cmd[0]}") from e
+            raise ProcessError(
+                cmd, -1, "", f"Command not found: {cmd[0]}"
+            ) from e
         return False, "", f"Command not found: {cmd[0]}"
 
 
@@ -89,16 +105,22 @@ def check_command_available(command: str) -> bool:
     """Check if a command is available in the system PATH."""
     try:
         subprocess.run(
-            ["which", command] if sys.platform != "win32" else ["where", command],
+            (
+                ["which", command]
+                if sys.platform != "win32"
+                else ["where", command]
+            ),
             capture_output=True,
-            check=True
+            check=True,
         )
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
 
 
-def ensure_command_available(command: str, install_hint: str | None = None) -> None:
+def ensure_command_available(
+    command: str, install_hint: str | None = None
+) -> None:
     """Ensure a command is available, raising an error with install hint if not."""
     if not check_command_available(command):
         error_msg = f"Required command '{command}' not found in PATH"

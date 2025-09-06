@@ -1,62 +1,70 @@
 """Validation context for providing metadata and configuration."""
 
-from typing import Any, Dict, Optional, Set
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any
 
 
 class ValidationMode(Enum):
     """Validation modes."""
-    STRICT = "strict"      # Fail on any validation error
-    LENIENT = "lenient"    # Allow minor validation issues
+
+    STRICT = "strict"  # Fail on any validation error
+    LENIENT = "lenient"  # Allow minor validation issues
     SANITIZE = "sanitize"  # Attempt to sanitize and fix issues
 
 
 @dataclass
 class ValidationContext:
     """Context information for validation operations."""
-    
+
     # Core context
-    user_id: Optional[str] = None
-    session_id: Optional[str] = None
-    request_id: Optional[str] = None
-    
-    # Validation configuration  
+    user_id: str | None = None
+    session_id: str | None = None
+    request_id: str | None = None
+
+    # Validation configuration
     mode: ValidationMode = ValidationMode.STRICT
     sanitize_input: bool = True
     check_security: bool = True
-    
+
     # Feature flags
-    enabled_validators: Set[str] = field(default_factory=lambda: {
-        "input", "security", "business", "config", "workflow", "agent"
-    })
-    disabled_rules: Set[str] = field(default_factory=set)
-    
+    enabled_validators: set[str] = field(
+        default_factory=lambda: {
+            "input",
+            "security",
+            "business",
+            "config",
+            "workflow",
+            "agent",
+        }
+    )
+    disabled_rules: set[str] = field(default_factory=set)
+
     # Custom configuration
-    max_length_overrides: Dict[str, int] = field(default_factory=dict)
-    custom_patterns: Dict[str, str] = field(default_factory=dict)
-    extra_context: Dict[str, Any] = field(default_factory=dict)
-    
+    max_length_overrides: dict[str, int] = field(default_factory=dict)
+    custom_patterns: dict[str, str] = field(default_factory=dict)
+    extra_context: dict[str, Any] = field(default_factory=dict)
+
     # Performance settings
     timeout_seconds: int = 30
     max_recursion_depth: int = 10
-    
+
     def is_validator_enabled(self, validator_name: str) -> bool:
         """Check if a validator is enabled."""
         return validator_name in self.enabled_validators
-        
+
     def is_rule_disabled(self, rule_name: str) -> bool:
         """Check if a rule is disabled."""
         return rule_name in self.disabled_rules
-        
+
     def get_max_length(self, field_name: str, default: int) -> int:
         """Get max length for a field with override support."""
         return self.max_length_overrides.get(field_name, default)
-        
-    def get_custom_pattern(self, pattern_name: str) -> Optional[str]:
+
+    def get_custom_pattern(self, pattern_name: str) -> str | None:
         """Get custom pattern if defined."""
         return self.custom_patterns.get(pattern_name)
-        
+
     def with_overrides(self, **kwargs) -> 'ValidationContext':
         """Create a new context with overrides."""
         # Create a copy of current context
@@ -75,12 +83,12 @@ class ValidationContext:
             timeout_seconds=self.timeout_seconds,
             max_recursion_depth=self.max_recursion_depth,
         )
-        
+
         # Apply overrides
         for key, value in kwargs.items():
             if hasattr(new_context, key):
                 setattr(new_context, key, value)
-                
+
         return new_context
 
 
@@ -90,17 +98,17 @@ DEFAULT_CONTEXT = ValidationContext()
 LENIENT_CONTEXT = ValidationContext(
     mode=ValidationMode.LENIENT,
     sanitize_input=True,
-    check_security=True
+    check_security=True,
 )
 
 STRICT_CONTEXT = ValidationContext(
     mode=ValidationMode.STRICT,
     sanitize_input=False,
-    check_security=True
+    check_security=True,
 )
 
 SANITIZE_CONTEXT = ValidationContext(
     mode=ValidationMode.SANITIZE,
     sanitize_input=True,
-    check_security=True
+    check_security=True,
 )

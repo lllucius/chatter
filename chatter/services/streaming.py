@@ -8,9 +8,9 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
+from chatter.core.monitoring import record_workflow_metrics
 from chatter.schemas.chat import StreamingChatChunk
 from chatter.utils.correlation import get_correlation_id
-from chatter.core.monitoring import record_workflow_metrics
 from chatter.utils.security_enhanced import get_secure_logger
 
 logger = get_secure_logger(__name__)
@@ -542,5 +542,3 @@ class StreamingService:
 
 # Global streaming service instance
 streaming_service = StreamingService()
-
-

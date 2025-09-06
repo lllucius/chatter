@@ -14,7 +14,10 @@ sys.path.insert(0, str(project_root))
 
 # Set test environment
 os.environ.setdefault("ENVIRONMENT", "testing")
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
+os.environ.setdefault(
+    "DATABASE_URL",
+    "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test",
+)
 
 
 async def verify_postgresql_setup():
@@ -23,6 +26,7 @@ async def verify_postgresql_setup():
 
     try:
         from chatter.config import settings
+
         print("✅ Configuration loaded")
         print(f"   Environment: {settings.environment}")
         print(f"   Test DB URL: {settings.test_database_url}")
@@ -48,24 +52,39 @@ async def verify_postgresql_setup():
 
             # Test pgvector extension
             try:
-                await conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
-                result = await conn.execute(text("SELECT extversion FROM pg_extension WHERE extname = 'vector'"))
+                await conn.execute(
+                    text("CREATE EXTENSION IF NOT EXISTS vector")
+                )
+                result = await conn.execute(
+                    text(
+                        "SELECT extversion FROM pg_extension WHERE extname = 'vector'"
+                    )
+                )
                 version = result.scalar()
                 if version:
-                    print(f"✅ pgvector extension available (version {version})")
+                    print(
+                        f"✅ pgvector extension available (version {version})"
+                    )
                 else:
                     print("⚠️  pgvector extension not found")
             except Exception as e:
                 print(f"⚠️  pgvector extension not available: {e}")
-                print("   This is optional but recommended for vector store tests")
+                print(
+                    "   This is optional but recommended for vector store tests"
+                )
 
             # Test table creation
             from chatter.utils.database import Base
+
             await conn.run_sync(Base.metadata.create_all)
             print("✅ Database schema creation successful")
 
             # Test basic query
-            result = await conn.execute(text("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'"))
+            result = await conn.execute(
+                text(
+                    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public'"
+                )
+            )
             table_count = result.scalar()
             print(f"✅ Created {table_count} tables in public schema")
 
@@ -86,10 +105,14 @@ async def verify_postgresql_setup():
         print("   sudo -u postgres psql")
         print("   CREATE USER test_user WITH PASSWORD 'test_password';")
         print("   CREATE DATABASE chatter_test OWNER test_user;")
-        print("   GRANT ALL PRIVILEGES ON DATABASE chatter_test TO test_user;")
+        print(
+            "   GRANT ALL PRIVILEGES ON DATABASE chatter_test TO test_user;"
+        )
         print("")
         print("3. Test connection manually:")
-        print("   psql postgresql://test_user:test_password@localhost:5432/chatter_test")
+        print(
+            "   psql postgresql://test_user:test_password@localhost:5432/chatter_test"
+        )
 
         return False
 

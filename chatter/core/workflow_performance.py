@@ -4,7 +4,6 @@ This module provides caching and lazy loading features to improve workflow
 performance and reduce resource usage.
 """
 
-import hashlib
 import time
 from typing import Any
 
@@ -13,12 +12,14 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
-
 # Legacy WorkflowCache and LazyToolLoader classes have been removed.
 # These functionalities are now provided by the unified cache system.
 
 # Global instances for easy access - now using unified cache system
-from chatter.core.unified_workflow_cache import get_unified_workflow_cache, get_unified_lazy_tool_loader
+from chatter.core.unified_workflow_cache import (
+    get_unified_lazy_tool_loader,
+    get_unified_workflow_cache,
+)
 
 workflow_cache = get_unified_workflow_cache()
 lazy_tool_loader = get_unified_lazy_tool_loader()

@@ -14,8 +14,11 @@ from chatter.core.exceptions import (
     ValidationError,
 )
 from chatter.models.conversation import Message, MessageRole
+from chatter.utils.performance import (
+    QueryOptimizer,
+    get_performance_monitor,
+)
 from chatter.utils.security_enhanced import get_secure_logger
-from chatter.utils.performance import QueryOptimizer, get_performance_monitor
 
 logger = get_secure_logger(__name__)
 
@@ -51,7 +54,9 @@ class MessageService:
         Raises:
             AuthorizationError: If user doesn't have access to conversation
         """
-        async with self.performance_monitor.measure_query("get_conversation_messages"):
+        async with self.performance_monitor.measure_query(
+            "get_conversation_messages"
+        ):
             try:
                 # First verify user has access to conversation
                 from chatter.services.conversation import (
@@ -78,7 +83,9 @@ class MessageService:
                 )
 
                 if not include_system:
-                    query = query.where(Message.role != MessageRole.SYSTEM)
+                    query = query.where(
+                        Message.role != MessageRole.SYSTEM
+                    )
 
                 if offset > 0:
                     query = query.offset(offset)
@@ -108,9 +115,9 @@ class MessageService:
                 logger.error(
                     "Failed to get conversation messages",
                     conversation_id=conversation_id,
-                user_id=user_id,
-                error=str(e),
-            )
+                    user_id=user_id,
+                    error=str(e),
+                )
             raise
 
     async def add_message_to_conversation(
@@ -145,7 +152,9 @@ class MessageService:
             AuthorizationError: If user doesn't have access to conversation
             ValidationError: If message data is invalid
         """
-        async with self.performance_monitor.measure_query("add_message_to_conversation"):
+        async with self.performance_monitor.measure_query(
+            "add_message_to_conversation"
+        ):
             try:
                 # Verify user has access to conversation
                 from chatter.services.conversation import (
@@ -158,13 +167,18 @@ class MessageService:
                 )
 
                 # Get the next sequence number for this conversation
-                next_seq_query = select(Message.sequence_number).where(
-                    Message.conversation_id == conversation_id
-                ).order_by(desc(Message.sequence_number)).limit(1)
-                
+                next_seq_query = (
+                    select(Message.sequence_number)
+                    .where(Message.conversation_id == conversation_id)
+                    .order_by(desc(Message.sequence_number))
+                    .limit(1)
+                )
+
                 result = await self.session.execute(next_seq_query)
                 last_sequence = result.scalar()
-                next_sequence = 0 if last_sequence is None else last_sequence + 1
+                next_sequence = (
+                    0 if last_sequence is None else last_sequence + 1
+                )
 
                 # Create the message
                 message = Message(
@@ -199,7 +213,9 @@ class MessageService:
                 return message
 
             except NotFoundError as e:
-                raise AuthorizationError("Access denied to conversation") from e
+                raise AuthorizationError(
+                    "Access denied to conversation"
+                ) from e
             except Exception as e:
                 logger.error(
                     "Failed to add message to conversation",
@@ -335,7 +351,9 @@ class MessageService:
             return messages
 
         except NotFoundError as e:
-            raise AuthorizationError("Access denied to conversation") from e
+            raise AuthorizationError(
+                "Access denied to conversation"
+            ) from e
         except Exception as e:
             logger.error(
                 "Failed to get recent messages",
@@ -404,7 +422,9 @@ class MessageService:
             return messages
 
         except NotFoundError as e:
-            raise AuthorizationError("Access denied to conversation") from e
+            raise AuthorizationError(
+                "Access denied to conversation"
+            ) from e
         except Exception as e:
             logger.error(
                 "Failed to search messages",
@@ -499,7 +519,9 @@ class MessageService:
             return stats
 
         except NotFoundError as e:
-            raise AuthorizationError("Access denied to conversation") from e
+            raise AuthorizationError(
+                "Access denied to conversation"
+            ) from e
         except Exception as e:
             logger.error(
                 "Failed to get message statistics",
@@ -566,7 +588,9 @@ class MessageService:
             return deleted_count
 
         except NotFoundError as e:
-            raise AuthorizationError("Access denied to conversation") from e
+            raise AuthorizationError(
+                "Access denied to conversation"
+            ) from e
         except Exception as e:
             logger.error(
                 "Failed to bulk delete messages",

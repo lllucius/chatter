@@ -36,6 +36,7 @@ class TestInfrastructureValidation:
         """Verify async test support is working."""
         # Simple async operation
         import asyncio
+
         await asyncio.sleep(0.001)
         assert True
 
@@ -66,4 +67,6 @@ class TestDatabaseFixtures:
             assert response.status_code == 200
         except Exception:
             # If health endpoint doesn't exist, that's a problem
-            assert False, "Health endpoint /healthz should be available"
+            raise AssertionError(
+                "Health endpoint /healthz should be available"
+            )

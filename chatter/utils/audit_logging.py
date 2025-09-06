@@ -77,13 +77,19 @@ class AuditLog(AuditBase):
     __tablename__ = "audit_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    event_id = Column(String(36), unique=True, nullable=False, index=True)
-    timestamp = Column(DateTime(timezone=True), nullable=False, index=True)
+    event_id = Column(
+        String(36), unique=True, nullable=False, index=True
+    )
+    timestamp = Column(
+        DateTime(timezone=True), nullable=False, index=True
+    )
     event_type = Column(String(50), nullable=False, index=True)
     result = Column(String(20), nullable=False)
     user_id = Column(String(36), nullable=True, index=True)
     session_id = Column(String(100), nullable=True)
-    ip_address = Column(String(45), nullable=True, index=True)  # Support IPv6
+    ip_address = Column(
+        String(45), nullable=True, index=True
+    )  # Support IPv6
     user_agent = Column(String(500), nullable=True)
     request_id = Column(String(36), nullable=True, index=True)
     resource_type = Column(String(50), nullable=True)
@@ -103,7 +109,9 @@ class AuditLogger:
         """
         self.session = session
 
-    def _extract_request_info(self, request: Request | None) -> dict[str, Any]:
+    def _extract_request_info(
+        self, request: Request | None
+    ) -> dict[str, Any]:
         """Extract relevant information from request.
 
         Args:
@@ -129,7 +137,9 @@ class AuditLogger:
         user_agent = request.headers.get("User-Agent", "")
 
         # Extract request ID if available
-        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        request_id = request.headers.get("X-Request-ID") or str(
+            uuid.uuid4()
+        )
 
         return {
             "ip_address": ip_address,
@@ -206,7 +216,9 @@ class AuditLogger:
                     resource_type=resource_type,
                     resource_id=resource_id,
                     details=json.dumps(sanitized_details),
-                    error_message=error_message[:1000] if error_message else None,
+                    error_message=(
+                        error_message[:1000] if error_message else None
+                    ),
                 )
 
                 self.session.add(audit_record)
@@ -246,7 +258,9 @@ class AuditLogger:
         """
         return await self.log_event(
             event_type=AuditEventType.PROVIDER_CREATE,
-            result=AuditResult.SUCCESS if success else AuditResult.FAILURE,
+            result=(
+                AuditResult.SUCCESS if success else AuditResult.FAILURE
+            ),
             user_id=user_id,
             resource_type="provider",
             resource_id=provider_id,
@@ -279,7 +293,9 @@ class AuditLogger:
         """
         return await self.log_event(
             event_type=AuditEventType.PROVIDER_UPDATE,
-            result=AuditResult.SUCCESS if success else AuditResult.FAILURE,
+            result=(
+                AuditResult.SUCCESS if success else AuditResult.FAILURE
+            ),
             user_id=user_id,
             resource_type="provider",
             resource_id=provider_id,
@@ -314,7 +330,9 @@ class AuditLogger:
         """
         return await self.log_event(
             event_type=AuditEventType.MODEL_CREATE,
-            result=AuditResult.SUCCESS if success else AuditResult.FAILURE,
+            result=(
+                AuditResult.SUCCESS if success else AuditResult.FAILURE
+            ),
             user_id=user_id,
             resource_type="model",
             resource_id=model_id,
@@ -493,7 +511,11 @@ class AuditLogger:
         """
         return await self.log_event(
             event_type=AuditEventType.PROMPT_TEST,
-            result=AuditResult.SUCCESS if test_success else AuditResult.FAILURE,
+            result=(
+                AuditResult.SUCCESS
+                if test_success
+                else AuditResult.FAILURE
+            ),
             user_id=user_id,
             resource_type="prompt",
             resource_id=prompt_id,
@@ -567,7 +589,11 @@ class AuditLogger:
         """
         return await self.log_event(
             event_type=AuditEventType.PROMPT_ACCESS_ATTEMPT,
-            result=AuditResult.SUCCESS if access_granted else AuditResult.FAILURE,
+            result=(
+                AuditResult.SUCCESS
+                if access_granted
+                else AuditResult.FAILURE
+            ),
             user_id=user_id,
             resource_type="prompt",
             resource_id=prompt_id,
@@ -623,7 +649,9 @@ class AuditLogger:
 _audit_logger: AuditLogger | None = None
 
 
-def get_audit_logger(session: AsyncSession | None = None) -> AuditLogger:
+def get_audit_logger(
+    session: AsyncSession | None = None,
+) -> AuditLogger:
     """Get the global audit logger instance.
 
     Args:
@@ -752,6 +780,3 @@ class AuditLogAnalyzer:
             "security_events": [],
             "recommendations": [],
         }
-
-
-

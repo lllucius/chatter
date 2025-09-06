@@ -1,6 +1,13 @@
 """Model and embedding registry endpoints."""
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Query,
+    Request,
+    status,
+)
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -96,20 +103,29 @@ async def create_provider(
     current_user: User = Depends(get_current_user),
 ):
     """Create a new provider."""
-    from chatter.utils.audit_logging import get_audit_logger, AuditEventType, AuditResult
-    
+    from chatter.utils.audit_logging import (
+        AuditEventType,
+        AuditResult,
+        get_audit_logger,
+    )
+
     service = ModelRegistryService(session)
     audit_logger = get_audit_logger(session)
 
     try:
         # Check if provider name already exists
-        existing = await service.get_provider_by_name(provider_data.name)
+        existing = await service.get_provider_by_name(
+            provider_data.name
+        )
         if existing:
             await audit_logger.log_event(
                 event_type=AuditEventType.PROVIDER_CREATE,
                 result=AuditResult.FAILURE,
                 user_id=current_user.id,
-                details={"provider_name": provider_data.name, "error": "name_already_exists"},
+                details={
+                    "provider_name": provider_data.name,
+                    "error": "name_already_exists",
+                },
                 request=request,
             )
             raise HTTPException(
@@ -118,7 +134,7 @@ async def create_provider(
             )
 
         provider = await service.create_provider(provider_data)
-        
+
         # Log successful creation
         await audit_logger.log_provider_create(
             provider_id=provider.id,
@@ -127,7 +143,7 @@ async def create_provider(
             request=request,
             success=True,
         )
-        
+
         logger.info(
             "Created provider",
             provider_id=provider.id,
@@ -136,7 +152,7 @@ async def create_provider(
         )
 
         return provider
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -168,7 +184,9 @@ async def update_provider(
     service = ModelRegistryService(session)
 
     try:
-        provider = await service.update_provider(provider_id, provider_data)
+        provider = await service.update_provider(
+            provider_id, provider_data
+        )
 
         if not provider:
             raise HTTPException(
@@ -592,8 +610,10 @@ async def create_embedding_space(
             )
 
         # Check if table name already exists
-        existing_table = await service.get_embedding_space_by_table_name(
-            space_data.table_name
+        existing_table = (
+            await service.get_embedding_space_by_table_name(
+                space_data.table_name
+            )
         )
         if existing_table:
             raise HTTPException(

@@ -1,27 +1,24 @@
 """Comprehensive security tests for enhanced authentication system."""
 
-import pytest
-import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timedelta, UTC
+from unittest.mock import AsyncMock, patch
 
+import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.auth import AuthService
-from chatter.models.user import User
 from chatter.schemas.auth import UserCreate
 from chatter.utils.security_enhanced import (
+    calculate_password_entropy,
+    contains_personal_info,
     generate_secure_api_key,
+    has_excessive_repetition,
+    has_keyboard_pattern,
+    is_common_password,
     validate_email_advanced,
     validate_password_advanced,
     validate_username_secure,
     verify_api_key_secure,
-    contains_personal_info,
-    calculate_password_entropy,
-    is_common_password,
-    has_keyboard_pattern,
-    has_excessive_repetition
 )
 
 
@@ -40,7 +37,9 @@ class TestEnhancedPasswordSecurity:
         assert 50 <= medium_entropy < 70
 
         # Strong password
-        strong_entropy = calculate_password_entropy("Str0ng!P@ssw0rd#2024")
+        strong_entropy = calculate_password_entropy(
+            "Str0ng!P@ssw0rd#2024"
+        )
         assert strong_entropy >= 100
 
     @pytest.mark.security
@@ -76,13 +75,18 @@ class TestEnhancedPasswordSecurity:
             "email": "john.doe@example.com",
             "full_name": "John Doe",
             "first_name": "John",
-            "last_name": "Doe"
+            "last_name": "Doe",
         }
 
         assert contains_personal_info("johndoe123", user_data) is True
-        assert contains_personal_info("john123password", user_data) is True
+        assert (
+            contains_personal_info("john123password", user_data) is True
+        )
         assert contains_personal_info("password.doe", user_data) is True
-        assert contains_personal_info("Str0ng!P@ssw0rd#2024", user_data) is False
+        assert (
+            contains_personal_info("Str0ng!P@ssw0rd#2024", user_data)
+            is False
+        )
 
     @pytest.mark.security
     def test_advanced_password_validation(self):
@@ -98,16 +102,24 @@ class TestEnhancedPasswordSecurity:
         assert common_result["valid"] is False
         # Check that validation catches the basic requirements first
         error_text = " ".join(common_result["errors"]).lower()
-        assert any(req in error_text for req in ["uppercase", "special", "common"])
+        assert any(
+            req in error_text
+            for req in ["uppercase", "special", "common"]
+        )
 
         # Test keyboard pattern
         pattern_result = validate_password_advanced("qwerty123")
         assert pattern_result["valid"] is False
         error_text = " ".join(pattern_result["errors"]).lower()
-        assert any(req in error_text for req in ["uppercase", "special", "keyboard"])
+        assert any(
+            req in error_text
+            for req in ["uppercase", "special", "keyboard"]
+        )
 
         # Test strong password
-        strong_result = validate_password_advanced("Str0ng!P@ssw0rd#2024")
+        strong_result = validate_password_advanced(
+            "Str0ng!P@ssw0rd#2024"
+        )
         assert strong_result["valid"] is True
         assert strong_result["entropy"] >= 30
         assert strong_result["score"] >= 5
@@ -126,7 +138,9 @@ class TestEnhancedEmailValidation:
         # Disposable emails
         assert validate_email_advanced("user@10minutemail.com") is False
         assert validate_email_advanced("test@tempmail.org") is False
-        assert validate_email_advanced("spam@guerrillamail.com") is False
+        assert (
+            validate_email_advanced("spam@guerrillamail.com") is False
+        )
 
     @pytest.mark.security
     def test_email_format_security(self):
@@ -214,63 +228,78 @@ class TestSecureAPIKeyManagement:
         # (bcrypt should handle this, but we test the wrapper)
         for _ in range(5):
             assert verify_api_key_secure(api_key, hashed_key) is True
-            assert verify_api_key_secure("wrong_key", hashed_key) is False
+            assert (
+                verify_api_key_secure("wrong_key", hashed_key) is False
+            )
 
 
 class TestAuthServiceSecurity:
     """Test enhanced authentication service security."""
 
     @pytest.mark.security
-    async def test_user_creation_security_validation(self, db_session: AsyncSession):
+    async def test_user_creation_security_validation(
+        self, db_session: AsyncSession
+    ):
         """Test user creation with enhanced security validation."""
         auth_service = AuthService(db_session)
 
         # Test disposable email rejection
         import uuid
+
         unique_id = str(uuid.uuid4())[:8]
         with pytest.raises(Exception) as exc_info:
-            await auth_service.create_user(UserCreate(
-                username=f"testuser_{unique_id}",
-                email="test@10minutemail.com",
-                password="ValidPass123!",
-                full_name="Test User"
-            ))
+            await auth_service.create_user(
+                UserCreate(
+                    username=f"testuser_{unique_id}",
+                    email="test@10minutemail.com",
+                    password="ValidPass123!",
+                    full_name="Test User",
+                )
+            )
         assert "disposable email" in str(exc_info.value).lower()
 
         # Test prohibited username rejection
         unique_id = str(uuid.uuid4())[:8]
         with pytest.raises(Exception) as exc_info:
-            await auth_service.create_user(UserCreate(
-                username="admin",
-                email=f"test_{unique_id}@example.com",
-                password="ValidPass123!",
-                full_name="Test User"
-            ))
+            await auth_service.create_user(
+                UserCreate(
+                    username="admin",
+                    email=f"test_{unique_id}@example.com",
+                    password="ValidPass123!",
+                    full_name="Test User",
+                )
+            )
         assert "prohibited" in str(exc_info.value).lower()
 
         # Test weak password rejection
         unique_id = str(uuid.uuid4())[:8]
         with pytest.raises(Exception) as exc_info:
-            await auth_service.create_user(UserCreate(
-                username=f"testuser_{unique_id}",
-                email=f"test_{unique_id}@example.com",
-                password="123456",
-                full_name="Test User"
-            ))
+            await auth_service.create_user(
+                UserCreate(
+                    username=f"testuser_{unique_id}",
+                    email=f"test_{unique_id}@example.com",
+                    password="123456",
+                    full_name="Test User",
+                )
+            )
         assert "security requirements" in str(exc_info.value).lower()
 
         # Test personal info in password rejection
         with pytest.raises(Exception) as exc_info:
-            await auth_service.create_user(UserCreate(
-                username="johndoe",
-                email="john@example.com",
-                password="johndoe123",
-                full_name="John Doe"
-            ))
+            await auth_service.create_user(
+                UserCreate(
+                    username="johndoe",
+                    email="john@example.com",
+                    password="johndoe123",
+                    full_name="John Doe",
+                )
+            )
         assert "personal information" in str(exc_info.value).lower()
 
     @pytest.mark.security
-    async def test_password_change_security(self, db_session: AsyncSession):
+    async def test_password_change_security(
+        self, db_session: AsyncSession
+    ):
         """Test password change security validation."""
         auth_service = AuthService(db_session)
 
@@ -279,38 +308,34 @@ class TestAuthServiceSecurity:
             username="testuser",
             email="test@example.com",
             password="OldPass123!",
-            full_name="Test User"
+            full_name="Test User",
         )
         user = await auth_service.create_user(user_data)
 
         # Test same password rejection
         with pytest.raises(Exception) as exc_info:
             await auth_service.change_password(
-                user.id,
-                "OldPass123!",
-                "OldPass123!"
+                user.id, "OldPass123!", "OldPass123!"
             )
         assert "different from current" in str(exc_info.value).lower()
 
         # Test weak new password rejection
         with pytest.raises(Exception) as exc_info:
             await auth_service.change_password(
-                user.id,
-                "OldPass123!",
-                "123456"
+                user.id, "OldPass123!", "123456"
             )
         assert "security requirements" in str(exc_info.value).lower()
 
         # Test valid password change
         result = await auth_service.change_password(
-            user.id,
-            "OldPass123!",
-            "NewStr0ng!P@ss2024"
+            user.id, "OldPass123!", "NewStr0ng!P@ss2024"
         )
         assert result is True
 
     @pytest.mark.security
-    async def test_secure_api_key_creation(self, db_session: AsyncSession):
+    async def test_secure_api_key_creation(
+        self, db_session: AsyncSession
+    ):
         """Test secure API key creation."""
         auth_service = AuthService(db_session)
 
@@ -319,7 +344,7 @@ class TestAuthServiceSecurity:
             username="testuser",
             email="test@example.com",
             password="ValidPass123!",
-            full_name="Test User"
+            full_name="Test User",
         )
         user = await auth_service.create_user(user_data)
 
@@ -342,7 +367,9 @@ class TestAuthServiceSecurity:
         assert "already has an API key" in str(exc_info.value).lower()
 
     @pytest.mark.security
-    async def test_authentication_security_logging(self, db_session: AsyncSession):
+    async def test_authentication_security_logging(
+        self, db_session: AsyncSession
+    ):
         """Test security logging for authentication events."""
         auth_service = AuthService(db_session)
 
@@ -351,18 +378,22 @@ class TestAuthServiceSecurity:
             username="testuser",
             email="test@example.com",
             password="ValidPass123!",
-            full_name="Test User"
+            full_name="Test User",
         )
-        user = await auth_service.create_user(user_data)
+        await auth_service.create_user(user_data)
 
         with patch('chatter.core.auth.logger') as mock_logger:
             # Test successful authentication logging
-            result = await auth_service.authenticate_user("testuser", "ValidPass123!")
+            result = await auth_service.authenticate_user(
+                "testuser", "ValidPass123!"
+            )
             assert result is not None
             mock_logger.info.assert_called()
 
             # Test failed authentication logging
-            result = await auth_service.authenticate_user("testuser", "wrongpass")
+            result = await auth_service.authenticate_user(
+                "testuser", "wrongpass"
+            )
             assert result is None
             mock_logger.warning.assert_called()
 
@@ -371,7 +402,9 @@ class TestTokenSecurityIntegration:
     """Test token security integration."""
 
     @pytest.mark.security
-    async def test_token_creation_security_claims(self, db_session: AsyncSession):
+    async def test_token_creation_security_claims(
+        self, db_session: AsyncSession
+    ):
         """Test token creation includes proper security claims."""
         auth_service = AuthService(db_session)
 
@@ -380,7 +413,7 @@ class TestTokenSecurityIntegration:
             username="testuser",
             email="test@example.com",
             password="ValidPass123!",
-            full_name="Test User"
+            full_name="Test User",
         )
         user = await auth_service.create_user(user_data)
 
@@ -395,6 +428,7 @@ class TestTokenSecurityIntegration:
 
         # Decode and verify claims
         from chatter.utils.security import verify_token
+
         access_payload = verify_token(tokens["access_token"])
         refresh_payload = verify_token(tokens["refresh_token"])
 
@@ -414,7 +448,10 @@ class TestTokenSecurityIntegration:
 
         # JTI should be the same for both tokens
         assert access_payload["jti"] == refresh_payload["jti"]
-        assert access_payload["session_id"] == refresh_payload["session_id"]
+        assert (
+            access_payload["session_id"]
+            == refresh_payload["session_id"]
+        )
 
     @pytest.mark.security
     async def test_token_blacklisting(self, db_session: AsyncSession):
@@ -432,7 +469,9 @@ class TestTokenSecurityIntegration:
 
         # Test token revocation
         jti = "test-jti-123"
-        result = await token_manager.revoke_token(jti, "test_revocation")
+        result = await token_manager.revoke_token(
+            jti, "test_revocation"
+        )
         assert result is True
 
         # Verify cache calls
@@ -441,7 +480,9 @@ class TestTokenSecurityIntegration:
         assert f"blacklist:{jti}" in cache_call[0][0]
 
         # Test blacklist check
-        mock_cache.get.return_value = {"revoked_at": "2024-01-01T00:00:00Z"}
+        mock_cache.get.return_value = {
+            "revoked_at": "2024-01-01T00:00:00Z"
+        }
         is_blacklisted = await token_manager.is_token_blacklisted(jti)
         assert is_blacklisted is True
 
@@ -454,22 +495,28 @@ class TestRateLimitingIntegration:
         """Test login endpoint rate limiting."""
         login_data = {
             "username": "testuser",
-            "password": "wrongpassword"
+            "password": "wrongpassword",
         }
 
         # Make multiple rapid requests
         responses = []
-        for i in range(10):
-            response = await client.post("/api/v1/auth/login", json=login_data)
+        for _i in range(10):
+            response = await client.post(
+                "/api/v1/auth/login", json=login_data
+            )
             responses.append(response.status_code)
 
         # Should have some rate limited responses
         # (This test may need adjustment based on actual middleware setup)
         status_codes = set(responses)
-        assert len(status_codes) > 1  # Should have different status codes
+        assert (
+            len(status_codes) > 1
+        )  # Should have different status codes
 
     @pytest.mark.security
-    async def test_registration_rate_limiting(self, client: AsyncClient):
+    async def test_registration_rate_limiting(
+        self, client: AsyncClient
+    ):
         """Test registration endpoint rate limiting."""
         # Make multiple rapid registration attempts
         responses = []
@@ -478,9 +525,11 @@ class TestRateLimitingIntegration:
                 "username": f"testuser{i}",
                 "email": f"test{i}@example.com",
                 "password": "ValidPass123!",
-                "full_name": f"Test User {i}"
+                "full_name": f"Test User {i}",
             }
-            response = await client.post("/api/v1/auth/register", json=registration_data)
+            response = await client.post(
+                "/api/v1/auth/register", json=registration_data
+            )
             responses.append(response.status_code)
 
         # Should have some successful and some rate limited
@@ -496,7 +545,7 @@ class TestSecurityCompliance:
     def test_password_storage_security(self):
         """Test password storage uses proper hashing."""
         from chatter.utils.security_enhanced import hash_password
-        
+
         password = "SecureP@ssw0rd!"
         hashed = hash_password(password)
 
@@ -514,13 +563,17 @@ class TestSecurityCompliance:
             "username": "testuser",
             "password": "secret123",
             "api_key": "sk-1234567890abcdef",
-            "safe_field": "public_data"
+            "safe_field": "public_data",
         }
 
         sanitized = sanitize_log_data(test_data)
-        
-        assert sanitized["username"] == "testuser"  # Non-sensitive preserved
-        assert sanitized["safe_field"] == "public_data"  # Non-sensitive preserved
+
+        assert (
+            sanitized["username"] == "testuser"
+        )  # Non-sensitive preserved
+        assert (
+            sanitized["safe_field"] == "public_data"
+        )  # Non-sensitive preserved
         # Check that password is masked (could be [MASKED] for short values or with asterisks for longer)
         password_str = str(sanitized["password"])
         assert "*" in password_str or "[MASKED]" in password_str
@@ -531,25 +584,29 @@ class TestSecurityCompliance:
     @pytest.mark.security
     def test_timing_attack_resistance(self):
         """Test authentication operations resist timing attacks."""
-        from chatter.utils.security_enhanced import verify_password, hash_password
-        
+        from chatter.utils.security_enhanced import (
+            hash_password,
+            verify_password,
+        )
+
         password = "SecureP@ssw0rd!"
         correct_hash = hash_password(password)
-        
+
         # Verify correct password
         import time
+
         start_time = time.time()
         result1 = verify_password(password, correct_hash)
         time1 = time.time() - start_time
-        
+
         # Verify incorrect password
         start_time = time.time()
         result2 = verify_password("wrongpassword", correct_hash)
         time2 = time.time() - start_time
-        
+
         assert result1 is True
         assert result2 is False
-        
+
         # Timing should be relatively similar (bcrypt provides this)
         # Allow for some variance but they shouldn't be orders of magnitude different
         time_ratio = max(time1, time2) / min(time1, time2)
@@ -565,15 +622,16 @@ class TestSecurityPerformance:
     def test_password_hashing_performance(self):
         """Test password hashing performance is acceptable."""
         from chatter.utils.security_enhanced import hash_password
-        
+
         password = "SecureP@ssw0rd!"
-        
+
         import time
+
         start_time = time.time()
         for _ in range(5):  # Hash 5 passwords
             hash_password(password)
         total_time = time.time() - start_time
-        
+
         # Should complete in reasonable time (bcrypt is intentionally slow)
         # 5 hashes should take less than 5 seconds on modern hardware
         assert total_time < 5.0
@@ -582,16 +640,20 @@ class TestSecurityPerformance:
     @pytest.mark.performance
     def test_api_key_verification_performance(self):
         """Test API key verification performance."""
-        from chatter.utils.security_enhanced import generate_secure_api_key, verify_api_key_secure
-        
+        from chatter.utils.security_enhanced import (
+            generate_secure_api_key,
+            verify_api_key_secure,
+        )
+
         # Generate test key
         api_key, hashed_key = generate_secure_api_key()
-        
+
         import time
+
         start_time = time.time()
         for _ in range(10):  # Verify 10 times
             verify_api_key_secure(api_key, hashed_key)
         total_time = time.time() - start_time
-        
+
         # Should be reasonably fast for verification
         assert total_time < 2.0

@@ -16,7 +16,9 @@ def ensure_directory(path: Path, clean: bool = False) -> None:
     print(f"📁 Directory ready: {path}")
 
 
-def save_json(data: dict[str, Any], path: Path, indent: int = 2) -> None:
+def save_json(
+    data: dict[str, Any], path: Path, indent: int = 2
+) -> None:
     """Save data as JSON to a file."""
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
@@ -41,9 +43,7 @@ def clean_temp_files(paths: list[Path]) -> None:
 
 
 def verify_files_exist(
-    base_dir: Path,
-    expected_files: list[str],
-    file_type: str = "files"
+    base_dir: Path, expected_files: list[str], file_type: str = "files"
 ) -> list[str]:
     """
     Verify that expected files exist and return a list of missing files.
@@ -65,7 +65,9 @@ def verify_files_exist(
 
         if full_path.exists():
             if full_path.is_file():
-                if file_path.endswith('.py') or file_path.endswith('.ts'):
+                if file_path.endswith('.py') or file_path.endswith(
+                    '.ts'
+                ):
                     # Count lines for code files
                     try:
                         with open(full_path, encoding='utf-8') as f:
@@ -97,7 +99,7 @@ def get_generated_files_info(sdk_dir: Path) -> dict[str, Any]:
         "total_files": 0,
         "total_size": 0,
         "file_types": {},
-        "largest_files": []
+        "largest_files": [],
     }
 
     if not sdk_dir.exists():
@@ -114,9 +116,13 @@ def get_generated_files_info(sdk_dir: Path) -> dict[str, Any]:
             info["total_size"] += size
 
             suffix = file_path.suffix or "no_extension"
-            info["file_types"][suffix] = info["file_types"].get(suffix, 0) + 1
+            info["file_types"][suffix] = (
+                info["file_types"].get(suffix, 0) + 1
+            )
 
-            info["largest_files"].append((str(file_path.relative_to(sdk_dir)), size))
+            info["largest_files"].append(
+                (str(file_path.relative_to(sdk_dir)), size)
+            )
         except Exception:
             continue
 

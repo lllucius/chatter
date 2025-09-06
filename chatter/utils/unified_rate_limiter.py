@@ -4,7 +4,7 @@ This is the primary rate limiting implementation for the Chatter platform.
 It provides:
 
 - Sliding window rate limiting algorithm
-- Redis backend with memory fallback 
+- Redis backend with memory fallback
 - Multiple rate limits per key (e.g., hourly + daily)
 - FastAPI middleware with endpoint-specific limits
 - Rich metadata and error responses
@@ -18,10 +18,10 @@ Use this module directly via:
 import asyncio
 import time
 from collections import defaultdict, deque
-from datetime import timedelta
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
-from fastapi import HTTPException, Request, status
+from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
@@ -88,7 +88,9 @@ class SlidingWindowRateLimiter:
             if data and isinstance(data, list):
                 return [float(ts) for ts in data]
         except Exception as e:
-            logger.warning(f"Cache get error for rate limit key {key}: {e}")
+            logger.warning(
+                f"Cache get error for rate limit key {key}: {e}"
+            )
 
         return []
 
@@ -106,14 +108,18 @@ class SlidingWindowRateLimiter:
                 f"rate_limit:{key}", requests, expire_seconds
             )
         except Exception as e:
-            logger.warning(f"Cache set error for rate limit key {key}: {e}")
+            logger.warning(
+                f"Cache set error for rate limit key {key}: {e}"
+            )
 
     async def _clean_old_requests(
         self, requests: list[float], current_time: float
     ) -> list[float]:
         """Remove requests outside the time window."""
         cutoff_time = current_time - self.window_seconds
-        return [req_time for req_time in requests if req_time > cutoff_time]
+        return [
+            req_time for req_time in requests if req_time > cutoff_time
+        ]
 
     async def is_allowed(self, key: str) -> tuple[bool, dict[str, Any]]:
         """Check if request is allowed and return metadata.
@@ -140,7 +146,9 @@ class SlidingWindowRateLimiter:
                 requests = list(self._memory_storage[key])
 
             # Clean old requests
-            requests = await self._clean_old_requests(requests, current_time)
+            requests = await self._clean_old_requests(
+                requests, current_time
+            )
 
             # Calculate metadata
             remaining = max(0, self.limit - len(requests))
@@ -187,7 +195,9 @@ class SlidingWindowRateLimiter:
                 requests = list(self._memory_storage[key])
 
             # Clean old requests
-            requests = await self._clean_old_requests(requests, current_time)
+            requests = await self._clean_old_requests(
+                requests, current_time
+            )
 
             return {
                 "remaining": max(0, self.limit - len(requests)),
@@ -204,7 +214,9 @@ class SlidingWindowRateLimiter:
                 try:
                     await self.cache_service.delete(f"rate_limit:{key}")
                 except Exception as e:
-                    logger.warning(f"Cache delete error for key {key}: {e}")
+                    logger.warning(
+                        f"Cache delete error for key {key}: {e}"
+                    )
 
             if key in self._memory_storage:
                 del self._memory_storage[key]
@@ -366,8 +378,12 @@ class UnifiedRateLimitMiddleware(BaseHTTPMiddleware):
         """
         super().__init__(app)
         self.rate_limiter = rate_limiter
-        self.default_limit = default_limit or settings.rate_limit_requests
-        self.default_window = default_window or settings.rate_limit_window
+        self.default_limit = (
+            default_limit or settings.rate_limit_requests
+        )
+        self.default_window = (
+            default_window or settings.rate_limit_window
+        )
         self.endpoint_limits = endpoint_limits or {}
         self.key_func = key_func or self._default_key_func
         self.skip_paths = skip_paths or [
@@ -419,7 +435,9 @@ class UnifiedRateLimitMiddleware(BaseHTTPMiddleware):
 
         if matching_patterns:
             # Sort by pattern length (longest first) for most specific match
-            matching_patterns.sort(key=lambda x: len(x[0]), reverse=True)
+            matching_patterns.sort(
+                key=lambda x: len(x[0]), reverse=True
+            )
             return matching_patterns[0][1]
 
         return self.default_limit, self.default_window
@@ -447,7 +465,10 @@ class UnifiedRateLimitMiddleware(BaseHTTPMiddleware):
         try:
             # Check rate limit
             status = await self.rate_limiter.check_rate_limit(
-                key=key, limit=limit, window=window, identifier=identifier
+                key=key,
+                limit=limit,
+                window=window,
+                identifier=identifier,
             )
 
             # Process request
@@ -458,7 +479,9 @@ class UnifiedRateLimitMiddleware(BaseHTTPMiddleware):
             response.headers["X-RateLimit-Remaining"] = str(
                 status["remaining"]
             )
-            response.headers["X-RateLimit-Reset"] = str(status["reset_time"])
+            response.headers["X-RateLimit-Reset"] = str(
+                status["reset_time"]
+            )
             response.headers["X-RateLimit-Window"] = str(window)
 
             return response
@@ -484,14 +507,18 @@ class UnifiedRateLimitMiddleware(BaseHTTPMiddleware):
             response = problem.to_response(request)
 
             # Add rate limit headers
-            response.headers["X-RateLimit-Limit"] = str(e.limit or limit)
+            response.headers["X-RateLimit-Limit"] = str(
+                e.limit or limit
+            )
             response.headers["X-RateLimit-Remaining"] = str(
                 e.remaining or 0
             )
             response.headers["X-RateLimit-Reset"] = str(
                 int(time.time() + (e.window or window))
             )
-            response.headers["X-RateLimit-Window"] = str(e.window or window)
+            response.headers["X-RateLimit-Window"] = str(
+                e.window or window
+            )
             if e.retry_after:
                 response.headers["Retry-After"] = str(e.retry_after)
 
@@ -506,7 +533,9 @@ def get_unified_rate_limiter(cache_service=None) -> UnifiedRateLimiter:
     """Get global unified rate limiter instance."""
     global _unified_rate_limiter
     if _unified_rate_limiter is None:
-        _unified_rate_limiter = UnifiedRateLimiter(cache_service=cache_service)
+        _unified_rate_limiter = UnifiedRateLimiter(
+            cache_service=cache_service
+        )
     return _unified_rate_limiter
 
 

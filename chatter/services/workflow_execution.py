@@ -1,25 +1,24 @@
 """Workflow execution service using strategy pattern.
 
-This replaces the monolithic WorkflowExecutionService with a clean 
+This replaces the monolithic WorkflowExecutionService with a clean
 orchestration layer that delegates to focused executor classes.
 """
 
 from __future__ import annotations
 
-import asyncio
-import time
+import logging
 from collections.abc import AsyncGenerator
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.unified_template_manager import get_template_manager_with_session
+from chatter.core.unified_template_manager import (
+    get_template_manager_with_session,
+)
 from chatter.core.workflow_executors import (
     WorkflowExecutorFactory,
-    WorkflowExecutionError,
 )
 from chatter.core.workflow_limits import (
-    WorkflowLimitManager,
     WorkflowLimits,
     workflow_limit_manager,
 )
@@ -35,7 +34,6 @@ from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
 
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -43,15 +41,17 @@ class WorkflowExecutionService:
     """Service for executing chat workflows using strategy pattern."""
 
     def __init__(
-        self, 
-        llm_service: LLMService, 
+        self,
+        llm_service: LLMService,
         message_service: MessageService,
-        session: AsyncSession
+        session: AsyncSession,
     ):
         """Initialize simplified workflow execution service."""
         self.llm_service = llm_service
         self.message_service = message_service
-        self.template_manager = get_template_manager_with_session(session)
+        self.template_manager = get_template_manager_with_session(
+            session
+        )
         self.limit_manager = workflow_limit_manager
         self.executor_factory = WorkflowExecutorFactory()
 
@@ -79,12 +79,15 @@ class WorkflowExecutionService:
             WorkflowExecutionError: If workflow execution fails
         """
         workflow_type = chat_request.workflow or "plain"
-        
+
         # Get appropriate executor
         executor = self.executor_factory.create_executor(
-            workflow_type, self.llm_service, self.message_service, self.template_manager
+            workflow_type,
+            self.llm_service,
+            self.message_service,
+            self.template_manager,
         )
-        
+
         # Execute workflow
         return await executor.execute(
             conversation, chat_request, correlation_id, user_id, limits
@@ -114,12 +117,15 @@ class WorkflowExecutionService:
             WorkflowExecutionError: If workflow execution fails
         """
         workflow_type = chat_request.workflow or "plain"
-        
+
         # Get appropriate executor
         executor = self.executor_factory.create_executor(
-            workflow_type, self.llm_service, self.message_service, self.template_manager
+            workflow_type,
+            self.llm_service,
+            self.message_service,
+            self.template_manager,
         )
-        
+
         # Execute workflow with streaming
         async for chunk in executor.execute_streaming(
             conversation, chat_request, correlation_id, user_id, limits
@@ -149,8 +155,7 @@ class WorkflowExecutionService:
         }
 
     async def validate_workflow_request(
-        self, 
-        chat_request: ChatRequest
+        self, chat_request: ChatRequest
     ) -> dict[str, Any]:
         """Validate a workflow request.
 
@@ -161,16 +166,18 @@ class WorkflowExecutionService:
             Dictionary with validation results
         """
         workflow_type = chat_request.workflow or "plain"
-        
+
         # Check if workflow type is supported
         supported_types = self.executor_factory.get_supported_types()
         if workflow_type not in supported_types:
             return {
                 "valid": False,
-                "errors": [f"Unsupported workflow type: {workflow_type}"],
+                "errors": [
+                    f"Unsupported workflow type: {workflow_type}"
+                ],
                 "supported_types": supported_types,
             }
-        
+
         return {
             "valid": True,
             "workflow_type": workflow_type,
@@ -178,8 +185,7 @@ class WorkflowExecutionService:
         }
 
     async def get_workflow_capabilities(
-        self, 
-        workflow_type: str
+        self, workflow_type: str
     ) -> dict[str, Any]:
         """Get capabilities for a specific workflow type.
 
@@ -190,10 +196,12 @@ class WorkflowExecutionService:
             Dictionary with workflow capabilities
         """
         supported_types = self.executor_factory.get_supported_types()
-        
+
         if workflow_type not in supported_types:
-            return {"error": f"Unsupported workflow type: {workflow_type}"}
-        
+            return {
+                "error": f"Unsupported workflow type: {workflow_type}"
+            }
+
         # Basic capabilities mapping
         capabilities = {
             "plain": {
@@ -225,5 +233,5 @@ class WorkflowExecutionService:
                 "max_documents": 10,
             },
         }
-        
+
         return capabilities.get(workflow_type, {})

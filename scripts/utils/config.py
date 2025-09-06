@@ -8,6 +8,7 @@ from typing import Any
 @dataclass
 class SDKConfig:
     """Base configuration for SDK generation."""
+
     project_root: Path
     output_dir: Path
     package_name: str
@@ -21,6 +22,7 @@ class SDKConfig:
 @dataclass
 class PythonSDKConfig(SDKConfig):
     """Configuration for Python SDK generation."""
+
     project_name: str = ""
     package_company: str = ""
     use_asyncio: bool = True
@@ -33,6 +35,7 @@ class PythonSDKConfig(SDKConfig):
 @dataclass
 class TypeScriptSDKConfig(SDKConfig):
     """Configuration for TypeScript SDK generation."""
+
     npm_name: str = ""
     npm_repository: str = ""
     base_path: str = "http://localhost:8000"
@@ -66,7 +69,9 @@ def get_default_python_config(project_root: Path) -> PythonSDKConfig:
     )
 
 
-def get_default_typescript_config(project_root: Path) -> TypeScriptSDKConfig:
+def get_default_typescript_config(
+    project_root: Path,
+) -> TypeScriptSDKConfig:
     """Get default configuration for TypeScript SDK generation."""
     return TypeScriptSDKConfig(
         project_root=project_root,

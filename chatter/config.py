@@ -237,10 +237,12 @@ class Settings(BaseSettings):
 
     # Unified cache system settings
     cache_backend: str = Field(
-        default="auto", description="Cache backend: 'memory', 'redis', 'multi_tier', or 'auto'"
+        default="auto",
+        description="Cache backend: 'memory', 'redis', 'multi_tier', or 'auto'",
     )
     cache_model_registry_ttl: int = Field(
-        default=1800, description="Model registry cache TTL (30 minutes)"
+        default=1800,
+        description="Model registry cache TTL (30 minutes)",
     )
     cache_workflow_ttl: int = Field(
         default=3600, description="Workflow cache TTL (1 hour)"
@@ -255,10 +257,12 @@ class Settings(BaseSettings):
         default=1000, description="Maximum entries in memory cache"
     )
     cache_l1_size_ratio: float = Field(
-        default=0.1, description="L1 cache size as ratio of L2 cache (for multi-tier)"
+        default=0.1,
+        description="L1 cache size as ratio of L2 cache (for multi-tier)",
     )
     cache_eviction_policy: str = Field(
-        default="lru", description="Cache eviction policy: 'lru', 'ttl', or 'random'"
+        default="lru",
+        description="Cache eviction policy: 'lru', 'ttl', or 'random'",
     )
 
     # =============================================================================
@@ -267,7 +271,8 @@ class Settings(BaseSettings):
 
     # Global rate limiting defaults
     rate_limit_requests: int = Field(
-        default=100, description="Default rate limit requests per window"
+        default=100,
+        description="Default rate limit requests per window",
     )
     rate_limit_window: int = Field(
         default=60, description="Default rate limit window in seconds"
@@ -275,7 +280,8 @@ class Settings(BaseSettings):
 
     # Cache integration for rate limiting
     rate_limit_use_cache: bool = Field(
-        default=True, description="Use cache backend for distributed rate limiting"
+        default=True,
+        description="Use cache backend for distributed rate limiting",
     )
 
     # Endpoint-specific rate limits
@@ -283,7 +289,8 @@ class Settings(BaseSettings):
         default=10, description="Auth endpoint requests per window"
     )
     rate_limit_auth_window: int = Field(
-        default=300, description="Auth endpoint window in seconds (5 minutes)"
+        default=300,
+        description="Auth endpoint window in seconds (5 minutes)",
     )
 
     rate_limit_analytics_requests: int = Field(
@@ -294,14 +301,16 @@ class Settings(BaseSettings):
     )
 
     rate_limit_model_write_requests: int = Field(
-        default=30, description="Model registry write requests per window"
+        default=30,
+        description="Model registry write requests per window",
     )
     rate_limit_model_write_window: int = Field(
         default=60, description="Model registry write window in seconds"
     )
 
     rate_limit_model_read_requests: int = Field(
-        default=200, description="Model registry read requests per window"
+        default=200,
+        description="Model registry read requests per window",
     )
     rate_limit_model_read_window: int = Field(
         default=60, description="Model registry read window in seconds"
@@ -333,7 +342,7 @@ class Settings(BaseSettings):
     # =============================================================================
     # SERVER-SENT EVENTS (SSE) SETTINGS
     # =============================================================================
-    
+
     sse_keepalive_timeout: int = Field(
         default=30, description="SSE keepalive timeout in seconds"
     )
@@ -344,13 +353,16 @@ class Settings(BaseSettings):
         default=1000, description="Maximum total SSE connections"
     )
     sse_connection_cleanup_interval: int = Field(
-        default=300, description="SSE connection cleanup interval in seconds"
+        default=300,
+        description="SSE connection cleanup interval in seconds",
     )
     sse_inactive_timeout: int = Field(
-        default=3600, description="SSE connection inactive timeout in seconds"
+        default=3600,
+        description="SSE connection inactive timeout in seconds",
     )
     sse_queue_maxsize: int = Field(
-        default=100, description="Maximum size of SSE event queue per connection"
+        default=100,
+        description="Maximum size of SSE event queue per connection",
     )
 
     # =============================================================================
@@ -460,7 +472,8 @@ class Settings(BaseSettings):
         default=300, description="Workflow execution timeout in seconds"
     )
     workflow_step_timeout: int = Field(
-        default=60, description="Individual workflow step timeout in seconds"
+        default=60,
+        description="Individual workflow step timeout in seconds",
     )
     workflow_streaming_timeout: int = Field(
         default=600, description="Workflow streaming timeout in seconds"
@@ -468,10 +481,12 @@ class Settings(BaseSettings):
 
     # Resource limits
     workflow_max_tokens: int = Field(
-        default=100000, description="Maximum tokens per workflow execution"
+        default=100000,
+        description="Maximum tokens per workflow execution",
     )
     workflow_max_memory_mb: int = Field(
-        default=1024, description="Maximum memory usage per workflow in MB"
+        default=1024,
+        description="Maximum memory usage per workflow in MB",
     )
     workflow_max_concurrent: int = Field(
         default=10, description="Maximum concurrent workflows per user"
@@ -482,7 +497,8 @@ class Settings(BaseSettings):
         default=1, description="Number of tokens per streaming chunk"
     )
     streaming_heartbeat_interval: float = Field(
-        default=30.0, description="Streaming heartbeat interval in seconds"
+        default=30.0,
+        description="Streaming heartbeat interval in seconds",
     )
     streaming_buffer_size: int = Field(
         default=4096, description="Streaming buffer size"
@@ -490,7 +506,8 @@ class Settings(BaseSettings):
 
     # Circuit breaker settings for workflow reliability
     workflow_failure_threshold: int = Field(
-        default=5, description="Failure threshold for workflow circuit breaker"
+        default=5,
+        description="Failure threshold for workflow circuit breaker",
     )
     workflow_circuit_breaker_timeout: int = Field(
         default=60, description="Circuit breaker timeout in seconds"
@@ -587,12 +604,14 @@ class Settings(BaseSettings):
     def is_testing(self) -> bool:
         """Check if running in testing environment."""
         return self.environment.lower() == "testing"
-    
+
     @property
     def effective_rate_limit_auth_requests(self) -> int:
         """Get auth rate limit requests, more lenient in testing."""
-        return 1000 if self.is_testing else self.rate_limit_auth_requests
-    
+        return (
+            1000 if self.is_testing else self.rate_limit_auth_requests
+        )
+
     @property
     def effective_rate_limit_auth_window(self) -> int:
         """Get auth rate limit window, more lenient in testing."""

@@ -11,9 +11,11 @@ from langchain_core.messages import (
     SystemMessage,
 )
 from langchain_core.tools import BaseTool
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
 
+from chatter.core.cache_factory import CacheBackend, get_general_cache
+from chatter.core.cache_interface import CacheConfig
 from chatter.core.langgraph import ConversationState, workflow_manager
 from chatter.schemas.agents import (
     AgentCapability,
@@ -22,8 +24,6 @@ from chatter.schemas.agents import (
     AgentStatus,
     AgentType,
 )
-from chatter.core.cache_factory import get_general_cache, CacheBackend
-from chatter.core.cache_interface import CacheConfig
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -496,7 +496,7 @@ class AgentManager:
         self.registry = AgentRegistry()
         self.cache = get_general_cache(
             backend=CacheBackend.MULTI_TIER,  # Use multi-tier for fallback to memory
-            config=CacheConfig(key_prefix="agents:")
+            config=CacheConfig(key_prefix="agents:"),
         )
         self.agent_classes: dict[AgentType, type[BaseAgent]] = {
             AgentType.CONVERSATIONAL: ConversationalAgent,
@@ -504,7 +504,7 @@ class AgentManager:
             AgentType.SPECIALIST: SpecializedAgent,
             # Add more agent types as needed
         }
-        
+
         # Database session for persistence
         self._session = session
 
@@ -513,14 +513,15 @@ class AgentManager:
             self.registry.register_agent_type(
                 agent_type.value, agent_class
             )
-            
+
     async def _get_session(self) -> AsyncSession:
         """Get database session."""
         if self._session:
             return self._session
-        
+
         # Import here to avoid circular imports
         from chatter.utils.database import get_session_maker
+
         session_maker = get_session_maker()
         return session_maker()
 
@@ -576,7 +577,7 @@ class AgentManager:
         try:
             # Import here to avoid circular imports
             from chatter.models.agent_db import AgentDB
-            
+
             session = await self._get_session()
             agent_db = AgentDB(
                 id=profile.id,
@@ -588,7 +589,9 @@ class AgentManager:
                 personality_traits=profile.personality_traits,
                 knowledge_domains=profile.knowledge_domains,
                 response_style=profile.response_style,
-                capabilities=[cap.value for cap in profile.capabilities],
+                capabilities=[
+                    cap.value for cap in profile.capabilities
+                ],
                 available_tools=profile.available_tools,
                 primary_llm=profile.primary_llm,
                 fallback_llm=profile.fallback_llm,
@@ -604,10 +607,10 @@ class AgentManager:
                 tags=profile.tags,
                 agent_metadata=profile.metadata,
             )
-            
+
             session.add(agent_db)
             await session.commit()
-            
+
         except Exception as e:
             logger.warning(f"Failed to save agent to database: {e}")
             # Continue without database - agent still works from memory/cache
@@ -617,7 +620,7 @@ class AgentManager:
             await self.cache.set(
                 f"profile:{profile.id}",
                 profile.model_dump(),
-                ttl=3600  # Cache for 1 hour
+                ttl=3600,  # Cache for 1 hour
             )
         except Exception as e:
             logger.warning(f"Failed to cache agent profile: {e}")
@@ -632,12 +635,14 @@ class AgentManager:
 
         return profile.id
 
-    async def _create_default_llm(self, provider: str = "openai") -> BaseChatModel:
+    async def _create_default_llm(
+        self, provider: str = "openai"
+    ) -> BaseChatModel:
         """Create a default LLM instance.
-        
+
         Args:
             provider: LLM provider name
-            
+
         Returns:
             BaseChatModel instance
         """
@@ -645,6 +650,7 @@ class AgentManager:
         try:
             if provider == "openai":
                 from langchain_openai import ChatOpenAI
+
                 return ChatOpenAI(
                     model="gpt-3.5-turbo",
                     temperature=0.7,
@@ -652,6 +658,7 @@ class AgentManager:
                 )
             elif provider == "anthropic":
                 from langchain_anthropic import ChatAnthropic
+
                 return ChatAnthropic(
                     model="claude-3-sonnet-20240229",
                     temperature=0.7,
@@ -659,11 +666,21 @@ class AgentManager:
                 )
             else:
                 # Fallback to a mock LLM for testing
-                from langchain_core.language_models.fake import FakeListChatModel
-                return FakeListChatModel(responses=["I'm a test response."])
+                from langchain_core.language_models.fake import (
+                    FakeListChatModel,
+                )
+
+                return FakeListChatModel(
+                    responses=["I'm a test response."]
+                )
         except ImportError as e:
-            logger.warning(f"Failed to import {provider} LLM: {e}, using fake LLM")
-            from langchain_core.language_models.fake import FakeListChatModel
+            logger.warning(
+                f"Failed to import {provider} LLM: {e}, using fake LLM"
+            )
+            from langchain_core.language_models.fake import (
+                FakeListChatModel,
+            )
+
             return FakeListChatModel(responses=["I'm a test response."])
 
     async def get_agent(self, agent_id: str) -> BaseAgent | None:
@@ -687,7 +704,9 @@ class AgentManager:
                 profile = AgentProfile.model_validate(cached_profile)
                 agent_class = self.agent_classes.get(profile.type)
                 if agent_class:
-                    llm = await self._create_default_llm(profile.primary_llm)
+                    llm = await self._create_default_llm(
+                        profile.primary_llm
+                    )
                     agent = agent_class(profile=profile, llm=llm)
                     self.agents[agent_id] = agent  # Cache in memory
                     return agent
@@ -697,11 +716,13 @@ class AgentManager:
         # Try to load from database
         try:
             from chatter.models.agent_db import AgentDB
-            
+
             session = await self._get_session()
-            result = await session.execute(select(AgentDB).where(AgentDB.id == agent_id))
+            result = await session.execute(
+                select(AgentDB).where(AgentDB.id == agent_id)
+            )
             agent_db = result.scalar_one_or_none()
-            
+
             if agent_db:
                 # Convert database model to profile
                 profile = AgentProfile(
@@ -711,10 +732,14 @@ class AgentManager:
                     type=agent_db.agent_type,
                     status=agent_db.status,
                     system_message=agent_db.system_message,
-                    personality_traits=agent_db.personality_traits or [],
+                    personality_traits=agent_db.personality_traits
+                    or [],
                     knowledge_domains=agent_db.knowledge_domains or [],
                     response_style=agent_db.response_style,
-                    capabilities=[AgentCapability(cap) for cap in (agent_db.capabilities or [])],
+                    capabilities=[
+                        AgentCapability(cap)
+                        for cap in (agent_db.capabilities or [])
+                    ],
                     available_tools=agent_db.available_tools or [],
                     primary_llm=agent_db.primary_llm,
                     fallback_llm=agent_db.fallback_llm,
@@ -732,23 +757,25 @@ class AgentManager:
                     tags=agent_db.tags or [],
                     metadata=agent_db.agent_metadata or {},
                 )
-                
+
                 # Create agent instance
                 agent_class = self.agent_classes.get(profile.type)
                 if agent_class:
-                    llm = await self._create_default_llm(profile.primary_llm)
+                    llm = await self._create_default_llm(
+                        profile.primary_llm
+                    )
                     agent = agent_class(profile=profile, llm=llm)
                     self.agents[agent_id] = agent  # Cache in memory
-                    
+
                     # Cache the profile too
                     await self.cache.set(
                         f"profile:{agent_id}",
                         profile.model_dump(),
-                        ttl=3600
+                        ttl=3600,
                     )
-                    
+
                     return agent
-                    
+
         except Exception as e:
             logger.warning(f"Failed to load agent from database: {e}")
 
@@ -777,10 +804,10 @@ class AgentManager:
         try:
             # Load from database first
             from chatter.models.agent_db import AgentDB
-            
+
             session = await self._get_session()
             query = select(AgentDB)
-            
+
             # Apply filters
             if agent_type:
                 query = query.where(AgentDB.agent_type == agent_type)
@@ -788,24 +815,30 @@ class AgentManager:
                 query = query.where(AgentDB.status == status)
             if user_id:
                 query = query.where(AgentDB.created_by == user_id)
-                
+
             # Get total count with a simpler approach
             count_query = select(func.count(AgentDB.id))
             if agent_type:
-                count_query = count_query.where(AgentDB.agent_type == agent_type)
+                count_query = count_query.where(
+                    AgentDB.agent_type == agent_type
+                )
             if status:
-                count_query = count_query.where(AgentDB.status == status)
+                count_query = count_query.where(
+                    AgentDB.status == status
+                )
             if user_id:
-                count_query = count_query.where(AgentDB.created_by == user_id)
-                
+                count_query = count_query.where(
+                    AgentDB.created_by == user_id
+                )
+
             count_result = await session.execute(count_query)
             total = count_result.scalar() or 0
-            
+
             # Apply pagination and get results
             query = query.offset(offset).limit(limit)
             result = await session.execute(query)
             agents_db = result.scalars().all()
-            
+
             # Convert to profiles
             profiles = []
             for agent_db in agents_db:
@@ -816,10 +849,14 @@ class AgentManager:
                     type=agent_db.agent_type,
                     status=agent_db.status,
                     system_message=agent_db.system_message,
-                    personality_traits=agent_db.personality_traits or [],
+                    personality_traits=agent_db.personality_traits
+                    or [],
                     knowledge_domains=agent_db.knowledge_domains or [],
                     response_style=agent_db.response_style,
-                    capabilities=[AgentCapability(cap) for cap in (agent_db.capabilities or [])],
+                    capabilities=[
+                        AgentCapability(cap)
+                        for cap in (agent_db.capabilities or [])
+                    ],
                     available_tools=agent_db.available_tools or [],
                     primary_llm=agent_db.primary_llm,
                     fallback_llm=agent_db.fallback_llm,
@@ -838,9 +875,9 @@ class AgentManager:
                     metadata=agent_db.agent_metadata or {},
                 )
                 profiles.append(profile)
-                
+
             return profiles, total
-            
+
         except Exception as e:
             logger.warning(f"Failed to load agents from database: {e}")
             # Fallback to in-memory agents
@@ -854,7 +891,11 @@ class AgentManager:
                 profiles = [p for p in profiles if p.status == status]
 
             if user_id:
-                profiles = [p for p in profiles if getattr(p, 'created_by', None) == user_id]
+                profiles = [
+                    p
+                    for p in profiles
+                    if getattr(p, 'created_by', None) == user_id
+                ]
 
             total = len(profiles)
 
@@ -863,7 +904,9 @@ class AgentManager:
 
             return paginated_profiles, total
 
-    async def update_agent(self, agent_id: str, update_data: dict[str, Any]) -> bool:
+    async def update_agent(
+        self, agent_id: str, update_data: dict[str, Any]
+    ) -> bool:
         """Update an agent's configuration.
 
         Args:
@@ -880,11 +923,18 @@ class AgentManager:
         try:
             # Update agent profile
             await agent.update_profile(update_data)
-            
+
             # If LLM-related fields changed, recreate LLM
-            llm_fields = {'primary_llm', 'fallback_llm', 'temperature', 'max_tokens'}
+            llm_fields = {
+                'primary_llm',
+                'fallback_llm',
+                'temperature',
+                'max_tokens',
+            }
             if any(field in update_data for field in llm_fields):
-                new_llm = await self._create_default_llm(agent.profile.primary_llm)
+                new_llm = await self._create_default_llm(
+                    agent.profile.primary_llm
+                )
                 agent.llm = new_llm
 
             # Update cache
@@ -892,7 +942,7 @@ class AgentManager:
                 await self.cache.set(
                     f"profile:{agent_id}",
                     agent.profile.model_dump(),
-                    ttl=3600
+                    ttl=3600,
                 )
             except Exception as e:
                 logger.warning(f"Failed to update agent cache: {e}")
@@ -921,13 +971,15 @@ class AgentManager:
             agent = self.agents[agent_id]
             agent.profile.status = AgentStatus.INACTIVE
             del self.agents[agent_id]
-            
+
             # Remove from cache
             try:
                 await self.cache.delete(f"profile:{agent_id}")
             except Exception as e:
-                logger.warning(f"Failed to remove agent from cache: {e}")
-            
+                logger.warning(
+                    f"Failed to remove agent from cache: {e}"
+                )
+
             logger.info(f"Deleted agent {agent_id}")
             return True
         return False
@@ -1036,19 +1088,26 @@ class AgentManager:
 
     async def get_agent_templates(self) -> list[dict[str, Any]]:
         """Get predefined agent templates.
-        
+
         Returns:
             List of agent template configurations
         """
         templates = [
             {
                 "id": "general-assistant",
-                "name": "General Assistant", 
+                "name": "General Assistant",
                 "description": "A versatile conversational agent for general assistance",
                 "agent_type": AgentType.CONVERSATIONAL,
                 "system_message": "You are a helpful, knowledgeable, and friendly assistant. Provide accurate information and assistance while maintaining a professional yet approachable tone.",
-                "personality_traits": ["helpful", "knowledgeable", "friendly"],
-                "capabilities": [AgentCapability.NATURAL_LANGUAGE, AgentCapability.MEMORY],
+                "personality_traits": [
+                    "helpful",
+                    "knowledgeable",
+                    "friendly",
+                ],
+                "capabilities": [
+                    AgentCapability.NATURAL_LANGUAGE,
+                    AgentCapability.MEMORY,
+                ],
                 "response_style": "professional",
                 "temperature": 0.7,
                 "max_tokens": 2048,
@@ -1059,9 +1118,21 @@ class AgentManager:
                 "description": "A specialized agent for technical questions and programming help",
                 "agent_type": AgentType.SPECIALIST,
                 "system_message": "You are a technical specialist with expertise in software development, programming, and technology. Provide detailed, accurate technical guidance and code examples when appropriate.",
-                "personality_traits": ["analytical", "precise", "technical"],
-                "knowledge_domains": ["programming", "software development", "technology"],
-                "capabilities": [AgentCapability.CODE_GENERATION, AgentCapability.ANALYTICAL, AgentCapability.TOOL_USE],
+                "personality_traits": [
+                    "analytical",
+                    "precise",
+                    "technical",
+                ],
+                "knowledge_domains": [
+                    "programming",
+                    "software development",
+                    "technology",
+                ],
+                "capabilities": [
+                    AgentCapability.CODE_GENERATION,
+                    AgentCapability.ANALYTICAL,
+                    AgentCapability.TOOL_USE,
+                ],
                 "response_style": "technical",
                 "temperature": 0.3,
                 "max_tokens": 4096,
@@ -1072,9 +1143,20 @@ class AgentManager:
                 "description": "A creative agent for writing, storytelling, and content creation",
                 "agent_type": AgentType.CONVERSATIONAL,
                 "system_message": "You are a creative writing assistant with a talent for storytelling, content creation, and literary expression. Help users craft engaging, well-structured written content.",
-                "personality_traits": ["creative", "imaginative", "articulate"],
-                "knowledge_domains": ["writing", "literature", "creative arts"],
-                "capabilities": [AgentCapability.CREATIVE, AgentCapability.NATURAL_LANGUAGE],
+                "personality_traits": [
+                    "creative",
+                    "imaginative",
+                    "articulate",
+                ],
+                "knowledge_domains": [
+                    "writing",
+                    "literature",
+                    "creative arts",
+                ],
+                "capabilities": [
+                    AgentCapability.CREATIVE,
+                    AgentCapability.NATURAL_LANGUAGE,
+                ],
                 "response_style": "creative",
                 "temperature": 0.9,
                 "max_tokens": 3072,
@@ -1085,27 +1167,45 @@ class AgentManager:
                 "description": "A task-oriented agent for completing specific actions and workflows",
                 "agent_type": AgentType.TASK_ORIENTED,
                 "system_message": "You are a task-oriented assistant focused on helping users complete specific actions and workflows efficiently. Use available tools when appropriate to accomplish tasks.",
-                "personality_traits": ["efficient", "focused", "reliable"],
-                "capabilities": [AgentCapability.TOOL_USE, AgentCapability.ANALYTICAL],
+                "personality_traits": [
+                    "efficient",
+                    "focused",
+                    "reliable",
+                ],
+                "capabilities": [
+                    AgentCapability.TOOL_USE,
+                    AgentCapability.ANALYTICAL,
+                ],
                 "response_style": "professional",
                 "temperature": 0.5,
                 "max_tokens": 2048,
             },
             {
                 "id": "research-analyst",
-                "name": "Research Analyst", 
+                "name": "Research Analyst",
                 "description": "A specialized agent for research, analysis, and information gathering",
                 "agent_type": AgentType.SPECIALIST,
                 "system_message": "You are a research analyst skilled in gathering, analyzing, and synthesizing information from various sources. Provide thorough, well-researched responses with proper context.",
-                "personality_traits": ["analytical", "thorough", "objective"],
-                "knowledge_domains": ["research", "analysis", "information science"],
-                "capabilities": [AgentCapability.RESEARCH, AgentCapability.ANALYTICAL],
+                "personality_traits": [
+                    "analytical",
+                    "thorough",
+                    "objective",
+                ],
+                "knowledge_domains": [
+                    "research",
+                    "analysis",
+                    "information science",
+                ],
+                "capabilities": [
+                    AgentCapability.RESEARCH,
+                    AgentCapability.ANALYTICAL,
+                ],
                 "response_style": "analytical",
                 "temperature": 0.4,
                 "max_tokens": 4096,
-            }
+            },
         ]
-        
+
         return templates
 
 
@@ -1182,7 +1282,9 @@ class AgentExecutor:
 
         try:
             # Execute the task through the agent
-            result = await agent.process_message(task, conversation_id, context)
+            result = await agent.process_message(
+                task, conversation_id, context
+            )
             self.active_tasks[task_id]["status"] = "completed"
             self.active_tasks[task_id]["result"] = result
             return {

@@ -42,7 +42,10 @@ class ChatterBaseException(Exception):
         super().__init__(message)
         self.message = message
         # Only auto-generate error codes for specific subclasses
-        if error_code is None and self.__class__ != ChatterBaseException:
+        if (
+            error_code is None
+            and self.__class__ != ChatterBaseException
+        ):
             self.error_code = self._get_default_error_code()
         else:
             self.error_code = error_code
@@ -52,6 +55,7 @@ class ChatterBaseException(Exception):
 
         # Add timestamp
         from datetime import datetime
+
         self.timestamp = datetime.utcnow().isoformat()
 
         # Set cause if provided
@@ -108,7 +112,7 @@ class ChatterBaseException(Exception):
 
     def to_dict(self) -> dict[str, Any]:
         """Convert exception to dictionary format.
-        
+
         Returns:
             Dictionary representation of the exception
         """
@@ -124,7 +128,7 @@ class ChatterBaseException(Exception):
 
     def to_response_dict(self) -> dict[str, Any]:
         """Convert exception to API response format.
-        
+
         Returns:
             Dictionary suitable for API responses
         """
@@ -146,13 +150,14 @@ class ChatterBaseException(Exception):
     @classmethod
     def context(cls, operation: str):
         """Context manager for operation-specific error handling.
-        
+
         Args:
             operation: Name of the operation being performed
-            
+
         Returns:
             Context manager that wraps exceptions
         """
+
         class ErrorContextManager:
             def __init__(self, operation_name: str):
                 self.operation = operation_name
@@ -165,7 +170,10 @@ class ChatterBaseException(Exception):
                     # Wrap non-ChatterException errors
                     raise cls(
                         f"Error in {self.operation}: {str(exc_val)}",
-                        details={"operation": self.operation, "original_error": str(exc_val)}
+                        details={
+                            "operation": self.operation,
+                            "original_error": str(exc_val),
+                        },
                     ) from exc_val
                 return False
 
@@ -254,12 +262,14 @@ class ValidationError(ChatterBaseException):
         )
 
     @classmethod
-    def from_pydantic_errors(cls, pydantic_errors: list[dict[str, Any]]) -> "ValidationError":
+    def from_pydantic_errors(
+        cls, pydantic_errors: list[dict[str, Any]]
+    ) -> "ValidationError":
         """Create ValidationError from Pydantic validation errors.
-        
+
         Args:
             pydantic_errors: List of Pydantic error dictionaries
-            
+
         Returns:
             ValidationError instance with field errors
         """
@@ -271,7 +281,11 @@ class ValidationError(ChatterBaseException):
             msg = error.get("msg", "Validation error")
 
             # Convert location tuple to field name
-            field_name = ".".join(str(part) for part in loc) if loc else "unknown"
+            field_name = (
+                ".".join(str(part) for part in loc)
+                if loc
+                else "unknown"
+            )
 
             if field_name not in field_errors:
                 field_errors[field_name] = []
@@ -280,7 +294,7 @@ class ValidationError(ChatterBaseException):
 
         return cls(
             message="; ".join(messages),
-            details={"field_errors": field_errors}
+            details={"field_errors": field_errors},
         )
 
 
@@ -308,7 +322,7 @@ class RateLimitError(ChatterBaseException):
             message=message,
             status_code=429,
             details={"service": "rate_limiter"},
-            **kwargs
+            **kwargs,
         )
 
 
@@ -443,7 +457,9 @@ class DocumentProcessingError(ServiceError):
 class ExternalServiceError(ChatterBaseException):
     """External service integration errors."""
 
-    def __init__(self, message: str, service_name: str | None = None, **kwargs):
+    def __init__(
+        self, message: str, service_name: str | None = None, **kwargs
+    ):
         # Include service info in details
         details = kwargs.pop("details", {})
         if service_name:
@@ -511,9 +527,7 @@ class WorkflowExecutionError(WorkflowError):
         if step:
             details["failed_step"] = step
 
-        super().__init__(
-            message=message, details=details, **kwargs
-        )
+        super().__init__(message=message, details=details, **kwargs)
 
     def _get_error_title(self) -> str:
         return "Workflow Execution Error"

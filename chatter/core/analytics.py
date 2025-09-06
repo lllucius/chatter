@@ -1578,10 +1578,18 @@ class AnalyticsService:
         """
         # Get each analytics section individually with their own exception handling
         # This ensures that if one fails, others still return proper default values
-        conversation_stats = await self.get_conversation_stats(user_id, time_range)
-        usage_metrics = await self.get_usage_metrics(user_id, time_range)
-        performance_metrics = await self.get_performance_metrics(user_id, time_range)
-        document_analytics = await self.get_document_analytics(user_id, time_range)
+        conversation_stats = await self.get_conversation_stats(
+            user_id, time_range
+        )
+        usage_metrics = await self.get_usage_metrics(
+            user_id, time_range
+        )
+        performance_metrics = await self.get_performance_metrics(
+            user_id, time_range
+        )
+        document_analytics = await self.get_document_analytics(
+            user_id, time_range
+        )
         system_health = await self.get_system_analytics()
 
         return {
@@ -1748,9 +1756,11 @@ class AnalyticsService:
             time_range = AnalyticsTimeRange(
                 start_date=start_date,
                 end_date=end_date,
-                period="30d"
-                if not start_date and not end_date
-                else "custom",
+                period=(
+                    "30d"
+                    if not start_date and not end_date
+                    else "custom"
+                ),
             )
 
             # Get comprehensive user analytics
@@ -1877,16 +1887,22 @@ class AnalyticsService:
                     "format": export_format,
                     "generated_at": datetime.now(UTC).isoformat(),
                     "user_id": user_id,
-                    "date_range": {
-                        "start": date_range[0].isoformat()
+                    "date_range": (
+                        {
+                            "start": (
+                                date_range[0].isoformat()
+                                if date_range
+                                else None
+                            ),
+                            "end": (
+                                date_range[1].isoformat()
+                                if date_range
+                                else None
+                            ),
+                        }
                         if date_range
-                        else None,
-                        "end": date_range[1].isoformat()
-                        if date_range
-                        else None,
-                    }
-                    if date_range
-                    else None,
+                        else None
+                    ),
                     "metrics_included": metrics,
                 }
             }
@@ -1895,38 +1911,38 @@ class AnalyticsService:
             for metric in metrics:
                 try:
                     if metric == "conversations":
-                        export_data[
-                            "conversations"
-                        ] = await self.get_conversation_stats(
-                            user_id, time_range
+                        export_data["conversations"] = (
+                            await self.get_conversation_stats(
+                                user_id, time_range
+                            )
                         )
                     elif metric == "usage":
-                        export_data[
-                            "usage"
-                        ] = await self.get_usage_metrics(
-                            user_id, time_range
+                        export_data["usage"] = (
+                            await self.get_usage_metrics(
+                                user_id, time_range
+                            )
                         )
                     elif metric == "performance":
-                        export_data[
-                            "performance"
-                        ] = await self.get_performance_metrics(
-                            user_id, time_range
+                        export_data["performance"] = (
+                            await self.get_performance_metrics(
+                                user_id, time_range
+                            )
                         )
                     elif metric == "documents":
-                        export_data[
-                            "documents"
-                        ] = await self.get_document_analytics(
-                            user_id, time_range
+                        export_data["documents"] = (
+                            await self.get_document_analytics(
+                                user_id, time_range
+                            )
                         )
                     elif metric == "system":
-                        export_data[
-                            "system"
-                        ] = await self.get_system_analytics()
+                        export_data["system"] = (
+                            await self.get_system_analytics()
+                        )
                     elif metric == "toolservers":
-                        export_data[
-                            "toolservers"
-                        ] = await self.get_tool_server_analytics(
-                            user_id, time_range
+                        export_data["toolservers"] = (
+                            await self.get_tool_server_analytics(
+                                user_id, time_range
+                            )
                         )
                     else:
                         logger.warning(
@@ -2083,9 +2099,9 @@ class AnalyticsService:
             db_response_time = (time.time() - start_time) * 1000
 
             health_data["checks"]["database"] = {
-                "status": "healthy"
-                if db_response_time < 1000
-                else "slow",
+                "status": (
+                    "healthy" if db_response_time < 1000 else "slow"
+                ),
                 "response_time_ms": db_response_time,
                 "details": "Database connectivity check",
             }
@@ -2098,9 +2114,9 @@ class AnalyticsService:
             query_response_time = (time.time() - start_time) * 1000
 
             health_data["checks"]["query_performance"] = {
-                "status": "healthy"
-                if query_response_time < 2000
-                else "slow",
+                "status": (
+                    "healthy" if query_response_time < 2000 else "slow"
+                ),
                 "response_time_ms": query_response_time,
                 "details": "Basic query performance check",
             }

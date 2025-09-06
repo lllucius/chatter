@@ -417,32 +417,54 @@ class AgentHealthResponse(BaseModel):
 
     agent_id: str = Field(..., description="Agent ID")
     status: AgentStatus = Field(..., description="Agent status")
-    health: str = Field(..., description="Health status (healthy/unhealthy/unknown)")
-    last_interaction: datetime | None = Field(None, description="Last interaction timestamp")
-    response_time_avg: float | None = Field(None, description="Average response time")
-    error_rate: float | None = Field(None, description="Error rate percentage")
+    health: str = Field(
+        ..., description="Health status (healthy/unhealthy/unknown)"
+    )
+    last_interaction: datetime | None = Field(
+        None, description="Last interaction timestamp"
+    )
+    response_time_avg: float | None = Field(
+        None, description="Average response time"
+    )
+    error_rate: float | None = Field(
+        None, description="Error rate percentage"
+    )
 
 
 class AgentBulkCreateRequest(BaseModel):
     """Request schema for bulk agent creation."""
 
     agents: list[AgentCreateRequest] = Field(
-        ..., min_items=1, max_items=10, description="List of agents to create (max 10)"
+        ...,
+        min_items=1,
+        max_items=10,
+        description="List of agents to create (max 10)",
     )
 
 
 class AgentBulkCreateResponse(BaseModel):
     """Response schema for bulk agent creation."""
 
-    created: list[AgentResponse] = Field(..., description="Successfully created agents")
-    failed: list[dict[str, Any]] = Field(..., description="Failed agent creations with errors")
-    total_requested: int = Field(..., description="Total agents requested")
-    total_created: int = Field(..., description="Total agents successfully created")
+    created: list[AgentResponse] = Field(
+        ..., description="Successfully created agents"
+    )
+    failed: list[dict[str, Any]] = Field(
+        ..., description="Failed agent creations with errors"
+    )
+    total_requested: int = Field(
+        ..., description="Total agents requested"
+    )
+    total_created: int = Field(
+        ..., description="Total agents successfully created"
+    )
 
 
 class AgentBulkDeleteRequest(BaseModel):
     """Request schema for bulk agent deletion."""
 
     agent_ids: list[str] = Field(
-        ..., min_items=1, max_items=50, description="List of agent IDs to delete (max 50)"
+        ...,
+        min_items=1,
+        max_items=50,
+        description="List of agent IDs to delete (max 50)",
     )

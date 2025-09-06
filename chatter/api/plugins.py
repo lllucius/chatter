@@ -367,12 +367,14 @@ async def enable_plugin(
             # Get plugin instance to provide more detailed error information
             plugin_instance = await plugin_manager.get_plugin(plugin_id)
             if not plugin_instance:
-                raise NotFoundProblem(detail=f"Plugin {plugin_id} not found")
-            
+                raise NotFoundProblem(
+                    detail=f"Plugin {plugin_id} not found"
+                )
+
             error_detail = "Failed to enable plugin"
             if plugin_instance.error_message:
                 error_detail += f": {plugin_instance.error_message}"
-            
+
             raise BadRequestProblem(detail=error_detail)
 
         return PluginActionResponse(
@@ -417,8 +419,10 @@ async def disable_plugin(
             # Get plugin instance to provide more detailed error information
             plugin_instance = await plugin_manager.get_plugin(plugin_id)
             if not plugin_instance:
-                raise NotFoundProblem(detail=f"Plugin {plugin_id} not found")
-            
+                raise NotFoundProblem(
+                    detail=f"Plugin {plugin_id} not found"
+                )
+
             raise BadRequestProblem(detail="Failed to disable plugin")
 
         return PluginActionResponse(
@@ -457,21 +461,25 @@ async def health_check_plugins(
         Health check results
     """
     try:
-        results = await plugin_manager.health_check_plugins(auto_disable_unhealthy)
-        
+        results = await plugin_manager.health_check_plugins(
+            auto_disable_unhealthy
+        )
+
         # Summarize results
         total_plugins = len(results)
-        healthy_plugins = sum(1 for r in results.values() if r.get("healthy", False))
+        healthy_plugins = sum(
+            1 for r in results.values() if r.get("healthy", False)
+        )
         unhealthy_plugins = total_plugins - healthy_plugins
-        
+
         return PluginHealthCheckResponse(
             summary={
                 "total_plugins": total_plugins,
                 "healthy_plugins": healthy_plugins,
                 "unhealthy_plugins": unhealthy_plugins,
-                "auto_disable_enabled": auto_disable_unhealthy
+                "auto_disable_enabled": auto_disable_unhealthy,
             },
-            results=results
+            results=results,
         )
 
     except Exception as e:
@@ -523,11 +531,17 @@ async def check_plugin_dependencies(
         Dependency check results
     """
     try:
-        results = await plugin_manager.check_plugin_dependencies(plugin_id)
+        results = await plugin_manager.check_plugin_dependencies(
+            plugin_id
+        )
         return results
 
     except Exception as e:
-        logger.error("Failed to check plugin dependencies", plugin_id=plugin_id, error=str(e))
+        logger.error(
+            "Failed to check plugin dependencies",
+            plugin_id=plugin_id,
+            error=str(e),
+        )
         raise InternalServerProblem(
             detail="Failed to check plugin dependencies"
         ) from e
@@ -551,14 +565,16 @@ async def bulk_enable_plugins(
     """
     try:
         results = await plugin_manager.bulk_enable_plugins(plugin_ids)
-        
-        success_count = sum(1 for success in results.values() if success)
+
+        success_count = sum(
+            1 for success in results.values() if success
+        )
         total_count = len(plugin_ids)
-        
+
         return {
             "success_count": success_count,
             "total_count": total_count,
-            "results": results
+            "results": results,
         }
 
     except Exception as e:
@@ -586,14 +602,16 @@ async def bulk_disable_plugins(
     """
     try:
         results = await plugin_manager.bulk_disable_plugins(plugin_ids)
-        
-        success_count = sum(1 for success in results.values() if success)
+
+        success_count = sum(
+            1 for success in results.values() if success
+        )
         total_count = len(plugin_ids)
-        
+
         return {
             "success_count": success_count,
             "total_count": total_count,
-            "results": results
+            "results": results,
         }
 
     except Exception as e:

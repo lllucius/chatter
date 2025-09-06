@@ -17,7 +17,9 @@ class MessageBase(BaseModel):
     """Base message schema."""
 
     role: MessageRole = Field(..., description="Message role")
-    content: str = Field(..., min_length=1, description="Message content")
+    content: str = Field(
+        ..., min_length=1, description="Message content"
+    )
 
 
 class MessageCreate(MessageBase):
@@ -51,7 +53,9 @@ class MessageResponse(MessageBase):
         None, description="Response time in milliseconds"
     )
     cost: float | None = Field(None, description="Cost of the message")
-    finish_reason: str | None = Field(None, description="Reason for completion")
+    finish_reason: str | None = Field(
+        None, description="Reason for completion"
+    )
     created_at: datetime = Field(..., description="Creation timestamp")
 
     class Config:
@@ -239,10 +243,11 @@ class ChatRequest(BaseModel):
     system_prompt_override: str | None = Field(
         None, description="Override system prompt for this request"
     )
-    
+
     # Internal field set by API processing
     workflow_type: str | None = Field(
-        None, description="Internal workflow type (set by API processing)"
+        None,
+        description="Internal workflow type (set by API processing)",
     )
 
 
@@ -272,15 +277,23 @@ class StreamingChatChunk(BaseModel):
         None, description="Conversation ID"
     )
     message_id: str | None = Field(None, description="Message ID")
-    correlation_id: str | None = Field(None, description="Correlation ID")
-    metadata: dict[str, Any] | None = Field(None, description="Additional metadata")
+    correlation_id: str | None = Field(
+        None, description="Correlation ID"
+    )
+    metadata: dict[str, Any] | None = Field(
+        None, description="Additional metadata"
+    )
 
 
 class ConversationSearchRequest(ListRequestBase):
     """Schema for conversation search."""
 
-    limit: int = Field(50, ge=1, le=100, description="Maximum number of results")
-    offset: int = Field(0, ge=0, description="Number of results to skip")
+    limit: int = Field(
+        50, ge=1, le=100, description="Maximum number of results"
+    )
+    offset: int = Field(
+        0, ge=0, description="Number of results to skip"
+    )
     search: str | None = Field(None, description="Search query")
     query: str | None = Field(None, description="Search query")
     status: ConversationStatus | None = Field(

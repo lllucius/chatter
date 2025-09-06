@@ -7,8 +7,16 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.api.dependencies import ConversationId, MessageId, PaginationLimit, PaginationOffset
-from chatter.api.resources import ConversationResourceHandler, MessageResourceHandler
+from chatter.api.dependencies import (
+    ConversationId,
+    MessageId,
+    PaginationLimit,
+    PaginationOffset,
+)
+from chatter.api.resources import (
+    ConversationResourceHandler,
+    MessageResourceHandler,
+)
 from chatter.core.exceptions import ChatServiceError, NotFoundError
 from chatter.models.user import User
 from chatter.schemas.chat import (
@@ -17,9 +25,7 @@ from chatter.schemas.chat import (
     ChatRequest,
     ChatResponse,
     ConversationCreate,
-    ConversationDeleteRequest,
     ConversationDeleteResponse,
-    ConversationGetRequest,
     ConversationResponse,
     ConversationSearchResponse,
     ConversationUpdate,
@@ -71,7 +77,7 @@ def _map_workflow_type(workflow: str | None) -> str:
     """Map API workflow to internal workflow types."""
     workflow_mapping = {
         "plain": "basic",
-        "rag": "rag", 
+        "rag": "rag",
         "tools": "tools",
         "full": "full",
     }
@@ -79,6 +85,7 @@ def _map_workflow_type(workflow: str | None) -> str:
 
 
 # Conversation Resource Endpoints
+
 
 @router.post(
     "/conversations",
@@ -88,10 +95,14 @@ def _map_workflow_type(workflow: str | None) -> str:
 async def create_conversation(
     conversation_data: ConversationCreate,
     current_user: User = Depends(get_current_user),
-    handler: ConversationResourceHandler = Depends(get_conversation_handler),
+    handler: ConversationResourceHandler = Depends(
+        get_conversation_handler
+    ),
 ) -> ConversationResponse:
     """Create a new conversation."""
-    return await handler.create_conversation(conversation_data, current_user)
+    return await handler.create_conversation(
+        conversation_data, current_user
+    )
 
 
 @router.get(
@@ -102,7 +113,9 @@ async def list_conversations(
     limit: PaginationLimit = 20,
     offset: PaginationOffset = 0,
     current_user: User = Depends(get_current_user),
-    handler: ConversationResourceHandler = Depends(get_conversation_handler),
+    handler: ConversationResourceHandler = Depends(
+        get_conversation_handler
+    ),
 ) -> ConversationSearchResponse:
     """List conversations for the current user."""
     return await handler.list_conversations(current_user, limit, offset)
@@ -114,12 +127,18 @@ async def list_conversations(
 )
 async def get_conversation(
     conversation_id: ConversationId,
-    include_messages: bool = Query(True, description="Include messages in response"),
+    include_messages: bool = Query(
+        True, description="Include messages in response"
+    ),
     current_user: User = Depends(get_current_user),
-    handler: ConversationResourceHandler = Depends(get_conversation_handler),
+    handler: ConversationResourceHandler = Depends(
+        get_conversation_handler
+    ),
 ) -> ConversationWithMessages:
     """Get conversation details with optional messages."""
-    return await handler.get_conversation(conversation_id, current_user, include_messages)
+    return await handler.get_conversation(
+        conversation_id, current_user, include_messages
+    )
 
 
 @router.put(
@@ -130,10 +149,14 @@ async def update_conversation(
     conversation_id: ConversationId,
     update_data: ConversationUpdate,
     current_user: User = Depends(get_current_user),
-    handler: ConversationResourceHandler = Depends(get_conversation_handler),
+    handler: ConversationResourceHandler = Depends(
+        get_conversation_handler
+    ),
 ) -> ConversationResponse:
     """Update conversation."""
-    return await handler.update_conversation(conversation_id, update_data, current_user)
+    return await handler.update_conversation(
+        conversation_id, update_data, current_user
+    )
 
 
 @router.delete(
@@ -143,13 +166,18 @@ async def update_conversation(
 async def delete_conversation(
     conversation_id: ConversationId,
     current_user: User = Depends(get_current_user),
-    handler: ConversationResourceHandler = Depends(get_conversation_handler),
+    handler: ConversationResourceHandler = Depends(
+        get_conversation_handler
+    ),
 ) -> ConversationDeleteResponse:
     """Delete conversation."""
-    return await handler.delete_conversation(conversation_id, current_user)
+    return await handler.delete_conversation(
+        conversation_id, current_user
+    )
 
 
 # Message Resource Endpoints
+
 
 @router.get(
     "/conversations/{conversation_id}/messages",
@@ -163,7 +191,9 @@ async def get_conversation_messages(
     handler: MessageResourceHandler = Depends(get_message_handler),
 ) -> list[MessageResponse]:
     """Get messages from a conversation."""
-    return await handler.get_conversation_messages(conversation_id, current_user, limit, offset)
+    return await handler.get_conversation_messages(
+        conversation_id, current_user, limit, offset
+    )
 
 
 @router.delete(
@@ -177,10 +207,13 @@ async def delete_message(
     handler: MessageResourceHandler = Depends(get_message_handler),
 ) -> MessageDeleteResponse:
     """Delete a message from a conversation."""
-    return await handler.delete_message(conversation_id, message_id, current_user)
+    return await handler.delete_message(
+        conversation_id, message_id, current_user
+    )
 
 
 # Core Chat Endpoint (Unified)
+
 
 @router.post(
     "/chat",
@@ -188,7 +221,9 @@ async def delete_message(
     responses={
         200: {
             "content": {
-                "application/json": {"schema": ChatResponse.model_json_schema()},
+                "application/json": {
+                    "schema": ChatResponse.model_json_schema()
+                },
                 "text/event-stream": {"schema": {"type": "string"}},
             },
             "description": "Chat response as JSON or streaming SSE when stream=true",
@@ -204,14 +239,18 @@ async def chat(
     """Unified chat endpoint supporting all workflow types with optional streaming."""
     workflow_type = _map_workflow_type(chat_request.workflow)
     chat_request.workflow_type = workflow_type
-    
+
     if chat_request.stream:
         # Streaming mode
         async def generate_stream():
             try:
-                async for chunk in chat_service.chat_streaming(current_user.id, chat_request):
+                async for chunk in chat_service.chat_streaming(
+                    current_user.id, chat_request
+                ):
                     if await request.is_disconnected():
-                        logger.info("Client disconnected during streaming")
+                        logger.info(
+                            "Client disconnected during streaming"
+                        )
                         break
                     yield f"data: {json.dumps(chunk)}\n\n"
             except (NotFoundError, ChatServiceError) as e:
@@ -223,22 +262,30 @@ async def chat(
         return StreamingResponse(
             generate_stream(),
             media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "Connection": "keep-alive"},
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+            },
         )
-    
+
     # Non-streaming mode
     try:
-        conversation, assistant_message = await chat_service.chat(current_user.id, chat_request)
+        conversation, assistant_message = await chat_service.chat(
+            current_user.id, chat_request
+        )
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation),
+            conversation=ConversationResponse.model_validate(
+                conversation
+            ),
         )
     except (NotFoundError, ChatServiceError) as e:
         raise BadRequestProblem(detail=str(e)) from e
 
 
 # Utility Endpoints
+
 
 @router.get("/tools/available", response_model=AvailableToolsResponse)
 async def get_available_tools(
@@ -250,11 +297,11 @@ async def get_available_tools(
     try:
         # Get MCP tools
         mcp_tools = await mcp_service.get_tools()
-        # Get built-in tools  
+        # Get built-in tools
         builtin_tools = BuiltInTools.create_builtin_tools()
 
         all_tools = []
-        
+
         # Add MCP tools
         for tool in mcp_tools:
             all_tools.append(
@@ -265,13 +312,13 @@ async def get_available_tools(
                     args_schema=getattr(tool, "args_schema", {}),
                 )
             )
-        
+
         # Add built-in tools
         for tool in builtin_tools:
             all_tools.append(
                 AvailableToolResponse(
                     name=tool.name,
-                    description=tool.description, 
+                    description=tool.description,
                     type="builtin",
                     args_schema=getattr(tool, "args_schema", {}),
                 )
@@ -291,10 +338,14 @@ async def get_workflow_templates(
 ) -> WorkflowTemplatesResponse:
     """Get available workflow templates."""
     try:
-        from chatter.core.unified_template_manager import get_template_manager_with_session
+        from chatter.core.unified_template_manager import (
+            get_template_manager_with_session,
+        )
 
         template_manager = get_template_manager_with_session(session)
-        templates_data = await template_manager.get_template_info(owner_id=current_user.id)
+        templates_data = await template_manager.get_template_info(
+            owner_id=current_user.id
+        )
         templates = {
             name: WorkflowTemplateInfo(**template_info)
             for name, template_info in templates_data.items()
@@ -324,22 +375,30 @@ async def chat_with_template(
             chat_request.system_prompt_override = f"{template_instruction} {chat_request.system_prompt_override}"
         else:
             chat_request.system_prompt_override = template_instruction
-        
+
         chat_request.workflow_type = "basic"
-        conversation, assistant_message = await chat_service.chat(current_user.id, chat_request)
+        conversation, assistant_message = await chat_service.chat(
+            current_user.id, chat_request
+        )
 
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
-            conversation=ConversationResponse.model_validate(conversation),
+            conversation=ConversationResponse.model_validate(
+                conversation
+            ),
         )
     except Exception as e:
         if "not found" in str(e).lower():
-            raise NotFoundProblem(detail=f"Template '{template_name}' not found") from e
+            raise NotFoundProblem(
+                detail=f"Template '{template_name}' not found"
+            ) from e
         raise BadRequestProblem(detail=str(e)) from e
 
 
-@router.get("/performance/stats", response_model=PerformanceStatsResponse)
+@router.get(
+    "/performance/stats", response_model=PerformanceStatsResponse
+)
 async def get_performance_stats(
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
@@ -347,7 +406,9 @@ async def get_performance_stats(
     """Get workflow performance statistics."""
     try:
         stats = chat_service.get_performance_stats()
-        return PerformanceStatsResponse(**stats, timestamp=__import__('time').time())
+        return PerformanceStatsResponse(
+            **stats, timestamp=__import__('time').time()
+        )
     except Exception as e:
         raise InternalServerProblem(
             detail=f"Failed to get performance stats: {str(e)}"
@@ -365,4 +426,6 @@ async def get_mcp_status(
         result = await mcp_service.health_check()
         return McpStatusResponse(**result)
     except Exception as e:
-        raise InternalServerProblem(detail=f"Failed to get MCP status: {str(e)}") from e
+        raise InternalServerProblem(
+            detail=f"Failed to get MCP status: {str(e)}"
+        ) from e

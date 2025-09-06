@@ -11,13 +11,15 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
     Text,
     UniqueConstraint,
 )
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -62,7 +64,7 @@ class Document(Base):
             name='check_file_size_positive',
         ),
         CheckConstraint(
-            'chunk_size > 0', 
+            'chunk_size > 0',
             name='check_chunk_size_positive',
         ),
         CheckConstraint(
@@ -85,7 +87,9 @@ class Document(Base):
             'search_count >= 0',
             name='check_search_count_non_negative',
         ),
-        UniqueConstraint('owner_id', 'file_hash', name='uq_document_owner_hash'),
+        UniqueConstraint(
+            'owner_id', 'file_hash', name='uq_document_owner_hash'
+        ),
     )
 
     # Foreign keys
@@ -295,8 +299,7 @@ class DocumentChunk(Base):
             name='check_token_count_positive',
         ),
         CheckConstraint(
-            "content != ''", 
-            name='check_content_not_empty'
+            "content != ''", name='check_content_not_empty'
         ),
     )
 

@@ -136,11 +136,15 @@ class User(Base):
     )
 
     workflow_templates: Mapped[list["WorkflowTemplate"]] = relationship(
-        "WorkflowTemplate", back_populates="owner", cascade="all, delete-orphan"
+        "WorkflowTemplate",
+        back_populates="owner",
+        cascade="all, delete-orphan",
     )
 
     template_specs: Mapped[list["TemplateSpec"]] = relationship(
-        "TemplateSpec", back_populates="owner", cascade="all, delete-orphan"
+        "TemplateSpec",
+        back_populates="owner",
+        cascade="all, delete-orphan",
     )
 
     default_profile: Mapped[Optional["Profile"]] = relationship(

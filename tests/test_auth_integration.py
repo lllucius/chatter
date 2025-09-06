@@ -12,10 +12,14 @@ class TestAuthIntegration:
     """Integration tests for authentication workflows."""
 
     @pytest.mark.integration
-    async def test_complete_user_registration_and_login_flow(self, client: AsyncClient, test_user_data: dict):
+    async def test_complete_user_registration_and_login_flow(
+        self, client: AsyncClient, test_user_data: dict
+    ):
         """Test complete user registration and login workflow."""
         # Step 1: Register user
-        register_response = await client.post("/api/v1/auth/register", json=test_user_data)
+        register_response = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
         assert register_response.status_code == 201
 
         register_data = register_response.json()
@@ -30,15 +34,21 @@ class TestAuthIntegration:
             "password": test_user_data["password"],
         }
 
-        login_response = await client.post("/api/v1/auth/login", json=login_data)
+        login_response = await client.post(
+            "/api/v1/auth/login", json=login_data
+        )
         assert login_response.status_code == 200
 
         login_response_data = login_response.json()
         assert login_response_data["user"]["id"] == user_id
 
         # Step 3: Use access token to get user profile
-        auth_headers = {"Authorization": f"Bearer {login_response_data['access_token']}"}
-        profile_response = await client.get("/api/v1/auth/me", headers=auth_headers)
+        auth_headers = {
+            "Authorization": f"Bearer {login_response_data['access_token']}"
+        }
+        profile_response = await client.get(
+            "/api/v1/auth/me", headers=auth_headers
+        )
         assert profile_response.status_code == 200
 
         profile_data = profile_response.json()
@@ -47,7 +57,9 @@ class TestAuthIntegration:
         assert profile_data["email"] == test_user_data["email"]
 
     @pytest.mark.integration
-    async def test_login_with_email_workflow(self, client: AsyncClient, test_user_data: dict):
+    async def test_login_with_email_workflow(
+        self, client: AsyncClient, test_user_data: dict
+    ):
         """Test login using email instead of username."""
         # Register user
         await client.post("/api/v1/auth/register", json=test_user_data)
@@ -58,17 +70,23 @@ class TestAuthIntegration:
             "password": test_user_data["password"],
         }
 
-        response = await client.post("/api/v1/auth/login", json=login_data)
+        response = await client.post(
+            "/api/v1/auth/login", json=login_data
+        )
         assert response.status_code == 200
 
         data = response.json()
         assert data["user"]["email"] == test_user_data["email"]
 
     @pytest.mark.integration
-    async def test_token_refresh_workflow(self, client: AsyncClient, test_user_data: dict):
+    async def test_token_refresh_workflow(
+        self, client: AsyncClient, test_user_data: dict
+    ):
         """Test token refresh workflow."""
         # Register user
-        register_response = await client.post("/api/v1/auth/register", json=test_user_data)
+        register_response = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
         register_data = register_response.json()
 
         original_access_token = register_data["access_token"]
@@ -76,7 +94,9 @@ class TestAuthIntegration:
 
         # Refresh token
         refresh_data = {"refresh_token": refresh_token}
-        refresh_response = await client.post("/api/v1/auth/refresh", json=refresh_data)
+        refresh_response = await client.post(
+            "/api/v1/auth/refresh", json=refresh_data
+        )
         assert refresh_response.status_code == 200
 
         refresh_response_data = refresh_response.json()
@@ -86,14 +106,23 @@ class TestAuthIntegration:
         assert new_access_token != original_access_token
 
         auth_headers = {"Authorization": f"Bearer {new_access_token}"}
-        profile_response = await client.get("/api/v1/auth/me", headers=auth_headers)
+        profile_response = await client.get(
+            "/api/v1/auth/me", headers=auth_headers
+        )
         assert profile_response.status_code == 200
 
     @pytest.mark.integration
-    async def test_profile_update_workflow(self, client: AsyncClient, test_user_data: dict, db_session: AsyncSession):
+    async def test_profile_update_workflow(
+        self,
+        client: AsyncClient,
+        test_user_data: dict,
+        db_session: AsyncSession,
+    ):
         """Test complete profile update workflow."""
         # Register user
-        register_response = await client.post("/api/v1/auth/register", json=test_user_data)
+        register_response = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
         register_data = register_response.json()
 
         access_token = register_data["access_token"]
@@ -106,11 +135,16 @@ class TestAuthIntegration:
             "email": "updated@example.com",
         }
 
-        update_response = await client.put("/api/v1/auth/me", json=update_data, headers=auth_headers)
+        update_response = await client.put(
+            "/api/v1/auth/me", json=update_data, headers=auth_headers
+        )
         assert update_response.status_code == 200
 
         update_response_data = update_response.json()
-        assert update_response_data["full_name"] == update_data["full_name"]
+        assert (
+            update_response_data["full_name"]
+            == update_data["full_name"]
+        )
         assert update_response_data["email"] == update_data["email"]
 
         # Verify changes in database
@@ -122,10 +156,14 @@ class TestAuthIntegration:
         assert user.email == update_data["email"]
 
     @pytest.mark.integration
-    async def test_password_change_workflow(self, client: AsyncClient, test_user_data: dict):
+    async def test_password_change_workflow(
+        self, client: AsyncClient, test_user_data: dict
+    ):
         """Test password change workflow."""
         # Register user
-        register_response = await client.post("/api/v1/auth/register", json=test_user_data)
+        register_response = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
         register_data = register_response.json()
 
         access_token = register_data["access_token"]
@@ -141,7 +179,7 @@ class TestAuthIntegration:
         change_response = await client.post(
             "/api/v1/auth/change-password",
             json=password_data,
-            headers=auth_headers
+            headers=auth_headers,
         )
         assert change_response.status_code == 200
 
@@ -151,7 +189,9 @@ class TestAuthIntegration:
             "password": test_user_data["password"],
         }
 
-        old_login_response = await client.post("/api/v1/auth/login", json=old_login_data)
+        old_login_response = await client.post(
+            "/api/v1/auth/login", json=old_login_data
+        )
         assert old_login_response.status_code == 401
 
         # Verify new password works
@@ -160,14 +200,20 @@ class TestAuthIntegration:
             "password": new_password,
         }
 
-        new_login_response = await client.post("/api/v1/auth/login", json=new_login_data)
+        new_login_response = await client.post(
+            "/api/v1/auth/login", json=new_login_data
+        )
         assert new_login_response.status_code == 200
 
     @pytest.mark.integration
-    async def test_api_key_workflow(self, client: AsyncClient, test_user_data: dict):
+    async def test_api_key_workflow(
+        self, client: AsyncClient, test_user_data: dict
+    ):
         """Test API key creation and usage workflow."""
         # Register user
-        register_response = await client.post("/api/v1/auth/register", json=test_user_data)
+        register_response = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
         register_data = register_response.json()
 
         access_token = register_data["access_token"]
@@ -178,16 +224,21 @@ class TestAuthIntegration:
         api_key_response = await client.post(
             "/api/v1/auth/api-key",
             json=api_key_data,
-            headers=auth_headers
+            headers=auth_headers,
         )
         assert api_key_response.status_code == 200
 
         api_key_response_data = api_key_response.json()
         assert "api_key" in api_key_response_data
-        assert api_key_response_data["api_key_name"] == api_key_data["name"]
+        assert (
+            api_key_response_data["api_key_name"]
+            == api_key_data["name"]
+        )
 
         # List API keys
-        list_response = await client.get("/api/v1/auth/api-keys", headers=auth_headers)
+        list_response = await client.get(
+            "/api/v1/auth/api-keys", headers=auth_headers
+        )
         assert list_response.status_code == 200
 
         api_keys = list_response.json()
@@ -195,32 +246,44 @@ class TestAuthIntegration:
         assert api_keys[0]["api_key_name"] == api_key_data["name"]
 
         # Revoke API key
-        revoke_response = await client.delete("/api/v1/auth/api-key", headers=auth_headers)
+        revoke_response = await client.delete(
+            "/api/v1/auth/api-key", headers=auth_headers
+        )
         assert revoke_response.status_code == 200
 
         # Verify API key is revoked
-        list_response_after = await client.get("/api/v1/auth/api-keys", headers=auth_headers)
+        list_response_after = await client.get(
+            "/api/v1/auth/api-keys", headers=auth_headers
+        )
         assert list_response_after.status_code == 200
 
         api_keys_after = list_response_after.json()
         assert len(api_keys_after) == 0
 
     @pytest.mark.integration
-    async def test_logout_workflow(self, client: AsyncClient, test_user_data: dict):
+    async def test_logout_workflow(
+        self, client: AsyncClient, test_user_data: dict
+    ):
         """Test logout workflow."""
         # Register user
-        register_response = await client.post("/api/v1/auth/register", json=test_user_data)
+        register_response = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
         register_data = register_response.json()
 
         access_token = register_data["access_token"]
         auth_headers = {"Authorization": f"Bearer {access_token}"}
 
         # Verify token works
-        profile_response = await client.get("/api/v1/auth/me", headers=auth_headers)
+        profile_response = await client.get(
+            "/api/v1/auth/me", headers=auth_headers
+        )
         assert profile_response.status_code == 200
 
         # Logout
-        logout_response = await client.post("/api/v1/auth/logout", headers=auth_headers)
+        logout_response = await client.post(
+            "/api/v1/auth/logout", headers=auth_headers
+        )
         assert logout_response.status_code == 200
 
         # Verify token no longer works (depends on implementation)
@@ -231,10 +294,17 @@ class TestAuthIntegration:
         # The specific behavior depends on the implementation details
 
     @pytest.mark.integration
-    async def test_account_deactivation_workflow(self, client: AsyncClient, test_user_data: dict, db_session: AsyncSession):
+    async def test_account_deactivation_workflow(
+        self,
+        client: AsyncClient,
+        test_user_data: dict,
+        db_session: AsyncSession,
+    ):
         """Test account deactivation workflow."""
         # Register user
-        register_response = await client.post("/api/v1/auth/register", json=test_user_data)
+        register_response = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
         register_data = register_response.json()
 
         access_token = register_data["access_token"]
@@ -242,7 +312,9 @@ class TestAuthIntegration:
         auth_headers = {"Authorization": f"Bearer {access_token}"}
 
         # Deactivate account
-        deactivate_response = await client.delete("/api/v1/auth/account", headers=auth_headers)
+        deactivate_response = await client.delete(
+            "/api/v1/auth/account", headers=auth_headers
+        )
         assert deactivate_response.status_code == 200
 
         deactivate_data = deactivate_response.json()
@@ -268,7 +340,9 @@ class TestAuthIntegration:
             "full_name": "User One",
         }
 
-        user1_response = await client.post("/api/v1/auth/register", json=user1_data)
+        user1_response = await client.post(
+            "/api/v1/auth/register", json=user1_data
+        )
         assert user1_response.status_code == 201
         user1_tokens = user1_response.json()
 
@@ -280,20 +354,32 @@ class TestAuthIntegration:
             "full_name": "User Two",
         }
 
-        user2_response = await client.post("/api/v1/auth/register", json=user2_data)
+        user2_response = await client.post(
+            "/api/v1/auth/register", json=user2_data
+        )
         assert user2_response.status_code == 201
         user2_tokens = user2_response.json()
 
         # Verify users have different IDs and tokens
         assert user1_tokens["user"]["id"] != user2_tokens["user"]["id"]
-        assert user1_tokens["access_token"] != user2_tokens["access_token"]
+        assert (
+            user1_tokens["access_token"] != user2_tokens["access_token"]
+        )
 
         # Verify each user can only access their own data
-        user1_headers = {"Authorization": f"Bearer {user1_tokens['access_token']}"}
-        user2_headers = {"Authorization": f"Bearer {user2_tokens['access_token']}"}
+        user1_headers = {
+            "Authorization": f"Bearer {user1_tokens['access_token']}"
+        }
+        user2_headers = {
+            "Authorization": f"Bearer {user2_tokens['access_token']}"
+        }
 
-        user1_profile = await client.get("/api/v1/auth/me", headers=user1_headers)
-        user2_profile = await client.get("/api/v1/auth/me", headers=user2_headers)
+        user1_profile = await client.get(
+            "/api/v1/auth/me", headers=user1_headers
+        )
+        user2_profile = await client.get(
+            "/api/v1/auth/me", headers=user2_headers
+        )
 
         assert user1_profile.status_code == 200
         assert user2_profile.status_code == 200
@@ -306,7 +392,9 @@ class TestAuthIntegration:
         assert user1_data_response["id"] != user2_data_response["id"]
 
     @pytest.mark.integration
-    async def test_password_reset_workflow(self, client: AsyncClient, test_user_data: dict):
+    async def test_password_reset_workflow(
+        self, client: AsyncClient, test_user_data: dict
+    ):
         """Test password reset workflow."""
         # Register user
         await client.post("/api/v1/auth/register", json=test_user_data)
@@ -314,7 +402,7 @@ class TestAuthIntegration:
         # Request password reset
         reset_request_response = await client.post(
             "/api/v1/auth/password-reset/request",
-            params={"email": test_user_data["email"]}
+            params={"email": test_user_data["email"]},
         )
         assert reset_request_response.status_code == 200
 
@@ -333,8 +421,8 @@ class TestAuthIntegration:
             "/api/v1/auth/password-reset/confirm",
             params={
                 "token": "fake_token",
-                "new_password": "NewPassword123!"
-            }
+                "new_password": "NewPassword123!",
+            },
         )
         # Expect this to fail with invalid token
         assert reset_confirm_response.status_code in [400, 401, 404]
@@ -344,10 +432,17 @@ class TestAuthDatabaseIntegration:
     """Integration tests that verify database operations."""
 
     @pytest.mark.integration
-    async def test_user_persistence(self, client: AsyncClient, test_user_data: dict, db_session: AsyncSession):
+    async def test_user_persistence(
+        self,
+        client: AsyncClient,
+        test_user_data: dict,
+        db_session: AsyncSession,
+    ):
         """Test that user data is properly persisted in database."""
         # Register user
-        response = await client.post("/api/v1/auth/register", json=test_user_data)
+        response = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
         assert response.status_code == 201
 
         response_data = response.json()
@@ -362,29 +457,42 @@ class TestAuthDatabaseIntegration:
         assert user.email == test_user_data["email"]
         assert user.full_name == test_user_data["full_name"]
         assert user.hashed_password is not None
-        assert user.hashed_password != test_user_data["password"]  # Should be hashed
+        assert (
+            user.hashed_password != test_user_data["password"]
+        )  # Should be hashed
         assert user.created_at is not None
         assert user.updated_at is not None
 
     @pytest.mark.integration
-    async def test_user_uniqueness_constraints(self, client: AsyncClient, test_user_data: dict, db_session: AsyncSession):
+    async def test_user_uniqueness_constraints(
+        self,
+        client: AsyncClient,
+        test_user_data: dict,
+        db_session: AsyncSession,
+    ):
         """Test database uniqueness constraints for username and email."""
         # Create first user
-        response1 = await client.post("/api/v1/auth/register", json=test_user_data)
+        response1 = await client.post(
+            "/api/v1/auth/register", json=test_user_data
+        )
         assert response1.status_code == 201
 
         # Try to create user with same username
         duplicate_username_data = test_user_data.copy()
         duplicate_username_data["email"] = "different@example.com"
 
-        response2 = await client.post("/api/v1/auth/register", json=duplicate_username_data)
+        response2 = await client.post(
+            "/api/v1/auth/register", json=duplicate_username_data
+        )
         assert response2.status_code == 409
 
         # Try to create user with same email
         duplicate_email_data = test_user_data.copy()
         duplicate_email_data["username"] = "differentuser"
 
-        response3 = await client.post("/api/v1/auth/register", json=duplicate_email_data)
+        response3 = await client.post(
+            "/api/v1/auth/register", json=duplicate_email_data
+        )
         assert response3.status_code == 409
 
         # Verify only one user exists in database
@@ -394,7 +502,9 @@ class TestAuthDatabaseIntegration:
         assert len(users) == 1
 
     @pytest.mark.integration
-    async def test_transaction_rollback_on_error(self, client: AsyncClient, db_session: AsyncSession):
+    async def test_transaction_rollback_on_error(
+        self, client: AsyncClient, db_session: AsyncSession
+    ):
         """Test that database transactions are properly rolled back on errors."""
         # Count users before
         stmt = select(User)
@@ -410,7 +520,9 @@ class TestAuthDatabaseIntegration:
             "full_name": "Valid Name",
         }
 
-        response = await client.post("/api/v1/auth/register", json=invalid_data)
+        response = await client.post(
+            "/api/v1/auth/register", json=invalid_data
+        )
         assert response.status_code == 422  # Validation error
 
         # Verify no user was created

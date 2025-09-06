@@ -17,7 +17,10 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Set required environment variables
-os.environ.setdefault("DATABASE_URL", "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test")
+os.environ.setdefault(
+    "DATABASE_URL",
+    "postgresql+asyncpg://test_user:test_password@localhost:5432/chatter_test",
+)
 os.environ.setdefault("ENVIRONMENT", "development")
 os.environ.setdefault("OPENAI_API_KEY", "fake-key-for-testing")
 

@@ -211,8 +211,18 @@ class PluginHealthCheckResponse(BaseModel):
 class PluginStatsResponse(BaseModel):
     """Response schema for plugin statistics."""
 
-    total_plugins: int = Field(..., description="Total number of plugins")
-    active_plugins: int = Field(..., description="Number of active plugins")
-    inactive_plugins: int = Field(..., description="Number of inactive plugins")
-    plugin_types: dict[str, int] = Field(..., description="Plugin count by type")
-    plugins_directory: str = Field(..., description="Plugin installation directory")
+    total_plugins: int = Field(
+        ..., description="Total number of plugins"
+    )
+    active_plugins: int = Field(
+        ..., description="Number of active plugins"
+    )
+    inactive_plugins: int = Field(
+        ..., description="Number of inactive plugins"
+    )
+    plugin_types: dict[str, int] = Field(
+        ..., description="Plugin count by type"
+    )
+    plugins_directory: str = Field(
+        ..., description="Plugin installation directory"
+    )

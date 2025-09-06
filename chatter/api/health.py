@@ -1,5 +1,7 @@
 """Health check and monitoring endpoints."""
 
+from datetime import UTC
+
 from fastapi import APIRouter, Depends, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -53,28 +55,28 @@ async def readiness_check(
         Returns 200 if ready, 503 if not ready.
     """
     checks = {}
-    
+
     # Perform database health check with timeout
     try:
         import asyncio
+
         # Use the provided session and add timeout
         db_health = await asyncio.wait_for(
-            health_check(session), 
-            timeout=5.0  # 5 second timeout
+            health_check(session), timeout=5.0  # 5 second timeout
         )
-    except asyncio.TimeoutError:
+    except TimeoutError:
         db_health = {
             "status": "unhealthy",
             "connected": False,
-            "error": "Database health check timeout (>5s)"
+            "error": "Database health check timeout (>5s)",
         }
     except Exception as e:
         db_health = {
-            "status": "unhealthy", 
+            "status": "unhealthy",
             "connected": False,
-            "error": f"Database health check failed: {str(e)}"
+            "error": f"Database health check failed: {str(e)}",
         }
-    
+
     checks["database"] = db_health
 
     # Could add more checks here (Redis, external APIs, etc.)
@@ -87,7 +89,11 @@ async def readiness_check(
     )
 
     response_data = ReadinessCheckResponse(
-        status=ReadinessStatus.READY if all_healthy else ReadinessStatus.NOT_READY,
+        status=(
+            ReadinessStatus.READY
+            if all_healthy
+            else ReadinessStatus.NOT_READY
+        ),
         service="chatter",
         version=settings.app_version,
         environment=settings.environment,
@@ -95,11 +101,14 @@ async def readiness_check(
     )
 
     # Return 503 if not ready (Kubernetes standard)
-    status_code = status.HTTP_200_OK if all_healthy else status.HTTP_503_SERVICE_UNAVAILABLE
-    
+    status_code = (
+        status.HTTP_200_OK
+        if all_healthy
+        else status.HTTP_503_SERVICE_UNAVAILABLE
+    )
+
     return JSONResponse(
-        content=response_data.model_dump(),
-        status_code=status_code
+        content=response_data.model_dump(), status_code=status_code
     )
 
 
@@ -130,16 +139,20 @@ async def get_metrics() -> MetricsResponse:
     Returns:
         Application metrics including performance and health data
     """
-    from datetime import datetime, timezone
-    
+    from datetime import datetime
+
     # Use real timestamp
-    current_timestamp = datetime.now(timezone.utc).isoformat()
-    
+    current_timestamp = datetime.now(UTC).isoformat()
+
     # Default empty metrics in case monitoring is unavailable
     health_metrics = {"status": "unknown", "checks_available": False}
-    performance_stats = {"requests": 0, "errors": 0, "response_time_ms": 0}
+    performance_stats = {
+        "requests": 0,
+        "errors": 0,
+        "response_time_ms": 0,
+    }
     endpoint_stats = {}
-    
+
     try:
         from chatter.core.monitoring import get_monitoring_service
 
@@ -148,10 +161,12 @@ async def get_metrics() -> MetricsResponse:
             monitoring_service = await get_monitoring_service()
             health_data = monitoring_service.get_system_health()
             health_metrics.update(health_data)
-            
+
             # Get endpoint stats
             endpoint_data = monitoring_service.stats_by_endpoint
-            endpoint_stats.update({k: v.__dict__ for k, v in endpoint_data.items()})
+            endpoint_stats.update(
+                {k: v.__dict__ for k, v in endpoint_data.items()}
+            )
             endpoint_stats.update(endpoint_data)
         except Exception as e:
             logger.warning(f"Failed to get endpoint stats: {e}")
@@ -165,10 +180,12 @@ async def get_metrics() -> MetricsResponse:
             performance=performance_stats,
             endpoints=endpoint_stats,
         )
-        
+
     except ImportError:
         # Monitoring module not available
-        logger.warning("Monitoring module not available, returning basic metrics")
+        logger.warning(
+            "Monitoring module not available, returning basic metrics"
+        )
         return MetricsResponse(
             timestamp=current_timestamp,
             service="chatter",
@@ -212,7 +229,9 @@ async def get_correlation_trace(
         )
     except ImportError:
         # Monitoring module not available
-        logger.warning("Monitoring module not available for correlation trace")
+        logger.warning(
+            "Monitoring module not available for correlation trace"
+        )
         return CorrelationTraceResponse(
             correlation_id=correlation_id,
             trace_length=0,
@@ -220,7 +239,9 @@ async def get_correlation_trace(
         )
     except Exception as e:
         # Log the error but don't expose internal details
-        logger.error(f"Failed to get correlation trace for {correlation_id}: {e}")
+        logger.error(
+            f"Failed to get correlation trace for {correlation_id}: {e}"
+        )
         raise InternalServerProblem(
             detail=f"Failed to get trace for correlation ID: {correlation_id}"
         ) from e

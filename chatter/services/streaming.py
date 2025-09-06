@@ -32,7 +32,6 @@ class StreamingEventType(str, Enum):
 
 
 @dataclass
-@dataclass
 class StreamingEvent:
     """Internal streaming event representation."""
 
@@ -543,66 +542,3 @@ class StreamingService:
 
 # Global streaming service instance
 streaming_service = StreamingService()
-
-
-async def create_stream(
-    workflow_type: str, correlation_id: str | None = None
-) -> str:
-    """Create a new streaming session.
-
-    Args:
-        workflow_type: Type of workflow
-        correlation_id: Optional correlation ID
-
-    Returns:
-        Stream ID
-    """
-    import uuid
-
-    stream_id = str(uuid.uuid4())
-
-    await streaming_service.create_stream(
-        stream_id, workflow_type, correlation_id
-    )
-
-    return stream_id
-
-
-async def stream_workflow(
-    stream_id: str,
-    workflow_generator: AsyncGenerator[dict[str, Any], None],
-    enable_heartbeat: bool = True,
-    heartbeat_interval: float = 30.0,
-) -> AsyncGenerator[StreamingChatChunk, None]:
-    """Stream workflow.
-
-    Args:
-        stream_id: Stream identifier
-        workflow_generator: Workflow event generator
-        enable_heartbeat: Whether to enable heartbeat
-        heartbeat_interval: Heartbeat interval in seconds
-
-    Yields:
-        Streaming chunks
-    """
-    try:
-        # Create base streaming generator
-        base_stream = streaming_service.stream_workflow_events(
-            stream_id, workflow_generator
-        )
-
-        # Add heartbeat if enabled
-        if enable_heartbeat:
-            stream = streaming_service.stream_with_heartbeat(
-                stream_id, base_stream, heartbeat_interval
-            )
-        else:
-            stream = base_stream
-
-        # Stream all chunks
-        async for chunk in stream:
-            yield chunk
-
-    finally:
-        # Always end the stream when done
-        await streaming_service.end_stream(stream_id)

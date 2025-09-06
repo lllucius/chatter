@@ -558,16 +558,18 @@ class AnalyticsService:
             time_range_minutes = self._get_time_range_minutes(
                 time_range
             )
-            
+
             # Ensure we don't divide by zero
             if time_range_minutes > 0:
-                requests_per_minute = total_requests / time_range_minutes
+                requests_per_minute = (
+                    total_requests / time_range_minutes
+                )
                 tokens_per_minute = total_tokens / time_range_minutes
             else:
                 # Log warning about invalid time range
                 logger.warning(
                     "Invalid time range for performance metrics calculation",
-                    time_range_minutes=time_range_minutes
+                    time_range_minutes=time_range_minutes,
                 )
                 requests_per_minute = 0.0
                 tokens_per_minute = 0.0
@@ -576,36 +578,39 @@ class AnalyticsService:
             error_messages_result = await self.session.execute(
                 select(
                     func.count(Message.id).label("total_errors"),
-                    func.count(func.distinct(Message.id)).filter(Message.error_message.is_not(None)).label("messages_with_errors"),
-                    func.sum(Message.retry_count).label("total_retries"),
-                    func.avg(Message.retry_count).label("avg_retries")
+                    func.count(func.distinct(Message.id))
+                    .filter(Message.error_message.is_not(None))
+                    .label("messages_with_errors"),
+                    func.sum(Message.retry_count).label(
+                        "total_retries"
+                    ),
+                    func.avg(Message.retry_count).label("avg_retries"),
                 )
                 .select_from(Message)
                 .join(Conversation)
                 .where(
-                    and_(
-                        Conversation.user_id == user_id,
-                        time_filter
-                    )
+                    and_(Conversation.user_id == user_id, time_filter)
                 )
             )
             error_row = error_messages_result.first()
-            
+
             total_errors = int(error_row.messages_with_errors or 0)
-            total_retries = int(error_row.total_retries or 0)
-            total_messages = int(error_row.total_errors or 0)  # Get total message count from the first result
-            
+            # total_retries = int(error_row.total_retries or 0)  # Unused for now
+            total_messages = int(
+                error_row.total_errors or 0
+            )  # Get total message count from the first result
+
             # Calculate error rate
             if total_messages > 0:
                 error_rate = (total_errors / total_messages) * 100
             else:
                 error_rate = 0.0
-            
+
             # Get error types from finish_reason field
             error_types_result = await self.session.execute(
                 select(
                     Message.finish_reason,
-                    func.count(Message.id).label("count")
+                    func.count(Message.id).label("count"),
                 )
                 .select_from(Message)
                 .join(Conversation)
@@ -613,13 +618,13 @@ class AnalyticsService:
                     and_(
                         Conversation.user_id == user_id,
                         time_filter,
-                        Message.error_message.is_not(None)
+                        Message.error_message.is_not(None),
                     )
                 )
                 .group_by(Message.finish_reason)
             )
             errors_by_type = {
-                row.finish_reason or "unknown": int(row.count) 
+                row.finish_reason or "unknown": int(row.count)
                 for row in error_types_result.all()
             }
 
@@ -937,7 +942,11 @@ class AnalyticsService:
                 "popular_search_terms": {},
                 "total_views": 0,
                 "most_viewed_documents": [],
-                "documents_by_access_level": {"private": 0, "public": 0, "shared": 0},
+                "documents_by_access_level": {
+                    "private": 0,
+                    "public": 0,
+                    "shared": 0,
+                },
             }
 
     async def get_system_analytics(self) -> dict[str, Any]:
@@ -948,8 +957,10 @@ class AnalyticsService:
         """
         try:
             # Default time filter for last 24 hours for API metrics
-            time_filter = Message.created_at >= datetime.now(UTC) - timedelta(hours=24)
-            
+            time_filter = Message.created_at >= datetime.now(
+                UTC
+            ) - timedelta(hours=24)
+
             # User activity
             user_activity_result = await self.session.execute(
                 select(
@@ -984,46 +995,60 @@ class AnalyticsService:
             # System health metrics (optional - requires psutil)
             system_health = {}
             try:
-                import psutil
                 import time
-                
+
+                import psutil
+
                 # Get current process info for basic metrics
-                process = psutil.Process()
+                # process = psutil.Process()  # Unused for now
                 system_health = {
-                    "system_uptime_seconds": time.time() - psutil.boot_time(),
+                    "system_uptime_seconds": time.time()
+                    - psutil.boot_time(),
                     "avg_cpu_usage": psutil.cpu_percent(interval=0.1),
                     "avg_memory_usage": psutil.virtual_memory().percent,
-                    "database_connections": len(self.session.get_bind().pool.checkedout()),
+                    "database_connections": len(
+                        self.session.get_bind().pool.checkedout()
+                    ),
                 }
             except (ImportError, AttributeError, Exception):
                 # If psutil not available or other error, skip system health metrics
-                logger.debug("System health metrics not available (psutil may not be installed)")
+                logger.debug(
+                    "System health metrics not available (psutil may not be installed)"
+                )
                 pass
 
             # API metrics from message data (using messages as proxy for API requests)
             api_metrics_result = await self.session.execute(
                 select(
                     func.count(Message.id).label("total_requests"),
-                    func.avg(Message.response_time_ms).label("avg_response_time"),
-                    func.count(Message.id).filter(Message.error_message.is_not(None)).label("error_requests")
+                    func.avg(Message.response_time_ms).label(
+                        "avg_response_time"
+                    ),
+                    func.count(Message.id)
+                    .filter(Message.error_message.is_not(None))
+                    .label("error_requests"),
                 )
                 .select_from(Message)
                 .join(Conversation)
                 .where(time_filter)
             )
             api_row = api_metrics_result.first()
-            
+
             total_api_requests = int(api_row.total_requests or 0)
             avg_response_time = float(api_row.avg_response_time or 0.0)
             error_requests = int(api_row.error_requests or 0)
-            
-            api_error_rate = (error_requests / total_api_requests * 100) if total_api_requests > 0 else 0.0
-            
+
+            api_error_rate = (
+                (error_requests / total_api_requests * 100)
+                if total_api_requests > 0
+                else 0.0
+            )
+
             # Get requests by endpoint (using model_used as proxy)
             endpoint_result = await self.session.execute(
                 select(
                     Message.model_used,
-                    func.count(Message.id).label("request_count")
+                    func.count(Message.id).label("request_count"),
                 )
                 .select_from(Message)
                 .join(Conversation)
@@ -1031,10 +1056,12 @@ class AnalyticsService:
                 .group_by(Message.model_used)
             )
             requests_per_endpoint = {
-                f"model_{row.model_used or 'unknown'}": int(row.request_count)
+                f"model_{row.model_used or 'unknown'}": int(
+                    row.request_count
+                )
                 for row in endpoint_result.all()
             }
-            
+
             api_metrics = {
                 "total_api_requests": total_api_requests,
                 "requests_per_endpoint": requests_per_endpoint,
@@ -1677,40 +1704,42 @@ class AnalyticsService:
         else:
             return 60 * 24 * 7  # Default 7 days
 
-    def _apply_query_optimizations(self, query, limit: int | None = None):
+    def _apply_query_optimizations(
+        self, query, limit: int | None = None
+    ):
         """Apply query optimizations like limits and hints.
-        
+
         Args:
             query: SQLAlchemy query object
             limit: Optional limit for results
-            
+
         Returns:
             Optimized query
         """
         # Add limit to prevent memory issues
         if limit:
             query = query.limit(limit)
-        
+
         # Add execution options for better performance
         query = query.execution_options(
             compiled_cache={},  # Enable statement caching
-            autocommit=False,   # Use transactions
+            autocommit=False,  # Use transactions
         )
-        
+
         return query
-    
+
     async def _execute_with_retry(self, query, max_retries: int = 3):
         """Execute query with retry logic for transient failures.
-        
+
         Args:
             query: SQLAlchemy query to execute
             max_retries: Maximum number of retries
-            
+
         Returns:
             Query result
         """
         last_exception = None
-        
+
         for attempt in range(max_retries):
             try:
                 result = await self.session.execute(query)
@@ -1720,17 +1749,23 @@ class AnalyticsService:
                 logger.warning(
                     f"Query execution failed (attempt {attempt + 1}/{max_retries}): {e}"
                 )
-                
+
                 # Only retry on specific database errors
-                if "connection" in str(e).lower() or "timeout" in str(e).lower():
+                if (
+                    "connection" in str(e).lower()
+                    or "timeout" in str(e).lower()
+                ):
                     if attempt < max_retries - 1:
                         import asyncio
-                        await asyncio.sleep(0.5 * (attempt + 1))  # Exponential backoff
+
+                        await asyncio.sleep(
+                            0.5 * (attempt + 1)
+                        )  # Exponential backoff
                         continue
-                
+
                 # Don't retry on other errors
                 break
-        
+
         # Re-raise the last exception if all retries failed
         raise last_exception
 
@@ -1742,28 +1777,41 @@ class AnalyticsService:
     ) -> dict[str, Any]:
         """Get analytics for a specific user."""
         try:
-            # Build time filter 
+            # Build time filter
             time_range = AnalyticsTimeRange(
                 start_date=start_date,
                 end_date=end_date,
-                period="30d" if not start_date and not end_date else "custom"
+                period="30d"
+                if not start_date and not end_date
+                else "custom",
             )
-            
+
             # Get comprehensive user analytics
-            conversations_task = self.get_conversation_stats(user_id, time_range)
+            conversations_task = self.get_conversation_stats(
+                user_id, time_range
+            )
             usage_task = self.get_usage_metrics(user_id, time_range)
-            performance_task = self.get_performance_metrics(user_id, time_range)
-            document_task = self.get_document_analytics(user_id, time_range)
-            
+            performance_task = self.get_performance_metrics(
+                user_id, time_range
+            )
+            document_task = self.get_document_analytics(
+                user_id, time_range
+            )
+
             # Run analytics in parallel for better performance
-            conversations, usage, performance, documents = await asyncio.gather(
+            (
+                conversations,
+                usage,
+                performance,
+                documents,
+            ) = await asyncio.gather(
                 conversations_task,
                 usage_task,
                 performance_task,
                 document_task,
-                return_exceptions=True
+                return_exceptions=True,
             )
-            
+
             # Handle any exceptions from individual analytics
             result = {
                 "user_id": user_id,
@@ -1771,39 +1819,54 @@ class AnalyticsService:
                 "end_date": end_date,
                 "generated_at": datetime.now(UTC),
             }
-            
+
             if not isinstance(conversations, Exception):
                 result["conversations"] = conversations
             else:
-                logger.warning(f"Failed to get conversation analytics: {conversations}")
+                logger.warning(
+                    f"Failed to get conversation analytics: {conversations}"
+                )
                 result["conversations"] = {}
-                
+
             if not isinstance(usage, Exception):
                 result["usage"] = usage
             else:
-                logger.warning(f"Failed to get usage analytics: {usage}")
+                logger.warning(
+                    f"Failed to get usage analytics: {usage}"
+                )
                 result["usage"] = {}
-                
+
             if not isinstance(performance, Exception):
                 result["performance"] = performance
             else:
-                logger.warning(f"Failed to get performance analytics: {performance}")
+                logger.warning(
+                    f"Failed to get performance analytics: {performance}"
+                )
                 result["performance"] = {}
-                
+
             if not isinstance(documents, Exception):
                 result["documents"] = documents
             else:
-                logger.warning(f"Failed to get document analytics: {documents}")
+                logger.warning(
+                    f"Failed to get document analytics: {documents}"
+                )
                 result["documents"] = {}
-            
+
             # Calculate some derived metrics
-            total_usage_time = usage.get("active_days", 0) * 24 if isinstance(usage, dict) else 0
+            total_usage_time = (
+                usage.get("active_days", 0) * 24
+                if isinstance(usage, dict)
+                else 0
+            )
             result["total_usage_time_hours"] = total_usage_time
-            
+
             return result
-            
+
         except Exception as e:
-            logger.error(f"Failed to get user analytics for {user_id}", error=str(e))
+            logger.error(
+                f"Failed to get user analytics for {user_id}",
+                error=str(e),
+            )
             return {
                 "user_id": user_id,
                 "error": "Failed to retrieve analytics",
@@ -1821,22 +1884,26 @@ class AnalyticsService:
         try:
             if not filters:
                 filters = {}
-                
+
             user_id = filters.get("user_id")
-            metrics = filters.get("metrics", ["conversations", "usage", "performance"])
-            
+            metrics = filters.get(
+                "metrics", ["conversations", "usage", "performance"]
+            )
+
             if not user_id:
-                raise ValueError("user_id is required for analytics export")
-            
+                raise ValueError(
+                    "user_id is required for analytics export"
+                )
+
             # Create time range from date_range tuple
             time_range = None
             if date_range:
                 time_range = AnalyticsTimeRange(
                     start_date=date_range[0],
                     end_date=date_range[1],
-                    period="custom"
+                    period="custom",
                 )
-            
+
             # Collect requested analytics data
             export_data = {
                 "export_info": {
@@ -1844,35 +1911,69 @@ class AnalyticsService:
                     "generated_at": datetime.now(UTC).isoformat(),
                     "user_id": user_id,
                     "date_range": {
-                        "start": date_range[0].isoformat() if date_range else None,
-                        "end": date_range[1].isoformat() if date_range else None,
-                    } if date_range else None,
+                        "start": date_range[0].isoformat()
+                        if date_range
+                        else None,
+                        "end": date_range[1].isoformat()
+                        if date_range
+                        else None,
+                    }
+                    if date_range
+                    else None,
                     "metrics_included": metrics,
                 }
             }
-            
+
             # Gather requested metrics
             for metric in metrics:
                 try:
                     if metric == "conversations":
-                        export_data["conversations"] = await self.get_conversation_stats(user_id, time_range)
+                        export_data[
+                            "conversations"
+                        ] = await self.get_conversation_stats(
+                            user_id, time_range
+                        )
                     elif metric == "usage":
-                        export_data["usage"] = await self.get_usage_metrics(user_id, time_range)
+                        export_data[
+                            "usage"
+                        ] = await self.get_usage_metrics(
+                            user_id, time_range
+                        )
                     elif metric == "performance":
-                        export_data["performance"] = await self.get_performance_metrics(user_id, time_range)
+                        export_data[
+                            "performance"
+                        ] = await self.get_performance_metrics(
+                            user_id, time_range
+                        )
                     elif metric == "documents":
-                        export_data["documents"] = await self.get_document_analytics(user_id, time_range)
+                        export_data[
+                            "documents"
+                        ] = await self.get_document_analytics(
+                            user_id, time_range
+                        )
                     elif metric == "system":
-                        export_data["system"] = await self.get_system_analytics()
+                        export_data[
+                            "system"
+                        ] = await self.get_system_analytics()
                     elif metric == "toolservers":
-                        export_data["toolservers"] = await self.get_tool_server_analytics(user_id, time_range)
+                        export_data[
+                            "toolservers"
+                        ] = await self.get_tool_server_analytics(
+                            user_id, time_range
+                        )
                     else:
-                        logger.warning(f"Unknown metric requested for export: {metric}")
-                        
+                        logger.warning(
+                            f"Unknown metric requested for export: {metric}"
+                        )
+
                 except Exception as e:
-                    logger.error(f"Failed to export metric '{metric}': {e}")
-                    export_data[metric] = {"error": f"Failed to export: {str(e)}"}
-            
+                    logger.error(
+                        f"Failed to export metric '{metric}': {e}"
+                    )
+                    export_data[metric] = {
+                        "error": f"Failed to export: {str(e)}"
+                    }
+
             # Handle different export formats
             if export_format == "json":
                 return export_data
@@ -1881,8 +1982,10 @@ class AnalyticsService:
             elif export_format == "xlsx":
                 return self._export_to_xlsx(export_data)
             else:
-                raise ValueError(f"Unsupported export format: {export_format}")
-                
+                raise ValueError(
+                    f"Unsupported export format: {export_format}"
+                )
+
         except Exception as e:
             logger.error(f"Analytics export failed: {e}")
             return {
@@ -1890,153 +1993,168 @@ class AnalyticsService:
                 "export_format": export_format,
                 "timestamp": datetime.now(UTC).isoformat(),
             }
-    
+
     def _export_to_csv(self, data: dict[str, Any]) -> Any:
         """Convert analytics data to CSV format."""
-        import io
         import csv
-        
+        import io
+
         # Create CSV content
         output = io.StringIO()
-        
+
         # Write export info
         writer = csv.writer(output)
         writer.writerow(["Analytics Export"])
-        writer.writerow(["Generated:", data["export_info"]["generated_at"]])
+        writer.writerow(
+            ["Generated:", data["export_info"]["generated_at"]]
+        )
         writer.writerow(["User ID:", data["export_info"]["user_id"]])
         writer.writerow([])  # Empty row
-        
+
         # Write each metric as separate sections
         for metric, metric_data in data.items():
             if metric == "export_info":
                 continue
-                
+
             writer.writerow([f"{metric.title()} Metrics"])
-            
-            if isinstance(metric_data, dict) and "error" not in metric_data:
+
+            if (
+                isinstance(metric_data, dict)
+                and "error" not in metric_data
+            ):
                 # Flatten the dictionary for CSV
                 for key, value in metric_data.items():
-                    if isinstance(value, (int, float, str)):
+                    if isinstance(value, int | float | str):
                         writer.writerow([key, value])
                     elif isinstance(value, dict):
                         writer.writerow([key, str(value)])
-            
+
             writer.writerow([])  # Empty row between sections
-        
+
         content = output.getvalue()
         output.close()
-        
+
         # Return as generator for streaming
         def generate():
             yield content
-            
+
         return generate()
-    
+
     def _export_to_xlsx(self, data: dict[str, Any]) -> Any:
         """Convert analytics data to Excel format."""
         try:
             import io
+
             from openpyxl import Workbook
-            
+
             wb = Workbook()
             ws = wb.active
             ws.title = "Analytics Export"
-            
+
             # Write header info
             ws.append(["Analytics Export"])
-            ws.append(["Generated:", data["export_info"]["generated_at"]])
+            ws.append(
+                ["Generated:", data["export_info"]["generated_at"]]
+            )
             ws.append(["User ID:", data["export_info"]["user_id"]])
             ws.append([])  # Empty row
-            
+
             # Write each metric as separate sections
             for metric, metric_data in data.items():
                 if metric == "export_info":
                     continue
-                    
+
                 ws.append([f"{metric.title()} Metrics"])
-                
-                if isinstance(metric_data, dict) and "error" not in metric_data:
+
+                if (
+                    isinstance(metric_data, dict)
+                    and "error" not in metric_data
+                ):
                     # Flatten the dictionary for Excel
                     for key, value in metric_data.items():
-                        if isinstance(value, (int, float, str)):
+                        if isinstance(value, int | float | str):
                             ws.append([key, value])
                         elif isinstance(value, dict):
                             ws.append([key, str(value)])
-                
+
                 ws.append([])  # Empty row between sections
-            
+
             # Save to bytes
             output = io.BytesIO()
             wb.save(output)
             output.seek(0)
-            
+
             content = output.getvalue()
             output.close()
-            
+
             # Return as generator for streaming
             def generate():
                 yield content
-                
+
             return generate()
-            
+
         except ImportError:
             logger.error("openpyxl not available for Excel export")
             return self._export_to_csv(data)  # Fallback to CSV
-    
+
     async def get_analytics_health_check(self) -> dict[str, Any]:
         """Perform health check on analytics system.
-        
+
         Returns:
             Health check results including database connectivity and query performance
         """
         health_data = {
             "status": "healthy",
             "timestamp": datetime.now(UTC).isoformat(),
-            "checks": {}
+            "checks": {},
         }
-        
+
         try:
             # Test database connectivity
             start_time = time.time()
             await self.session.execute(select(literal(1)))
             db_response_time = (time.time() - start_time) * 1000
-            
+
             health_data["checks"]["database"] = {
-                "status": "healthy" if db_response_time < 1000 else "slow",
+                "status": "healthy"
+                if db_response_time < 1000
+                else "slow",
                 "response_time_ms": db_response_time,
-                "details": "Database connectivity check"
+                "details": "Database connectivity check",
             }
-            
+
             # Test basic query performance with a simple count
             start_time = time.time()
-            result = await self.session.execute(
+            await self.session.execute(
                 select(func.count(Conversation.id)).limit(1)
             )
             query_response_time = (time.time() - start_time) * 1000
-            
+
             health_data["checks"]["query_performance"] = {
-                "status": "healthy" if query_response_time < 2000 else "slow",
+                "status": "healthy"
+                if query_response_time < 2000
+                else "slow",
                 "response_time_ms": query_response_time,
-                "details": "Basic query performance check"
+                "details": "Basic query performance check",
             }
-            
+
             # Check for any critical errors in analytics data
             health_data["checks"]["data_integrity"] = {
                 "status": "healthy",
-                "details": "No data integrity issues detected"
+                "details": "No data integrity issues detected",
             }
-            
+
             # Overall health assessment
             all_checks_healthy = all(
-                check["status"] == "healthy" 
+                check["status"] == "healthy"
                 for check in health_data["checks"].values()
             )
-            
+
             if not all_checks_healthy:
                 health_data["status"] = "degraded"
-                
+
             return health_data
-            
+
         except Exception as e:
             logger.error(f"Analytics health check failed: {e}")
             health_data["status"] = "unhealthy"
@@ -2044,122 +2162,79 @@ class AnalyticsService:
             health_data["checks"]["database"] = {
                 "status": "unhealthy",
                 "error": str(e),
-                "details": "Database connectivity failed"
+                "details": "Database connectivity failed",
             }
-            
+
             return health_data
-    
+
     async def get_analytics_metrics_summary(self) -> dict[str, Any]:
         """Get a quick summary of key analytics metrics for monitoring.
-        
+
         Returns:
             Summary of analytics metrics for system monitoring
         """
         try:
-            import time
-            
             # Quick metrics collection (last 24 hours)
             yesterday = datetime.now(UTC) - timedelta(hours=24)
-            
+
             # Count recent conversations
             recent_conversations = await self.session.execute(
-                select(func.count(Conversation.id))
-                .where(Conversation.created_at >= yesterday)
+                select(func.count(Conversation.id)).where(
+                    Conversation.created_at >= yesterday
+                )
             )
-            
+
             # Count recent messages
             recent_messages = await self.session.execute(
-                select(func.count(Message.id))
-                .where(Message.created_at >= yesterday)
+                select(func.count(Message.id)).where(
+                    Message.created_at >= yesterday
+                )
             )
-            
+
             # Count recent documents
             recent_documents = await self.session.execute(
-                select(func.count(Document.id))
-                .where(Document.created_at >= yesterday)
+                select(func.count(Document.id)).where(
+                    Document.created_at >= yesterday
+                )
             )
-            
+
             # Get average response time
             avg_response_time = await self.session.execute(
-                select(func.avg(Message.response_time_ms))
-                .where(
+                select(func.avg(Message.response_time_ms)).where(
                     and_(
                         Message.created_at >= yesterday,
-                        Message.response_time_ms.is_not(None)
+                        Message.response_time_ms.is_not(None),
                     )
                 )
             )
-            
+
             return {
                 "period": "last_24_hours",
                 "metrics": {
-                    "conversations_created": recent_conversations.scalar() or 0,
+                    "conversations_created": recent_conversations.scalar()
+                    or 0,
                     "messages_sent": recent_messages.scalar() or 0,
-                    "documents_processed": recent_documents.scalar() or 0,
-                    "avg_response_time_ms": float(avg_response_time.scalar() or 0),
+                    "documents_processed": recent_documents.scalar()
+                    or 0,
+                    "avg_response_time_ms": float(
+                        avg_response_time.scalar() or 0
+                    ),
                 },
                 "timestamp": datetime.now(UTC).isoformat(),
-                "status": "collected"
+                "status": "collected",
             }
-            
+
         except Exception as e:
-            logger.error(f"Failed to collect analytics metrics summary: {e}")
+            logger.error(
+                f"Failed to collect analytics metrics summary: {e}"
+            )
             return {
                 "period": "last_24_hours",
                 "metrics": {},
                 "timestamp": datetime.now(UTC).isoformat(),
                 "status": "failed",
-                "error": str(e)
+                "error": str(e),
             }
-        """Convert analytics data to Excel format."""
-        try:
-            import io
-            from openpyxl import Workbook
-            
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "Analytics Export"
-            
-            # Write header info
-            ws.append(["Analytics Export"])
-            ws.append(["Generated:", data["export_info"]["generated_at"]])
-            ws.append(["User ID:", data["export_info"]["user_id"]])
-            ws.append([])  # Empty row
-            
-            # Write each metric as separate sections
-            for metric, metric_data in data.items():
-                if metric == "export_info":
-                    continue
-                    
-                ws.append([f"{metric.title()} Metrics"])
-                
-                if isinstance(metric_data, dict) and "error" not in metric_data:
-                    # Flatten the dictionary for Excel
-                    for key, value in metric_data.items():
-                        if isinstance(value, (int, float, str)):
-                            ws.append([key, value])
-                        elif isinstance(value, dict):
-                            ws.append([key, str(value)])
-                
-                ws.append([])  # Empty row between sections
-            
-            # Save to bytes
-            output = io.BytesIO()
-            wb.save(output)
-            output.seek(0)
-            
-            content = output.getvalue()
-            output.close()
-            
-            # Return as generator for streaming
-            def generate():
-                yield content
-                
-            return generate()
-            
-        except ImportError:
-            logger.error("openpyxl not available for Excel export")
-            return self._export_to_csv(data)  # Fallback to CSV
 
 
 class AnalyticsError(Exception):
@@ -2196,19 +2271,25 @@ class ConversationAnalyzer:
                     "patterns": [],
                     "quality_score": 0.0,
                 }
-            
+
             # Basic conversation analysis
-            user_messages = [m for m in messages if m.get("role") == "user"]
-            assistant_messages = [m for m in messages if m.get("role") == "assistant"]
-            
+            user_messages = [
+                m for m in messages if m.get("role") == "user"
+            ]
+            assistant_messages = [
+                m for m in messages if m.get("role") == "assistant"
+            ]
+
             # Calculate metrics
             total_words = sum(
-                len(m.get("content", "").split()) 
-                for m in messages 
+                len(m.get("content", "").split())
+                for m in messages
                 if isinstance(m.get("content"), str)
             )
-            avg_words_per_message = total_words / len(messages) if messages else 0
-            
+            avg_words_per_message = (
+                total_words / len(messages) if messages else 0
+            )
+
             # Detect patterns
             patterns = []
             if len(user_messages) > len(assistant_messages):
@@ -2217,10 +2298,13 @@ class ConversationAnalyzer:
                 patterns.append("detailed_conversation")
             if len(messages) > 20:
                 patterns.append("long_conversation")
-            
+
             # Simple quality score based on response completeness
-            quality_score = min(1.0, len(assistant_messages) / max(1, len(user_messages)))
-            
+            quality_score = min(
+                1.0,
+                len(assistant_messages) / max(1, len(user_messages)),
+            )
+
             analysis = {
                 "conversation_id": conversation_id,
                 "message_count": len(messages),
@@ -2232,14 +2316,16 @@ class ConversationAnalyzer:
                 "quality_score": quality_score,
                 "analysis": "conversation_analyzed",
             }
-            
+
             # Store metrics for later retrieval
             self.metrics[conversation_id] = analysis
-            
+
             return analysis
-            
+
         except Exception as e:
-            logger.error(f"Failed to analyze conversation {conversation_id}: {e}")
+            logger.error(
+                f"Failed to analyze conversation {conversation_id}: {e}"
+            )
             return {
                 "conversation_id": conversation_id,
                 "message_count": len(messages) if messages else 0,
@@ -2258,10 +2344,13 @@ class ConversationAnalyzer:
         Returns:
             Conversation metrics
         """
-        return self.metrics.get(conversation_id, {
-            "conversation_id": conversation_id,
-            "status": "not_analyzed"
-        })
+        return self.metrics.get(
+            conversation_id,
+            {
+                "conversation_id": conversation_id,
+                "status": "not_analyzed",
+            },
+        )
 
 
 class PerformanceAnalyzer:
@@ -2297,60 +2386,74 @@ class PerformanceAnalyzer:
             error_rate = metrics.get("error_rate", 0)
             cpu_usage = metrics.get("cpu_usage", 0)
             memory_usage = metrics.get("memory_usage", 0)
-            
+
             # Analyze response time
             response_status = "good"
-            if response_time > self.thresholds["response_time_critical_ms"]:
+            if (
+                response_time
+                > self.thresholds["response_time_critical_ms"]
+            ):
                 response_status = "critical"
-            elif response_time > self.thresholds["response_time_warning_ms"]:
+            elif (
+                response_time
+                > self.thresholds["response_time_warning_ms"]
+            ):
                 response_status = "warning"
-            
+
             # Analyze error rate
             error_status = "good"
             if error_rate > self.thresholds["error_rate_critical"]:
                 error_status = "critical"
             elif error_rate > self.thresholds["error_rate_warning"]:
                 error_status = "warning"
-            
+
             # Analyze resource usage
             resource_status = "good"
-            if (cpu_usage > self.thresholds["cpu_warning"] or 
-                memory_usage > self.thresholds["memory_warning"]):
+            if (
+                cpu_usage > self.thresholds["cpu_warning"]
+                or memory_usage > self.thresholds["memory_warning"]
+            ):
                 resource_status = "warning"
-            
+
             # Overall health score (0-100)
             health_score = 100
             if response_status == "warning":
                 health_score -= 20
             elif response_status == "critical":
                 health_score -= 40
-            
+
             if error_status == "warning":
                 health_score -= 15
             elif error_status == "critical":
                 health_score -= 30
-            
+
             if resource_status == "warning":
                 health_score -= 10
-            
+
             health_score = max(0, health_score)
-            
+
             # Determine overall status
             overall_status = "good"
             if health_score < 50:
                 overall_status = "critical"
             elif health_score < 80:
                 overall_status = "warning"
-            
+
             # Generate recommendations
             recommendations = []
             if response_status in ["warning", "critical"]:
-                recommendations.append("Consider optimizing database queries or adding caching")
+                recommendations.append(
+                    "Consider optimizing database queries or adding caching"
+                )
             if error_status in ["warning", "critical"]:
-                recommendations.append("Investigate error patterns and improve error handling")
+                recommendations.append(
+                    "Investigate error patterns and improve error handling"
+                )
             if resource_status == "warning":
-                recommendations.append("Monitor resource usage and consider scaling")
-            
+                recommendations.append(
+                    "Monitor resource usage and consider scaling"
+                )
+
             analysis = {
                 "component": component,
                 "metrics": metrics,
@@ -2364,14 +2467,16 @@ class PerformanceAnalyzer:
                 },
                 "timestamp": datetime.now(UTC).isoformat(),
             }
-            
+
             # Store for retrieval
             self.performance_data[component] = analysis
-            
+
             return analysis
-            
+
         except Exception as e:
-            logger.error(f"Failed to analyze performance for {component}: {e}")
+            logger.error(
+                f"Failed to analyze performance for {component}: {e}"
+            )
             return {
                 "component": component,
                 "metrics": metrics,
@@ -2391,26 +2496,28 @@ class PerformanceAnalyzer:
                 "components_analyzed": 0,
                 "summary": "No performance data available",
             }
-        
+
         # Calculate overall health
         total_health = 0
         critical_count = 0
         warning_count = 0
-        
+
         for component_data in self.performance_data.values():
             analysis = component_data.get("analysis", {})
             health_score = analysis.get("health_score", 0)
             total_health += health_score
-            
+
             status = analysis.get("overall_status", "unknown")
             if status == "critical":
                 critical_count += 1
             elif status == "warning":
                 warning_count += 1
-        
+
         component_count = len(self.performance_data)
-        avg_health = total_health / component_count if component_count > 0 else 0
-        
+        avg_health = (
+            total_health / component_count if component_count > 0 else 0
+        )
+
         # Determine overall health
         if critical_count > 0:
             overall_health = "critical"
@@ -2420,14 +2527,16 @@ class PerformanceAnalyzer:
             overall_health = "good"
         else:
             overall_health = "degraded"
-        
+
         return {
             "overall_health": overall_health,
             "average_health_score": avg_health,
             "components_analyzed": component_count,
             "critical_components": critical_count,
             "warning_components": warning_count,
-            "healthy_components": component_count - critical_count - warning_count,
+            "healthy_components": component_count
+            - critical_count
+            - warning_count,
         }
 
 
@@ -2458,16 +2567,16 @@ class TrendAnalyzer:
                     "trend": "insufficient_data",
                     "confidence": 0.0,
                 }
-            
+
             # Extract values and timestamps
             values = []
             timestamps = []
-            
+
             for point in time_series_data:
                 if "value" in point and "timestamp" in point:
                     values.append(float(point["value"]))
                     timestamps.append(point["timestamp"])
-            
+
             if len(values) < 2:
                 return {
                     "data_type": data_type,
@@ -2475,23 +2584,25 @@ class TrendAnalyzer:
                     "trend": "invalid_data",
                     "confidence": 0.0,
                 }
-            
+
             # Simple linear trend analysis
             n = len(values)
-            
+
             # Calculate trend direction and strength
-            first_half = values[:n//2]
-            second_half = values[n//2:]
-            
+            first_half = values[: n // 2]
+            second_half = values[n // 2 :]
+
             first_avg = sum(first_half) / len(first_half)
             second_avg = sum(second_half) / len(second_half)
-            
+
             # Calculate percentage change
             if first_avg != 0:
-                percent_change = ((second_avg - first_avg) / first_avg) * 100
+                percent_change = (
+                    (second_avg - first_avg) / first_avg
+                ) * 100
             else:
                 percent_change = 0
-            
+
             # Determine trend direction
             if abs(percent_change) < 5:
                 trend_direction = "stable"
@@ -2499,7 +2610,7 @@ class TrendAnalyzer:
                 trend_direction = "increasing"
             else:
                 trend_direction = "decreasing"
-            
+
             # Calculate trend strength
             if abs(percent_change) > 50:
                 trend_strength = "strong"
@@ -2509,30 +2620,42 @@ class TrendAnalyzer:
                 trend_strength = "weak"
             else:
                 trend_strength = "stable"
-            
+
             # Calculate volatility (standard deviation)
             mean_value = sum(values) / len(values)
-            variance = sum((x - mean_value) ** 2 for x in values) / len(values)
-            volatility = variance ** 0.5
-            
+            variance = sum((x - mean_value) ** 2 for x in values) / len(
+                values
+            )
+            volatility = variance**0.5
+
             # Confidence score based on data consistency
             if volatility == 0:
                 confidence = 1.0
             else:
-                cv = volatility / mean_value if mean_value != 0 else float('inf')
-                confidence = max(0, min(1, 1 - (cv / 2)))  # Normalize coefficient of variation
-            
+                cv = (
+                    volatility / mean_value
+                    if mean_value != 0
+                    else float("inf")
+                )
+                confidence = max(
+                    0, min(1, 1 - (cv / 2))
+                )  # Normalize coefficient of variation
+
             # Detect anomalies (values significantly different from mean)
             anomalies = []
-            threshold = mean_value + (2 * volatility)  # 2 standard deviations
+            threshold = mean_value + (
+                2 * volatility
+            )  # 2 standard deviations
             for i, value in enumerate(values):
                 if abs(value - mean_value) > threshold:
-                    anomalies.append({
-                        "index": i,
-                        "value": value,
-                        "deviation": abs(value - mean_value),
-                    })
-            
+                    anomalies.append(
+                        {
+                            "index": i,
+                            "value": value,
+                            "deviation": abs(value - mean_value),
+                        }
+                    )
+
             analysis = {
                 "data_type": data_type,
                 "data_points": len(time_series_data),
@@ -2553,14 +2676,16 @@ class TrendAnalyzer:
                 "anomalies": anomalies,
                 "analysis_timestamp": datetime.now(UTC).isoformat(),
             }
-            
+
             # Store for later retrieval
             self.trend_data[data_type] = analysis
-            
+
             return analysis
-            
+
         except Exception as e:
-            logger.error(f"Failed to analyze trends for {data_type}: {e}")
+            logger.error(
+                f"Failed to analyze trends for {data_type}: {e}"
+            )
             return {
                 "data_type": data_type,
                 "data_points": len(time_series_data),
@@ -2577,10 +2702,10 @@ class TrendAnalyzer:
         Returns:
             Trend summary
         """
-        return self.trend_data.get(data_type, {
-            "data_type": data_type,
-            "status": "not_analyzed"
-        })
+        return self.trend_data.get(
+            data_type,
+            {"data_type": data_type, "status": "not_analyzed"},
+        )
 
 
 class UserBehaviorAnalyzer:

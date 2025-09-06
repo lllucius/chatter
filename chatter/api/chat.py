@@ -252,7 +252,7 @@ async def chat(
                             "Client disconnected during streaming"
                         )
                         break
-                    yield f"data: {json.dumps(chunk)}\n\n"
+                    yield f"data: {json.dumps(chunk.model_dump())}\n\n"
             except (NotFoundError, ChatServiceError) as e:
                 error_chunk = {"type": "error", "error": str(e)}
                 yield f"data: {json.dumps(error_chunk)}\n\n"

@@ -47,11 +47,20 @@ class AuditEventType(str, Enum):
     EMBEDDING_SPACE_DELETE = "embedding_space.delete"
     EMBEDDING_SPACE_SET_DEFAULT = "embedding_space.set_default"
 
+    # Prompt operations
+    PROMPT_CREATE = "prompt.create"
+    PROMPT_UPDATE = "prompt.update"
+    PROMPT_DELETE = "prompt.delete"
+    PROMPT_TEST = "prompt.test"
+    PROMPT_CLONE = "prompt.clone"
+    PROMPT_ACCESS_ATTEMPT = "prompt.access_attempt"
+
     # Security events
     RATE_LIMIT_EXCEEDED = "security.rate_limit_exceeded"
     AUTHORIZATION_FAILED = "security.authorization_failed"
     VALIDATION_FAILED = "security.validation_failed"
     SUSPICIOUS_ACTIVITY = "security.suspicious_activity"
+    SECURITY_INCIDENT = "security.incident"
 
 
 class AuditResult(str, Enum):
@@ -347,6 +356,268 @@ class AuditLogger:
             request=request,
         )
 
+    async def log_prompt_create(
+        self,
+        prompt_id: str,
+        user_id: str,
+        prompt_name: str,
+        prompt_type: str,
+        category: str,
+        is_public: bool = False,
+        metadata: dict[str, Any] | None = None,
+        request: Request | None = None,
+    ) -> str:
+        """Log prompt creation event.
+
+        Args:
+            prompt_id: Created prompt ID
+            user_id: User who created the prompt
+            prompt_name: Prompt name
+            prompt_type: Type of prompt
+            category: Prompt category
+            is_public: Whether prompt is public
+            metadata: Additional metadata
+            request: HTTP request
+
+        Returns:
+            Event ID
+        """
+        return await self.log_event(
+            event_type=AuditEventType.PROMPT_CREATE,
+            result=AuditResult.SUCCESS,
+            user_id=user_id,
+            resource_type="prompt",
+            resource_id=prompt_id,
+            details={
+                "prompt_name": prompt_name,
+                "prompt_type": prompt_type,
+                "category": category,
+                "is_public": is_public,
+                **(metadata or {}),
+            },
+            request=request,
+        )
+
+    async def log_prompt_update(
+        self,
+        prompt_id: str,
+        user_id: str,
+        fields_updated: list[str],
+        old_values: dict[str, Any] | None = None,
+        new_values: dict[str, Any] | None = None,
+        request: Request | None = None,
+    ) -> str:
+        """Log prompt update event.
+
+        Args:
+            prompt_id: Updated prompt ID
+            user_id: User who updated the prompt
+            fields_updated: List of fields that were updated
+            old_values: Previous values
+            new_values: New values
+            request: HTTP request
+
+        Returns:
+            Event ID
+        """
+        return await self.log_event(
+            event_type=AuditEventType.PROMPT_UPDATE,
+            result=AuditResult.SUCCESS,
+            user_id=user_id,
+            resource_type="prompt",
+            resource_id=prompt_id,
+            details={
+                "fields_updated": fields_updated,
+                "old_values": old_values or {},
+                "new_values": new_values or {},
+            },
+            request=request,
+        )
+
+    async def log_prompt_delete(
+        self,
+        prompt_id: str,
+        user_id: str,
+        prompt_name: str,
+        metadata: dict[str, Any] | None = None,
+        request: Request | None = None,
+    ) -> str:
+        """Log prompt deletion event.
+
+        Args:
+            prompt_id: Deleted prompt ID
+            user_id: User who deleted the prompt
+            prompt_name: Name of deleted prompt
+            metadata: Additional metadata
+            request: HTTP request
+
+        Returns:
+            Event ID
+        """
+        return await self.log_event(
+            event_type=AuditEventType.PROMPT_DELETE,
+            result=AuditResult.SUCCESS,
+            user_id=user_id,
+            resource_type="prompt",
+            resource_id=prompt_id,
+            details={
+                "prompt_name": prompt_name,
+                **(metadata or {}),
+            },
+            request=request,
+        )
+
+    async def log_prompt_test(
+        self,
+        prompt_id: str,
+        user_id: str,
+        test_success: bool,
+        test_duration_ms: int,
+        security_warnings: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
+        request: Request | None = None,
+    ) -> str:
+        """Log prompt test event.
+
+        Args:
+            prompt_id: Tested prompt ID
+            user_id: User who tested the prompt
+            test_success: Whether test succeeded
+            test_duration_ms: Test duration in milliseconds
+            security_warnings: Security warnings if any
+            metadata: Additional metadata
+            request: HTTP request
+
+        Returns:
+            Event ID
+        """
+        return await self.log_event(
+            event_type=AuditEventType.PROMPT_TEST,
+            result=AuditResult.SUCCESS if test_success else AuditResult.FAILURE,
+            user_id=user_id,
+            resource_type="prompt",
+            resource_id=prompt_id,
+            details={
+                "test_success": test_success,
+                "test_duration_ms": test_duration_ms,
+                "security_warnings": security_warnings or [],
+                "security_warnings_count": len(security_warnings or []),
+                **(metadata or {}),
+            },
+            request=request,
+        )
+
+    async def log_prompt_clone(
+        self,
+        source_prompt_id: str,
+        cloned_prompt_id: str,
+        user_id: str,
+        new_name: str,
+        metadata: dict[str, Any] | None = None,
+        request: Request | None = None,
+    ) -> str:
+        """Log prompt clone event.
+
+        Args:
+            source_prompt_id: Source prompt ID
+            cloned_prompt_id: New cloned prompt ID
+            user_id: User who cloned the prompt
+            new_name: Name of cloned prompt
+            metadata: Additional metadata
+            request: HTTP request
+
+        Returns:
+            Event ID
+        """
+        return await self.log_event(
+            event_type=AuditEventType.PROMPT_CLONE,
+            result=AuditResult.SUCCESS,
+            user_id=user_id,
+            resource_type="prompt",
+            resource_id=cloned_prompt_id,
+            details={
+                "source_prompt_id": source_prompt_id,
+                "new_name": new_name,
+                **(metadata or {}),
+            },
+            request=request,
+        )
+
+    async def log_prompt_access_attempt(
+        self,
+        prompt_id: str,
+        user_id: str,
+        access_granted: bool,
+        access_type: str = "read",
+        reason: str | None = None,
+        request: Request | None = None,
+    ) -> str:
+        """Log prompt access attempt.
+
+        Args:
+            prompt_id: Accessed prompt ID
+            user_id: User attempting access
+            access_granted: Whether access was granted
+            access_type: Type of access (read, write, etc.)
+            reason: Reason for access denial if applicable
+            request: HTTP request
+
+        Returns:
+            Event ID
+        """
+        return await self.log_event(
+            event_type=AuditEventType.PROMPT_ACCESS_ATTEMPT,
+            result=AuditResult.SUCCESS if access_granted else AuditResult.FAILURE,
+            user_id=user_id,
+            resource_type="prompt",
+            resource_id=prompt_id,
+            details={
+                "access_granted": access_granted,
+                "access_type": access_type,
+                "reason": reason,
+            },
+            request=request,
+        )
+
+    async def log_security_incident(
+        self,
+        incident_type: str,
+        description: str,
+        user_id: str | None = None,
+        prompt_id: str | None = None,
+        severity: str = "medium",
+        metadata: dict[str, Any] | None = None,
+        request: Request | None = None,
+    ) -> str:
+        """Log security incident.
+
+        Args:
+            incident_type: Type of security incident
+            description: Description of the incident
+            user_id: User ID if applicable
+            prompt_id: Prompt ID if applicable
+            severity: Incident severity (low, medium, high, critical)
+            metadata: Additional metadata
+            request: HTTP request
+
+        Returns:
+            Event ID
+        """
+        return await self.log_event(
+            event_type=AuditEventType.SECURITY_INCIDENT,
+            result=AuditResult.FAILURE,
+            user_id=user_id,
+            resource_type="security",
+            resource_id=prompt_id,
+            details={
+                "incident_type": incident_type,
+                "description": description,
+                "severity": severity,
+                **(metadata or {}),
+            },
+            request=request,
+        )
+
 
 # Global audit logger instance
 _audit_logger: AuditLogger | None = None
@@ -400,6 +671,11 @@ async def audit_operation(
         "create_embedding_space": AuditEventType.EMBEDDING_SPACE_CREATE,
         "update_embedding_space": AuditEventType.EMBEDDING_SPACE_UPDATE,
         "delete_embedding_space": AuditEventType.EMBEDDING_SPACE_DELETE,
+        "create_prompt": AuditEventType.PROMPT_CREATE,
+        "update_prompt": AuditEventType.PROMPT_UPDATE,
+        "delete_prompt": AuditEventType.PROMPT_DELETE,
+        "test_prompt": AuditEventType.PROMPT_TEST,
+        "clone_prompt": AuditEventType.PROMPT_CLONE,
     }
 
     event_type = event_type_map.get(operation_name)
@@ -476,3 +752,6 @@ class AuditLogAnalyzer:
             "security_events": [],
             "recommendations": [],
         }
+
+
+

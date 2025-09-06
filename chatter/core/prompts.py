@@ -45,8 +45,8 @@ class PromptService:
         Raises:
             PromptError: If prompt creation fails
         """
-        from chatter.utils.prompt_audit import PromptAuditLogger
-        
+        from chatter.utils.audit_logging import get_audit_logger
+
         try:
             # Check for duplicate prompt names for this user
             existing_result = await self.session.execute(
@@ -60,11 +60,12 @@ class PromptService:
             existing_prompt = existing_result.scalar_one_or_none()
 
             if existing_prompt:
-                PromptAuditLogger.log_security_incident(
-                    prompt_id=None,
-                    user_id=user_id,
+                audit_logger = get_audit_logger(self.session)
+                await audit_logger.log_security_incident(
                     incident_type="duplicate_name_attempt",
                     description=f"Attempted to create prompt with existing name: {prompt_data.name}",
+                    user_id=user_id,
+                    prompt_id=None,
                     severity="low"
                 )
                 raise PromptError(
@@ -89,7 +90,8 @@ class PromptService:
             await self.session.refresh(prompt)
 
             # Audit log the creation
-            PromptAuditLogger.log_prompt_created(
+            audit_logger = get_audit_logger(self.session)
+            await audit_logger.log_prompt_create(
                 prompt_id=prompt.id,
                 user_id=user_id,
                 prompt_name=prompt.name,
@@ -134,8 +136,8 @@ class PromptService:
         Returns:
             Prompt if found and accessible, None otherwise
         """
-        from chatter.utils.prompt_audit import PromptAuditLogger
-        
+        from chatter.utils.audit_logging import get_audit_logger
+
         try:
             result = await self.session.execute(
                 select(Prompt).where(
@@ -149,10 +151,11 @@ class PromptService:
                 )
             )
             prompt = result.scalar_one_or_none()
-            
+
             # Log access attempt
+            audit_logger = get_audit_logger(self.session)
             if prompt:
-                PromptAuditLogger.log_access_attempt(
+                await audit_logger.log_prompt_access_attempt(
                     prompt_id=prompt_id,
                     user_id=user_id,
                     access_granted=True,
@@ -164,9 +167,9 @@ class PromptService:
                     select(Prompt).where(Prompt.id == prompt_id)
                 )
                 existing_prompt = check_result.scalar_one_or_none()
-                
+
                 if existing_prompt:
-                    PromptAuditLogger.log_access_attempt(
+                    await audit_logger.log_prompt_access_attempt(
                         prompt_id=prompt_id,
                         user_id=user_id,
                         access_granted=False,
@@ -174,14 +177,14 @@ class PromptService:
                         reason="insufficient_permissions"
                     )
                 else:
-                    PromptAuditLogger.log_access_attempt(
+                    await audit_logger.log_prompt_access_attempt(
                         prompt_id=prompt_id,
                         user_id=user_id,
                         access_granted=False,
                         access_type="read",
                         reason="prompt_not_found"
                     )
-            
+
             return prompt
 
         except Exception as e:
@@ -329,6 +332,17 @@ class PromptService:
             await self.session.commit()
             await self.session.refresh(prompt)
 
+            # Audit log the update
+            from chatter.utils.audit_logging import get_audit_logger
+            audit_logger = get_audit_logger(self.session)
+            await audit_logger.log_prompt_update(
+                prompt_id=prompt_id,
+                user_id=user_id,
+                fields_updated=list(update_dict.keys()),
+                old_values={},  # Would need to capture this before update for full audit
+                new_values=update_dict
+            )
+
             logger.info(
                 "Prompt updated", prompt_id=prompt_id, user_id=user_id
             )
@@ -371,8 +385,21 @@ class PromptService:
             if not prompt:
                 return False
 
+            # Store prompt details before deletion for audit logging
+            prompt_name = prompt.name
+
             await self.session.delete(prompt)
             await self.session.commit()
+
+            # Audit log the deletion
+            from chatter.utils.audit_logging import get_audit_logger
+            audit_logger = get_audit_logger(self.session)
+            await audit_logger.log_prompt_delete(
+                prompt_id=prompt_id,
+                user_id=user_id,
+                prompt_name=prompt_name,
+                metadata={}
+            )
 
             logger.info(
                 "Prompt deleted", prompt_id=prompt_id, user_id=user_id
@@ -423,12 +450,14 @@ class PromptService:
             performance_metrics = {}
 
             # Check for potential security issues
-            from chatter.utils.template_security import SecureTemplateRenderer
+            from chatter.utils.template_security import (
+                SecureTemplateRenderer,
+            )
             template_validation = SecureTemplateRenderer.validate_template_syntax(
                 prompt.content, prompt.template_format
             )
             template_variables_used = template_validation.get('variables', [])
-            
+
             # Add security warnings
             if template_validation.get('warnings'):
                 security_warnings.extend(template_validation['warnings'])
@@ -444,7 +473,7 @@ class PromptService:
                         **test_request.variables
                     )
                     render_end = datetime.now(UTC)
-                    
+
                     # Improved token estimation using better approximation
                     if rendered_content:
                         # More accurate token estimation
@@ -453,9 +482,9 @@ class PromptService:
                         word_count = len(rendered_content.split())
                         estimated_tokens = max(
                             char_count // 4,  # Character-based estimation
-                            int(word_count * 1.3),  # Word-based estimation  
+                            int(word_count * 1.3),  # Word-based estimation
                         )
-                    
+
                     if test_request.include_performance_metrics:
                         performance_metrics = {
                             'render_time_ms': int(
@@ -465,7 +494,7 @@ class PromptService:
                             'variable_count': len(test_request.variables),
                             'template_complexity_score': self._calculate_template_complexity(prompt.content),
                         }
-                        
+
                 except Exception as render_error:
                     validation_result["valid"] = False
                     validation_result["errors"].append(
@@ -506,8 +535,9 @@ class PromptService:
             )
 
             # Audit log the test
-            from chatter.utils.prompt_audit import PromptAuditLogger
-            PromptAuditLogger.log_prompt_tested(
+            from chatter.utils.audit_logging import get_audit_logger
+            audit_logger = get_audit_logger(self.session)
+            await audit_logger.log_prompt_test(
                 prompt_id=prompt_id,
                 user_id=user_id,
                 test_success=validation_result["valid"] and rendered_content is not None,
@@ -533,22 +563,22 @@ class PromptService:
 
     def _calculate_template_complexity(self, content: str) -> int:
         """Calculate a simple complexity score for a template.
-        
+
         Args:
             content: Template content
-            
+
         Returns:
             Complexity score (higher = more complex)
         """
         score = 0
-        
+
         # Basic complexity factors
         score += len(content) // 100  # Length factor
         score += content.count('{')   # Variable count
         score += content.count('{{')  # Mustache variables
         score += content.count('{% ')  # Jinja2 control structures
         score += content.count('{{ ')  # Jinja2 variables
-        
+
         return score
 
     async def clone_prompt(
@@ -641,6 +671,17 @@ class PromptService:
             self.session.add(cloned_prompt)
             await self.session.commit()
             await self.session.refresh(cloned_prompt)
+
+            # Audit log the clone
+            from chatter.utils.audit_logging import get_audit_logger
+            audit_logger = get_audit_logger(self.session)
+            await audit_logger.log_prompt_clone(
+                source_prompt_id=prompt_id,
+                cloned_prompt_id=cloned_prompt.id,
+                user_id=user_id,
+                new_name=new_name,
+                metadata=modifications
+            )
 
             logger.info(
                 "Prompt cloned",

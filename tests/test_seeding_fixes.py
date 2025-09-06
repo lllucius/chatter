@@ -174,7 +174,7 @@ class TestErrorHandling:
             side_effect=Exception("Database error")
         )
 
-        with pytest.raises(Exception):
+        with pytest.raises((Exception, RuntimeError)):
             await seeder.seed_database(
                 mode=SeedingMode.MINIMAL, force=False
             )

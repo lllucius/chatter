@@ -224,8 +224,9 @@ class MessageService:
                     role=role.value if role else None,
                     error=str(e),
                 )
-                raise
-            raise ValidationError(f"Failed to add message: {e}") from e
+                raise ValidationError(
+                    f"Failed to add message: {e}"
+                ) from e
 
     async def delete_message(
         self, conversation_id: str, message_id: str, user_id: str

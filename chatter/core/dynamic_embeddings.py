@@ -284,9 +284,7 @@ class DynamicEmbeddingService:
         """Search for similar embeddings using pgvector similarity."""
         try:
             # Get the dynamic embedding table
-            embedding_table = get_embedding_model(
-                model_name, dimension
-            )
+            embedding_table = get_embedding_model(model_name, dimension)
 
             # Build the query with vector similarity
             from sqlalchemy import text

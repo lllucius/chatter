@@ -27,10 +27,11 @@ logger = get_logger(__name__)
 try:
     from chatter.core.workflow_security import workflow_security_manager
 
+    METRICS_ENABLED = False  # Metrics not currently implemented
     SECURITY_ENABLED = True
 except ImportError:
     logger.warning("Workflow security module not available")
-    SECURITY_ENABLED = False
+    METRICS_ENABLED = False
     SECURITY_ENABLED = False
 
 

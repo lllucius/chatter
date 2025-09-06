@@ -1,6 +1,7 @@
 """Tests for model registry API fixes."""
 
 import pytest
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.exceptions import ValidationError
@@ -393,7 +394,7 @@ class TestTransactionManagement:
 
         # Second create with same name should fail and not leave partial data
         with pytest.raises(
-            Exception
+            (ValueError, IntegrityError)
         ):  # Could be IntegrityError or ValidationError
             await service.create_model(model_data)
 

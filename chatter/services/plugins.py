@@ -1,5 +1,6 @@
 """Plugin architecture for custom tools and extensibility."""
 
+import asyncio
 import importlib
 import importlib.util
 import inspect
@@ -346,7 +347,9 @@ class PluginManager:
             try:
                 await self._validate_plugin(plugin_path, manifest)
             except Exception as e:
-                raise ValueError(f"Plugin validation failed: {str(e)}")
+                raise ValueError(
+                    f"Plugin validation failed: {str(e)}"
+                ) from e
 
             # Prepare installation path with atomic operation
             plugin_install_path = self.plugins_directory / manifest.name
@@ -382,7 +385,7 @@ class PluginManager:
                     shutil.rmtree(temp_install_path)
                 raise ValueError(
                     f"Failed to install plugin files: {str(e)}"
-                )
+                ) from e
 
             # Create plugin instance
             try:
@@ -421,7 +424,7 @@ class PluginManager:
                     shutil.rmtree(plugin_install_path)
                 raise ValueError(
                     f"Failed to create plugin instance: {str(e)}"
-                )
+                ) from e
 
     async def uninstall_plugin(self, plugin_id: str) -> bool:
         """Uninstall a plugin.
@@ -534,7 +537,7 @@ class PluginManager:
                 except TimeoutError:
                     raise RuntimeError(
                         "Plugin initialization timed out"
-                    )
+                    ) from None
 
                 # Store loaded plugin
                 self.loaded_plugins[plugin_id] = plugin
@@ -983,8 +986,7 @@ class PluginManager:
                     f"Plugin path outside allowed directory: {plugin_path}"
                 )
         except (OSError, ValueError) as e:
-            raise ValueError(f"Invalid plugin path: {e}")
-
+            raise ValueError(f"Invalid plugin path: {e}") from e
         # Check entry point exists and validate path
         entry_point_path = plugin_path / manifest.entry_point
         if not entry_point_path.exists():
@@ -1158,8 +1160,7 @@ class PluginManager:
                 )
 
         except (OSError, ValueError) as e:
-            raise ImportError(f"Invalid plugin paths: {e}")
-
+            raise ImportError(f"Invalid plugin paths: {e}") from e
         # Check file size (prevent extremely large files)
         try:
             file_size = entry_point_path.stat().st_size
@@ -1169,8 +1170,7 @@ class PluginManager:
                     f"Plugin file too large: {file_size} bytes (max {max_size})"
                 )
         except OSError as e:
-            raise ImportError(f"Cannot access plugin file: {e}")
-
+            raise ImportError(f"Cannot access plugin file: {e}") from e
         # Create a restricted module namespace
         restricted_builtins = {
             '__builtins__': (
@@ -1228,7 +1228,9 @@ class PluginManager:
                 import signal
 
                 def timeout_handler(signum, frame):
-                    raise TimeoutError("Plugin loading timeout")
+                    raise TimeoutError(
+                        "Plugin loading timeout"
+                    ) from None
 
                 # Only use signal-based timeout on Unix systems
                 if platform.system() != 'Windows':
@@ -1247,15 +1249,17 @@ class PluginManager:
                     spec.loader.exec_module(module)
 
             except (TimeoutError, OSError):
-                raise ImportError("Plugin loading timed out or failed")
+                raise ImportError(
+                    "Plugin loading timed out or failed"
+                ) from None
             except Exception as e:
-                raise ImportError(f"Error loading plugin module: {e}")
-
+                raise ImportError(
+                    f"Error loading plugin module: {e}"
+                ) from e
         except ImportError:
             raise
         except Exception as e:
-            raise ImportError(f"Failed to load plugin: {e}")
-
+            raise ImportError(f"Failed to load plugin: {e}") from e
         # Find plugin class
         plugin_class = None
         valid_base_classes = (

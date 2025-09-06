@@ -7,6 +7,7 @@ from typing import Any
 from urllib.parse import urlparse
 
 from .context import ValidationContext
+from .engine import ValidationResult
 from .exceptions import (
     BusinessValidationError,
     SecurityValidationError,

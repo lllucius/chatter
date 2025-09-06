@@ -65,8 +65,8 @@ class TestDatabaseFixtures:
             response = await client.get("/healthz")
             # Health endpoint should exist and return 200
             assert response.status_code == 200
-        except Exception:
+        except Exception as e:
             # If health endpoint doesn't exist, that's a problem
             raise AssertionError(
                 "Health endpoint /healthz should be available"
-            )
+            ) from e

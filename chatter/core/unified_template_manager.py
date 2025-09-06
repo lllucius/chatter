@@ -380,7 +380,7 @@ class UnifiedTemplateManager:
                     await self.session.rollback()
                 raise WorkflowConfigurationError(
                     f"Failed to save template: {str(e)}"
-                )
+                ) from e
 
         # Record in builder history
         self.builder_history.append(
@@ -536,7 +536,7 @@ class UnifiedTemplateManager:
                     await self.session.rollback()
                 raise WorkflowConfigurationError(
                     f"Failed to register template: {str(e)}"
-                )
+                ) from e
         else:
             logger.info(
                 f"Registered template in memory: {template.name}"
@@ -586,7 +586,7 @@ class UnifiedTemplateManager:
             await self.session.rollback()
             raise WorkflowConfigurationError(
                 f"Failed to remove template: {str(e)}"
-            )
+            ) from e
 
         return False
 

@@ -16,13 +16,15 @@ from chatter.models.conversation import (
 )
 from chatter.schemas.chat import (
     ChatRequest,
-    StreamingChatChunk,
 )
 from chatter.schemas.chat import (
     ConversationCreate as ConversationCreateSchema,
 )
 from chatter.schemas.chat import (
     ConversationUpdate as ConversationUpdateSchema,
+)
+from chatter.schemas.chat import (
+    StreamingChatChunk,
 )
 from chatter.services.conversation import ConversationService
 from chatter.services.llm import LLMService

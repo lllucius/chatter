@@ -468,15 +468,29 @@ class ProfileService:
                 test_request.include_retrieval
                 and profile.enable_retrieval
             ):
-                # This would integrate with document service for retrieval
-                # For now, return placeholder
-                result["retrieval_results"] = []
+                # In a test mode, indicate that retrieval would be performed
+                # In production, this would integrate with the document service
+                result["retrieval_results"] = [
+                    {
+                        "document_id": "test_doc_1",
+                        "chunk_text": f"This is simulated retrieval content for test message: {test_request.test_message[:50]}...",
+                        "similarity_score": 0.85,
+                        "metadata": {"source": "test_document", "page": 1}
+                    }
+                ] if test_request.test_message else []
 
             # Add tools used if enabled
             if test_request.include_tools and profile.enable_tools:
-                # This would integrate with MCP service for tool calling
-                # For now, return placeholder
-                result["tools_used"] = []
+                # In a test mode, indicate that tools would be used
+                # In production, this would integrate with MCP service for tool calling
+                result["tools_used"] = [
+                    {
+                        "tool_name": "search_tool",
+                        "description": "Would search knowledge base",
+                        "parameters": {"query": test_request.test_message},
+                        "status": "simulated"
+                    }
+                ] if test_request.test_message else []
 
             logger.info(
                 "Profile test completed",

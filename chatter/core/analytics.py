@@ -541,10 +541,55 @@ class AnalyticsService:
                 requests_per_minute = 0.0
                 tokens_per_minute = 0.0
 
-            # Error metrics (placeholder - would need error tracking)
-            total_errors = 0
-            error_rate = 0.0
-            errors_by_type = {}
+            # Error metrics from message error tracking
+            error_messages_result = await self.session.execute(
+                select(
+                    func.count(Message.id).label("total_errors"),
+                    func.count(distinct(Message.id)).filter(Message.error_message.is_not(None)).label("messages_with_errors"),
+                    func.sum(Message.retry_count).label("total_retries"),
+                    func.avg(Message.retry_count).label("avg_retries")
+                )
+                .select_from(Message)
+                .join(Conversation)
+                .where(
+                    and_(
+                        Conversation.user_id == user_id,
+                        time_filter
+                    )
+                )
+            )
+            error_row = error_messages_result.first()
+            
+            total_errors = int(error_row.messages_with_errors or 0)
+            total_retries = int(error_row.total_retries or 0)
+            
+            # Calculate error rate
+            if total_messages > 0:
+                error_rate = (total_errors / total_messages) * 100
+            else:
+                error_rate = 0.0
+            
+            # Get error types from finish_reason field
+            error_types_result = await self.session.execute(
+                select(
+                    Message.finish_reason,
+                    func.count(Message.id).label("count")
+                )
+                .select_from(Message)
+                .join(Conversation)
+                .where(
+                    and_(
+                        Conversation.user_id == user_id,
+                        time_filter,
+                        Message.error_message.is_not(None)
+                    )
+                )
+                .group_by(Message.finish_reason)
+            )
+            errors_by_type = {
+                row.finish_reason or "unknown": int(row.count) 
+                for row in error_types_result.all()
+            }
 
             # Performance by model
             model_performance_result = await self.session.execute(
@@ -634,9 +679,6 @@ class AnalyticsService:
                 "errors_by_type": errors_by_type,
                 "performance_by_model": performance_by_model,
                 "performance_by_provider": performance_by_provider,
-                "database_response_time_ms": 0.0,  # Placeholder
-                "vector_search_time_ms": 0.0,  # Placeholder
-                "embedding_generation_time_ms": 0.0,  # Placeholder
             }
 
         except Exception as e:
@@ -867,20 +909,65 @@ class AnalyticsService:
                 active_users_week = 0
                 active_users_month = 0
 
-            # System health (placeholder values)
-            system_health = {
-                "system_uptime_seconds": 0.0,
-                "avg_cpu_usage": 0.0,
-                "avg_memory_usage": 0.0,
-                "database_connections": 0,
-            }
+            # System health metrics (optional - requires psutil)
+            system_health = {}
+            try:
+                import psutil
+                import time
+                
+                # Get current process info for basic metrics
+                process = psutil.Process()
+                system_health = {
+                    "system_uptime_seconds": time.time() - psutil.boot_time(),
+                    "avg_cpu_usage": psutil.cpu_percent(interval=0.1),
+                    "avg_memory_usage": psutil.virtual_memory().percent,
+                    "database_connections": len(self.session.get_bind().pool.checkedout()),
+                }
+            except (ImportError, AttributeError, Exception):
+                # If psutil not available or other error, skip system health metrics
+                logger.debug("System health metrics not available (psutil may not be installed)")
+                pass
 
-            # API metrics (placeholder values)
+            # API metrics from message data (using messages as proxy for API requests)
+            api_metrics_result = await self.session.execute(
+                select(
+                    func.count(Message.id).label("total_requests"),
+                    func.avg(Message.response_time_ms).label("avg_response_time"),
+                    func.count(Message.id).filter(Message.error_message.is_not(None)).label("error_requests")
+                )
+                .select_from(Message)
+                .join(Conversation)
+                .where(time_filter)
+            )
+            api_row = api_metrics_result.first()
+            
+            total_api_requests = int(api_row.total_requests or 0)
+            avg_response_time = float(api_row.avg_response_time or 0.0)
+            error_requests = int(api_row.error_requests or 0)
+            
+            api_error_rate = (error_requests / total_api_requests * 100) if total_api_requests > 0 else 0.0
+            
+            # Get requests by endpoint (using model_used as proxy)
+            endpoint_result = await self.session.execute(
+                select(
+                    Message.model_used,
+                    func.count(Message.id).label("request_count")
+                )
+                .select_from(Message)
+                .join(Conversation)
+                .where(time_filter)
+                .group_by(Message.model_used)
+            )
+            requests_per_endpoint = {
+                f"model_{row.model_used or 'unknown'}": int(row.request_count)
+                for row in endpoint_result.all()
+            }
+            
             api_metrics = {
-                "total_api_requests": 0,
-                "requests_per_endpoint": {},
-                "avg_api_response_time": 0.0,
-                "api_error_rate": 0.0,
+                "total_api_requests": total_api_requests,
+                "requests_per_endpoint": requests_per_endpoint,
+                "avg_api_response_time": avg_response_time,
+                "api_error_rate": api_error_rate,
             }
 
             # Resource usage
@@ -897,8 +984,6 @@ class AnalyticsService:
                 **system_health,
                 **api_metrics,
                 "storage_usage_bytes": storage_usage,
-                "vector_database_size_bytes": 0,  # Placeholder
-                "cache_hit_rate": 0.0,  # Placeholder
             }
 
         except Exception as e:
@@ -1389,7 +1474,6 @@ class AnalyticsService:
                 "performance_metrics": performance_metrics,
                 "document_analytics": document_analytics,
                 "system_health": system_health,
-                "custom_metrics": [],  # Placeholder for custom metrics
                 "generated_at": datetime.now(UTC),
             }
 

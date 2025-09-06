@@ -438,9 +438,53 @@ class BusinessValidator(BaseValidator):
         
     def _validate_provider_rules(self, data: Dict[str, Any], context: ValidationContext) -> 'ValidationResult':
         """Validate provider-specific rules."""
-        from .engine import ValidationResult
-        # Placeholder for provider-specific validation
-        return ValidationResult(is_valid=True, value=data)
+        from .engine import ValidationResult, BusinessValidationError
+        
+        errors = []
+        provider_name = data.get("name", "").lower()
+        api_key = data.get("api_key", "")
+        
+        # Provider-specific validation rules
+        if provider_name == "openai":
+            if api_key and not api_key.startswith("sk-"):
+                errors.append(BusinessValidationError(
+                    "OpenAI API keys must start with 'sk-'",
+                    rule_name="provider_rules"
+                ))
+        elif provider_name == "anthropic":
+            if api_key and not api_key.startswith("sk-ant-"):
+                errors.append(BusinessValidationError(
+                    "Anthropic API keys must start with 'sk-ant-'",
+                    rule_name="provider_rules"
+                ))
+        elif provider_name in ["cohere", "cohereai"]:
+            if api_key and len(api_key) < 32:
+                errors.append(BusinessValidationError(
+                    "Cohere API keys must be at least 32 characters",
+                    rule_name="provider_rules"
+                ))
+        
+        # General validations for all providers
+        if "api_key" in data and not api_key:
+            errors.append(BusinessValidationError(
+                "API key cannot be empty",
+                rule_name="provider_rules"
+            ))
+            
+        # Check required fields based on provider
+        required_fields = data.get("required_fields", [])
+        for field in required_fields:
+            if field not in data or not data[field]:
+                errors.append(BusinessValidationError(
+                    f"Required field '{field}' is missing or empty",
+                    rule_name="provider_rules"
+                ))
+        
+        return ValidationResult(
+            is_valid=len(errors) == 0,
+            value=data,
+            errors=errors
+        )
 
 
 class ConfigValidator(BaseValidator):

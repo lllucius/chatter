@@ -1576,55 +1576,22 @@ class AnalyticsService:
         Returns:
             Dictionary with all dashboard data
         """
-        try:
-            # Run all analytics in parallel
-            conversation_task = self.get_conversation_stats(
-                user_id, time_range
-            )
-            usage_task = self.get_usage_metrics(user_id, time_range)
-            performance_task = self.get_performance_metrics(
-                user_id, time_range
-            )
-            document_task = self.get_document_analytics(
-                user_id, time_range
-            )
-            system_task = self.get_system_analytics()
+        # Get each analytics section individually with their own exception handling
+        # This ensures that if one fails, others still return proper default values
+        conversation_stats = await self.get_conversation_stats(user_id, time_range)
+        usage_metrics = await self.get_usage_metrics(user_id, time_range)
+        performance_metrics = await self.get_performance_metrics(user_id, time_range)
+        document_analytics = await self.get_document_analytics(user_id, time_range)
+        system_health = await self.get_system_analytics()
 
-            # Wait for all tasks to complete
-            (
-                conversation_stats,
-                usage_metrics,
-                performance_metrics,
-                document_analytics,
-                system_health,
-            ) = await asyncio.gather(
-                conversation_task,
-                usage_task,
-                performance_task,
-                document_task,
-                system_task,
-            )
-
-            return {
-                "conversation_stats": conversation_stats,
-                "usage_metrics": usage_metrics,
-                "performance_metrics": performance_metrics,
-                "document_analytics": document_analytics,
-                "system_health": system_health,
-                "generated_at": datetime.now(UTC),
-            }
-
-        except Exception as e:
-            logger.error("Failed to get dashboard data", error=str(e))
-            # Return default values to prevent validation errors
-            return {
-                "conversation_stats": {},
-                "usage_metrics": {},
-                "performance_metrics": {},
-                "document_analytics": {},
-                "system_health": {},
-                "generated_at": datetime.now(UTC),
-            }
+        return {
+            "conversation_stats": conversation_stats,
+            "usage_metrics": usage_metrics,
+            "performance_metrics": performance_metrics,
+            "document_analytics": document_analytics,
+            "system_health": system_health,
+            "generated_at": datetime.now(UTC),
+        }
 
     def _build_time_filter(
         self,

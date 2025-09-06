@@ -20,6 +20,15 @@ Name | Type | Description | Notes
 **message_count** | **number** | Number of messages | [default to undefined]
 **total_tokens** | **number** | Total tokens used | [default to undefined]
 **total_cost** | **number** | Total cost | [default to undefined]
+**system_prompt** | **string** |  | [optional] [default to undefined]
+**context_window** | **number** | Context window size | [default to undefined]
+**memory_enabled** | **boolean** | Memory enabled | [default to undefined]
+**memory_strategy** | **string** |  | [optional] [default to undefined]
+**retrieval_limit** | **number** | Retrieval limit | [default to undefined]
+**retrieval_score_threshold** | **number** | Retrieval score threshold | [default to undefined]
+**tags** | **Array&lt;string&gt;** |  | [optional] [default to undefined]
+**extra_metadata** | **{ [key: string]: any; }** |  | [optional] [default to undefined]
+**workflow_config** | **{ [key: string]: any; }** |  | [optional] [default to undefined]
 **created_at** | **string** | Creation timestamp | [default to undefined]
 **updated_at** | **string** | Last update timestamp | [default to undefined]
 **last_message_at** | **string** |  | [optional] [default to undefined]
@@ -44,6 +53,15 @@ const instance: ConversationResponse = {
     message_count,
     total_tokens,
     total_cost,
+    system_prompt,
+    context_window,
+    memory_enabled,
+    memory_strategy,
+    retrieval_limit,
+    retrieval_score_threshold,
+    tags,
+    extra_metadata,
+    workflow_config,
     created_at,
     updated_at,
     last_message_at,

@@ -55,7 +55,7 @@ const { status, data } = await apiInstance.changePasswordApiV1AuthChangePassword
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -163,7 +163,7 @@ const { status, data } = await apiInstance.createApiKeyApiV1AuthApiKeyPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -208,7 +208,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -252,7 +252,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -296,7 +296,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -393,7 +393,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -595,7 +595,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -647,7 +647,7 @@ const { status, data } = await apiInstance.updateProfileApiV1AuthMePut(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

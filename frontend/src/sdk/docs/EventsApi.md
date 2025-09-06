@@ -39,7 +39,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -83,7 +83,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -127,7 +127,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -171,7 +171,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -215,7 +215,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

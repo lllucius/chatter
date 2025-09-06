@@ -63,7 +63,7 @@ const { status, data } = await apiInstance.createEmbeddingSpaceApiV1ModelsEmbedd
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -116,7 +116,7 @@ const { status, data } = await apiInstance.createModelApiV1ModelsModelsPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -169,7 +169,7 @@ const { status, data } = await apiInstance.createProviderApiV1ModelsProvidersPos
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -221,7 +221,7 @@ const { status, data } = await apiInstance.deleteEmbeddingSpaceApiV1ModelsEmbedd
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -273,7 +273,7 @@ const { status, data } = await apiInstance.deleteModelApiV1ModelsModelsModelIdDe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -325,7 +325,7 @@ const { status, data } = await apiInstance.deleteProviderApiV1ModelsProvidersPro
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -370,7 +370,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -421,7 +421,7 @@ const { status, data } = await apiInstance.getDefaultModelApiV1ModelsDefaultsMod
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -473,7 +473,7 @@ const { status, data } = await apiInstance.getDefaultProviderApiV1ModelsDefaults
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -525,7 +525,7 @@ const { status, data } = await apiInstance.getEmbeddingSpaceApiV1ModelsEmbedding
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -577,7 +577,7 @@ const { status, data } = await apiInstance.getModelApiV1ModelsModelsModelIdGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -629,7 +629,7 @@ const { status, data } = await apiInstance.getProviderApiV1ModelsProvidersProvid
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -690,7 +690,7 @@ const { status, data } = await apiInstance.listEmbeddingSpacesApiV1ModelsEmbeddi
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -754,7 +754,7 @@ const { status, data } = await apiInstance.listModelsApiV1ModelsModelsGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -812,7 +812,7 @@ const { status, data } = await apiInstance.listProvidersApiV1ModelsProvidersGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -864,7 +864,7 @@ const { status, data } = await apiInstance.setDefaultEmbeddingSpaceApiV1ModelsEm
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -916,7 +916,7 @@ const { status, data } = await apiInstance.setDefaultModelApiV1ModelsModelsModel
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -972,7 +972,7 @@ const { status, data } = await apiInstance.setDefaultProviderApiV1ModelsProvider
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1028,7 +1028,7 @@ const { status, data } = await apiInstance.updateEmbeddingSpaceApiV1ModelsEmbedd
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1084,7 +1084,7 @@ const { status, data } = await apiInstance.updateModelApiV1ModelsModelsModelIdPu
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1140,7 +1140,7 @@ const { status, data } = await apiInstance.updateProviderApiV1ModelsProvidersPro
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

@@ -52,7 +52,7 @@ const { status, data } = await apiInstance.deleteDocumentApiV1DocumentsDocumentI
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -104,7 +104,7 @@ const { status, data } = await apiInstance.downloadDocumentApiV1DocumentsDocumen
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -156,7 +156,7 @@ const { status, data } = await apiInstance.getDocumentApiV1DocumentsDocumentIdGe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -217,7 +217,7 @@ const { status, data } = await apiInstance.getDocumentChunksApiV1DocumentsDocume
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -262,7 +262,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -334,7 +334,7 @@ const { status, data } = await apiInstance.listDocumentsApiV1DocumentsGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -392,7 +392,7 @@ const { status, data } = await apiInstance.processDocumentApiV1DocumentsDocument
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -444,7 +444,7 @@ const { status, data } = await apiInstance.reprocessDocumentApiV1DocumentsDocume
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -497,7 +497,7 @@ const { status, data } = await apiInstance.searchDocumentsApiV1DocumentsSearchPo
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -553,7 +553,7 @@ const { status, data } = await apiInstance.updateDocumentApiV1DocumentsDocumentI
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -623,7 +623,7 @@ const { status, data } = await apiInstance.uploadDocumentApiV1DocumentsUploadPos
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

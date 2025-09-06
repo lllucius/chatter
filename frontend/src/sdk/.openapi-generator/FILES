@@ -18,9 +18,13 @@ docs/APIKeyCreate.md
 docs/APIKeyResponse.md
 docs/APIKeyRevokeResponse.md
 docs/AccountDeactivateResponse.md
+docs/AgentBulkCreateRequest.md
+docs/AgentBulkCreateResponse.md
+docs/AgentBulkDeleteRequest.md
 docs/AgentCapability.md
 docs/AgentCreateRequest.md
 docs/AgentDeleteResponse.md
+docs/AgentHealthResponse.md
 docs/AgentInteractRequest.md
 docs/AgentInteractResponse.md
 docs/AgentListResponse.md
@@ -91,6 +95,7 @@ docs/ExportScope.md
 docs/HTTPValidationError.md
 docs/HealthApi.md
 docs/HealthCheckResponse.md
+docs/HealthStatus.md
 docs/JobActionResponse.md
 docs/JobCreateRequest.md
 docs/JobListResponse.md
@@ -101,7 +106,6 @@ docs/JobStatus.md
 docs/JobsApi.md
 docs/LogoutResponse.md
 docs/McpStatusResponse.md
-docs/MessageCreate.md
 docs/MessageDeleteResponse.md
 docs/MessageResponse.md
 docs/MessageRole.md
@@ -125,9 +129,11 @@ docs/PerformanceMetricsResponse.md
 docs/PerformanceStatsResponse.md
 docs/PluginActionResponse.md
 docs/PluginDeleteResponse.md
+docs/PluginHealthCheckResponse.md
 docs/PluginInstallRequest.md
 docs/PluginListResponse.md
 docs/PluginResponse.md
+docs/PluginStatsResponse.md
 docs/PluginStatus.md
 docs/PluginType.md
 docs/PluginUpdateRequest.md
@@ -163,6 +169,7 @@ docs/ProviderList.md
 docs/ProviderType.md
 docs/ProviderUpdate.md
 docs/ReadinessCheckResponse.md
+docs/ReadinessStatus.md
 docs/ReductionStrategy.md
 docs/RestoreRequest.md
 docs/RestoreResponse.md

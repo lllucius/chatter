@@ -1162,8 +1162,7 @@ export const AgentType = {
     creative: 'creative',
     research: 'research',
     support: 'support',
-    specialist: 'specialist',
-    specialist2: 'specialist'
+    specialist: 'specialist'
 } as const;
 
 export type AgentType = typeof AgentType[keyof typeof AgentType];
@@ -1560,25 +1559,25 @@ export type BackupType = typeof BackupType[keyof typeof BackupType];
 /**
  * 
  * @export
- * @interface BodyListAgentsApiV1AgentsAgentsGet
+ * @interface BodyListAgentsApiV1AgentsGet
  */
-export interface BodyListAgentsApiV1AgentsAgentsGet {
+export interface BodyListAgentsApiV1AgentsGet {
     /**
      * 
      * @type {PaginationRequest}
-     * @memberof BodyListAgentsApiV1AgentsAgentsGet
+     * @memberof BodyListAgentsApiV1AgentsGet
      */
     'pagination'?: PaginationRequest;
     /**
      * 
      * @type {SortingRequest}
-     * @memberof BodyListAgentsApiV1AgentsAgentsGet
+     * @memberof BodyListAgentsApiV1AgentsGet
      */
     'sorting'?: SortingRequest;
     /**
      * 
      * @type {Array<string>}
-     * @memberof BodyListAgentsApiV1AgentsAgentsGet
+     * @memberof BodyListAgentsApiV1AgentsGet
      */
     'tags'?: Array<string> | null;
 }
@@ -1755,6 +1754,12 @@ export interface ChatRequest {
     'system_prompt_override'?: string | null;
     /**
      * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ChatRequest
+     */
+    'workflow_config'?: { [key: string]: any; } | null;
+    /**
+     * 
      * @type {string}
      * @memberof ChatRequest
      */
@@ -1856,6 +1861,30 @@ export interface ConversationCreate {
      * @memberof ConversationCreate
      */
     'enable_retrieval'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof ConversationCreate
+     */
+    'temperature'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ConversationCreate
+     */
+    'max_tokens'?: number | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationCreate
+     */
+    'workflow_config'?: { [key: string]: any; } | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationCreate
+     */
+    'extra_metadata'?: { [key: string]: any; } | null;
 }
 /**
  * Schema for conversation delete response.
@@ -1960,6 +1989,60 @@ export interface ConversationResponse {
      * @memberof ConversationResponse
      */
     'total_cost': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationResponse
+     */
+    'system_prompt'?: string | null;
+    /**
+     * Context window size
+     * @type {number}
+     * @memberof ConversationResponse
+     */
+    'context_window': number;
+    /**
+     * Memory enabled
+     * @type {boolean}
+     * @memberof ConversationResponse
+     */
+    'memory_enabled': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationResponse
+     */
+    'memory_strategy'?: string | null;
+    /**
+     * Retrieval limit
+     * @type {number}
+     * @memberof ConversationResponse
+     */
+    'retrieval_limit': number;
+    /**
+     * Retrieval score threshold
+     * @type {number}
+     * @memberof ConversationResponse
+     */
+    'retrieval_score_threshold': number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ConversationResponse
+     */
+    'tags'?: Array<string> | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationResponse
+     */
+    'extra_metadata'?: { [key: string]: any; } | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationResponse
+     */
+    'workflow_config'?: { [key: string]: any; } | null;
     /**
      * Creation timestamp
      * @type {string}
@@ -2130,6 +2213,30 @@ export interface ConversationUpdate {
      * @memberof ConversationUpdate
      */
     'status'?: ConversationStatus | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ConversationUpdate
+     */
+    'temperature'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof ConversationUpdate
+     */
+    'max_tokens'?: number | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationUpdate
+     */
+    'workflow_config'?: { [key: string]: any; } | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationUpdate
+     */
+    'extra_metadata'?: { [key: string]: any; } | null;
 }
 
 
@@ -2223,6 +2330,60 @@ export interface ConversationWithMessages {
      * @memberof ConversationWithMessages
      */
     'total_cost': number;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationWithMessages
+     */
+    'system_prompt'?: string | null;
+    /**
+     * Context window size
+     * @type {number}
+     * @memberof ConversationWithMessages
+     */
+    'context_window': number;
+    /**
+     * Memory enabled
+     * @type {boolean}
+     * @memberof ConversationWithMessages
+     */
+    'memory_enabled': boolean;
+    /**
+     * 
+     * @type {string}
+     * @memberof ConversationWithMessages
+     */
+    'memory_strategy'?: string | null;
+    /**
+     * Retrieval limit
+     * @type {number}
+     * @memberof ConversationWithMessages
+     */
+    'retrieval_limit': number;
+    /**
+     * Retrieval score threshold
+     * @type {number}
+     * @memberof ConversationWithMessages
+     */
+    'retrieval_score_threshold': number;
+    /**
+     * 
+     * @type {Array<string>}
+     * @memberof ConversationWithMessages
+     */
+    'tags'?: Array<string> | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationWithMessages
+     */
+    'extra_metadata'?: { [key: string]: any; } | null;
+    /**
+     * 
+     * @type {{ [key: string]: any; }}
+     * @memberof ConversationWithMessages
+     */
+    'workflow_config'?: { [key: string]: any; } | null;
     /**
      * Creation timestamp
      * @type {string}
@@ -4028,27 +4189,6 @@ export interface McpStatusResponse {
     'errors'?: Array<string>;
 }
 /**
- * Schema for creating a message.
- * @export
- * @interface MessageCreate
- */
-export interface MessageCreate {
-    /**
-     * Message role
-     * @type {MessageRole}
-     * @memberof MessageCreate
-     */
-    'role': MessageRole;
-    /**
-     * Message content
-     * @type {string}
-     * @memberof MessageCreate
-     */
-    'content': string;
-}
-
-
-/**
  * Response schema for message deletion.
  * @export
  * @interface MessageDeleteResponse
@@ -4605,6 +4745,7 @@ export interface ModelDeleteResponse {
 
 export const ModelType = {
     llm: 'llm',
+    chat: 'chat',
     embedding: 'embedding'
 } as const;
 
@@ -8934,6 +9075,12 @@ export interface UserResponse {
      */
     'is_verified': boolean;
     /**
+     * Is user a superuser
+     * @type {boolean}
+     * @memberof UserResponse
+     */
+    'is_superuser': boolean;
+    /**
      * 
      * @type {string}
      * @memberof UserResponse
@@ -8945,6 +9092,30 @@ export interface UserResponse {
      * @memberof UserResponse
      */
     'default_profile_id'?: string | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserResponse
+     */
+    'daily_message_limit'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserResponse
+     */
+    'monthly_message_limit'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof UserResponse
+     */
+    'max_file_size_mb'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof UserResponse
+     */
+    'api_key_name'?: string | null;
     /**
      * Account creation date
      * @type {string}
@@ -9195,7 +9366,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9232,7 +9403,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9273,7 +9444,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9314,7 +9485,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9356,7 +9527,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9394,7 +9565,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9432,7 +9603,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9470,7 +9641,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9508,7 +9679,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9545,7 +9716,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9594,7 +9765,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9632,7 +9803,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -9673,7 +9844,7 @@ export const ABTestingApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10544,10 +10715,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkCreateAgentsApiV1AgentsAgentsBulkPost: async (agentBulkCreateRequest: AgentBulkCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        bulkCreateAgentsApiV1AgentsBulkPost: async (agentBulkCreateRequest: AgentBulkCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentBulkCreateRequest' is not null or undefined
-            assertParamExists('bulkCreateAgentsApiV1AgentsAgentsBulkPost', 'agentBulkCreateRequest', agentBulkCreateRequest)
-            const localVarPath = `/api/v1/agents/agents/bulk`;
+            assertParamExists('bulkCreateAgentsApiV1AgentsBulkPost', 'agentBulkCreateRequest', agentBulkCreateRequest)
+            const localVarPath = `/api/v1/agents/bulk`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -10559,7 +10730,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10584,10 +10755,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkCreateAgentsApiV1AgentsAgentsBulkPost_1: async (agentBulkCreateRequest: AgentBulkCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        bulkCreateAgentsApiV1AgentsBulkPost_1: async (agentBulkCreateRequest: AgentBulkCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentBulkCreateRequest' is not null or undefined
-            assertParamExists('bulkCreateAgentsApiV1AgentsAgentsBulkPost_1', 'agentBulkCreateRequest', agentBulkCreateRequest)
-            const localVarPath = `/api/v1/agents/agents/bulk`;
+            assertParamExists('bulkCreateAgentsApiV1AgentsBulkPost_1', 'agentBulkCreateRequest', agentBulkCreateRequest)
+            const localVarPath = `/api/v1/agents/bulk`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -10599,7 +10770,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10624,10 +10795,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkDeleteAgentsApiV1AgentsAgentsBulkDelete: async (agentBulkDeleteRequest: AgentBulkDeleteRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        bulkDeleteAgentsApiV1AgentsBulkDelete: async (agentBulkDeleteRequest: AgentBulkDeleteRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentBulkDeleteRequest' is not null or undefined
-            assertParamExists('bulkDeleteAgentsApiV1AgentsAgentsBulkDelete', 'agentBulkDeleteRequest', agentBulkDeleteRequest)
-            const localVarPath = `/api/v1/agents/agents/bulk`;
+            assertParamExists('bulkDeleteAgentsApiV1AgentsBulkDelete', 'agentBulkDeleteRequest', agentBulkDeleteRequest)
+            const localVarPath = `/api/v1/agents/bulk`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -10639,7 +10810,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10664,10 +10835,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2: async (agentBulkDeleteRequest: AgentBulkDeleteRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        bulkDeleteAgentsApiV1AgentsBulkDelete_2: async (agentBulkDeleteRequest: AgentBulkDeleteRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentBulkDeleteRequest' is not null or undefined
-            assertParamExists('bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2', 'agentBulkDeleteRequest', agentBulkDeleteRequest)
-            const localVarPath = `/api/v1/agents/agents/bulk`;
+            assertParamExists('bulkDeleteAgentsApiV1AgentsBulkDelete_2', 'agentBulkDeleteRequest', agentBulkDeleteRequest)
+            const localVarPath = `/api/v1/agents/bulk`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -10679,7 +10850,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10704,10 +10875,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createAgentApiV1AgentsAgentsPost: async (agentCreateRequest: AgentCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        createAgentApiV1AgentsPost: async (agentCreateRequest: AgentCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentCreateRequest' is not null or undefined
-            assertParamExists('createAgentApiV1AgentsAgentsPost', 'agentCreateRequest', agentCreateRequest)
-            const localVarPath = `/api/v1/agents/agents/`;
+            assertParamExists('createAgentApiV1AgentsPost', 'agentCreateRequest', agentCreateRequest)
+            const localVarPath = `/api/v1/agents/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -10719,7 +10890,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10744,10 +10915,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createAgentApiV1AgentsAgentsPost_3: async (agentCreateRequest: AgentCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        createAgentApiV1AgentsPost_3: async (agentCreateRequest: AgentCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentCreateRequest' is not null or undefined
-            assertParamExists('createAgentApiV1AgentsAgentsPost_3', 'agentCreateRequest', agentCreateRequest)
-            const localVarPath = `/api/v1/agents/agents/`;
+            assertParamExists('createAgentApiV1AgentsPost_3', 'agentCreateRequest', agentCreateRequest)
+            const localVarPath = `/api/v1/agents/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -10759,7 +10930,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10784,10 +10955,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteAgentApiV1AgentsAgentsAgentIdDelete: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deleteAgentApiV1AgentsAgentIdDelete: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('deleteAgentApiV1AgentsAgentsAgentIdDelete', 'agentId', agentId)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}`
+            assertParamExists('deleteAgentApiV1AgentsAgentIdDelete', 'agentId', agentId)
+            const localVarPath = `/api/v1/agents/{agent_id}`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -10800,7 +10971,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10822,10 +10993,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteAgentApiV1AgentsAgentsAgentIdDelete_4: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        deleteAgentApiV1AgentsAgentIdDelete_4: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('deleteAgentApiV1AgentsAgentsAgentIdDelete_4', 'agentId', agentId)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}`
+            assertParamExists('deleteAgentApiV1AgentsAgentIdDelete_4', 'agentId', agentId)
+            const localVarPath = `/api/v1/agents/{agent_id}`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -10838,7 +11009,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10860,10 +11031,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentApiV1AgentsAgentsAgentIdGet: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getAgentApiV1AgentsAgentIdGet: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('getAgentApiV1AgentsAgentsAgentIdGet', 'agentId', agentId)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}`
+            assertParamExists('getAgentApiV1AgentsAgentIdGet', 'agentId', agentId)
+            const localVarPath = `/api/v1/agents/{agent_id}`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -10876,7 +11047,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10898,10 +11069,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentApiV1AgentsAgentsAgentIdGet_5: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getAgentApiV1AgentsAgentIdGet_5: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('getAgentApiV1AgentsAgentsAgentIdGet_5', 'agentId', agentId)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}`
+            assertParamExists('getAgentApiV1AgentsAgentIdGet_5', 'agentId', agentId)
+            const localVarPath = `/api/v1/agents/{agent_id}`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -10914,7 +11085,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10936,10 +11107,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentHealthApiV1AgentsAgentsAgentIdHealthGet: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getAgentHealthApiV1AgentsAgentIdHealthGet: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('getAgentHealthApiV1AgentsAgentsAgentIdHealthGet', 'agentId', agentId)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}/health`
+            assertParamExists('getAgentHealthApiV1AgentsAgentIdHealthGet', 'agentId', agentId)
+            const localVarPath = `/api/v1/agents/{agent_id}/health`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -10952,7 +11123,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -10974,10 +11145,10 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getAgentHealthApiV1AgentsAgentIdHealthGet_6: async (agentId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6', 'agentId', agentId)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}/health`
+            assertParamExists('getAgentHealthApiV1AgentsAgentIdHealthGet_6', 'agentId', agentId)
+            const localVarPath = `/api/v1/agents/{agent_id}/health`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -10990,7 +11161,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -11011,8 +11182,8 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentStatsApiV1AgentsAgentsStatsOverviewGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/agents/agents/stats/overview`;
+        getAgentStatsApiV1AgentsStatsOverviewGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/agents/stats/overview`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -11024,7 +11195,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -11045,8 +11216,8 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentStatsApiV1AgentsAgentsStatsOverviewGet_7: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/agents/agents/stats/overview`;
+        getAgentStatsApiV1AgentsStatsOverviewGet_7: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/agents/stats/overview`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -11058,7 +11229,75 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get predefined agent templates for common use cases.
+         * @summary Get agent templates
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAgentTemplatesApiV1AgentsTemplatesGet: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/agents/templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication CustomHTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Get predefined agent templates for common use cases.
+         * @summary Get agent templates
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAgentTemplatesApiV1AgentsTemplatesGet_8: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/agents/templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -11081,12 +11320,12 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        interactWithAgentApiV1AgentsAgentsAgentIdInteractPost: async (agentId: string, agentInteractRequest: AgentInteractRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        interactWithAgentApiV1AgentsAgentIdInteractPost: async (agentId: string, agentInteractRequest: AgentInteractRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('interactWithAgentApiV1AgentsAgentsAgentIdInteractPost', 'agentId', agentId)
+            assertParamExists('interactWithAgentApiV1AgentsAgentIdInteractPost', 'agentId', agentId)
             // verify required parameter 'agentInteractRequest' is not null or undefined
-            assertParamExists('interactWithAgentApiV1AgentsAgentsAgentIdInteractPost', 'agentInteractRequest', agentInteractRequest)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}/interact`
+            assertParamExists('interactWithAgentApiV1AgentsAgentIdInteractPost', 'agentInteractRequest', agentInteractRequest)
+            const localVarPath = `/api/v1/agents/{agent_id}/interact`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -11099,7 +11338,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -11125,12 +11364,12 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8: async (agentId: string, agentInteractRequest: AgentInteractRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        interactWithAgentApiV1AgentsAgentIdInteractPost_9: async (agentId: string, agentInteractRequest: AgentInteractRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8', 'agentId', agentId)
+            assertParamExists('interactWithAgentApiV1AgentsAgentIdInteractPost_9', 'agentId', agentId)
             // verify required parameter 'agentInteractRequest' is not null or undefined
-            assertParamExists('interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8', 'agentInteractRequest', agentInteractRequest)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}/interact`
+            assertParamExists('interactWithAgentApiV1AgentsAgentIdInteractPost_9', 'agentInteractRequest', agentInteractRequest)
+            const localVarPath = `/api/v1/agents/{agent_id}/interact`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -11143,7 +11382,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -11166,12 +11405,12 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @summary List agents
          * @param {AgentType | null} [agentType] 
          * @param {AgentStatus | null} [status] 
-         * @param {BodyListAgentsApiV1AgentsAgentsGet} [bodyListAgentsApiV1AgentsAgentsGet] 
+         * @param {BodyListAgentsApiV1AgentsGet} [bodyListAgentsApiV1AgentsGet] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listAgentsApiV1AgentsAgentsGet: async (agentType?: AgentType | null, status?: AgentStatus | null, bodyListAgentsApiV1AgentsAgentsGet?: BodyListAgentsApiV1AgentsAgentsGet, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/agents/agents/`;
+        listAgentsApiV1AgentsGet: async (agentType?: AgentType | null, status?: AgentStatus | null, bodyListAgentsApiV1AgentsGet?: BodyListAgentsApiV1AgentsGet, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/agents/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -11183,7 +11422,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -11202,7 +11441,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(bodyListAgentsApiV1AgentsAgentsGet, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(bodyListAgentsApiV1AgentsGet, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -11214,12 +11453,12 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @summary List agents
          * @param {AgentType | null} [agentType] 
          * @param {AgentStatus | null} [status] 
-         * @param {BodyListAgentsApiV1AgentsAgentsGet} [bodyListAgentsApiV1AgentsAgentsGet] 
+         * @param {BodyListAgentsApiV1AgentsGet} [bodyListAgentsApiV1AgentsGet] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listAgentsApiV1AgentsAgentsGet_9: async (agentType?: AgentType | null, status?: AgentStatus | null, bodyListAgentsApiV1AgentsAgentsGet?: BodyListAgentsApiV1AgentsAgentsGet, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/agents/agents/`;
+        listAgentsApiV1AgentsGet_10: async (agentType?: AgentType | null, status?: AgentStatus | null, bodyListAgentsApiV1AgentsGet?: BodyListAgentsApiV1AgentsGet, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/agents/`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -11231,7 +11470,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -11250,7 +11489,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(bodyListAgentsApiV1AgentsAgentsGet, localVarRequestOptions, configuration)
+            localVarRequestOptions.data = serializeDataIfNeeded(bodyListAgentsApiV1AgentsGet, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -11265,12 +11504,12 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAgentApiV1AgentsAgentsAgentIdPut: async (agentId: string, agentUpdateRequest: AgentUpdateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        updateAgentApiV1AgentsAgentIdPut: async (agentId: string, agentUpdateRequest: AgentUpdateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('updateAgentApiV1AgentsAgentsAgentIdPut', 'agentId', agentId)
+            assertParamExists('updateAgentApiV1AgentsAgentIdPut', 'agentId', agentId)
             // verify required parameter 'agentUpdateRequest' is not null or undefined
-            assertParamExists('updateAgentApiV1AgentsAgentsAgentIdPut', 'agentUpdateRequest', agentUpdateRequest)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}`
+            assertParamExists('updateAgentApiV1AgentsAgentIdPut', 'agentUpdateRequest', agentUpdateRequest)
+            const localVarPath = `/api/v1/agents/{agent_id}`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -11283,7 +11522,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -11309,12 +11548,12 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAgentApiV1AgentsAgentsAgentIdPut_10: async (agentId: string, agentUpdateRequest: AgentUpdateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        updateAgentApiV1AgentsAgentIdPut_11: async (agentId: string, agentUpdateRequest: AgentUpdateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'agentId' is not null or undefined
-            assertParamExists('updateAgentApiV1AgentsAgentsAgentIdPut_10', 'agentId', agentId)
+            assertParamExists('updateAgentApiV1AgentsAgentIdPut_11', 'agentId', agentId)
             // verify required parameter 'agentUpdateRequest' is not null or undefined
-            assertParamExists('updateAgentApiV1AgentsAgentsAgentIdPut_10', 'agentUpdateRequest', agentUpdateRequest)
-            const localVarPath = `/api/v1/agents/agents/{agent_id}`
+            assertParamExists('updateAgentApiV1AgentsAgentIdPut_11', 'agentUpdateRequest', agentUpdateRequest)
+            const localVarPath = `/api/v1/agents/{agent_id}`
                 .replace(`{${"agent_id"}}`, encodeURIComponent(String(agentId)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -11327,7 +11566,7 @@ export const AgentsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -11362,10 +11601,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async bulkCreateAgentsApiV1AgentsAgentsBulkPost(agentBulkCreateRequest: AgentBulkCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentBulkCreateResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.bulkCreateAgentsApiV1AgentsAgentsBulkPost(agentBulkCreateRequest, options);
+        async bulkCreateAgentsApiV1AgentsBulkPost(agentBulkCreateRequest: AgentBulkCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentBulkCreateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.bulkCreateAgentsApiV1AgentsBulkPost(agentBulkCreateRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.bulkCreateAgentsApiV1AgentsAgentsBulkPost']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.bulkCreateAgentsApiV1AgentsBulkPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11375,10 +11614,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async bulkCreateAgentsApiV1AgentsAgentsBulkPost_1(agentBulkCreateRequest: AgentBulkCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentBulkCreateResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.bulkCreateAgentsApiV1AgentsAgentsBulkPost_1(agentBulkCreateRequest, options);
+        async bulkCreateAgentsApiV1AgentsBulkPost_1(agentBulkCreateRequest: AgentBulkCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentBulkCreateResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.bulkCreateAgentsApiV1AgentsBulkPost_1(agentBulkCreateRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.bulkCreateAgentsApiV1AgentsAgentsBulkPost_1']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.bulkCreateAgentsApiV1AgentsBulkPost_1']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11388,10 +11627,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async bulkDeleteAgentsApiV1AgentsAgentsBulkDelete(agentBulkDeleteRequest: AgentBulkDeleteRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.bulkDeleteAgentsApiV1AgentsAgentsBulkDelete(agentBulkDeleteRequest, options);
+        async bulkDeleteAgentsApiV1AgentsBulkDelete(agentBulkDeleteRequest: AgentBulkDeleteRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.bulkDeleteAgentsApiV1AgentsBulkDelete(agentBulkDeleteRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.bulkDeleteAgentsApiV1AgentsAgentsBulkDelete']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.bulkDeleteAgentsApiV1AgentsBulkDelete']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11401,10 +11640,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2(agentBulkDeleteRequest: AgentBulkDeleteRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2(agentBulkDeleteRequest, options);
+        async bulkDeleteAgentsApiV1AgentsBulkDelete_2(agentBulkDeleteRequest: AgentBulkDeleteRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{ [key: string]: any; }>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.bulkDeleteAgentsApiV1AgentsBulkDelete_2(agentBulkDeleteRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.bulkDeleteAgentsApiV1AgentsBulkDelete_2']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11414,10 +11653,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async createAgentApiV1AgentsAgentsPost(agentCreateRequest: AgentCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createAgentApiV1AgentsAgentsPost(agentCreateRequest, options);
+        async createAgentApiV1AgentsPost(agentCreateRequest: AgentCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createAgentApiV1AgentsPost(agentCreateRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.createAgentApiV1AgentsAgentsPost']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.createAgentApiV1AgentsPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11427,10 +11666,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async createAgentApiV1AgentsAgentsPost_3(agentCreateRequest: AgentCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.createAgentApiV1AgentsAgentsPost_3(agentCreateRequest, options);
+        async createAgentApiV1AgentsPost_3(agentCreateRequest: AgentCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createAgentApiV1AgentsPost_3(agentCreateRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.createAgentApiV1AgentsAgentsPost_3']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.createAgentApiV1AgentsPost_3']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11440,10 +11679,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteAgentApiV1AgentsAgentsAgentIdDelete(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentDeleteResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteAgentApiV1AgentsAgentsAgentIdDelete(agentId, options);
+        async deleteAgentApiV1AgentsAgentIdDelete(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentDeleteResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteAgentApiV1AgentsAgentIdDelete(agentId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.deleteAgentApiV1AgentsAgentsAgentIdDelete']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.deleteAgentApiV1AgentsAgentIdDelete']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11453,10 +11692,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async deleteAgentApiV1AgentsAgentsAgentIdDelete_4(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentDeleteResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteAgentApiV1AgentsAgentsAgentIdDelete_4(agentId, options);
+        async deleteAgentApiV1AgentsAgentIdDelete_4(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentDeleteResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteAgentApiV1AgentsAgentIdDelete_4(agentId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.deleteAgentApiV1AgentsAgentsAgentIdDelete_4']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.deleteAgentApiV1AgentsAgentIdDelete_4']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11466,10 +11705,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAgentApiV1AgentsAgentsAgentIdGet(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentApiV1AgentsAgentsAgentIdGet(agentId, options);
+        async getAgentApiV1AgentsAgentIdGet(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentApiV1AgentsAgentIdGet(agentId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentApiV1AgentsAgentsAgentIdGet']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentApiV1AgentsAgentIdGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11479,10 +11718,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAgentApiV1AgentsAgentsAgentIdGet_5(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentApiV1AgentsAgentsAgentIdGet_5(agentId, options);
+        async getAgentApiV1AgentsAgentIdGet_5(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentApiV1AgentsAgentIdGet_5(agentId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentApiV1AgentsAgentsAgentIdGet_5']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentApiV1AgentsAgentIdGet_5']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11492,10 +11731,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAgentHealthApiV1AgentsAgentsAgentIdHealthGet(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentHealthResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentHealthApiV1AgentsAgentsAgentIdHealthGet(agentId, options);
+        async getAgentHealthApiV1AgentsAgentIdHealthGet(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentHealthResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentHealthApiV1AgentsAgentIdHealthGet(agentId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentHealthApiV1AgentsAgentsAgentIdHealthGet']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentHealthApiV1AgentsAgentIdHealthGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11505,10 +11744,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentHealthResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6(agentId, options);
+        async getAgentHealthApiV1AgentsAgentIdHealthGet_6(agentId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentHealthResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentHealthApiV1AgentsAgentIdHealthGet_6(agentId, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentHealthApiV1AgentsAgentIdHealthGet_6']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11517,10 +11756,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAgentStatsApiV1AgentsAgentsStatsOverviewGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentStatsResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentStatsApiV1AgentsAgentsStatsOverviewGet(options);
+        async getAgentStatsApiV1AgentsStatsOverviewGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentStatsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentStatsApiV1AgentsStatsOverviewGet(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentStatsApiV1AgentsAgentsStatsOverviewGet']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentStatsApiV1AgentsStatsOverviewGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11529,10 +11768,34 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getAgentStatsApiV1AgentsAgentsStatsOverviewGet_7(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentStatsResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentStatsApiV1AgentsAgentsStatsOverviewGet_7(options);
+        async getAgentStatsApiV1AgentsStatsOverviewGet_7(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentStatsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentStatsApiV1AgentsStatsOverviewGet_7(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentStatsApiV1AgentsAgentsStatsOverviewGet_7']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentStatsApiV1AgentsStatsOverviewGet_7']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get predefined agent templates for common use cases.
+         * @summary Get agent templates
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAgentTemplatesApiV1AgentsTemplatesGet(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<{ [key: string]: any; }>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentTemplatesApiV1AgentsTemplatesGet(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentTemplatesApiV1AgentsTemplatesGet']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Get predefined agent templates for common use cases.
+         * @summary Get agent templates
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getAgentTemplatesApiV1AgentsTemplatesGet_8(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<{ [key: string]: any; }>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getAgentTemplatesApiV1AgentsTemplatesGet_8(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.getAgentTemplatesApiV1AgentsTemplatesGet_8']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11543,10 +11806,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async interactWithAgentApiV1AgentsAgentsAgentIdInteractPost(agentId: string, agentInteractRequest: AgentInteractRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentInteractResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.interactWithAgentApiV1AgentsAgentsAgentIdInteractPost(agentId, agentInteractRequest, options);
+        async interactWithAgentApiV1AgentsAgentIdInteractPost(agentId: string, agentInteractRequest: AgentInteractRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentInteractResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.interactWithAgentApiV1AgentsAgentIdInteractPost(agentId, agentInteractRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.interactWithAgentApiV1AgentsAgentsAgentIdInteractPost']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.interactWithAgentApiV1AgentsAgentIdInteractPost']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11557,10 +11820,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8(agentId: string, agentInteractRequest: AgentInteractRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentInteractResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8(agentId, agentInteractRequest, options);
+        async interactWithAgentApiV1AgentsAgentIdInteractPost_9(agentId: string, agentInteractRequest: AgentInteractRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentInteractResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.interactWithAgentApiV1AgentsAgentIdInteractPost_9(agentId, agentInteractRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.interactWithAgentApiV1AgentsAgentIdInteractPost_9']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11568,14 +11831,14 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @summary List agents
          * @param {AgentType | null} [agentType] 
          * @param {AgentStatus | null} [status] 
-         * @param {BodyListAgentsApiV1AgentsAgentsGet} [bodyListAgentsApiV1AgentsAgentsGet] 
+         * @param {BodyListAgentsApiV1AgentsGet} [bodyListAgentsApiV1AgentsGet] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listAgentsApiV1AgentsAgentsGet(agentType?: AgentType | null, status?: AgentStatus | null, bodyListAgentsApiV1AgentsAgentsGet?: BodyListAgentsApiV1AgentsAgentsGet, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listAgentsApiV1AgentsAgentsGet(agentType, status, bodyListAgentsApiV1AgentsAgentsGet, options);
+        async listAgentsApiV1AgentsGet(agentType?: AgentType | null, status?: AgentStatus | null, bodyListAgentsApiV1AgentsGet?: BodyListAgentsApiV1AgentsGet, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listAgentsApiV1AgentsGet(agentType, status, bodyListAgentsApiV1AgentsGet, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.listAgentsApiV1AgentsAgentsGet']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.listAgentsApiV1AgentsGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11583,14 +11846,14 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @summary List agents
          * @param {AgentType | null} [agentType] 
          * @param {AgentStatus | null} [status] 
-         * @param {BodyListAgentsApiV1AgentsAgentsGet} [bodyListAgentsApiV1AgentsAgentsGet] 
+         * @param {BodyListAgentsApiV1AgentsGet} [bodyListAgentsApiV1AgentsGet] 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listAgentsApiV1AgentsAgentsGet_9(agentType?: AgentType | null, status?: AgentStatus | null, bodyListAgentsApiV1AgentsAgentsGet?: BodyListAgentsApiV1AgentsAgentsGet, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listAgentsApiV1AgentsAgentsGet_9(agentType, status, bodyListAgentsApiV1AgentsAgentsGet, options);
+        async listAgentsApiV1AgentsGet_10(agentType?: AgentType | null, status?: AgentStatus | null, bodyListAgentsApiV1AgentsGet?: BodyListAgentsApiV1AgentsGet, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listAgentsApiV1AgentsGet_10(agentType, status, bodyListAgentsApiV1AgentsGet, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.listAgentsApiV1AgentsAgentsGet_9']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.listAgentsApiV1AgentsGet_10']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11601,10 +11864,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async updateAgentApiV1AgentsAgentsAgentIdPut(agentId: string, agentUpdateRequest: AgentUpdateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateAgentApiV1AgentsAgentsAgentIdPut(agentId, agentUpdateRequest, options);
+        async updateAgentApiV1AgentsAgentIdPut(agentId: string, agentUpdateRequest: AgentUpdateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateAgentApiV1AgentsAgentIdPut(agentId, agentUpdateRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.updateAgentApiV1AgentsAgentsAgentIdPut']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.updateAgentApiV1AgentsAgentIdPut']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -11615,10 +11878,10 @@ export const AgentsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async updateAgentApiV1AgentsAgentsAgentIdPut_10(agentId: string, agentUpdateRequest: AgentUpdateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.updateAgentApiV1AgentsAgentsAgentIdPut_10(agentId, agentUpdateRequest, options);
+        async updateAgentApiV1AgentsAgentIdPut_11(agentId: string, agentUpdateRequest: AgentUpdateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AgentResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateAgentApiV1AgentsAgentIdPut_11(agentId, agentUpdateRequest, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['AgentsApi.updateAgentApiV1AgentsAgentsAgentIdPut_10']?.[localVarOperationServerIndex]?.url;
+            const localVarOperationServerBasePath = operationServerMap['AgentsApi.updateAgentApiV1AgentsAgentIdPut_11']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
     }
@@ -11634,122 +11897,122 @@ export const AgentsApiFactory = function (configuration?: Configuration, basePat
         /**
          * Create multiple agents in bulk.  Args:     request: Bulk creation request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk creation results
          * @summary Bulk Create Agents
-         * @param {AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPostRequest} requestParameters Request parameters.
+         * @param {AgentsApiBulkCreateAgentsApiV1AgentsBulkPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkCreateAgentsApiV1AgentsAgentsBulkPost(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentBulkCreateResponse> {
-            return localVarFp.bulkCreateAgentsApiV1AgentsAgentsBulkPost(requestParameters.agentBulkCreateRequest, options).then((request) => request(axios, basePath));
+        bulkCreateAgentsApiV1AgentsBulkPost(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsBulkPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentBulkCreateResponse> {
+            return localVarFp.bulkCreateAgentsApiV1AgentsBulkPost(requestParameters.agentBulkCreateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Create multiple agents in bulk.  Args:     request: Bulk creation request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk creation results
          * @summary Bulk Create Agents
-         * @param {AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost0Request} requestParameters Request parameters.
+         * @param {AgentsApiBulkCreateAgentsApiV1AgentsBulkPost0Request} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkCreateAgentsApiV1AgentsAgentsBulkPost_1(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentBulkCreateResponse> {
-            return localVarFp.bulkCreateAgentsApiV1AgentsAgentsBulkPost_1(requestParameters.agentBulkCreateRequest, options).then((request) => request(axios, basePath));
+        bulkCreateAgentsApiV1AgentsBulkPost_1(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsBulkPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentBulkCreateResponse> {
+            return localVarFp.bulkCreateAgentsApiV1AgentsBulkPost_1(requestParameters.agentBulkCreateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Delete multiple agents in bulk.  Args:     request: Bulk deletion request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk deletion results
          * @summary Bulk Delete Agents
-         * @param {AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDeleteRequest} requestParameters Request parameters.
+         * @param {AgentsApiBulkDeleteAgentsApiV1AgentsBulkDeleteRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkDeleteAgentsApiV1AgentsAgentsBulkDelete(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
-            return localVarFp.bulkDeleteAgentsApiV1AgentsAgentsBulkDelete(requestParameters.agentBulkDeleteRequest, options).then((request) => request(axios, basePath));
+        bulkDeleteAgentsApiV1AgentsBulkDelete(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsBulkDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+            return localVarFp.bulkDeleteAgentsApiV1AgentsBulkDelete(requestParameters.agentBulkDeleteRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Delete multiple agents in bulk.  Args:     request: Bulk deletion request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk deletion results
          * @summary Bulk Delete Agents
-         * @param {AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete0Request} requestParameters Request parameters.
+         * @param {AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete0Request} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete0Request, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
-            return localVarFp.bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2(requestParameters.agentBulkDeleteRequest, options).then((request) => request(axios, basePath));
+        bulkDeleteAgentsApiV1AgentsBulkDelete_2(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete0Request, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }> {
+            return localVarFp.bulkDeleteAgentsApiV1AgentsBulkDelete_2(requestParameters.agentBulkDeleteRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new AI agent with specified configuration and capabilities.
          * @summary Create a new agent
-         * @param {AgentsApiCreateAgentApiV1AgentsAgentsPostRequest} requestParameters Request parameters.
+         * @param {AgentsApiCreateAgentApiV1AgentsPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createAgentApiV1AgentsAgentsPost(requestParameters: AgentsApiCreateAgentApiV1AgentsAgentsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
-            return localVarFp.createAgentApiV1AgentsAgentsPost(requestParameters.agentCreateRequest, options).then((request) => request(axios, basePath));
+        createAgentApiV1AgentsPost(requestParameters: AgentsApiCreateAgentApiV1AgentsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
+            return localVarFp.createAgentApiV1AgentsPost(requestParameters.agentCreateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Create a new AI agent with specified configuration and capabilities.
          * @summary Create a new agent
-         * @param {AgentsApiCreateAgentApiV1AgentsAgentsPost0Request} requestParameters Request parameters.
+         * @param {AgentsApiCreateAgentApiV1AgentsPost0Request} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        createAgentApiV1AgentsAgentsPost_3(requestParameters: AgentsApiCreateAgentApiV1AgentsAgentsPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
-            return localVarFp.createAgentApiV1AgentsAgentsPost_3(requestParameters.agentCreateRequest, options).then((request) => request(axios, basePath));
+        createAgentApiV1AgentsPost_3(requestParameters: AgentsApiCreateAgentApiV1AgentsPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
+            return localVarFp.createAgentApiV1AgentsPost_3(requestParameters.agentCreateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Delete an agent.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Deletion result
          * @summary Delete Agent
-         * @param {AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDeleteRequest} requestParameters Request parameters.
+         * @param {AgentsApiDeleteAgentApiV1AgentsAgentIdDeleteRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteAgentApiV1AgentsAgentsAgentIdDelete(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentDeleteResponse> {
-            return localVarFp.deleteAgentApiV1AgentsAgentsAgentIdDelete(requestParameters.agentId, options).then((request) => request(axios, basePath));
+        deleteAgentApiV1AgentsAgentIdDelete(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentDeleteResponse> {
+            return localVarFp.deleteAgentApiV1AgentsAgentIdDelete(requestParameters.agentId, options).then((request) => request(axios, basePath));
         },
         /**
          * Delete an agent.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Deletion result
          * @summary Delete Agent
-         * @param {AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete0Request} requestParameters Request parameters.
+         * @param {AgentsApiDeleteAgentApiV1AgentsAgentIdDelete0Request} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        deleteAgentApiV1AgentsAgentsAgentIdDelete_4(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentDeleteResponse> {
-            return localVarFp.deleteAgentApiV1AgentsAgentsAgentIdDelete_4(requestParameters.agentId, options).then((request) => request(axios, basePath));
+        deleteAgentApiV1AgentsAgentIdDelete_4(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentIdDelete0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentDeleteResponse> {
+            return localVarFp.deleteAgentApiV1AgentsAgentIdDelete_4(requestParameters.agentId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get agent by ID.  Args:     agent_id: Agent ID     request: Get request parameters     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent data
          * @summary Get Agent
-         * @param {AgentsApiGetAgentApiV1AgentsAgentsAgentIdGetRequest} requestParameters Request parameters.
+         * @param {AgentsApiGetAgentApiV1AgentsAgentIdGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentApiV1AgentsAgentsAgentIdGet(requestParameters: AgentsApiGetAgentApiV1AgentsAgentsAgentIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
-            return localVarFp.getAgentApiV1AgentsAgentsAgentIdGet(requestParameters.agentId, options).then((request) => request(axios, basePath));
+        getAgentApiV1AgentsAgentIdGet(requestParameters: AgentsApiGetAgentApiV1AgentsAgentIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
+            return localVarFp.getAgentApiV1AgentsAgentIdGet(requestParameters.agentId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get agent by ID.  Args:     agent_id: Agent ID     request: Get request parameters     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent data
          * @summary Get Agent
-         * @param {AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet0Request} requestParameters Request parameters.
+         * @param {AgentsApiGetAgentApiV1AgentsAgentIdGet0Request} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentApiV1AgentsAgentsAgentIdGet_5(requestParameters: AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
-            return localVarFp.getAgentApiV1AgentsAgentsAgentIdGet_5(requestParameters.agentId, options).then((request) => request(axios, basePath));
+        getAgentApiV1AgentsAgentIdGet_5(requestParameters: AgentsApiGetAgentApiV1AgentsAgentIdGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
+            return localVarFp.getAgentApiV1AgentsAgentIdGet_5(requestParameters.agentId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get agent health status.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent health information
          * @summary Get Agent Health
-         * @param {AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGetRequest} requestParameters Request parameters.
+         * @param {AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentHealthApiV1AgentsAgentsAgentIdHealthGet(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentHealthResponse> {
-            return localVarFp.getAgentHealthApiV1AgentsAgentsAgentIdHealthGet(requestParameters.agentId, options).then((request) => request(axios, basePath));
+        getAgentHealthApiV1AgentsAgentIdHealthGet(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentHealthResponse> {
+            return localVarFp.getAgentHealthApiV1AgentsAgentIdHealthGet(requestParameters.agentId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get agent health status.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent health information
          * @summary Get Agent Health
-         * @param {AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet0Request} requestParameters Request parameters.
+         * @param {AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet0Request} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentHealthResponse> {
-            return localVarFp.getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6(requestParameters.agentId, options).then((request) => request(axios, basePath));
+        getAgentHealthApiV1AgentsAgentIdHealthGet_6(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentHealthResponse> {
+            return localVarFp.getAgentHealthApiV1AgentsAgentIdHealthGet_6(requestParameters.agentId, options).then((request) => request(axios, basePath));
         },
         /**
          * Get comprehensive statistics about all agents for the current user.
@@ -11757,8 +12020,8 @@ export const AgentsApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentStatsApiV1AgentsAgentsStatsOverviewGet(options?: RawAxiosRequestConfig): AxiosPromise<AgentStatsResponse> {
-            return localVarFp.getAgentStatsApiV1AgentsAgentsStatsOverviewGet(options).then((request) => request(axios, basePath));
+        getAgentStatsApiV1AgentsStatsOverviewGet(options?: RawAxiosRequestConfig): AxiosPromise<AgentStatsResponse> {
+            return localVarFp.getAgentStatsApiV1AgentsStatsOverviewGet(options).then((request) => request(axios, basePath));
         },
         /**
          * Get comprehensive statistics about all agents for the current user.
@@ -11766,68 +12029,86 @@ export const AgentsApiFactory = function (configuration?: Configuration, basePat
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getAgentStatsApiV1AgentsAgentsStatsOverviewGet_7(options?: RawAxiosRequestConfig): AxiosPromise<AgentStatsResponse> {
-            return localVarFp.getAgentStatsApiV1AgentsAgentsStatsOverviewGet_7(options).then((request) => request(axios, basePath));
+        getAgentStatsApiV1AgentsStatsOverviewGet_7(options?: RawAxiosRequestConfig): AxiosPromise<AgentStatsResponse> {
+            return localVarFp.getAgentStatsApiV1AgentsStatsOverviewGet_7(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get predefined agent templates for common use cases.
+         * @summary Get agent templates
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAgentTemplatesApiV1AgentsTemplatesGet(options?: RawAxiosRequestConfig): AxiosPromise<Array<{ [key: string]: any; }>> {
+            return localVarFp.getAgentTemplatesApiV1AgentsTemplatesGet(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Get predefined agent templates for common use cases.
+         * @summary Get agent templates
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getAgentTemplatesApiV1AgentsTemplatesGet_8(options?: RawAxiosRequestConfig): AxiosPromise<Array<{ [key: string]: any; }>> {
+            return localVarFp.getAgentTemplatesApiV1AgentsTemplatesGet_8(options).then((request) => request(axios, basePath));
         },
         /**
          * Send a message to an agent and receive a response. Rate limited per user per agent.
          * @summary Interact with agent
-         * @param {AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPostRequest} requestParameters Request parameters.
+         * @param {AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        interactWithAgentApiV1AgentsAgentsAgentIdInteractPost(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentInteractResponse> {
-            return localVarFp.interactWithAgentApiV1AgentsAgentsAgentIdInteractPost(requestParameters.agentId, requestParameters.agentInteractRequest, options).then((request) => request(axios, basePath));
+        interactWithAgentApiV1AgentsAgentIdInteractPost(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentInteractResponse> {
+            return localVarFp.interactWithAgentApiV1AgentsAgentIdInteractPost(requestParameters.agentId, requestParameters.agentInteractRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Send a message to an agent and receive a response. Rate limited per user per agent.
          * @summary Interact with agent
-         * @param {AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0Request} requestParameters Request parameters.
+         * @param {AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0Request} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentInteractResponse> {
-            return localVarFp.interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8(requestParameters.agentId, requestParameters.agentInteractRequest, options).then((request) => request(axios, basePath));
+        interactWithAgentApiV1AgentsAgentIdInteractPost_9(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentInteractResponse> {
+            return localVarFp.interactWithAgentApiV1AgentsAgentIdInteractPost_9(requestParameters.agentId, requestParameters.agentInteractRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * List all agents with optional filtering and pagination. Users can only see their own agents.
          * @summary List agents
-         * @param {AgentsApiListAgentsApiV1AgentsAgentsGetRequest} requestParameters Request parameters.
+         * @param {AgentsApiListAgentsApiV1AgentsGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listAgentsApiV1AgentsAgentsGet(requestParameters: AgentsApiListAgentsApiV1AgentsAgentsGetRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<AgentListResponse> {
-            return localVarFp.listAgentsApiV1AgentsAgentsGet(requestParameters.agentType, requestParameters.status, requestParameters.bodyListAgentsApiV1AgentsAgentsGet, options).then((request) => request(axios, basePath));
+        listAgentsApiV1AgentsGet(requestParameters: AgentsApiListAgentsApiV1AgentsGetRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<AgentListResponse> {
+            return localVarFp.listAgentsApiV1AgentsGet(requestParameters.agentType, requestParameters.status, requestParameters.bodyListAgentsApiV1AgentsGet, options).then((request) => request(axios, basePath));
         },
         /**
          * List all agents with optional filtering and pagination. Users can only see their own agents.
          * @summary List agents
-         * @param {AgentsApiListAgentsApiV1AgentsAgentsGet0Request} requestParameters Request parameters.
+         * @param {AgentsApiListAgentsApiV1AgentsGet0Request} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listAgentsApiV1AgentsAgentsGet_9(requestParameters: AgentsApiListAgentsApiV1AgentsAgentsGet0Request = {}, options?: RawAxiosRequestConfig): AxiosPromise<AgentListResponse> {
-            return localVarFp.listAgentsApiV1AgentsAgentsGet_9(requestParameters.agentType, requestParameters.status, requestParameters.bodyListAgentsApiV1AgentsAgentsGet, options).then((request) => request(axios, basePath));
+        listAgentsApiV1AgentsGet_10(requestParameters: AgentsApiListAgentsApiV1AgentsGet0Request = {}, options?: RawAxiosRequestConfig): AxiosPromise<AgentListResponse> {
+            return localVarFp.listAgentsApiV1AgentsGet_10(requestParameters.agentType, requestParameters.status, requestParameters.bodyListAgentsApiV1AgentsGet, options).then((request) => request(axios, basePath));
         },
         /**
          * Update an agent.  Args:     agent_id: Agent ID     agent_data: Agent update data     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Updated agent data
          * @summary Update Agent
-         * @param {AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPutRequest} requestParameters Request parameters.
+         * @param {AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAgentApiV1AgentsAgentsAgentIdPut(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
-            return localVarFp.updateAgentApiV1AgentsAgentsAgentIdPut(requestParameters.agentId, requestParameters.agentUpdateRequest, options).then((request) => request(axios, basePath));
+        updateAgentApiV1AgentsAgentIdPut(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
+            return localVarFp.updateAgentApiV1AgentsAgentIdPut(requestParameters.agentId, requestParameters.agentUpdateRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * Update an agent.  Args:     agent_id: Agent ID     agent_data: Agent update data     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Updated agent data
          * @summary Update Agent
-         * @param {AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0Request} requestParameters Request parameters.
+         * @param {AgentsApiUpdateAgentApiV1AgentsAgentIdPut0Request} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        updateAgentApiV1AgentsAgentsAgentIdPut_10(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
-            return localVarFp.updateAgentApiV1AgentsAgentsAgentIdPut_10(requestParameters.agentId, requestParameters.agentUpdateRequest, options).then((request) => request(axios, basePath));
+        updateAgentApiV1AgentsAgentIdPut_11(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentIdPut0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse> {
+            return localVarFp.updateAgentApiV1AgentsAgentIdPut_11(requestParameters.agentId, requestParameters.agentUpdateRequest, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -11841,122 +12122,122 @@ export interface AgentsApiInterface {
     /**
      * Create multiple agents in bulk.  Args:     request: Bulk creation request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk creation results
      * @summary Bulk Create Agents
-     * @param {AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPostRequest} requestParameters Request parameters.
+     * @param {AgentsApiBulkCreateAgentsApiV1AgentsBulkPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    bulkCreateAgentsApiV1AgentsAgentsBulkPost(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentBulkCreateResponse>;
+    bulkCreateAgentsApiV1AgentsBulkPost(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsBulkPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentBulkCreateResponse>;
 
     /**
      * Create multiple agents in bulk.  Args:     request: Bulk creation request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk creation results
      * @summary Bulk Create Agents
-     * @param {AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost0Request} requestParameters Request parameters.
+     * @param {AgentsApiBulkCreateAgentsApiV1AgentsBulkPost0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    bulkCreateAgentsApiV1AgentsAgentsBulkPost_1(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentBulkCreateResponse>;
+    bulkCreateAgentsApiV1AgentsBulkPost_1(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsBulkPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentBulkCreateResponse>;
 
     /**
      * Delete multiple agents in bulk.  Args:     request: Bulk deletion request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk deletion results
      * @summary Bulk Delete Agents
-     * @param {AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDeleteRequest} requestParameters Request parameters.
+     * @param {AgentsApiBulkDeleteAgentsApiV1AgentsBulkDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    bulkDeleteAgentsApiV1AgentsAgentsBulkDelete(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    bulkDeleteAgentsApiV1AgentsBulkDelete(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsBulkDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
 
     /**
      * Delete multiple agents in bulk.  Args:     request: Bulk deletion request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk deletion results
      * @summary Bulk Delete Agents
-     * @param {AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete0Request} requestParameters Request parameters.
+     * @param {AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete0Request, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
+    bulkDeleteAgentsApiV1AgentsBulkDelete_2(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete0Request, options?: RawAxiosRequestConfig): AxiosPromise<{ [key: string]: any; }>;
 
     /**
      * Create a new AI agent with specified configuration and capabilities.
      * @summary Create a new agent
-     * @param {AgentsApiCreateAgentApiV1AgentsAgentsPostRequest} requestParameters Request parameters.
+     * @param {AgentsApiCreateAgentApiV1AgentsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    createAgentApiV1AgentsAgentsPost(requestParameters: AgentsApiCreateAgentApiV1AgentsAgentsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
+    createAgentApiV1AgentsPost(requestParameters: AgentsApiCreateAgentApiV1AgentsPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
 
     /**
      * Create a new AI agent with specified configuration and capabilities.
      * @summary Create a new agent
-     * @param {AgentsApiCreateAgentApiV1AgentsAgentsPost0Request} requestParameters Request parameters.
+     * @param {AgentsApiCreateAgentApiV1AgentsPost0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    createAgentApiV1AgentsAgentsPost_3(requestParameters: AgentsApiCreateAgentApiV1AgentsAgentsPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
+    createAgentApiV1AgentsPost_3(requestParameters: AgentsApiCreateAgentApiV1AgentsPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
 
     /**
      * Delete an agent.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Deletion result
      * @summary Delete Agent
-     * @param {AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDeleteRequest} requestParameters Request parameters.
+     * @param {AgentsApiDeleteAgentApiV1AgentsAgentIdDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    deleteAgentApiV1AgentsAgentsAgentIdDelete(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentDeleteResponse>;
+    deleteAgentApiV1AgentsAgentIdDelete(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentDeleteResponse>;
 
     /**
      * Delete an agent.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Deletion result
      * @summary Delete Agent
-     * @param {AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete0Request} requestParameters Request parameters.
+     * @param {AgentsApiDeleteAgentApiV1AgentsAgentIdDelete0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    deleteAgentApiV1AgentsAgentsAgentIdDelete_4(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentDeleteResponse>;
+    deleteAgentApiV1AgentsAgentIdDelete_4(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentIdDelete0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentDeleteResponse>;
 
     /**
      * Get agent by ID.  Args:     agent_id: Agent ID     request: Get request parameters     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent data
      * @summary Get Agent
-     * @param {AgentsApiGetAgentApiV1AgentsAgentsAgentIdGetRequest} requestParameters Request parameters.
+     * @param {AgentsApiGetAgentApiV1AgentsAgentIdGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    getAgentApiV1AgentsAgentsAgentIdGet(requestParameters: AgentsApiGetAgentApiV1AgentsAgentsAgentIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
+    getAgentApiV1AgentsAgentIdGet(requestParameters: AgentsApiGetAgentApiV1AgentsAgentIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
 
     /**
      * Get agent by ID.  Args:     agent_id: Agent ID     request: Get request parameters     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent data
      * @summary Get Agent
-     * @param {AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet0Request} requestParameters Request parameters.
+     * @param {AgentsApiGetAgentApiV1AgentsAgentIdGet0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    getAgentApiV1AgentsAgentsAgentIdGet_5(requestParameters: AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
+    getAgentApiV1AgentsAgentIdGet_5(requestParameters: AgentsApiGetAgentApiV1AgentsAgentIdGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
 
     /**
      * Get agent health status.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent health information
      * @summary Get Agent Health
-     * @param {AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGetRequest} requestParameters Request parameters.
+     * @param {AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    getAgentHealthApiV1AgentsAgentsAgentIdHealthGet(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentHealthResponse>;
+    getAgentHealthApiV1AgentsAgentIdHealthGet(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentHealthResponse>;
 
     /**
      * Get agent health status.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent health information
      * @summary Get Agent Health
-     * @param {AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet0Request} requestParameters Request parameters.
+     * @param {AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentHealthResponse>;
+    getAgentHealthApiV1AgentsAgentIdHealthGet_6(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentHealthResponse>;
 
     /**
      * Get comprehensive statistics about all agents for the current user.
@@ -11965,7 +12246,7 @@ export interface AgentsApiInterface {
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    getAgentStatsApiV1AgentsAgentsStatsOverviewGet(options?: RawAxiosRequestConfig): AxiosPromise<AgentStatsResponse>;
+    getAgentStatsApiV1AgentsStatsOverviewGet(options?: RawAxiosRequestConfig): AxiosPromise<AgentStatsResponse>;
 
     /**
      * Get comprehensive statistics about all agents for the current user.
@@ -11974,374 +12255,392 @@ export interface AgentsApiInterface {
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    getAgentStatsApiV1AgentsAgentsStatsOverviewGet_7(options?: RawAxiosRequestConfig): AxiosPromise<AgentStatsResponse>;
+    getAgentStatsApiV1AgentsStatsOverviewGet_7(options?: RawAxiosRequestConfig): AxiosPromise<AgentStatsResponse>;
+
+    /**
+     * Get predefined agent templates for common use cases.
+     * @summary Get agent templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AgentsApiInterface
+     */
+    getAgentTemplatesApiV1AgentsTemplatesGet(options?: RawAxiosRequestConfig): AxiosPromise<Array<{ [key: string]: any; }>>;
+
+    /**
+     * Get predefined agent templates for common use cases.
+     * @summary Get agent templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AgentsApiInterface
+     */
+    getAgentTemplatesApiV1AgentsTemplatesGet_8(options?: RawAxiosRequestConfig): AxiosPromise<Array<{ [key: string]: any; }>>;
 
     /**
      * Send a message to an agent and receive a response. Rate limited per user per agent.
      * @summary Interact with agent
-     * @param {AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPostRequest} requestParameters Request parameters.
+     * @param {AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    interactWithAgentApiV1AgentsAgentsAgentIdInteractPost(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentInteractResponse>;
+    interactWithAgentApiV1AgentsAgentIdInteractPost(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentInteractResponse>;
 
     /**
      * Send a message to an agent and receive a response. Rate limited per user per agent.
      * @summary Interact with agent
-     * @param {AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0Request} requestParameters Request parameters.
+     * @param {AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentInteractResponse>;
+    interactWithAgentApiV1AgentsAgentIdInteractPost_9(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentInteractResponse>;
 
     /**
      * List all agents with optional filtering and pagination. Users can only see their own agents.
      * @summary List agents
-     * @param {AgentsApiListAgentsApiV1AgentsAgentsGetRequest} requestParameters Request parameters.
+     * @param {AgentsApiListAgentsApiV1AgentsGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    listAgentsApiV1AgentsAgentsGet(requestParameters?: AgentsApiListAgentsApiV1AgentsAgentsGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentListResponse>;
+    listAgentsApiV1AgentsGet(requestParameters?: AgentsApiListAgentsApiV1AgentsGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentListResponse>;
 
     /**
      * List all agents with optional filtering and pagination. Users can only see their own agents.
      * @summary List agents
-     * @param {AgentsApiListAgentsApiV1AgentsAgentsGet0Request} requestParameters Request parameters.
+     * @param {AgentsApiListAgentsApiV1AgentsGet0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    listAgentsApiV1AgentsAgentsGet_9(requestParameters?: AgentsApiListAgentsApiV1AgentsAgentsGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentListResponse>;
+    listAgentsApiV1AgentsGet_10(requestParameters?: AgentsApiListAgentsApiV1AgentsGet0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentListResponse>;
 
     /**
      * Update an agent.  Args:     agent_id: Agent ID     agent_data: Agent update data     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Updated agent data
      * @summary Update Agent
-     * @param {AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPutRequest} requestParameters Request parameters.
+     * @param {AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    updateAgentApiV1AgentsAgentsAgentIdPut(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
+    updateAgentApiV1AgentsAgentIdPut(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
 
     /**
      * Update an agent.  Args:     agent_id: Agent ID     agent_data: Agent update data     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Updated agent data
      * @summary Update Agent
-     * @param {AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0Request} requestParameters Request parameters.
+     * @param {AgentsApiUpdateAgentApiV1AgentsAgentIdPut0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApiInterface
      */
-    updateAgentApiV1AgentsAgentsAgentIdPut_10(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
+    updateAgentApiV1AgentsAgentIdPut_11(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentIdPut0Request, options?: RawAxiosRequestConfig): AxiosPromise<AgentResponse>;
 
 }
 
 /**
- * Request parameters for bulkCreateAgentsApiV1AgentsAgentsBulkPost operation in AgentsApi.
+ * Request parameters for bulkCreateAgentsApiV1AgentsBulkPost operation in AgentsApi.
  * @export
- * @interface AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPostRequest
+ * @interface AgentsApiBulkCreateAgentsApiV1AgentsBulkPostRequest
  */
-export interface AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPostRequest {
+export interface AgentsApiBulkCreateAgentsApiV1AgentsBulkPostRequest {
     /**
      * 
      * @type {AgentBulkCreateRequest}
-     * @memberof AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost
+     * @memberof AgentsApiBulkCreateAgentsApiV1AgentsBulkPost
      */
     readonly agentBulkCreateRequest: AgentBulkCreateRequest
 }
 
 /**
- * Request parameters for bulkCreateAgentsApiV1AgentsAgentsBulkPost_1 operation in AgentsApi.
+ * Request parameters for bulkCreateAgentsApiV1AgentsBulkPost_1 operation in AgentsApi.
  * @export
- * @interface AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost0Request
+ * @interface AgentsApiBulkCreateAgentsApiV1AgentsBulkPost0Request
  */
-export interface AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost0Request {
+export interface AgentsApiBulkCreateAgentsApiV1AgentsBulkPost0Request {
     /**
      * 
      * @type {AgentBulkCreateRequest}
-     * @memberof AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost0
+     * @memberof AgentsApiBulkCreateAgentsApiV1AgentsBulkPost0
      */
     readonly agentBulkCreateRequest: AgentBulkCreateRequest
 }
 
 /**
- * Request parameters for bulkDeleteAgentsApiV1AgentsAgentsBulkDelete operation in AgentsApi.
+ * Request parameters for bulkDeleteAgentsApiV1AgentsBulkDelete operation in AgentsApi.
  * @export
- * @interface AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDeleteRequest
+ * @interface AgentsApiBulkDeleteAgentsApiV1AgentsBulkDeleteRequest
  */
-export interface AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDeleteRequest {
+export interface AgentsApiBulkDeleteAgentsApiV1AgentsBulkDeleteRequest {
     /**
      * 
      * @type {AgentBulkDeleteRequest}
-     * @memberof AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete
+     * @memberof AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete
      */
     readonly agentBulkDeleteRequest: AgentBulkDeleteRequest
 }
 
 /**
- * Request parameters for bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2 operation in AgentsApi.
+ * Request parameters for bulkDeleteAgentsApiV1AgentsBulkDelete_2 operation in AgentsApi.
  * @export
- * @interface AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete0Request
+ * @interface AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete0Request
  */
-export interface AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete0Request {
+export interface AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete0Request {
     /**
      * 
      * @type {AgentBulkDeleteRequest}
-     * @memberof AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete0
+     * @memberof AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete0
      */
     readonly agentBulkDeleteRequest: AgentBulkDeleteRequest
 }
 
 /**
- * Request parameters for createAgentApiV1AgentsAgentsPost operation in AgentsApi.
+ * Request parameters for createAgentApiV1AgentsPost operation in AgentsApi.
  * @export
- * @interface AgentsApiCreateAgentApiV1AgentsAgentsPostRequest
+ * @interface AgentsApiCreateAgentApiV1AgentsPostRequest
  */
-export interface AgentsApiCreateAgentApiV1AgentsAgentsPostRequest {
+export interface AgentsApiCreateAgentApiV1AgentsPostRequest {
     /**
      * 
      * @type {AgentCreateRequest}
-     * @memberof AgentsApiCreateAgentApiV1AgentsAgentsPost
+     * @memberof AgentsApiCreateAgentApiV1AgentsPost
      */
     readonly agentCreateRequest: AgentCreateRequest
 }
 
 /**
- * Request parameters for createAgentApiV1AgentsAgentsPost_3 operation in AgentsApi.
+ * Request parameters for createAgentApiV1AgentsPost_3 operation in AgentsApi.
  * @export
- * @interface AgentsApiCreateAgentApiV1AgentsAgentsPost0Request
+ * @interface AgentsApiCreateAgentApiV1AgentsPost0Request
  */
-export interface AgentsApiCreateAgentApiV1AgentsAgentsPost0Request {
+export interface AgentsApiCreateAgentApiV1AgentsPost0Request {
     /**
      * 
      * @type {AgentCreateRequest}
-     * @memberof AgentsApiCreateAgentApiV1AgentsAgentsPost0
+     * @memberof AgentsApiCreateAgentApiV1AgentsPost0
      */
     readonly agentCreateRequest: AgentCreateRequest
 }
 
 /**
- * Request parameters for deleteAgentApiV1AgentsAgentsAgentIdDelete operation in AgentsApi.
+ * Request parameters for deleteAgentApiV1AgentsAgentIdDelete operation in AgentsApi.
  * @export
- * @interface AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDeleteRequest
+ * @interface AgentsApiDeleteAgentApiV1AgentsAgentIdDeleteRequest
  */
-export interface AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDeleteRequest {
+export interface AgentsApiDeleteAgentApiV1AgentsAgentIdDeleteRequest {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete
+     * @memberof AgentsApiDeleteAgentApiV1AgentsAgentIdDelete
      */
     readonly agentId: string
 }
 
 /**
- * Request parameters for deleteAgentApiV1AgentsAgentsAgentIdDelete_4 operation in AgentsApi.
+ * Request parameters for deleteAgentApiV1AgentsAgentIdDelete_4 operation in AgentsApi.
  * @export
- * @interface AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete0Request
+ * @interface AgentsApiDeleteAgentApiV1AgentsAgentIdDelete0Request
  */
-export interface AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete0Request {
+export interface AgentsApiDeleteAgentApiV1AgentsAgentIdDelete0Request {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete0
+     * @memberof AgentsApiDeleteAgentApiV1AgentsAgentIdDelete0
      */
     readonly agentId: string
 }
 
 /**
- * Request parameters for getAgentApiV1AgentsAgentsAgentIdGet operation in AgentsApi.
+ * Request parameters for getAgentApiV1AgentsAgentIdGet operation in AgentsApi.
  * @export
- * @interface AgentsApiGetAgentApiV1AgentsAgentsAgentIdGetRequest
+ * @interface AgentsApiGetAgentApiV1AgentsAgentIdGetRequest
  */
-export interface AgentsApiGetAgentApiV1AgentsAgentsAgentIdGetRequest {
+export interface AgentsApiGetAgentApiV1AgentsAgentIdGetRequest {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet
+     * @memberof AgentsApiGetAgentApiV1AgentsAgentIdGet
      */
     readonly agentId: string
 }
 
 /**
- * Request parameters for getAgentApiV1AgentsAgentsAgentIdGet_5 operation in AgentsApi.
+ * Request parameters for getAgentApiV1AgentsAgentIdGet_5 operation in AgentsApi.
  * @export
- * @interface AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet0Request
+ * @interface AgentsApiGetAgentApiV1AgentsAgentIdGet0Request
  */
-export interface AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet0Request {
+export interface AgentsApiGetAgentApiV1AgentsAgentIdGet0Request {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet0
+     * @memberof AgentsApiGetAgentApiV1AgentsAgentIdGet0
      */
     readonly agentId: string
 }
 
 /**
- * Request parameters for getAgentHealthApiV1AgentsAgentsAgentIdHealthGet operation in AgentsApi.
+ * Request parameters for getAgentHealthApiV1AgentsAgentIdHealthGet operation in AgentsApi.
  * @export
- * @interface AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGetRequest
+ * @interface AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGetRequest
  */
-export interface AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGetRequest {
+export interface AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGetRequest {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet
+     * @memberof AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet
      */
     readonly agentId: string
 }
 
 /**
- * Request parameters for getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6 operation in AgentsApi.
+ * Request parameters for getAgentHealthApiV1AgentsAgentIdHealthGet_6 operation in AgentsApi.
  * @export
- * @interface AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet0Request
+ * @interface AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet0Request
  */
-export interface AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet0Request {
+export interface AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet0Request {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet0
+     * @memberof AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet0
      */
     readonly agentId: string
 }
 
 /**
- * Request parameters for interactWithAgentApiV1AgentsAgentsAgentIdInteractPost operation in AgentsApi.
+ * Request parameters for interactWithAgentApiV1AgentsAgentIdInteractPost operation in AgentsApi.
  * @export
- * @interface AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPostRequest
+ * @interface AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPostRequest
  */
-export interface AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPostRequest {
+export interface AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPostRequest {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost
+     * @memberof AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost
      */
     readonly agentId: string
 
     /**
      * 
      * @type {AgentInteractRequest}
-     * @memberof AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost
+     * @memberof AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost
      */
     readonly agentInteractRequest: AgentInteractRequest
 }
 
 /**
- * Request parameters for interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8 operation in AgentsApi.
+ * Request parameters for interactWithAgentApiV1AgentsAgentIdInteractPost_9 operation in AgentsApi.
  * @export
- * @interface AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0Request
+ * @interface AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0Request
  */
-export interface AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0Request {
+export interface AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0Request {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0
+     * @memberof AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0
      */
     readonly agentId: string
 
     /**
      * 
      * @type {AgentInteractRequest}
-     * @memberof AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0
+     * @memberof AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0
      */
     readonly agentInteractRequest: AgentInteractRequest
 }
 
 /**
- * Request parameters for listAgentsApiV1AgentsAgentsGet operation in AgentsApi.
+ * Request parameters for listAgentsApiV1AgentsGet operation in AgentsApi.
  * @export
- * @interface AgentsApiListAgentsApiV1AgentsAgentsGetRequest
+ * @interface AgentsApiListAgentsApiV1AgentsGetRequest
  */
-export interface AgentsApiListAgentsApiV1AgentsAgentsGetRequest {
+export interface AgentsApiListAgentsApiV1AgentsGetRequest {
     /**
      * 
      * @type {AgentType}
-     * @memberof AgentsApiListAgentsApiV1AgentsAgentsGet
+     * @memberof AgentsApiListAgentsApiV1AgentsGet
      */
     readonly agentType?: AgentType | null
 
     /**
      * 
      * @type {AgentStatus}
-     * @memberof AgentsApiListAgentsApiV1AgentsAgentsGet
+     * @memberof AgentsApiListAgentsApiV1AgentsGet
      */
     readonly status?: AgentStatus | null
 
     /**
      * 
-     * @type {BodyListAgentsApiV1AgentsAgentsGet}
-     * @memberof AgentsApiListAgentsApiV1AgentsAgentsGet
+     * @type {BodyListAgentsApiV1AgentsGet}
+     * @memberof AgentsApiListAgentsApiV1AgentsGet
      */
-    readonly bodyListAgentsApiV1AgentsAgentsGet?: BodyListAgentsApiV1AgentsAgentsGet
+    readonly bodyListAgentsApiV1AgentsGet?: BodyListAgentsApiV1AgentsGet
 }
 
 /**
- * Request parameters for listAgentsApiV1AgentsAgentsGet_9 operation in AgentsApi.
+ * Request parameters for listAgentsApiV1AgentsGet_10 operation in AgentsApi.
  * @export
- * @interface AgentsApiListAgentsApiV1AgentsAgentsGet0Request
+ * @interface AgentsApiListAgentsApiV1AgentsGet0Request
  */
-export interface AgentsApiListAgentsApiV1AgentsAgentsGet0Request {
+export interface AgentsApiListAgentsApiV1AgentsGet0Request {
     /**
      * 
      * @type {AgentType}
-     * @memberof AgentsApiListAgentsApiV1AgentsAgentsGet0
+     * @memberof AgentsApiListAgentsApiV1AgentsGet0
      */
     readonly agentType?: AgentType | null
 
     /**
      * 
      * @type {AgentStatus}
-     * @memberof AgentsApiListAgentsApiV1AgentsAgentsGet0
+     * @memberof AgentsApiListAgentsApiV1AgentsGet0
      */
     readonly status?: AgentStatus | null
 
     /**
      * 
-     * @type {BodyListAgentsApiV1AgentsAgentsGet}
-     * @memberof AgentsApiListAgentsApiV1AgentsAgentsGet0
+     * @type {BodyListAgentsApiV1AgentsGet}
+     * @memberof AgentsApiListAgentsApiV1AgentsGet0
      */
-    readonly bodyListAgentsApiV1AgentsAgentsGet?: BodyListAgentsApiV1AgentsAgentsGet
+    readonly bodyListAgentsApiV1AgentsGet?: BodyListAgentsApiV1AgentsGet
 }
 
 /**
- * Request parameters for updateAgentApiV1AgentsAgentsAgentIdPut operation in AgentsApi.
+ * Request parameters for updateAgentApiV1AgentsAgentIdPut operation in AgentsApi.
  * @export
- * @interface AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPutRequest
+ * @interface AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest
  */
-export interface AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPutRequest {
+export interface AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut
+     * @memberof AgentsApiUpdateAgentApiV1AgentsAgentIdPut
      */
     readonly agentId: string
 
     /**
      * 
      * @type {AgentUpdateRequest}
-     * @memberof AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut
+     * @memberof AgentsApiUpdateAgentApiV1AgentsAgentIdPut
      */
     readonly agentUpdateRequest: AgentUpdateRequest
 }
 
 /**
- * Request parameters for updateAgentApiV1AgentsAgentsAgentIdPut_10 operation in AgentsApi.
+ * Request parameters for updateAgentApiV1AgentsAgentIdPut_11 operation in AgentsApi.
  * @export
- * @interface AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0Request
+ * @interface AgentsApiUpdateAgentApiV1AgentsAgentIdPut0Request
  */
-export interface AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0Request {
+export interface AgentsApiUpdateAgentApiV1AgentsAgentIdPut0Request {
     /**
      * 
      * @type {string}
-     * @memberof AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0
+     * @memberof AgentsApiUpdateAgentApiV1AgentsAgentIdPut0
      */
     readonly agentId: string
 
     /**
      * 
      * @type {AgentUpdateRequest}
-     * @memberof AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0
+     * @memberof AgentsApiUpdateAgentApiV1AgentsAgentIdPut0
      */
     readonly agentUpdateRequest: AgentUpdateRequest
 }
@@ -12356,145 +12655,145 @@ export class AgentsApi extends BaseAPI implements AgentsApiInterface {
     /**
      * Create multiple agents in bulk.  Args:     request: Bulk creation request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk creation results
      * @summary Bulk Create Agents
-     * @param {AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPostRequest} requestParameters Request parameters.
+     * @param {AgentsApiBulkCreateAgentsApiV1AgentsBulkPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public bulkCreateAgentsApiV1AgentsAgentsBulkPost(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPostRequest, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).bulkCreateAgentsApiV1AgentsAgentsBulkPost(requestParameters.agentBulkCreateRequest, options).then((request) => request(this.axios, this.basePath));
+    public bulkCreateAgentsApiV1AgentsBulkPost(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsBulkPostRequest, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).bulkCreateAgentsApiV1AgentsBulkPost(requestParameters.agentBulkCreateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create multiple agents in bulk.  Args:     request: Bulk creation request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk creation results
      * @summary Bulk Create Agents
-     * @param {AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost0Request} requestParameters Request parameters.
+     * @param {AgentsApiBulkCreateAgentsApiV1AgentsBulkPost0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public bulkCreateAgentsApiV1AgentsAgentsBulkPost_1(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsAgentsBulkPost0Request, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).bulkCreateAgentsApiV1AgentsAgentsBulkPost_1(requestParameters.agentBulkCreateRequest, options).then((request) => request(this.axios, this.basePath));
+    public bulkCreateAgentsApiV1AgentsBulkPost_1(requestParameters: AgentsApiBulkCreateAgentsApiV1AgentsBulkPost0Request, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).bulkCreateAgentsApiV1AgentsBulkPost_1(requestParameters.agentBulkCreateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Delete multiple agents in bulk.  Args:     request: Bulk deletion request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk deletion results
      * @summary Bulk Delete Agents
-     * @param {AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDeleteRequest} requestParameters Request parameters.
+     * @param {AgentsApiBulkDeleteAgentsApiV1AgentsBulkDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public bulkDeleteAgentsApiV1AgentsAgentsBulkDelete(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDeleteRequest, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).bulkDeleteAgentsApiV1AgentsAgentsBulkDelete(requestParameters.agentBulkDeleteRequest, options).then((request) => request(this.axios, this.basePath));
+    public bulkDeleteAgentsApiV1AgentsBulkDelete(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsBulkDeleteRequest, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).bulkDeleteAgentsApiV1AgentsBulkDelete(requestParameters.agentBulkDeleteRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Delete multiple agents in bulk.  Args:     request: Bulk deletion request     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Bulk deletion results
      * @summary Bulk Delete Agents
-     * @param {AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete0Request} requestParameters Request parameters.
+     * @param {AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsAgentsBulkDelete0Request, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).bulkDeleteAgentsApiV1AgentsAgentsBulkDelete_2(requestParameters.agentBulkDeleteRequest, options).then((request) => request(this.axios, this.basePath));
+    public bulkDeleteAgentsApiV1AgentsBulkDelete_2(requestParameters: AgentsApiBulkDeleteAgentsApiV1AgentsBulkDelete0Request, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).bulkDeleteAgentsApiV1AgentsBulkDelete_2(requestParameters.agentBulkDeleteRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create a new AI agent with specified configuration and capabilities.
      * @summary Create a new agent
-     * @param {AgentsApiCreateAgentApiV1AgentsAgentsPostRequest} requestParameters Request parameters.
+     * @param {AgentsApiCreateAgentApiV1AgentsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public createAgentApiV1AgentsAgentsPost(requestParameters: AgentsApiCreateAgentApiV1AgentsAgentsPostRequest, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).createAgentApiV1AgentsAgentsPost(requestParameters.agentCreateRequest, options).then((request) => request(this.axios, this.basePath));
+    public createAgentApiV1AgentsPost(requestParameters: AgentsApiCreateAgentApiV1AgentsPostRequest, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).createAgentApiV1AgentsPost(requestParameters.agentCreateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Create a new AI agent with specified configuration and capabilities.
      * @summary Create a new agent
-     * @param {AgentsApiCreateAgentApiV1AgentsAgentsPost0Request} requestParameters Request parameters.
+     * @param {AgentsApiCreateAgentApiV1AgentsPost0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public createAgentApiV1AgentsAgentsPost_3(requestParameters: AgentsApiCreateAgentApiV1AgentsAgentsPost0Request, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).createAgentApiV1AgentsAgentsPost_3(requestParameters.agentCreateRequest, options).then((request) => request(this.axios, this.basePath));
+    public createAgentApiV1AgentsPost_3(requestParameters: AgentsApiCreateAgentApiV1AgentsPost0Request, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).createAgentApiV1AgentsPost_3(requestParameters.agentCreateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Delete an agent.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Deletion result
      * @summary Delete Agent
-     * @param {AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDeleteRequest} requestParameters Request parameters.
+     * @param {AgentsApiDeleteAgentApiV1AgentsAgentIdDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public deleteAgentApiV1AgentsAgentsAgentIdDelete(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDeleteRequest, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).deleteAgentApiV1AgentsAgentsAgentIdDelete(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
+    public deleteAgentApiV1AgentsAgentIdDelete(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentIdDeleteRequest, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).deleteAgentApiV1AgentsAgentIdDelete(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Delete an agent.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Deletion result
      * @summary Delete Agent
-     * @param {AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete0Request} requestParameters Request parameters.
+     * @param {AgentsApiDeleteAgentApiV1AgentsAgentIdDelete0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public deleteAgentApiV1AgentsAgentsAgentIdDelete_4(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentsAgentIdDelete0Request, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).deleteAgentApiV1AgentsAgentsAgentIdDelete_4(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
+    public deleteAgentApiV1AgentsAgentIdDelete_4(requestParameters: AgentsApiDeleteAgentApiV1AgentsAgentIdDelete0Request, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).deleteAgentApiV1AgentsAgentIdDelete_4(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get agent by ID.  Args:     agent_id: Agent ID     request: Get request parameters     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent data
      * @summary Get Agent
-     * @param {AgentsApiGetAgentApiV1AgentsAgentsAgentIdGetRequest} requestParameters Request parameters.
+     * @param {AgentsApiGetAgentApiV1AgentsAgentIdGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public getAgentApiV1AgentsAgentsAgentIdGet(requestParameters: AgentsApiGetAgentApiV1AgentsAgentsAgentIdGetRequest, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).getAgentApiV1AgentsAgentsAgentIdGet(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
+    public getAgentApiV1AgentsAgentIdGet(requestParameters: AgentsApiGetAgentApiV1AgentsAgentIdGetRequest, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).getAgentApiV1AgentsAgentIdGet(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get agent by ID.  Args:     agent_id: Agent ID     request: Get request parameters     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent data
      * @summary Get Agent
-     * @param {AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet0Request} requestParameters Request parameters.
+     * @param {AgentsApiGetAgentApiV1AgentsAgentIdGet0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public getAgentApiV1AgentsAgentsAgentIdGet_5(requestParameters: AgentsApiGetAgentApiV1AgentsAgentsAgentIdGet0Request, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).getAgentApiV1AgentsAgentsAgentIdGet_5(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
+    public getAgentApiV1AgentsAgentIdGet_5(requestParameters: AgentsApiGetAgentApiV1AgentsAgentIdGet0Request, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).getAgentApiV1AgentsAgentIdGet_5(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get agent health status.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent health information
      * @summary Get Agent Health
-     * @param {AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGetRequest} requestParameters Request parameters.
+     * @param {AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public getAgentHealthApiV1AgentsAgentsAgentIdHealthGet(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGetRequest, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).getAgentHealthApiV1AgentsAgentsAgentIdHealthGet(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
+    public getAgentHealthApiV1AgentsAgentIdHealthGet(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGetRequest, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).getAgentHealthApiV1AgentsAgentIdHealthGet(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Get agent health status.  Args:     agent_id: Agent ID     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Agent health information
      * @summary Get Agent Health
-     * @param {AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet0Request} requestParameters Request parameters.
+     * @param {AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentsAgentIdHealthGet0Request, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).getAgentHealthApiV1AgentsAgentsAgentIdHealthGet_6(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
+    public getAgentHealthApiV1AgentsAgentIdHealthGet_6(requestParameters: AgentsApiGetAgentHealthApiV1AgentsAgentIdHealthGet0Request, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).getAgentHealthApiV1AgentsAgentIdHealthGet_6(requestParameters.agentId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -12504,8 +12803,8 @@ export class AgentsApi extends BaseAPI implements AgentsApiInterface {
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public getAgentStatsApiV1AgentsAgentsStatsOverviewGet(options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).getAgentStatsApiV1AgentsAgentsStatsOverviewGet(options).then((request) => request(this.axios, this.basePath));
+    public getAgentStatsApiV1AgentsStatsOverviewGet(options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).getAgentStatsApiV1AgentsStatsOverviewGet(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -12515,80 +12814,102 @@ export class AgentsApi extends BaseAPI implements AgentsApiInterface {
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public getAgentStatsApiV1AgentsAgentsStatsOverviewGet_7(options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).getAgentStatsApiV1AgentsAgentsStatsOverviewGet_7(options).then((request) => request(this.axios, this.basePath));
+    public getAgentStatsApiV1AgentsStatsOverviewGet_7(options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).getAgentStatsApiV1AgentsStatsOverviewGet_7(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get predefined agent templates for common use cases.
+     * @summary Get agent templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AgentsApi
+     */
+    public getAgentTemplatesApiV1AgentsTemplatesGet(options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).getAgentTemplatesApiV1AgentsTemplatesGet(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Get predefined agent templates for common use cases.
+     * @summary Get agent templates
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AgentsApi
+     */
+    public getAgentTemplatesApiV1AgentsTemplatesGet_8(options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).getAgentTemplatesApiV1AgentsTemplatesGet_8(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Send a message to an agent and receive a response. Rate limited per user per agent.
      * @summary Interact with agent
-     * @param {AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPostRequest} requestParameters Request parameters.
+     * @param {AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public interactWithAgentApiV1AgentsAgentsAgentIdInteractPost(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPostRequest, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).interactWithAgentApiV1AgentsAgentsAgentIdInteractPost(requestParameters.agentId, requestParameters.agentInteractRequest, options).then((request) => request(this.axios, this.basePath));
+    public interactWithAgentApiV1AgentsAgentIdInteractPost(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPostRequest, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).interactWithAgentApiV1AgentsAgentIdInteractPost(requestParameters.agentId, requestParameters.agentInteractRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Send a message to an agent and receive a response. Rate limited per user per agent.
      * @summary Interact with agent
-     * @param {AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0Request} requestParameters Request parameters.
+     * @param {AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentsAgentIdInteractPost0Request, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).interactWithAgentApiV1AgentsAgentsAgentIdInteractPost_8(requestParameters.agentId, requestParameters.agentInteractRequest, options).then((request) => request(this.axios, this.basePath));
+    public interactWithAgentApiV1AgentsAgentIdInteractPost_9(requestParameters: AgentsApiInteractWithAgentApiV1AgentsAgentIdInteractPost0Request, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).interactWithAgentApiV1AgentsAgentIdInteractPost_9(requestParameters.agentId, requestParameters.agentInteractRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * List all agents with optional filtering and pagination. Users can only see their own agents.
      * @summary List agents
-     * @param {AgentsApiListAgentsApiV1AgentsAgentsGetRequest} requestParameters Request parameters.
+     * @param {AgentsApiListAgentsApiV1AgentsGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public listAgentsApiV1AgentsAgentsGet(requestParameters: AgentsApiListAgentsApiV1AgentsAgentsGetRequest = {}, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).listAgentsApiV1AgentsAgentsGet(requestParameters.agentType, requestParameters.status, requestParameters.bodyListAgentsApiV1AgentsAgentsGet, options).then((request) => request(this.axios, this.basePath));
+    public listAgentsApiV1AgentsGet(requestParameters: AgentsApiListAgentsApiV1AgentsGetRequest = {}, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).listAgentsApiV1AgentsGet(requestParameters.agentType, requestParameters.status, requestParameters.bodyListAgentsApiV1AgentsGet, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * List all agents with optional filtering and pagination. Users can only see their own agents.
      * @summary List agents
-     * @param {AgentsApiListAgentsApiV1AgentsAgentsGet0Request} requestParameters Request parameters.
+     * @param {AgentsApiListAgentsApiV1AgentsGet0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public listAgentsApiV1AgentsAgentsGet_9(requestParameters: AgentsApiListAgentsApiV1AgentsAgentsGet0Request = {}, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).listAgentsApiV1AgentsAgentsGet_9(requestParameters.agentType, requestParameters.status, requestParameters.bodyListAgentsApiV1AgentsAgentsGet, options).then((request) => request(this.axios, this.basePath));
+    public listAgentsApiV1AgentsGet_10(requestParameters: AgentsApiListAgentsApiV1AgentsGet0Request = {}, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).listAgentsApiV1AgentsGet_10(requestParameters.agentType, requestParameters.status, requestParameters.bodyListAgentsApiV1AgentsGet, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Update an agent.  Args:     agent_id: Agent ID     agent_data: Agent update data     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Updated agent data
      * @summary Update Agent
-     * @param {AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPutRequest} requestParameters Request parameters.
+     * @param {AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public updateAgentApiV1AgentsAgentsAgentIdPut(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPutRequest, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).updateAgentApiV1AgentsAgentsAgentIdPut(requestParameters.agentId, requestParameters.agentUpdateRequest, options).then((request) => request(this.axios, this.basePath));
+    public updateAgentApiV1AgentsAgentIdPut(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentIdPutRequest, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).updateAgentApiV1AgentsAgentIdPut(requestParameters.agentId, requestParameters.agentUpdateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
      * Update an agent.  Args:     agent_id: Agent ID     agent_data: Agent update data     current_user: Current authenticated user     agent_manager: Agent manager instance  Returns:     Updated agent data
      * @summary Update Agent
-     * @param {AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0Request} requestParameters Request parameters.
+     * @param {AgentsApiUpdateAgentApiV1AgentsAgentIdPut0Request} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AgentsApi
      */
-    public updateAgentApiV1AgentsAgentsAgentIdPut_10(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentsAgentIdPut0Request, options?: RawAxiosRequestConfig) {
-        return AgentsApiFp(this.configuration).updateAgentApiV1AgentsAgentsAgentIdPut_10(requestParameters.agentId, requestParameters.agentUpdateRequest, options).then((request) => request(this.axios, this.basePath));
+    public updateAgentApiV1AgentsAgentIdPut_11(requestParameters: AgentsApiUpdateAgentApiV1AgentsAgentIdPut0Request, options?: RawAxiosRequestConfig) {
+        return AgentsApiFp(this.configuration).updateAgentApiV1AgentsAgentIdPut_11(requestParameters.agentId, requestParameters.agentUpdateRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -12626,7 +12947,7 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -12684,6 +13005,10 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
+            // authentication CustomHTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
 
     
             setSearchParams(localVarUrlObj, localVarQueryParameter);
@@ -12713,6 +13038,10 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
+
+            // authentication CustomHTTPBearer required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
 
     
@@ -12747,7 +13076,7 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -12800,7 +13129,7 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -12853,7 +13182,7 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -12906,7 +13235,7 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -12956,7 +13285,7 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -12993,7 +13322,7 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -13046,7 +13375,7 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -13103,7 +13432,7 @@ export const AnalyticsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -13950,7 +14279,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -14034,7 +14363,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -14071,7 +14400,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -14105,7 +14434,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -14139,7 +14468,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -14209,7 +14538,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -14352,7 +14681,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -14389,7 +14718,7 @@ export const AuthenticationApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15140,51 +15469,7 @@ export class AuthenticationApi extends BaseAPI implements AuthenticationApiInter
 export const ChatApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Add a new message to existing conversation.
-         * @summary Add Message To Conversation
-         * @param {string} conversationId 
-         * @param {MessageCreate} messageCreate 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost: async (conversationId: string, messageCreate: MessageCreate, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'conversationId' is not null or undefined
-            assertParamExists('addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost', 'conversationId', conversationId)
-            // verify required parameter 'messageCreate' is not null or undefined
-            assertParamExists('addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost', 'messageCreate', messageCreate)
-            const localVarPath = `/api/v1/chat/conversations/{conversation_id}/messages`
-                .replace(`{${"conversation_id"}}`, encodeURIComponent(String(conversationId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication HTTPBearer required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(messageCreate, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
+         * Unified chat endpoint supporting all workflow types with optional streaming.
          * @summary Chat
          * @param {ChatRequest} chatRequest 
          * @param {*} [options] Override http request option.
@@ -15205,7 +15490,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15249,7 +15534,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15268,7 +15553,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
+         * Create a new conversation.
          * @summary Create Conversation
          * @param {ConversationCreate} conversationCreate 
          * @param {*} [options] Override http request option.
@@ -15289,7 +15574,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15310,7 +15595,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
         /**
          * Delete conversation.
          * @summary Delete Conversation
-         * @param {string} conversationId 
+         * @param {string} conversationId Conversation ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -15330,7 +15615,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15346,10 +15631,10 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Delete a message from conversation.
+         * Delete a message from a conversation.
          * @summary Delete Message
-         * @param {string} conversationId 
-         * @param {string} messageId 
+         * @param {string} conversationId Conversation ID
+         * @param {string} messageId Message ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -15372,7 +15657,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15406,7 +15691,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15422,13 +15707,14 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Get conversation details with messages.
+         * Get conversation details with optional messages.
          * @summary Get Conversation
-         * @param {string} conversationId 
+         * @param {string} conversationId Conversation ID
+         * @param {boolean} [includeMessages] Include messages in response
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getConversationApiV1ChatConversationsConversationIdGet: async (conversationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getConversationApiV1ChatConversationsConversationIdGet: async (conversationId: string, includeMessages?: boolean, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'conversationId' is not null or undefined
             assertParamExists('getConversationApiV1ChatConversationsConversationIdGet', 'conversationId', conversationId)
             const localVarPath = `/api/v1/chat/conversations/{conversation_id}`
@@ -15444,9 +15730,13 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (includeMessages !== undefined) {
+                localVarQueryParameter['include_messages'] = includeMessages;
+            }
 
 
     
@@ -15460,13 +15750,15 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Get conversation messages.
+         * Get messages from a conversation.
          * @summary Get Conversation Messages
-         * @param {string} conversationId 
+         * @param {string} conversationId Conversation ID
+         * @param {number} [limit] Number of results per page
+         * @param {number} [offset] Number of results to skip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: async (conversationId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: async (conversationId: string, limit?: number, offset?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'conversationId' is not null or undefined
             assertParamExists('getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet', 'conversationId', conversationId)
             const localVarPath = `/api/v1/chat/conversations/{conversation_id}/messages`
@@ -15482,9 +15774,17 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
 
 
     
@@ -15516,7 +15816,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15550,7 +15850,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15584,7 +15884,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15600,18 +15900,14 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
+         * List conversations for the current user.
          * @summary List Conversations
-         * @param {string | null} [query] Search query
-         * @param {ConversationStatus | null} [status] Filter by status
-         * @param {number} [limit] Maximum number of results
+         * @param {number} [limit] Number of results per page
          * @param {number} [offset] Number of results to skip
-         * @param {string} [sortBy] Sort field
-         * @param {string} [sortOrder] Sort order
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listConversationsApiV1ChatConversationsGet: async (query?: string | null, status?: ConversationStatus | null, limit?: number, offset?: number, sortBy?: string, sortOrder?: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listConversationsApiV1ChatConversationsGet: async (limit?: number, offset?: number, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v1/chat/conversations`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -15624,17 +15920,9 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            if (query !== undefined) {
-                localVarQueryParameter['query'] = query;
-            }
-
-            if (status !== undefined) {
-                localVarQueryParameter['status'] = status;
-            }
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
@@ -15642,14 +15930,6 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
 
             if (offset !== undefined) {
                 localVarQueryParameter['offset'] = offset;
-            }
-
-            if (sortBy !== undefined) {
-                localVarQueryParameter['sort_by'] = sortBy;
-            }
-
-            if (sortOrder !== undefined) {
-                localVarQueryParameter['sort_order'] = sortOrder;
             }
 
 
@@ -15666,7 +15946,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
         /**
          * Update conversation.
          * @summary Update Conversation
-         * @param {string} conversationId 
+         * @param {string} conversationId Conversation ID
          * @param {ConversationUpdate} conversationUpdate 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -15689,7 +15969,7 @@ export const ChatApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -15718,21 +15998,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = ChatApiAxiosParamCreator(configuration)
     return {
         /**
-         * Add a new message to existing conversation.
-         * @summary Add Message To Conversation
-         * @param {string} conversationId 
-         * @param {MessageCreate} messageCreate 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(conversationId: string, messageCreate: MessageCreate, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<MessageResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(conversationId, messageCreate, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['ChatApi.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
+         * Unified chat endpoint supporting all workflow types with optional streaming.
          * @summary Chat
          * @param {ChatRequest} chatRequest 
          * @param {*} [options] Override http request option.
@@ -15759,7 +16025,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
+         * Create a new conversation.
          * @summary Create Conversation
          * @param {ConversationCreate} conversationCreate 
          * @param {*} [options] Override http request option.
@@ -15774,7 +16040,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
         /**
          * Delete conversation.
          * @summary Delete Conversation
-         * @param {string} conversationId 
+         * @param {string} conversationId Conversation ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -15785,10 +16051,10 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Delete a message from conversation.
+         * Delete a message from a conversation.
          * @summary Delete Message
-         * @param {string} conversationId 
-         * @param {string} messageId 
+         * @param {string} conversationId Conversation ID
+         * @param {string} messageId Message ID
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -15811,27 +16077,30 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get conversation details with messages.
+         * Get conversation details with optional messages.
          * @summary Get Conversation
-         * @param {string} conversationId 
+         * @param {string} conversationId Conversation ID
+         * @param {boolean} [includeMessages] Include messages in response
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getConversationApiV1ChatConversationsConversationIdGet(conversationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConversationWithMessages>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getConversationApiV1ChatConversationsConversationIdGet(conversationId, options);
+        async getConversationApiV1ChatConversationsConversationIdGet(conversationId: string, includeMessages?: boolean, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConversationWithMessages>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getConversationApiV1ChatConversationsConversationIdGet(conversationId, includeMessages, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ChatApi.getConversationApiV1ChatConversationsConversationIdGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Get conversation messages.
+         * Get messages from a conversation.
          * @summary Get Conversation Messages
-         * @param {string} conversationId 
+         * @param {string} conversationId Conversation ID
+         * @param {number} [limit] Number of results per page
+         * @param {number} [offset] Number of results to skip
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(conversationId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MessageResponse>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(conversationId, options);
+        async getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(conversationId: string, limit?: number, offset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<MessageResponse>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(conversationId, limit, offset, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ChatApi.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -15873,19 +16142,15 @@ export const ChatApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
+         * List conversations for the current user.
          * @summary List Conversations
-         * @param {string | null} [query] Search query
-         * @param {ConversationStatus | null} [status] Filter by status
-         * @param {number} [limit] Maximum number of results
+         * @param {number} [limit] Number of results per page
          * @param {number} [offset] Number of results to skip
-         * @param {string} [sortBy] Sort field
-         * @param {string} [sortOrder] Sort order
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listConversationsApiV1ChatConversationsGet(query?: string | null, status?: ConversationStatus | null, limit?: number, offset?: number, sortBy?: string, sortOrder?: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConversationSearchResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listConversationsApiV1ChatConversationsGet(query, status, limit, offset, sortBy, sortOrder, options);
+        async listConversationsApiV1ChatConversationsGet(limit?: number, offset?: number, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ConversationSearchResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listConversationsApiV1ChatConversationsGet(limit, offset, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ChatApi.listConversationsApiV1ChatConversationsGet']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -15893,7 +16158,7 @@ export const ChatApiFp = function(configuration?: Configuration) {
         /**
          * Update conversation.
          * @summary Update Conversation
-         * @param {string} conversationId 
+         * @param {string} conversationId Conversation ID
          * @param {ConversationUpdate} conversationUpdate 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -15915,17 +16180,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
     const localVarFp = ChatApiFp(configuration)
     return {
         /**
-         * Add a new message to existing conversation.
-         * @summary Add Message To Conversation
-         * @param {ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest} requestParameters Request parameters.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters: ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<MessageResponse> {
-            return localVarFp.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters.conversationId, requestParameters.messageCreate, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
+         * Unified chat endpoint supporting all workflow types with optional streaming.
          * @summary Chat
          * @param {ChatApiChatApiV1ChatChatPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -15945,7 +16200,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.chatWithTemplateApiV1ChatTemplateTemplateNamePost(requestParameters.templateName, requestParameters.chatRequest, options).then((request) => request(axios, basePath));
         },
         /**
-         * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
+         * Create a new conversation.
          * @summary Create Conversation
          * @param {ChatApiCreateConversationApiV1ChatConversationsPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -15965,7 +16220,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.deleteConversationApiV1ChatConversationsConversationIdDelete(requestParameters.conversationId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Delete a message from conversation.
+         * Delete a message from a conversation.
          * @summary Delete Message
          * @param {ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -15984,24 +16239,24 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.getAvailableToolsApiV1ChatToolsAvailableGet(options).then((request) => request(axios, basePath));
         },
         /**
-         * Get conversation details with messages.
+         * Get conversation details with optional messages.
          * @summary Get Conversation
          * @param {ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         getConversationApiV1ChatConversationsConversationIdGet(requestParameters: ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConversationWithMessages> {
-            return localVarFp.getConversationApiV1ChatConversationsConversationIdGet(requestParameters.conversationId, options).then((request) => request(axios, basePath));
+            return localVarFp.getConversationApiV1ChatConversationsConversationIdGet(requestParameters.conversationId, requestParameters.includeMessages, options).then((request) => request(axios, basePath));
         },
         /**
-         * Get conversation messages.
+         * Get messages from a conversation.
          * @summary Get Conversation Messages
          * @param {ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(requestParameters: ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<Array<MessageResponse>> {
-            return localVarFp.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(requestParameters.conversationId, options).then((request) => request(axios, basePath));
+            return localVarFp.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(requestParameters.conversationId, requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
         },
         /**
          * Get MCP service status.
@@ -16031,14 +16286,14 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.getWorkflowTemplatesApiV1ChatTemplatesGet(options).then((request) => request(axios, basePath));
         },
         /**
-         * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
+         * List conversations for the current user.
          * @summary List Conversations
          * @param {ChatApiListConversationsApiV1ChatConversationsGetRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
         listConversationsApiV1ChatConversationsGet(requestParameters: ChatApiListConversationsApiV1ChatConversationsGetRequest = {}, options?: RawAxiosRequestConfig): AxiosPromise<ConversationSearchResponse> {
-            return localVarFp.listConversationsApiV1ChatConversationsGet(requestParameters.query, requestParameters.status, requestParameters.limit, requestParameters.offset, requestParameters.sortBy, requestParameters.sortOrder, options).then((request) => request(axios, basePath));
+            return localVarFp.listConversationsApiV1ChatConversationsGet(requestParameters.limit, requestParameters.offset, options).then((request) => request(axios, basePath));
         },
         /**
          * Update conversation.
@@ -16060,17 +16315,7 @@ export const ChatApiFactory = function (configuration?: Configuration, basePath?
  */
 export interface ChatApiInterface {
     /**
-     * Add a new message to existing conversation.
-     * @summary Add Message To Conversation
-     * @param {ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApiInterface
-     */
-    addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters: ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<MessageResponse>;
-
-    /**
-     * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
+     * Unified chat endpoint supporting all workflow types with optional streaming.
      * @summary Chat
      * @param {ChatApiChatApiV1ChatChatPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16090,7 +16335,7 @@ export interface ChatApiInterface {
     chatWithTemplateApiV1ChatTemplateTemplateNamePost(requestParameters: ChatApiChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest, options?: RawAxiosRequestConfig): AxiosPromise<ChatResponse>;
 
     /**
-     * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
+     * Create a new conversation.
      * @summary Create Conversation
      * @param {ChatApiCreateConversationApiV1ChatConversationsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16110,7 +16355,7 @@ export interface ChatApiInterface {
     deleteConversationApiV1ChatConversationsConversationIdDelete(requestParameters: ChatApiDeleteConversationApiV1ChatConversationsConversationIdDeleteRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConversationDeleteResponse>;
 
     /**
-     * Delete a message from conversation.
+     * Delete a message from a conversation.
      * @summary Delete Message
      * @param {ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16129,7 +16374,7 @@ export interface ChatApiInterface {
     getAvailableToolsApiV1ChatToolsAvailableGet(options?: RawAxiosRequestConfig): AxiosPromise<AvailableToolsResponse>;
 
     /**
-     * Get conversation details with messages.
+     * Get conversation details with optional messages.
      * @summary Get Conversation
      * @param {ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16139,7 +16384,7 @@ export interface ChatApiInterface {
     getConversationApiV1ChatConversationsConversationIdGet(requestParameters: ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConversationWithMessages>;
 
     /**
-     * Get conversation messages.
+     * Get messages from a conversation.
      * @summary Get Conversation Messages
      * @param {ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16176,7 +16421,7 @@ export interface ChatApiInterface {
     getWorkflowTemplatesApiV1ChatTemplatesGet(options?: RawAxiosRequestConfig): AxiosPromise<WorkflowTemplatesResponse>;
 
     /**
-     * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
+     * List conversations for the current user.
      * @summary List Conversations
      * @param {ChatApiListConversationsApiV1ChatConversationsGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16195,27 +16440,6 @@ export interface ChatApiInterface {
      */
     updateConversationApiV1ChatConversationsConversationIdPut(requestParameters: ChatApiUpdateConversationApiV1ChatConversationsConversationIdPutRequest, options?: RawAxiosRequestConfig): AxiosPromise<ConversationResponse>;
 
-}
-
-/**
- * Request parameters for addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost operation in ChatApi.
- * @export
- * @interface ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest
- */
-export interface ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPost
-     */
-    readonly conversationId: string
-
-    /**
-     * 
-     * @type {MessageCreate}
-     * @memberof ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPost
-     */
-    readonly messageCreate: MessageCreate
 }
 
 /**
@@ -16274,7 +16498,7 @@ export interface ChatApiCreateConversationApiV1ChatConversationsPostRequest {
  */
 export interface ChatApiDeleteConversationApiV1ChatConversationsConversationIdDeleteRequest {
     /**
-     * 
+     * Conversation ID
      * @type {string}
      * @memberof ChatApiDeleteConversationApiV1ChatConversationsConversationIdDelete
      */
@@ -16288,14 +16512,14 @@ export interface ChatApiDeleteConversationApiV1ChatConversationsConversationIdDe
  */
 export interface ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest {
     /**
-     * 
+     * Conversation ID
      * @type {string}
      * @memberof ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete
      */
     readonly conversationId: string
 
     /**
-     * 
+     * Message ID
      * @type {string}
      * @memberof ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete
      */
@@ -16309,11 +16533,18 @@ export interface ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessage
  */
 export interface ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest {
     /**
-     * 
+     * Conversation ID
      * @type {string}
      * @memberof ChatApiGetConversationApiV1ChatConversationsConversationIdGet
      */
     readonly conversationId: string
+
+    /**
+     * Include messages in response
+     * @type {boolean}
+     * @memberof ChatApiGetConversationApiV1ChatConversationsConversationIdGet
+     */
+    readonly includeMessages?: boolean
 }
 
 /**
@@ -16323,11 +16554,25 @@ export interface ChatApiGetConversationApiV1ChatConversationsConversationIdGetRe
  */
 export interface ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest {
     /**
-     * 
+     * Conversation ID
      * @type {string}
      * @memberof ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGet
      */
     readonly conversationId: string
+
+    /**
+     * Number of results per page
+     * @type {number}
+     * @memberof ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGet
+     */
+    readonly limit?: number
+
+    /**
+     * Number of results to skip
+     * @type {number}
+     * @memberof ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGet
+     */
+    readonly offset?: number
 }
 
 /**
@@ -16337,21 +16582,7 @@ export interface ChatApiGetConversationMessagesApiV1ChatConversationsConversatio
  */
 export interface ChatApiListConversationsApiV1ChatConversationsGetRequest {
     /**
-     * Search query
-     * @type {string}
-     * @memberof ChatApiListConversationsApiV1ChatConversationsGet
-     */
-    readonly query?: string | null
-
-    /**
-     * Filter by status
-     * @type {ConversationStatus}
-     * @memberof ChatApiListConversationsApiV1ChatConversationsGet
-     */
-    readonly status?: ConversationStatus | null
-
-    /**
-     * Maximum number of results
+     * Number of results per page
      * @type {number}
      * @memberof ChatApiListConversationsApiV1ChatConversationsGet
      */
@@ -16363,20 +16594,6 @@ export interface ChatApiListConversationsApiV1ChatConversationsGetRequest {
      * @memberof ChatApiListConversationsApiV1ChatConversationsGet
      */
     readonly offset?: number
-
-    /**
-     * Sort field
-     * @type {string}
-     * @memberof ChatApiListConversationsApiV1ChatConversationsGet
-     */
-    readonly sortBy?: string
-
-    /**
-     * Sort order
-     * @type {string}
-     * @memberof ChatApiListConversationsApiV1ChatConversationsGet
-     */
-    readonly sortOrder?: string
 }
 
 /**
@@ -16386,7 +16603,7 @@ export interface ChatApiListConversationsApiV1ChatConversationsGetRequest {
  */
 export interface ChatApiUpdateConversationApiV1ChatConversationsConversationIdPutRequest {
     /**
-     * 
+     * Conversation ID
      * @type {string}
      * @memberof ChatApiUpdateConversationApiV1ChatConversationsConversationIdPut
      */
@@ -16408,19 +16625,7 @@ export interface ChatApiUpdateConversationApiV1ChatConversationsConversationIdPu
  */
 export class ChatApi extends BaseAPI implements ChatApiInterface {
     /**
-     * Add a new message to existing conversation.
-     * @summary Add Message To Conversation
-     * @param {ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest} requestParameters Request parameters.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof ChatApi
-     */
-    public addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters: ChatApiAddMessageToConversationApiV1ChatConversationsConversationIdMessagesPostRequest, options?: RawAxiosRequestConfig) {
-        return ChatApiFp(this.configuration).addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(requestParameters.conversationId, requestParameters.messageCreate, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
+     * Unified chat endpoint supporting all workflow types with optional streaming.
      * @summary Chat
      * @param {ChatApiChatApiV1ChatChatPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16444,7 +16649,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
+     * Create a new conversation.
      * @summary Create Conversation
      * @param {ChatApiCreateConversationApiV1ChatConversationsPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16468,7 +16673,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Delete a message from conversation.
+     * Delete a message from a conversation.
      * @summary Delete Message
      * @param {ChatApiDeleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDeleteRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16491,7 +16696,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * Get conversation details with messages.
+     * Get conversation details with optional messages.
      * @summary Get Conversation
      * @param {ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16499,11 +16704,11 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
      * @memberof ChatApi
      */
     public getConversationApiV1ChatConversationsConversationIdGet(requestParameters: ChatApiGetConversationApiV1ChatConversationsConversationIdGetRequest, options?: RawAxiosRequestConfig) {
-        return ChatApiFp(this.configuration).getConversationApiV1ChatConversationsConversationIdGet(requestParameters.conversationId, options).then((request) => request(this.axios, this.basePath));
+        return ChatApiFp(this.configuration).getConversationApiV1ChatConversationsConversationIdGet(requestParameters.conversationId, requestParameters.includeMessages, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
-     * Get conversation messages.
+     * Get messages from a conversation.
      * @summary Get Conversation Messages
      * @param {ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16511,7 +16716,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
      * @memberof ChatApi
      */
     public getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(requestParameters: ChatApiGetConversationMessagesApiV1ChatConversationsConversationIdMessagesGetRequest, options?: RawAxiosRequestConfig) {
-        return ChatApiFp(this.configuration).getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(requestParameters.conversationId, options).then((request) => request(this.axios, this.basePath));
+        return ChatApiFp(this.configuration).getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(requestParameters.conversationId, requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -16548,7 +16753,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
     }
 
     /**
-     * List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
+     * List conversations for the current user.
      * @summary List Conversations
      * @param {ChatApiListConversationsApiV1ChatConversationsGetRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -16556,7 +16761,7 @@ export class ChatApi extends BaseAPI implements ChatApiInterface {
      * @memberof ChatApi
      */
     public listConversationsApiV1ChatConversationsGet(requestParameters: ChatApiListConversationsApiV1ChatConversationsGetRequest = {}, options?: RawAxiosRequestConfig) {
-        return ChatApiFp(this.configuration).listConversationsApiV1ChatConversationsGet(requestParameters.query, requestParameters.status, requestParameters.limit, requestParameters.offset, requestParameters.sortBy, requestParameters.sortOrder, options).then((request) => request(this.axios, this.basePath));
+        return ChatApiFp(this.configuration).listConversationsApiV1ChatConversationsGet(requestParameters.limit, requestParameters.offset, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -16602,7 +16807,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -16642,7 +16847,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -16682,7 +16887,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -16722,7 +16927,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -16762,7 +16967,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -16799,7 +17004,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -16835,7 +17040,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -16880,7 +17085,7 @@ export const DataManagementApiAxiosParamCreator = function (configuration?: Conf
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17548,7 +17753,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17586,7 +17791,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17624,7 +17829,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17664,7 +17869,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17706,7 +17911,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17748,7 +17953,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17821,7 +18026,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17862,7 +18067,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17899,7 +18104,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17943,7 +18148,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -17990,7 +18195,7 @@ export const DocumentsApiAxiosParamCreator = function (configuration?: Configura
             const localVarQueryParameter = {} as any;
             const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -18869,7 +19074,7 @@ export const EventsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -18903,7 +19108,7 @@ export const EventsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -18937,7 +19142,7 @@ export const EventsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -18971,7 +19176,7 @@ export const EventsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -19005,7 +19210,7 @@ export const EventsApiAxiosParamCreator = function (configuration?: Configuratio
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -19719,7 +19924,7 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -19735,7 +19940,7 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
             };
         },
         /**
-         * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user      Returns:     Cleanup statistics
+         * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user  Returns:     Cleanup statistics
          * @summary Cleanup Jobs
          * @param {boolean} [force] 
          * @param {*} [options] Override http request option.
@@ -19754,7 +19959,7 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -19795,7 +20000,7 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -19836,7 +20041,7 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -19870,7 +20075,7 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -19915,7 +20120,7 @@ export const JobsApiAxiosParamCreator = function (configuration?: Configuration)
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20001,7 +20206,7 @@ export const JobsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user      Returns:     Cleanup statistics
+         * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user  Returns:     Cleanup statistics
          * @summary Cleanup Jobs
          * @param {boolean} [force] 
          * @param {*} [options] Override http request option.
@@ -20095,7 +20300,7 @@ export const JobsApiFactory = function (configuration?: Configuration, basePath?
             return localVarFp.cancelJobApiV1JobsJobIdCancelPost(requestParameters.jobId, options).then((request) => request(axios, basePath));
         },
         /**
-         * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user      Returns:     Cleanup statistics
+         * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user  Returns:     Cleanup statistics
          * @summary Cleanup Jobs
          * @param {JobsApiCleanupJobsApiV1JobsCleanupPostRequest} requestParameters Request parameters.
          * @param {*} [options] Override http request option.
@@ -20163,7 +20368,7 @@ export interface JobsApiInterface {
     cancelJobApiV1JobsJobIdCancelPost(requestParameters: JobsApiCancelJobApiV1JobsJobIdCancelPostRequest, options?: RawAxiosRequestConfig): AxiosPromise<JobActionResponse>;
 
     /**
-     * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user      Returns:     Cleanup statistics
+     * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user  Returns:     Cleanup statistics
      * @summary Cleanup Jobs
      * @param {JobsApiCleanupJobsApiV1JobsCleanupPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -20373,7 +20578,7 @@ export class JobsApi extends BaseAPI implements JobsApiInterface {
     }
 
     /**
-     * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user      Returns:     Cleanup statistics
+     * Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user  Returns:     Cleanup statistics
      * @summary Cleanup Jobs
      * @param {JobsApiCleanupJobsApiV1JobsCleanupPostRequest} requestParameters Request parameters.
      * @param {*} [options] Override http request option.
@@ -20462,7 +20667,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20502,7 +20707,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20542,7 +20747,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20583,7 +20788,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20621,7 +20826,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20659,7 +20864,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20693,7 +20898,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20731,7 +20936,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20769,7 +20974,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20807,7 +21012,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20845,7 +21050,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20883,7 +21088,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20921,7 +21126,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -20976,7 +21181,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -21033,7 +21238,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -21083,7 +21288,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -21121,7 +21326,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -21162,7 +21367,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -21206,7 +21411,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -21250,7 +21455,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -21294,7 +21499,7 @@ export const ModelRegistryApiAxiosParamCreator = function (configuration?: Confi
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -22706,7 +22911,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -22746,7 +22951,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -22787,7 +22992,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -22825,7 +23030,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -22863,7 +23068,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -22901,7 +23106,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -22935,7 +23140,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -22970,7 +23175,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -23011,7 +23216,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -23051,7 +23256,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -23101,7 +23306,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -23142,7 +23347,7 @@ export const PluginsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -23947,7 +24152,7 @@ export const ProfilesApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -23987,7 +24192,7 @@ export const ProfilesApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -24028,7 +24233,7 @@ export const ProfilesApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -24062,7 +24267,7 @@ export const ProfilesApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -24100,7 +24305,7 @@ export const ProfilesApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -24134,7 +24339,7 @@ export const ProfilesApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -24176,7 +24381,7 @@ export const ProfilesApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -24249,7 +24454,7 @@ export const ProfilesApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -24293,7 +24498,7 @@ export const ProfilesApiAxiosParamCreator = function (configuration?: Configurat
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -24959,7 +25164,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -24999,7 +25204,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -25040,7 +25245,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -25078,7 +25283,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -25112,7 +25317,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -25155,7 +25360,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -25232,7 +25437,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -25276,7 +25481,7 @@ export const PromptsApiAxiosParamCreator = function (configuration?: Configurati
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -25905,7 +26110,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -25946,7 +26151,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -25983,7 +26188,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26023,7 +26228,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26063,7 +26268,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26104,7 +26309,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26142,7 +26347,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26180,7 +26385,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26218,7 +26423,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26256,7 +26461,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26291,7 +26496,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26333,7 +26538,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26373,7 +26578,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26419,7 +26624,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26457,7 +26662,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26494,7 +26699,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26531,7 +26736,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26567,7 +26772,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26613,7 +26818,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26651,7 +26856,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26689,7 +26894,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26727,7 +26932,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26765,7 +26970,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26803,7 +27008,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26844,7 +27049,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
@@ -26888,7 +27093,7 @@ export const ToolServersApiAxiosParamCreator = function (configuration?: Configu
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
-            // authentication HTTPBearer required
+            // authentication CustomHTTPBearer required
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 

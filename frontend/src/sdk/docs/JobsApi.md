@@ -47,7 +47,7 @@ const { status, data } = await apiInstance.cancelJobApiV1JobsJobIdCancelPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -66,7 +66,7 @@ const { status, data } = await apiInstance.cancelJobApiV1JobsJobIdCancelPost(
 # **cleanupJobsApiV1JobsCleanupPost**
 > { [key: string]: any; } cleanupJobsApiV1JobsCleanupPost()
 
-Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user      Returns:     Cleanup statistics
+Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user  Returns:     Cleanup statistics
 
 ### Example
 
@@ -99,7 +99,7 @@ const { status, data } = await apiInstance.cleanupJobsApiV1JobsCleanupPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -152,7 +152,7 @@ const { status, data } = await apiInstance.createJobApiV1JobsPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -204,7 +204,7 @@ const { status, data } = await apiInstance.getJobApiV1JobsJobIdGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -249,7 +249,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -330,7 +330,7 @@ const { status, data } = await apiInstance.listJobsApiV1JobsGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

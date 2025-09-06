@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **enable_retrieval** | **boolean** |  | [optional] [default to undefined]
 **document_ids** | **Array&lt;string&gt;** |  | [optional] [default to undefined]
 **system_prompt_override** | **string** |  | [optional] [default to undefined]
+**workflow_config** | **{ [key: string]: any; }** |  | [optional] [default to undefined]
 **workflow_type** | **string** |  | [optional] [default to undefined]
 
 ## Example
@@ -38,6 +39,7 @@ const instance: ChatRequest = {
     enable_retrieval,
     document_ids,
     system_prompt_override,
+    workflow_config,
     workflow_type,
 };
 ```

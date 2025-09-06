@@ -64,7 +64,7 @@ const { status, data } = await apiInstance.exportAnalyticsApiV1AnalyticsExportPo
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -109,7 +109,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-No authorization required
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -153,7 +153,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-No authorization required
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -210,7 +210,7 @@ const { status, data } = await apiInstance.getConversationStatsApiV1AnalyticsCon
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -268,7 +268,7 @@ const { status, data } = await apiInstance.getDashboardApiV1AnalyticsDashboardGe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -326,7 +326,7 @@ const { status, data } = await apiInstance.getDocumentAnalyticsApiV1AnalyticsDoc
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -384,7 +384,7 @@ const { status, data } = await apiInstance.getPerformanceMetricsApiV1AnalyticsPe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -429,7 +429,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -486,7 +486,7 @@ const { status, data } = await apiInstance.getToolServerAnalyticsApiV1AnalyticsT
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -544,7 +544,7 @@ const { status, data } = await apiInstance.getUsageMetricsApiV1AnalyticsUsageGet
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -605,7 +605,7 @@ const { status, data } = await apiInstance.getUserAnalyticsApiV1AnalyticsUsersUs
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

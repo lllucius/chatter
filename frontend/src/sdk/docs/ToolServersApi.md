@@ -68,7 +68,7 @@ const { status, data } = await apiInstance.bulkServerOperationApiV1ToolserversSe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -120,7 +120,7 @@ const { status, data } = await apiInstance.checkServerHealthApiV1ToolserversServ
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -173,7 +173,7 @@ const { status, data } = await apiInstance.checkToolAccessApiV1ToolserversAccess
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -226,7 +226,7 @@ const { status, data } = await apiInstance.createRoleAccessRuleApiV1ToolserversR
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -279,7 +279,7 @@ const { status, data } = await apiInstance.createToolServerApiV1ToolserversServe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -331,7 +331,7 @@ const { status, data } = await apiInstance.deleteToolServerApiV1ToolserversServe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -383,7 +383,7 @@ const { status, data } = await apiInstance.disableToolApiV1ToolserversToolsToolI
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -435,7 +435,7 @@ const { status, data } = await apiInstance.disableToolServerApiV1ToolserversServ
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -487,7 +487,7 @@ const { status, data } = await apiInstance.enableToolApiV1ToolserversToolsToolId
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -539,7 +539,7 @@ const { status, data } = await apiInstance.enableToolServerApiV1ToolserversServe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -591,7 +591,7 @@ const { status, data } = await apiInstance.getRoleAccessRulesApiV1ToolserversRol
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -643,7 +643,7 @@ const { status, data } = await apiInstance.getServerMetricsApiV1ToolserversServe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -701,7 +701,7 @@ const { status, data } = await apiInstance.getServerToolsApiV1ToolserversServers
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -753,7 +753,7 @@ const { status, data } = await apiInstance.getToolServerApiV1ToolserversServersS
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -805,7 +805,7 @@ const { status, data } = await apiInstance.getUserPermissionsApiV1ToolserversUse
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -858,7 +858,7 @@ const { status, data } = await apiInstance.grantToolPermissionApiV1ToolserversPe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -903,7 +903,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -957,7 +957,7 @@ const { status, data } = await apiInstance.listToolServersApiV1ToolserversServer
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1009,7 +1009,7 @@ const { status, data } = await apiInstance.refreshServerToolsApiV1ToolserversSer
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1061,7 +1061,7 @@ const { status, data } = await apiInstance.restartToolServerApiV1ToolserversServ
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1113,7 +1113,7 @@ const { status, data } = await apiInstance.revokeToolPermissionApiV1ToolserversP
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1165,7 +1165,7 @@ const { status, data } = await apiInstance.startToolServerApiV1ToolserversServer
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1217,7 +1217,7 @@ const { status, data } = await apiInstance.stopToolServerApiV1ToolserversServers
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1269,7 +1269,7 @@ const { status, data } = await apiInstance.testServerConnectivityApiV1Toolserver
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1325,7 +1325,7 @@ const { status, data } = await apiInstance.updateToolPermissionApiV1ToolserversP
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -1381,7 +1381,7 @@ const { status, data } = await apiInstance.updateToolServerApiV1ToolserversServe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

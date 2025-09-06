@@ -54,7 +54,7 @@ const { status, data } = await apiInstance.completeAbTestApiV1AbTestsTestIdCompl
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -107,7 +107,7 @@ const { status, data } = await apiInstance.createAbTestApiV1AbTestsPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -159,7 +159,7 @@ const { status, data } = await apiInstance.deleteAbTestApiV1AbTestsTestIdDelete(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -214,7 +214,7 @@ const { status, data } = await apiInstance.endAbTestApiV1AbTestsTestIdEndPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -266,7 +266,7 @@ const { status, data } = await apiInstance.getAbTestApiV1AbTestsTestIdGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -318,7 +318,7 @@ const { status, data } = await apiInstance.getAbTestMetricsApiV1AbTestsTestIdMet
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -370,7 +370,7 @@ const { status, data } = await apiInstance.getAbTestPerformanceApiV1AbTestsTestI
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -422,7 +422,7 @@ const { status, data } = await apiInstance.getAbTestRecommendationsApiV1AbTestsT
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -474,7 +474,7 @@ const { status, data } = await apiInstance.getAbTestResultsApiV1AbTestsTestIdRes
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -532,7 +532,7 @@ const { status, data } = await apiInstance.listAbTestsApiV1AbTestsGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -584,7 +584,7 @@ const { status, data } = await apiInstance.pauseAbTestApiV1AbTestsTestIdPausePos
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -636,7 +636,7 @@ const { status, data } = await apiInstance.startAbTestApiV1AbTestsTestIdStartPos
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -692,7 +692,7 @@ const { status, data } = await apiInstance.updateAbTestApiV1AbTestsTestIdPut(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

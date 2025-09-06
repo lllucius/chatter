@@ -53,7 +53,7 @@ const { status, data } = await apiInstance.bulkDisablePluginsApiV1PluginsBulkDis
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -105,7 +105,7 @@ const { status, data } = await apiInstance.bulkEnablePluginsApiV1PluginsBulkEnab
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -157,7 +157,7 @@ const { status, data } = await apiInstance.checkPluginDependenciesApiV1PluginsPl
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -209,7 +209,7 @@ const { status, data } = await apiInstance.disablePluginApiV1PluginsPluginIdDisa
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -261,7 +261,7 @@ const { status, data } = await apiInstance.enablePluginApiV1PluginsPluginIdEnabl
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -313,7 +313,7 @@ const { status, data } = await apiInstance.getPluginApiV1PluginsPluginIdGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -358,7 +358,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -409,7 +409,7 @@ const { status, data } = await apiInstance.healthCheckPluginsApiV1PluginsHealthG
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -462,7 +462,7 @@ const { status, data } = await apiInstance.installPluginApiV1PluginsInstallPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -520,7 +520,7 @@ const { status, data } = await apiInstance.listPluginsApiV1PluginsGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -572,7 +572,7 @@ const { status, data } = await apiInstance.uninstallPluginApiV1PluginsPluginIdDe
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -628,7 +628,7 @@ const { status, data } = await apiInstance.updatePluginApiV1PluginsPluginIdPut(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

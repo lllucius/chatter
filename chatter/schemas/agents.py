@@ -24,7 +24,6 @@ class AgentType(str, Enum):
     RESEARCH = "research"
     SUPPORT = "support"
     SPECIALIST = "specialist"
-    SPECIALIZED = "specialist"  # Alias for backward compatibility
 
 
 class AgentStatus(str, Enum):

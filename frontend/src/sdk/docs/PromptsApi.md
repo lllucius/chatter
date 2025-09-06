@@ -53,7 +53,7 @@ const { status, data } = await apiInstance.clonePromptApiV1PromptsPromptIdCloneP
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -106,7 +106,7 @@ const { status, data } = await apiInstance.createPromptApiV1PromptsPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -158,7 +158,7 @@ const { status, data } = await apiInstance.deletePromptApiV1PromptsPromptIdDelet
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -210,7 +210,7 @@ const { status, data } = await apiInstance.getPromptApiV1PromptsPromptIdGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -255,7 +255,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -330,7 +330,7 @@ const { status, data } = await apiInstance.listPromptsApiV1PromptsGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -386,7 +386,7 @@ const { status, data } = await apiInstance.testPromptApiV1PromptsPromptIdTestPos
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -442,7 +442,7 @@ const { status, data } = await apiInstance.updatePromptApiV1PromptsPromptIdPut(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

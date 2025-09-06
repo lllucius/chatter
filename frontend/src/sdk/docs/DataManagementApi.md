@@ -49,7 +49,7 @@ const { status, data } = await apiInstance.bulkDeleteConversationsApiV1DataBulkD
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -101,7 +101,7 @@ const { status, data } = await apiInstance.bulkDeleteDocumentsApiV1DataBulkDelet
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -153,7 +153,7 @@ const { status, data } = await apiInstance.bulkDeletePromptsApiV1DataBulkDeleteP
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -206,7 +206,7 @@ const { status, data } = await apiInstance.createBackupApiV1DataBackupPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -259,7 +259,7 @@ const { status, data } = await apiInstance.exportDataApiV1DataExportPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -304,7 +304,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -358,7 +358,7 @@ const { status, data } = await apiInstance.listBackupsApiV1DataBackupsGet(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -411,7 +411,7 @@ const { status, data } = await apiInstance.restoreFromBackupApiV1DataRestorePost
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

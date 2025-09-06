@@ -4,7 +4,6 @@ All URIs are relative to *http://localhost:8000*
 
 |Method | HTTP request | Description|
 |------------- | ------------- | -------------|
-|[**addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost**](#addmessagetoconversationapiv1chatconversationsconversationidmessagespost) | **POST** /api/v1/chat/conversations/{conversation_id}/messages | Add Message To Conversation|
 |[**chatApiV1ChatChatPost**](#chatapiv1chatchatpost) | **POST** /api/v1/chat/chat | Chat|
 |[**chatWithTemplateApiV1ChatTemplateTemplateNamePost**](#chatwithtemplateapiv1chattemplatetemplatenamepost) | **POST** /api/v1/chat/template/{template_name} | Chat With Template|
 |[**createConversationApiV1ChatConversationsPost**](#createconversationapiv1chatconversationspost) | **POST** /api/v1/chat/conversations | Create Conversation|
@@ -19,66 +18,10 @@ All URIs are relative to *http://localhost:8000*
 |[**listConversationsApiV1ChatConversationsGet**](#listconversationsapiv1chatconversationsget) | **GET** /api/v1/chat/conversations | List Conversations|
 |[**updateConversationApiV1ChatConversationsConversationIdPut**](#updateconversationapiv1chatconversationsconversationidput) | **PUT** /api/v1/chat/conversations/{conversation_id} | Update Conversation|
 
-# **addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost**
-> MessageResponse addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(messageCreate)
-
-Add a new message to existing conversation.
-
-### Example
-
-```typescript
-import {
-    ChatApi,
-    Configuration,
-    MessageCreate
-} from 'chatter-sdk';
-
-const configuration = new Configuration();
-const apiInstance = new ChatApi(configuration);
-
-let conversationId: string; // (default to undefined)
-let messageCreate: MessageCreate; //
-
-const { status, data } = await apiInstance.addMessageToConversationApiV1ChatConversationsConversationIdMessagesPost(
-    conversationId,
-    messageCreate
-);
-```
-
-### Parameters
-
-|Name | Type | Description  | Notes|
-|------------- | ------------- | ------------- | -------------|
-| **messageCreate** | **MessageCreate**|  | |
-| **conversationId** | [**string**] |  | defaults to undefined|
-
-
-### Return type
-
-**MessageResponse**
-
-### Authorization
-
-[HTTPBearer](../README.md#HTTPBearer)
-
-### HTTP request headers
-
- - **Content-Type**: application/json
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-|**200** | Successful Response |  -  |
-|**422** | Validation Error |  -  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
 # **chatApiV1ChatChatPost**
 > ChatResponse1 chatApiV1ChatChatPost(chatRequest)
 
-Single chat endpoint supporting plain, rag, tools, and full workflows.  - If chat_request.stream is True, returns SSE stream. - Otherwise returns ChatResponse JSON.
+Unified chat endpoint supporting all workflow types with optional streaming.
 
 ### Example
 
@@ -112,7 +55,7 @@ const { status, data } = await apiInstance.chatApiV1ChatChatPost(
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -168,7 +111,7 @@ const { status, data } = await apiInstance.chatWithTemplateApiV1ChatTemplateTemp
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -187,7 +130,7 @@ const { status, data } = await apiInstance.chatWithTemplateApiV1ChatTemplateTemp
 # **createConversationApiV1ChatConversationsPost**
 > ConversationResponse createConversationApiV1ChatConversationsPost(conversationCreate)
 
-Create a new conversation.  Args:     conversation_data: Conversation creation data     current_user: Current authenticated user     chat_service: Chat service  Returns:     Created conversation
+Create a new conversation.
 
 ### Example
 
@@ -221,7 +164,7 @@ const { status, data } = await apiInstance.createConversationApiV1ChatConversati
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -253,7 +196,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ChatApi(configuration);
 
-let conversationId: string; // (default to undefined)
+let conversationId: string; //Conversation ID (default to undefined)
 
 const { status, data } = await apiInstance.deleteConversationApiV1ChatConversationsConversationIdDelete(
     conversationId
@@ -264,7 +207,7 @@ const { status, data } = await apiInstance.deleteConversationApiV1ChatConversati
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **conversationId** | [**string**] |  | defaults to undefined|
+| **conversationId** | [**string**] | Conversation ID | defaults to undefined|
 
 
 ### Return type
@@ -273,7 +216,7 @@ const { status, data } = await apiInstance.deleteConversationApiV1ChatConversati
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -292,7 +235,7 @@ const { status, data } = await apiInstance.deleteConversationApiV1ChatConversati
 # **deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete**
 > MessageDeleteResponse deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete()
 
-Delete a message from conversation.
+Delete a message from a conversation.
 
 ### Example
 
@@ -305,8 +248,8 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ChatApi(configuration);
 
-let conversationId: string; // (default to undefined)
-let messageId: string; // (default to undefined)
+let conversationId: string; //Conversation ID (default to undefined)
+let messageId: string; //Message ID (default to undefined)
 
 const { status, data } = await apiInstance.deleteMessageApiV1ChatConversationsConversationIdMessagesMessageIdDelete(
     conversationId,
@@ -318,8 +261,8 @@ const { status, data } = await apiInstance.deleteMessageApiV1ChatConversationsCo
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **conversationId** | [**string**] |  | defaults to undefined|
-| **messageId** | [**string**] |  | defaults to undefined|
+| **conversationId** | [**string**] | Conversation ID | defaults to undefined|
+| **messageId** | [**string**] | Message ID | defaults to undefined|
 
 
 ### Return type
@@ -328,7 +271,7 @@ const { status, data } = await apiInstance.deleteMessageApiV1ChatConversationsCo
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -373,7 +316,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -391,7 +334,7 @@ This endpoint does not have any parameters.
 # **getConversationApiV1ChatConversationsConversationIdGet**
 > ConversationWithMessages getConversationApiV1ChatConversationsConversationIdGet()
 
-Get conversation details with messages.
+Get conversation details with optional messages.
 
 ### Example
 
@@ -404,10 +347,12 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ChatApi(configuration);
 
-let conversationId: string; // (default to undefined)
+let conversationId: string; //Conversation ID (default to undefined)
+let includeMessages: boolean; //Include messages in response (optional) (default to true)
 
 const { status, data } = await apiInstance.getConversationApiV1ChatConversationsConversationIdGet(
-    conversationId
+    conversationId,
+    includeMessages
 );
 ```
 
@@ -415,7 +360,8 @@ const { status, data } = await apiInstance.getConversationApiV1ChatConversations
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **conversationId** | [**string**] |  | defaults to undefined|
+| **conversationId** | [**string**] | Conversation ID | defaults to undefined|
+| **includeMessages** | [**boolean**] | Include messages in response | (optional) defaults to true|
 
 
 ### Return type
@@ -424,7 +370,7 @@ const { status, data } = await apiInstance.getConversationApiV1ChatConversations
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -443,7 +389,7 @@ const { status, data } = await apiInstance.getConversationApiV1ChatConversations
 # **getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet**
 > Array<MessageResponse> getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet()
 
-Get conversation messages.
+Get messages from a conversation.
 
 ### Example
 
@@ -456,10 +402,14 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ChatApi(configuration);
 
-let conversationId: string; // (default to undefined)
+let conversationId: string; //Conversation ID (default to undefined)
+let limit: number; //Number of results per page (optional) (default to 50)
+let offset: number; //Number of results to skip (optional) (default to 0)
 
 const { status, data } = await apiInstance.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(
-    conversationId
+    conversationId,
+    limit,
+    offset
 );
 ```
 
@@ -467,7 +417,9 @@ const { status, data } = await apiInstance.getConversationMessagesApiV1ChatConve
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **conversationId** | [**string**] |  | defaults to undefined|
+| **conversationId** | [**string**] | Conversation ID | defaults to undefined|
+| **limit** | [**number**] | Number of results per page | (optional) defaults to 50|
+| **offset** | [**number**] | Number of results to skip | (optional) defaults to 0|
 
 
 ### Return type
@@ -476,7 +428,7 @@ const { status, data } = await apiInstance.getConversationMessagesApiV1ChatConve
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -488,9 +440,6 @@ const { status, data } = await apiInstance.getConversationMessagesApiV1ChatConve
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Successful Response |  -  |
-|**401** | Unauthorized - Invalid or missing authentication token |  -  |
-|**403** | Forbidden - User lacks permission to access this conversation |  -  |
-|**404** | Not Found - Conversation does not exist |  -  |
 |**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -524,7 +473,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -568,7 +517,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -612,7 +561,7 @@ This endpoint does not have any parameters.
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -630,7 +579,7 @@ This endpoint does not have any parameters.
 # **listConversationsApiV1ChatConversationsGet**
 > ConversationSearchResponse listConversationsApiV1ChatConversationsGet()
 
-List user\'s conversations.  Note: Filters may be ignored if not supported by the service implementation.
+List conversations for the current user.
 
 ### Example
 
@@ -643,20 +592,12 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ChatApi(configuration);
 
-let query: string; //Search query (optional) (default to undefined)
-let status: ConversationStatus; //Filter by status (optional) (default to undefined)
-let limit: number; //Maximum number of results (optional) (default to 50)
+let limit: number; //Number of results per page (optional) (default to 20)
 let offset: number; //Number of results to skip (optional) (default to 0)
-let sortBy: string; //Sort field (optional) (default to 'created_at')
-let sortOrder: string; //Sort order (optional) (default to 'desc')
 
 const { status, data } = await apiInstance.listConversationsApiV1ChatConversationsGet(
-    query,
-    status,
     limit,
-    offset,
-    sortBy,
-    sortOrder
+    offset
 );
 ```
 
@@ -664,12 +605,8 @@ const { status, data } = await apiInstance.listConversationsApiV1ChatConversatio
 
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
-| **query** | [**string**] | Search query | (optional) defaults to undefined|
-| **status** | **ConversationStatus** | Filter by status | (optional) defaults to undefined|
-| **limit** | [**number**] | Maximum number of results | (optional) defaults to 50|
+| **limit** | [**number**] | Number of results per page | (optional) defaults to 20|
 | **offset** | [**number**] | Number of results to skip | (optional) defaults to 0|
-| **sortBy** | [**string**] | Sort field | (optional) defaults to 'created_at'|
-| **sortOrder** | [**string**] | Sort order | (optional) defaults to 'desc'|
 
 
 ### Return type
@@ -678,7 +615,7 @@ const { status, data } = await apiInstance.listConversationsApiV1ChatConversatio
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 
@@ -690,8 +627,6 @@ const { status, data } = await apiInstance.listConversationsApiV1ChatConversatio
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 |**200** | Successful Response |  -  |
-|**401** | Unauthorized - Invalid or missing authentication token |  -  |
-|**403** | Forbidden - User lacks permission to access conversations |  -  |
 |**422** | Validation Error |  -  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
@@ -713,7 +648,7 @@ import {
 const configuration = new Configuration();
 const apiInstance = new ChatApi(configuration);
 
-let conversationId: string; // (default to undefined)
+let conversationId: string; //Conversation ID (default to undefined)
 let conversationUpdate: ConversationUpdate; //
 
 const { status, data } = await apiInstance.updateConversationApiV1ChatConversationsConversationIdPut(
@@ -727,7 +662,7 @@ const { status, data } = await apiInstance.updateConversationApiV1ChatConversati
 |Name | Type | Description  | Notes|
 |------------- | ------------- | ------------- | -------------|
 | **conversationUpdate** | **ConversationUpdate**|  | |
-| **conversationId** | [**string**] |  | defaults to undefined|
+| **conversationId** | [**string**] | Conversation ID | defaults to undefined|
 
 
 ### Return type
@@ -736,7 +671,7 @@ const { status, data } = await apiInstance.updateConversationApiV1ChatConversati
 
 ### Authorization
 
-[HTTPBearer](../README.md#HTTPBearer)
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
 
 ### HTTP request headers
 

@@ -195,7 +195,7 @@ class EventRouter:
             try:
                 handler(event)
             except Exception as e:
-                logger.error("Error in global handler", error=str(e), event_id=event.event_id, event_type=event.event_type)
+                logger.error("Error in global handler", error=str(e), event_id=event.id, event_type=event.event_type)
                 success = False
         
         # Call category-specific handlers
@@ -204,7 +204,7 @@ class EventRouter:
                 try:
                     handler(event)
                 except Exception as e:
-                    logger.error("Error in category handler", error=str(e), event_id=event.event_id, event_type=event.event_type, category=event.category)
+                    logger.error("Error in category handler", error=str(e), event_id=event.id, event_type=event.event_type, category=event.category)
                     success = False
         
         # Call type-specific handlers
@@ -213,7 +213,7 @@ class EventRouter:
                 try:
                     handler(event)
                 except Exception as e:
-                    logger.error("Error in type handler", error=str(e), event_id=event.event_id, event_type=event.event_type)
+                    logger.error("Error in type handler", error=str(e), event_id=event.id, event_type=event.event_type)
                     success = False
         
         # Route to category emitters
@@ -224,7 +224,7 @@ class EventRouter:
                     if not emitter_success:
                         success = False
                 except Exception as e:
-                    logger.error("Error in emitter", error=str(e), event_id=event.event_id, event_type=event.event_type, category=event.category)
+                    logger.error("Error in emitter", error=str(e), event_id=event.id, event_type=event.event_type, category=event.category)
                     success = False
         
         return success
@@ -331,5 +331,57 @@ def create_analytics_event(
 
 
 async def emit_event(event: UnifiedEvent) -> bool:
-    """Emit an event through the global router."""
-    return await event_router.route_event(event)
+    """Emit an event through the global router with enhanced validation."""
+    try:
+        # Validate event structure
+        if not validate_event_structure(event):
+            logger.error("Invalid event structure", event_id=event.id, event_type=event.event_type)
+            return False
+            
+        # Route the event
+        return await event_router.route_event(event)
+        
+    except Exception as e:
+        logger.error("Failed to emit event", event_id=event.id, event_type=event.event_type, error=str(e))
+        return False
+
+
+def validate_event_structure(event: UnifiedEvent) -> bool:
+    """Validate event structure for consistency and security."""
+    try:
+        # Basic field validation
+        if not event.id or not event.event_type or not event.category:
+            logger.warning("Event missing required fields", event_id=getattr(event, 'id', None))
+            return False
+            
+        # Validate event type format (should not contain special characters)
+        if not event.event_type.replace('.', '').replace('_', '').replace('-', '').isalnum():
+            logger.warning("Event type contains invalid characters", event_type=event.event_type)
+            return False
+            
+        # Validate data size (prevent memory issues)
+        try:
+            import json
+            data_size = len(json.dumps(event.data))
+            if data_size > 1024 * 1024:  # 1MB limit
+                logger.warning("Event data too large", event_id=event.id, size_bytes=data_size)
+                return False
+        except (TypeError, ValueError) as e:
+            logger.warning("Event data not serializable", event_id=event.id, error=str(e))
+            return False
+            
+        # Validate metadata size
+        try:
+            metadata_size = len(json.dumps(event.metadata))
+            if metadata_size > 64 * 1024:  # 64KB limit
+                logger.warning("Event metadata too large", event_id=event.id, size_bytes=metadata_size)
+                return False
+        except (TypeError, ValueError) as e:
+            logger.warning("Event metadata not serializable", event_id=event.id, error=str(e))
+            return False
+            
+        return True
+        
+    except Exception as e:
+        logger.error("Error validating event", event_id=getattr(event, 'id', None), error=str(e))
+        return False

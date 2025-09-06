@@ -21,6 +21,9 @@ export class SSEEventManager {
   private eventCount = 0;
   private lastEventTime: number | null = null;
   private healthCheckInterval: NodeJS.Timeout | null = null;
+  private eventBuffer: AnySSEEvent[] = [];
+  private maxBufferSize = 100; // Buffer up to 100 events during disconnections
+  private reconnectTimeouts: Set<NodeJS.Timeout> = new Set();
 
   /**
    * Connect to the SSE stream using the current authentication from chatterSDK
@@ -50,6 +53,13 @@ export class SSEEventManager {
     this.isConnected = false;
     this.reconnectAttempts = 0;
     this.stopHealthCheck();
+
+    // Clear all reconnect timeouts
+    this.reconnectTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.reconnectTimeouts.clear();
+
+    // Clear event buffer to prevent memory leaks
+    this.eventBuffer = [];
 
     // Note: With fetch-based approach, we don't have a direct way to cancel
     // The stream will be cancelled when the browser closes the connection
@@ -349,11 +359,17 @@ export class SSEEventManager {
     
     console.log(`SSE: Scheduling reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
     
-    setTimeout(() => {
+    const timeout = setTimeout(() => {
+      // Remove this timeout from tracking
+      this.reconnectTimeouts.delete(timeout);
+      
       if (!this.isManuallyDisconnected) {
         this.createConnection();
       }
     }, delay);
+    
+    // Track timeout for cleanup
+    this.reconnectTimeouts.add(timeout);
   }
 
   /**

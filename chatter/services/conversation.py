@@ -80,6 +80,11 @@ class ConversationService:
                 except ValueError as e:
                     raise ValueError("Invalid user ID format") from e
 
+                # Prepare metadata with workflow_config
+                metadata = kwargs.get('metadata', {})
+                if kwargs.get('workflow_config') is not None:
+                    metadata['workflow_config'] = kwargs.get('workflow_config')
+                
                 conversation = Conversation(
                     title=title,
                     user_id=user_id,
@@ -87,10 +92,14 @@ class ConversationService:
                     profile_id=kwargs.get('profile_id'),
                     temperature=kwargs.get('temperature', 0.7),
                     max_tokens=kwargs.get('max_tokens', 1000),
-                    workflow_config=kwargs.get('workflow_config'),
-                    metadata=kwargs.get('metadata', {}),
+                    extra_metadata=metadata,
                 )
             else:
+                # Prepare metadata with workflow_config
+                metadata = conversation_data.metadata or {}
+                if conversation_data.workflow_config is not None:
+                    metadata['workflow_config'] = conversation_data.workflow_config
+                
                 # Use schema object
                 conversation = Conversation(
                     title=conversation_data.title,
@@ -99,8 +108,7 @@ class ConversationService:
                     status=ConversationStatus.ACTIVE,
                     temperature=conversation_data.temperature,
                     max_tokens=conversation_data.max_tokens,
-                    workflow_config=conversation_data.workflow_config,
-                    metadata=conversation_data.metadata or {},
+                    extra_metadata=metadata,
                 )
 
             self.session.add(conversation)
@@ -247,6 +255,7 @@ class ConversationService:
                         'status': kwargs.get('status'),
                         'temperature': kwargs.get('temperature'),
                         'max_tokens': kwargs.get('max_tokens'),
+                        'workflow_config': kwargs.get('workflow_config'),
                         'metadata': kwargs.get('metadata'),
                     },
                 )()
@@ -271,16 +280,17 @@ class ConversationService:
                 conversation.max_tokens = update_data.max_tokens
 
             if update_data.workflow_config is not None:
-                conversation.workflow_config = (
-                    update_data.workflow_config
-                )
+                # Store workflow_config in extra_metadata
+                if conversation.extra_metadata is None:
+                    conversation.extra_metadata = {}
+                conversation.extra_metadata['workflow_config'] = update_data.workflow_config
 
             if update_data.metadata is not None:
                 # Merge metadata
-                if conversation.metadata:
-                    conversation.metadata.update(update_data.metadata)
+                if conversation.extra_metadata:
+                    conversation.extra_metadata.update(update_data.metadata)
                 else:
-                    conversation.metadata = update_data.metadata
+                    conversation.extra_metadata = update_data.metadata
 
             await self.session.flush()
             await self.session.refresh(conversation)
@@ -613,7 +623,7 @@ class ConversationService:
                 'status': conversation.status,
                 'created_at': conversation.created_at,
                 'updated_at': conversation.updated_at,
-                'metadata': conversation.metadata,
+                'metadata': conversation.extra_metadata,
             }
         except Exception as e:
             logger.error(f"Failed to get conversation metadata: {e}")

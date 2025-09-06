@@ -4,13 +4,13 @@ import yaml
 from pathlib import Path
 from typing import Dict, List, Any, Optional
 
-from chatter.utils.seeding import DatabaseSeeder as BaseDatabaseSeeder, SeedingMode
+from chatter.utils.seeding import DatabaseSeeder, SeedingMode
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
 
-class ConfigurableSeeder(BaseDatabaseSeeder):
+class ConfigurableSeeder(DatabaseSeeder):
     """Enhanced seeder that loads configuration from YAML files."""
     
     def __init__(self, config_path: Optional[str] = None, session=None):
@@ -55,15 +55,30 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
             logger.error(f"Failed to load config from {self.config_path}: {e}")
             return {}
     
-    async def _create_development_users(self, skip_existing: bool = True) -> List:
-        """Create development users from configuration."""
-        if not self.config.get("development_users"):
-            logger.info("No development users in configuration, using defaults")
-            return await super()._create_development_users(skip_existing)
+    def _get_configured_data(self, section: str, subsection: str = None) -> List[Dict]:
+        """Get configured data for a section/subsection."""
+        if not self.config:
+            return []
         
-        users_data = self.config["development_users"]
+        data = self.config.get(section, {})
+        if subsection:
+            data = data.get(subsection, [])
+        
+        return data if isinstance(data, list) else []
+    
+    async def _create_configured_users(self, user_type: str, skip_existing: bool = True) -> List:
+        """Create users from configuration."""
+        users_data = self._get_configured_data(f"{user_type}_users")
+        if not users_data:
+            logger.info(f"No {user_type} users in configuration, using defaults")
+            # Fallback to parent implementation
+            if user_type == "development":
+                return await super()._create_development_users(skip_existing)
+            elif user_type == "test":
+                return await super()._create_test_users(skip_existing)
+            return []
+        
         created_users = []
-        
         for user_data in users_data:
             if skip_existing:
                 from sqlalchemy import select
@@ -86,7 +101,7 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
                 is_active=True,
                 is_verified=True,
                 is_superuser=user_data.get("is_superuser", False),
-                bio=user_data.get("bio", f"Development user: {user_data['full_name']}"),
+                bio=user_data.get("bio", f"{user_type.title()} user: {user_data['full_name']}"),
             )
             
             self.session.add(user)
@@ -97,11 +112,35 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
             for user in created_users:
                 await self.session.refresh(user)
         
-        logger.info(f"Created {len(created_users)} development users from configuration")
+        logger.info(f"Created {len(created_users)} {user_type} users from configuration")
         return created_users
     
-    async def _create_basic_profiles(self, admin_user, skip_existing: bool = True) -> int:
-        """Create profiles from configuration."""
+    async def _create_development_users(self, skip_existing: bool = True) -> List:
+        """Create development users from configuration or defaults."""
+        return await self._create_configured_users("development", skip_existing)
+    
+    async def _create_test_users(self, skip_existing: bool = True) -> List:
+        """Create test users from configuration or defaults."""
+        return await self._create_configured_users("test", skip_existing)
+    
+    async def _create_configured_entities(self, entity_type: str, section: str, subsection: str, admin_user, skip_existing: bool = True) -> int:
+        """Generic method to create configured entities."""
+        entities_data = self._get_configured_data(section, subsection)
+        if not entities_data:
+            logger.info(f"No {entity_type} in configuration, using defaults")
+            # Fallback to parent implementation based on entity type
+            if entity_type == "profiles" and subsection == "basic":
+                return await super()._create_basic_profiles(admin_user, skip_existing)
+            elif entity_type == "prompts" and subsection == "basic":
+                return await super()._create_basic_prompts(admin_user, skip_existing)
+            elif entity_type == "workflow_templates" and subsection == "basic":
+                return await super()._create_basic_workflow_templates(admin_user, skip_existing)
+            return 0
+        
+        return await self._process_configured_entities(entity_type, entities_data, admin_user, skip_existing)
+    
+    async def _process_configured_entities(self, entity_type: str, entities_data: List[Dict], admin_user, skip_existing: bool) -> int:
+        """Process and create entities from configuration data."""
         if not admin_user:
             from sqlalchemy import select
             from chatter.models.user import User
@@ -110,56 +149,124 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
             )
             admin_user = result.scalar_one_or_none()
             if not admin_user:
-                logger.warning("No admin user found, skipping profile creation")
+                logger.warning(f"No admin user found, skipping {entity_type} creation")
                 return 0
         
-        profiles_config = self.config.get("chat_profiles", {}).get("basic", [])
-        if not profiles_config:
-            logger.info("No basic profiles in configuration, using defaults")
-            return await super()._create_basic_profiles(admin_user, skip_existing)
-        
         created_count = 0
-        for profile_data in profiles_config:
+        
+        for entity_data in entities_data:
             if skip_existing:
-                from sqlalchemy import select
-                from chatter.models.profile import Profile
-                existing = await self.session.execute(
-                    select(Profile).where(Profile.name == profile_data["name"])
-                )
-                if existing.scalar_one_or_none():
+                existing = await self._check_existing_entity(entity_type, entity_data)
+                if existing:
                     continue
             
-            from chatter.models.profile import Profile, ProfileType
-            
-            profile = Profile(
-                owner_id=admin_user.id,
-                name=profile_data["name"],
-                description=profile_data["description"],
-                profile_type=ProfileType[profile_data["profile_type"]],
-                llm_provider=profile_data["llm_provider"],
-                llm_model=profile_data["llm_model"],
-                temperature=profile_data["temperature"],
-                max_tokens=profile_data["max_tokens"],
-                top_p=profile_data.get("top_p"),
-                system_prompt=profile_data.get("system_prompt"),
-                is_public=True,
-            )
-            
-            self.session.add(profile)
-            created_count += 1
+            entity = await self._create_entity_from_config(entity_type, entity_data, admin_user)
+            if entity:
+                self.session.add(entity)
+                created_count += 1
         
         if created_count > 0:
             await self.session.commit()
         
-        logger.info(f"Created {created_count} basic profiles from configuration")
+        logger.info(f"Created {created_count} {entity_type} from configuration")
         return created_count
+    
+    async def _check_existing_entity(self, entity_type: str, entity_data: Dict) -> bool:
+        """Check if an entity already exists."""
+        from sqlalchemy import select
+        
+        if entity_type == "profiles":
+            from chatter.models.profile import Profile
+            existing = await self.session.execute(
+                select(Profile).where(Profile.name == entity_data["name"])
+            )
+        elif entity_type == "prompts":
+            from chatter.models.prompt import Prompt
+            existing = await self.session.execute(
+                select(Prompt).where(Prompt.name == entity_data["name"])
+            )
+        elif entity_type == "workflow_templates":
+            from chatter.models.workflow import WorkflowTemplate
+            existing = await self.session.execute(
+                select(WorkflowTemplate).where(
+                    WorkflowTemplate.name == entity_data["name"],
+                    WorkflowTemplate.is_builtin == entity_data.get("is_builtin", True)
+                )
+            )
+        else:
+            return False
+        
+        return existing.scalar_one_or_none() is not None
+    
+    async def _create_entity_from_config(self, entity_type: str, entity_data: Dict, admin_user) -> Any:
+        """Create an entity from configuration data."""
+        if entity_type == "profiles":
+            from chatter.models.profile import Profile, ProfileType
+            return Profile(
+                owner_id=admin_user.id,
+                name=entity_data["name"],
+                description=entity_data["description"],
+                profile_type=ProfileType[entity_data["profile_type"]],
+                llm_provider=entity_data["llm_provider"],
+                llm_model=entity_data["llm_model"],
+                temperature=entity_data["temperature"],
+                max_tokens=entity_data["max_tokens"],
+                top_p=entity_data.get("top_p"),
+                top_k=entity_data.get("top_k"),
+                system_prompt=entity_data.get("system_prompt"),
+                enable_tools=entity_data.get("enable_tools", False),
+                is_public=True,
+                tags=entity_data.get("tags", []),
+            )
+        elif entity_type == "prompts":
+            from chatter.models.prompt import Prompt, PromptCategory, PromptType
+            return Prompt(
+                owner_id=admin_user.id,
+                name=entity_data["name"],
+                description=entity_data["description"],
+                prompt_type=PromptType.TEMPLATE,
+                category=PromptCategory[entity_data["category"]],
+                content=entity_data["content"],
+                variables=entity_data["variables"],
+                examples=entity_data.get("examples"),
+                suggested_temperature=entity_data.get("suggested_temperature"),
+                suggested_max_tokens=entity_data.get("suggested_max_tokens"),
+                is_public=True,
+            )
+        elif entity_type == "workflow_templates":
+            from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType
+            return WorkflowTemplate(
+                owner_id=admin_user.id,
+                name=entity_data["name"],
+                description=entity_data["description"],
+                workflow_type=WorkflowType(entity_data["workflow_type"]),
+                category=TemplateCategory(entity_data["category"]),
+                default_params=entity_data["default_params"],
+                required_tools=entity_data.get("required_tools"),
+                required_retrievers=entity_data.get("required_retrievers"),
+                is_builtin=entity_data.get("is_builtin", True),
+                is_public=True,
+                version=1,
+                is_latest=True,
+            )
+        
+        return None
+    
+    # Override specific methods to use configuration
+    async def _create_basic_profiles(self, admin_user, skip_existing: bool = True) -> int:
+        """Create profiles from configuration."""
+        return await self._create_configured_entities("profiles", "chat_profiles", "basic", admin_user, skip_existing)
+    
+    async def _create_basic_prompts(self, admin_user, skip_existing: bool = True) -> int:
+        """Create prompts from configuration."""
+        return await self._create_configured_entities("prompts", "prompt_templates", "basic", admin_user, skip_existing)
+    
+    async def _create_basic_workflow_templates(self, admin_user, skip_existing: bool = True) -> int:
+        """Create basic workflow templates from configuration."""
+        return await self._create_configured_entities("workflow_templates", "workflow_templates", "basic", admin_user, skip_existing)
     
     async def _create_demo_profiles(self, skip_existing: bool = True) -> List:
         """Create extended profiles for demo mode."""
-        profiles_config = self.config.get("chat_profiles", {}).get("extended", [])
-        if not profiles_config:
-            return []
-        
         # Get admin user
         from sqlalchemy import select
         from chatter.models.user import User
@@ -171,205 +278,40 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
             logger.warning("No admin user found for demo profiles")
             return []
         
-        created_profiles = []
-        for profile_data in profiles_config:
-            if skip_existing:
-                from chatter.models.profile import Profile
-                existing = await self.session.execute(
-                    select(Profile).where(Profile.name == profile_data["name"])
-                )
-                if existing.scalar_one_or_none():
-                    continue
-            
-            from chatter.models.profile import Profile, ProfileType
-            
-            profile = Profile(
-                owner_id=admin_user.id,
-                name=profile_data["name"],
-                description=profile_data["description"],
-                profile_type=ProfileType[profile_data["profile_type"]],
-                llm_provider=profile_data["llm_provider"],
-                llm_model=profile_data["llm_model"],
-                temperature=profile_data["temperature"],
-                max_tokens=profile_data["max_tokens"],
-                system_prompt=profile_data.get("system_prompt"),
-                is_public=True,
-            )
-            
-            self.session.add(profile)
-            created_profiles.append(profile)
-        
-        if created_profiles:
-            await self.session.commit()
-            for profile in created_profiles:
-                await self.session.refresh(profile)
-        
-        logger.info(f"Created {len(created_profiles)} demo profiles from configuration")
-        return created_profiles
+        count = await self._create_configured_entities("profiles", "chat_profiles", "extended", admin_user, skip_existing)
+        return [] if count == 0 else [f"Created {count} demo profiles"]  # Return placeholder for compatibility
     
-    async def _create_basic_prompts(self, admin_user, skip_existing: bool = True) -> int:
-        """Create prompts from configuration."""
+    async def _create_demo_prompts(self, skip_existing: bool = True) -> List:
+        """Create extended prompts for demo mode."""
+        # Get admin user
+        from sqlalchemy import select
+        from chatter.models.user import User
+        result = await self.session.execute(
+            select(User).where(User.username == "admin")
+        )
+        admin_user = result.scalar_one_or_none()
         if not admin_user:
-            from sqlalchemy import select
-            from chatter.models.user import User
-            result = await self.session.execute(
-                select(User).where(User.username == "admin")
-            )
-            admin_user = result.scalar_one_or_none()
-            if not admin_user:
-                logger.warning("No admin user found, skipping prompt creation")
-                return 0
+            logger.warning("No admin user found for demo prompts")
+            return []
         
-        prompts_config = self.config.get("prompt_templates", {}).get("basic", [])
-        if not prompts_config:
-            logger.info("No basic prompts in configuration, using defaults")
-            return await super()._create_basic_prompts(admin_user, skip_existing)
-        
-        created_count = 0
-        for prompt_data in prompts_config:
-            if skip_existing:
-                from sqlalchemy import select
-                from chatter.models.prompt import Prompt
-                existing = await self.session.execute(
-                    select(Prompt).where(Prompt.name == prompt_data["name"])
-                )
-                if existing.scalar_one_or_none():
-                    continue
-            
-            from chatter.models.prompt import Prompt, PromptCategory, PromptType
-            
-            prompt = Prompt(
-                owner_id=admin_user.id,
-                name=prompt_data["name"],
-                description=prompt_data["description"],
-                prompt_type=PromptType.TEMPLATE,
-                category=PromptCategory[prompt_data["category"]],
-                content=prompt_data["content"],
-                variables=prompt_data["variables"],
-                suggested_temperature=prompt_data.get("suggested_temperature"),
-                suggested_max_tokens=prompt_data.get("suggested_max_tokens"),
-                is_public=True,
-            )
-            
-            self.session.add(prompt)
-            created_count += 1
-        
-        if created_count > 0:
-            await self.session.commit()
-        
-        logger.info(f"Created {created_count} basic prompts from configuration")
-        return created_count
+        count = await self._create_configured_entities("prompts", "prompt_templates", "extended", admin_user, skip_existing)
+        return [] if count == 0 else [f"Created {count} demo prompts"]  # Return placeholder for compatibility
     
-    async def _create_production_prompts(self, admin_user, skip_existing: bool = True) -> int:
-        """Create production prompts from configuration."""
+    async def _create_demo_workflow_templates(self, skip_existing: bool = True) -> List:
+        """Create extended workflow templates for demo mode."""
+        # Get admin user
+        from sqlalchemy import select
+        from chatter.models.user import User
+        result = await self.session.execute(
+            select(User).where(User.username == "admin")
+        )
+        admin_user = result.scalar_one_or_none()
         if not admin_user:
-            from sqlalchemy import select
-            from chatter.models.user import User
-            result = await self.session.execute(
-                select(User).where(User.username == "admin")
-            )
-            admin_user = result.scalar_one_or_none()
-            if not admin_user:
-                logger.warning("No admin user found, skipping production prompt creation")
-                return 0
+            logger.warning("No admin user found for demo workflow templates")
+            return []
         
-        prompts_config = self.config.get("production_data", {}).get("prompt_templates", [])
-        if not prompts_config:
-            logger.info("No production prompts in configuration, falling back to basic prompts")
-            return await self._create_basic_prompts(admin_user, skip_existing)
-        
-        created_count = 0
-        for prompt_data in prompts_config:
-            if skip_existing:
-                from sqlalchemy import select
-                from chatter.models.prompt import Prompt
-                existing = await self.session.execute(
-                    select(Prompt).where(Prompt.name == prompt_data["name"])
-                )
-                if existing.scalar_one_or_none():
-                    continue
-            
-            from chatter.models.prompt import Prompt, PromptCategory, PromptType
-            
-            prompt = Prompt(
-                owner_id=admin_user.id,
-                name=prompt_data["name"],
-                description=prompt_data["description"],
-                prompt_type=PromptType.TEMPLATE,
-                category=PromptCategory[prompt_data["category"]],
-                content=prompt_data["content"],
-                variables=prompt_data["variables"],
-                examples=prompt_data.get("examples"),
-                suggested_temperature=prompt_data.get("suggested_temperature"),
-                suggested_max_tokens=prompt_data.get("suggested_max_tokens"),
-                is_public=True,
-            )
-            
-            self.session.add(prompt)
-            created_count += 1
-        
-        if created_count > 0:
-            await self.session.commit()
-        
-        logger.info(f"Created {created_count} production prompts from configuration")
-        return created_count
-
-    async def _create_production_profiles(self, admin_user, skip_existing: bool = True) -> int:
-        """Create production profiles from configuration."""
-        if not admin_user:
-            from sqlalchemy import select
-            from chatter.models.user import User
-            result = await self.session.execute(
-                select(User).where(User.username == "admin")
-            )
-            admin_user = result.scalar_one_or_none()
-            if not admin_user:
-                logger.warning("No admin user found, skipping production profile creation")
-                return 0
-        
-        profiles_config = self.config.get("production_data", {}).get("chat_profiles", [])
-        if not profiles_config:
-            logger.info("No production profiles in configuration, falling back to basic profiles")
-            return await self._create_basic_profiles(admin_user, skip_existing)
-        
-        created_count = 0
-        for profile_data in profiles_config:
-            if skip_existing:
-                from sqlalchemy import select
-                from chatter.models.profile import Profile
-                existing = await self.session.execute(
-                    select(Profile).where(Profile.name == profile_data["name"])
-                )
-                if existing.scalar_one_or_none():
-                    continue
-            
-            from chatter.models.profile import Profile, ProfileType
-            
-            profile = Profile(
-                owner_id=admin_user.id,
-                name=profile_data["name"],
-                description=profile_data["description"],
-                profile_type=ProfileType[profile_data["profile_type"]],
-                llm_provider=profile_data["llm_provider"],
-                llm_model=profile_data["llm_model"],
-                temperature=profile_data["temperature"],
-                max_tokens=profile_data["max_tokens"],
-                top_p=profile_data.get("top_p"),
-                top_k=profile_data.get("top_k"),
-                system_prompt=profile_data.get("system_prompt"),
-                enable_tools=profile_data.get("enable_tools", False),
-                is_public=True,
-                tags=profile_data.get("tags", []),
-            )
-            
-            self.session.add(profile)
-            created_count += 1
-        
-        if created_count > 0:
-            await self.session.commit()
-        
-        logger.info(f"Created {created_count} production profiles from configuration")
-        return created_count
+        count = await self._create_configured_entities("workflow_templates", "workflow_templates", "extended", admin_user, skip_existing)
+        return [] if count == 0 else [f"Created {count} demo workflow templates"]  # Return placeholder for compatibility
     
     async def _seed_production_data(self, results: Dict[str, Any], skip_existing: bool):
         """Override production seeding to use configuration data."""
@@ -381,9 +323,9 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
             results["created"]["admin_user"] = admin_user.username
         
         # Create production profiles and prompts from configuration
-        profiles_created = await self._create_production_profiles(admin_user, skip_existing)
-        prompts_created = await self._create_production_prompts(admin_user, skip_existing)
-        workflow_templates_created = await self._create_production_workflow_templates(admin_user, skip_existing)
+        profiles_created = await self._create_configured_entities("profiles", "production_data", "chat_profiles", admin_user, skip_existing)
+        prompts_created = await self._create_configured_entities("prompts", "production_data", "prompt_templates", admin_user, skip_existing)
+        workflow_templates_created = await self._create_configured_entities("workflow_templates", "production_data", "workflow_templates", admin_user, skip_existing)
         
         results["created"]["profiles"] = profiles_created
         results["created"]["prompts"] = prompts_created
@@ -396,64 +338,11 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
         
         logger.info(f"Production seeding completed: {profiles_created} profiles, {prompts_created} prompts, {workflow_templates_created} workflow templates")
     
-    async def _create_demo_prompts(self, skip_existing: bool = True) -> List:
-        """Create extended prompts for demo mode."""
-        prompts_config = self.config.get("prompt_templates", {}).get("extended", [])
-        if not prompts_config:
-            return []
-        
-        # Get admin user
-        from sqlalchemy import select
-        from chatter.models.user import User
-        result = await self.session.execute(
-            select(User).where(User.username == "admin")
-        )
-        admin_user = result.scalar_one_or_none()
-        if not admin_user:
-            logger.warning("No admin user found for demo prompts")
-            return []
-        
-        created_prompts = []
-        for prompt_data in prompts_config:
-            if skip_existing:
-                from chatter.models.prompt import Prompt
-                existing = await self.session.execute(
-                    select(Prompt).where(Prompt.name == prompt_data["name"])
-                )
-                if existing.scalar_one_or_none():
-                    continue
-            
-            from chatter.models.prompt import Prompt, PromptCategory, PromptType
-            
-            prompt = Prompt(
-                owner_id=admin_user.id,
-                name=prompt_data["name"],
-                description=prompt_data["description"],
-                prompt_type=PromptType.TEMPLATE,
-                category=PromptCategory[prompt_data["category"]],
-                content=prompt_data["content"],
-                variables=prompt_data["variables"],
-                suggested_temperature=prompt_data.get("suggested_temperature"),
-                suggested_max_tokens=prompt_data.get("suggested_max_tokens"),
-                is_public=True,
-            )
-            
-            self.session.add(prompt)
-            created_prompts.append(prompt)
-        
-        if created_prompts:
-            await self.session.commit()
-            for prompt in created_prompts:
-                await self.session.refresh(prompt)
-        
-        logger.info(f"Created {len(created_prompts)} demo prompts from configuration")
-        return created_prompts
-    
     async def _create_sample_conversations(self, users: List, skip_existing: bool = True) -> int:
         """Create sample conversations from configuration."""
-        conversations_config = self.config.get("sample_conversations", [])
+        conversations_config = self._get_configured_data("sample_conversations")
         if not conversations_config or not users:
-            logger.info("No sample conversations in configuration or no users")
+            logger.info("No sample conversations in configuration or no users, using defaults")
             return await super()._create_sample_conversations(users, skip_existing)
         
         created_count = 0
@@ -501,9 +390,9 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
     
     async def _create_sample_documents(self, users: List, skip_existing: bool = True) -> int:
         """Create sample documents from configuration."""
-        documents_config = self.config.get("sample_documents", [])
+        documents_config = self._get_configured_data("sample_documents")
         if not documents_config or not users:
-            logger.info("No sample documents in configuration or no users")
+            logger.info("No sample documents in configuration or no users, using defaults")
             return await super()._create_sample_documents(users, skip_existing)
         
         created_count = 0
@@ -522,7 +411,7 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
             user = users[0]
             
             document = Document(
-                user_id=user.id,
+                owner_id=user.id,
                 filename=doc_data["filename"],
                 title=doc_data["title"],
                 content=doc_data["content"],
@@ -553,225 +442,6 @@ class ConfigurableSeeder(BaseDatabaseSeeder):
         
         logger.info(f"Created {created_count} sample documents from configuration")
         return created_count
-    
-    async def _create_test_users(self, skip_existing: bool = True) -> List:
-        """Create test users from configuration."""
-        test_config = self.config.get("test_data", {})
-        users_data = test_config.get("users", [])
-        
-        if not users_data:
-            logger.info("No test users in configuration, using defaults")
-            return await super()._create_test_users(skip_existing)
-        
-        created_users = []
-        for user_data in users_data:
-            if skip_existing:
-                from sqlalchemy import select
-                from chatter.models.user import User
-                existing = await self.session.execute(
-                    select(User).where(User.username == user_data["username"])
-                )
-                if existing.scalar_one_or_none():
-                    continue
-            
-            from chatter.models.user import User
-            from chatter.utils.security_enhanced import hash_password
-            
-            user = User(
-                email=user_data["email"],
-                username=user_data["username"],
-                hashed_password=hash_password(user_data["password"]),
-                full_name=user_data["full_name"],
-                is_active=True,
-                is_verified=True,
-                is_superuser=False,
-                bio="Test user for automated testing",
-            )
-            
-            self.session.add(user)
-            created_users.append(user)
-        
-        if created_users:
-            await self.session.commit()
-            for user in created_users:
-                await self.session.refresh(user)
-        
-        logger.info(f"Created {len(created_users)} test users from configuration")
-        return created_users
-
-    async def _create_basic_workflow_templates(self, admin_user, skip_existing: bool = True) -> int:
-        """Create basic workflow templates from configuration."""
-        if not admin_user:
-            from sqlalchemy import select
-            from chatter.models.user import User
-            result = await self.session.execute(
-                select(User).where(User.username == "admin")
-            )
-            admin_user = result.scalar_one_or_none()
-            if not admin_user:
-                logger.warning("No admin user found, skipping basic workflow template creation")
-                return 0
-        
-        templates_config = self.config.get("workflow_templates", {}).get("basic", [])
-        if not templates_config:
-            logger.info("No basic workflow templates in configuration, using defaults")
-            return await super()._create_basic_workflow_templates(admin_user, skip_existing)
-        
-        created_count = 0
-        for template_data in templates_config:
-            if skip_existing:
-                from sqlalchemy import select
-                from chatter.models.workflow import WorkflowTemplate
-                existing = await self.session.execute(
-                    select(WorkflowTemplate).where(
-                        WorkflowTemplate.name == template_data["name"],
-                        WorkflowTemplate.is_builtin == True
-                    )
-                )
-                if existing.scalar_one_or_none():
-                    continue
-            
-            from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType
-            
-            workflow_template = WorkflowTemplate(
-                owner_id=admin_user.id,
-                name=template_data["name"],
-                description=template_data["description"],
-                workflow_type=WorkflowType(template_data["workflow_type"]),
-                category=TemplateCategory(template_data["category"]),
-                default_params=template_data["default_params"],
-                required_tools=template_data.get("required_tools"),
-                required_retrievers=template_data.get("required_retrievers"),
-                is_builtin=True,
-                is_public=True,  # Built-in templates are public by default
-                version=1,
-                is_latest=True,
-            )
-            
-            self.session.add(workflow_template)
-            created_count += 1
-        
-        if created_count > 0:
-            await self.session.commit()
-        
-        logger.info(f"Created {created_count} basic workflow templates from configuration")
-        return created_count
-
-    async def _create_production_workflow_templates(self, admin_user, skip_existing: bool = True) -> int:
-        """Create production workflow templates from configuration."""
-        if not admin_user:
-            from sqlalchemy import select
-            from chatter.models.user import User
-            result = await self.session.execute(
-                select(User).where(User.username == "admin")
-            )
-            admin_user = result.scalar_one_or_none()
-            if not admin_user:
-                logger.warning("No admin user found, skipping production workflow template creation")
-                return 0
-        
-        templates_config = self.config.get("production_data", {}).get("workflow_templates", [])
-        if not templates_config:
-            logger.info("No production workflow templates in configuration, falling back to basic templates")
-            return await self._create_basic_workflow_templates(admin_user, skip_existing)
-        
-        created_count = 0
-        for template_data in templates_config:
-            if skip_existing:
-                from sqlalchemy import select
-                from chatter.models.workflow import WorkflowTemplate
-                existing = await self.session.execute(
-                    select(WorkflowTemplate).where(
-                        WorkflowTemplate.name == template_data["name"],
-                        WorkflowTemplate.is_builtin == True
-                    )
-                )
-                if existing.scalar_one_or_none():
-                    continue
-            
-            from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType
-            
-            workflow_template = WorkflowTemplate(
-                owner_id=admin_user.id,
-                name=template_data["name"],
-                description=template_data["description"],
-                workflow_type=WorkflowType(template_data["workflow_type"]),
-                category=TemplateCategory(template_data["category"]),
-                default_params=template_data["default_params"],
-                required_tools=template_data.get("required_tools"),
-                required_retrievers=template_data.get("required_retrievers"),
-                is_builtin=True,
-                is_public=True,  # Production templates are public by default
-                version=1,
-                is_latest=True,
-            )
-            
-            self.session.add(workflow_template)
-            created_count += 1
-        
-        if created_count > 0:
-            await self.session.commit()
-        
-        logger.info(f"Created {created_count} production workflow templates from configuration")
-        return created_count
-
-    async def _create_demo_workflow_templates(self, skip_existing: bool = True) -> List:
-        """Create extended workflow templates for demo mode."""
-        templates_config = self.config.get("workflow_templates", {}).get("extended", [])
-        if not templates_config:
-            return []
-        
-        # Get admin user
-        from sqlalchemy import select
-        from chatter.models.user import User
-        result = await self.session.execute(
-            select(User).where(User.username == "admin")
-        )
-        admin_user = result.scalar_one_or_none()
-        if not admin_user:
-            logger.warning("No admin user found for demo workflow templates")
-            return []
-        
-        created_templates = []
-        for template_data in templates_config:
-            if skip_existing:
-                from chatter.models.workflow import WorkflowTemplate
-                existing = await self.session.execute(
-                    select(WorkflowTemplate).where(
-                        WorkflowTemplate.name == template_data["name"],
-                        WorkflowTemplate.owner_id == admin_user.id
-                    )
-                )
-                if existing.scalar_one_or_none():
-                    continue
-            
-            from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType
-            
-            workflow_template = WorkflowTemplate(
-                owner_id=admin_user.id,
-                name=template_data["name"],
-                description=template_data["description"],
-                workflow_type=WorkflowType(template_data["workflow_type"]),
-                category=TemplateCategory(template_data["category"]),
-                default_params=template_data["default_params"],
-                required_tools=template_data.get("required_tools"),
-                required_retrievers=template_data.get("required_retrievers"),
-                is_builtin=False,
-                is_public=True,  # Demo templates are public
-                version=1,
-                is_latest=True,
-            )
-            
-            self.session.add(workflow_template)
-            created_templates.append(workflow_template)
-        
-        if created_templates:
-            await self.session.commit()
-            for template in created_templates:
-                await self.session.refresh(template)
-        
-        logger.info(f"Created {len(created_templates)} demo workflow templates from configuration")
-        return created_templates
 
 
 # Enhanced convenience function

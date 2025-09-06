@@ -187,6 +187,11 @@ const LayoutFrame: React.FC = () => {
     setAnchorEl(null);
   };
 
+  const handleSettingsClick = () => {
+    navigate('/settings');
+    handleProfileMenuClose();
+  };
+
   const handleLogout = () => {
     chatterSDK.logout();
     navigate('/login');
@@ -325,7 +330,7 @@ const LayoutFrame: React.FC = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem onClick={handleProfileMenuClose}>
+        <MenuItem onClick={handleSettingsClick}>
           <ListItemIcon>
             <SettingsIcon fontSize="small" />
           </ListItemIcon>
@@ -430,7 +435,7 @@ const LayoutFrame: React.FC = () => {
                 anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                 transformOrigin={{ vertical: 'top', horizontal: 'right' }}
               >
-                <MenuItem onClick={handleProfileMenuClose}>
+                <MenuItem onClick={handleSettingsClick}>
                   <ListItemIcon>
                     <SettingsIcon fontSize="small" />
                   </ListItemIcon>

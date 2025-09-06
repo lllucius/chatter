@@ -311,25 +311,26 @@ const AdministrationPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error(`Error ${action} job:`, error);
-      setError(error.response?.data?.detail || error.message || `Failed to ${action} job`);
+      const errorMsg = error.response?.data?.detail || error.message || `Failed to ${action} job`;
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
-  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+  const showToast = (messageOrError: string | any, type: 'success' | 'error' | 'info' | 'warning' = 'info', fallback?: string) => {
     switch (type) {
       case 'success':
-        toastService.success(message);
+        toastService.success(messageOrError);
         break;
       case 'error':
-        toastService.error(message);
+        toastService.error(messageOrError, fallback);
         break;
       case 'warning':
-        toastService.warning(message);
+        toastService.warning(messageOrError, fallback);
         break;
       default:
-        toastService.info(message);
+        toastService.info(messageOrError);
     }
   };
 
@@ -394,9 +395,8 @@ const AdministrationPage: React.FC = () => {
 
     } catch (error: any) {
       console.error('Bulk operation failed:', error);
-      const message = error.response?.data?.detail || error.message || 'Bulk operation failed';
-      setError(message);
-      showToast(message, 'error');
+      setError(error.response?.data?.detail || error.message || 'Bulk operation failed');
+      showToast(error, 'error', 'Bulk operation failed');
     } finally {
       setLoading(false);
     }
@@ -424,8 +424,8 @@ const AdministrationPage: React.FC = () => {
       showToast('User settings updated successfully!', 'success');
       setUserSettingsOpen(false);
       setEditingUser(null);
-    } catch {
-      showToast('Failed to update user settings', 'error');
+    } catch (error: any) {
+      showToast(error, 'error', 'Failed to update user settings');
     }
   };
 
@@ -570,7 +570,8 @@ const AdministrationPage: React.FC = () => {
       });
     } catch (error: any) {
       console.error('Error submitting form:', error);
-      setError(error.response?.data?.detail || error.message || 'An error occurred. Please try again.');
+      const errorMsg = error.response?.data?.detail || error.message || 'An error occurred. Please try again.';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -604,7 +605,8 @@ const AdministrationPage: React.FC = () => {
         }
       } catch (error: any) {
         console.error(`Error deleting ${type}:`, error);
-        setError(error.response?.data?.detail || error.message || `Failed to delete ${type}`);
+        const errorMsg = error.response?.data?.detail || error.message || `Failed to delete ${type}`;
+        setError(errorMsg);
       } finally {
         setLoading(false);
       }
@@ -628,7 +630,8 @@ const AdministrationPage: React.FC = () => {
       }
     } catch (error: any) {
       console.error(`Error editing ${type}:`, error);
-      setError(error.response?.data?.detail || error.message || `Failed to edit ${type}`);
+      const errorMsg = error.response?.data?.detail || error.message || `Failed to edit ${type}`;
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

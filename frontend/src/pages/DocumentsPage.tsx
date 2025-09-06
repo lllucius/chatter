@@ -126,7 +126,7 @@ const DocumentsPage: React.FC = () => {
           ? { ...doc, status: 'failed' as any }
           : doc
       ));
-      setError(`Document processing failed: ${docEvent.data.error}`);
+      toastService.error(`Document processing failed: ${docEvent.data.error}`);
     });
 
     return () => {
@@ -144,7 +144,7 @@ const DocumentsPage: React.FC = () => {
       const response = await chatterSDK.documents.listDocumentsApiV1DocumentsGet({});
       setDocuments(response.data.documents);
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to load documents');
+      toastService.error(err, 'Failed to load documents');
     } finally {
       setLoading(false);
     }
@@ -164,7 +164,7 @@ const DocumentsPage: React.FC = () => {
       setUploadFile(null);
       setUploadTitle('');
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to upload document');
+      toastService.error(err, 'Failed to upload document');
     } finally {
       setUploading(false);
     }
@@ -179,7 +179,7 @@ const DocumentsPage: React.FC = () => {
       await chatterSDK.documents.deleteDocumentApiV1DocumentsDocumentIdDelete({ documentId: documentId });
       setDocuments(prev => prev.filter(d => d.id !== documentId));
     } catch (err: any) {
-      setError('Failed to delete document');
+      toastService.error(err, 'Failed to delete document');
     }
   };
 
@@ -290,7 +290,7 @@ const DocumentsPage: React.FC = () => {
         newWindow.document.close();
       }
     } catch (err: any) {
-      setError('Failed to view document details');
+      toastService.error(err, 'Failed to view document details');
     }
   };
 
@@ -311,7 +311,7 @@ const DocumentsPage: React.FC = () => {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (err: any) {
-      setError('Failed to download document');
+      toastService.error(err, 'Failed to download document');
     }
   };
 
@@ -327,7 +327,7 @@ const DocumentsPage: React.FC = () => {
       const response = await chatterSDK.documents.searchDocumentsApiV1DocumentsSearchPost({ documentSearchRequest: searchRequest });
       setSearchResults(response.data.results);
     } catch (err: any) {
-      setError('Failed to search documents');
+      toastService.error(err, 'Failed to search documents');
     } finally {
       setSearching(false);
     }

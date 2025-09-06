@@ -151,7 +151,7 @@ const ABTestingPage: React.FC = () => {
       const data = response.data;
       setTests(data.tests || []);
     } catch (err: any) {
-      toastService.error(err.response?.data?.detail || 'Failed to load AB tests');
+      toastService.error(err, 'Failed to load AB tests');
     } finally {
       setLoading(false);
     }
@@ -270,7 +270,7 @@ const ABTestingPage: React.FC = () => {
       handleCloseDialog();
       await loadTests();
     } catch (err: any) {
-      toastService.error(err.response?.data?.detail || 'Failed to save test');
+      toastService.error(err, 'Failed to save test');
     } finally {
       setSaving(false);
     }
@@ -286,7 +286,7 @@ const ABTestingPage: React.FC = () => {
       toastService.success('Test deleted successfully');
       await loadTests();
     } catch (err: any) {
-      toastService.error(err.response?.data?.detail || 'Failed to delete test');
+      toastService.error(err, 'Failed to delete test');
     }
   };
 
@@ -311,7 +311,7 @@ const ABTestingPage: React.FC = () => {
       await loadTests();
       handleCloseActionMenu();
     } catch (err: any) {
-      toastService.error(err.response?.data?.detail || `Failed to ${action} test`);
+      toastService.error(err, `Failed to ${action} test`);
     }
   };
 

@@ -216,19 +216,19 @@ const ToolsPage: React.FC = () => {
 
   const [accessCheckResult, setAccessCheckResult] = useState<any>(null);
 
-  const showToast = (message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info') => {
+  const showToast = (messageOrError: string | any, type: 'success' | 'error' | 'info' | 'warning' = 'info', fallback?: string) => {
     switch (type) {
       case 'success':
-        toastService.success(message);
+        toastService.success(messageOrError);
         break;
       case 'error':
-        toastService.error(message);
+        toastService.error(messageOrError, fallback);
         break;
       case 'warning':
-        toastService.warning(message);
+        toastService.warning(messageOrError, fallback);
         break;
       default:
-        toastService.info(message);
+        toastService.info(messageOrError);
     }
   };
 
@@ -446,8 +446,7 @@ const ToolsPage: React.FC = () => {
       
     } catch (err) {
       console.error('Failed to load remote servers:', err);
-      const errorMessage = 'Failed to load remote servers';
-      showToast(errorMessage, 'error');
+      showToast(err, 'error', 'Failed to load remote servers');
     } finally {
       setLoading(false);
     }
@@ -461,8 +460,7 @@ const ToolsPage: React.FC = () => {
       
     } catch (err) {
       console.error('Failed to load tools:', err);
-      const errorMessage = 'Failed to load tools';
-      showToast(errorMessage, 'error');
+      showToast(err, 'error', 'Failed to load tools');
     } finally {
       setLoading(false);
     }
@@ -481,8 +479,7 @@ const ToolsPage: React.FC = () => {
       
     } catch (err) {
       console.error('Failed to load permissions:', err);
-      const errorMessage = 'Failed to load permissions';
-      showToast(errorMessage, 'error');
+      showToast(err, 'error', 'Failed to load permissions');
     } finally {
       setLoading(false);
     }
@@ -496,8 +493,7 @@ const ToolsPage: React.FC = () => {
       
     } catch (err) {
       console.error('Failed to load role access rules:', err);
-      const errorMessage = 'Failed to load role access rules';
-      showToast(errorMessage, 'error');
+      showToast(err, 'error', 'Failed to load role access rules');
     } finally {
       setLoading(false);
     }
@@ -539,8 +535,7 @@ const ToolsPage: React.FC = () => {
       loadRemoteServers();
     } catch (err) {
       console.error('Failed to create remote server:', err);
-      const errorMessage = 'Failed to create remote server';
-      showToast(errorMessage, 'error');
+      showToast(err, 'error', 'Failed to create remote server');
     } finally {
       setLoading(false);
     }
@@ -573,8 +568,7 @@ const ToolsPage: React.FC = () => {
       loadRemoteServers();
     } catch (err) {
       console.error('Failed to update server:', err);
-      const errorMessage = 'Failed to update server';
-      showToast(errorMessage, 'error');
+      showToast(err, 'error', 'Failed to update server');
     } finally {
       setLoading(false);
     }
@@ -591,7 +585,7 @@ const ToolsPage: React.FC = () => {
       loadRemoteServers();
     } catch (err) {
       console.error(`Failed to ${enable ? 'enable' : 'disable'} server:`, err);
-      showToast(`Failed to ${enable ? 'enable' : 'disable'} server`, 'error');
+      showToast(err, 'error', `Failed to ${enable ? 'enable' : 'disable'} server`);
     }
     handleActionClose();
   };
@@ -603,7 +597,7 @@ const ToolsPage: React.FC = () => {
       loadTools();
     } catch (err) {
       console.error('Failed to refresh server tools:', err);
-      showToast('Failed to refresh server tools', 'error');
+      showToast(err, 'error', 'Failed to refresh server tools');
     }
     handleActionClose();
   };
@@ -616,7 +610,7 @@ const ToolsPage: React.FC = () => {
       loadTools();
     } catch (err) {
       console.error('Failed to delete server:', err);
-      showToast('Failed to delete server', 'error');
+      showToast(err, 'error', 'Failed to delete server');
     }
     handleActionClose();
   };
@@ -632,7 +626,7 @@ const ToolsPage: React.FC = () => {
       loadTools();
     } catch (err) {
       console.error(`Failed to ${enable ? 'enable' : 'disable'} tool:`, err);
-      showToast(`Failed to ${enable ? 'enable' : 'disable'} tool`, 'error');
+      showToast(err, 'error', `Failed to ${enable ? 'enable' : 'disable'} tool`);
     }
     handleActionClose();
   };
@@ -649,8 +643,7 @@ const ToolsPage: React.FC = () => {
       loadPermissions();
     } catch (err) {
       console.error('Failed to grant permission:', err);
-      const errorMessage = 'Failed to grant permission';
-      showToast(errorMessage, 'error');
+      showToast(err, 'error', 'Failed to grant permission');
     } finally {
       setLoading(false);
     }
@@ -663,7 +656,7 @@ const ToolsPage: React.FC = () => {
       loadPermissions();
     } catch (err) {
       console.error('Failed to revoke permission:', err);
-      showToast('Failed to revoke permission', 'error');
+      showToast(err, 'error', 'Failed to revoke permission');
     }
   };
 
@@ -679,8 +672,7 @@ const ToolsPage: React.FC = () => {
       loadRoleAccessRules();
     } catch (err) {
       console.error('Failed to create role access rule:', err);
-      const errorMessage = 'Failed to create role access rule';
-      showToast(errorMessage, 'error');
+      showToast(err, 'error', 'Failed to create role access rule');
     } finally {
       setLoading(false);
     }
@@ -697,8 +689,7 @@ const ToolsPage: React.FC = () => {
       showToast('Access check completed', 'success');
     } catch (err) {
       console.error('Failed to check access:', err);
-      const errorMessage = 'Failed to check access';
-      showToast(errorMessage, 'error');
+      showToast(err, 'error', 'Failed to check access');
     } finally {
       setLoading(false);
     }

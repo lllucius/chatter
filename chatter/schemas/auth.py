@@ -80,12 +80,30 @@ class UserResponse(UserBase):
     id: str = Field(..., description="User ID")
     is_active: bool = Field(..., description="Is user active")
     is_verified: bool = Field(..., description="Is user email verified")
+    is_superuser: bool = Field(..., description="Is user a superuser")
     default_llm_provider: str | None = Field(
         None, description="Default LLM provider"
     )
     default_profile_id: str | None = Field(
         None, description="Default profile ID"
     )
+    
+    # Usage limits (non-sensitive)
+    daily_message_limit: int | None = Field(
+        None, description="Daily message limit"
+    )
+    monthly_message_limit: int | None = Field(
+        None, description="Monthly message limit"
+    )
+    max_file_size_mb: int | None = Field(
+        None, description="Max file size in MB"
+    )
+    
+    # API key name (but not the actual key for security)
+    api_key_name: str | None = Field(
+        None, description="API key name"
+    )
+    
     created_at: datetime = Field(
         ..., description="Account creation date"
     )

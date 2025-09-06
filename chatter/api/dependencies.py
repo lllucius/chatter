@@ -1,9 +1,11 @@
 """Common API dependencies for validation and request handling."""
 
-from typing import Annotated
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import Path, Query
+from pydantic import GetCoreSchemaHandler
+from pydantic_core import core_schema
 
 from chatter.utils.problem import BadRequestProblem
 
@@ -12,12 +14,33 @@ class ValidatedUUID(str):
     """UUID string that validates format on creation."""
 
     @classmethod
-    def __get_validators__(cls):
-        yield cls.validate
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> core_schema.CoreSchema:
+        """Generate Pydantic v2 core schema for OpenAPI compatibility."""
+
+        def validate_uuid(v: str) -> str:
+            """Validate UUID format."""
+            if not isinstance(v, str):
+                raise BadRequestProblem(
+                    detail="Invalid UUID format: must be a string"
+                )
+            try:
+                UUID(v)
+                return v
+            except ValueError as e:
+                raise BadRequestProblem(
+                    detail="Invalid UUID format: must be a valid UUID"
+                ) from e
+
+        return core_schema.chain_schema([
+            core_schema.str_schema(min_length=1),
+            core_schema.no_info_plain_validator_function(validate_uuid),
+        ])
 
     @classmethod
     def validate(cls, v):
-        """Validate UUID format."""
+        """Validate UUID format (for backward compatibility)."""
         if isinstance(v, str):
             try:
                 UUID(v)

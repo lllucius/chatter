@@ -27,4 +27,3 @@ The project will be using:
 
 Reiterating...Never create backwards compatibility layers!!!  Always update code to use new interfaces.
 
-

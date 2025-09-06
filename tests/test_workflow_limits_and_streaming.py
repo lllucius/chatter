@@ -352,7 +352,7 @@ class TestWorkflowExecutionService:
         self.workflow_service._get_conversation_messages = AsyncMock(return_value=[])
 
         # Mock the workflow manager to avoid the 'str' object astream issue
-        with patch('chatter.services.workflow_execution.get_workflow_manager') as mock_get_manager:
+        with patch('chatter.core.dependencies.get_workflow_manager') as mock_get_manager:
             mock_workflow_manager = AsyncMock()
             mock_get_manager.return_value = mock_workflow_manager
             
@@ -403,7 +403,7 @@ class TestWorkflowExecutionService:
     async def test_streaming_workflow_timeout(self):
         """Test streaming workflow timeout."""
         # Mock workflow manager to avoid the 'str' object astream issue
-        with patch('chatter.services.workflow_execution.get_workflow_manager') as mock_get_manager:
+        with patch('chatter.core.dependencies.get_workflow_manager') as mock_get_manager:
             mock_workflow_manager = AsyncMock()
             mock_get_manager.return_value = mock_workflow_manager
             

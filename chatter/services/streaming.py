@@ -544,17 +544,3 @@ class StreamingService:
 streaming_service = StreamingService()
 
 
-# Module-level convenience functions
-async def create_stream(
-    stream_id: str,
-    workflow_type: str,
-    correlation_id: str | None = None,
-) -> None:
-    """Create a new streaming session using the global streaming service.
-
-    Args:
-        stream_id: Unique stream identifier
-        workflow_type: Type of workflow being streamed
-        correlation_id: Optional correlation ID
-    """
-    return await streaming_service.create_stream(stream_id, workflow_type, correlation_id)

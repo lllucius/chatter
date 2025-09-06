@@ -9,7 +9,7 @@ from chatter.core.validation import (
     ValidationError,
     validation_engine,
 )
-from chatter.core.validation.engine import ValidationResult
+from chatter.core.validation import ValidationResult
 from chatter.core.validation.validators import (
     BusinessValidator,
     InputValidator,

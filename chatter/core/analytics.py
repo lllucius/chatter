@@ -2,6 +2,8 @@
 
 import asyncio
 import time
+import psutil
+
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -994,28 +996,17 @@ class AnalyticsService:
 
             # System health metrics (optional - requires psutil)
             system_health = {}
-            try:
-                import time
-
-                import psutil
-
-                # Get current process info for basic metrics
-                # process = psutil.Process()  # Unused for now
-                system_health = {
-                    "system_uptime_seconds": time.time()
-                    - psutil.boot_time(),
-                    "avg_cpu_usage": psutil.cpu_percent(interval=0.1),
-                    "avg_memory_usage": psutil.virtual_memory().percent,
-                    "database_connections": len(
-                        self.session.get_bind().pool.checkedout()
-                    ),
-                }
-            except (ImportError, AttributeError, Exception):
-                # If psutil not available or other error, skip system health metrics
-                logger.debug(
-                    "System health metrics not available (psutil may not be installed)"
-                )
-                pass
+            # Get current process info for basic metrics
+            # process = psutil.Process()  # Unused for now
+            system_health = {
+                "system_uptime_seconds": time.time()
+                - psutil.boot_time(),
+                "avg_cpu_usage": psutil.cpu_percent(interval=0.1),
+                "avg_memory_usage": psutil.virtual_memory().percent,
+                "database_connections": len(
+                    self.session.get_bind().pool.checkedout()
+                ),
+            }
 
             # API metrics from message data (using messages as proxy for API requests)
             api_metrics_result = await self.session.execute(

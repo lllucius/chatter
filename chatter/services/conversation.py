@@ -22,7 +22,7 @@ from chatter.schemas.chat import (
 from chatter.schemas.chat import (
     ConversationUpdate as ConversationUpdateSchema,
 )
-from chatter.utils.database_optimization import (
+from chatter.utils.performance import (
     ConversationQueryService,
     get_conversation_optimized,
     get_user_conversations_optimized,

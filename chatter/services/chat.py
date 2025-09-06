@@ -26,6 +26,7 @@ from chatter.utils.correlation import get_correlation_id
 from chatter.core.monitoring import record_request_metrics
 from chatter.utils.security_enhanced import get_secure_logger
 from chatter.core.exceptions import ChatServiceError
+from chatter.utils.performance import get_conversation_optimized, get_performance_monitor
 
 logger = get_secure_logger(__name__)
 
@@ -111,9 +112,10 @@ class ChatService:
     """
 
     def __init__(self, session: AsyncSession, llm_service: LLMService) -> None:
-        """Initialize chat service with dependencies."""
+        """Initialize chat service with dependencies and performance monitoring."""
         self.session = session
         self.llm_service = llm_service
+        self.performance_monitor = get_performance_monitor()
 
         # Initialize specialized services
         self.conversation_service = ConversationService(session)
@@ -216,55 +218,56 @@ class ChatService:
     async def _chat_sync(
         self, user_id: str, chat_request: ChatRequest
     ) -> tuple[Conversation, Message]:
-        """Process a synchronous chat request."""
+        """Process a synchronous chat request with performance monitoring."""
         correlation_id = get_correlation_id()
         start_time = __import__('time').time()
 
-        try:
-            # Shared conversation setup logic
-            conversation = await self._setup_conversation(user_id, chat_request)
-            
-            # Add user message
-            await self.add_message_to_conversation(
-                conversation.id, user_id, MessageRole.USER, chat_request.message
-            )
+        async with self.performance_monitor.measure_query("chat_sync_request"):
+            try:
+                # Shared conversation setup logic
+                conversation = await self._setup_conversation(user_id, chat_request)
+                
+                # Add user message
+                await self.add_message_to_conversation(
+                    conversation.id, user_id, MessageRole.USER, chat_request.message
+                )
 
-            # Execute workflow to get response
-            response_message, usage_info = await self.workflow_service.execute_workflow(
-                conversation, chat_request, correlation_id
-            )
+                # Execute workflow to get response
+                response_message, usage_info = await self.workflow_service.execute_workflow(
+                    conversation, chat_request, correlation_id
+                )
 
-            # Apply usage information and save response
-            self._apply_usage_to_message(response_message, usage_info)
-            response_message = await self.message_service.add_message_to_conversation(
-                conversation.id,
-                user_id,
-                response_message.role,
-                response_message.content,
-                response_message.metadata,
-                response_message.input_tokens,
-                response_message.output_tokens,
-                response_message.cost,
-                response_message.provider,
-            )
+                # Apply usage information and save response
+                self._apply_usage_to_message(response_message, usage_info)
+                response_message = await self.message_service.add_message_to_conversation(
+                    conversation.id,
+                    user_id,
+                        response_message.role,
+                    response_message.content,
+                    response_message.metadata,
+                    response_message.input_tokens,
+                    response_message.output_tokens,
+                    response_message.cost,
+                    response_message.provider,
+                )
 
-            # Record metrics
-            self._record_request_metrics(start_time, correlation_id, user_id, 200)
-            
-            logger.info(
-                "Chat request processed successfully",
-                conversation_id=conversation.id,
-                user_id=user_id,
-                workflow_type=chat_request.workflow_type,
-                correlation_id=correlation_id,
-            )
+                # Record metrics
+                self._record_request_metrics(start_time, correlation_id, user_id, 200)
+                
+                logger.info(
+                    "Chat request processed successfully",
+                    conversation_id=conversation.id,
+                    user_id=user_id,
+                    workflow_type=chat_request.workflow_type,
+                    correlation_id=correlation_id,
+                )
 
-            return conversation, response_message
+                return conversation, response_message
 
-        except Exception as e:
-            self._record_request_metrics(start_time, correlation_id, user_id, 500)
-            logger.error("Chat request failed", user_id=user_id, error=str(e), correlation_id=correlation_id)
-            raise ChatServiceError(f"Chat processing failed: {e}") from e
+            except Exception as e:
+                self._record_request_metrics(start_time, correlation_id, user_id, 500)
+                logger.error("Chat request failed", user_id=user_id, error=str(e), correlation_id=correlation_id)
+                raise ChatServiceError(f"Chat processing failed: {e}") from e
 
     async def chat_streaming(
         self, user_id: str, chat_request: ChatRequest
@@ -314,25 +317,31 @@ class ChatService:
     # Helper Methods
 
     async def _setup_conversation(self, user_id: str, chat_request: ChatRequest) -> Conversation:
-        """Setup conversation for both sync and streaming requests."""
-        if chat_request.conversation_id:
-            return await self.get_conversation(
-                chat_request.conversation_id, user_id, include_messages=True
-            )
-        else:
-            # Create new conversation
-            conv_data = ConversationCreateSchema(
-                title=(
-                    chat_request.message[:50] + "..."
-                    if len(chat_request.message) > 50
-                    else chat_request.message
-                ),
-                profile_id=chat_request.profile_id,
-                temperature=chat_request.temperature,
-                max_tokens=chat_request.max_tokens,
-                workflow_config=chat_request.workflow_config,
-            )
-            return await self.create_conversation(user_id, conv_data)
+        """Setup conversation for both sync and streaming requests with optimization."""
+        async with self.performance_monitor.measure_query("setup_conversation"):
+            if chat_request.conversation_id:
+                # Use optimized conversation retrieval with message limit for better performance
+                return await get_conversation_optimized(
+                    self.session,
+                    chat_request.conversation_id,
+                    user_id=user_id,
+                    include_messages=True,
+                    message_limit=50  # Limit context window for performance
+                )
+            else:
+                # Create new conversation
+                conv_data = ConversationCreateSchema(
+                    title=(
+                        chat_request.message[:50] + "..."
+                        if len(chat_request.message) > 50
+                        else chat_request.message
+                    ),
+                    profile_id=chat_request.profile_id,
+                    temperature=chat_request.temperature,
+                    max_tokens=chat_request.max_tokens,
+                    workflow_config=chat_request.workflow_config,
+                )
+                return await self.create_conversation(user_id, conv_data)
 
     def _apply_usage_to_message(self, message: Message, usage: dict[str, Any]) -> None:
         """Apply usage information to a message."""

@@ -157,7 +157,7 @@ class ModelDefBase(BaseModel):
         None,
         description="Maximum batch size",
         gt=0,
-        le=1000
+        le=10000
     )
     default_config: dict[str, Any] = Field(
         default_factory=dict, description="Default configuration"
@@ -215,7 +215,7 @@ class ModelDefUpdate(BaseModel):
     max_batch_size: int | None = Field(
         None,
         gt=0,
-        le=1000
+        le=10000
     )
     default_config: dict[str, Any] | None = None
     is_active: bool | None = None

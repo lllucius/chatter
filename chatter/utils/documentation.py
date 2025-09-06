@@ -10,6 +10,34 @@ from chatter.utils.versioning import version_manager
 
 logger = structlog.get_logger()
 
+# API Constants
+API_V1_PREFIX = "/api/v1"
+EXAMPLE_TIMESTAMP = "2025-01-09T00:00:00Z"
+
+# Common response headers for all endpoints
+STANDARD_RESPONSE_HEADERS = {
+    "x-correlation-id": {
+        "description": "Request correlation ID for tracing",
+        "schema": {"type": "string", "format": "uuid"},
+    },
+    "X-RateLimit-Limit-Minute": {
+        "description": "Requests allowed per minute",
+        "schema": {"type": "integer"},
+    },
+    "X-RateLimit-Limit-Hour": {
+        "description": "Requests allowed per hour",
+        "schema": {"type": "integer"},
+    },
+    "X-RateLimit-Remaining-Minute": {
+        "description": "Requests remaining this minute",
+        "schema": {"type": "integer"},
+    },
+    "X-RateLimit-Remaining-Hour": {
+        "description": "Requests remaining this hour",
+        "schema": {"type": "integer"},
+    },
+}
+
 
 class APIDocumentationEnhancer:
     """Enhanced API documentation generator."""
@@ -76,45 +104,8 @@ class APIDocumentationEnhancer:
             for version in version_manager.get_all_versions()
         ]
 
-        # Add correlation ID to all responses
-        for path_item in schema.get("paths", {}).values():
-            for operation in path_item.values():
-                if (
-                    isinstance(operation, dict)
-                    and "responses" in operation
-                ):
-                    for response in operation["responses"].values():
-                        if "headers" not in response:
-                            response["headers"] = {}
-                        response["headers"]["x-correlation-id"] = {
-                            "description": "Request correlation ID for tracing",
-                            "schema": {
-                                "type": "string",
-                                "format": "uuid",
-                            },
-                        }
-
-                        # Add rate limiting headers
-                        response["headers"].update(
-                            {
-                                "X-RateLimit-Limit-Minute": {
-                                    "description": "Requests allowed per minute",
-                                    "schema": {"type": "integer"},
-                                },
-                                "X-RateLimit-Limit-Hour": {
-                                    "description": "Requests allowed per hour",
-                                    "schema": {"type": "integer"},
-                                },
-                                "X-RateLimit-Remaining-Minute": {
-                                    "description": "Requests remaining this minute",
-                                    "schema": {"type": "integer"},
-                                },
-                                "X-RateLimit-Remaining-Hour": {
-                                    "description": "Requests remaining this hour",
-                                    "schema": {"type": "integer"},
-                                },
-                            }
-                        )
+        # Add standard headers to all responses
+        self._add_standard_headers(schema)
 
         # Add examples to endpoints
         for path, path_item in schema.get("paths", {}).items():
@@ -166,6 +157,20 @@ class APIDocumentationEnhancer:
                     self._enhance_chat_endpoint_docs(operation)
 
         return schema
+
+    def _add_standard_headers(self, schema: dict[str, Any]) -> None:
+        """Add standard response headers to all endpoints.
+
+        Args:
+            schema: OpenAPI schema to modify
+        """
+        for path_item in schema.get("paths", {}).values():
+            for operation in path_item.values():
+                if isinstance(operation, dict) and "responses" in operation:
+                    for response in operation["responses"].values():
+                        if "headers" not in response:
+                            response["headers"] = {}
+                        response["headers"].update(STANDARD_RESPONSE_HEADERS)
 
     def _enhance_chat_endpoint_docs(self, operation: dict) -> None:
         """Enhance chat endpoint documentation with workflow examples."""
@@ -255,10 +260,19 @@ class APIDocumentationEnhancer:
 
     def generate_examples(self) -> None:
         """Generate common examples for standard endpoints."""
+        self._add_auth_examples()
+        self._add_chat_examples()
+        self._add_document_examples()
+        self._add_profile_examples()
+        self._add_health_examples()
+        self._add_conversation_examples()
 
-        # Authentication examples
+        logger.debug("Enhanced documentation examples loaded successfully")
+
+    def _add_auth_examples(self) -> None:
+        """Add authentication endpoint examples."""
         self.add_endpoint_example(
-            "/api/v1/auth/login",
+            f"{API_V1_PREFIX}/auth/login",
             "POST",
             request_example={
                 "username": "user@example.com",
@@ -271,9 +285,30 @@ class APIDocumentationEnhancer:
             },
         )
 
-        # Chat workflow examples
         self.add_endpoint_example(
-            "/api/v1/chat",
+            f"{API_V1_PREFIX}/auth/register",
+            "POST",
+            request_example={
+                "username": "developer123",
+                "email": "developer@example.com",
+                "password": "SecurePassword123!",
+                "full_name": "John Developer",
+            },
+            response_example={
+                "id": "usr_abc123",
+                "username": "developer123",
+                "email": "developer@example.com",
+                "full_name": "John Developer",
+                "is_active": True,
+                "created_at": EXAMPLE_TIMESTAMP,
+            },
+        )
+
+    def _add_chat_examples(self) -> None:
+        """Add chat endpoint examples."""
+        # Basic chat workflow
+        self.add_endpoint_example(
+            f"{API_V1_PREFIX}/chat",
             "POST",
             request_example={
                 "message": "What are the latest customer satisfaction metrics?",
@@ -291,7 +326,7 @@ class APIDocumentationEnhancer:
 
         # Streaming chat example
         self.add_endpoint_example(
-            "/api/v1/chat/stream",
+            f"{API_V1_PREFIX}/chat/stream",
             "POST",
             request_example={
                 "message": "Write a Python function to calculate fibonacci numbers",
@@ -309,7 +344,7 @@ class APIDocumentationEnhancer:
 
         # Template-based chat example
         self.add_endpoint_example(
-            "/api/v1/chat/template",
+            f"{API_V1_PREFIX}/chat/template",
             "POST",
             request_example={
                 "message": "I'm having trouble with my recent order",
@@ -326,7 +361,7 @@ class APIDocumentationEnhancer:
 
         # Workflow templates list example
         self.add_endpoint_example(
-            "/api/v1/chat/templates",
+            f"{API_V1_PREFIX}/chat/templates",
             "GET",
             request_example=None,
             response_example={
@@ -356,124 +391,9 @@ class APIDocumentationEnhancer:
             },
         )
 
-        # Add authentication examples
+        # Conversation management
         self.add_endpoint_example(
-            "/api/v1/auth/register",
-            "POST",
-            request_example={
-                "username": "developer123",
-                "email": "developer@example.com",
-                "password": "SecurePassword123!",
-                "full_name": "John Developer"
-            },
-            response_example={
-                "id": "usr_abc123",
-                "username": "developer123",
-                "email": "developer@example.com",
-                "full_name": "John Developer",
-                "is_active": True,
-                "created_at": "2025-01-09T00:00:00Z"
-            }
-        )
-
-        # Add document upload examples
-        self.add_endpoint_example(
-            "/api/v1/documents",
-            "POST",
-            request_example={
-                "title": "Project Documentation",
-                "description": "Comprehensive guide for the AI platform",
-                "chunk_size": 1000,
-                "chunk_overlap": 200,
-                "is_public": False
-            },
-            response_example={
-                "id": "doc_xyz789",
-                "title": "Project Documentation",
-                "filename": "project-docs.pdf",
-                "file_size": 2048576,
-                "document_type": "pdf",
-                "status": "processing",
-                "chunk_count": 0,
-                "created_at": "2025-01-09T00:00:00Z"
-            }
-        )
-
-        # Add conversation list examples
-        self.add_endpoint_example(
-            "/api/v1/conversations",
-            "GET",
-            request_example=None,
-            response_example={
-                "conversations": [
-                    {
-                        "id": "conv_123",
-                        "title": "API Development Help",
-                        "message_count": 8,
-                        "total_tokens": 1542,
-                        "created_at": "2025-01-09T00:00:00Z",
-                        "updated_at": "2025-01-09T00:15:00Z"
-                    }
-                ],
-                "total_count": 15,
-                "has_next": True,
-                "has_previous": False
-            }
-        )
-
-        # Add profile examples
-        self.add_endpoint_example(
-            "/api/v1/profiles",
-            "POST",
-            request_example={
-                "name": "Code Assistant",
-                "description": "Helpful assistant for programming tasks",
-                "provider": "openai",
-                "model_name": "gpt-4",
-                "temperature": 0.1,
-                "max_tokens": 2000,
-                "system_prompt": "You are a helpful programming assistant. Provide clear, concise code examples and explanations."
-            },
-            response_example={
-                "id": "prof_abc456",
-                "name": "Code Assistant",
-                "provider": "openai",
-                "model_name": "gpt-4",
-                "temperature": 0.1,
-                "max_tokens": 2000,
-                "is_default": False,
-                "created_at": "2025-01-09T00:00:00Z"
-            }
-        )
-
-        # Add health check examples
-        self.add_endpoint_example(
-            "/api/v1/health",
-            "GET",
-            request_example=None,
-            response_example={
-                "status": "healthy",
-                "timestamp": "2025-01-09T00:00:00Z",
-                "version": "0.1.0",
-                "services": {
-                    "database": {"status": "healthy", "response_time_ms": 12},
-                    "cache": {"status": "healthy", "response_time_ms": 3},
-                    "llm_providers": {"status": "healthy", "response_time_ms": 89}
-                },
-                "system_info": {
-                    "python_version": "3.12.0",
-                    "total_conversations": 1247,
-                    "total_users": 45
-                }
-            }
-        )
-
-        # Add more examples as needed
-        logger.debug("Enhanced documentation examples loaded successfully")
-
-        # Chat examples
-        self.add_endpoint_example(
-            "/api/v1/chat/conversations",
+            f"{API_V1_PREFIX}/chat/conversations",
             "POST",
             request_example={
                 "title": "Help with Python",
@@ -496,11 +416,11 @@ class APIDocumentationEnhancer:
                     "message_count": 0,
                     "total_tokens": 0,
                     "total_cost": 0.0,
-                    "created_at": "2024-01-01T12:00:00Z",
+                    "created_at": EXAMPLE_TIMESTAMP,
                 },
                 "message": "Conversation created successfully",
                 "metadata": {
-                    "timestamp": "2024-01-01T12:00:00Z",
+                    "timestamp": EXAMPLE_TIMESTAMP,
                     "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
                     "version": "0.1.0",
                 },
@@ -510,7 +430,7 @@ class APIDocumentationEnhancer:
 
         # Error response example
         self.add_endpoint_example(
-            "/api/v1/chat/conversations/{conversation_id}/messages",
+            f"{API_V1_PREFIX}/chat/conversations/{{conversation_id}}/messages",
             "POST",
             request_example={
                 "content": "What is Python?",
@@ -519,16 +439,110 @@ class APIDocumentationEnhancer:
             response_example={
                 "success": False,
                 "message": "Conversation not found",
-                "errors": [
-                    "Conversation with ID '01ARZ3NDEKTSV4RRFFQ69G5FAV' does not exist"
-                ],
+                "errors": ["Conversation with ID '01ARZ3NDEKTSV4RRFFQ69G5FAV' does not exist"],
                 "metadata": {
-                    "timestamp": "2024-01-01T12:00:00Z",
+                    "timestamp": EXAMPLE_TIMESTAMP,
                     "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
                     "version": "0.1.0",
                 },
             },
             description="Example error response when conversation is not found",
+        )
+
+    def _add_document_examples(self) -> None:
+        """Add document endpoint examples."""
+        self.add_endpoint_example(
+            f"{API_V1_PREFIX}/documents",
+            "POST",
+            request_example={
+                "title": "Project Documentation",
+                "description": "Comprehensive guide for the AI platform",
+                "chunk_size": 1000,
+                "chunk_overlap": 200,
+                "is_public": False
+            },
+            response_example={
+                "id": "doc_xyz789",
+                "title": "Project Documentation",
+                "filename": "project-docs.pdf",
+                "file_size": 2048576,
+                "document_type": "pdf",
+                "status": "processing",
+                "chunk_count": 0,
+                "created_at": EXAMPLE_TIMESTAMP
+            }
+        )
+
+    def _add_conversation_examples(self) -> None:
+        """Add conversation endpoint examples."""
+        self.add_endpoint_example(
+            f"{API_V1_PREFIX}/conversations",
+            "GET",
+            request_example=None,
+            response_example={
+                "conversations": [
+                    {
+                        "id": "conv_123",
+                        "title": "API Development Help",
+                        "message_count": 8,
+                        "total_tokens": 1542,
+                        "created_at": EXAMPLE_TIMESTAMP,
+                        "updated_at": EXAMPLE_TIMESTAMP
+                    }
+                ],
+                "total_count": 15,
+                "has_next": True,
+                "has_previous": False
+            }
+        )
+
+    def _add_profile_examples(self) -> None:
+        """Add profile endpoint examples."""
+        self.add_endpoint_example(
+            f"{API_V1_PREFIX}/profiles",
+            "POST",
+            request_example={
+                "name": "Code Assistant",
+                "description": "Helpful assistant for programming tasks",
+                "provider": "openai",
+                "model_name": "gpt-4",
+                "temperature": 0.1,
+                "max_tokens": 2000,
+                "system_prompt": "You are a helpful programming assistant. Provide clear, concise code examples and explanations."
+            },
+            response_example={
+                "id": "prof_abc456",
+                "name": "Code Assistant",
+                "provider": "openai",
+                "model_name": "gpt-4",
+                "temperature": 0.1,
+                "max_tokens": 2000,
+                "is_default": False,
+                "created_at": EXAMPLE_TIMESTAMP
+            }
+        )
+
+    def _add_health_examples(self) -> None:
+        """Add health endpoint examples."""
+        self.add_endpoint_example(
+            f"{API_V1_PREFIX}/health",
+            "GET",
+            request_example=None,
+            response_example={
+                "status": "healthy",
+                "timestamp": EXAMPLE_TIMESTAMP,
+                "version": "0.1.0",
+                "services": {
+                    "database": {"status": "healthy", "response_time_ms": 12},
+                    "cache": {"status": "healthy", "response_time_ms": 3},
+                    "llm_providers": {"status": "healthy", "response_time_ms": 89}
+                },
+                "system_info": {
+                    "python_version": "3.12.0",
+                    "total_conversations": 1247,
+                    "total_users": 45
+                }
+            }
         )
 
 

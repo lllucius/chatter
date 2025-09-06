@@ -285,6 +285,36 @@ async def list_agents(
 
 
 @router.get(
+    "/templates",
+    response_model=list[dict[str, Any]],
+    summary="Get agent templates",
+    description="Get predefined agent templates for common use cases.",
+)
+async def get_agent_templates(
+    current_user: User = Depends(get_current_user),
+    agent_manager: AgentManager = Depends(get_agent_manager),
+) -> list[dict[str, Any]]:
+    """Get agent templates.
+
+    Args:
+        current_user: Current authenticated user
+        agent_manager: Agent manager instance
+
+    Returns:
+        List of agent templates
+    """
+    try:
+        templates = await agent_manager.get_agent_templates()
+        return templates
+
+    except Exception as e:
+        logger.error("Failed to get agent templates", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to get agent templates"
+        ) from e
+
+
+@router.get(
     "/stats/overview", 
     response_model=AgentStatsResponse,
     summary="Get agent statistics",

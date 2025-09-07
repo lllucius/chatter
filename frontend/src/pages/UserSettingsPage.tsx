@@ -37,6 +37,7 @@ import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { useForm } from '../hooks/useForm';
+import PageLayout from '../components/PageLayout';
 
 interface UserProfile {
   id: string;
@@ -229,11 +230,7 @@ const UserSettingsPage: React.FC = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        User Settings
-      </Typography>
-
+    <PageLayout title="User Settings">
       <Card>
         <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tab label="Profile" />
@@ -530,7 +527,7 @@ const UserSettingsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageLayout>
   );
 };
 

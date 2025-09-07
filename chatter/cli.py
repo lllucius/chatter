@@ -1020,6 +1020,7 @@ def generate_docs(
             export_openapi_json,
             export_openapi_yaml,
             generate_openapi_spec,
+            convert_openapi_3_1_to_3_0,
         )
 
         console.print("🚀 Generating OpenAPI documentation...")
@@ -1053,6 +1054,12 @@ def generate_docs(
             versioned_json = output_path / f"openapi-v{version}.json"
             export_openapi_json(spec, versioned_json)
             generated_files.append(versioned_json)
+            
+            # Export OpenAPI 3.0 compatible version for SDK generation
+            converted_spec = convert_openapi_3_1_to_3_0(spec)
+            json_3_0_file = output_path / "openapi-3.0.json"
+            export_openapi_json(converted_spec, json_3_0_file)
+            generated_files.append(json_3_0_file)
 
         if format in ["yaml", "all"]:
             yaml_file = output_path / "openapi.yaml"
@@ -1063,6 +1070,12 @@ def generate_docs(
             versioned_yaml = output_path / f"openapi-v{version}.yaml"
             export_openapi_yaml(spec, versioned_yaml)
             generated_files.append(versioned_yaml)
+            
+            # Export OpenAPI 3.0 compatible version for SDK generation
+            converted_spec = convert_openapi_3_1_to_3_0(spec)
+            yaml_3_0_file = output_path / "openapi-3.0.yaml"
+            export_openapi_yaml(converted_spec, yaml_3_0_file)
+            generated_files.append(yaml_3_0_file)
 
         # Verify and report generated files
         verified_files = []
@@ -1357,6 +1370,7 @@ def generate_workflow(
                     export_openapi_json,
                     export_openapi_yaml,
                     generate_openapi_spec,
+                    convert_openapi_3_1_to_3_0,
                 )
 
                 spec = generate_openapi_spec()
@@ -1371,6 +1385,10 @@ def generate_workflow(
                     export_openapi_json(
                         spec, docs_output / f"openapi-v{version}.json"
                     )
+                    
+                    # Export OpenAPI 3.0 compatible version for SDK generation
+                    converted_spec = convert_openapi_3_1_to_3_0(spec)
+                    export_openapi_json(converted_spec, docs_output / "openapi-3.0.json")
 
                 if docs_format in ["yaml", "all"]:
                     export_openapi_yaml(
@@ -1382,6 +1400,10 @@ def generate_workflow(
                     export_openapi_yaml(
                         spec, docs_output / f"openapi-v{version}.yaml"
                     )
+                    
+                    # Export OpenAPI 3.0 compatible version for SDK generation
+                    converted_spec = convert_openapi_3_1_to_3_0(spec)
+                    export_openapi_yaml(converted_spec, docs_output / "openapi-3.0.yaml")
 
                 # Collect generated files
                 for file in docs_output.glob("*"):
@@ -1402,6 +1424,30 @@ def generate_workflow(
 
         # Generate SDKs
         if not docs_only:
+            # Ensure OpenAPI spec is available for SDK generation
+            docs_output = output_path / "docs" / "api"
+            openapi_spec_path = docs_output / "openapi-3.0.json"
+            
+            # Generate OpenAPI spec if it doesn't exist or if we're only generating SDKs
+            if (sdk_only or python_only or typescript_only) or not openapi_spec_path.exists():
+                console.print("\n📝 Generating OpenAPI spec for SDK generation...")
+                docs_output.mkdir(parents=True, exist_ok=True)
+                
+                from scripts.generate_openapi import (
+                    generate_openapi_spec,
+                    convert_openapi_3_1_to_3_0,
+                    export_openapi_json,
+                )
+                
+                try:
+                    spec = generate_openapi_spec()
+                    converted_spec = convert_openapi_3_1_to_3_0(spec)
+                    export_openapi_json(converted_spec, openapi_spec_path)
+                    console.print("✅ OpenAPI 3.0 spec generated for SDK generation")
+                except Exception as e:
+                    console.print(f"❌ Failed to generate OpenAPI spec: {e}")
+                    success = False
+                    
             from scripts.sdk.python_sdk import PythonSDKGenerator
             from scripts.sdk.typescript_sdk import (
                 TypeScriptSDKGenerator,

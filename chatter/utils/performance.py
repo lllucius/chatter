@@ -902,6 +902,75 @@ class PerformanceMonitor:
 
         return recommendations
 
+    def get_database_response_time(self) -> float:
+        """Get average database response time across all operations.
+        
+        Returns:
+            Average response time in milliseconds
+        """
+        summary = self.get_performance_summary()
+        
+        # Calculate weighted average of database operations
+        db_operations = [
+            "get_conversation_stats", "get_usage_metrics",
+            "get_performance_metrics", "get_document_analytics",
+            "list_providers", "get_default_provider", "get_default_model",
+            "get_conversation_optimized", "get_user_conversations_optimized"
+        ]
+        
+        total_time = 0.0
+        total_count = 0
+        
+        for operation in db_operations:
+            if operation in summary:
+                op_data = summary[operation]
+                total_time += op_data.get('avg_ms', 0) * op_data.get('count', 0)
+                total_count += op_data.get('count', 0)
+        
+        return total_time / total_count if total_count > 0 else 0.0
+
+    def get_vector_search_time(self) -> float:
+        """Get average vector search time across all operations.
+        
+        Returns:
+            Average vector search time in milliseconds
+        """
+        summary = self.get_performance_summary()
+        
+        # Look for vector search related operations
+        vector_operations = [
+            op for op in summary.keys()
+            if any(term in op.lower() for term in ['vector', 'search', 'similarity', 'embedding'])
+        ]
+        
+        if not vector_operations:
+            return 0.0
+        
+        total_time = 0.0
+        total_count = 0
+        
+        for operation in vector_operations:
+            op_data = summary[operation]
+            total_time += op_data.get('avg_ms', 0) * op_data.get('count', 0)
+            total_count += op_data.get('count', 0)
+        
+        return total_time / total_count if total_count > 0 else 0.0
+
+    def get_performance_health_metrics(self) -> dict[str, Any]:
+        """Get comprehensive health metrics for monitoring dashboards.
+        
+        Returns:
+            Dictionary with health metrics including database and vector performance
+        """
+        return {
+            "database_response_time_ms": self.get_database_response_time(),
+            "vector_search_time_ms": self.get_vector_search_time(),
+            "slow_query_analysis": self.get_slow_query_analysis(),
+            "performance_grade": self._calculate_performance_grade(),
+            "total_queries": sum(self.query_counts.values()),
+            "active_operations": len([op for op, times in self.query_times.items() if times])
+        }
+
 
 class BulkOperations:
     """Efficient bulk database operations with performance monitoring."""

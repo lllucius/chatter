@@ -234,7 +234,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Initialize unified event system
     try:
         from chatter.core.monitoring import MonitoringService
-        from chatter.core.unified_events import initialize_event_system
+        from chatter.core.events import initialize_event_system
         from chatter.utils.audit_logging import AuditLogger
         from chatter.utils.database import get_session_maker
 
@@ -286,15 +286,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as e:
         logger.error("Failed to stop SSE event service", error=str(e))
 
-    # Shutdown unified event system
+    # Shutdown consolidated event system
     try:
-        from chatter.core.unified_events import shutdown_event_system
+        from chatter.core.events import shutdown_event_system
 
         await shutdown_event_system()
-        logger.info("Unified event system shutdown")
+        logger.info("Event system shutdown")
     except Exception as e:
         logger.error(
-            "Failed to shutdown unified event system", error=str(e)
+            "Failed to shutdown event system", error=str(e)
         )
 
     await close_database()

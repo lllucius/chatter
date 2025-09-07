@@ -65,25 +65,7 @@ class AnalyticsService:
     async def _get_database_response_time(self) -> float:
         """Get average database response time from performance monitor."""
         try:
-            summary = self.performance_monitor.get_performance_summary()
-
-            # Calculate weighted average of database operations
-            db_operations = [
-                "get_conversation_stats", "get_usage_metrics",
-                "get_performance_metrics", "get_document_analytics"
-            ]
-
-            total_time = 0.0
-            total_count = 0
-
-            for operation in db_operations:
-                if operation in summary:
-                    op_data = summary[operation]
-                    total_time += op_data.get('avg_ms', 0) * op_data.get('count', 0)
-                    total_count += op_data.get('count', 0)
-
-            return total_time / total_count if total_count > 0 else 0.0
-
+            return self.performance_monitor.get_database_response_time()
         except Exception as e:
             logger.debug(f"Could not get database response time: {e}")
             return 0.0
@@ -91,27 +73,7 @@ class AnalyticsService:
     async def _get_vector_search_time(self) -> float:
         """Get average vector search time from performance monitor."""
         try:
-            summary = self.performance_monitor.get_performance_summary()
-
-            # Look for vector search related operations
-            vector_operations = [
-                op for op in summary.keys()
-                if any(term in op.lower() for term in ['vector', 'search', 'similarity', 'embedding'])
-            ]
-
-            if not vector_operations:
-                return 0.0
-
-            total_time = 0.0
-            total_count = 0
-
-            for operation in vector_operations:
-                op_data = summary[operation]
-                total_time += op_data.get('avg_ms', 0) * op_data.get('count', 0)
-                total_count += op_data.get('count', 0)
-
-            return total_time / total_count if total_count > 0 else 0.0
-
+            return self.performance_monitor.get_vector_search_time()
         except Exception as e:
             logger.debug(f"Could not get vector search time: {e}")
             return 0.0

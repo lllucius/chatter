@@ -16,10 +16,7 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
-# Legacy WorkflowCache and LazyToolLoader classes have been removed.
-# These functionalities are now provided by the unified cache system.
-
-# Global instances for easy access - now using unified cache system
+# Global instances for easy access - using unified cache system
 workflow_cache = get_unified_workflow_cache()
 lazy_tool_loader = get_unified_lazy_tool_loader()
 

@@ -13,14 +13,6 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
-class CacheBackend(Enum):
-    """Available cache backend types."""
-
-    MEMORY = "memory"
-    REDIS = "redis"
-    MULTI_TIER = "multi_tier"
-
-
 class CacheType(Enum):
     """Cache types for different use cases."""
 
@@ -32,40 +24,40 @@ class CacheType(Enum):
 
 
 class CacheFactory:
-    """Factory for creating and managing cache instances."""
+    """Simplified factory for creating cache instances."""
 
     def __init__(self):
         """Initialize cache factory."""
         self._cache_instances: dict[str, CacheInterface] = {}
-        self._default_configs = self._create_default_configs()
-
         logger.debug("Cache factory initialized")
 
-    def _create_default_configs(self) -> dict[CacheType, CacheConfig]:
-        """Create default configurations for different cache types.
+    def _get_config_for_type(self, cache_type: CacheType) -> CacheConfig:
+        """Get configuration for cache type.
+
+        Args:
+            cache_type: Type of cache
 
         Returns:
-            Dictionary of cache type to default configuration
+            Cache configuration
         """
-        return {
+        configs = {
             CacheType.MODEL_REGISTRY: CacheConfig(
                 default_ttl=settings.cache_model_registry_ttl,
-                max_size=settings.cache_max_memory_size
-                // 2,  # Smaller for specialized cache
+                max_size=settings.cache_max_memory_size // 2,
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="model_registry",
                 enable_stats=True,
             ),
             CacheType.WORKFLOW: CacheConfig(
                 default_ttl=settings.cache_workflow_ttl,
-                max_size=100,  # Workflows are larger objects, keep smaller cache
+                max_size=100,
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="workflow",
                 enable_stats=True,
             ),
             CacheType.TOOL: CacheConfig(
                 default_ttl=settings.cache_tool_ttl,
-                max_size=200,  # Tools are medium-sized objects
+                max_size=200,
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="tool",
                 enable_stats=True,
@@ -80,16 +72,16 @@ class CacheFactory:
             CacheType.SESSION: CacheConfig(
                 default_ttl=settings.cache_session_ttl,
                 max_size=settings.cache_max_memory_size,
-                eviction_policy="ttl",  # Sessions should expire by time
+                eviction_policy="ttl",
                 key_prefix="session",
                 enable_stats=True,
             ),
         }
+        return configs.get(cache_type, configs[CacheType.GENERAL])
 
     def create_cache(
         self,
         cache_type: CacheType,
-        backend: CacheBackend | None = None,
         config: CacheConfig | None = None,
         **kwargs,
     ) -> CacheInterface:
@@ -97,7 +89,6 @@ class CacheFactory:
 
         Args:
             cache_type: Type of cache to create
-            backend: Cache backend to use (auto-detected if None)
             config: Custom cache configuration (uses default if None)
             **kwargs: Additional arguments for cache initialization
 
@@ -106,128 +97,41 @@ class CacheFactory:
         """
         # Use provided config or default for cache type
         if config is None:
-            config = self._default_configs.get(
-                cache_type, self._default_configs[CacheType.GENERAL]
-            )
+            config = self._get_config_for_type(cache_type)
 
-        # Auto-detect backend if not specified
-        if backend is None:
-            backend = self._detect_optimal_backend()
+        # Create instance key for reuse
+        instance_key = f"{cache_type.value}_{id(config)}"
 
-        # Create instance key for potential reuse
-        instance_key = (
-            f"{cache_type.value}_{backend.value}_{id(config)}"
-        )
-
-        # Return existing instance if available (for singleton-like behavior)
+        # Return existing instance if available
         if instance_key in self._cache_instances:
             logger.debug(
                 "Reusing existing cache instance",
                 cache_type=cache_type.value,
-                backend=backend.value,
             )
             return self._cache_instances[instance_key]
 
-        # Create new cache instance
-        cache_instance = self._create_cache_instance(
-            backend, config, **kwargs
+        # Create multi-tier cache by default (best performance)
+        redis_url = kwargs.get('redis_url')
+        l1_config = kwargs.get('l1_config')
+        l1_size_ratio = kwargs.get(
+            'l1_size_ratio', settings.cache_l1_size_ratio
+        )
+        cache_instance = MultiTierCache(
+            config, l1_config, redis_url, l1_size_ratio
         )
 
-        # Store instance for potential reuse
+        # Store instance for reuse
         self._cache_instances[instance_key] = cache_instance
 
         logger.info(
             "Created cache instance",
             cache_type=cache_type.value,
-            backend=backend.value,
             max_size=config.max_size,
             default_ttl=config.default_ttl,
             key_prefix=config.key_prefix,
         )
 
         return cache_instance
-
-    def _detect_optimal_backend(self) -> CacheBackend:
-        """Detect the optimal cache backend based on configuration and availability.
-
-        Returns:
-            Optimal cache backend
-        """
-        # Use explicit setting if provided
-        if settings.cache_backend != "auto":
-            backend_map = {
-                "memory": CacheBackend.MEMORY,
-                "redis": CacheBackend.REDIS,
-                "multi_tier": CacheBackend.MULTI_TIER,
-            }
-
-            if settings.cache_backend in backend_map:
-                logger.debug(
-                    f"Using configured cache backend: {settings.cache_backend}"
-                )
-                return backend_map[settings.cache_backend]
-            else:
-                logger.warning(
-                    f"Unknown cache backend '{settings.cache_backend}', using auto-detection"
-                )
-
-        # Auto-detect optimal backend
-
-        # If Redis is explicitly disabled, use memory
-        if not settings.cache_enabled:
-            logger.debug("Redis disabled, using memory cache")
-            return CacheBackend.MEMORY
-
-        # If we're in development mode, prefer multi-tier for best performance
-        if settings.environment == "development":
-            logger.debug(
-                "Development environment, using multi-tier cache"
-            )
-            return CacheBackend.MULTI_TIER
-
-        # For production, also prefer multi-tier if Redis is available
-        try:
-            # Quick Redis availability check could be added here
-            return CacheBackend.MULTI_TIER
-        except Exception:
-            logger.warning(
-                "Redis not available, falling back to memory cache"
-            )
-            return CacheBackend.MEMORY
-
-    def _create_cache_instance(
-        self, backend: CacheBackend, config: CacheConfig, **kwargs
-    ) -> CacheInterface:
-        """Create cache instance based on backend type.
-
-        Args:
-            backend: Cache backend type
-            config: Cache configuration
-            **kwargs: Additional arguments
-
-        Returns:
-            Cache instance
-        """
-        if backend == CacheBackend.MEMORY:
-            return EnhancedInMemoryCache(config)
-
-        elif backend == CacheBackend.REDIS:
-            redis_url = kwargs.get('redis_url')
-            pool_config = kwargs.get('pool_config')
-            return EnhancedRedisCache(config, redis_url, pool_config)
-
-        elif backend == CacheBackend.MULTI_TIER:
-            redis_url = kwargs.get('redis_url')
-            l1_config = kwargs.get('l1_config')
-            l1_size_ratio = kwargs.get(
-                'l1_size_ratio', settings.cache_l1_size_ratio
-            )
-            return MultiTierCache(
-                config, l1_config, redis_url, l1_size_ratio
-            )
-
-        else:
-            raise ValueError(f"Unsupported cache backend: {backend}")
 
     def get_cache(self, cache_type: CacheType) -> CacheInterface | None:
         """Get existing cache instance if available.

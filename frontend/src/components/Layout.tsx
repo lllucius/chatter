@@ -33,7 +33,6 @@ import {
   HealthAndSafety as HealthIcon,
   Logout as LogoutIcon,
   Settings as SettingsIcon,
-  Notifications as NotificationsIcon,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
   LightMode as LightModeIcon,
@@ -299,11 +298,6 @@ const LayoutFrame: React.FC = () => {
                   {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
                 </IconButton>
               </Tooltip>
-              <IconButton size="small" sx={{ mr: 1 }}>
-                <Badge badgeContent={4} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
               <IconButton
                 size="small"
                 aria-label="account of current user"
@@ -405,11 +399,6 @@ const LayoutFrame: React.FC = () => {
                       {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
                     </IconButton>
                   </Tooltip>
-                  <IconButton size="small" sx={{ mr: 1 }}>
-                    <Badge badgeContent={4} color="error">
-                      <NotificationsIcon />
-                    </Badge>
-                  </IconButton>
                   <IconButton size="small" aria-label="account of current user" onClick={handleProfileMenuOpen}>
                     <Avatar sx={{ width: 24, height: 24 }}>U</Avatar>
                   </IconButton>

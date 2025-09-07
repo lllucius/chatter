@@ -25,9 +25,10 @@ import {
   MenuItem, 
   Alert, 
   Snackbar,
-  FormControl,
-  InputLabel,
-  Select,
+  Paper,
+  Fade,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import {
   PlayArrow as StartIcon,
@@ -36,9 +37,21 @@ import {
   Memory as MemoryIcon,
   Search as RetrievalIcon,
   CallSplit as ConditionalIcon,
+  Loop as LoopIcon,
+  Storage as VariableIcon,
+  Error as ErrorHandlerIcon,
+  Schedule as DelayIcon,
   CheckCircle as ValidIcon,
   Error as ErrorIcon,
   GetApp as ExampleIcon,
+  Settings as PropertiesIcon,
+  GridOn as GridIcon,
+  Undo as UndoIcon,
+  Redo as RedoIcon,
+  ContentCopy as CopyIcon,
+  ContentPaste as PasteIcon,
+  Analytics as AnalyticsIcon,
+  LibraryBooks as TemplateIcon,
 } from '@mui/icons-material';
 
 // Import custom node components
@@ -48,7 +61,14 @@ import ToolNode from './nodes/ToolNode';
 import MemoryNode from './nodes/MemoryNode';
 import RetrievalNode from './nodes/RetrievalNode';
 import ConditionalNode from './nodes/ConditionalNode';
+import LoopNode from './nodes/LoopNode';
+import VariableNode from './nodes/VariableNode';
+import ErrorHandlerNode from './nodes/ErrorHandlerNode';
+import DelayNode from './nodes/DelayNode';
 import CustomEdge from './edges/CustomEdge';
+import PropertiesPanel from './PropertiesPanel';
+import WorkflowAnalytics from './WorkflowAnalytics';
+import TemplateManager from './TemplateManager';
 import { exampleWorkflows, WorkflowValidator } from './WorkflowExamples';
 
 // Define node types for the workflow
@@ -58,7 +78,11 @@ export type WorkflowNodeType =
   | 'tool'
   | 'memory'
   | 'retrieval'
-  | 'conditional';
+  | 'conditional'
+  | 'loop'
+  | 'variable'
+  | 'errorHandler'
+  | 'delay';
 
 export interface WorkflowNodeData extends Record<string, unknown> {
   label: string;
@@ -90,6 +114,10 @@ interface WorkflowEditorProps {
   readOnly?: boolean;
 }
 
+// Grid settings for smart positioning
+const GRID_SIZE = 20;
+const NODE_SPACING = 200;
+
 // Define custom node types
 const nodeTypes: NodeTypes = {
   start: StartNode,
@@ -98,6 +126,10 @@ const nodeTypes: NodeTypes = {
   memory: MemoryNode,
   retrieval: RetrievalNode,
   conditional: ConditionalNode,
+  loop: LoopNode,
+  variable: VariableNode,
+  errorHandler: ErrorHandlerNode,
+  delay: DelayNode,
 };
 
 // Define custom edge types
@@ -122,10 +154,73 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const [exampleMenuAnchor, setExampleMenuAnchor] = useState<null | HTMLElement>(null);
   const [validationResult, setValidationResult] = useState<{ isValid: boolean; errors: string[] } | null>(null);
   const [showValidation, setShowValidation] = useState(false);
+  const [selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
+  const [showPropertiesPanel, setShowPropertiesPanel] = useState(false);
+  const [snapToGrid, setSnapToGrid] = useState(true);
+  const [clipboard, setClipboard] = useState<{ nodes: Node<WorkflowNodeData>[]; edges: Edge<WorkflowEdgeData>[] } | null>(null);
+  const [history, setHistory] = useState<{ nodes: Node<WorkflowNodeData>[]; edges: Edge<WorkflowEdgeData>[] }[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [sidePanelTab, setSidePanelTab] = useState<'properties' | 'analytics'>('properties');
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
 
+  // Save current state to history
+  const saveToHistory = useCallback(() => {
+    const currentState = { nodes, edges };
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push(currentState);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  }, [nodes, edges, history, historyIndex]);
+
+  // Handle node selection
+  const onNodeClick = useCallback((_: React.MouseEvent, node: Node<WorkflowNodeData>) => {
+    setSelectedNode(node);
+    setShowPropertiesPanel(true);
+  }, []);
+
+  // Handle node updates from properties panel
+  const handleNodeUpdate = useCallback((nodeId: string, updates: Partial<WorkflowNodeData>) => {
+    saveToHistory();
+    setNodes((nds) =>
+      nds.map((node) =>
+        node.id === nodeId
+          ? { ...node, data: { ...node.data, ...updates } }
+          : node
+      )
+    );
+  }, [setNodes, saveToHistory]);
+
+  // Smart positioning function
+  const getSmartPosition = useCallback((nodeType: WorkflowNodeType): { x: number; y: number } => {
+    const existingNodes = nodes;
+    let x = 100;
+    let y = 100;
+
+    // Try to place new nodes in a logical flow
+    if (existingNodes.length === 0) {
+      return { x: 100, y: 200 };
+    }
+
+    // Find rightmost node and place new node to its right
+    const rightmostNode = existingNodes.reduce((rightmost, node) => 
+      node.position.x > rightmost.position.x ? node : rightmost
+    );
+
+    x = rightmostNode.position.x + NODE_SPACING;
+    y = rightmostNode.position.y;
+
+    // Snap to grid if enabled
+    if (snapToGrid) {
+      x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+      y = Math.round(y / GRID_SIZE) * GRID_SIZE;
+    }
+
+    return { x, y };
+  }, [nodes, snapToGrid]);
   // Handle new connections
   const onConnect = useCallback(
     (params: Connection) => {
+      saveToHistory();
       const newEdge = {
         ...params,
         id: `e${edges.length + 1}`,
@@ -134,16 +229,18 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       };
       setEdges((eds) => addEdge(newEdge, eds));
     },
-    [setEdges, edges.length]
+    [setEdges, edges.length, saveToHistory]
   );
 
   // Add new node of specific type
   const addNode = useCallback(
     (nodeType: WorkflowNodeType) => {
+      saveToHistory();
+      const position = getSmartPosition(nodeType);
       const newNode: Node<WorkflowNodeData> = {
         id: `${nodeType}-${nodeIdCounter}`,
         type: nodeType,
-        position: { x: Math.random() * 400, y: Math.random() * 400 },
+        position,
         data: {
           label: `${nodeType.charAt(0).toUpperCase() + nodeType.slice(1)} Node`,
           nodeType,
@@ -154,7 +251,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       setNodes((nds) => [...nds, newNode]);
       setNodeIdCounter((counter) => counter + 1);
     },
-    [setNodes, nodeIdCounter]
+    [setNodes, nodeIdCounter, saveToHistory, getSmartPosition]
   );
 
   // Get default configuration for node type
@@ -163,15 +260,23 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       case 'start':
         return { isEntryPoint: true };
       case 'model':
-        return { systemMessage: '', temperature: 0.7, maxTokens: 1000 };
+        return { systemMessage: '', temperature: 0.7, maxTokens: 1000, model: 'gpt-4' };
       case 'tool':
         return { tools: [], parallel: false };
       case 'memory':
-        return { enabled: true, window: 20 };
+        return { enabled: true, window: 20, memoryType: 'conversation' };
       case 'retrieval':
-        return { collection: '', topK: 5 };
+        return { collection: '', topK: 5, threshold: 0.7 };
       case 'conditional':
         return { condition: '', branches: {} };
+      case 'loop':
+        return { maxIterations: 10, condition: '', breakCondition: '' };
+      case 'variable':
+        return { operation: 'set', variableName: '', value: '', scope: 'workflow' };
+      case 'errorHandler':
+        return { retryCount: 3, fallbackAction: 'continue', logErrors: true };
+      case 'delay':
+        return { duration: 1, type: 'fixed', unit: 'seconds' };
       default:
         return {};
     }
@@ -190,6 +295,121 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     },
   }), [nodes, edges, initialWorkflow]);
 
+  // Keyboard shortcuts
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key) {
+          case 'z':
+            event.preventDefault();
+            if (event.shiftKey) {
+              handleRedo();
+            } else {
+              handleUndo();
+            }
+            break;
+          case 'c':
+            event.preventDefault();
+            handleCopy();
+            break;
+          case 'v':
+            event.preventDefault();
+            handlePaste();
+            break;
+          case 's':
+            event.preventDefault();
+            handleSave();
+            break;
+        }
+      }
+      if (event.key === 'Delete' && selectedNode) {
+        event.preventDefault();
+        handleDeleteSelected();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedNode]);
+
+  // Undo functionality
+  const handleUndo = useCallback(() => {
+    if (historyIndex > 0) {
+      const previousState = history[historyIndex - 1];
+      setNodes(previousState.nodes);
+      setEdges(previousState.edges);
+      setHistoryIndex(historyIndex - 1);
+    }
+  }, [history, historyIndex, setNodes, setEdges]);
+
+  // Redo functionality
+  const handleRedo = useCallback(() => {
+    if (historyIndex < history.length - 1) {
+      const nextState = history[historyIndex + 1];
+      setNodes(nextState.nodes);
+      setEdges(nextState.edges);
+      setHistoryIndex(historyIndex + 1);
+    }
+  }, [history, historyIndex, setNodes, setEdges]);
+
+  // Copy functionality
+  const handleCopy = useCallback(() => {
+    if (selectedNode) {
+      const selectedEdges = edges.filter(edge => 
+        edge.source === selectedNode.id || edge.target === selectedNode.id
+      );
+      setClipboard({ nodes: [selectedNode], edges: selectedEdges });
+    }
+  }, [selectedNode, edges]);
+
+  // Paste functionality
+  const handlePaste = useCallback(() => {
+    if (clipboard) {
+      saveToHistory();
+      const nodeIdMap = new Map<string, string>();
+      
+      // Create new nodes with new IDs
+      const newNodes = clipboard.nodes.map(node => {
+        const newId = `${node.type}-${nodeIdCounter + nodes.length}`;
+        nodeIdMap.set(node.id, newId);
+        return {
+          ...node,
+          id: newId,
+          position: {
+            x: node.position.x + 50,
+            y: node.position.y + 50,
+          },
+        };
+      });
+
+      // Create new edges with updated IDs
+      const newEdges = clipboard.edges
+        .filter(edge => nodeIdMap.has(edge.source) && nodeIdMap.has(edge.target))
+        .map(edge => ({
+          ...edge,
+          id: `e${edges.length + newNodes.length}`,
+          source: nodeIdMap.get(edge.source)!,
+          target: nodeIdMap.get(edge.target)!,
+        }));
+
+      setNodes(nds => [...nds, ...newNodes]);
+      setEdges(eds => [...eds, ...newEdges]);
+      setNodeIdCounter(counter => counter + newNodes.length);
+    }
+  }, [clipboard, nodes, edges, nodeIdCounter, setNodes, setEdges, saveToHistory]);
+
+  // Delete selected node
+  const handleDeleteSelected = useCallback(() => {
+    if (selectedNode) {
+      saveToHistory();
+      setNodes(nds => nds.filter(node => node.id !== selectedNode.id));
+      setEdges(eds => eds.filter(edge => 
+        edge.source !== selectedNode.id && edge.target !== selectedNode.id
+      ));
+      setSelectedNode(null);
+      setShowPropertiesPanel(false);
+    }
+  }, [selectedNode, setNodes, setEdges, saveToHistory]);
   // Notify parent of changes
   React.useEffect(() => {
     if (onWorkflowChange) {
@@ -206,19 +426,31 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
   // Clear workflow
   const handleClear = useCallback(() => {
+    saveToHistory();
     setNodes([]);
     setEdges([]);
-  }, [setNodes, setEdges]);
+    setSelectedNode(null);
+    setShowPropertiesPanel(false);
+  }, [setNodes, setEdges, saveToHistory]);
 
   // Load example workflow
   const handleLoadExample = useCallback((exampleKey: string) => {
     const example = exampleWorkflows[exampleKey];
     if (example) {
+      saveToHistory();
       setNodes(example.nodes);
       setEdges(example.edges);
     }
     setExampleMenuAnchor(null);
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, saveToHistory]);
+
+  // Load template workflow
+  const handleLoadTemplate = useCallback((workflow: WorkflowDefinition) => {
+    saveToHistory();
+    setNodes(workflow.nodes);
+    setEdges(workflow.edges);
+    setSelectedNode(null);
+  }, [setNodes, setEdges, saveToHistory]);
 
   // Validate workflow
   const handleValidate = useCallback(() => {
@@ -228,107 +460,247 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   }, [currentWorkflow]);
 
   return (
-    <Box sx={{ height: '600px', width: '100%', border: '1px solid #e0e0e0', borderRadius: 1 }}>
-      {/* Toolbar */}
-      <Toolbar sx={{ bgcolor: 'background.paper', borderBottom: '1px solid #e0e0e0' }}>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Workflow Editor
-        </Typography>
-        
-        {!readOnly && (
-          <>
-            <ButtonGroup size="small" sx={{ mr: 2 }}>
-              <Button
-                startIcon={<StartIcon />}
-                onClick={() => addNode('start')}
-                variant="outlined"
-              >
-                Start
-              </Button>
-              <Button
-                startIcon={<ModelIcon />}
-                onClick={() => addNode('model')}
-                variant="outlined"
-              >
-                Model
-              </Button>
-              <Button
-                startIcon={<ToolIcon />}
-                onClick={() => addNode('tool')}
-                variant="outlined"
-              >
-                Tool
-              </Button>
-              <Button
-                startIcon={<MemoryIcon />}
-                onClick={() => addNode('memory')}
-                variant="outlined"
-              >
-                Memory
-              </Button>
-              <Button
-                startIcon={<RetrievalIcon />}
-                onClick={() => addNode('retrieval')}
-                variant="outlined"
-              >
-                Retrieval
-              </Button>
-              <Button
-                startIcon={<ConditionalIcon />}
-                onClick={() => addNode('conditional')}
-                variant="outlined"
-              >
-                Conditional
-              </Button>
-            </ButtonGroup>
+    <Box sx={{ height: '600px', width: '100%', display: 'flex' }}>
+      {/* Main Editor Area */}
+      <Box sx={{ flex: 1, border: '1px solid #e0e0e0', borderRadius: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* Toolbar */}
+        <Toolbar sx={{ bgcolor: 'background.paper', borderBottom: '1px solid #e0e0e0', minHeight: '48px !important' }}>
+          <Typography variant="h6" sx={{ flexGrow: 1 }}>
+            Workflow Editor
+          </Typography>
+          
+          {!readOnly && (
+            <>
+              {/* Node Type Buttons */}
+              <ButtonGroup size="small" sx={{ mr: 2 }}>
+                <Button
+                  startIcon={<StartIcon />}
+                  onClick={() => addNode('start')}
+                  variant="outlined"
+                >
+                  Start
+                </Button>
+                <Button
+                  startIcon={<ModelIcon />}
+                  onClick={() => addNode('model')}
+                  variant="outlined"
+                >
+                  Model
+                </Button>
+                <Button
+                  startIcon={<ToolIcon />}
+                  onClick={() => addNode('tool')}
+                  variant="outlined"
+                >
+                  Tool
+                </Button>
+                <Button
+                  startIcon={<MemoryIcon />}
+                  onClick={() => addNode('memory')}
+                  variant="outlined"
+                >
+                  Memory
+                </Button>
+                <Button
+                  startIcon={<RetrievalIcon />}
+                  onClick={() => addNode('retrieval')}
+                  variant="outlined"
+                >
+                  Retrieval
+                </Button>
+                <Button
+                  startIcon={<ConditionalIcon />}
+                  onClick={() => addNode('conditional')}
+                  variant="outlined"
+                >
+                  Conditional
+                </Button>
+              </ButtonGroup>
 
-            <ButtonGroup size="small">
-              <Button 
-                onClick={handleValidate}
-                variant="outlined"
-                startIcon={validationResult?.isValid ? <ValidIcon /> : <ErrorIcon />}
-                color={validationResult?.isValid === false ? 'error' : 'primary'}
-              >
-                Validate
-              </Button>
-              <Button 
-                onClick={(e) => setExampleMenuAnchor(e.currentTarget)}
-                variant="outlined"
-                startIcon={<ExampleIcon />}
-              >
-                Examples
-              </Button>
-              <Button onClick={handleSave} variant="contained">
-                Save
-              </Button>
-              <Button onClick={handleClear} variant="outlined" color="error">
-                Clear
-              </Button>
-            </ButtonGroup>
-          </>
-        )}
-      </Toolbar>
+              {/* Advanced Node Types */}
+              <ButtonGroup size="small" sx={{ mr: 2 }}>
+                <Button
+                  startIcon={<LoopIcon />}
+                  onClick={() => addNode('loop')}
+                  variant="outlined"
+                  color="secondary"
+                >
+                  Loop
+                </Button>
+                <Button
+                  startIcon={<VariableIcon />}
+                  onClick={() => addNode('variable')}
+                  variant="outlined"
+                  color="secondary"
+                >
+                  Variable
+                </Button>
+                <Button
+                  startIcon={<ErrorHandlerIcon />}
+                  onClick={() => addNode('errorHandler')}
+                  variant="outlined"
+                  color="secondary"
+                >
+                  Error
+                </Button>
+                <Button
+                  startIcon={<DelayIcon />}
+                  onClick={() => addNode('delay')}
+                  variant="outlined"
+                  color="secondary"
+                >
+                  Delay
+                </Button>
+              </ButtonGroup>
 
-      {/* React Flow Canvas */}
-      <Box sx={{ height: 'calc(100% - 64px)' }}>
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          connectionMode={ConnectionMode.Loose}
-          fitView
-          attributionPosition="bottom-left"
-          proOptions={{ hideAttribution: true }}
-        >
-          <Controls />
-          <MiniMap />
-          <Background />
-        </ReactFlow>
+              {/* Edit Controls */}
+              <ButtonGroup size="small" sx={{ mr: 2 }}>
+                <Button 
+                  onClick={handleUndo}
+                  disabled={historyIndex <= 0}
+                  variant="outlined"
+                  startIcon={<UndoIcon />}
+                  title="Undo (Ctrl+Z)"
+                >
+                  Undo
+                </Button>
+                <Button 
+                  onClick={handleRedo}
+                  disabled={historyIndex >= history.length - 1}
+                  variant="outlined"
+                  startIcon={<RedoIcon />}
+                  title="Redo (Ctrl+Shift+Z)"
+                >
+                  Redo
+                </Button>
+                <Button 
+                  onClick={handleCopy}
+                  disabled={!selectedNode}
+                  variant="outlined"
+                  startIcon={<CopyIcon />}
+                  title="Copy (Ctrl+C)"
+                >
+                  Copy
+                </Button>
+                <Button 
+                  onClick={handlePaste}
+                  disabled={!clipboard}
+                  variant="outlined"
+                  startIcon={<PasteIcon />}
+                  title="Paste (Ctrl+V)"
+                >
+                  Paste
+                </Button>
+              </ButtonGroup>
+
+              {/* Utility Controls */}
+              <ButtonGroup size="small" sx={{ mr: 2 }}>
+                <Button 
+                  onClick={() => setSnapToGrid(!snapToGrid)}
+                  variant={snapToGrid ? "contained" : "outlined"}
+                  startIcon={<GridIcon />}
+                  title="Toggle Grid Snap"
+                >
+                  Grid
+                </Button>
+                <Button 
+                  onClick={() => setShowPropertiesPanel(!showPropertiesPanel)}
+                  variant={showPropertiesPanel ? "contained" : "outlined"}
+                  startIcon={<PropertiesIcon />}
+                  title="Toggle Properties Panel"
+                >
+                  Properties
+                </Button>
+                <Button 
+                  onClick={handleValidate}
+                  variant="outlined"
+                  startIcon={validationResult?.isValid ? <ValidIcon /> : <ErrorIcon />}
+                  color={validationResult?.isValid === false ? 'error' : 'primary'}
+                >
+                  Validate
+                </Button>
+              </ButtonGroup>
+
+              {/* Workflow Controls */}
+              <ButtonGroup size="small">
+                <Button 
+                  onClick={() => setShowTemplateManager(true)}
+                  variant="outlined"
+                  startIcon={<TemplateIcon />}
+                >
+                  Templates
+                </Button>
+                <Button 
+                  onClick={(e) => setExampleMenuAnchor(e.currentTarget)}
+                  variant="outlined"
+                  startIcon={<ExampleIcon />}
+                >
+                  Examples
+                </Button>
+                <Button onClick={handleSave} variant="contained">
+                  Save
+                </Button>
+                <Button onClick={handleClear} variant="outlined" color="error">
+                  Clear
+                </Button>
+              </ButtonGroup>
+            </>
+          )}
+        </Toolbar>
+
+        {/* React Flow Canvas */}
+        <Box sx={{ height: 'calc(100% - 48px)' }}>
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={onNodeClick}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            connectionMode={ConnectionMode.Loose}
+            fitView
+            snapToGrid={snapToGrid}
+            snapGrid={[GRID_SIZE, GRID_SIZE]}
+            attributionPosition="bottom-left"
+            proOptions={{ hideAttribution: true }}
+          >
+            <Controls />
+            <MiniMap />
+            <Background gap={GRID_SIZE} />
+          </ReactFlow>
+        </Box>
       </Box>
+
+      {/* Side Panel with Tabs */}
+      {showPropertiesPanel && (
+        <Fade in={showPropertiesPanel} timeout={300}>
+          <Paper elevation={3} sx={{ borderRadius: 0, display: 'flex', flexDirection: 'column' }}>
+            <Tabs 
+              value={sidePanelTab} 
+              onChange={(_, newValue) => setSidePanelTab(newValue)}
+              variant="fullWidth"
+            >
+              <Tab label="Properties" value="properties" icon={<PropertiesIcon />} iconPosition="start" />
+              <Tab label="Analytics" value="analytics" icon={<AnalyticsIcon />} iconPosition="start" />
+            </Tabs>
+            
+            <Box sx={{ flex: 1, overflow: 'hidden' }}>
+              {sidePanelTab === 'properties' && (
+                <PropertiesPanel
+                  selectedNode={selectedNode}
+                  onNodeUpdate={handleNodeUpdate}
+                  onClose={() => setShowPropertiesPanel(false)}
+                />
+              )}
+              {sidePanelTab === 'analytics' && (
+                <WorkflowAnalytics workflow={currentWorkflow} />
+              )}
+            </Box>
+          </Paper>
+        </Fade>
+      )}
 
       {/* Example workflows menu */}
       <Menu
@@ -363,6 +735,14 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           }
         </Alert>
       </Snackbar>
+
+      {/* Template Manager Dialog */}
+      <TemplateManager
+        open={showTemplateManager}
+        onClose={() => setShowTemplateManager(false)}
+        onSelectTemplate={handleLoadTemplate}
+        currentWorkflow={currentWorkflow}
+      />
     </Box>
   );
 };

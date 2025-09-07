@@ -732,7 +732,8 @@ const ToolsPage: React.FC = () => {
     <Dialog open={dialogOpen && (dialogType === 'server' || dialogType === 'edit-server')} onClose={closeDialog} maxWidth="md" fullWidth>
       <DialogTitle>{dialogType === 'edit-server' ? 'Edit Server Configuration' : 'Add Remote MCP Server'}</DialogTitle>
       <DialogContent>
-        <Grid container spacing={3} sx={{ mt: 1 }}>
+        <Box sx={{ pt: 1 }}>
+          <Grid container spacing={3}>
           {/* Basic Information Section */}
           <Grid item xs={12}>
             <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
@@ -948,6 +949,7 @@ const ToolsPage: React.FC = () => {
             />
           </Grid>
         </Grid>
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={closeDialog}>Cancel</Button>
@@ -966,8 +968,8 @@ const ToolsPage: React.FC = () => {
     <Dialog open={dialogOpen && dialogType === 'role-access'} onClose={closeDialog} maxWidth="sm" fullWidth>
       <DialogTitle>Create Role Access Rule</DialogTitle>
       <DialogContent>
-        
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Box sx={{ pt: 1 }}>
+          <Grid container spacing={2}>
           <Grid item xs={12}>
             <FormControl fullWidth>
               <InputLabel>User Role</InputLabel>
@@ -1052,6 +1054,7 @@ const ToolsPage: React.FC = () => {
             />
           </Grid>
         </Grid>
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={closeDialog}>Cancel</Button>
@@ -1070,8 +1073,8 @@ const ToolsPage: React.FC = () => {
     <Dialog open={dialogOpen && dialogType === 'access-check'} onClose={closeDialog} maxWidth="sm" fullWidth>
       <DialogTitle>Check Tool Access</DialogTitle>
       <DialogContent>
-        
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Box sx={{ pt: 1 }}>
+          <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
               fullWidth
@@ -1160,6 +1163,7 @@ const ToolsPage: React.FC = () => {
             </Alert>
           </Box>
         )}
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={closeDialog}>Close</Button>
@@ -1178,8 +1182,8 @@ const ToolsPage: React.FC = () => {
     <Dialog open={dialogOpen && dialogType === 'permission'} onClose={closeDialog} maxWidth="sm" fullWidth>
       <DialogTitle>Grant Tool Permission</DialogTitle>
       <DialogContent>
-        
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Box sx={{ pt: 1 }}>
+          <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
               fullWidth
@@ -1289,6 +1293,7 @@ const ToolsPage: React.FC = () => {
             />
           </Grid>
         </Grid>
+        </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={closeDialog}>Cancel</Button>

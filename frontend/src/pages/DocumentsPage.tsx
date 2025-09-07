@@ -653,13 +653,13 @@ const DocumentsPage: React.FC = () => {
       <Dialog open={uploadDialogOpen} onClose={() => setUploadDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Upload Document</DialogTitle>
         <DialogContent>
-          <Box sx={{ mt: 2 }}>
+          <Box sx={{ pt: 1 }}>
             <TextField
               fullWidth
               label="Document Title (optional)"
               value={uploadTitle}
               onChange={(e) => setUploadTitle(e.target.value)}
-              sx={{ mb: 2 }}
+              sx={{ mb: 3 }}
             />
             <input
               type="file"

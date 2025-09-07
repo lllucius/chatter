@@ -49,7 +49,7 @@ class ChatterSDK {
 
   private initializeConfiguration() {
     this.configuration = new Configuration({
-      basePath: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000',
+      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
       accessToken: () => this.token || '',
       headers: {
         'Content-Type': 'application/json',
@@ -108,7 +108,7 @@ class ChatterSDK {
     
     // Update configuration to remove token
     this.configuration = new Configuration({
-      basePath: process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000',
+      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
       headers: {
         'Content-Type': 'application/json',
       },

@@ -1387,6 +1387,261 @@ async def test_broadcast(
             console.print(f"[dim]{response.message}[/dim]")
 
 
+# Agents Commands
+agents_app = typer.Typer(help="AI agent management commands")
+app.add_typer(agents_app, name="agents")
+
+
+@agents_app.command("list")
+@run_async
+async def list_agents(
+    limit: int = typer.Option(10, help="Number of agents to list"),
+    offset: int = typer.Option(0, help="Number of agents to skip"),
+    status: str = typer.Option(None, help="Filter by agent status"),
+):
+    """List AI agents."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.agents_api.list_agents_api_v1_agents_get(
+            limit=limit,
+            offset=offset,
+            status=status
+        )
+        
+        if not response.agents:
+            console.print("No agents found.")
+            return
+        
+        table = Table(title=f"AI Agents ({response.total} total)")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="green")
+        table.add_column("Type", style="yellow")
+        table.add_column("Status", style="magenta")
+        table.add_column("Tasks", style="blue")
+        
+        for agent in response.agents:
+            table.add_row(
+                str(agent.id),
+                agent.name,
+                getattr(agent, 'agent_type', 'unknown'),
+                getattr(agent, 'status', 'active'),
+                str(getattr(agent, 'task_count', 0))
+            )
+        
+        console.print(table)
+
+
+@agents_app.command("show")
+@run_async
+async def show_agent(agent_id: str = typer.Argument(..., help="Agent ID")):
+    """Show detailed agent information."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.agents_api.get_agent_api_v1_agents_agent_id_get(
+            agent_id=agent_id
+        )
+        
+        console.print(Panel.fit(
+            f"[bold]{response.name}[/bold]\n\n"
+            f"[dim]ID:[/dim] {response.id}\n"
+            f"[dim]Type:[/dim] {getattr(response, 'agent_type', 'unknown')}\n"
+            f"[dim]Status:[/dim] {getattr(response, 'status', 'active')}\n"
+            f"[dim]Tasks Completed:[/dim] {getattr(response, 'tasks_completed', 0)}\n"
+            f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n"
+            f"[dim]Last Active:[/dim] {getattr(response, 'last_active_at', 'N/A')}\n\n"
+            f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}\n\n"
+            f"[dim]Configuration:[/dim]\n{getattr(response, 'config', 'No configuration')}",
+            title="Agent Details"
+        ))
+
+
+@agents_app.command("create")
+@run_async
+async def create_agent(
+    name: str = typer.Option(..., help="Agent name"),
+    agent_type: str = typer.Option("general", help="Agent type"),
+    description: str = typer.Option(None, help="Agent description"),
+    config: str = typer.Option(None, help="Agent configuration as JSON"),
+):
+    """Create a new AI agent."""
+    from chatter_sdk.models.agent_create import AgentCreate
+    import json
+    
+    agent_config = {}
+    if config:
+        try:
+            agent_config = json.loads(config)
+        except json.JSONDecodeError as e:
+            console.print(f"❌ [red]Invalid JSON configuration: {e}[/red]")
+            return
+    
+    async with get_client() as sdk_client:
+        agent_data = AgentCreate(
+            name=name,
+            agent_type=agent_type,
+            description=description,
+            config=agent_config
+        )
+        
+        response = await sdk_client.agents_api.create_agent_api_v1_agents_post(
+            agent_create=agent_data
+        )
+        
+        console.print(f"✅ [green]Created agent: {response.name}[/green]")
+        console.print(f"[dim]ID: {response.id}[/dim]")
+
+
+@agents_app.command("delete")
+@run_async
+async def delete_agent(
+    agent_id: str = typer.Argument(..., help="Agent ID to delete"),
+    force: bool = typer.Option(False, help="Skip confirmation prompt"),
+):
+    """Delete an AI agent."""
+    if not force:
+        confirm = Prompt.ask(f"Are you sure you want to delete agent {agent_id}?", choices=["y", "n"])
+        if confirm.lower() != "y":
+            console.print("Operation cancelled.")
+            return
+    
+    async with get_client() as sdk_client:
+        await sdk_client.agents_api.delete_agent_api_v1_agents_agent_id_delete(
+            agent_id=agent_id
+        )
+        
+        console.print(f"✅ [green]Deleted agent {agent_id}[/green]")
+
+
+# Data Management Commands
+data_app = typer.Typer(help="Data management and backup commands")
+app.add_typer(data_app, name="data")
+
+
+@data_app.command("backup")
+@run_async
+async def create_backup(
+    backup_type: str = typer.Option("full", help="Backup type: full, incremental"),
+    include_documents: bool = typer.Option(True, help="Include documents in backup"),
+    include_conversations: bool = typer.Option(True, help="Include conversations"),
+    description: str = typer.Option(None, help="Backup description"),
+):
+    """Create a data backup."""
+    from chatter_sdk.models.backup_request import BackupRequest
+    
+    async with get_client() as sdk_client:
+        backup_request = BackupRequest(
+            backup_type=backup_type,
+            include_documents=include_documents,
+            include_conversations=include_conversations,
+            description=description
+        )
+        
+        response = await sdk_client.data_api.create_backup_api_v1_data_backup_post(
+            backup_request=backup_request
+        )
+        
+        console.print(f"✅ [green]Backup created: {response.backup_id}[/green]")
+        if hasattr(response, 'job_id'):
+            console.print(f"[dim]Job ID: {response.job_id}[/dim]")
+        console.print(f"[dim]Check status with: chatter jobs show {response.job_id if hasattr(response, 'job_id') else 'JOB_ID'}[/dim]")
+
+
+@data_app.command("export")
+@run_async
+async def export_data(
+    format: str = typer.Option("json", help="Export format: json, csv"),
+    data_types: str = typer.Option("all", help="Data types: all, conversations, documents, prompts"),
+    include_metadata: bool = typer.Option(True, help="Include metadata"),
+):
+    """Export data in specified format."""
+    from chatter_sdk.models.export_data_request import ExportDataRequest
+    
+    async with get_client() as sdk_client:
+        export_request = ExportDataRequest(
+            format=format,
+            data_types=data_types.split(','),
+            include_metadata=include_metadata
+        )
+        
+        response = await sdk_client.data_api.export_data_api_v1_data_export_post(
+            export_data_request=export_request
+        )
+        
+        console.print(f"✅ [green]Data export started[/green]")
+        if hasattr(response, 'job_id'):
+            console.print(f"[dim]Job ID: {response.job_id}[/dim]")
+        console.print(f"[dim]Check status with: chatter jobs show {response.job_id if hasattr(response, 'job_id') else 'JOB_ID'}[/dim]")
+
+
+@data_app.command("bulk-delete-conversations")
+@run_async
+async def bulk_delete_conversations(
+    conversation_ids: str = typer.Argument(..., help="Comma-separated conversation IDs"),
+    force: bool = typer.Option(False, help="Skip confirmation prompt"),
+):
+    """Bulk delete conversations."""
+    ids = [id.strip() for id in conversation_ids.split(',')]
+    
+    if not force:
+        confirm = Prompt.ask(f"Are you sure you want to delete {len(ids)} conversations?", choices=["y", "n"])
+        if confirm.lower() != "y":
+            console.print("Operation cancelled.")
+            return
+    
+    async with get_client() as sdk_client:
+        response = await sdk_client.data_api.bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post(
+            conversation_ids=ids
+        )
+        
+        success_count = getattr(response, 'deleted_count', len(ids))
+        console.print(f"✅ [green]Deleted {success_count} conversations[/green]")
+
+
+@data_app.command("bulk-delete-documents")
+@run_async
+async def bulk_delete_documents(
+    document_ids: str = typer.Argument(..., help="Comma-separated document IDs"),
+    force: bool = typer.Option(False, help="Skip confirmation prompt"),
+):
+    """Bulk delete documents."""
+    ids = [id.strip() for id in document_ids.split(',')]
+    
+    if not force:
+        confirm = Prompt.ask(f"Are you sure you want to delete {len(ids)} documents?", choices=["y", "n"])
+        if confirm.lower() != "y":
+            console.print("Operation cancelled.")
+            return
+    
+    async with get_client() as sdk_client:
+        response = await sdk_client.data_api.bulk_delete_documents_api_v1_data_bulk_delete_documents_post(
+            document_ids=ids
+        )
+        
+        success_count = getattr(response, 'deleted_count', len(ids))
+        console.print(f"✅ [green]Deleted {success_count} documents[/green]")
+
+
+@data_app.command("storage-stats")
+@run_async
+async def storage_stats():
+    """Show storage usage statistics."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.data_api.get_storage_stats_api_v1_data_storage_stats_get()
+        
+        table = Table(title="Storage Statistics")
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="green")
+        
+        if hasattr(response, 'total_size_bytes'):
+            table.add_row("Total Storage Used", f"{response.total_size_bytes:,} bytes")
+        if hasattr(response, 'documents_size_bytes'):
+            table.add_row("Documents Storage", f"{response.documents_size_bytes:,} bytes")
+        if hasattr(response, 'embeddings_size_bytes'):
+            table.add_row("Embeddings Storage", f"{response.embeddings_size_bytes:,} bytes")
+        if hasattr(response, 'backups_size_bytes'):
+            table.add_row("Backups Storage", f"{response.backups_size_bytes:,} bytes")
+        
+        console.print(table)
+
+
 # Analytics Commands
 analytics_app = typer.Typer(help="Analytics and metrics commands")
 app.add_typer(analytics_app, name="analytics")

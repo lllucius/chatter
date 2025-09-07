@@ -1,6 +1,5 @@
 """Workflow analytics service for complexity analysis and optimization suggestions."""
 
-import math
 from collections import defaultdict, deque
 from typing import Any, Dict, List, Set, Tuple, Optional
 
@@ -97,35 +96,26 @@ class WorkflowAnalyticsService:
         node_count = len(nodes)
         edge_count = len(edges)
         
-        # Calculate maximum depth
+        # Calculate metrics in a single pass
         depth = self._calculate_max_depth(graph)
-        
-        # Calculate average branching factor
         branching_factor = self._calculate_branching_factor(graph)
         
-        # Calculate loop complexity
-        loop_complexity = self._calculate_loop_complexity(nodes)
+        # Count special node types efficiently
+        node_types = [node.get("data", {}).get("nodeType", "") for node in nodes]
+        loop_complexity = node_types.count("loop")
+        conditional_complexity = node_types.count("conditional")
         
-        # Calculate conditional complexity
-        conditional_complexity = self._calculate_conditional_complexity(nodes, graph)
-        
-        # Calculate overall complexity score
-        base_score = node_count + edge_count
-        depth_penalty = depth * 2
-        branching_penalty = int(branching_factor * 10)
-        loop_penalty = loop_complexity * 5
-        conditional_penalty = conditional_complexity * 3
-        
-        total_score = (
-            base_score + 
-            depth_penalty + 
-            branching_penalty + 
-            loop_penalty + 
-            conditional_penalty
+        # Simplified complexity scoring
+        complexity_score = (
+            node_count + edge_count +                    # Base complexity
+            depth * 2 +                                  # Depth penalty  
+            int(branching_factor * 10) +                 # Branching penalty
+            loop_complexity * 5 +                        # Loop penalty
+            conditional_complexity * 3                   # Conditional penalty
         )
         
         return ComplexityMetrics(
-            score=total_score,
+            score=complexity_score,
             node_count=node_count,
             edge_count=edge_count,
             depth=depth,
@@ -185,38 +175,6 @@ class WorkflowAnalyticsService:
             return 0.0
         
         return total_branches / nodes_with_branches
-    
-    def _calculate_loop_complexity(self, nodes: List[Dict[str, Any]]) -> int:
-        """Calculate loop complexity score."""
-        complexity = 0
-        
-        for node in nodes:
-            node_type = node.get("data", {}).get("nodeType")
-            if node_type == "loop":
-                config = node.get("data", {}).get("config", {})
-                max_iterations = config.get("maxIterations", 100)  # Default assumption
-                condition_complexity = 1 if config.get("condition") else 0
-                complexity += int(math.log10(max_iterations + 1)) + condition_complexity
-        
-        return complexity
-    
-    def _calculate_conditional_complexity(
-        self,
-        nodes: List[Dict[str, Any]],
-        graph: Dict[str, Any],
-    ) -> int:
-        """Calculate conditional complexity score."""
-        complexity = 0
-        
-        for node in nodes:
-            node_type = node.get("data", {}).get("nodeType")
-            if node_type == "conditional":
-                # Add complexity based on number of output branches
-                node_id = node["id"]
-                branches = len(graph["outgoing"].get(node_id, []))
-                complexity += branches
-        
-        return complexity
     
     def _identify_bottlenecks(
         self,
@@ -339,57 +297,51 @@ class WorkflowAnalyticsService:
         graph: Dict[str, Any],
         complexity: ComplexityMetrics,
     ) -> List[OptimizationSuggestion]:
-        """Generate optimization suggestions."""
+        """Generate optimization suggestions using data-driven rules."""
         suggestions = []
         
-        # High complexity suggestions
-        if complexity.score > 100:
-            suggestions.append(OptimizationSuggestion(
-                type="complexity",
-                description="Consider breaking this workflow into smaller, reusable components",
-                impact="high",
-            ))
+        # Define optimization rules more concisely
+        optimization_rules = [
+            (complexity.score > 100, "complexity", 
+             "Consider breaking this workflow into smaller, reusable components", "high"),
+            (complexity.depth > 15, "depth",
+             "Workflow is very deep - consider parallel processing where possible", "medium"),
+            (complexity.branching_factor > 3, "branching",
+             "High branching factor - consider consolidating similar branches", "medium"),
+            (complexity.loop_complexity > 5, "loops",
+             "Multiple loops detected - ensure proper exit conditions and consider batch processing", "high"),
+        ]
         
-        # Deep workflow suggestions
-        if complexity.depth > 15:
-            suggestions.append(OptimizationSuggestion(
-                type="depth",
-                description="Workflow is very deep - consider parallel processing where possible",
-                impact="medium",
-            ))
+        # Apply rules
+        for condition, opt_type, description, impact in optimization_rules:
+            if condition:
+                suggestions.append(OptimizationSuggestion(
+                    type=opt_type,
+                    description=description,
+                    impact=impact,
+                ))
         
-        # High branching factor suggestions
-        if complexity.branching_factor > 3:
-            suggestions.append(OptimizationSuggestion(
-                type="branching",
-                description="High branching factor - consider consolidating similar branches",
-                impact="medium",
-            ))
+        # Check for specific optimization opportunities
+        parallel_nodes = self._find_parallelization_opportunities(nodes, graph)
+        cache_nodes = self._find_caching_opportunities(nodes)
         
-        # Loop optimization suggestions
-        if complexity.loop_complexity > 5:
-            suggestions.append(OptimizationSuggestion(
-                type="loops",
-                description="Multiple loops detected - ensure proper exit conditions and consider batch processing",
-                impact="high",
-            ))
-        
-        # Parallelization suggestions
-        parallel_opportunities = self._find_parallelization_opportunities(nodes, graph)
-        if parallel_opportunities:
+        if parallel_nodes:
             suggestions.append(OptimizationSuggestion(
                 type="parallelization",
                 description="Potential for parallel execution detected",
                 impact="high",
-                node_ids=parallel_opportunities,
+                node_ids=parallel_nodes,
             ))
         
-        # Caching suggestions
-        cache_opportunities = self._find_caching_opportunities(nodes)
-        if cache_opportunities:
+        if cache_nodes:
             suggestions.append(OptimizationSuggestion(
                 type="caching",
                 description="Consider caching results from expensive operations",
+                impact="medium",
+                node_ids=cache_nodes,
+            ))
+        
+        return suggestions
                 impact="medium",
                 node_ids=cache_opportunities,
             ))

@@ -69,7 +69,7 @@ class WorkflowManagementService:
                 description=description,
                 nodes=nodes,
                 edges=edges,
-                metadata=metadata or {},
+                workflow_metadata=metadata or {},
                 template_id=template_id,
             )
             

@@ -422,7 +422,7 @@ class WorkflowDefinition(Base):
     edges: Mapped[list[dict[str, Any]]] = mapped_column(
         JSON, nullable=False
     )
-    metadata: Mapped[dict[str, Any] | None] = mapped_column(
+    workflow_metadata: Mapped[dict[str, Any] | None] = mapped_column(
         JSON, nullable=True, default=lambda: {}
     )
 
@@ -471,7 +471,7 @@ class WorkflowDefinition(Base):
             "description": self.description,
             "nodes": self.nodes,
             "edges": self.edges,
-            "metadata": self.metadata,
+            "metadata": self.workflow_metadata,
             "version": self.version,
             "is_public": self.is_public,
             "tags": self.tags,

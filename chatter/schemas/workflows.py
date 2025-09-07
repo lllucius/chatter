@@ -128,7 +128,7 @@ class WorkflowTemplateUpdate(BaseModel):
     is_public: Optional[bool] = Field(None, description="Whether template is public")
 
 
-class WorkflowTemplateResponse(WorkflowTemplateBase)
+class WorkflowTemplateResponse(WorkflowTemplateBase):
     """Schema for workflow template response."""
     
     id: str = Field(..., description="Unique node identifier")

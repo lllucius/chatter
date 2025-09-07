@@ -3,21 +3,35 @@
 from typing import Any, Dict, List, Optional
 from datetime import datetime
 
-from chatter.core.validation.engine import ValidationEngine
-from chatter.core.validation.context import ValidationContext
-from chatter.core.validation.results import ValidationResult
-from chatter.models.workflow import WorkflowType, WorkflowDefinition, WorkflowTemplate
-from chatter.schemas.workflows import ValidationError as WorkflowValidationError
-from chatter.utils.logging import get_logger
+try:
+    from chatter.core.validation.results import ValidationResult
+except ImportError:
+    # Fallback validation result for environments without full validation engine
+    class ValidationResult:
+        def __init__(self, valid: bool, errors: List[str], warnings: List[str], requirements_met: bool = True):
+            self.valid = valid
+            self.errors = errors
+            self.warnings = warnings
+            self.requirements_met = requirements_met
 
-logger = get_logger(__name__)
+from chatter.models.workflow import WorkflowType, WorkflowDefinition, WorkflowTemplate
+
+# Use standard logging to avoid config dependencies
+import logging
+logger = logging.getLogger(__name__)
 
 
 class WorkflowValidationService:
     """Centralized service for workflow validation to eliminate duplication."""
     
     def __init__(self):
-        self.validation_engine = ValidationEngine()
+        # Note: ValidationEngine is optional to avoid config dependencies
+        self.validation_engine = None
+        try:
+            from chatter.core.validation.engine import ValidationEngine
+            self.validation_engine = ValidationEngine()
+        except ImportError:
+            logger.info("ValidationEngine not available - using basic validation")
     
     def validate_workflow_definition(
         self, 

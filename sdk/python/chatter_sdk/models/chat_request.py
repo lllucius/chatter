@@ -48,7 +48,7 @@ class ChatRequest(BaseModel):
         if value is None:
             return value
 
-        if value not in set(['plain', 'rag', 'tools', 'full']):
+        if value not in {'plain', 'rag', 'tools', 'full'}:
             raise ValueError("must be one of enum values ('plain', 'rag', 'tools', 'full')")
         return value
 
@@ -83,8 +83,7 @@ class ChatRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,

@@ -36,131 +36,131 @@ class TestDashboardResponse(unittest.TestCase):
         if include_optional:
             return DashboardResponse(
                 conversation_stats = chatter_sdk.models.conversation_stats_response.ConversationStatsResponse(
-                    total_conversations = 56, 
+                    total_conversations = 56,
                     conversations_by_status = {
                         'key' : 56
-                        }, 
-                    total_messages = 56, 
+                        },
+                    total_messages = 56,
                     messages_by_role = {
                         'key' : 56
-                        }, 
-                    avg_messages_per_conversation = 1.337, 
-                    total_tokens_used = 56, 
-                    total_cost = 1.337, 
-                    avg_response_time_ms = 1.337, 
+                        },
+                    avg_messages_per_conversation = 1.337,
+                    total_tokens_used = 56,
+                    total_cost = 1.337,
+                    avg_response_time_ms = 1.337,
                     conversations_by_date = {
                         'key' : 56
-                        }, 
+                        },
                     most_active_hours = {
                         'key' : 56
-                        }, 
+                        },
                     popular_models = {
                         'key' : 56
-                        }, 
+                        },
                     popular_providers = {
                         'key' : 56
                         }, ),
                 usage_metrics = chatter_sdk.models.usage_metrics_response.UsageMetricsResponse(
-                    total_prompt_tokens = 56, 
-                    total_completion_tokens = 56, 
-                    total_tokens = 56, 
+                    total_prompt_tokens = 56,
+                    total_completion_tokens = 56,
+                    total_tokens = 56,
                     tokens_by_model = {
                         'key' : 56
-                        }, 
+                        },
                     tokens_by_provider = {
                         'key' : 56
-                        }, 
-                    total_cost = 1.337, 
+                        },
+                    total_cost = 1.337,
                     cost_by_model = {
                         'key' : 1.337
-                        }, 
+                        },
                     cost_by_provider = {
                         'key' : 1.337
-                        }, 
+                        },
                     daily_usage = {
                         'key' : 56
-                        }, 
+                        },
                     daily_cost = {
                         'key' : 1.337
-                        }, 
-                    avg_response_time = 1.337, 
+                        },
+                    avg_response_time = 1.337,
                     response_times_by_model = {
                         'key' : 1.337
-                        }, 
-                    active_days = 56, 
-                    peak_usage_hour = 56, 
+                        },
+                    active_days = 56,
+                    peak_usage_hour = 56,
                     conversations_per_day = 1.337, ),
                 performance_metrics = chatter_sdk.models.performance_metrics_response.PerformanceMetricsResponse(
-                    avg_response_time_ms = 1.337, 
-                    median_response_time_ms = 1.337, 
-                    p95_response_time_ms = 1.337, 
-                    p99_response_time_ms = 1.337, 
-                    requests_per_minute = 1.337, 
-                    tokens_per_minute = 1.337, 
-                    total_errors = 56, 
-                    error_rate = 1.337, 
+                    avg_response_time_ms = 1.337,
+                    median_response_time_ms = 1.337,
+                    p95_response_time_ms = 1.337,
+                    p99_response_time_ms = 1.337,
+                    requests_per_minute = 1.337,
+                    tokens_per_minute = 1.337,
+                    total_errors = 56,
+                    error_rate = 1.337,
                     errors_by_type = {
                         'key' : 56
-                        }, 
+                        },
                     performance_by_model = {
                         'key' : {
                             'key' : 1.337
                             }
-                        }, 
+                        },
                     performance_by_provider = {
                         'key' : {
                             'key' : 1.337
                             }
-                        }, 
-                    database_response_time_ms = 1.337, 
-                    vector_search_time_ms = 1.337, 
+                        },
+                    database_response_time_ms = 1.337,
+                    vector_search_time_ms = 1.337,
                     embedding_generation_time_ms = 1.337, ),
                 document_analytics = chatter_sdk.models.document_analytics_response.DocumentAnalyticsResponse(
-                    total_documents = 56, 
+                    total_documents = 56,
                     documents_by_status = {
                         'key' : 56
-                        }, 
+                        },
                     documents_by_type = {
                         'key' : 56
-                        }, 
-                    avg_processing_time_seconds = 1.337, 
-                    processing_success_rate = 1.337, 
-                    total_chunks = 56, 
-                    avg_chunks_per_document = 1.337, 
-                    total_storage_bytes = 56, 
-                    avg_document_size_bytes = 1.337, 
+                        },
+                    avg_processing_time_seconds = 1.337,
+                    processing_success_rate = 1.337,
+                    total_chunks = 56,
+                    avg_chunks_per_document = 1.337,
+                    total_storage_bytes = 56,
+                    avg_document_size_bytes = 1.337,
                     storage_by_type = {
                         'key' : 56
-                        }, 
-                    total_searches = 56, 
-                    avg_search_results = 1.337, 
+                        },
+                    total_searches = 56,
+                    avg_search_results = 1.337,
                     popular_search_terms = {
                         'key' : 56
-                        }, 
-                    total_views = 56, 
+                        },
+                    total_views = 56,
                     most_viewed_documents = [
                         { }
-                        ], 
+                        ],
                     documents_by_access_level = {
                         'key' : 56
                         }, ),
                 system_health = chatter_sdk.models.system_analytics_response.SystemAnalyticsResponse(
-                    total_users = 56, 
-                    active_users_today = 56, 
-                    active_users_week = 56, 
-                    active_users_month = 56, 
-                    system_uptime_seconds = 1.337, 
-                    avg_cpu_usage = 1.337, 
-                    avg_memory_usage = 1.337, 
-                    database_connections = 56, 
-                    total_api_requests = 56, 
+                    total_users = 56,
+                    active_users_today = 56,
+                    active_users_week = 56,
+                    active_users_month = 56,
+                    system_uptime_seconds = 1.337,
+                    avg_cpu_usage = 1.337,
+                    avg_memory_usage = 1.337,
+                    database_connections = 56,
+                    total_api_requests = 56,
                     requests_per_endpoint = {
                         'key' : 56
-                        }, 
-                    avg_api_response_time = 1.337, 
-                    api_error_rate = 1.337, 
-                    storage_usage_bytes = 56, 
-                    vector_database_size_bytes = 56, 
+                        },
+                    avg_api_response_time = 1.337,
+                    api_error_rate = 1.337,
+                    storage_usage_bytes = 56,
+                    vector_database_size_bytes = 56,
                     cache_hit_rate = 1.337, ),
                 custom_metrics = [
                     { }
@@ -170,131 +170,131 @@ class TestDashboardResponse(unittest.TestCase):
         else:
             return DashboardResponse(
                 conversation_stats = chatter_sdk.models.conversation_stats_response.ConversationStatsResponse(
-                    total_conversations = 56, 
+                    total_conversations = 56,
                     conversations_by_status = {
                         'key' : 56
-                        }, 
-                    total_messages = 56, 
+                        },
+                    total_messages = 56,
                     messages_by_role = {
                         'key' : 56
-                        }, 
-                    avg_messages_per_conversation = 1.337, 
-                    total_tokens_used = 56, 
-                    total_cost = 1.337, 
-                    avg_response_time_ms = 1.337, 
+                        },
+                    avg_messages_per_conversation = 1.337,
+                    total_tokens_used = 56,
+                    total_cost = 1.337,
+                    avg_response_time_ms = 1.337,
                     conversations_by_date = {
                         'key' : 56
-                        }, 
+                        },
                     most_active_hours = {
                         'key' : 56
-                        }, 
+                        },
                     popular_models = {
                         'key' : 56
-                        }, 
+                        },
                     popular_providers = {
                         'key' : 56
                         }, ),
                 usage_metrics = chatter_sdk.models.usage_metrics_response.UsageMetricsResponse(
-                    total_prompt_tokens = 56, 
-                    total_completion_tokens = 56, 
-                    total_tokens = 56, 
+                    total_prompt_tokens = 56,
+                    total_completion_tokens = 56,
+                    total_tokens = 56,
                     tokens_by_model = {
                         'key' : 56
-                        }, 
+                        },
                     tokens_by_provider = {
                         'key' : 56
-                        }, 
-                    total_cost = 1.337, 
+                        },
+                    total_cost = 1.337,
                     cost_by_model = {
                         'key' : 1.337
-                        }, 
+                        },
                     cost_by_provider = {
                         'key' : 1.337
-                        }, 
+                        },
                     daily_usage = {
                         'key' : 56
-                        }, 
+                        },
                     daily_cost = {
                         'key' : 1.337
-                        }, 
-                    avg_response_time = 1.337, 
+                        },
+                    avg_response_time = 1.337,
                     response_times_by_model = {
                         'key' : 1.337
-                        }, 
-                    active_days = 56, 
-                    peak_usage_hour = 56, 
+                        },
+                    active_days = 56,
+                    peak_usage_hour = 56,
                     conversations_per_day = 1.337, ),
                 performance_metrics = chatter_sdk.models.performance_metrics_response.PerformanceMetricsResponse(
-                    avg_response_time_ms = 1.337, 
-                    median_response_time_ms = 1.337, 
-                    p95_response_time_ms = 1.337, 
-                    p99_response_time_ms = 1.337, 
-                    requests_per_minute = 1.337, 
-                    tokens_per_minute = 1.337, 
-                    total_errors = 56, 
-                    error_rate = 1.337, 
+                    avg_response_time_ms = 1.337,
+                    median_response_time_ms = 1.337,
+                    p95_response_time_ms = 1.337,
+                    p99_response_time_ms = 1.337,
+                    requests_per_minute = 1.337,
+                    tokens_per_minute = 1.337,
+                    total_errors = 56,
+                    error_rate = 1.337,
                     errors_by_type = {
                         'key' : 56
-                        }, 
+                        },
                     performance_by_model = {
                         'key' : {
                             'key' : 1.337
                             }
-                        }, 
+                        },
                     performance_by_provider = {
                         'key' : {
                             'key' : 1.337
                             }
-                        }, 
-                    database_response_time_ms = 1.337, 
-                    vector_search_time_ms = 1.337, 
+                        },
+                    database_response_time_ms = 1.337,
+                    vector_search_time_ms = 1.337,
                     embedding_generation_time_ms = 1.337, ),
                 document_analytics = chatter_sdk.models.document_analytics_response.DocumentAnalyticsResponse(
-                    total_documents = 56, 
+                    total_documents = 56,
                     documents_by_status = {
                         'key' : 56
-                        }, 
+                        },
                     documents_by_type = {
                         'key' : 56
-                        }, 
-                    avg_processing_time_seconds = 1.337, 
-                    processing_success_rate = 1.337, 
-                    total_chunks = 56, 
-                    avg_chunks_per_document = 1.337, 
-                    total_storage_bytes = 56, 
-                    avg_document_size_bytes = 1.337, 
+                        },
+                    avg_processing_time_seconds = 1.337,
+                    processing_success_rate = 1.337,
+                    total_chunks = 56,
+                    avg_chunks_per_document = 1.337,
+                    total_storage_bytes = 56,
+                    avg_document_size_bytes = 1.337,
                     storage_by_type = {
                         'key' : 56
-                        }, 
-                    total_searches = 56, 
-                    avg_search_results = 1.337, 
+                        },
+                    total_searches = 56,
+                    avg_search_results = 1.337,
                     popular_search_terms = {
                         'key' : 56
-                        }, 
-                    total_views = 56, 
+                        },
+                    total_views = 56,
                     most_viewed_documents = [
                         { }
-                        ], 
+                        ],
                     documents_by_access_level = {
                         'key' : 56
                         }, ),
                 system_health = chatter_sdk.models.system_analytics_response.SystemAnalyticsResponse(
-                    total_users = 56, 
-                    active_users_today = 56, 
-                    active_users_week = 56, 
-                    active_users_month = 56, 
-                    system_uptime_seconds = 1.337, 
-                    avg_cpu_usage = 1.337, 
-                    avg_memory_usage = 1.337, 
-                    database_connections = 56, 
-                    total_api_requests = 56, 
+                    total_users = 56,
+                    active_users_today = 56,
+                    active_users_week = 56,
+                    active_users_month = 56,
+                    system_uptime_seconds = 1.337,
+                    avg_cpu_usage = 1.337,
+                    avg_memory_usage = 1.337,
+                    database_connections = 56,
+                    total_api_requests = 56,
                     requests_per_endpoint = {
                         'key' : 56
-                        }, 
-                    avg_api_response_time = 1.337, 
-                    api_error_rate = 1.337, 
-                    storage_usage_bytes = 56, 
-                    vector_database_size_bytes = 56, 
+                        },
+                    avg_api_response_time = 1.337,
+                    api_error_rate = 1.337,
+                    storage_usage_bytes = 56,
+                    vector_database_size_bytes = 56,
                     cache_hit_rate = 1.337, ),
                 custom_metrics = [
                     { }

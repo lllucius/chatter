@@ -13,7 +13,7 @@ class TypeScriptSDKGenerator:
 
     def __init__(self, config: TypeScriptSDKConfig) -> None:
         """Initialize TypeScript SDK generator.
-        
+
         Args:
             config: Configuration for TypeScript SDK generation
         """
@@ -22,7 +22,7 @@ class TypeScriptSDKGenerator:
 
     def generate_with_cleanup(self) -> bool:
         """Generate TypeScript SDK with cleanup of temporary files.
-        
+
         Returns:
             True if generation was successful, False otherwise
         """
@@ -33,7 +33,7 @@ class TypeScriptSDKGenerator:
 
     def _generate(self) -> bool:
         """Generate TypeScript SDK using OpenAPI Generator CLI.
-        
+
         Returns:
             True if generation was successful, False otherwise
         """
@@ -96,7 +96,7 @@ class TypeScriptSDKGenerator:
 
     def validate(self) -> bool:
         """Validate that the generated TypeScript SDK is complete and functional.
-        
+
         Returns:
             True if SDK validation passes, False otherwise
         """
@@ -168,7 +168,7 @@ class TypeScriptSDKGenerator:
 
     def _find_openapi_spec(self) -> Path | None:
         """Find OpenAPI specification file.
-        
+
         Returns:
             Path to OpenAPI spec file, or None if not found
         """

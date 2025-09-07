@@ -356,7 +356,7 @@ const ABTestingPage: React.FC = () => {
     switch (status) {
       case 'running': return <TrendingUpIcon />;
       case 'paused': return <PauseIcon />;
-      case 'completed': return <CheckCircle />;
+      case 'completed': return <CompleteIcon />;
       case 'stopped': return <StopIcon />;
       default: return <TrendingFlatIcon />;
     }

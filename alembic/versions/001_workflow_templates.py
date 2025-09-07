@@ -1,7 +1,7 @@
 """Add workflow templates and template specs
 
 Revision ID: 001_workflow_templates
-Revises: 
+Revises:
 Create Date: 2024-01-01 00:00:00.000000
 
 """

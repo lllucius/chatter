@@ -36,10 +36,10 @@ class TestBodyListAgentsApiV1AgentsGet(unittest.TestCase):
         if include_optional:
             return BodyListAgentsApiV1AgentsGet(
                 pagination = chatter_sdk.models.pagination_request.PaginationRequest(
-                    limit = 1.0, 
+                    limit = 1.0,
                     offset = 0.0, ),
                 sorting = chatter_sdk.models.sorting_request.SortingRequest(
-                    sort_by = 'created_at', 
+                    sort_by = 'created_at',
                     sort_order = 'desc', ),
                 tags = [
                     ''

@@ -37,36 +37,36 @@ class TestAgentBulkCreateRequest(unittest.TestCase):
             return AgentBulkCreateRequest(
                 agents = [
                     chatter_sdk.models.agent_create_request.AgentCreateRequest(
-                        name = '', 
-                        description = '', 
-                        agent_type = 'conversational', 
-                        system_prompt = '', 
+                        name = '',
+                        description = '',
+                        agent_type = 'conversational',
+                        system_prompt = '',
                         personality_traits = [
                             ''
-                            ], 
+                            ],
                         knowledge_domains = [
                             ''
-                            ], 
-                        response_style = 'professional', 
+                            ],
+                        response_style = 'professional',
                         capabilities = [
                             'natural_language'
-                            ], 
+                            ],
                         available_tools = [
                             ''
-                            ], 
-                        primary_llm = 'openai', 
-                        fallback_llm = 'anthropic', 
-                        temperature = 0.0, 
-                        max_tokens = 1.0, 
-                        max_conversation_length = 1.0, 
-                        context_window_size = 100.0, 
-                        response_timeout = 1.0, 
-                        learning_enabled = True, 
-                        feedback_weight = 0.0, 
-                        adaptation_threshold = 0.0, 
+                            ],
+                        primary_llm = 'openai',
+                        fallback_llm = 'anthropic',
+                        temperature = 0.0,
+                        max_tokens = 1.0,
+                        max_conversation_length = 1.0,
+                        context_window_size = 100.0,
+                        response_timeout = 1.0,
+                        learning_enabled = True,
+                        feedback_weight = 0.0,
+                        adaptation_threshold = 0.0,
                         tags = [
                             ''
-                            ], 
+                            ],
                         metadata = { }, )
                     ]
             )
@@ -74,36 +74,36 @@ class TestAgentBulkCreateRequest(unittest.TestCase):
             return AgentBulkCreateRequest(
                 agents = [
                     chatter_sdk.models.agent_create_request.AgentCreateRequest(
-                        name = '', 
-                        description = '', 
-                        agent_type = 'conversational', 
-                        system_prompt = '', 
+                        name = '',
+                        description = '',
+                        agent_type = 'conversational',
+                        system_prompt = '',
                         personality_traits = [
                             ''
-                            ], 
+                            ],
                         knowledge_domains = [
                             ''
-                            ], 
-                        response_style = 'professional', 
+                            ],
+                        response_style = 'professional',
                         capabilities = [
                             'natural_language'
-                            ], 
+                            ],
                         available_tools = [
                             ''
-                            ], 
-                        primary_llm = 'openai', 
-                        fallback_llm = 'anthropic', 
-                        temperature = 0.0, 
-                        max_tokens = 1.0, 
-                        max_conversation_length = 1.0, 
-                        context_window_size = 100.0, 
-                        response_timeout = 1.0, 
-                        learning_enabled = True, 
-                        feedback_weight = 0.0, 
-                        adaptation_threshold = 0.0, 
+                            ],
+                        primary_llm = 'openai',
+                        fallback_llm = 'anthropic',
+                        temperature = 0.0,
+                        max_tokens = 1.0,
+                        max_conversation_length = 1.0,
+                        context_window_size = 100.0,
+                        response_timeout = 1.0,
+                        learning_enabled = True,
+                        feedback_weight = 0.0,
+                        adaptation_threshold = 0.0,
                         tags = [
                             ''
-                            ], 
+                            ],
                         metadata = { }, )
                     ],
         )

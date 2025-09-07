@@ -61,8 +61,7 @@ class WorkflowTemplatesResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -88,10 +87,10 @@ class WorkflowTemplatesResponse(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "templates": dict(
-                (_k, WorkflowTemplateInfo.from_dict(_v))
+            "templates": {
+                _k: WorkflowTemplateInfo.from_dict(_v)
                 for _k, _v in obj["templates"].items()
-            )
+            }
             if obj.get("templates") is not None
             else None,
             "total_count": obj.get("total_count")

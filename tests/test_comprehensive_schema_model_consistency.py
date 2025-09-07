@@ -162,7 +162,7 @@ class TestComprehensiveSchemaModelConsistency:
 
         # Most profile fields should be in response (profiles are user-owned configurations)
         expected_in_response = model_fields - {'owner_id'}  # owner_id might be excluded
-        missing_important = expected_in_response - response_fields
+        expected_in_response - response_fields
 
         # For now, just ensure no critical fields are missing - full check might be too strict
         critical_fields = {'name', 'description', 'profile_type', 'llm_provider', 'llm_model'}

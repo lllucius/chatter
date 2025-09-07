@@ -218,7 +218,7 @@ class TestCLICommands:
         mock_sdk_client_class.side_effect = [mock_temp_client, mock_final_client]
 
         with patch.dict(os.environ, {}, clear=True):  # Clear CHATTER_ACCESS_TOKEN
-            client = get_client()
+            get_client()
 
             # Verify that ChatterSDKClient was called twice
             assert mock_sdk_client_class.call_count == 2

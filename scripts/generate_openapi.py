@@ -10,7 +10,7 @@ from chatter.main import app
 
 def generate_openapi_spec() -> dict[str, Any]:
     """Generate OpenAPI specification from FastAPI app.
-    
+
     Returns:
         Dict containing the OpenAPI specification
     """
@@ -19,10 +19,10 @@ def generate_openapi_spec() -> dict[str, Any]:
 
 def convert_openapi_3_1_to_3_0(spec: dict[str, Any]) -> dict[str, Any]:
     """Convert OpenAPI 3.1 spec to 3.0 for better compatibility.
-    
+
     Args:
         spec: OpenAPI 3.1 specification
-        
+
     Returns:
         OpenAPI 3.0 compatible specification
     """
@@ -63,7 +63,7 @@ def convert_openapi_3_1_to_3_0(spec: dict[str, Any]) -> dict[str, Any]:
 
 def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
     """Export OpenAPI specification as JSON.
-    
+
     Args:
         spec: OpenAPI specification dictionary
         output_path: Path to write JSON file
@@ -76,9 +76,9 @@ def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
 
 def export_openapi_yaml(spec: dict[str, Any], output_path: Path) -> None:
     """Export OpenAPI specification as YAML.
-    
+
     Args:
-        spec: OpenAPI specification dictionary  
+        spec: OpenAPI specification dictionary
         output_path: Path to write YAML file
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)

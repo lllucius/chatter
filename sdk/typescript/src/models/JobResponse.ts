@@ -165,7 +165,7 @@ export function JobResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'retryCount': json['retry_count'],
         'maxRetries': json['max_retries'],
         'errorMessage': json['error_message'] == null ? undefined : json['error_message'],
-        'result': json['result'] == null ? undefined : FromJSON(json['result']),
+        'result': json['result'],
         'progress': json['progress'] == null ? undefined : json['progress'],
         'progressMessage': json['progress_message'] == null ? undefined : json['progress_message'],
     };
@@ -194,7 +194,7 @@ export function JobResponseToJSONTyped(value?: JobResponse | null, ignoreDiscrim
         'retry_count': value['retryCount'],
         'max_retries': value['maxRetries'],
         'error_message': value['errorMessage'],
-        'result': ToJSON(value['result']),
+        'result': value['result'],
         'progress': value['progress'],
         'progress_message': value['progressMessage'],
     };

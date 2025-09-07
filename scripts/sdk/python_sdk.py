@@ -13,7 +13,7 @@ class PythonSDKGenerator:
 
     def __init__(self, config: PythonSDKConfig) -> None:
         """Initialize Python SDK generator.
-        
+
         Args:
             config: Configuration for Python SDK generation
         """
@@ -22,7 +22,7 @@ class PythonSDKGenerator:
 
     def generate_with_cleanup(self) -> bool:
         """Generate Python SDK with cleanup of temporary files.
-        
+
         Returns:
             True if generation was successful, False otherwise
         """
@@ -33,7 +33,7 @@ class PythonSDKGenerator:
 
     def _generate(self) -> bool:
         """Generate Python SDK using OpenAPI Generator CLI.
-        
+
         Returns:
             True if generation was successful, False otherwise
         """
@@ -96,7 +96,7 @@ class PythonSDKGenerator:
 
     def validate(self) -> bool:
         """Validate that the generated Python SDK is complete and functional.
-        
+
         Returns:
             True if SDK validation passes, False otherwise
         """
@@ -150,7 +150,7 @@ class PythonSDKGenerator:
 
     def _find_openapi_spec(self) -> Path | None:
         """Find OpenAPI specification file.
-        
+
         Returns:
             Path to OpenAPI spec file, or None if not found
         """

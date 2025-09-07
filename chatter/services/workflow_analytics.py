@@ -166,7 +166,7 @@ class WorkflowAnalyticsService:
         total_branches = 0
         nodes_with_branches = 0
 
-        for node_id, neighbors in graph["outgoing"].items():
+        for _node_id, neighbors in graph["outgoing"].items():
             if neighbors:
                 total_branches += len(neighbors)
                 nodes_with_branches += 1

@@ -303,8 +303,7 @@ const AdministrationPage: React.FC = () => {
       switch (action) {
         case 'cancel':
           await chatterSDK.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId });
-          setSnackbarMessage('Job cancelled successfully!');
-          setSnackbarOpen(true);
+          console.log('Job cancelled successfully!');
           loadJobs();
           loadJobStats();
           break;

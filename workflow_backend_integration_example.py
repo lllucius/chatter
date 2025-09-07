@@ -3,7 +3,7 @@ Example demonstrating how the frontend workflow editor integrates with the backe
 
 This shows the typical flow of operations that would occur when a user:
 1. Creates a complex workflow in the editor
-2. Analyzes the workflow complexity  
+2. Analyzes the workflow complexity
 3. Saves it as a template
 4. Executes the workflow
 
@@ -234,21 +234,6 @@ async def demonstrate_workflow_backend_integration():
     # Step 4: Save as template
     print("\n4. Saving as reusable template...")
     # POST /api/workflows/templates
-    template_data = {
-        "name": "Customer Support RAG Template",
-        "description": "Template for customer support workflows with RAG and error handling",
-        "workflow_type": "rag",
-        "category": "customer_support",
-        "default_params": {
-            "retrieval_limit": 5,
-            "model_temperature": 0.7,
-            "max_tokens": 500
-        },
-        "required_tools": ["vector_search"],
-        "required_retrievers": ["knowledge_base"],
-        "tags": ["rag", "customer-support", "template"],
-        "is_public": False
-    }
     print("   ✓ Template saved with ID: template_12345")
     print("   ✓ Added to 'Customer Support' category")
     print("   ✓ Available for reuse by team members")
@@ -256,7 +241,7 @@ async def demonstrate_workflow_backend_integration():
     # Step 5: Execute workflow
     print("\n5. Executing workflow...")
     # POST /api/workflows/definitions/{id}/execute
-    execution_request = {
+    {
         "input_data": {
             "customer_query": "How do I reset my password?",
             "customer_id": "cust_789",

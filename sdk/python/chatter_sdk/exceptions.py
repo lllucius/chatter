@@ -44,7 +44,7 @@ class ApiTypeError(OpenApiException, TypeError):
         full_msg = msg
         if path_to_item:
             full_msg = f"{msg} at {render_path(path_to_item)}"
-        super(ApiTypeError, self).__init__(full_msg)
+        super().__init__(full_msg)
 
 
 class ApiValueError(OpenApiException, ValueError):
@@ -62,7 +62,7 @@ class ApiValueError(OpenApiException, ValueError):
         full_msg = msg
         if path_to_item:
             full_msg = f"{msg} at {render_path(path_to_item)}"
-        super(ApiValueError, self).__init__(full_msg)
+        super().__init__(full_msg)
 
 
 class ApiAttributeError(OpenApiException, AttributeError):
@@ -81,7 +81,7 @@ class ApiAttributeError(OpenApiException, AttributeError):
         full_msg = msg
         if path_to_item:
             full_msg = f"{msg} at {render_path(path_to_item)}"
-        super(ApiAttributeError, self).__init__(full_msg)
+        super().__init__(full_msg)
 
 
 class ApiKeyError(OpenApiException, KeyError):
@@ -98,7 +98,7 @@ class ApiKeyError(OpenApiException, KeyError):
         full_msg = msg
         if path_to_item:
             full_msg = f"{msg} at {render_path(path_to_item)}"
-        super(ApiKeyError, self).__init__(full_msg)
+        super().__init__(full_msg)
 
 
 class ApiException(OpenApiException):

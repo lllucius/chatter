@@ -10,7 +10,7 @@ import logging
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import Any
+from typing import Any, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -233,7 +233,7 @@ class WorkflowExecutionService:
 
         return capabilities.get(workflow_type, {})
 
-    async def execute_workflow(
+    async def execute_workflow_definition(
         self,
         workflow_definition: Any,  # WorkflowDefinition object
         input_data: dict[str, Any],

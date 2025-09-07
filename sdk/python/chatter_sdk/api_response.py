@@ -1,13 +1,13 @@
 """API response object."""
 
 from __future__ import annotations
-from typing import Generic, TypeVar
+from typing import TypeVar
 from collections.abc import Mapping
 from pydantic import Field, StrictInt, StrictBytes, BaseModel
 
 T = TypeVar("T")
 
-class ApiResponse(BaseModel, Generic[T]):
+class ApiResponse[T](BaseModel):
     """
     API response object
     """

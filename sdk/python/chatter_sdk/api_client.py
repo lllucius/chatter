@@ -195,7 +195,7 @@ class ApiClient:
             for k, v in path_params:
                 # specified safe chars, encode everything
                 resource_path = resource_path.replace(
-                    '{%s}' % k,
+                    f'{{{k}}}',
                     quote(str(v), safe=config.safe_chars_for_path_param)
                 )
 
@@ -361,7 +361,7 @@ class ApiClient:
             return tuple(
                 self.sanitize_for_serialization(sub_obj) for sub_obj in obj
             )
-        elif isinstance(obj, (datetime.datetime, datetime.date)):
+        elif isinstance(obj, datetime.datetime | datetime.date):
             return obj.isoformat()
         elif isinstance(obj, decimal.Decimal):
             return str(obj)
@@ -510,7 +510,7 @@ class ApiClient:
         for k, v in params.items() if isinstance(params, dict) else params:
             if isinstance(v, bool):
                 v = str(v).lower()
-            if isinstance(v, (int, float)):
+            if isinstance(v, int | float):
                 v = str(v)
             if isinstance(v, dict):
                 v = json.dumps(v)
@@ -567,7 +567,7 @@ class ApiClient:
                 or 'application/octet-stream'
             )
             params.append(
-                tuple([k, tuple([filename, filedata, mimetype])])
+                (k, (filename, filedata, mimetype))
             )
         return params
 

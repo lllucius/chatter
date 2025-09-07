@@ -40,9 +40,9 @@ class TestToolServerUpdate(unittest.TestCase):
                 base_url = '0',
                 transport_type = 'stdio',
                 oauth_config = chatter_sdk.models.o_auth_config_schema.OAuthConfigSchema(
-                    client_id = '', 
-                    client_secret = '', 
-                    token_url = '0', 
+                    client_id = '',
+                    client_secret = '',
+                    token_url = '0',
                     scope = '', ),
                 headers = {
                     'key' : ''

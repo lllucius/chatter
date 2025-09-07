@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -38,46 +39,46 @@ class TestProfileCloneRequest(unittest.TestCase):
                 name = '0',
                 description = '',
                 modifications = chatter_sdk.models.profile_update.ProfileUpdate(
-                    name = '0',
-                    description = '',
-                    profile_type = 'conversational',
-                    llm_provider = '',
-                    llm_model = '',
-                    temperature = 0.0,
-                    top_p = 0.0,
-                    top_k = 1.0,
-                    max_tokens = 1.0,
-                    presence_penalty = -2.0,
-                    frequency_penalty = -2.0,
-                    context_window = 1.0,
-                    system_prompt = '',
-                    memory_enabled = True,
-                    memory_strategy = '',
-                    enable_retrieval = True,
-                    retrieval_limit = 1.0,
-                    retrieval_score_threshold = 0.0,
-                    enable_tools = True,
+                    name = '0', 
+                    description = '', 
+                    profile_type = 'conversational', 
+                    llm_provider = '', 
+                    llm_model = '', 
+                    temperature = 0.0, 
+                    top_p = 0.0, 
+                    top_k = 1.0, 
+                    max_tokens = 1.0, 
+                    presence_penalty = -2.0, 
+                    frequency_penalty = -2.0, 
+                    context_window = 1.0, 
+                    system_prompt = '', 
+                    memory_enabled = True, 
+                    memory_strategy = '', 
+                    enable_retrieval = True, 
+                    retrieval_limit = 1.0, 
+                    retrieval_score_threshold = 0.0, 
+                    enable_tools = True, 
                     available_tools = [
                         ''
-                        ],
-                    tool_choice = '',
-                    content_filter_enabled = True,
-                    safety_level = '',
-                    response_format = '',
-                    stream_response = True,
-                    seed = 56,
+                        ], 
+                    tool_choice = '', 
+                    content_filter_enabled = True, 
+                    safety_level = '', 
+                    response_format = '', 
+                    stream_response = True, 
+                    seed = 56, 
                     stop_sequences = [
                         ''
-                        ],
+                        ], 
                     logit_bias = {
                         'key' : 1.337
-                        },
-                    embedding_provider = '',
-                    embedding_model = '',
-                    is_public = True,
+                        }, 
+                    embedding_provider = '', 
+                    embedding_model = '', 
+                    is_public = True, 
                     tags = [
                         ''
-                        ],
+                        ], 
                     extra_metadata = { }, )
             )
         else:

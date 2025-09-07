@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,29 +19,30 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
-from typing import Any, ClassVar
-from typing import Annotated
-from typing import Self
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ChatRequest(BaseModel):
     """
     Schema for chat request.
     """ # noqa: E501
     message: StrictStr = Field(description="User message")
-    conversation_id: StrictStr | None = None
-    profile_id: StrictStr | None = None
-    stream: StrictBool | None = Field(default=False, description="Enable streaming response")
-    workflow: StrictStr | None = Field(default='plain', description="Workflow type: plain, rag, tools, or full (rag + tools)")
-    provider: StrictStr | None = None
-    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
-    max_tokens: Annotated[int, Field(le=8192, strict=True, ge=1)] | None = None
-    context_limit: Annotated[int, Field(strict=True, ge=1)] | None = None
-    enable_retrieval: StrictBool | None = None
-    document_ids: list[StrictStr] | None = None
-    system_prompt_override: StrictStr | None = None
-    workflow_config: dict[str, Any] | None = None
-    workflow_type: StrictStr | None = None
-    __properties: ClassVar[list[str]] = ["message", "conversation_id", "profile_id", "stream", "workflow", "provider", "temperature", "max_tokens", "context_limit", "enable_retrieval", "document_ids", "system_prompt_override", "workflow_config", "workflow_type"]
+    conversation_id: Optional[StrictStr] = None
+    profile_id: Optional[StrictStr] = None
+    stream: Optional[StrictBool] = Field(default=False, description="Enable streaming response")
+    workflow: Optional[StrictStr] = Field(default='plain', description="Workflow type: plain, rag, tools, or full (rag + tools)")
+    provider: Optional[StrictStr] = None
+    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
+    max_tokens: Optional[Annotated[int, Field(le=8192, strict=True, ge=1)]] = None
+    context_limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    enable_retrieval: Optional[StrictBool] = None
+    document_ids: Optional[List[StrictStr]] = None
+    system_prompt_override: Optional[StrictStr] = None
+    workflow_config: Optional[Dict[str, Any]] = None
+    workflow_type: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["message", "conversation_id", "profile_id", "stream", "workflow", "provider", "temperature", "max_tokens", "context_limit", "enable_retrieval", "document_ids", "system_prompt_override", "workflow_config", "workflow_type"]
 
     @field_validator('workflow')
     def workflow_validate_enum(cls, value):
@@ -48,7 +50,7 @@ class ChatRequest(BaseModel):
         if value is None:
             return value
 
-        if value not in {'plain', 'rag', 'tools', 'full'}:
+        if value not in set(['plain', 'rag', 'tools', 'full']):
             raise ValueError("must be one of enum values ('plain', 'rag', 'tools', 'full')")
         return value
 
@@ -69,11 +71,11 @@ class ChatRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ChatRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -83,7 +85,8 @@ class ChatRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -148,7 +151,7 @@ class ChatRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ChatRequest from a dict"""
         if obj is None:
             return None

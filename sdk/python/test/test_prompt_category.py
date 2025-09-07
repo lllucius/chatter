@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,6 +15,7 @@
 
 import unittest
 
+from chatter_sdk.models.prompt_category import PromptCategory
 
 class TestPromptCategory(unittest.TestCase):
     """PromptCategory unit test stubs"""

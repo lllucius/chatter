@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,9 +19,10 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar
-from typing import Annotated
-from typing import Self
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class TestVariant(BaseModel):
     """
@@ -28,9 +30,9 @@ class TestVariant(BaseModel):
     """ # noqa: E501
     name: StrictStr = Field(description="Variant name")
     description: StrictStr = Field(description="Variant description")
-    configuration: dict[str, Any] = Field(description="Variant configuration")
-    weight: Annotated[float, Field(strict=True, ge=0.0)] | Annotated[int, Field(strict=True, ge=0)] | None = Field(default=1.0, description="Variant weight for allocation")
-    __properties: ClassVar[list[str]] = ["name", "description", "configuration", "weight"]
+    configuration: Dict[str, Any] = Field(description="Variant configuration")
+    weight: Optional[Union[Annotated[float, Field(strict=True, ge=0.0)], Annotated[int, Field(strict=True, ge=0)]]] = Field(default=1.0, description="Variant weight for allocation")
+    __properties: ClassVar[List[str]] = ["name", "description", "configuration", "weight"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,11 +51,11 @@ class TestVariant(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of TestVariant from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -63,7 +65,8 @@ class TestVariant(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -73,7 +76,7 @@ class TestVariant(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of TestVariant from a dict"""
         if obj is None:
             return None

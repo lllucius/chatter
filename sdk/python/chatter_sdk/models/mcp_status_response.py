@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -19,18 +20,19 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar
-from typing import Self
+from typing import Any, ClassVar, Dict, List, Optional
+from typing import Optional, Set
+from typing_extensions import Self
 
 class McpStatusResponse(BaseModel):
     """
     Schema for MCP status response.
     """ # noqa: E501
     status: StrictStr = Field(description="MCP service status")
-    servers: list[dict[str, Any]] = Field(description="Connected servers")
-    last_check: datetime | None = None
-    errors: list[StrictStr] | None = Field(default=None, description="Any error messages")
-    __properties: ClassVar[list[str]] = ["status", "servers", "last_check", "errors"]
+    servers: List[Dict[str, Any]] = Field(description="Connected servers")
+    last_check: Optional[datetime] = None
+    errors: Optional[List[StrictStr]] = Field(default=None, description="Any error messages")
+    __properties: ClassVar[List[str]] = ["status", "servers", "last_check", "errors"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,11 +51,11 @@ class McpStatusResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of McpStatusResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -63,7 +65,8 @@ class McpStatusResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -78,7 +81,7 @@ class McpStatusResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of McpStatusResponse from a dict"""
         if obj is None:
             return None

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,6 +15,7 @@
 
 import unittest
 
+from chatter_sdk.models.test_type import TestType
 
 class TestTestType(unittest.TestCase):
     """TestType unit test stubs"""

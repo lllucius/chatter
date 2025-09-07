@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -19,8 +20,9 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar
-from typing import Self
+from typing import Any, ClassVar, Dict, List, Optional
+from typing import Optional, Set
+from typing_extensions import Self
 
 class DocumentChunkResponse(BaseModel):
     """
@@ -30,18 +32,18 @@ class DocumentChunkResponse(BaseModel):
     document_id: StrictStr = Field(description="Document ID")
     content: StrictStr = Field(description="Chunk content")
     chunk_index: StrictInt = Field(description="Chunk index")
-    start_char: StrictInt | None = None
-    end_char: StrictInt | None = None
-    extra_metadata: dict[str, Any] | None = None
-    token_count: StrictInt | None = None
-    language: StrictStr | None = None
-    embedding_model: StrictStr | None = None
-    embedding_provider: StrictStr | None = None
-    embedding_created_at: datetime | None = None
+    start_char: Optional[StrictInt] = None
+    end_char: Optional[StrictInt] = None
+    extra_metadata: Optional[Dict[str, Any]] = None
+    token_count: Optional[StrictInt] = None
+    language: Optional[StrictStr] = None
+    embedding_model: Optional[StrictStr] = None
+    embedding_provider: Optional[StrictStr] = None
+    embedding_created_at: Optional[datetime] = None
     content_hash: StrictStr = Field(description="Content hash")
     created_at: datetime = Field(description="Creation time")
     updated_at: datetime = Field(description="Last update time")
-    __properties: ClassVar[list[str]] = ["id", "document_id", "content", "chunk_index", "start_char", "end_char", "extra_metadata", "token_count", "language", "embedding_model", "embedding_provider", "embedding_created_at", "content_hash", "created_at", "updated_at"]
+    __properties: ClassVar[List[str]] = ["id", "document_id", "content", "chunk_index", "start_char", "end_char", "extra_metadata", "token_count", "language", "embedding_model", "embedding_provider", "embedding_created_at", "content_hash", "created_at", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -60,11 +62,11 @@ class DocumentChunkResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of DocumentChunkResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -74,7 +76,8 @@ class DocumentChunkResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -124,7 +127,7 @@ class DocumentChunkResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of DocumentChunkResponse from a dict"""
         if obj is None:
             return None

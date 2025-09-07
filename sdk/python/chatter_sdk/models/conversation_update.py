@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,23 +19,24 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar
-from typing import Annotated
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from chatter_sdk.models.conversation_status import ConversationStatus
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ConversationUpdate(BaseModel):
     """
     Schema for updating a conversation.
     """ # noqa: E501
-    title: StrictStr | None = None
-    description: StrictStr | None = None
-    status: ConversationStatus | None = None
-    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
-    max_tokens: Annotated[int, Field(strict=True, ge=1)] | None = None
-    workflow_config: dict[str, Any] | None = None
-    extra_metadata: dict[str, Any] | None = None
-    __properties: ClassVar[list[str]] = ["title", "description", "status", "temperature", "max_tokens", "workflow_config", "extra_metadata"]
+    title: Optional[StrictStr] = None
+    description: Optional[StrictStr] = None
+    status: Optional[ConversationStatus] = None
+    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
+    max_tokens: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    workflow_config: Optional[Dict[str, Any]] = None
+    extra_metadata: Optional[Dict[str, Any]] = None
+    __properties: ClassVar[List[str]] = ["title", "description", "status", "temperature", "max_tokens", "workflow_config", "extra_metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,11 +55,11 @@ class ConversationUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ConversationUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -67,7 +69,8 @@ class ConversationUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -112,7 +115,7 @@ class ConversationUpdate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ConversationUpdate from a dict"""
         if obj is None:
             return None

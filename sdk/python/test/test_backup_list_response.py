@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -37,19 +38,19 @@ class TestBackupListResponse(unittest.TestCase):
             return BackupListResponse(
                 backups = [
                     chatter_sdk.models.backup_response.BackupResponse(
-                        id = '',
-                        name = '',
-                        description = '',
-                        backup_type = 'full',
-                        status = '',
-                        file_size = 56,
-                        compressed_size = 56,
-                        record_count = 56,
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        encrypted = True,
-                        compressed = True,
+                        id = '', 
+                        name = '', 
+                        description = '', 
+                        backup_type = 'full', 
+                        status = '', 
+                        file_size = 56, 
+                        compressed_size = 56, 
+                        record_count = 56, 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        encrypted = True, 
+                        compressed = True, 
                         metadata = { }, )
                     ],
                 total = 56
@@ -58,19 +59,19 @@ class TestBackupListResponse(unittest.TestCase):
             return BackupListResponse(
                 backups = [
                     chatter_sdk.models.backup_response.BackupResponse(
-                        id = '',
-                        name = '',
-                        description = '',
-                        backup_type = 'full',
-                        status = '',
-                        file_size = 56,
-                        compressed_size = 56,
-                        record_count = 56,
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        encrypted = True,
-                        compressed = True,
+                        id = '', 
+                        name = '', 
+                        description = '', 
+                        backup_type = 'full', 
+                        status = '', 
+                        file_size = 56, 
+                        compressed_size = 56, 
+                        record_count = 56, 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        expires_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        encrypted = True, 
+                        compressed = True, 
                         metadata = { }, )
                     ],
                 total = 56,

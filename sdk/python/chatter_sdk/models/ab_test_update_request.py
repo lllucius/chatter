@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,25 +19,26 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar
-from typing import Annotated
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from chatter_sdk.models.test_status import TestStatus
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ABTestUpdateRequest(BaseModel):
     """
     Request schema for updating an A/B test.
     """ # noqa: E501
-    name: StrictStr | None = None
-    description: StrictStr | None = None
-    status: TestStatus | None = None
-    duration_days: Annotated[int, Field(le=365, strict=True, ge=1)] | None = None
-    min_sample_size: Annotated[int, Field(strict=True, ge=10)] | None = None
-    confidence_level: Annotated[float, Field(le=0.99, strict=True, ge=0.5)] | Annotated[int, Field(le=0, strict=True, ge=1)] | None = None
-    traffic_percentage: Annotated[float, Field(le=100.0, strict=True, ge=0.1)] | Annotated[int, Field(le=100, strict=True, ge=1)] | None = None
-    tags: list[StrictStr] | None = None
-    metadata: dict[str, Any] | None = None
-    __properties: ClassVar[list[str]] = ["name", "description", "status", "duration_days", "min_sample_size", "confidence_level", "traffic_percentage", "tags", "metadata"]
+    name: Optional[StrictStr] = None
+    description: Optional[StrictStr] = None
+    status: Optional[TestStatus] = None
+    duration_days: Optional[Annotated[int, Field(le=365, strict=True, ge=1)]] = None
+    min_sample_size: Optional[Annotated[int, Field(strict=True, ge=10)]] = None
+    confidence_level: Optional[Union[Annotated[float, Field(le=0.99, strict=True, ge=0.5)], Annotated[int, Field(le=0, strict=True, ge=1)]]] = None
+    traffic_percentage: Optional[Union[Annotated[float, Field(le=100.0, strict=True, ge=0.1)], Annotated[int, Field(le=100, strict=True, ge=1)]]] = None
+    tags: Optional[List[StrictStr]] = None
+    metadata: Optional[Dict[str, Any]] = None
+    __properties: ClassVar[List[str]] = ["name", "description", "status", "duration_days", "min_sample_size", "confidence_level", "traffic_percentage", "tags", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -55,11 +57,11 @@ class ABTestUpdateRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ABTestUpdateRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -69,7 +71,8 @@ class ABTestUpdateRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -124,7 +127,7 @@ class ABTestUpdateRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ABTestUpdateRequest from a dict"""
         if obj is None:
             return None

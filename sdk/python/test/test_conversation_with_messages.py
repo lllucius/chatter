@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -65,19 +66,19 @@ class TestConversationWithMessages(unittest.TestCase):
                 last_message_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                 messages = [
                     chatter_sdk.models.message_response.MessageResponse(
-                        role = 'user',
-                        content = '0',
-                        id = '',
-                        conversation_id = '',
-                        sequence_number = 56,
-                        prompt_tokens = 56,
-                        completion_tokens = 56,
-                        total_tokens = 56,
-                        model_used = '',
-                        provider_used = '',
-                        response_time_ms = 56,
-                        cost = 1.337,
-                        finish_reason = '',
+                        role = 'user', 
+                        content = '0', 
+                        id = '', 
+                        conversation_id = '', 
+                        sequence_number = 56, 
+                        prompt_tokens = 56, 
+                        completion_tokens = 56, 
+                        total_tokens = 56, 
+                        model_used = '', 
+                        provider_used = '', 
+                        response_time_ms = 56, 
+                        cost = 1.337, 
+                        finish_reason = '', 
                         created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ]
             )

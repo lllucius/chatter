@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,25 +19,26 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar
-from typing import Annotated
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.tool_access_level import ToolAccessLevel
 from chatter_sdk.models.user_role import UserRole
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class RoleToolAccessCreate(BaseModel):
     """
     Schema for creating role-based tool access.
     """ # noqa: E501
     role: UserRole
-    tool_pattern: StrictStr | None = None
-    server_pattern: StrictStr | None = None
+    tool_pattern: Optional[StrictStr] = None
+    server_pattern: Optional[StrictStr] = None
     access_level: ToolAccessLevel
-    default_rate_limit_per_hour: Annotated[int, Field(strict=True, ge=0)] | None = None
-    default_rate_limit_per_day: Annotated[int, Field(strict=True, ge=0)] | None = None
-    allowed_hours: list[StrictInt] | None = None
-    allowed_days: list[StrictInt] | None = None
-    __properties: ClassVar[list[str]] = ["role", "tool_pattern", "server_pattern", "access_level", "default_rate_limit_per_hour", "default_rate_limit_per_day", "allowed_hours", "allowed_days"]
+    default_rate_limit_per_hour: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
+    default_rate_limit_per_day: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
+    allowed_hours: Optional[List[StrictInt]] = None
+    allowed_days: Optional[List[StrictInt]] = None
+    __properties: ClassVar[List[str]] = ["role", "tool_pattern", "server_pattern", "access_level", "default_rate_limit_per_hour", "default_rate_limit_per_day", "allowed_hours", "allowed_days"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -55,11 +57,11 @@ class RoleToolAccessCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of RoleToolAccessCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -69,7 +71,8 @@ class RoleToolAccessCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -109,7 +112,7 @@ class RoleToolAccessCreate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of RoleToolAccessCreate from a dict"""
         if obj is None:
             return None

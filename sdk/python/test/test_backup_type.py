@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,6 +15,7 @@
 
 import unittest
 
+from chatter_sdk.models.backup_type import BackupType
 
 class TestBackupType(unittest.TestCase):
     """BackupType unit test stubs"""

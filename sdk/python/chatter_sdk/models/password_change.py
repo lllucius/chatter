@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,9 +19,10 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar
-from typing import Annotated
-from typing import Self
+from typing import Any, ClassVar, Dict, List
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class PasswordChange(BaseModel):
     """
@@ -28,7 +30,7 @@ class PasswordChange(BaseModel):
     """ # noqa: E501
     current_password: StrictStr = Field(description="Current password")
     new_password: Annotated[str, Field(min_length=8, strict=True, max_length=128)] = Field(description="New password")
-    __properties: ClassVar[list[str]] = ["current_password", "new_password"]
+    __properties: ClassVar[List[str]] = ["current_password", "new_password"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -47,11 +49,11 @@ class PasswordChange(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of PasswordChange from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -61,7 +63,8 @@ class PasswordChange(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -71,7 +74,7 @@ class PasswordChange(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of PasswordChange from a dict"""
         if obj is None:
             return None

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,19 +19,20 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Dict, List, Union
 from chatter_sdk.models.document_search_result import DocumentSearchResult
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class DocumentSearchResponse(BaseModel):
     """
     Schema for document search response.
     """ # noqa: E501
-    results: list[DocumentSearchResult] = Field(description="Search results")
+    results: List[DocumentSearchResult] = Field(description="Search results")
     total_results: StrictInt = Field(description="Total number of matching results")
     query: StrictStr = Field(description="Original search query")
-    score_threshold: StrictFloat | StrictInt = Field(description="Applied score threshold")
-    __properties: ClassVar[list[str]] = ["results", "total_results", "query", "score_threshold"]
+    score_threshold: Union[StrictFloat, StrictInt] = Field(description="Applied score threshold")
+    __properties: ClassVar[List[str]] = ["results", "total_results", "query", "score_threshold"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,11 +51,11 @@ class DocumentSearchResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of DocumentSearchResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -63,7 +65,8 @@ class DocumentSearchResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -80,7 +83,7 @@ class DocumentSearchResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of DocumentSearchResponse from a dict"""
         if obj is None:
             return None

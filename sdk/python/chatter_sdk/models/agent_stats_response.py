@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,8 +19,9 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Any, ClassVar
-from typing import Self
+from typing import Any, ClassVar, Dict, List
+from typing import Optional, Set
+from typing_extensions import Self
 
 class AgentStatsResponse(BaseModel):
     """
@@ -27,9 +29,9 @@ class AgentStatsResponse(BaseModel):
     """ # noqa: E501
     total_agents: StrictInt = Field(description="Total number of agents")
     active_agents: StrictInt = Field(description="Number of active agents")
-    agent_types: dict[str, StrictInt] = Field(description="Agents by type")
+    agent_types: Dict[str, StrictInt] = Field(description="Agents by type")
     total_interactions: StrictInt = Field(description="Total interactions across all agents")
-    __properties: ClassVar[list[str]] = ["total_agents", "active_agents", "agent_types", "total_interactions"]
+    __properties: ClassVar[List[str]] = ["total_agents", "active_agents", "agent_types", "total_interactions"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -48,11 +50,11 @@ class AgentStatsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of AgentStatsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -62,7 +64,8 @@ class AgentStatsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -72,7 +75,7 @@ class AgentStatsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of AgentStatsResponse from a dict"""
         if obj is None:
             return None

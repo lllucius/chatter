@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -39,8 +40,8 @@ class TestHTTPValidationError(unittest.TestCase):
                     chatter_sdk.models.validation_error.ValidationError(
                         loc = [
                             null
-                            ],
-                        msg = '',
+                            ], 
+                        msg = '', 
                         type = '', )
                     ]
             )

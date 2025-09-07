@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,6 +15,7 @@
 
 import unittest
 
+from chatter_sdk.models.variant_allocation import VariantAllocation
 
 class TestVariantAllocation(unittest.TestCase):
     """VariantAllocation unit test stubs"""

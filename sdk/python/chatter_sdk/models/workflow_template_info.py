@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,8 +19,9 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar
-from typing import Self
+from typing import Any, ClassVar, Dict, List
+from typing import Optional, Set
+from typing_extensions import Self
 
 class WorkflowTemplateInfo(BaseModel):
     """
@@ -28,10 +30,10 @@ class WorkflowTemplateInfo(BaseModel):
     name: StrictStr = Field(description="Template name")
     workflow_type: StrictStr = Field(description="Workflow type")
     description: StrictStr = Field(description="Template description")
-    required_tools: list[StrictStr] = Field(description="Required tools")
-    required_retrievers: list[StrictStr] = Field(description="Required retrievers")
-    default_params: dict[str, Any] = Field(description="Default parameters")
-    __properties: ClassVar[list[str]] = ["name", "workflow_type", "description", "required_tools", "required_retrievers", "default_params"]
+    required_tools: List[StrictStr] = Field(description="Required tools")
+    required_retrievers: List[StrictStr] = Field(description="Required retrievers")
+    default_params: Dict[str, Any] = Field(description="Default parameters")
+    __properties: ClassVar[List[str]] = ["name", "workflow_type", "description", "required_tools", "required_retrievers", "default_params"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,11 +52,11 @@ class WorkflowTemplateInfo(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of WorkflowTemplateInfo from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -64,7 +66,8 @@ class WorkflowTemplateInfo(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -74,7 +77,7 @@ class WorkflowTemplateInfo(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of WorkflowTemplateInfo from a dict"""
         if obj is None:
             return None

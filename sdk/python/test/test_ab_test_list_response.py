@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -37,36 +38,36 @@ class TestABTestListResponse(unittest.TestCase):
             return ABTestListResponse(
                 tests = [
                     chatter_sdk.models.ab_test_response.ABTestResponse(
-                        id = '',
-                        name = '',
-                        description = '',
-                        test_type = 'prompt',
-                        status = 'draft',
-                        allocation_strategy = 'equal',
+                        id = '', 
+                        name = '', 
+                        description = '', 
+                        test_type = 'prompt', 
+                        status = 'draft', 
+                        allocation_strategy = 'equal', 
                         variants = [
                             chatter_sdk.models.test_variant.TestVariant(
-                                name = '',
-                                description = '',
-                                configuration = { },
+                                name = '', 
+                                description = '', 
+                                configuration = { }, 
                                 weight = 0.0, )
-                            ],
+                            ], 
                         metrics = [
                             'response_time'
-                            ],
-                        duration_days = 56,
-                        min_sample_size = 56,
-                        confidence_level = 1.337,
-                        target_audience = { },
-                        traffic_percentage = 1.337,
-                        start_date = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        end_date = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        participant_count = 56,
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        created_by = '',
+                            ], 
+                        duration_days = 56, 
+                        min_sample_size = 56, 
+                        confidence_level = 1.337, 
+                        target_audience = { }, 
+                        traffic_percentage = 1.337, 
+                        start_date = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        end_date = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        participant_count = 56, 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        created_by = '', 
                         tags = [
                             ''
-                            ],
+                            ], 
                         metadata = { }, )
                     ],
                 total = 56
@@ -75,36 +76,36 @@ class TestABTestListResponse(unittest.TestCase):
             return ABTestListResponse(
                 tests = [
                     chatter_sdk.models.ab_test_response.ABTestResponse(
-                        id = '',
-                        name = '',
-                        description = '',
-                        test_type = 'prompt',
-                        status = 'draft',
-                        allocation_strategy = 'equal',
+                        id = '', 
+                        name = '', 
+                        description = '', 
+                        test_type = 'prompt', 
+                        status = 'draft', 
+                        allocation_strategy = 'equal', 
                         variants = [
                             chatter_sdk.models.test_variant.TestVariant(
-                                name = '',
-                                description = '',
-                                configuration = { },
+                                name = '', 
+                                description = '', 
+                                configuration = { }, 
                                 weight = 0.0, )
-                            ],
+                            ], 
                         metrics = [
                             'response_time'
-                            ],
-                        duration_days = 56,
-                        min_sample_size = 56,
-                        confidence_level = 1.337,
-                        target_audience = { },
-                        traffic_percentage = 1.337,
-                        start_date = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        end_date = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        participant_count = 56,
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        created_by = '',
+                            ], 
+                        duration_days = 56, 
+                        min_sample_size = 56, 
+                        confidence_level = 1.337, 
+                        target_audience = { }, 
+                        traffic_percentage = 1.337, 
+                        start_date = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        end_date = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        participant_count = 56, 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        created_by = '', 
                         tags = [
                             ''
-                            ],
+                            ], 
                         metadata = { }, )
                     ],
                 total = 56,

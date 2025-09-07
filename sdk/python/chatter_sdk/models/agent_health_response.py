@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -19,9 +20,10 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from chatter_sdk.models.agent_status import AgentStatus
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class AgentHealthResponse(BaseModel):
     """
@@ -30,10 +32,10 @@ class AgentHealthResponse(BaseModel):
     agent_id: StrictStr = Field(description="Agent ID")
     status: AgentStatus
     health: StrictStr = Field(description="Health status (healthy/unhealthy/unknown)")
-    last_interaction: datetime | None = None
-    response_time_avg: StrictFloat | StrictInt | None = None
-    error_rate: StrictFloat | StrictInt | None = None
-    __properties: ClassVar[list[str]] = ["agent_id", "status", "health", "last_interaction", "response_time_avg", "error_rate"]
+    last_interaction: Optional[datetime] = None
+    response_time_avg: Optional[Union[StrictFloat, StrictInt]] = None
+    error_rate: Optional[Union[StrictFloat, StrictInt]] = None
+    __properties: ClassVar[List[str]] = ["agent_id", "status", "health", "last_interaction", "response_time_avg", "error_rate"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,11 +54,11 @@ class AgentHealthResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of AgentHealthResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -66,7 +68,8 @@ class AgentHealthResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -91,7 +94,7 @@ class AgentHealthResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of AgentHealthResponse from a dict"""
         if obj is None:
             return None

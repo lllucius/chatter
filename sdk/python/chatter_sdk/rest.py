@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -16,6 +17,7 @@ import io
 import json
 import re
 import ssl
+from typing import Optional, Union
 
 import aiohttp
 import aiohttp_retry
@@ -73,8 +75,8 @@ class RESTClientObject:
 
         self.retries = configuration.retries
 
-        self.pool_manager: aiohttp.ClientSession | None = None
-        self.retry_client: aiohttp_retry.RetryClient | None = None
+        self.pool_manager: Optional[aiohttp.ClientSession] = None
+        self.retry_client: Optional[aiohttp_retry.RetryClient] = None
 
     async def close(self) -> None:
         if self.pool_manager:
@@ -184,7 +186,7 @@ class RESTClientObject:
                          declared content type."""
                 raise ApiException(status=0, reason=msg)
 
-        pool_manager: aiohttp.ClientSession | aiohttp_retry.RetryClient
+        pool_manager: Union[aiohttp.ClientSession, aiohttp_retry.RetryClient]
 
         # https pool manager
         if self.pool_manager is None:

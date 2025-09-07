@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -38,10 +39,10 @@ class TestABTestMetricsResponse(unittest.TestCase):
                 test_id = '',
                 metrics = [
                     chatter_sdk.models.test_metric.TestMetric(
-                        metric_type = 'response_time',
-                        variant_name = '',
-                        value = 1.337,
-                        sample_size = 56,
+                        metric_type = 'response_time', 
+                        variant_name = '', 
+                        value = 1.337, 
+                        sample_size = 56, 
                         confidence_interval = [
                             1.337
                             ], )
@@ -54,10 +55,10 @@ class TestABTestMetricsResponse(unittest.TestCase):
                 test_id = '',
                 metrics = [
                     chatter_sdk.models.test_metric.TestMetric(
-                        metric_type = 'response_time',
-                        variant_name = '',
-                        value = 1.337,
-                        sample_size = 56,
+                        metric_type = 'response_time', 
+                        variant_name = '', 
+                        value = 1.337, 
+                        sample_size = 56, 
                         confidence_interval = [
                             1.337
                             ], )

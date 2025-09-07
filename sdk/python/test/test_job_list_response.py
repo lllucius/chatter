@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -37,20 +38,20 @@ class TestJobListResponse(unittest.TestCase):
             return JobListResponse(
                 jobs = [
                     chatter_sdk.models.job_response.JobResponse(
-                        id = '',
-                        name = '',
-                        function_name = '',
-                        priority = 'low',
-                        status = 'pending',
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        started_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        scheduled_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        retry_count = 56,
-                        max_retries = 56,
-                        error_message = '',
-                        result = null,
-                        progress = 0.0,
+                        id = '', 
+                        name = '', 
+                        function_name = '', 
+                        priority = 'low', 
+                        status = 'pending', 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        started_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        scheduled_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        retry_count = 56, 
+                        max_retries = 56, 
+                        error_message = '', 
+                        result = null, 
+                        progress = 0.0, 
                         progress_message = '', )
                     ],
                 total = 56,
@@ -62,20 +63,20 @@ class TestJobListResponse(unittest.TestCase):
             return JobListResponse(
                 jobs = [
                     chatter_sdk.models.job_response.JobResponse(
-                        id = '',
-                        name = '',
-                        function_name = '',
-                        priority = 'low',
-                        status = 'pending',
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        started_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        scheduled_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        retry_count = 56,
-                        max_retries = 56,
-                        error_message = '',
-                        result = null,
-                        progress = 0.0,
+                        id = '', 
+                        name = '', 
+                        function_name = '', 
+                        priority = 'low', 
+                        status = 'pending', 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        started_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        completed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        scheduled_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        retry_count = 56, 
+                        max_retries = 56, 
+                        error_message = '', 
+                        result = null, 
+                        progress = 0.0, 
                         progress_message = '', )
                     ],
                 total = 56,

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -41,9 +42,9 @@ class TestToolServerResponse(unittest.TestCase):
                 base_url = '0',
                 transport_type = 'http',
                 oauth_config = chatter_sdk.models.o_auth_config_schema.OAuthConfigSchema(
-                    client_id = '',
-                    client_secret = '',
-                    token_url = '0',
+                    client_id = '', 
+                    client_secret = '', 
+                    token_url = '0', 
                     scope = '', ),
                 headers = {
                     'key' : ''
@@ -64,21 +65,21 @@ class TestToolServerResponse(unittest.TestCase):
                 created_by = '',
                 tools = [
                     chatter_sdk.models.server_tool_response.ServerToolResponse(
-                        name = '0',
-                        display_name = '0',
-                        description = '',
-                        args_schema = { },
-                        bypass_when_unavailable = True,
-                        id = '',
-                        server_id = '',
-                        status = 'enabled',
-                        is_available = True,
-                        total_calls = 56,
-                        total_errors = 56,
-                        last_called = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        last_error = '',
-                        avg_response_time_ms = 1.337,
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        name = '0', 
+                        display_name = '0', 
+                        description = '', 
+                        args_schema = { }, 
+                        bypass_when_unavailable = True, 
+                        id = '', 
+                        server_id = '', 
+                        status = 'enabled', 
+                        is_available = True, 
+                        total_calls = 56, 
+                        total_errors = 56, 
+                        last_called = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        last_error = '', 
+                        avg_response_time_ms = 1.337, 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ]
             )

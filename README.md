@@ -88,15 +88,14 @@ The API will be available at `http://localhost:8000` with interactive documentat
 
 To run the React frontend in development mode:
 
-1. Build the TypeScript SDK:
+1. Generate the TypeScript SDK:
 ```bash
-cd sdk-ts/typescript
-npm install
+python scripts/generate_sdks.py --typescript
 ```
 
 2. Install and run the frontend:
 ```bash
-cd ../../frontend
+cd frontend
 npm install
 npm start
 ```
@@ -176,6 +175,41 @@ DEBUG_HTTP_REQUESTS=false
 - `GET /healthz` - Health check
 - `GET /readyz` - Readiness check
 - `GET /metrics` - Prometheus metrics
+
+## SDK Generation
+
+Chatter provides automatically generated SDKs for both Python and TypeScript to make it easy to integrate with the API.
+
+### Regenerating SDKs
+
+To regenerate both SDKs from the latest OpenAPI specification:
+
+```bash
+python scripts/generate_sdks.py
+```
+
+### Available Options
+
+```bash
+# Generate both SDKs (default)
+python scripts/generate_sdks.py
+
+# Generate Python SDK only
+python scripts/generate_sdks.py --python
+
+# Generate TypeScript SDK only  
+python scripts/generate_sdks.py --typescript
+
+# Verbose output
+python scripts/generate_sdks.py --verbose
+```
+
+### SDK Locations
+
+- **Python SDK**: `sdk/python/` (package: `chatter_sdk`)
+- **TypeScript SDK**: `frontend/src/sdk/` (package: `chatter-sdk`)
+
+For detailed information, see [SDK Generation Documentation](docs/sdk-generation.md).
 
 ## Architecture
 

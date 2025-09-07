@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,6 +15,7 @@
 
 import unittest
 
+from chatter_sdk.models.data_format import DataFormat
 
 class TestDataFormat(unittest.TestCase):
     """DataFormat unit test stubs"""

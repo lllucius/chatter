@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -23,6 +24,7 @@ import re
 import tempfile
 
 from urllib.parse import quote
+from typing import Tuple, Optional, List, Dict, Union
 from pydantic import SecretStr
 
 from chatter_sdk.configuration import Configuration
@@ -31,10 +33,15 @@ import chatter_sdk.models
 from chatter_sdk import rest
 from chatter_sdk.exceptions import (
     ApiValueError,
-    ApiException
+    ApiException,
+    BadRequestException,
+    UnauthorizedException,
+    ForbiddenException,
+    NotFoundException,
+    ServiceException
 )
 
-RequestSerialized = tuple[str, str, dict[str, str], str | None, list[str]]
+RequestSerialized = Tuple[str, str, Dict[str, str], Optional[str], List[str]]
 
 class ApiClient:
     """Generic API client for OpenAPI client library builds.
@@ -195,7 +202,7 @@ class ApiClient:
             for k, v in path_params:
                 # specified safe chars, encode everything
                 resource_path = resource_path.replace(
-                    f'{{{k}}}',
+                    '{%s}' % k,
                     quote(str(v), safe=config.safe_chars_for_path_param)
                 )
 
@@ -282,7 +289,7 @@ class ApiClient:
     def response_deserialize(
         self,
         response_data: rest.RESTResponse,
-        response_types_map: dict[str, ApiResponseT] | None=None
+        response_types_map: Optional[Dict[str, ApiResponseT]]=None
     ) -> ApiResponse[ApiResponseT]:
         """Deserializes response into an object.
         :param response_data: RESTResponse object to be deserialized.
@@ -361,7 +368,7 @@ class ApiClient:
             return tuple(
                 self.sanitize_for_serialization(sub_obj) for sub_obj in obj
             )
-        elif isinstance(obj, datetime.datetime | datetime.date):
+        elif isinstance(obj, (datetime.datetime, datetime.date)):
             return obj.isoformat()
         elif isinstance(obj, decimal.Decimal):
             return str(obj)
@@ -374,7 +381,7 @@ class ApiClient:
             # and attributes which value is not None.
             # Convert attribute name to json key in
             # model definition for request.
-            if hasattr(obj, 'to_dict') and callable(obj.to_dict):
+            if hasattr(obj, 'to_dict') and callable(getattr(obj, 'to_dict')):
                 obj_dict = obj.to_dict()
             else:
                 obj_dict = obj.__dict__
@@ -388,7 +395,7 @@ class ApiClient:
             for key, val in obj_dict.items()
         }
 
-    def deserialize(self, response_text: str, response_type: str, content_type: str | None):
+    def deserialize(self, response_text: str, response_type: str, content_type: Optional[str]):
         """Deserializes response into an object.
 
         :param response: RESTResponse object to be deserialized.
@@ -415,7 +422,7 @@ class ApiClient:
         else:
             raise ApiException(
                 status=0,
-                reason=f"Unsupported content type: {content_type}"
+                reason="Unsupported content type: {0}".format(content_type)
             )
 
         return self.__deserialize(data, response_type)
@@ -474,7 +481,7 @@ class ApiClient:
         :param dict collection_formats: Parameter collection formats
         :return: Parameters as list of tuples, collections formatted
         """
-        new_params: list[tuple[str, str]] = []
+        new_params: List[Tuple[str, str]] = []
         if collection_formats is None:
             collection_formats = {}
         for k, v in params.items() if isinstance(params, dict) else params:
@@ -504,13 +511,13 @@ class ApiClient:
         :param dict collection_formats: Parameter collection formats
         :return: URL query string (e.g. a=Hello%20World&b=123)
         """
-        new_params: list[tuple[str, str]] = []
+        new_params: List[Tuple[str, str]] = []
         if collection_formats is None:
             collection_formats = {}
         for k, v in params.items() if isinstance(params, dict) else params:
             if isinstance(v, bool):
                 v = str(v).lower()
-            if isinstance(v, int | float):
+            if isinstance(v, (int, float)):
                 v = str(v)
             if isinstance(v, dict):
                 v = json.dumps(v)
@@ -538,7 +545,7 @@ class ApiClient:
 
     def files_parameters(
         self,
-        files: dict[str, str | bytes | list[str] | list[bytes] | tuple[str, bytes]],
+        files: Dict[str, Union[str, bytes, List[str], List[bytes], Tuple[str, bytes]]],
     ):
         """Builds form parameters.
 
@@ -567,11 +574,11 @@ class ApiClient:
                 or 'application/octet-stream'
             )
             params.append(
-                (k, (filename, filedata, mimetype))
+                tuple([k, tuple([filename, filedata, mimetype])])
             )
         return params
 
-    def select_header_accept(self, accepts: list[str]) -> str | None:
+    def select_header_accept(self, accepts: List[str]) -> Optional[str]:
         """Returns `Accept` based on an array of accepts provided.
 
         :param accepts: List of headers.
@@ -745,7 +752,7 @@ class ApiClient:
         except ValueError:
             raise rest.ApiException(
                 status=0,
-                reason=f"Failed to parse `{string}` as date object"
+                reason="Failed to parse `{0}` as date object".format(string)
             )
 
     def __deserialize_datetime(self, string):
@@ -764,8 +771,8 @@ class ApiClient:
             raise rest.ApiException(
                 status=0,
                 reason=(
-                    f"Failed to parse `{string}` as datetime object"
-
+                    "Failed to parse `{0}` as datetime object"
+                    .format(string)
                 )
             )
 
@@ -782,8 +789,8 @@ class ApiClient:
             raise rest.ApiException(
                 status=0,
                 reason=(
-                    f"Failed to parse `{data}` as `{klass}`"
-
+                    "Failed to parse `{0}` as `{1}`"
+                    .format(data, klass)
                 )
             )
 

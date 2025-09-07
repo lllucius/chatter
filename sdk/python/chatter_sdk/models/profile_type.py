@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +16,7 @@
 from __future__ import annotations
 import json
 from enum import Enum
-from typing import Self
+from typing_extensions import Self
 
 
 class ProfileType(str, Enum):

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,6 +15,7 @@
 
 import unittest
 
+from chatter_sdk.models.tool_status import ToolStatus
 
 class TestToolStatus(unittest.TestCase):
     """ToolStatus unit test stubs"""

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -19,41 +20,42 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from chatter_sdk.models.conversation_status import ConversationStatus
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ConversationResponse(BaseModel):
     """
     Schema for conversation response.
     """ # noqa: E501
     title: StrictStr = Field(description="Conversation title")
-    description: StrictStr | None = None
+    description: Optional[StrictStr] = None
     id: StrictStr = Field(description="Conversation ID")
     user_id: StrictStr = Field(description="User ID")
-    profile_id: StrictStr | None = None
+    profile_id: Optional[StrictStr] = None
     status: ConversationStatus
-    llm_provider: StrictStr | None = None
-    llm_model: StrictStr | None = None
-    temperature: StrictFloat | StrictInt | None = None
-    max_tokens: StrictInt | None = None
+    llm_provider: Optional[StrictStr] = None
+    llm_model: Optional[StrictStr] = None
+    temperature: Optional[Union[StrictFloat, StrictInt]] = None
+    max_tokens: Optional[StrictInt] = None
     enable_retrieval: StrictBool = Field(description="Retrieval enabled")
     message_count: StrictInt = Field(description="Number of messages")
     total_tokens: StrictInt = Field(description="Total tokens used")
-    total_cost: StrictFloat | StrictInt = Field(description="Total cost")
-    system_prompt: StrictStr | None = None
+    total_cost: Union[StrictFloat, StrictInt] = Field(description="Total cost")
+    system_prompt: Optional[StrictStr] = None
     context_window: StrictInt = Field(description="Context window size")
     memory_enabled: StrictBool = Field(description="Memory enabled")
-    memory_strategy: StrictStr | None = None
+    memory_strategy: Optional[StrictStr] = None
     retrieval_limit: StrictInt = Field(description="Retrieval limit")
-    retrieval_score_threshold: StrictFloat | StrictInt = Field(description="Retrieval score threshold")
-    tags: list[StrictStr] | None = None
-    extra_metadata: dict[str, Any] | None = None
-    workflow_config: dict[str, Any] | None = None
+    retrieval_score_threshold: Union[StrictFloat, StrictInt] = Field(description="Retrieval score threshold")
+    tags: Optional[List[StrictStr]] = None
+    extra_metadata: Optional[Dict[str, Any]] = None
+    workflow_config: Optional[Dict[str, Any]] = None
     created_at: datetime = Field(description="Creation timestamp")
     updated_at: datetime = Field(description="Last update timestamp")
-    last_message_at: datetime | None = None
-    __properties: ClassVar[list[str]] = ["title", "description", "id", "user_id", "profile_id", "status", "llm_provider", "llm_model", "temperature", "max_tokens", "enable_retrieval", "message_count", "total_tokens", "total_cost", "system_prompt", "context_window", "memory_enabled", "memory_strategy", "retrieval_limit", "retrieval_score_threshold", "tags", "extra_metadata", "workflow_config", "created_at", "updated_at", "last_message_at"]
+    last_message_at: Optional[datetime] = None
+    __properties: ClassVar[List[str]] = ["title", "description", "id", "user_id", "profile_id", "status", "llm_provider", "llm_model", "temperature", "max_tokens", "enable_retrieval", "message_count", "total_tokens", "total_cost", "system_prompt", "context_window", "memory_enabled", "memory_strategy", "retrieval_limit", "retrieval_score_threshold", "tags", "extra_metadata", "workflow_config", "created_at", "updated_at", "last_message_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -72,11 +74,11 @@ class ConversationResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ConversationResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -86,7 +88,8 @@ class ConversationResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -156,7 +159,7 @@ class ConversationResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ConversationResponse from a dict"""
         if obj is None:
             return None

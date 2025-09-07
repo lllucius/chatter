@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -19,10 +20,11 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar
-from typing import Annotated
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from chatter_sdk.models.tool_status import ToolStatus
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ServerToolResponse(BaseModel):
     """
@@ -30,21 +32,21 @@ class ServerToolResponse(BaseModel):
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Tool name")
     display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Display name")
-    description: StrictStr | None = None
-    args_schema: dict[str, Any] | None = None
-    bypass_when_unavailable: StrictBool | None = Field(default=False, description="Bypass when tool is unavailable")
+    description: Optional[StrictStr] = None
+    args_schema: Optional[Dict[str, Any]] = None
+    bypass_when_unavailable: Optional[StrictBool] = Field(default=False, description="Bypass when tool is unavailable")
     id: StrictStr = Field(description="Tool ID")
     server_id: StrictStr = Field(description="Server ID")
     status: ToolStatus
     is_available: StrictBool = Field(description="Tool availability")
     total_calls: StrictInt = Field(description="Total number of calls")
     total_errors: StrictInt = Field(description="Total number of errors")
-    last_called: datetime | None = None
-    last_error: StrictStr | None = None
-    avg_response_time_ms: StrictFloat | StrictInt | None = None
+    last_called: Optional[datetime] = None
+    last_error: Optional[StrictStr] = None
+    avg_response_time_ms: Optional[Union[StrictFloat, StrictInt]] = None
     created_at: datetime = Field(description="Creation timestamp")
     updated_at: datetime = Field(description="Last update timestamp")
-    __properties: ClassVar[list[str]] = ["name", "display_name", "description", "args_schema", "bypass_when_unavailable", "id", "server_id", "status", "is_available", "total_calls", "total_errors", "last_called", "last_error", "avg_response_time_ms", "created_at", "updated_at"]
+    __properties: ClassVar[List[str]] = ["name", "display_name", "description", "args_schema", "bypass_when_unavailable", "id", "server_id", "status", "is_available", "total_calls", "total_errors", "last_called", "last_error", "avg_response_time_ms", "created_at", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -63,11 +65,11 @@ class ServerToolResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ServerToolResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -77,7 +79,8 @@ class ServerToolResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -112,7 +115,7 @@ class ServerToolResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ServerToolResponse from a dict"""
         if obj is None:
             return None

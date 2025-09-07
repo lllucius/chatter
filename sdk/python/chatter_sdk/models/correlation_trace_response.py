@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,8 +19,9 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar
-from typing import Self
+from typing import Any, ClassVar, Dict, List
+from typing import Optional, Set
+from typing_extensions import Self
 
 class CorrelationTraceResponse(BaseModel):
     """
@@ -27,8 +29,8 @@ class CorrelationTraceResponse(BaseModel):
     """ # noqa: E501
     correlation_id: StrictStr = Field(description="Correlation ID")
     trace_length: StrictInt = Field(description="Number of requests in trace")
-    requests: list[dict[str, Any]] = Field(description="List of requests in trace")
-    __properties: ClassVar[list[str]] = ["correlation_id", "trace_length", "requests"]
+    requests: List[Dict[str, Any]] = Field(description="List of requests in trace")
+    __properties: ClassVar[List[str]] = ["correlation_id", "trace_length", "requests"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -47,11 +49,11 @@ class CorrelationTraceResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of CorrelationTraceResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -61,7 +63,8 @@ class CorrelationTraceResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -71,7 +74,7 @@ class CorrelationTraceResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of CorrelationTraceResponse from a dict"""
         if obj is None:
             return None

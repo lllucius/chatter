@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,8 +19,9 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar
-from typing import Self
+from typing import Any, ClassVar, Dict, List
+from typing import Optional, Set
+from typing_extensions import Self
 
 class PluginStatsResponse(BaseModel):
     """
@@ -28,9 +30,9 @@ class PluginStatsResponse(BaseModel):
     total_plugins: StrictInt = Field(description="Total number of plugins")
     active_plugins: StrictInt = Field(description="Number of active plugins")
     inactive_plugins: StrictInt = Field(description="Number of inactive plugins")
-    plugin_types: dict[str, StrictInt] = Field(description="Plugin count by type")
+    plugin_types: Dict[str, StrictInt] = Field(description="Plugin count by type")
     plugins_directory: StrictStr = Field(description="Plugin installation directory")
-    __properties: ClassVar[list[str]] = ["total_plugins", "active_plugins", "inactive_plugins", "plugin_types", "plugins_directory"]
+    __properties: ClassVar[List[str]] = ["total_plugins", "active_plugins", "inactive_plugins", "plugin_types", "plugins_directory"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,11 +51,11 @@ class PluginStatsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of PluginStatsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -63,7 +65,8 @@ class PluginStatsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -73,7 +76,7 @@ class PluginStatsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of PluginStatsResponse from a dict"""
         if obj is None:
             return None

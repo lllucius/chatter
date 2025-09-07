@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -19,8 +20,9 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar
-from typing import Self
+from typing import Any, ClassVar, Dict, List, Union
+from typing import Optional, Set
+from typing_extensions import Self
 
 class AgentInteractResponse(BaseModel):
     """
@@ -29,11 +31,11 @@ class AgentInteractResponse(BaseModel):
     agent_id: StrictStr = Field(description="Agent ID")
     response: StrictStr = Field(description="Agent response")
     conversation_id: StrictStr = Field(description="Conversation ID")
-    tools_used: list[StrictStr] = Field(description="Tools used in response")
-    confidence_score: StrictFloat | StrictInt = Field(description="Confidence score")
-    response_time: StrictFloat | StrictInt = Field(description="Response time in seconds")
+    tools_used: List[StrictStr] = Field(description="Tools used in response")
+    confidence_score: Union[StrictFloat, StrictInt] = Field(description="Confidence score")
+    response_time: Union[StrictFloat, StrictInt] = Field(description="Response time in seconds")
     timestamp: datetime = Field(description="Response timestamp")
-    __properties: ClassVar[list[str]] = ["agent_id", "response", "conversation_id", "tools_used", "confidence_score", "response_time", "timestamp"]
+    __properties: ClassVar[List[str]] = ["agent_id", "response", "conversation_id", "tools_used", "confidence_score", "response_time", "timestamp"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,11 +54,11 @@ class AgentInteractResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of AgentInteractResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -66,7 +68,8 @@ class AgentInteractResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -76,7 +79,7 @@ class AgentInteractResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of AgentInteractResponse from a dict"""
         if obj is None:
             return None

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -37,20 +38,20 @@ class TestDocumentChunksResponse(unittest.TestCase):
             return DocumentChunksResponse(
                 chunks = [
                     chatter_sdk.models.document_chunk_response.DocumentChunkResponse(
-                        id = '',
-                        document_id = '',
-                        content = '',
-                        chunk_index = 56,
-                        start_char = 56,
-                        end_char = 56,
-                        extra_metadata = { },
-                        token_count = 56,
-                        language = '',
-                        embedding_model = '',
-                        embedding_provider = '',
-                        embedding_created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        content_hash = '',
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        id = '', 
+                        document_id = '', 
+                        content = '', 
+                        chunk_index = 56, 
+                        start_char = 56, 
+                        end_char = 56, 
+                        extra_metadata = { }, 
+                        token_count = 56, 
+                        language = '', 
+                        embedding_model = '', 
+                        embedding_provider = '', 
+                        embedding_created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        content_hash = '', 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 total_count = 56,
@@ -61,20 +62,20 @@ class TestDocumentChunksResponse(unittest.TestCase):
             return DocumentChunksResponse(
                 chunks = [
                     chatter_sdk.models.document_chunk_response.DocumentChunkResponse(
-                        id = '',
-                        document_id = '',
-                        content = '',
-                        chunk_index = 56,
-                        start_char = 56,
-                        end_char = 56,
-                        extra_metadata = { },
-                        token_count = 56,
-                        language = '',
-                        embedding_model = '',
-                        embedding_provider = '',
-                        embedding_created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
-                        content_hash = '',
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        id = '', 
+                        document_id = '', 
+                        content = '', 
+                        chunk_index = 56, 
+                        start_char = 56, 
+                        end_char = 56, 
+                        extra_metadata = { }, 
+                        token_count = 56, 
+                        language = '', 
+                        embedding_model = '', 
+                        embedding_provider = '', 
+                        embedding_created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        content_hash = '', 
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
                         updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 total_count = 56,

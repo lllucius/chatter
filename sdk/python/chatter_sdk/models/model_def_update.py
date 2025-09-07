@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,27 +19,28 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
-from typing import Any, ClassVar
-from typing import Annotated
-from typing import Self
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ModelDefUpdate(BaseModel):
     """
     Schema for updating a model definition.
     """ # noqa: E501
-    display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] | None = None
-    description: Annotated[str, Field(strict=True, max_length=1000)] | None = None
-    model_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] | None = None
-    max_tokens: Annotated[int, Field(le=1000000, strict=True)] | None = None
-    context_length: Annotated[int, Field(le=10000000, strict=True)] | None = None
-    dimensions: Annotated[int, Field(le=10000, strict=True)] | None = None
-    chunk_size: Annotated[int, Field(le=100000, strict=True)] | None = None
-    supports_batch: StrictBool | None = None
-    max_batch_size: Annotated[int, Field(le=10000, strict=True)] | None = None
-    default_config: dict[str, Any] | None = None
-    is_active: StrictBool | None = None
-    is_default: StrictBool | None = None
-    __properties: ClassVar[list[str]] = ["display_name", "description", "model_name", "max_tokens", "context_length", "dimensions", "chunk_size", "supports_batch", "max_batch_size", "default_config", "is_active", "is_default"]
+    display_name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=200)]] = None
+    description: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
+    model_name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=200)]] = None
+    max_tokens: Optional[Annotated[int, Field(le=1000000, strict=True)]] = None
+    context_length: Optional[Annotated[int, Field(le=10000000, strict=True)]] = None
+    dimensions: Optional[Annotated[int, Field(le=10000, strict=True)]] = None
+    chunk_size: Optional[Annotated[int, Field(le=100000, strict=True)]] = None
+    supports_batch: Optional[StrictBool] = None
+    max_batch_size: Optional[Annotated[int, Field(le=10000, strict=True)]] = None
+    default_config: Optional[Dict[str, Any]] = None
+    is_active: Optional[StrictBool] = None
+    is_default: Optional[StrictBool] = None
+    __properties: ClassVar[List[str]] = ["display_name", "description", "model_name", "max_tokens", "context_length", "dimensions", "chunk_size", "supports_batch", "max_batch_size", "default_config", "is_active", "is_default"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -57,11 +59,11 @@ class ModelDefUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ModelDefUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -71,7 +73,8 @@ class ModelDefUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -141,7 +144,7 @@ class ModelDefUpdate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ModelDefUpdate from a dict"""
         if obj is None:
             return None

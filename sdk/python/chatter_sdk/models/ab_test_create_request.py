@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,13 +19,14 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar
-from typing import Annotated
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from chatter_sdk.models.metric_type import MetricType
 from chatter_sdk.models.test_type import TestType
 from chatter_sdk.models.test_variant import TestVariant
 from chatter_sdk.models.variant_allocation import VariantAllocation
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ABTestCreateRequest(BaseModel):
     """
@@ -34,16 +36,16 @@ class ABTestCreateRequest(BaseModel):
     description: StrictStr = Field(description="Test description")
     test_type: TestType
     allocation_strategy: VariantAllocation
-    variants: Annotated[list[TestVariant], Field(min_length=2)] = Field(description="Test variants")
-    metrics: Annotated[list[MetricType], Field(min_length=1)] = Field(description="Metrics to track")
-    duration_days: Annotated[int, Field(le=365, strict=True, ge=1)] | None = Field(default=7, description="Test duration in days")
-    min_sample_size: Annotated[int, Field(strict=True, ge=10)] | None = Field(default=100, description="Minimum sample size")
-    confidence_level: Annotated[float, Field(le=0.99, strict=True, ge=0.5)] | Annotated[int, Field(le=0, strict=True, ge=1)] | None = Field(default=0.95, description="Statistical confidence level")
-    target_audience: dict[str, Any] | None = None
-    traffic_percentage: Annotated[float, Field(le=100.0, strict=True, ge=0.1)] | Annotated[int, Field(le=100, strict=True, ge=1)] | None = Field(default=100.0, description="Percentage of traffic to include")
-    tags: list[StrictStr] | None = Field(default=None, description="Test tags")
-    metadata: dict[str, Any] | None = Field(default=None, description="Additional metadata")
-    __properties: ClassVar[list[str]] = ["name", "description", "test_type", "allocation_strategy", "variants", "metrics", "duration_days", "min_sample_size", "confidence_level", "target_audience", "traffic_percentage", "tags", "metadata"]
+    variants: Annotated[List[TestVariant], Field(min_length=2)] = Field(description="Test variants")
+    metrics: Annotated[List[MetricType], Field(min_length=1)] = Field(description="Metrics to track")
+    duration_days: Optional[Annotated[int, Field(le=365, strict=True, ge=1)]] = Field(default=7, description="Test duration in days")
+    min_sample_size: Optional[Annotated[int, Field(strict=True, ge=10)]] = Field(default=100, description="Minimum sample size")
+    confidence_level: Optional[Union[Annotated[float, Field(le=0.99, strict=True, ge=0.5)], Annotated[int, Field(le=0, strict=True, ge=1)]]] = Field(default=0.95, description="Statistical confidence level")
+    target_audience: Optional[Dict[str, Any]] = None
+    traffic_percentage: Optional[Union[Annotated[float, Field(le=100.0, strict=True, ge=0.1)], Annotated[int, Field(le=100, strict=True, ge=1)]]] = Field(default=100.0, description="Percentage of traffic to include")
+    tags: Optional[List[StrictStr]] = Field(default=None, description="Test tags")
+    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata")
+    __properties: ClassVar[List[str]] = ["name", "description", "test_type", "allocation_strategy", "variants", "metrics", "duration_days", "min_sample_size", "confidence_level", "target_audience", "traffic_percentage", "tags", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -62,11 +64,11 @@ class ABTestCreateRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ABTestCreateRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -76,7 +78,8 @@ class ABTestCreateRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -98,7 +101,7 @@ class ABTestCreateRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ABTestCreateRequest from a dict"""
         if obj is None:
             return None

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,28 +19,29 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
-from typing import Any, ClassVar
-from typing import Self
+from typing import Any, ClassVar, Dict, List, Union
+from typing import Optional, Set
+from typing_extensions import Self
 
 class PerformanceMetricsResponse(BaseModel):
     """
     Schema for performance metrics response.
     """ # noqa: E501
-    avg_response_time_ms: StrictFloat | StrictInt = Field(description="Average response time")
-    median_response_time_ms: StrictFloat | StrictInt = Field(description="Median response time")
-    p95_response_time_ms: StrictFloat | StrictInt = Field(description="95th percentile response time")
-    p99_response_time_ms: StrictFloat | StrictInt = Field(description="99th percentile response time")
-    requests_per_minute: StrictFloat | StrictInt = Field(description="Average requests per minute")
-    tokens_per_minute: StrictFloat | StrictInt = Field(description="Average tokens per minute")
+    avg_response_time_ms: Union[StrictFloat, StrictInt] = Field(description="Average response time")
+    median_response_time_ms: Union[StrictFloat, StrictInt] = Field(description="Median response time")
+    p95_response_time_ms: Union[StrictFloat, StrictInt] = Field(description="95th percentile response time")
+    p99_response_time_ms: Union[StrictFloat, StrictInt] = Field(description="99th percentile response time")
+    requests_per_minute: Union[StrictFloat, StrictInt] = Field(description="Average requests per minute")
+    tokens_per_minute: Union[StrictFloat, StrictInt] = Field(description="Average tokens per minute")
     total_errors: StrictInt = Field(description="Total number of errors")
-    error_rate: StrictFloat | StrictInt = Field(description="Error rate percentage")
-    errors_by_type: dict[str, StrictInt] = Field(description="Errors grouped by type")
-    performance_by_model: dict[str, dict[str, StrictFloat | StrictInt]] = Field(description="Performance metrics by model")
-    performance_by_provider: dict[str, dict[str, StrictFloat | StrictInt]] = Field(description="Performance metrics by provider")
-    database_response_time_ms: StrictFloat | StrictInt = Field(description="Average database response time")
-    vector_search_time_ms: StrictFloat | StrictInt = Field(description="Average vector search time")
-    embedding_generation_time_ms: StrictFloat | StrictInt = Field(description="Average embedding generation time")
-    __properties: ClassVar[list[str]] = ["avg_response_time_ms", "median_response_time_ms", "p95_response_time_ms", "p99_response_time_ms", "requests_per_minute", "tokens_per_minute", "total_errors", "error_rate", "errors_by_type", "performance_by_model", "performance_by_provider", "database_response_time_ms", "vector_search_time_ms", "embedding_generation_time_ms"]
+    error_rate: Union[StrictFloat, StrictInt] = Field(description="Error rate percentage")
+    errors_by_type: Dict[str, StrictInt] = Field(description="Errors grouped by type")
+    performance_by_model: Dict[str, Dict[str, Union[StrictFloat, StrictInt]]] = Field(description="Performance metrics by model")
+    performance_by_provider: Dict[str, Dict[str, Union[StrictFloat, StrictInt]]] = Field(description="Performance metrics by provider")
+    database_response_time_ms: Union[StrictFloat, StrictInt] = Field(description="Average database response time")
+    vector_search_time_ms: Union[StrictFloat, StrictInt] = Field(description="Average vector search time")
+    embedding_generation_time_ms: Union[StrictFloat, StrictInt] = Field(description="Average embedding generation time")
+    __properties: ClassVar[List[str]] = ["avg_response_time_ms", "median_response_time_ms", "p95_response_time_ms", "p99_response_time_ms", "requests_per_minute", "tokens_per_minute", "total_errors", "error_rate", "errors_by_type", "performance_by_model", "performance_by_provider", "database_response_time_ms", "vector_search_time_ms", "embedding_generation_time_ms"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -58,11 +60,11 @@ class PerformanceMetricsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of PerformanceMetricsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -72,7 +74,8 @@ class PerformanceMetricsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -82,7 +85,7 @@ class PerformanceMetricsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of PerformanceMetricsResponse from a dict"""
         if obj is None:
             return None

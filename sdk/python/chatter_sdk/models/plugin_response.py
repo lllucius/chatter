@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -19,10 +20,11 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Dict, List, Optional
 from chatter_sdk.models.plugin_status import PluginStatus
 from chatter_sdk.models.plugin_type import PluginType
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class PluginResponse(BaseModel):
     """
@@ -36,15 +38,15 @@ class PluginResponse(BaseModel):
     plugin_type: PluginType
     status: PluginStatus
     entry_point: StrictStr = Field(description="Plugin entry point")
-    capabilities: list[dict[str, Any]] = Field(description="Plugin capabilities")
-    dependencies: list[StrictStr] = Field(description="Plugin dependencies")
-    permissions: list[StrictStr] = Field(description="Required permissions")
+    capabilities: List[Dict[str, Any]] = Field(description="Plugin capabilities")
+    dependencies: List[StrictStr] = Field(description="Plugin dependencies")
+    permissions: List[StrictStr] = Field(description="Required permissions")
     enabled: StrictBool = Field(description="Whether plugin is enabled")
-    error_message: StrictStr | None = None
+    error_message: Optional[StrictStr] = None
     installed_at: datetime = Field(description="Installation timestamp")
     updated_at: datetime = Field(description="Last update timestamp")
-    metadata: dict[str, Any] = Field(description="Additional metadata")
-    __properties: ClassVar[list[str]] = ["id", "name", "version", "description", "author", "plugin_type", "status", "entry_point", "capabilities", "dependencies", "permissions", "enabled", "error_message", "installed_at", "updated_at", "metadata"]
+    metadata: Dict[str, Any] = Field(description="Additional metadata")
+    __properties: ClassVar[List[str]] = ["id", "name", "version", "description", "author", "plugin_type", "status", "entry_point", "capabilities", "dependencies", "permissions", "enabled", "error_message", "installed_at", "updated_at", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -63,11 +65,11 @@ class PluginResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of PluginResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -77,7 +79,8 @@ class PluginResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -92,7 +95,7 @@ class PluginResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of PluginResponse from a dict"""
         if obj is None:
             return None

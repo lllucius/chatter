@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,40 +19,41 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar
-from typing import Annotated
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from chatter_sdk.models.prompt_category import PromptCategory
 from chatter_sdk.models.prompt_type import PromptType
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class PromptCreate(BaseModel):
     """
     Schema for creating a prompt.
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=255)] = Field(description="Prompt name")
-    description: StrictStr | None = None
-    prompt_type: PromptType | None = None
-    category: PromptCategory | None = None
+    description: Optional[StrictStr] = None
+    prompt_type: Optional[PromptType] = None
+    category: Optional[PromptCategory] = None
     content: Annotated[str, Field(min_length=1, strict=True)] = Field(description="Prompt content/template")
-    variables: list[StrictStr] | None = None
-    template_format: StrictStr | None = Field(default='f-string', description="Template format (f-string, jinja2, mustache)")
-    input_schema: dict[str, Any] | None = None
-    output_schema: dict[str, Any] | None = None
-    max_length: Annotated[int, Field(strict=True, ge=1)] | None = None
-    min_length: Annotated[int, Field(strict=True, ge=1)] | None = None
-    required_variables: list[StrictStr] | None = None
-    examples: list[dict[str, Any]] | None = None
-    test_cases: list[dict[str, Any]] | None = None
-    suggested_temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
-    suggested_max_tokens: Annotated[int, Field(strict=True, ge=1)] | None = None
-    suggested_providers: list[StrictStr] | None = None
-    is_chain: StrictBool | None = Field(default=False, description="Whether this is a chain prompt")
-    chain_steps: list[dict[str, Any]] | None = None
-    parent_prompt_id: StrictStr | None = None
-    is_public: StrictBool | None = Field(default=False, description="Whether prompt is public")
-    tags: list[StrictStr] | None = None
-    extra_metadata: dict[str, Any] | None = None
-    __properties: ClassVar[list[str]] = ["name", "description", "prompt_type", "category", "content", "variables", "template_format", "input_schema", "output_schema", "max_length", "min_length", "required_variables", "examples", "test_cases", "suggested_temperature", "suggested_max_tokens", "suggested_providers", "is_chain", "chain_steps", "parent_prompt_id", "is_public", "tags", "extra_metadata"]
+    variables: Optional[List[StrictStr]] = None
+    template_format: Optional[StrictStr] = Field(default='f-string', description="Template format (f-string, jinja2, mustache)")
+    input_schema: Optional[Dict[str, Any]] = None
+    output_schema: Optional[Dict[str, Any]] = None
+    max_length: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    min_length: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    required_variables: Optional[List[StrictStr]] = None
+    examples: Optional[List[Dict[str, Any]]] = None
+    test_cases: Optional[List[Dict[str, Any]]] = None
+    suggested_temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
+    suggested_max_tokens: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    suggested_providers: Optional[List[StrictStr]] = None
+    is_chain: Optional[StrictBool] = Field(default=False, description="Whether this is a chain prompt")
+    chain_steps: Optional[List[Dict[str, Any]]] = None
+    parent_prompt_id: Optional[StrictStr] = None
+    is_public: Optional[StrictBool] = Field(default=False, description="Whether prompt is public")
+    tags: Optional[List[StrictStr]] = None
+    extra_metadata: Optional[Dict[str, Any]] = None
+    __properties: ClassVar[List[str]] = ["name", "description", "prompt_type", "category", "content", "variables", "template_format", "input_schema", "output_schema", "max_length", "min_length", "required_variables", "examples", "test_cases", "suggested_temperature", "suggested_max_tokens", "suggested_providers", "is_chain", "chain_steps", "parent_prompt_id", "is_public", "tags", "extra_metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -70,11 +72,11 @@ class PromptCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of PromptCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -84,7 +86,8 @@ class PromptCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -174,7 +177,7 @@ class PromptCreate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of PromptCreate from a dict"""
         if obj is None:
             return None

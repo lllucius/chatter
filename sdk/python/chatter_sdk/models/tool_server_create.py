@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,10 +19,11 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
-from typing import Any, ClassVar
-from typing import Annotated
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.o_auth_config_schema import OAuthConfigSchema
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ToolServerCreate(BaseModel):
     """
@@ -29,16 +31,16 @@ class ToolServerCreate(BaseModel):
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Server name")
     display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Display name")
-    description: StrictStr | None = None
-    base_url: Annotated[str, Field(min_length=1, strict=True, max_length=2083)] | None = None
-    transport_type: Annotated[str, Field(strict=True)] | None = Field(default='http', description="Transport type: http, sse, stdio, or websocket")
-    oauth_config: OAuthConfigSchema | None = None
-    headers: dict[str, StrictStr] | None = None
-    timeout: Annotated[int, Field(le=300, strict=True, ge=5)] | None = Field(default=30, description="Request timeout in seconds")
-    auto_start: StrictBool | None = Field(default=True, description="Auto-connect to server on system startup")
-    auto_update: StrictBool | None = Field(default=True, description="Auto-update server capabilities")
-    max_failures: Annotated[int, Field(le=10, strict=True, ge=1)] | None = Field(default=3, description="Maximum consecutive failures before disabling")
-    __properties: ClassVar[list[str]] = ["name", "display_name", "description", "base_url", "transport_type", "oauth_config", "headers", "timeout", "auto_start", "auto_update", "max_failures"]
+    description: Optional[StrictStr] = None
+    base_url: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=2083)]] = None
+    transport_type: Optional[Annotated[str, Field(strict=True)]] = Field(default='http', description="Transport type: http, sse, stdio, or websocket")
+    oauth_config: Optional[OAuthConfigSchema] = None
+    headers: Optional[Dict[str, StrictStr]] = None
+    timeout: Optional[Annotated[int, Field(le=300, strict=True, ge=5)]] = Field(default=30, description="Request timeout in seconds")
+    auto_start: Optional[StrictBool] = Field(default=True, description="Auto-connect to server on system startup")
+    auto_update: Optional[StrictBool] = Field(default=True, description="Auto-update server capabilities")
+    max_failures: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = Field(default=3, description="Maximum consecutive failures before disabling")
+    __properties: ClassVar[List[str]] = ["name", "display_name", "description", "base_url", "transport_type", "oauth_config", "headers", "timeout", "auto_start", "auto_update", "max_failures"]
 
     @field_validator('transport_type')
     def transport_type_validate_regular_expression(cls, value):
@@ -67,11 +69,11 @@ class ToolServerCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ToolServerCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -81,7 +83,8 @@ class ToolServerCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -114,7 +117,7 @@ class ToolServerCreate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ToolServerCreate from a dict"""
         if obj is None:
             return None

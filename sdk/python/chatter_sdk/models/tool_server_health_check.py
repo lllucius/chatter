@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -19,9 +20,10 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Dict, List, Optional
 from chatter_sdk.models.server_status import ServerStatus
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ToolServerHealthCheck(BaseModel):
     """
@@ -34,8 +36,8 @@ class ToolServerHealthCheck(BaseModel):
     is_responsive: StrictBool = Field(description="Whether server is responsive")
     tools_count: StrictInt = Field(description="Number of available tools")
     last_check: datetime = Field(description="Last health check time")
-    error_message: StrictStr | None = None
-    __properties: ClassVar[list[str]] = ["server_id", "server_name", "status", "is_running", "is_responsive", "tools_count", "last_check", "error_message"]
+    error_message: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["server_id", "server_name", "status", "is_running", "is_responsive", "tools_count", "last_check", "error_message"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,11 +56,11 @@ class ToolServerHealthCheck(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ToolServerHealthCheck from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -68,7 +70,8 @@ class ToolServerHealthCheck(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -83,7 +86,7 @@ class ToolServerHealthCheck(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ToolServerHealthCheck from a dict"""
         if obj is None:
             return None

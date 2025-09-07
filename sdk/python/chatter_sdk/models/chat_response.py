@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -18,10 +19,11 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Dict, List
 from chatter_sdk.models.conversation_response import ConversationResponse
 from chatter_sdk.models.message_response import MessageResponse
-from typing import Self
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ChatResponse(BaseModel):
     """
@@ -30,7 +32,7 @@ class ChatResponse(BaseModel):
     conversation_id: StrictStr = Field(description="Conversation ID")
     message: MessageResponse
     conversation: ConversationResponse
-    __properties: ClassVar[list[str]] = ["conversation_id", "message", "conversation"]
+    __properties: ClassVar[List[str]] = ["conversation_id", "message", "conversation"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,11 +51,11 @@ class ChatResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ChatResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -63,7 +65,8 @@ class ChatResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set()
+        excluded_fields: Set[str] = set([
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -79,7 +82,7 @@ class ChatResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ChatResponse from a dict"""
         if obj is None:
             return None

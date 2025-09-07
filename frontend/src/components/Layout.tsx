@@ -141,7 +141,8 @@ const LayoutFrame: React.FC = () => {
   } = useRightSidebar();
 
   const currentDrawerWidth = sidebarCollapsed ? collapsedDrawerWidth : drawerWidth;
-  const isRightVisible = rightOpen && !!panelContent;
+  // Right drawer should only be visible if there's content to show
+  const isRightVisible = !!panelContent;
   const effectiveRightWidth = isRightVisible
     ? (rightCollapsed ? rightCollapsedDrawerWidth : rightDrawerWidth)
     : 0;
@@ -366,11 +367,7 @@ const LayoutFrame: React.FC = () => {
       </Toolbar>
       <CustomScrollbar style={{ flexGrow: 1 }}>
         <Box sx={{ p: rightCollapsed ? 1 : 2 }}>
-          {panelContent ?? (
-            <Typography variant="body2" color="text.secondary">
-              No panel content
-            </Typography>
-          )}
+          {panelContent}
         </Box>
       </CustomScrollbar>
     </div>
@@ -474,12 +471,11 @@ const LayoutFrame: React.FC = () => {
         </Drawer>
       </Box>
 
-      {/* MAIN CONTENT (scrolls instead of window) */}
+      {/* MAIN CONTENT */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
           width: { sm: `calc(100% - ${currentDrawerWidth + effectiveRightWidth}px)` },
           minWidth: 0,
           minHeight: 0,
@@ -493,19 +489,17 @@ const LayoutFrame: React.FC = () => {
             }),
         }}
       >
-        <CustomScrollbar>
-          <Outlet />
-        </CustomScrollbar>
+        <Outlet />
       </Box>
 
       {/* RIGHT NAV */}
       <Box component="nav" sx={{ width: { sm: effectiveRightWidth }, flexShrink: { sm: 0 } }}>
         {/* Mobile Right Drawer - mount/open only on mobile */}
-        {isMobile && (
+        {isMobile && isRightVisible && (
           <Drawer
             variant="temporary"
             anchor="right"
-            open={isRightVisible}
+            open={rightOpen}
             onClose={() => setRightOpen(false)}
             hideBackdrop
             ModalProps={{

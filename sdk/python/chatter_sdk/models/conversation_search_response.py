@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,20 +18,19 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar
 from chatter_sdk.models.conversation_response import ConversationResponse
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ConversationSearchResponse(BaseModel):
     """
     Schema for conversation search response.
     """ # noqa: E501
-    conversations: List[ConversationResponse] = Field(description="Conversations")
+    conversations: list[ConversationResponse] = Field(description="Conversations")
     total: StrictInt = Field(description="Total number of conversations")
     limit: StrictInt = Field(description="Request limit")
     offset: StrictInt = Field(description="Request offset")
-    __properties: ClassVar[List[str]] = ["conversations", "total", "limit", "offset"]
+    __properties: ClassVar[list[str]] = ["conversations", "total", "limit", "offset"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,11 +49,11 @@ class ConversationSearchResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ConversationSearchResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -65,7 +63,7 @@ class ConversationSearchResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -83,7 +81,7 @@ class ConversationSearchResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ConversationSearchResponse from a dict"""
         if obj is None:
             return None

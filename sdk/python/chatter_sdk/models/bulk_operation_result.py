@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,9 +18,8 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar
+from typing import Self
 
 class BulkOperationResult(BaseModel):
     """
@@ -30,9 +28,9 @@ class BulkOperationResult(BaseModel):
     total_requested: StrictInt = Field(description="Total servers requested")
     successful: StrictInt = Field(description="Successfully processed")
     failed: StrictInt = Field(description="Failed to process")
-    results: List[Dict[str, Any]] = Field(description="Detailed results")
-    errors: Optional[List[StrictStr]] = Field(default=None, description="Error messages")
-    __properties: ClassVar[List[str]] = ["total_requested", "successful", "failed", "results", "errors"]
+    results: list[dict[str, Any]] = Field(description="Detailed results")
+    errors: list[StrictStr] | None = Field(default=None, description="Error messages")
+    __properties: ClassVar[list[str]] = ["total_requested", "successful", "failed", "results", "errors"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,11 +49,11 @@ class BulkOperationResult(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of BulkOperationResult from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -65,7 +63,7 @@ class BulkOperationResult(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -76,7 +74,7 @@ class BulkOperationResult(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of BulkOperationResult from a dict"""
         if obj is None:
             return None

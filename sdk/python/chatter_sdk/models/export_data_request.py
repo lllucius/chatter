@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,27 +19,26 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar
 from chatter_sdk.models.data_format import DataFormat
 from chatter_sdk.models.export_scope import ExportScope
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ExportDataRequest(BaseModel):
     """
     Request schema for data export API.
     """ # noqa: E501
     scope: ExportScope
-    format: Optional[DataFormat] = None
-    user_id: Optional[StrictStr] = None
-    conversation_id: Optional[StrictStr] = None
-    date_from: Optional[datetime] = None
-    date_to: Optional[datetime] = None
-    include_metadata: Optional[StrictBool] = Field(default=True, description="Include metadata")
-    compress: Optional[StrictBool] = Field(default=True, description="Compress export file")
-    encrypt: Optional[StrictBool] = Field(default=False, description="Encrypt export file")
-    custom_query: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["scope", "format", "user_id", "conversation_id", "date_from", "date_to", "include_metadata", "compress", "encrypt", "custom_query"]
+    format: DataFormat | None = None
+    user_id: StrictStr | None = None
+    conversation_id: StrictStr | None = None
+    date_from: datetime | None = None
+    date_to: datetime | None = None
+    include_metadata: StrictBool | None = Field(default=True, description="Include metadata")
+    compress: StrictBool | None = Field(default=True, description="Compress export file")
+    encrypt: StrictBool | None = Field(default=False, description="Encrypt export file")
+    custom_query: dict[str, Any] | None = None
+    __properties: ClassVar[list[str]] = ["scope", "format", "user_id", "conversation_id", "date_from", "date_to", "include_metadata", "compress", "encrypt", "custom_query"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -59,11 +57,11 @@ class ExportDataRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ExportDataRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -73,7 +71,7 @@ class ExportDataRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -109,7 +107,7 @@ class ExportDataRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ExportDataRequest from a dict"""
         if obj is None:
             return None

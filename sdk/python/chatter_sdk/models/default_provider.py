@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,17 +18,16 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar
 from chatter_sdk.models.model_type import ModelType
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class DefaultProvider(BaseModel):
     """
     Schema for setting default provider.
     """ # noqa: E501
     model_type: ModelType
-    __properties: ClassVar[List[str]] = ["model_type"]
+    __properties: ClassVar[list[str]] = ["model_type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -48,11 +46,11 @@ class DefaultProvider(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of DefaultProvider from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -62,7 +60,7 @@ class DefaultProvider(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -73,7 +71,7 @@ class DefaultProvider(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of DefaultProvider from a dict"""
         if obj is None:
             return None

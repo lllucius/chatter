@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,11 +19,10 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+from typing import Annotated
 from chatter_sdk.models.server_status import ServerStatus
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ToolServerMetrics(BaseModel):
     """
@@ -37,11 +35,11 @@ class ToolServerMetrics(BaseModel):
     enabled_tools: StrictInt = Field(description="Number of enabled tools")
     total_calls: StrictInt = Field(description="Total tool calls")
     total_errors: StrictInt = Field(description="Total errors")
-    success_rate: Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]] = Field(description="Success rate")
-    avg_response_time_ms: Optional[Union[StrictFloat, StrictInt]] = None
-    last_activity: Optional[datetime] = None
-    uptime_percentage: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
-    __properties: ClassVar[List[str]] = ["server_id", "server_name", "status", "total_tools", "enabled_tools", "total_calls", "total_errors", "success_rate", "avg_response_time_ms", "last_activity", "uptime_percentage"]
+    success_rate: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] = Field(description="Success rate")
+    avg_response_time_ms: StrictFloat | StrictInt | None = None
+    last_activity: datetime | None = None
+    uptime_percentage: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
+    __properties: ClassVar[list[str]] = ["server_id", "server_name", "status", "total_tools", "enabled_tools", "total_calls", "total_errors", "success_rate", "avg_response_time_ms", "last_activity", "uptime_percentage"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -60,11 +58,11 @@ class ToolServerMetrics(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ToolServerMetrics from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -74,7 +72,7 @@ class ToolServerMetrics(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -100,7 +98,7 @@ class ToolServerMetrics(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ToolServerMetrics from a dict"""
         if obj is None:
             return None

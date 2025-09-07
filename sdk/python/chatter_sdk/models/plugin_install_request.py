@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,17 +18,16 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar
+from typing import Self
 
 class PluginInstallRequest(BaseModel):
     """
     Request schema for installing a plugin.
     """ # noqa: E501
     plugin_path: StrictStr = Field(description="Path to plugin file or directory")
-    enable_on_install: Optional[StrictBool] = Field(default=True, description="Enable plugin after installation")
-    __properties: ClassVar[List[str]] = ["plugin_path", "enable_on_install"]
+    enable_on_install: StrictBool | None = Field(default=True, description="Enable plugin after installation")
+    __properties: ClassVar[list[str]] = ["plugin_path", "enable_on_install"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -48,11 +46,11 @@ class PluginInstallRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of PluginInstallRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -62,7 +60,7 @@ class PluginInstallRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -73,7 +71,7 @@ class PluginInstallRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of PluginInstallRequest from a dict"""
         if obj is None:
             return None

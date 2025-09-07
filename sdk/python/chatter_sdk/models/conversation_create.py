@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,25 +18,24 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar
+from typing import Annotated
+from typing import Self
 
 class ConversationCreate(BaseModel):
     """
     Schema for creating a conversation.
     """ # noqa: E501
     title: StrictStr = Field(description="Conversation title")
-    description: Optional[StrictStr] = None
-    profile_id: Optional[StrictStr] = None
-    system_prompt: Optional[StrictStr] = None
-    enable_retrieval: Optional[StrictBool] = Field(default=False, description="Enable document retrieval")
-    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
-    max_tokens: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
-    workflow_config: Optional[Dict[str, Any]] = None
-    extra_metadata: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["title", "description", "profile_id", "system_prompt", "enable_retrieval", "temperature", "max_tokens", "workflow_config", "extra_metadata"]
+    description: StrictStr | None = None
+    profile_id: StrictStr | None = None
+    system_prompt: StrictStr | None = None
+    enable_retrieval: StrictBool | None = Field(default=False, description="Enable document retrieval")
+    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
+    max_tokens: Annotated[int, Field(strict=True, ge=1)] | None = None
+    workflow_config: dict[str, Any] | None = None
+    extra_metadata: dict[str, Any] | None = None
+    __properties: ClassVar[list[str]] = ["title", "description", "profile_id", "system_prompt", "enable_retrieval", "temperature", "max_tokens", "workflow_config", "extra_metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -56,11 +54,11 @@ class ConversationCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ConversationCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -70,7 +68,7 @@ class ConversationCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -116,7 +114,7 @@ class ConversationCreate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ConversationCreate from a dict"""
         if obj is None:
             return None

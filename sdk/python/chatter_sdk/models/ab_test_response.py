@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,14 +19,13 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar
 from chatter_sdk.models.metric_type import MetricType
 from chatter_sdk.models.test_status import TestStatus
 from chatter_sdk.models.test_type import TestType
 from chatter_sdk.models.test_variant import TestVariant
 from chatter_sdk.models.variant_allocation import VariantAllocation
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ABTestResponse(BaseModel):
     """
@@ -39,22 +37,22 @@ class ABTestResponse(BaseModel):
     test_type: TestType
     status: TestStatus
     allocation_strategy: VariantAllocation
-    variants: List[TestVariant] = Field(description="Test variants")
-    metrics: List[MetricType] = Field(description="Metrics being tracked")
+    variants: list[TestVariant] = Field(description="Test variants")
+    metrics: list[MetricType] = Field(description="Metrics being tracked")
     duration_days: StrictInt = Field(description="Test duration in days")
     min_sample_size: StrictInt = Field(description="Minimum sample size")
-    confidence_level: Union[StrictFloat, StrictInt] = Field(description="Statistical confidence level")
-    target_audience: Optional[Dict[str, Any]] = None
-    traffic_percentage: Union[StrictFloat, StrictInt] = Field(description="Percentage of traffic included")
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
-    participant_count: Optional[StrictInt] = Field(default=0, description="Number of participants")
+    confidence_level: StrictFloat | StrictInt = Field(description="Statistical confidence level")
+    target_audience: dict[str, Any] | None = None
+    traffic_percentage: StrictFloat | StrictInt = Field(description="Percentage of traffic included")
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    participant_count: StrictInt | None = Field(default=0, description="Number of participants")
     created_at: datetime = Field(description="Creation timestamp")
     updated_at: datetime = Field(description="Last update timestamp")
     created_by: StrictStr = Field(description="Creator")
-    tags: List[StrictStr] = Field(description="Test tags")
-    metadata: Dict[str, Any] = Field(description="Additional metadata")
-    __properties: ClassVar[List[str]] = ["id", "name", "description", "test_type", "status", "allocation_strategy", "variants", "metrics", "duration_days", "min_sample_size", "confidence_level", "target_audience", "traffic_percentage", "start_date", "end_date", "participant_count", "created_at", "updated_at", "created_by", "tags", "metadata"]
+    tags: list[StrictStr] = Field(description="Test tags")
+    metadata: dict[str, Any] = Field(description="Additional metadata")
+    __properties: ClassVar[list[str]] = ["id", "name", "description", "test_type", "status", "allocation_strategy", "variants", "metrics", "duration_days", "min_sample_size", "confidence_level", "target_audience", "traffic_percentage", "start_date", "end_date", "participant_count", "created_at", "updated_at", "created_by", "tags", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -73,11 +71,11 @@ class ABTestResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ABTestResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -87,7 +85,7 @@ class ABTestResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -120,7 +118,7 @@ class ABTestResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ABTestResponse from a dict"""
         if obj is None:
             return None

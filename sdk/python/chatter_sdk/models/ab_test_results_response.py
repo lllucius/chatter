@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,11 +19,10 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar
 from chatter_sdk.models.test_metric import TestMetric
 from chatter_sdk.models.test_status import TestStatus
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ABTestResultsResponse(BaseModel):
     """
@@ -33,15 +31,15 @@ class ABTestResultsResponse(BaseModel):
     test_id: StrictStr = Field(description="Test ID")
     test_name: StrictStr = Field(description="Test name")
     status: TestStatus
-    metrics: List[TestMetric] = Field(description="Metric results by variant")
-    statistical_significance: Dict[str, StrictBool] = Field(description="Statistical significance by metric")
-    confidence_intervals: Dict[str, Dict[str, List[Union[StrictFloat, StrictInt]]]] = Field(description="Confidence intervals")
-    winning_variant: Optional[StrictStr] = None
+    metrics: list[TestMetric] = Field(description="Metric results by variant")
+    statistical_significance: dict[str, StrictBool] = Field(description="Statistical significance by metric")
+    confidence_intervals: dict[str, dict[str, list[StrictFloat | StrictInt]]] = Field(description="Confidence intervals")
+    winning_variant: StrictStr | None = None
     recommendation: StrictStr = Field(description="Action recommendation")
     generated_at: datetime = Field(description="Results generation timestamp")
     sample_size: StrictInt = Field(description="Total sample size")
     duration_days: StrictInt = Field(description="Test duration so far")
-    __properties: ClassVar[List[str]] = ["test_id", "test_name", "status", "metrics", "statistical_significance", "confidence_intervals", "winning_variant", "recommendation", "generated_at", "sample_size", "duration_days"]
+    __properties: ClassVar[list[str]] = ["test_id", "test_name", "status", "metrics", "statistical_significance", "confidence_intervals", "winning_variant", "recommendation", "generated_at", "sample_size", "duration_days"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -60,11 +58,11 @@ class ABTestResultsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ABTestResultsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -74,7 +72,7 @@ class ABTestResultsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -97,7 +95,7 @@ class ABTestResultsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ABTestResultsResponse from a dict"""
         if obj is None:
             return None

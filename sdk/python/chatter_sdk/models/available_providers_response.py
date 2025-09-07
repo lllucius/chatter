@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,18 +18,17 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar
+from typing import Self
 
 class AvailableProvidersResponse(BaseModel):
     """
     Schema for available providers response.
     """ # noqa: E501
-    providers: Dict[str, Any] = Field(description="Available LLM providers with their configurations")
+    providers: dict[str, Any] = Field(description="Available LLM providers with their configurations")
     total_providers: StrictInt = Field(description="Total number of available providers")
-    supported_features: Dict[str, List[StrictStr]] = Field(description="Features supported by each provider")
-    __properties: ClassVar[List[str]] = ["providers", "total_providers", "supported_features"]
+    supported_features: dict[str, list[StrictStr]] = Field(description="Features supported by each provider")
+    __properties: ClassVar[list[str]] = ["providers", "total_providers", "supported_features"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,11 +47,11 @@ class AvailableProvidersResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of AvailableProvidersResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -63,7 +61,7 @@ class AvailableProvidersResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -74,7 +72,7 @@ class AvailableProvidersResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of AvailableProvidersResponse from a dict"""
         if obj is None:
             return None

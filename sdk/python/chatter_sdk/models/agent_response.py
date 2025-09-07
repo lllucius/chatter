@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,12 +19,11 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Union
+from typing import Any, ClassVar
 from chatter_sdk.models.agent_capability import AgentCapability
 from chatter_sdk.models.agent_status import AgentStatus
 from chatter_sdk.models.agent_type import AgentType
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class AgentResponse(BaseModel):
     """
@@ -37,27 +35,27 @@ class AgentResponse(BaseModel):
     type: AgentType
     status: AgentStatus
     system_message: StrictStr = Field(description="System message")
-    personality_traits: List[StrictStr] = Field(description="Agent personality traits")
-    knowledge_domains: List[StrictStr] = Field(description="Knowledge domains")
+    personality_traits: list[StrictStr] = Field(description="Agent personality traits")
+    knowledge_domains: list[StrictStr] = Field(description="Knowledge domains")
     response_style: StrictStr = Field(description="Response style")
-    capabilities: List[AgentCapability] = Field(description="Agent capabilities")
-    available_tools: List[StrictStr] = Field(description="Available tools")
+    capabilities: list[AgentCapability] = Field(description="Agent capabilities")
+    available_tools: list[StrictStr] = Field(description="Available tools")
     primary_llm: StrictStr = Field(description="Primary LLM provider")
     fallback_llm: StrictStr = Field(description="Fallback LLM provider")
-    temperature: Union[StrictFloat, StrictInt] = Field(description="Temperature for responses")
+    temperature: StrictFloat | StrictInt = Field(description="Temperature for responses")
     max_tokens: StrictInt = Field(description="Maximum tokens")
     max_conversation_length: StrictInt = Field(description="Maximum conversation length")
     context_window_size: StrictInt = Field(description="Context window size")
     response_timeout: StrictInt = Field(description="Response timeout in seconds")
     learning_enabled: StrictBool = Field(description="Learning enabled")
-    feedback_weight: Union[StrictFloat, StrictInt] = Field(description="Feedback weight")
-    adaptation_threshold: Union[StrictFloat, StrictInt] = Field(description="Adaptation threshold")
+    feedback_weight: StrictFloat | StrictInt = Field(description="Feedback weight")
+    adaptation_threshold: StrictFloat | StrictInt = Field(description="Adaptation threshold")
     created_at: datetime = Field(description="Creation timestamp")
     updated_at: datetime = Field(description="Last update timestamp")
     created_by: StrictStr = Field(description="Creator")
-    tags: List[StrictStr] = Field(description="Agent tags")
-    metadata: Dict[str, Any] = Field(description="Additional metadata")
-    __properties: ClassVar[List[str]] = ["id", "name", "description", "type", "status", "system_message", "personality_traits", "knowledge_domains", "response_style", "capabilities", "available_tools", "primary_llm", "fallback_llm", "temperature", "max_tokens", "max_conversation_length", "context_window_size", "response_timeout", "learning_enabled", "feedback_weight", "adaptation_threshold", "created_at", "updated_at", "created_by", "tags", "metadata"]
+    tags: list[StrictStr] = Field(description="Agent tags")
+    metadata: dict[str, Any] = Field(description="Additional metadata")
+    __properties: ClassVar[list[str]] = ["id", "name", "description", "type", "status", "system_message", "personality_traits", "knowledge_domains", "response_style", "capabilities", "available_tools", "primary_llm", "fallback_llm", "temperature", "max_tokens", "max_conversation_length", "context_window_size", "response_timeout", "learning_enabled", "feedback_weight", "adaptation_threshold", "created_at", "updated_at", "created_by", "tags", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -76,11 +74,11 @@ class AgentResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of AgentResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -90,7 +88,7 @@ class AgentResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -101,7 +99,7 @@ class AgentResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of AgentResponse from a dict"""
         if obj is None:
             return None

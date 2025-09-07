@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,11 +19,10 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+from typing import Annotated
 from chatter_sdk.models.message_role import MessageRole
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class MessageResponse(BaseModel):
     """
@@ -35,16 +33,16 @@ class MessageResponse(BaseModel):
     id: StrictStr = Field(description="Message ID")
     conversation_id: StrictStr = Field(description="Conversation ID")
     sequence_number: StrictInt = Field(description="Message sequence number")
-    prompt_tokens: Optional[StrictInt] = None
-    completion_tokens: Optional[StrictInt] = None
-    total_tokens: Optional[StrictInt] = None
-    model_used: Optional[StrictStr] = None
-    provider_used: Optional[StrictStr] = None
-    response_time_ms: Optional[StrictInt] = None
-    cost: Optional[Union[StrictFloat, StrictInt]] = None
-    finish_reason: Optional[StrictStr] = None
+    prompt_tokens: StrictInt | None = None
+    completion_tokens: StrictInt | None = None
+    total_tokens: StrictInt | None = None
+    model_used: StrictStr | None = None
+    provider_used: StrictStr | None = None
+    response_time_ms: StrictInt | None = None
+    cost: StrictFloat | StrictInt | None = None
+    finish_reason: StrictStr | None = None
     created_at: datetime = Field(description="Creation timestamp")
-    __properties: ClassVar[List[str]] = ["role", "content", "id", "conversation_id", "sequence_number", "prompt_tokens", "completion_tokens", "total_tokens", "model_used", "provider_used", "response_time_ms", "cost", "finish_reason", "created_at"]
+    __properties: ClassVar[list[str]] = ["role", "content", "id", "conversation_id", "sequence_number", "prompt_tokens", "completion_tokens", "total_tokens", "model_used", "provider_used", "response_time_ms", "cost", "finish_reason", "created_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -63,11 +61,11 @@ class MessageResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of MessageResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -77,7 +75,7 @@ class MessageResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -128,7 +126,7 @@ class MessageResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of MessageResponse from a dict"""
         if obj is None:
             return None

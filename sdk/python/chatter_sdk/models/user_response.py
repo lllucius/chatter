@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,10 +19,9 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar
+from typing import Annotated
+from typing import Self
 
 class UserResponse(BaseModel):
     """
@@ -31,24 +29,24 @@ class UserResponse(BaseModel):
     """ # noqa: E501
     email: StrictStr = Field(description="User email address")
     username: Annotated[str, Field(min_length=3, strict=True, max_length=50)] = Field(description="Username")
-    full_name: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None
-    bio: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
-    avatar_url: Optional[Annotated[str, Field(strict=True, max_length=500)]] = None
-    phone_number: Optional[Annotated[str, Field(strict=True, max_length=20)]] = None
+    full_name: Annotated[str, Field(strict=True, max_length=255)] | None = None
+    bio: Annotated[str, Field(strict=True, max_length=1000)] | None = None
+    avatar_url: Annotated[str, Field(strict=True, max_length=500)] | None = None
+    phone_number: Annotated[str, Field(strict=True, max_length=20)] | None = None
     id: StrictStr = Field(description="User ID")
     is_active: StrictBool = Field(description="Is user active")
     is_verified: StrictBool = Field(description="Is user email verified")
     is_superuser: StrictBool = Field(description="Is user a superuser")
-    default_llm_provider: Optional[StrictStr] = None
-    default_profile_id: Optional[StrictStr] = None
-    daily_message_limit: Optional[StrictInt] = None
-    monthly_message_limit: Optional[StrictInt] = None
-    max_file_size_mb: Optional[StrictInt] = None
-    api_key_name: Optional[StrictStr] = None
+    default_llm_provider: StrictStr | None = None
+    default_profile_id: StrictStr | None = None
+    daily_message_limit: StrictInt | None = None
+    monthly_message_limit: StrictInt | None = None
+    max_file_size_mb: StrictInt | None = None
+    api_key_name: StrictStr | None = None
     created_at: datetime = Field(description="Account creation date")
     updated_at: datetime = Field(description="Last update date")
-    last_login_at: Optional[datetime] = None
-    __properties: ClassVar[List[str]] = ["email", "username", "full_name", "bio", "avatar_url", "phone_number", "id", "is_active", "is_verified", "is_superuser", "default_llm_provider", "default_profile_id", "daily_message_limit", "monthly_message_limit", "max_file_size_mb", "api_key_name", "created_at", "updated_at", "last_login_at"]
+    last_login_at: datetime | None = None
+    __properties: ClassVar[list[str]] = ["email", "username", "full_name", "bio", "avatar_url", "phone_number", "id", "is_active", "is_verified", "is_superuser", "default_llm_provider", "default_profile_id", "daily_message_limit", "monthly_message_limit", "max_file_size_mb", "api_key_name", "created_at", "updated_at", "last_login_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -67,11 +65,11 @@ class UserResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of UserResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -81,7 +79,7 @@ class UserResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -147,7 +145,7 @@ class UserResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of UserResponse from a dict"""
         if obj is None:
             return None

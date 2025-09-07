@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,10 +19,9 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar
 from chatter_sdk.models.tool_access_level import ToolAccessLevel
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ToolAccessResult(BaseModel):
     """
@@ -31,11 +29,11 @@ class ToolAccessResult(BaseModel):
     """ # noqa: E501
     allowed: StrictBool = Field(description="Whether access is allowed")
     access_level: ToolAccessLevel
-    rate_limit_remaining_hour: Optional[StrictInt] = None
-    rate_limit_remaining_day: Optional[StrictInt] = None
-    restriction_reason: Optional[StrictStr] = None
-    expires_at: Optional[datetime] = None
-    __properties: ClassVar[List[str]] = ["allowed", "access_level", "rate_limit_remaining_hour", "rate_limit_remaining_day", "restriction_reason", "expires_at"]
+    rate_limit_remaining_hour: StrictInt | None = None
+    rate_limit_remaining_day: StrictInt | None = None
+    restriction_reason: StrictStr | None = None
+    expires_at: datetime | None = None
+    __properties: ClassVar[list[str]] = ["allowed", "access_level", "rate_limit_remaining_hour", "rate_limit_remaining_day", "restriction_reason", "expires_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,11 +52,11 @@ class ToolAccessResult(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ToolAccessResult from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -68,7 +66,7 @@ class ToolAccessResult(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -99,7 +97,7 @@ class ToolAccessResult(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ToolAccessResult from a dict"""
         if obj is None:
             return None

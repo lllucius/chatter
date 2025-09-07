@@ -21,7 +21,7 @@ def upgrade() -> None:
     # Create workflow_type enum
     workflow_type_enum = postgresql.ENUM('plain', 'tools', 'rag', 'full', name='workflowtype')
     workflow_type_enum.create(op.get_bind())
-    
+
     # Create template_category enum
     template_category_enum = postgresql.ENUM(
         'general', 'customer_support', 'programming', 'research', 'data_analysis',
@@ -75,7 +75,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['owner_id'], ['users.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
-    
+
     # Create indexes for workflow_templates
     op.create_index(op.f('ix_workflow_templates_owner_id'), 'workflow_templates', ['owner_id'], unique=False)
     op.create_index(op.f('ix_workflow_templates_name'), 'workflow_templates', ['name'], unique=False)
@@ -110,7 +110,7 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(['owner_id'], ['users.id'], ),
         sa.PrimaryKeyConstraint('id')
     )
-    
+
     # Create indexes for template_specs
     op.create_index(op.f('ix_template_specs_owner_id'), 'template_specs', ['owner_id'], unique=False)
     op.create_index(op.f('ix_template_specs_name'), 'template_specs', ['name'], unique=False)
@@ -125,7 +125,7 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_template_specs_workflow_type'), table_name='template_specs')
     op.drop_index(op.f('ix_template_specs_name'), table_name='template_specs')
     op.drop_index(op.f('ix_template_specs_owner_id'), table_name='template_specs')
-    
+
     op.drop_index(op.f('ix_workflow_templates_config_hash'), table_name='workflow_templates')
     op.drop_index(op.f('ix_workflow_templates_is_public'), table_name='workflow_templates')
     op.drop_index(op.f('ix_workflow_templates_is_latest'), table_name='workflow_templates')
@@ -135,15 +135,15 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_workflow_templates_workflow_type'), table_name='workflow_templates')
     op.drop_index(op.f('ix_workflow_templates_name'), table_name='workflow_templates')
     op.drop_index(op.f('ix_workflow_templates_owner_id'), table_name='workflow_templates')
-    
+
     # Drop tables
     op.drop_table('template_specs')
     op.drop_table('workflow_templates')
-    
+
     # Drop enums
     workflow_type_enum = postgresql.ENUM('plain', 'tools', 'rag', 'full', name='workflowtype')
     workflow_type_enum.drop(op.get_bind())
-    
+
     template_category_enum = postgresql.ENUM(
         'general', 'customer_support', 'programming', 'research', 'data_analysis',
         'creative', 'educational', 'business', 'custom', name='templatecategory'

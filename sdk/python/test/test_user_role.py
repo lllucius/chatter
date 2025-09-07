@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.user_role import UserRole
 
 class TestUserRole(unittest.TestCase):
     """UserRole unit test stubs"""

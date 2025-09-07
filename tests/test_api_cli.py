@@ -4,10 +4,9 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
+from unittest.mock import AsyncMock, patch, Mock
 
 import pytest
-import typer
 from typer.testing import CliRunner
 
 from chatter.api_cli import ChatterSDKClient, app
@@ -41,7 +40,7 @@ class TestChatterSDKClient:
             "CHATTER_API_BASE_URL": "https://api.example.com",
             "CHATTER_ACCESS_TOKEN": "env_token",
         }
-        
+
         with patch.dict(os.environ, env_vars):
             client = ChatterSDKClient()
             assert client.base_url == "https://api.example.com"
@@ -50,17 +49,17 @@ class TestChatterSDKClient:
     def test_save_token(self):
         """Test token saving functionality."""
         client = ChatterSDKClient()
-        
+
         with tempfile.TemporaryDirectory() as temp_dir:
             config_file = Path(temp_dir) / ".chatter" / "config.json"
-            
+
             with patch("pathlib.Path.home") as mock_home:
                 mock_home.return_value = Path(temp_dir)
-                
+
                 # Save a token
                 test_token = "test_access_token"
                 client.save_token(test_token)
-                
+
                 # Verify file was created and token was saved
                 assert config_file.exists()
                 config = json.loads(config_file.read_text())
@@ -69,30 +68,30 @@ class TestChatterSDKClient:
     def test_load_token(self):
         """Test token loading functionality."""
         client = ChatterSDKClient()
-        
+
         with tempfile.TemporaryDirectory() as temp_dir:
             config_dir = Path(temp_dir) / ".chatter"
             config_dir.mkdir()
             config_file = config_dir / "config.json"
-            
+
             # Create config file with token
             test_token = "saved_token"
             config_file.write_text(json.dumps({"access_token": test_token}))
-            
+
             with patch("pathlib.Path.home") as mock_home:
                 mock_home.return_value = Path(temp_dir)
-                
+
                 loaded_token = client.load_token()
                 assert loaded_token == test_token
 
     def test_load_token_no_file(self):
         """Test token loading when no config file exists."""
         client = ChatterSDKClient()
-        
+
         with tempfile.TemporaryDirectory() as temp_dir:
             with patch("pathlib.Path.home") as mock_home:
                 mock_home.return_value = Path(temp_dir)
-                
+
                 loaded_token = client.load_token()
                 assert loaded_token is None
 
@@ -180,11 +179,11 @@ class TestCLICommands:
         mock_response.status = "healthy"
         mock_response.timestamp = "2024-01-01T00:00:00Z"
         mock_response.details = None
-        
+
         mock_client.health_api.health_check_healthz_get = AsyncMock(return_value=mock_response)
         mock_get_client.return_value.__aenter__ = AsyncMock(return_value=mock_client)
         mock_get_client.return_value.__aexit__ = AsyncMock()
-        
+
         result = self.runner.invoke(app, ["health", "check"])
         assert result.exit_code == 0
         assert "Status: healthy" in result.stdout
@@ -196,7 +195,7 @@ class TestCLICommands:
             "CHATTER_API_BASE_URL": "https://test.example.com",
             "CHATTER_ACCESS_TOKEN": "test_token"
         }
-        
+
         with patch.dict(os.environ, env_vars):
             result = self.runner.invoke(app, ["config"])
             assert result.exit_code == 0
@@ -207,20 +206,20 @@ class TestCLICommands:
     def test_get_client_loads_token_from_config(self, mock_sdk_client_class):
         """Test that get_client loads token from local config when env var not set."""
         from chatter.api_cli import get_client
-        
+
         # Mock the temporary client used to load token
         mock_temp_client = Mock()
         mock_temp_client.load_token.return_value = "loaded_token"
-        
+
         # Mock the final client
         mock_final_client = Mock()
-        
+
         # Set up the mock to return different instances for different calls
         mock_sdk_client_class.side_effect = [mock_temp_client, mock_final_client]
-        
+
         with patch.dict(os.environ, {}, clear=True):  # Clear CHATTER_ACCESS_TOKEN
             client = get_client()
-            
+
             # Verify that ChatterSDKClient was called twice
             assert mock_sdk_client_class.call_count == 2
             # First call should be with no access_token to load from config
@@ -240,14 +239,14 @@ class TestErrorHandling:
     def test_api_exception_401(self, mock_get_client):
         """Test handling of 401 authentication errors."""
         from chatter_sdk.exceptions import ApiException
-        
+
         mock_client = AsyncMock()
         mock_client.health_api.health_check_healthz_get = AsyncMock(
             side_effect=ApiException(status=401, reason="Unauthorized")
         )
         mock_get_client.return_value.__aenter__ = AsyncMock(return_value=mock_client)
         mock_get_client.return_value.__aexit__ = AsyncMock()
-        
+
         result = self.runner.invoke(app, ["health", "check"])
         assert result.exit_code == 1
         assert "Authentication failed" in result.stdout
@@ -257,14 +256,14 @@ class TestErrorHandling:
     def test_api_exception_404(self, mock_get_client):
         """Test handling of 404 not found errors."""
         from chatter_sdk.exceptions import ApiException
-        
+
         mock_client = AsyncMock()
         mock_client.health_api.health_check_healthz_get = AsyncMock(
             side_effect=ApiException(status=404, reason="Not Found")
         )
         mock_get_client.return_value.__aenter__ = AsyncMock(return_value=mock_client)
         mock_get_client.return_value.__aexit__ = AsyncMock()
-        
+
         result = self.runner.invoke(app, ["health", "check"])
         assert result.exit_code == 1
         assert "Resource not found" in result.stdout
@@ -278,7 +277,7 @@ class TestErrorHandling:
         )
         mock_get_client.return_value.__aenter__ = AsyncMock(return_value=mock_client)
         mock_get_client.return_value.__aexit__ = AsyncMock()
-        
+
         result = self.runner.invoke(app, ["health", "check"])
         assert result.exit_code == 1
         assert "Unexpected error" in result.stdout
@@ -291,11 +290,11 @@ class TestAsyncDecorator:
     def test_run_async_decorator_success(self):
         """Test successful execution with run_async decorator."""
         from chatter.api_cli import run_async
-        
+
         @run_async
         async def test_func():
             return "success"
-        
+
         result = test_func()
         assert result == "success"
 
@@ -303,11 +302,11 @@ class TestAsyncDecorator:
         """Test run_async decorator handles API exceptions."""
         from chatter.api_cli import run_async
         from chatter_sdk.exceptions import ApiException
-        
+
         @run_async
         async def test_func():
             raise ApiException(status=500, reason="Server Error")
-        
+
         with pytest.raises(SystemExit) as exc_info:
             test_func()
         assert exc_info.value.code == 1
@@ -315,11 +314,11 @@ class TestAsyncDecorator:
     def test_run_async_decorator_with_generic_exception(self):
         """Test run_async decorator handles generic exceptions."""
         from chatter.api_cli import run_async
-        
+
         @run_async
         async def test_func():
             raise Exception("Test error")
-        
+
         with pytest.raises(SystemExit) as exc_info:
             test_func()
         assert exc_info.value.code == 1

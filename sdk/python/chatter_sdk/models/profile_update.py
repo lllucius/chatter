@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,50 +18,49 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+from typing import Annotated
 from chatter_sdk.models.profile_type import ProfileType
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ProfileUpdate(BaseModel):
     """
     Schema for updating a profile.
     """ # noqa: E501
-    name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=255)]] = None
-    description: Optional[StrictStr] = None
-    profile_type: Optional[ProfileType] = None
-    llm_provider: Optional[StrictStr] = None
-    llm_model: Optional[StrictStr] = None
-    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
-    top_p: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
-    top_k: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
-    max_tokens: Optional[Annotated[int, Field(le=100000, strict=True, ge=1)]] = None
-    presence_penalty: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=-2.0)], Annotated[int, Field(le=2, strict=True, ge=-2)]]] = None
-    frequency_penalty: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=-2.0)], Annotated[int, Field(le=2, strict=True, ge=-2)]]] = None
-    context_window: Optional[Annotated[int, Field(le=200000, strict=True, ge=1)]] = None
-    system_prompt: Optional[StrictStr] = None
-    memory_enabled: Optional[StrictBool] = None
-    memory_strategy: Optional[StrictStr] = None
-    enable_retrieval: Optional[StrictBool] = None
-    retrieval_limit: Optional[Annotated[int, Field(le=50, strict=True, ge=1)]] = None
-    retrieval_score_threshold: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
-    enable_tools: Optional[StrictBool] = None
-    available_tools: Optional[List[StrictStr]] = None
-    tool_choice: Optional[StrictStr] = None
-    content_filter_enabled: Optional[StrictBool] = None
-    safety_level: Optional[StrictStr] = None
-    response_format: Optional[StrictStr] = None
-    stream_response: Optional[StrictBool] = None
-    seed: Optional[StrictInt] = None
-    stop_sequences: Optional[List[StrictStr]] = None
-    logit_bias: Optional[Dict[str, Union[StrictFloat, StrictInt]]] = None
-    embedding_provider: Optional[StrictStr] = None
-    embedding_model: Optional[StrictStr] = None
-    is_public: Optional[StrictBool] = None
-    tags: Optional[List[StrictStr]] = None
-    extra_metadata: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["name", "description", "profile_type", "llm_provider", "llm_model", "temperature", "top_p", "top_k", "max_tokens", "presence_penalty", "frequency_penalty", "context_window", "system_prompt", "memory_enabled", "memory_strategy", "enable_retrieval", "retrieval_limit", "retrieval_score_threshold", "enable_tools", "available_tools", "tool_choice", "content_filter_enabled", "safety_level", "response_format", "stream_response", "seed", "stop_sequences", "logit_bias", "embedding_provider", "embedding_model", "is_public", "tags", "extra_metadata"]
+    name: Annotated[str, Field(min_length=1, strict=True, max_length=255)] | None = None
+    description: StrictStr | None = None
+    profile_type: ProfileType | None = None
+    llm_provider: StrictStr | None = None
+    llm_model: StrictStr | None = None
+    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
+    top_p: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
+    top_k: Annotated[int, Field(strict=True, ge=1)] | None = None
+    max_tokens: Annotated[int, Field(le=100000, strict=True, ge=1)] | None = None
+    presence_penalty: Annotated[float, Field(le=2.0, strict=True, ge=-2.0)] | Annotated[int, Field(le=2, strict=True, ge=-2)] | None = None
+    frequency_penalty: Annotated[float, Field(le=2.0, strict=True, ge=-2.0)] | Annotated[int, Field(le=2, strict=True, ge=-2)] | None = None
+    context_window: Annotated[int, Field(le=200000, strict=True, ge=1)] | None = None
+    system_prompt: StrictStr | None = None
+    memory_enabled: StrictBool | None = None
+    memory_strategy: StrictStr | None = None
+    enable_retrieval: StrictBool | None = None
+    retrieval_limit: Annotated[int, Field(le=50, strict=True, ge=1)] | None = None
+    retrieval_score_threshold: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
+    enable_tools: StrictBool | None = None
+    available_tools: list[StrictStr] | None = None
+    tool_choice: StrictStr | None = None
+    content_filter_enabled: StrictBool | None = None
+    safety_level: StrictStr | None = None
+    response_format: StrictStr | None = None
+    stream_response: StrictBool | None = None
+    seed: StrictInt | None = None
+    stop_sequences: list[StrictStr] | None = None
+    logit_bias: dict[str, StrictFloat | StrictInt] | None = None
+    embedding_provider: StrictStr | None = None
+    embedding_model: StrictStr | None = None
+    is_public: StrictBool | None = None
+    tags: list[StrictStr] | None = None
+    extra_metadata: dict[str, Any] | None = None
+    __properties: ClassVar[list[str]] = ["name", "description", "profile_type", "llm_provider", "llm_model", "temperature", "top_p", "top_k", "max_tokens", "presence_penalty", "frequency_penalty", "context_window", "system_prompt", "memory_enabled", "memory_strategy", "enable_retrieval", "retrieval_limit", "retrieval_score_threshold", "enable_tools", "available_tools", "tool_choice", "content_filter_enabled", "safety_level", "response_format", "stream_response", "seed", "stop_sequences", "logit_bias", "embedding_provider", "embedding_model", "is_public", "tags", "extra_metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -81,11 +79,11 @@ class ProfileUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ProfileUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -95,7 +93,7 @@ class ProfileUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -271,7 +269,7 @@ class ProfileUpdate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ProfileUpdate from a dict"""
         if obj is None:
             return None

@@ -1479,6 +1479,39 @@ components:
       - file
       title: Body_upload_document_api_v1_documents_upload_post
       type: object
+    BottleneckInfo:
+      description: Schema for bottleneck information.
+      properties:
+        node_id:
+          description: Node ID with bottleneck
+          title: Node Id
+          type: string
+        node_type:
+          description: Node type
+          title: Node Type
+          type: string
+        reason:
+          description: Bottleneck reason
+          title: Reason
+          type: string
+        severity:
+          description: Bottleneck severity (low/medium/high)
+          title: Severity
+          type: string
+        suggestions:
+          description: Optimization suggestions
+          items:
+            type: string
+          title: Suggestions
+          type: array
+      required:
+      - node_id
+      - node_type
+      - reason
+      - severity
+      - suggestions
+      title: BottleneckInfo
+      type: object
     BulkDeleteResponse:
       description: Response schema for bulk delete operations.
       properties:
@@ -1686,6 +1719,47 @@ components:
       - message
       - conversation
       title: ChatResponse
+      type: object
+    ComplexityMetrics:
+      description: Schema for workflow complexity metrics.
+      properties:
+        branching_factor:
+          description: Average branching factor
+          title: Branching Factor
+          type: number
+        conditional_complexity:
+          default: 0
+          description: Conditional complexity score
+          title: Conditional Complexity
+          type: integer
+        depth:
+          description: Maximum path depth
+          title: Depth
+          type: integer
+        edge_count:
+          description: Number of edges
+          title: Edge Count
+          type: integer
+        loop_complexity:
+          default: 0
+          description: Loop complexity score
+          title: Loop Complexity
+          type: integer
+        node_count:
+          description: Number of nodes
+          title: Node Count
+          type: integer
+        score:
+          description: Overall complexity score
+          title: Score
+          type: integer
+      required:
+      - score
+      - node_count
+      - edge_count
+      - depth
+      - branching_factor
+      title: ComplexityMetrics
       type: object
     ConversationCreate:
       description: Schema for creating a conversation.
@@ -4333,6 +4407,106 @@ components:
       - embedding
       title: ModelType
       type: string
+    NodePropertyDefinition:
+      description: Schema for node property definition.
+      properties:
+        default_value:
+          anyOf:
+          - {}
+          - type: 'null'
+          description: Default value
+          title: Default Value
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Property description
+          title: Description
+        max_value:
+          anyOf:
+          - type: integer
+          - type: number
+          - type: 'null'
+          description: Maximum value for numeric types
+          title: Max Value
+        min_value:
+          anyOf:
+          - type: integer
+          - type: number
+          - type: 'null'
+          description: Minimum value for numeric types
+          title: Min Value
+        name:
+          description: Property name
+          title: Name
+          type: string
+        options:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Valid options for select type
+          title: Options
+        required:
+          default: false
+          description: Whether property is required
+          title: Required
+          type: boolean
+        type:
+          description: Property type
+          title: Type
+          type: string
+      required:
+      - name
+      - type
+      title: NodePropertyDefinition
+      type: object
+    NodeTypeResponse:
+      description: Schema for node type information.
+      properties:
+        category:
+          description: Node category
+          title: Category
+          type: string
+        color:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Node color
+          title: Color
+        description:
+          description: Node description
+          title: Description
+          type: string
+        icon:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Icon name
+          title: Icon
+        name:
+          description: Human-readable name
+          title: Name
+          type: string
+        properties:
+          description: Node properties
+          items:
+            $ref: '#/components/schemas/NodePropertyDefinition'
+          title: Properties
+          type: array
+        type:
+          description: Node type identifier
+          title: Type
+          type: string
+      required:
+      - type
+      - name
+      - description
+      - category
+      - properties
+      title: NodeTypeResponse
+      type: object
     OAuthConfigSchema:
       description: OAuth configuration for remote servers.
       properties:
@@ -4362,6 +4536,35 @@ components:
       - client_secret
       - token_url
       title: OAuthConfigSchema
+      type: object
+    OptimizationSuggestion:
+      description: Schema for optimization suggestions.
+      properties:
+        description:
+          description: Suggestion description
+          title: Description
+          type: string
+        impact:
+          description: Expected impact (low/medium/high)
+          title: Impact
+          type: string
+        node_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Affected node IDs
+          title: Node Ids
+        type:
+          description: Suggestion type
+          title: Type
+          type: string
+      required:
+      - type
+      - description
+      - impact
+      title: OptimizationSuggestion
       type: object
     PaginationRequest:
       description: Common pagination request schema.
@@ -8651,6 +8854,573 @@ components:
       - user_attribute
       title: VariantAllocation
       type: string
+    WorkflowAnalyticsResponse:
+      description: Schema for workflow analytics response.
+      properties:
+        bottlenecks:
+          description: Identified bottlenecks
+          items:
+            $ref: '#/components/schemas/BottleneckInfo'
+          title: Bottlenecks
+          type: array
+        completed_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Execution completion time
+          title: Completed At
+        complexity:
+          $ref: '#/components/schemas/ComplexityMetrics'
+          description: Complexity metrics
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Error message if failed
+          title: Error
+        estimated_execution_time_ms:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Estimated execution time
+          title: Estimated Execution Time Ms
+        execution_paths:
+          description: Number of possible execution paths
+          title: Execution Paths
+          type: integer
+        optimization_suggestions:
+          description: Optimization suggestions
+          items:
+            $ref: '#/components/schemas/OptimizationSuggestion'
+          title: Optimization Suggestions
+          type: array
+        risk_factors:
+          description: Identified risk factors
+          items:
+            type: string
+          title: Risk Factors
+          type: array
+        started_at:
+          description: Execution start time
+          format: date-time
+          title: Started At
+          type: string
+        total_execution_time_ms:
+          description: Total execution time
+          title: Total Execution Time Ms
+          type: integer
+      required:
+      - complexity
+      - bottlenecks
+      - optimization_suggestions
+      - execution_paths
+      - risk_factors
+      - total_execution_time_ms
+      - started_at
+      title: WorkflowAnalyticsResponse
+      type: object
+    WorkflowDefinitionCreate:
+      description: Schema for creating a workflow definition.
+      properties:
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Workflow description
+          title: Description
+        edges:
+          description: Workflow edges
+          items:
+            $ref: '#/components/schemas/WorkflowEdge'
+          title: Edges
+          type: array
+        is_public:
+          default: false
+          description: Whether workflow is publicly visible
+          title: Is Public
+          type: boolean
+        metadata:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Additional metadata
+          title: Metadata
+        name:
+          description: Workflow name
+          maxLength: 255
+          minLength: 1
+          title: Name
+          type: string
+        nodes:
+          description: Workflow nodes
+          items:
+            $ref: '#/components/schemas/WorkflowNode'
+          title: Nodes
+          type: array
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Workflow tags
+          title: Tags
+        template_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Source template ID if created from template
+          title: Template Id
+      required:
+      - name
+      - nodes
+      - edges
+      title: WorkflowDefinitionCreate
+      type: object
+    WorkflowDefinitionResponse:
+      description: Schema for workflow definition response.
+      properties:
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Workflow description
+          title: Description
+        edges:
+          description: Workflow edges
+          items:
+            $ref: '#/components/schemas/WorkflowEdge'
+          title: Edges
+          type: array
+        id:
+          description: Unique node identifier
+          title: Id
+          type: string
+        is_public:
+          default: false
+          description: Whether workflow is public
+          title: Is Public
+          type: boolean
+        metadata:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Additional metadata
+          title: Metadata
+        name:
+          description: Workflow name
+          maxLength: 255
+          minLength: 1
+          title: Name
+          type: string
+        nodes:
+          description: Workflow nodes
+          items:
+            $ref: '#/components/schemas/WorkflowNode'
+          title: Nodes
+          type: array
+        owner_id:
+          description: Owner user ID
+          title: Owner Id
+          type: string
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Workflow tags
+          title: Tags
+        template_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Source template ID if created from template
+          title: Template Id
+        version:
+          default: 1
+          description: Workflow version
+          title: Version
+          type: integer
+      required:
+      - name
+      - nodes
+      - edges
+      - id
+      - owner_id
+      title: WorkflowDefinitionResponse
+      type: object
+    WorkflowDefinitionUpdate:
+      description: Schema for updating a workflow definition.
+      properties:
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Workflow description
+          title: Description
+        edges:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/WorkflowEdge'
+            type: array
+          - type: 'null'
+          description: Workflow edges
+          title: Edges
+        metadata:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Additional metadata
+          title: Metadata
+        name:
+          anyOf:
+          - maxLength: 255
+            minLength: 1
+            type: string
+          - type: 'null'
+          description: Workflow name
+          title: Name
+        nodes:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/WorkflowNode'
+            type: array
+          - type: 'null'
+          description: Workflow nodes
+          title: Nodes
+      title: WorkflowDefinitionUpdate
+      type: object
+    WorkflowDefinitionsResponse:
+      description: Schema for workflow definitions list response.
+      properties:
+        definitions:
+          description: Workflow definitions
+          items:
+            $ref: '#/components/schemas/WorkflowDefinitionResponse'
+          title: Definitions
+          type: array
+        total_count:
+          description: Total number of definitions
+          title: Total Count
+          type: integer
+      required:
+      - definitions
+      - total_count
+      title: WorkflowDefinitionsResponse
+      type: object
+    WorkflowEdge:
+      description: Schema for a workflow edge.
+      properties:
+        data:
+          anyOf:
+          - $ref: '#/components/schemas/WorkflowEdgeData'
+          - type: 'null'
+          description: Edge data
+        id:
+          description: Unique edge identifier
+          title: Id
+          type: string
+        source:
+          description: Source node ID
+          title: Source
+          type: string
+        sourceHandle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Source handle ID
+          title: Sourcehandle
+        target:
+          description: Target node ID
+          title: Target
+          type: string
+        targetHandle:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Target handle ID
+          title: Targethandle
+        type:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: default
+          description: Edge type
+          title: Type
+      required:
+      - id
+      - source
+      - target
+      title: WorkflowEdge
+      type: object
+    WorkflowEdgeData:
+      description: Schema for workflow edge data.
+      properties:
+        condition:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Edge condition
+          title: Condition
+        label:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Edge label
+          title: Label
+      title: WorkflowEdgeData
+      type: object
+    WorkflowExecutionRequest:
+      description: Schema for starting a workflow execution.
+      properties:
+        definition_id:
+          description: Workflow definition ID
+          title: Definition Id
+          type: string
+        input_data:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Execution input data
+          title: Input Data
+      required:
+      - definition_id
+      title: WorkflowExecutionRequest
+      type: object
+    WorkflowExecutionResponse:
+      description: Schema for workflow execution response.
+      properties:
+        completed_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Execution completion time
+          title: Completed At
+        cost:
+          default: 0.0
+          description: Total cost
+          title: Cost
+          type: number
+        created_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Creation timestamp
+          title: Created At
+        definition_id:
+          description: Workflow definition ID
+          title: Definition Id
+          type: string
+        error_message:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Error message if failed
+          title: Error Message
+        execution_time_ms:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Execution time in milliseconds
+          title: Execution Time Ms
+        id:
+          description: Execution ID
+          title: Id
+          type: string
+        input_data:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Execution input data
+          title: Input Data
+        output_data:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Execution output data
+          title: Output Data
+        owner_id:
+          description: Owner user ID
+          title: Owner Id
+          type: string
+        started_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Execution start time
+          title: Started At
+        status:
+          description: Execution status
+          title: Status
+          type: string
+        tokens_used:
+          default: 0
+          description: Total tokens used
+          title: Tokens Used
+          type: integer
+        updated_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Last update timestamp
+          title: Updated At
+      required:
+      - id
+      - definition_id
+      - owner_id
+      - status
+      title: WorkflowExecutionResponse
+      type: object
+    WorkflowNode:
+      description: Schema for a workflow node.
+      properties:
+        data:
+          $ref: '#/components/schemas/WorkflowNodeData'
+          description: Node data
+        dragging:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: false
+          description: Whether node is being dragged
+          title: Dragging
+        id:
+          description: Unique node identifier
+          title: Id
+          type: string
+        position:
+          additionalProperties:
+            type: number
+          description: Node position (x, y)
+          title: Position
+          type: object
+        selected:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: false
+          description: Whether node is selected
+          title: Selected
+        type:
+          description: Node type
+          title: Type
+          type: string
+      required:
+      - id
+      - type
+      - position
+      - data
+      title: WorkflowNode
+      type: object
+    WorkflowNodeData:
+      description: Schema for workflow node data.
+      properties:
+        config:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Node configuration
+          title: Config
+        label:
+          description: Node display label
+          title: Label
+          type: string
+        nodeType:
+          description: Type of the node
+          title: Nodetype
+          type: string
+      required:
+      - label
+      - nodeType
+      title: WorkflowNodeData
+      type: object
+    WorkflowTemplateCreate:
+      description: Schema for creating a workflow template.
+      properties:
+        base_template_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Base template ID for derivation
+          title: Base Template Id
+        category:
+          default: custom
+          description: Template category
+          title: Category
+          type: string
+        default_params:
+          additionalProperties: true
+          description: Default parameters
+          title: Default Params
+          type: object
+        description:
+          description: Template description
+          title: Description
+          type: string
+        is_public:
+          default: false
+          description: Whether template is public
+          title: Is Public
+          type: boolean
+        name:
+          description: Template name
+          maxLength: 255
+          minLength: 1
+          title: Name
+          type: string
+        required_retrievers:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Required retrievers
+          title: Required Retrievers
+        required_tools:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Required tools
+          title: Required Tools
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Template tags
+          title: Tags
+        workflow_definition_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Source workflow definition ID
+          title: Workflow Definition Id
+        workflow_type:
+          description: Workflow type
+          title: Workflow Type
+          type: string
+      required:
+      - name
+      - description
+      - workflow_type
+      title: WorkflowTemplateCreate
+      type: object
     WorkflowTemplateInfo:
       description: Schema for workflow template information.
       properties:
@@ -8692,7 +9462,227 @@ components:
       - default_params
       title: WorkflowTemplateInfo
       type: object
-    WorkflowTemplatesResponse:
+    WorkflowTemplateResponse:
+      description: Schema for workflow template response.
+      properties:
+        base_template_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Base template ID
+          title: Base Template Id
+        category:
+          default: custom
+          description: Template category
+          title: Category
+          type: string
+        config_hash:
+          description: Configuration hash
+          title: Config Hash
+          type: string
+        default_params:
+          additionalProperties: true
+          description: Default parameters
+          title: Default Params
+          type: object
+        description:
+          description: Template description
+          title: Description
+          type: string
+        estimated_complexity:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Estimated complexity score
+          title: Estimated Complexity
+        id:
+          description: Unique node identifier
+          title: Id
+          type: string
+        is_builtin:
+          default: false
+          description: Whether template is built-in
+          title: Is Builtin
+          type: boolean
+        is_latest:
+          default: true
+          description: Whether this is the latest version
+          title: Is Latest
+          type: boolean
+        is_public:
+          default: false
+          description: Whether template is public
+          title: Is Public
+          type: boolean
+        name:
+          description: Template name
+          maxLength: 255
+          minLength: 1
+          title: Name
+          type: string
+        owner_id:
+          description: Owner user ID
+          title: Owner Id
+          type: string
+        rating:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: Average rating
+          title: Rating
+        rating_count:
+          default: 0
+          description: Number of ratings
+          title: Rating Count
+          type: integer
+        required_retrievers:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Required retrievers
+          title: Required Retrievers
+        required_tools:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Required tools
+          title: Required Tools
+        success_rate:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: Success rate
+          title: Success Rate
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Template tags
+          title: Tags
+        usage_count:
+          default: 0
+          description: Usage count
+          title: Usage Count
+          type: integer
+        version:
+          default: 1
+          description: Template version
+          title: Version
+          type: integer
+        workflow_type:
+          description: Workflow type
+          title: Workflow Type
+          type: string
+      required:
+      - name
+      - description
+      - workflow_type
+      - id
+      - owner_id
+      - config_hash
+      title: WorkflowTemplateResponse
+      type: object
+    WorkflowTemplateUpdate:
+      description: Schema for updating a workflow template.
+      properties:
+        category:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Template category
+          title: Category
+        default_params:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Default parameters
+          title: Default Params
+        description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Template description
+          title: Description
+        is_public:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Whether template is public
+          title: Is Public
+        name:
+          anyOf:
+          - maxLength: 255
+            minLength: 1
+            type: string
+          - type: 'null'
+          description: Template name
+          title: Name
+        required_retrievers:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Required retrievers
+          title: Required Retrievers
+        required_tools:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Required tools
+          title: Required Tools
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Template tags
+          title: Tags
+      title: WorkflowTemplateUpdate
+      type: object
+    WorkflowValidationResponse:
+      description: Schema for workflow validation response.
+      properties:
+        errors:
+          description: Validation errors
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: Errors
+          type: array
+        is_valid:
+          description: Whether workflow is valid
+          title: Is Valid
+          type: boolean
+        suggestions:
+          description: Validation suggestions
+          items:
+            type: string
+          title: Suggestions
+          type: array
+        warnings:
+          description: Validation warnings
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          title: Warnings
+          type: array
+      required:
+      - is_valid
+      - errors
+      - warnings
+      - suggestions
+      title: WorkflowValidationResponse
+      type: object
+    chatter__schemas__chat__WorkflowTemplatesResponse:
       description: Schema for workflow templates response.
       properties:
         templates:
@@ -8701,6 +9691,24 @@ components:
           description: Available templates
           title: Templates
           type: object
+        total_count:
+          description: Total number of templates
+          title: Total Count
+          type: integer
+      required:
+      - templates
+      - total_count
+      title: WorkflowTemplatesResponse
+      type: object
+    chatter__schemas__workflows__WorkflowTemplatesResponse:
+      description: Schema for workflow templates list response.
+      properties:
+        templates:
+          description: Workflow templates
+          items:
+            $ref: '#/components/schemas/WorkflowTemplateResponse'
+          title: Templates
+          type: array
         total_count:
           description: Total number of templates
           title: Total Count
@@ -12421,7 +13429,7 @@ paths:
                     - escalate
                     workflow_type: full
               schema:
-                $ref: '#/components/schemas/WorkflowTemplatesResponse'
+                $ref: '#/components/schemas/chatter__schemas__chat__WorkflowTemplatesResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -17331,6 +18339,536 @@ paths:
       summary: Get User Permissions
       tags:
       - Tool Servers
+  /api/v1/workflows/workflows/definitions:
+    get:
+      description: List all workflow definitions for the current user.
+      operationId: list_workflow_definitions_api_v1_workflows_workflows_definitions_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowDefinitionsResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: List Workflow Definitions
+      tags:
+      - Workflows
+      - workflows
+    post:
+      description: Create a new workflow definition.
+      operationId: create_workflow_definition_api_v1_workflows_workflows_definitions_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowDefinitionCreate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowDefinitionResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Create Workflow Definition
+      tags:
+      - Workflows
+      - workflows
+  /api/v1/workflows/workflows/definitions/validate:
+    post:
+      description: Validate a workflow definition.
+      operationId: validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowDefinitionCreate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowValidationResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Validate Workflow Definition
+      tags:
+      - Workflows
+      - workflows
+  /api/v1/workflows/workflows/definitions/{workflow_id}:
+    delete:
+      description: Delete a workflow definition.
+      operationId: delete_workflow_definition_api_v1_workflows_workflows_definitions__workflow_id__delete
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        schema:
+          description: Workflow ID
+          minLength: 1
+          title: Workflow Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                title: Response Delete Workflow Definition Api V1 Workflows Workflows
+                  Definitions  Workflow Id  Delete
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Delete Workflow Definition
+      tags:
+      - Workflows
+      - workflows
+    get:
+      description: Get a specific workflow definition.
+      operationId: get_workflow_definition_api_v1_workflows_workflows_definitions__workflow_id__get
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        schema:
+          description: Workflow ID
+          minLength: 1
+          title: Workflow Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowDefinitionResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Workflow Definition
+      tags:
+      - Workflows
+      - workflows
+    put:
+      description: Update a workflow definition.
+      operationId: update_workflow_definition_api_v1_workflows_workflows_definitions__workflow_id__put
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        schema:
+          description: Workflow ID
+          minLength: 1
+          title: Workflow Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowDefinitionUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowDefinitionResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Update Workflow Definition
+      tags:
+      - Workflows
+      - workflows
+  /api/v1/workflows/workflows/definitions/{workflow_id}/analytics:
+    get:
+      description: Get analytics for a specific workflow definition.
+      operationId: get_workflow_analytics_api_v1_workflows_workflows_definitions__workflow_id__analytics_get
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        schema:
+          description: Workflow ID
+          minLength: 1
+          title: Workflow Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowAnalyticsResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Workflow Analytics
+      tags:
+      - Workflows
+      - workflows
+  /api/v1/workflows/workflows/definitions/{workflow_id}/execute:
+    post:
+      description: Execute a workflow definition.
+      operationId: execute_workflow_api_v1_workflows_workflows_definitions__workflow_id__execute_post
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        schema:
+          description: Workflow ID
+          minLength: 1
+          title: Workflow Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowExecutionRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowExecutionResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Execute Workflow
+      tags:
+      - Workflows
+      - workflows
+  /api/v1/workflows/workflows/definitions/{workflow_id}/executions:
+    get:
+      description: List executions for a workflow definition.
+      operationId: list_workflow_executions_api_v1_workflows_workflows_definitions__workflow_id__executions_get
+      parameters:
+      - description: Workflow ID
+        in: path
+        name: workflow_id
+        required: true
+        schema:
+          description: Workflow ID
+          minLength: 1
+          title: Workflow Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/WorkflowExecutionResponse'
+                title: Response List Workflow Executions Api V1 Workflows Workflows
+                  Definitions  Workflow Id  Executions Get
+                type: array
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: List Workflow Executions
+      tags:
+      - Workflows
+      - workflows
+  /api/v1/workflows/workflows/node-types:
+    get:
+      description: Get list of supported workflow node types.
+      operationId: get_supported_node_types_api_v1_workflows_workflows_node_types_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/NodeTypeResponse'
+                title: Response Get Supported Node Types Api V1 Workflows Workflows
+                  Node Types Get
+                type: array
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Supported Node Types
+      tags:
+      - Workflows
+      - workflows
+  /api/v1/workflows/workflows/templates:
+    get:
+      description: List all workflow templates accessible to the current user.
+      operationId: list_workflow_templates_api_v1_workflows_workflows_templates_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/chatter__schemas__workflows__WorkflowTemplatesResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: List Workflow Templates
+      tags:
+      - Workflows
+      - workflows
+    post:
+      description: Create a new workflow template.
+      operationId: create_workflow_template_api_v1_workflows_workflows_templates_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowTemplateCreate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowTemplateResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Create Workflow Template
+      tags:
+      - Workflows
+      - workflows
+  /api/v1/workflows/workflows/templates/{template_id}:
+    put:
+      description: Update a workflow template.
+      operationId: update_workflow_template_api_v1_workflows_workflows_templates__template_id__put
+      parameters:
+      - in: path
+        name: template_id
+        required: true
+        schema:
+          title: Template Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowTemplateUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkflowTemplateResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Update Workflow Template
+      tags:
+      - Workflows
+      - workflows
   /healthz:
     get:
       description: "Basic health check endpoint.\n\nReturns:\n    Health status"
@@ -17460,3 +18998,6 @@ paths:
       summary: Get Correlation Trace
       tags:
       - Health
+servers:
+- description: Main server
+  url: http://localhost:8000

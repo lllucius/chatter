@@ -451,7 +451,7 @@ const LayoutFrame: React.FC = () => {
                   easing: theme.transitions.easing.sharp,
                   duration: theme.transitions.duration.enteringScreen,
                 }),
-              overflowX: 'hidden',
+              overflow: 'hidden',
             },
           }}
           open
@@ -520,7 +520,7 @@ const LayoutFrame: React.FC = () => {
                   easing: theme.transitions.easing.sharp,
                   duration: theme.transitions.duration.enteringScreen,
                 }),
-              overflowX: 'hidden',
+              overflow: 'hidden',
               pointerEvents: 'auto',
             },
           }}

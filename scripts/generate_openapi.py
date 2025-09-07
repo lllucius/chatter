@@ -1,9 +1,18 @@
+#!/usr/bin/env python3
 """OpenAPI specification generation for Chatter API."""
 
 import json
 import yaml
 from pathlib import Path
 from typing import Any
+
+import sys
+from pathlib import Path
+
+# Add project root to Python path for imports
+project_root = Path(__file__).parent.parent.resolve()
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 from chatter.main import app
 

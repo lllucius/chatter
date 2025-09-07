@@ -24,7 +24,6 @@ import {
   Person as PersonIcon,
   SmartToy as BotIcon,
   Refresh as RefreshIcon,
-  Tune as TuneIcon,
   Stream as StreamIcon,
   Speed as SpeedIcon,
   History as HistoryIcon,
@@ -222,7 +221,7 @@ const ChatPage: React.FC = () => {
 
   // Inject configuration panel into the right drawer
   useEffect(() => {
-    setTitle('Chat Configuration');
+    setTitle('Configuration');
     
     // Restore right drawer state
     const savedDrawerState = localStorage.getItem('chatter_rightDrawerOpen');
@@ -645,12 +644,6 @@ const ChatPage: React.FC = () => {
           variant="outlined"
         />
       )}
-      {/* Toggle right drawer */}
-      <Tooltip title={open ? 'Hide Settings' : 'Show Settings'}>
-        <IconButton onClick={() => setOpen(!open)} size="small">
-          <TuneIcon />
-        </IconButton>
-      </Tooltip>
     </>
   );
 

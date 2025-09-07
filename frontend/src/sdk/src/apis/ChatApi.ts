@@ -19,6 +19,7 @@ import type {
   ChatRequest,
   ChatResponse,
   ChatResponse1,
+  ChatterSchemasChatWorkflowTemplatesResponse,
   ConversationCreate,
   ConversationDeleteResponse,
   ConversationResponse,
@@ -30,7 +31,6 @@ import type {
   MessageDeleteResponse,
   MessageResponse,
   PerformanceStatsResponse,
-  WorkflowTemplatesResponse,
 } from '../models/index';
 import {
     AvailableToolsResponseFromJSON,
@@ -41,6 +41,8 @@ import {
     ChatResponseToJSON,
     ChatResponse1FromJSON,
     ChatResponse1ToJSON,
+    ChatterSchemasChatWorkflowTemplatesResponseFromJSON,
+    ChatterSchemasChatWorkflowTemplatesResponseToJSON,
     ConversationCreateFromJSON,
     ConversationCreateToJSON,
     ConversationDeleteResponseFromJSON,
@@ -63,8 +65,6 @@ import {
     MessageResponseToJSON,
     PerformanceStatsResponseFromJSON,
     PerformanceStatsResponseToJSON,
-    WorkflowTemplatesResponseFromJSON,
-    WorkflowTemplatesResponseToJSON,
 } from '../models/index';
 
 export interface ChatApiV1ChatChatPostRequest {
@@ -286,13 +286,13 @@ export interface ChatApiInterface {
      * @throws {RequiredError}
      * @memberof ChatApiInterface
      */
-    getWorkflowTemplatesApiV1ChatTemplatesGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WorkflowTemplatesResponse>>;
+    getWorkflowTemplatesApiV1ChatTemplatesGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ChatterSchemasChatWorkflowTemplatesResponse>>;
 
     /**
      * Get available workflow templates.
      * Get Workflow Templates
      */
-    getWorkflowTemplatesApiV1ChatTemplatesGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WorkflowTemplatesResponse>;
+    getWorkflowTemplatesApiV1ChatTemplatesGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ChatterSchemasChatWorkflowTemplatesResponse>;
 
     /**
      * List conversations for the current user.
@@ -819,7 +819,7 @@ export class ChatApi extends runtime.BaseAPI implements ChatApiInterface {
      * Get available workflow templates.
      * Get Workflow Templates
      */
-    async getWorkflowTemplatesApiV1ChatTemplatesGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WorkflowTemplatesResponse>> {
+    async getWorkflowTemplatesApiV1ChatTemplatesGetRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ChatterSchemasChatWorkflowTemplatesResponse>> {
         const queryParameters: any = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
@@ -842,14 +842,14 @@ export class ChatApi extends runtime.BaseAPI implements ChatApiInterface {
             query: queryParameters,
         }, initOverrides);
 
-        return new runtime.JSONApiResponse(response, (jsonValue) => WorkflowTemplatesResponseFromJSON(jsonValue));
+        return new runtime.JSONApiResponse(response, (jsonValue) => ChatterSchemasChatWorkflowTemplatesResponseFromJSON(jsonValue));
     }
 
     /**
      * Get available workflow templates.
      * Get Workflow Templates
      */
-    async getWorkflowTemplatesApiV1ChatTemplatesGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WorkflowTemplatesResponse> {
+    async getWorkflowTemplatesApiV1ChatTemplatesGet(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ChatterSchemasChatWorkflowTemplatesResponse> {
         const response = await this.getWorkflowTemplatesApiV1ChatTemplatesGetRaw(initOverrides);
         return await response.value();
     }

@@ -24,37 +24,37 @@ import {
 /**
  * Schema for workflow templates response.
  * @export
- * @interface WorkflowTemplatesResponse
+ * @interface ChatterSchemasChatWorkflowTemplatesResponse
  */
-export interface WorkflowTemplatesResponse {
+export interface ChatterSchemasChatWorkflowTemplatesResponse {
     /**
      * Available templates
      * @type {{ [key: string]: WorkflowTemplateInfo; }}
-     * @memberof WorkflowTemplatesResponse
+     * @memberof ChatterSchemasChatWorkflowTemplatesResponse
      */
     templates: { [key: string]: WorkflowTemplateInfo; };
     /**
      * Total number of templates
      * @type {number}
-     * @memberof WorkflowTemplatesResponse
+     * @memberof ChatterSchemasChatWorkflowTemplatesResponse
      */
     totalCount: number;
 }
 
 /**
- * Check if a given object implements the WorkflowTemplatesResponse interface.
+ * Check if a given object implements the ChatterSchemasChatWorkflowTemplatesResponse interface.
  */
-export function instanceOfWorkflowTemplatesResponse(value: object): value is WorkflowTemplatesResponse {
+export function instanceOfChatterSchemasChatWorkflowTemplatesResponse(value: object): value is ChatterSchemasChatWorkflowTemplatesResponse {
     if (!('templates' in value) || value['templates'] === undefined) return false;
     if (!('totalCount' in value) || value['totalCount'] === undefined) return false;
     return true;
 }
 
-export function WorkflowTemplatesResponseFromJSON(json: any): WorkflowTemplatesResponse {
-    return WorkflowTemplatesResponseFromJSONTyped(json, false);
+export function ChatterSchemasChatWorkflowTemplatesResponseFromJSON(json: any): ChatterSchemasChatWorkflowTemplatesResponse {
+    return ChatterSchemasChatWorkflowTemplatesResponseFromJSONTyped(json, false);
 }
 
-export function WorkflowTemplatesResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): WorkflowTemplatesResponse {
+export function ChatterSchemasChatWorkflowTemplatesResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): ChatterSchemasChatWorkflowTemplatesResponse {
     if (json == null) {
         return json;
     }
@@ -65,11 +65,11 @@ export function WorkflowTemplatesResponseFromJSONTyped(json: any, ignoreDiscrimi
     };
 }
 
-export function WorkflowTemplatesResponseToJSON(json: any): WorkflowTemplatesResponse {
-    return WorkflowTemplatesResponseToJSONTyped(json, false);
+export function ChatterSchemasChatWorkflowTemplatesResponseToJSON(json: any): ChatterSchemasChatWorkflowTemplatesResponse {
+    return ChatterSchemasChatWorkflowTemplatesResponseToJSONTyped(json, false);
 }
 
-export function WorkflowTemplatesResponseToJSONTyped(value?: WorkflowTemplatesResponse | null, ignoreDiscriminator: boolean = false): any {
+export function ChatterSchemasChatWorkflowTemplatesResponseToJSONTyped(value?: ChatterSchemasChatWorkflowTemplatesResponse | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }

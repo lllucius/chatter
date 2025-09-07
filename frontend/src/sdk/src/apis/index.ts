@@ -16,3 +16,4 @@ export * from './PluginsApi';
 export * from './ProfilesApi';
 export * from './PromptsApi';
 export * from './ToolServersApi';
+export * from './WorkflowsApi';

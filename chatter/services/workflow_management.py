@@ -514,7 +514,7 @@ class WorkflowManagementService:
             raise
 
     # Validation
-    async def validate_workflow_definition(
+    async def validate_workflow_structure(
         self,
         nodes: list[dict[str, Any]],
         edges: list[dict[str, Any]],

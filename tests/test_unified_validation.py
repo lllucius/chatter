@@ -234,25 +234,6 @@ class TestValidationContext:
         assert not context.is_validator_enabled("business")
 
 
-class TestBackwardsCompatibility:
-    """Test backwards compatibility layer."""
-
-    def test_legacy_imports(self):
-        """Test that legacy imports still work."""
-        # Skip this test as compat module doesn't exist in current implementation
-        # This functionality was removed during refactoring
-        pytest.skip(
-            "Backwards compatibility module not implemented in current version"
-        )
-
-    def test_legacy_validator_classes(self):
-        """Test legacy validator class compatibility."""
-        # Skip this test as compat module doesn't exist in current implementation
-        # This functionality was removed during refactoring
-        pytest.skip(
-            "Backwards compatibility module not implemented in current version"
-        )
-
 
 class TestValidationResult:
     """Test validation result functionality."""

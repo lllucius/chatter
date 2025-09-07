@@ -28,7 +28,6 @@ import {
   Message as MessageIcon,
   Search as SearchIcon,
   Delete as DeleteIcon,
-  Share as ShareIcon,
   Download as DownloadIcon,
   MoreVert as MoreVertIcon,
   Refresh as RefreshIcon,
@@ -102,7 +101,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
       });
       setConversations(prev => prev.filter(c => c.id !== actionConversation.id));
       handleActionClose();
-    } catch (err: any) {
+    } catch (_err: any) {
       setError('Failed to delete conversation');
     }
   };
@@ -124,7 +123,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       handleActionClose();
-    } catch (err: any) {
+    } catch (_err: any) {
       setError('Failed to export conversation');
     }
   };

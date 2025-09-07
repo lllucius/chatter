@@ -66,6 +66,7 @@ import {
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
+import PageLayout from '../components/PageLayout';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -1785,67 +1786,65 @@ const ToolsPage: React.FC = () => {
     </Box>
   );
 
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Tool Server Management
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={() => {
+          if (activeTab === 0) {
+            loadRemoteServers();
+          } else if (activeTab === 1) {
+            loadTools();
+          } else {
+            loadPermissions();
+            loadRoleAccessRules();
+          }
+        }}
+        disabled={loading}
+      >
+        Refresh
+      </Button>
+      {activeTab === 0 && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => openDialog('server')}
+        >
+          Add Remote Server
+        </Button>
+      )}
+      {activeTab === 2 && (
+        <>
+          <Button
+            variant="contained"
+            startIcon={<SecurityIcon />}
+            onClick={() => openDialog('permission')}
+          >
+            Grant Permission
+          </Button>
           <Button
             variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={() => {
-              if (activeTab === 0) {
-                loadRemoteServers();
-              } else if (activeTab === 1) {
-                loadTools();
-              } else {
-                loadPermissions();
-                loadRoleAccessRules();
-              }
-            }}
-            disabled={loading}
+            startIcon={<SettingsIcon />}
+            onClick={() => openDialog('role-access')}
           >
-            Refresh
+            Create Role Rule
           </Button>
-          {activeTab === 0 && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => openDialog('server')}
-            >
-              Add Remote Server
-            </Button>
-          )}
-          {activeTab === 2 && (
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="contained"
-                startIcon={<SecurityIcon />}
-                onClick={() => openDialog('permission')}
-              >
-                Grant Permission
-              </Button>
-              <Button
-                variant="outlined"
-                startIcon={<SettingsIcon />}
-                onClick={() => openDialog('role-access')}
-              >
-                Create Role Rule
-              </Button>
-              <Button
-                variant="outlined"
-                color="info"
-                startIcon={<SecurityIcon />}
-                onClick={() => openDialog('access-check')}
-              >
-                Check Access
-              </Button>
-            </Box>
-          )}
-        </Box>
-      </Box>
+          <Button
+            variant="outlined"
+            color="info"
+            startIcon={<SecurityIcon />}
+            onClick={() => openDialog('access-check')}
+          >
+            Check Access
+          </Button>
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <PageLayout title="Tool Server Management" toolbar={toolbar}>
       
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={activeTab} onChange={handleTabChange}>
@@ -1918,7 +1917,7 @@ const ToolsPage: React.FC = () => {
           </MenuItem>
         )}
       </Menu>
-    </Box>
+    </PageLayout>
   );
 };
 

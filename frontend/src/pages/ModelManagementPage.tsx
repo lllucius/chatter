@@ -51,6 +51,7 @@ import {
   EmbeddingSpaceWithModel,
   DefaultProvider,
 } from '../sdk';
+import PageLayout from '../components/PageLayout';
 
 type TabKey = 'providers' | 'models' | 'spaces';
 
@@ -556,97 +557,94 @@ const ModelManagementPage: React.FC = () => {
     setSpaceDialogOpen(true);
   };
 
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Model Management
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadData}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-          {activeTab === 'providers' && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setEditingProvider(null);
-                setProviderForm({
-                  name: '',
-                  provider_type: 'openai',
-                  display_name: '',
-                  description: '',
-                  api_key_required: true,
-                  base_url: '',
-                  is_active: true,
-                });
-                setProviderDialogOpen(true);
-              }}
-            >
-              Create Provider
-            </Button>
-          )}
-          {activeTab === 'models' && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setEditingModel(null);
-                setModelForm({
-                  provider_id: providers[0]?.id || '',
-                  name: '',
-                  model_type: 'embedding',
-                  display_name: '',
-                  description: '',
-                  model_name: '',
-                  dimensions: 1536,
-                  supports_batch: true,
-                  is_active: true,
-                });
-                setModelDialogOpen(true);
-              }}
-              disabled={providers.length === 0}
-            >
-              Create Model
-            </Button>
-          )}
-          {activeTab === 'spaces' && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => {
-                const firstEmbedding = embeddingModels[0];
-                setEditingSpace(null);
-                setSpaceForm({
-                  model_id: firstEmbedding?.id || '',
-                  name: '',
-                  display_name: '',
-                  description: '',
-                  base_dimensions: firstEmbedding?.dimensions || 1536,
-                  effective_dimensions: firstEmbedding?.dimensions || 1536,
-                  reduction_strategy: 'none',
-                  distance_metric: 'cosine',
-                  table_name: '',
-                  index_type: 'hnsw',
-                  normalize_vectors: true,
-                  is_active: true,
-                });
-                setSpaceDialogOpen(true);
-              }}
-              disabled={embeddingModels.length === 0}
-            >
-              Create Space
-            </Button>
-          )}
-        </Box>
-      </Box>
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={loadData}
+        disabled={loading}
+      >
+        Refresh
+      </Button>
+      {activeTab === 'providers' && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            setEditingProvider(null);
+            setProviderForm({
+              name: '',
+              provider_type: 'openai',
+              display_name: '',
+              description: '',
+              api_key_required: true,
+              base_url: '',
+              is_active: true,
+            });
+            setProviderDialogOpen(true);
+          }}
+        >
+          Create Provider
+        </Button>
+      )}
+      {activeTab === 'models' && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            setEditingModel(null);
+            setModelForm({
+              provider_id: providers[0]?.id || '',
+              name: '',
+              model_type: 'embedding',
+              display_name: '',
+              description: '',
+              model_name: '',
+              dimensions: 1536,
+              supports_batch: true,
+              is_active: true,
+            });
+            setModelDialogOpen(true);
+          }}
+          disabled={providers.length === 0}
+        >
+          Create Model
+        </Button>
+      )}
+      {activeTab === 'spaces' && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            const firstEmbedding = embeddingModels[0];
+            setEditingSpace(null);
+            setSpaceForm({
+              model_id: firstEmbedding?.id || '',
+              name: '',
+              display_name: '',
+              description: '',
+              base_dimensions: firstEmbedding?.dimensions || 1536,
+              effective_dimensions: firstEmbedding?.dimensions || 1536,
+              reduction_strategy: 'none',
+              distance_metric: 'cosine',
+              table_name: '',
+              index_type: 'hnsw',
+              normalize_vectors: true,
+              is_active: true,
+            });
+            setSpaceDialogOpen(true);
+          }}
+          disabled={embeddingModels.length === 0}
+        >
+          Create Space
+        </Button>
+      )}
+    </>
+  );
 
+  return (
+    <PageLayout title="Model Management" toolbar={toolbar}>
 
       <Tabs
         value={activeTab}
@@ -1427,7 +1425,7 @@ const ModelManagementPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageLayout>
   );
 };
 

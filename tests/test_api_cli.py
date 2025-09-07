@@ -170,6 +170,124 @@ class TestCLICommands:
         assert "Analytics and metrics commands" in result.stdout
         assert "dashboard" in result.stdout
 
+    def test_chat_help(self):
+        """Test chat subcommand help."""
+        result = self.runner.invoke(app, ["chat", "--help"])
+        assert result.exit_code == 0
+        assert "Chat and conversation management commands" in result.stdout
+        assert "send" in result.stdout
+        assert "conversations" in result.stdout
+        assert "show" in result.stdout
+        assert "create" in result.stdout
+        assert "delete" in result.stdout
+        assert "tools" in result.stdout
+        assert "templates" in result.stdout
+
+    def test_profiles_help(self):
+        """Test profiles subcommand help."""
+        result = self.runner.invoke(app, ["profiles", "--help"])
+        assert result.exit_code == 0
+        assert "Profile management commands" in result.stdout
+        assert "list" in result.stdout
+        assert "show" in result.stdout
+        assert "create" in result.stdout
+        assert "delete" in result.stdout
+        assert "test" in result.stdout
+        assert "clone" in result.stdout
+        assert "providers" in result.stdout
+        assert "stats" in result.stdout
+
+    def test_jobs_help(self):
+        """Test jobs subcommand help."""
+        result = self.runner.invoke(app, ["jobs", "--help"])
+        assert result.exit_code == 0
+        assert "Job management commands" in result.stdout
+        assert "list" in result.stdout
+        assert "show" in result.stdout
+        assert "create" in result.stdout
+        assert "cancel" in result.stdout
+        assert "cleanup" in result.stdout
+        assert "stats" in result.stdout
+
+    def test_models_help(self):
+        """Test models subcommand help."""
+        result = self.runner.invoke(app, ["models", "--help"])
+        assert result.exit_code == 0
+        assert "Model registry and management commands" in result.stdout
+        assert "providers" in result.stdout
+        assert "list" in result.stdout
+        assert "embedding-spaces" in result.stdout
+
+    def test_events_help(self):
+        """Test events subcommand help."""
+        result = self.runner.invoke(app, ["events", "--help"])
+        assert result.exit_code == 0
+        assert "Event monitoring and streaming commands" in result.stdout
+        assert "stats" in result.stdout
+        assert "test-broadcast" in result.stdout
+
+    def test_agents_help(self):
+        """Test agents subcommand help."""
+        result = self.runner.invoke(app, ["agents", "--help"])
+        assert result.exit_code == 0
+        assert "AI agent management commands" in result.stdout
+        assert "list" in result.stdout
+        assert "show" in result.stdout
+        assert "create" in result.stdout
+        assert "delete" in result.stdout
+
+    def test_data_help(self):
+        """Test data subcommand help."""
+        result = self.runner.invoke(app, ["data", "--help"])
+        assert result.exit_code == 0
+        assert "Data management and backup commands" in result.stdout
+        assert "backup" in result.stdout
+        assert "export" in result.stdout
+        assert "bulk-delete-conversations" in result.stdout
+        assert "bulk-delete-documents" in result.stdout
+        assert "storage-stats" in result.stdout
+
+    def test_enhanced_documents_help(self):
+        """Test enhanced documents subcommand help."""
+        result = self.runner.invoke(app, ["documents", "--help"])
+        assert result.exit_code == 0
+        assert "Document management commands" in result.stdout
+        assert "list" in result.stdout
+        assert "search" in result.stdout
+        assert "show" in result.stdout
+        assert "delete" in result.stdout
+        assert "chunks" in result.stdout
+        assert "process" in result.stdout
+        assert "stats" in result.stdout
+
+    def test_enhanced_prompts_help(self):
+        """Test enhanced prompts subcommand help."""
+        result = self.runner.invoke(app, ["prompts", "--help"])
+        assert result.exit_code == 0
+        assert "Prompt management commands" in result.stdout
+        assert "list" in result.stdout
+        assert "show" in result.stdout
+        assert "create" in result.stdout
+        assert "delete" in result.stdout
+        assert "clone" in result.stdout
+        assert "test" in result.stdout
+        assert "stats" in result.stdout
+
+    def test_all_commands_in_main_help(self):
+        """Test that all command groups appear in main help."""
+        result = self.runner.invoke(app, ["--help"])
+        assert result.exit_code == 0
+        
+        # Check all command groups are present
+        expected_commands = [
+            "health", "auth", "prompts", "profiles", "jobs", 
+            "documents", "chat", "models", "events", "agents", 
+            "data", "analytics", "config", "version"
+        ]
+        
+        for command in expected_commands:
+            assert command in result.stdout
+
     @patch('chatter.api_cli.get_client')
     def test_health_check_success(self, mock_get_client):
         """Test successful health check."""

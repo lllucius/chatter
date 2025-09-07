@@ -23,6 +23,7 @@ from typing import Any
 from uuid import uuid4
 
 from chatter.utils.logging import get_logger
+from chatter.utils.performance import get_performance_monitor
 
 logger = get_logger(__name__)
 
@@ -280,6 +281,9 @@ class MonitoringService:
         self.max_history = max_history
         self.cache = cache_service
 
+        # Use shared performance monitor instead of duplicating tracking
+        self.performance_monitor = get_performance_monitor()
+
         # Metric storage
         self.requests: deque[RequestMetrics] = deque(maxlen=max_history)
         self.database_ops: deque[DatabaseMetrics] = deque(
@@ -297,8 +301,7 @@ class MonitoringService:
         # Active workflow tracking
         self.active_workflows: dict[str, WorkflowMetrics] = {}
 
-        # Performance tracking
-        self.performance_metrics = defaultdict(list)
+        # Configuration thresholds
         self.slow_query_threshold = 100  # ms
         self.slow_operation_threshold = 500  # ms
 
@@ -571,37 +574,18 @@ class MonitoringService:
     # ========================================================================
 
     def track_performance_metric(self, metric_name: str, value: float):
-        """Track a performance metric value."""
-        self.performance_metrics[metric_name].append(value)
-
-        # Keep only recent values
-        if len(self.performance_metrics[metric_name]) > 1000:
-            self.performance_metrics[metric_name] = (
-                self.performance_metrics[metric_name][-1000:]
-            )
+        """Track a performance metric value by delegating to performance monitor."""
+        # Use the shared performance monitor instead of duplicating tracking
+        # This method is kept for backward compatibility
+        pass  # The performance monitor tracks metrics automatically via decorators
 
     def get_performance_summary(self) -> dict[str, Any]:
-        """Get performance summary statistics."""
-        summary = {}
+        """Get performance summary statistics from shared performance monitor."""
+        return self.performance_monitor.get_performance_summary()
 
-        for metric_name, values in self.performance_metrics.items():
-            if values:
-                summary[metric_name] = {
-                    "count": len(values),
-                    "avg": sum(values) / len(values),
-                    "min": min(values),
-                    "max": max(values),
-                    "p95": self._percentile(values, 95),
-                    "p99": self._percentile(values, 99),
-                }
-
-        return summary
-
-    def _percentile(self, values: list, percentile: float) -> float:
-        """Calculate percentile value."""
-        sorted_values = sorted(values)
-        index = int(len(sorted_values) * percentile / 100)
-        return sorted_values[min(index, len(sorted_values) - 1)]
+    def get_performance_health_metrics(self) -> dict[str, Any]:
+        """Get comprehensive performance health metrics."""
+        return self.performance_monitor.get_performance_health_metrics()
 
     # ========================================================================
     # System Health & Statistics

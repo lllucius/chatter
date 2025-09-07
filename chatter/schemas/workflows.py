@@ -53,6 +53,9 @@ class WorkflowDefinitionBase(BaseModel):
     nodes: List[WorkflowNode] = Field(..., description="Workflow nodes")
     edges: List[WorkflowEdge] = Field(..., description="Workflow edges")
     metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Additional metadata")
+    is_public: bool = Field(default=False, description="Whether workflow is publicly visible")
+    tags: Optional[List[str]] = Field(None, description="Workflow tags")
+    template_id: Optional[str] = Field(None, description="Source template ID if created from template")
 
 
 class WorkflowDefinitionCreate(WorkflowDefinitionBase):
@@ -262,6 +265,54 @@ class NodePropertyDefinition(BaseModel):
     options: Optional[List[str]] = Field(None, description="Valid options for select type")
     min_value: Optional[Union[int, float]] = Field(None, description="Minimum value for numeric types")
     max_value: Optional[Union[int, float]] = Field(None, description="Maximum value for numeric types")
+
+
+# Workflow Execution schemas
+class WorkflowExecutionBase(BaseModel):
+    """Base schema for workflow executions."""
+    
+    input_data: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Execution input data")
+
+
+class WorkflowExecutionRequest(WorkflowExecutionBase):
+    """Schema for starting a workflow execution."""
+    
+    definition_id: str = Field(..., description="Workflow definition ID")
+
+
+class WorkflowExecutionResponse(WorkflowExecutionBase):
+    """Schema for workflow execution response."""
+    
+    id: str = Field(..., description="Execution ID")
+    definition_id: str = Field(..., description="Workflow definition ID")
+    owner_id: str = Field(..., description="Owner user ID")
+    status: str = Field(..., description="Execution status")
+    started_at: Optional[datetime] = Field(None, description="Execution start time")
+    completed_at: Optional[datetime] = Field(None, description="Execution completion time")
+    execution_time_ms: Optional[int] = Field(None, description="Execution time in milliseconds")
+    output_data: Optional[Dict[str, Any]] = Field(None, description="Execution output data")
+    error_message: Optional[str] = Field(None, description="Error message if failed")
+    tokens_used: int = Field(default=0, description="Total tokens used")
+    cost: float = Field(default=0.0, description="Total cost")
+    created_at: Optional[datetime] = Field(None, description="Creation timestamp")
+    updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
+    
+    class Config:
+        from_attributes = True
+
+
+class WorkflowExecutionStep(BaseModel):
+    """Schema for individual workflow execution steps."""
+    
+    step_id: str = Field(..., description="Step identifier")
+    node_id: str = Field(..., description="Node being executed")
+    node_type: str = Field(..., description="Type of node")
+    status: str = Field(..., description="Step status")
+    started_at: datetime = Field(..., description="Step start time")
+    completed_at: Optional[datetime] = Field(None, description="Step completion time")
+    input_data: Optional[Dict[str, Any]] = Field(None, description="Step input")
+    output_data: Optional[Dict[str, Any]] = Field(None, description="Step output")
+    error: Optional[str] = Field(None, description="Error message if failed")
 
 
 class NodeTypeResponse(BaseModel):

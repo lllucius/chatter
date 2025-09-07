@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,10 +18,9 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar
 from chatter_sdk.models.user_response import UserResponse
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class TokenResponse(BaseModel):
     """
@@ -30,10 +28,10 @@ class TokenResponse(BaseModel):
     """ # noqa: E501
     access_token: StrictStr = Field(description="JWT access token")
     refresh_token: StrictStr = Field(description="JWT refresh token")
-    token_type: Optional[StrictStr] = Field(default='bearer', description="Token type")
+    token_type: StrictStr | None = Field(default='bearer', description="Token type")
     expires_in: StrictInt = Field(description="Token expiration time in seconds")
     user: UserResponse
-    __properties: ClassVar[List[str]] = ["access_token", "refresh_token", "token_type", "expires_in", "user"]
+    __properties: ClassVar[list[str]] = ["access_token", "refresh_token", "token_type", "expires_in", "user"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,11 +50,11 @@ class TokenResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of TokenResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -66,8 +64,7 @@ class TokenResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -80,7 +77,7 @@ class TokenResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of TokenResponse from a dict"""
         if obj is None:
             return None

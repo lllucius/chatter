@@ -2,7 +2,6 @@
 
 import pytest
 from unittest.mock import AsyncMock, Mock, patch
-from datetime import UTC, datetime
 
 from chatter.core.analytics import AnalyticsService
 
@@ -26,7 +25,7 @@ class TestAnalyticsTodoImplementations:
         """Create analytics service with mocked dependencies."""
         with patch('chatter.utils.performance.get_performance_monitor') as mock_perf, \
              patch('chatter.core.cache_factory.CacheFactory') as mock_cache_factory:
-            
+
             # Mock performance monitor
             mock_perf.return_value = Mock()
             mock_perf.return_value.get_performance_summary.return_value = {
@@ -34,12 +33,12 @@ class TestAnalyticsTodoImplementations:
                 'vector_search_operation': {'avg_ms': 100.0, 'count': 5},
                 'embedding_generation': {'avg_ms': 200.0, 'count': 3}
             }
-            
+
             # Mock cache factory and cache instance
             mock_cache = AsyncMock()
             mock_cache.get_stats.return_value = Mock(hit_rate=0.85)
             mock_cache_factory.return_value.get_cache.return_value = mock_cache
-            
+
             service = AnalyticsService(mock_session)
             service._cache_instance = mock_cache
             return service
@@ -101,18 +100,18 @@ class TestAnalyticsTodoImplementations:
         with patch.object(analytics_service, '_get_database_response_time', return_value=25.5) as mock_db, \
              patch.object(analytics_service, '_get_vector_search_time', return_value=75.2) as mock_vector, \
              patch.object(analytics_service, '_get_embedding_generation_time', return_value=150.8) as mock_embed:
-            
+
             # Mock all the database queries that get_performance_metrics makes
             mock_session.execute.return_value.first.return_value = None
             mock_session.scalar.return_value = 0
-            
+
             result = await analytics_service.get_performance_metrics("test_user")
-            
+
             # Verify our methods were called
             mock_db.assert_called_once()
             mock_vector.assert_called_once()
             mock_embed.assert_called_once()
-            
+
             # Verify the results include our calculated values
             assert result["database_response_time_ms"] == 25.5
             assert result["vector_search_time_ms"] == 75.2
@@ -123,18 +122,18 @@ class TestAnalyticsTodoImplementations:
         """Test that system analytics method uses the new implementations."""
         with patch.object(analytics_service, '_get_vector_database_size', return_value=1000000) as mock_size, \
              patch.object(analytics_service, '_get_cache_hit_rate', return_value=0.92) as mock_cache:
-            
+
             # Mock database queries
             mock_session.execute.return_value.first.return_value = Mock(total_requests=100)
             mock_session.execute.return_value.scalar.return_value = 50
             mock_session.scalar.return_value = 500
-            
+
             result = await analytics_service.get_system_analytics()
-            
+
             # Verify our methods were called
             mock_size.assert_called_once()
             mock_cache.assert_called_once()
-            
+
             # Verify the results include our calculated values
             assert result["vector_database_size_bytes"] == 1000000
             assert result["cache_hit_rate"] == 0.92

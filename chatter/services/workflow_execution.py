@@ -233,11 +233,11 @@ class WorkflowExecutionService:
 
         return capabilities.get(workflow_type, {})
 
-    async def execute_workflow(
+    async def execute_workflow_definition(
         self,
         workflow_definition: Any,  # WorkflowDefinition object
         input_data: dict[str, Any],
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Execute a node-based workflow definition.
 
@@ -328,7 +328,7 @@ class WorkflowExecutionService:
         context: dict[str, Any],
         variables: dict[str, Any],
         steps: list[dict[str, Any]],
-        visited: Optional[set] = None,
+        visited: set | None = None,
     ) -> dict[str, Any]:
         """Execute a node and its connected nodes."""
         if visited is None:

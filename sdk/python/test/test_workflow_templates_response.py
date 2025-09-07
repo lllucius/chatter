@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -38,15 +37,15 @@ class TestWorkflowTemplatesResponse(unittest.TestCase):
             return WorkflowTemplatesResponse(
                 templates = {
                     'key' : chatter_sdk.models.workflow_template_info.WorkflowTemplateInfo(
-                        name = '', 
-                        workflow_type = '', 
-                        description = '', 
+                        name = '',
+                        workflow_type = '',
+                        description = '',
                         required_tools = [
                             ''
-                            ], 
+                            ],
                         required_retrievers = [
                             ''
-                            ], 
+                            ],
                         default_params = { }, )
                     },
                 total_count = 56
@@ -55,15 +54,15 @@ class TestWorkflowTemplatesResponse(unittest.TestCase):
             return WorkflowTemplatesResponse(
                 templates = {
                     'key' : chatter_sdk.models.workflow_template_info.WorkflowTemplateInfo(
-                        name = '', 
-                        workflow_type = '', 
-                        description = '', 
+                        name = '',
+                        workflow_type = '',
+                        description = '',
                         required_tools = [
                             ''
-                            ], 
+                            ],
                         required_retrievers = [
                             ''
-                            ], 
+                            ],
                         default_params = { }, )
                     },
                 total_count = 56,

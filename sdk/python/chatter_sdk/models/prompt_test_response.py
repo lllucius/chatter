@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,22 +18,21 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar
+from typing import Self
 
 class PromptTestResponse(BaseModel):
     """
     Schema for prompt test response.
     """ # noqa: E501
-    rendered_content: Optional[StrictStr] = None
-    validation_result: Dict[str, Any] = Field(description="Validation results")
-    estimated_tokens: Optional[StrictInt] = None
+    rendered_content: StrictStr | None = None
+    validation_result: dict[str, Any] = Field(description="Validation results")
+    estimated_tokens: StrictInt | None = None
     test_duration_ms: StrictInt = Field(description="Test execution time")
-    template_variables_used: List[StrictStr] = Field(description="Template variables actually used")
-    security_warnings: Optional[List[StrictStr]] = Field(default=None, description="Security warnings if any")
-    performance_metrics: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["rendered_content", "validation_result", "estimated_tokens", "test_duration_ms", "template_variables_used", "security_warnings", "performance_metrics"]
+    template_variables_used: list[StrictStr] = Field(description="Template variables actually used")
+    security_warnings: list[StrictStr] | None = Field(default=None, description="Security warnings if any")
+    performance_metrics: dict[str, Any] | None = None
+    __properties: ClassVar[list[str]] = ["rendered_content", "validation_result", "estimated_tokens", "test_duration_ms", "template_variables_used", "security_warnings", "performance_metrics"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,11 +51,11 @@ class PromptTestResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of PromptTestResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -67,8 +65,7 @@ class PromptTestResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -93,7 +90,7 @@ class PromptTestResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of PromptTestResponse from a dict"""
         if obj is None:
             return None

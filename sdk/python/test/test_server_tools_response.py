@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -38,21 +37,21 @@ class TestServerToolsResponse(unittest.TestCase):
             return ServerToolsResponse(
                 tools = [
                     chatter_sdk.models.server_tool_response.ServerToolResponse(
-                        name = '0', 
-                        display_name = '0', 
-                        description = '', 
-                        args_schema = { }, 
-                        bypass_when_unavailable = True, 
-                        id = '', 
-                        server_id = '', 
-                        status = 'enabled', 
-                        is_available = True, 
-                        total_calls = 56, 
-                        total_errors = 56, 
-                        last_called = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        last_error = '', 
-                        avg_response_time_ms = 1.337, 
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        name = '0',
+                        display_name = '0',
+                        description = '',
+                        args_schema = { },
+                        bypass_when_unavailable = True,
+                        id = '',
+                        server_id = '',
+                        status = 'enabled',
+                        is_available = True,
+                        total_calls = 56,
+                        total_errors = 56,
+                        last_called = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        last_error = '',
+                        avg_response_time_ms = 1.337,
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                         updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 total_count = 56,
@@ -63,21 +62,21 @@ class TestServerToolsResponse(unittest.TestCase):
             return ServerToolsResponse(
                 tools = [
                     chatter_sdk.models.server_tool_response.ServerToolResponse(
-                        name = '0', 
-                        display_name = '0', 
-                        description = '', 
-                        args_schema = { }, 
-                        bypass_when_unavailable = True, 
-                        id = '', 
-                        server_id = '', 
-                        status = 'enabled', 
-                        is_available = True, 
-                        total_calls = 56, 
-                        total_errors = 56, 
-                        last_called = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        last_error = '', 
-                        avg_response_time_ms = 1.337, 
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        name = '0',
+                        display_name = '0',
+                        description = '',
+                        args_schema = { },
+                        bypass_when_unavailable = True,
+                        id = '',
+                        server_id = '',
+                        status = 'enabled',
+                        is_available = True,
+                        total_calls = 56,
+                        total_errors = 56,
+                        last_called = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        last_error = '',
+                        avg_response_time_ms = 1.337,
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                         updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 total_count = 56,

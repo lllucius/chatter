@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -38,41 +37,41 @@ class TestAgentListResponse(unittest.TestCase):
             return AgentListResponse(
                 agents = [
                     chatter_sdk.models.agent_response.AgentResponse(
-                        id = '', 
-                        name = '', 
-                        description = '', 
-                        type = 'conversational', 
-                        status = 'active', 
-                        system_message = '', 
+                        id = '',
+                        name = '',
+                        description = '',
+                        type = 'conversational',
+                        status = 'active',
+                        system_message = '',
                         personality_traits = [
                             ''
-                            ], 
+                            ],
                         knowledge_domains = [
                             ''
-                            ], 
-                        response_style = '', 
+                            ],
+                        response_style = '',
                         capabilities = [
                             'natural_language'
-                            ], 
+                            ],
                         available_tools = [
                             ''
-                            ], 
-                        primary_llm = '', 
-                        fallback_llm = '', 
-                        temperature = 1.337, 
-                        max_tokens = 56, 
-                        max_conversation_length = 56, 
-                        context_window_size = 56, 
-                        response_timeout = 56, 
-                        learning_enabled = True, 
-                        feedback_weight = 1.337, 
-                        adaptation_threshold = 1.337, 
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        created_by = '', 
+                            ],
+                        primary_llm = '',
+                        fallback_llm = '',
+                        temperature = 1.337,
+                        max_tokens = 56,
+                        max_conversation_length = 56,
+                        context_window_size = 56,
+                        response_timeout = 56,
+                        learning_enabled = True,
+                        feedback_weight = 1.337,
+                        adaptation_threshold = 1.337,
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        created_by = '',
                         tags = [
                             ''
-                            ], 
+                            ],
                         metadata = { }, )
                     ],
                 total = 56,
@@ -84,41 +83,41 @@ class TestAgentListResponse(unittest.TestCase):
             return AgentListResponse(
                 agents = [
                     chatter_sdk.models.agent_response.AgentResponse(
-                        id = '', 
-                        name = '', 
-                        description = '', 
-                        type = 'conversational', 
-                        status = 'active', 
-                        system_message = '', 
+                        id = '',
+                        name = '',
+                        description = '',
+                        type = 'conversational',
+                        status = 'active',
+                        system_message = '',
                         personality_traits = [
                             ''
-                            ], 
+                            ],
                         knowledge_domains = [
                             ''
-                            ], 
-                        response_style = '', 
+                            ],
+                        response_style = '',
                         capabilities = [
                             'natural_language'
-                            ], 
+                            ],
                         available_tools = [
                             ''
-                            ], 
-                        primary_llm = '', 
-                        fallback_llm = '', 
-                        temperature = 1.337, 
-                        max_tokens = 56, 
-                        max_conversation_length = 56, 
-                        context_window_size = 56, 
-                        response_timeout = 56, 
-                        learning_enabled = True, 
-                        feedback_weight = 1.337, 
-                        adaptation_threshold = 1.337, 
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        created_by = '', 
+                            ],
+                        primary_llm = '',
+                        fallback_llm = '',
+                        temperature = 1.337,
+                        max_tokens = 56,
+                        max_conversation_length = 56,
+                        context_window_size = 56,
+                        response_timeout = 56,
+                        learning_enabled = True,
+                        feedback_weight = 1.337,
+                        adaptation_threshold = 1.337,
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        created_by = '',
                         tags = [
                             ''
-                            ], 
+                            ],
                         metadata = { }, )
                     ],
                 total = 56,

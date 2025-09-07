@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,12 +19,11 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+from typing import Annotated
 from chatter_sdk.models.job_priority import JobPriority
 from chatter_sdk.models.job_status import JobStatus
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class JobResponse(BaseModel):
     """
@@ -37,16 +35,16 @@ class JobResponse(BaseModel):
     priority: JobPriority
     status: JobStatus
     created_at: datetime = Field(description="Creation timestamp")
-    started_at: Optional[datetime] = None
-    completed_at: Optional[datetime] = None
-    scheduled_at: Optional[datetime] = None
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
+    scheduled_at: datetime | None = None
     retry_count: StrictInt = Field(description="Number of retry attempts")
     max_retries: StrictInt = Field(description="Maximum retry attempts")
-    error_message: Optional[StrictStr] = None
-    result: Optional[Any] = Field(default=None, description="Job result if completed")
-    progress: Optional[Annotated[int, Field(le=100, strict=True, ge=0)]] = Field(default=0, description="Job progress percentage")
-    progress_message: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["id", "name", "function_name", "priority", "status", "created_at", "started_at", "completed_at", "scheduled_at", "retry_count", "max_retries", "error_message", "result", "progress", "progress_message"]
+    error_message: StrictStr | None = None
+    result: Any | None = Field(default=None, description="Job result if completed")
+    progress: Annotated[int, Field(le=100, strict=True, ge=0)] | None = Field(default=0, description="Job progress percentage")
+    progress_message: StrictStr | None = None
+    __properties: ClassVar[list[str]] = ["id", "name", "function_name", "priority", "status", "created_at", "started_at", "completed_at", "scheduled_at", "retry_count", "max_retries", "error_message", "result", "progress", "progress_message"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -65,11 +63,11 @@ class JobResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of JobResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -79,8 +77,7 @@ class JobResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -123,7 +120,7 @@ class JobResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of JobResponse from a dict"""
         if obj is None:
             return None

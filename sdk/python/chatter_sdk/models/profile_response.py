@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,58 +19,57 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+from typing import Annotated
 from chatter_sdk.models.profile_type import ProfileType
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ProfileResponse(BaseModel):
     """
     Schema for profile response.
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=255)] = Field(description="Profile name")
-    description: Optional[Annotated[str, Field(strict=True, max_length=2000)]] = None
-    profile_type: Optional[ProfileType] = None
+    description: Annotated[str, Field(strict=True, max_length=2000)] | None = None
+    profile_type: ProfileType | None = None
     llm_provider: Annotated[str, Field(min_length=1, strict=True, max_length=50)] = Field(description="LLM provider (openai, anthropic, etc.)")
     llm_model: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="LLM model name")
-    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = Field(default=0.7, description="Temperature for generation")
-    top_p: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
-    top_k: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None
-    max_tokens: Optional[Annotated[int, Field(le=100000, strict=True, ge=1)]] = Field(default=4096, description="Maximum tokens to generate")
-    presence_penalty: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=-2.0)], Annotated[int, Field(le=2, strict=True, ge=-2)]]] = None
-    frequency_penalty: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=-2.0)], Annotated[int, Field(le=2, strict=True, ge=-2)]]] = None
-    context_window: Optional[Annotated[int, Field(le=200000, strict=True, ge=1)]] = Field(default=4096, description="Context window size")
-    system_prompt: Optional[Annotated[str, Field(strict=True, max_length=10000)]] = None
-    memory_enabled: Optional[StrictBool] = Field(default=True, description="Enable conversation memory")
-    memory_strategy: Optional[Annotated[str, Field(strict=True, max_length=50)]] = None
-    enable_retrieval: Optional[StrictBool] = Field(default=False, description="Enable document retrieval")
-    retrieval_limit: Optional[Annotated[int, Field(le=50, strict=True, ge=1)]] = Field(default=5, description="Number of documents to retrieve")
-    retrieval_score_threshold: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = Field(default=0.7, description="Minimum retrieval score")
-    enable_tools: Optional[StrictBool] = Field(default=False, description="Enable tool calling")
-    available_tools: Optional[Annotated[List[StrictStr], Field(max_length=20)]] = None
-    tool_choice: Optional[Annotated[str, Field(strict=True, max_length=50)]] = None
-    content_filter_enabled: Optional[StrictBool] = Field(default=True, description="Enable content filtering")
-    safety_level: Optional[Annotated[str, Field(strict=True, max_length=20)]] = None
-    response_format: Optional[Annotated[str, Field(strict=True, max_length=20)]] = None
-    stream_response: Optional[StrictBool] = Field(default=True, description="Enable streaming responses")
-    seed: Optional[Annotated[int, Field(le=2147483647, strict=True, ge=0)]] = None
-    stop_sequences: Optional[Annotated[List[StrictStr], Field(max_length=10)]] = None
-    logit_bias: Optional[Dict[str, Union[StrictFloat, StrictInt]]] = None
-    embedding_provider: Optional[Annotated[str, Field(strict=True, max_length=50)]] = None
-    embedding_model: Optional[Annotated[str, Field(strict=True, max_length=100)]] = None
-    is_public: Optional[StrictBool] = Field(default=False, description="Whether profile is public")
-    tags: Optional[Annotated[List[StrictStr], Field(max_length=10)]] = None
-    extra_metadata: Optional[Dict[str, Any]] = None
+    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = Field(default=0.7, description="Temperature for generation")
+    top_p: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
+    top_k: Annotated[int, Field(le=1000, strict=True, ge=1)] | None = None
+    max_tokens: Annotated[int, Field(le=100000, strict=True, ge=1)] | None = Field(default=4096, description="Maximum tokens to generate")
+    presence_penalty: Annotated[float, Field(le=2.0, strict=True, ge=-2.0)] | Annotated[int, Field(le=2, strict=True, ge=-2)] | None = None
+    frequency_penalty: Annotated[float, Field(le=2.0, strict=True, ge=-2.0)] | Annotated[int, Field(le=2, strict=True, ge=-2)] | None = None
+    context_window: Annotated[int, Field(le=200000, strict=True, ge=1)] | None = Field(default=4096, description="Context window size")
+    system_prompt: Annotated[str, Field(strict=True, max_length=10000)] | None = None
+    memory_enabled: StrictBool | None = Field(default=True, description="Enable conversation memory")
+    memory_strategy: Annotated[str, Field(strict=True, max_length=50)] | None = None
+    enable_retrieval: StrictBool | None = Field(default=False, description="Enable document retrieval")
+    retrieval_limit: Annotated[int, Field(le=50, strict=True, ge=1)] | None = Field(default=5, description="Number of documents to retrieve")
+    retrieval_score_threshold: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = Field(default=0.7, description="Minimum retrieval score")
+    enable_tools: StrictBool | None = Field(default=False, description="Enable tool calling")
+    available_tools: Annotated[list[StrictStr], Field(max_length=20)] | None = None
+    tool_choice: Annotated[str, Field(strict=True, max_length=50)] | None = None
+    content_filter_enabled: StrictBool | None = Field(default=True, description="Enable content filtering")
+    safety_level: Annotated[str, Field(strict=True, max_length=20)] | None = None
+    response_format: Annotated[str, Field(strict=True, max_length=20)] | None = None
+    stream_response: StrictBool | None = Field(default=True, description="Enable streaming responses")
+    seed: Annotated[int, Field(le=2147483647, strict=True, ge=0)] | None = None
+    stop_sequences: Annotated[list[StrictStr], Field(max_length=10)] | None = None
+    logit_bias: dict[str, StrictFloat | StrictInt] | None = None
+    embedding_provider: Annotated[str, Field(strict=True, max_length=50)] | None = None
+    embedding_model: Annotated[str, Field(strict=True, max_length=100)] | None = None
+    is_public: StrictBool | None = Field(default=False, description="Whether profile is public")
+    tags: Annotated[list[StrictStr], Field(max_length=10)] | None = None
+    extra_metadata: dict[str, Any] | None = None
     id: StrictStr = Field(description="Profile ID")
     owner_id: StrictStr = Field(description="Owner user ID")
     usage_count: StrictInt = Field(description="Number of times used")
     total_tokens_used: StrictInt = Field(description="Total tokens used")
-    total_cost: Union[StrictFloat, StrictInt] = Field(description="Total cost incurred")
-    last_used_at: Optional[datetime] = None
+    total_cost: StrictFloat | StrictInt = Field(description="Total cost incurred")
+    last_used_at: datetime | None = None
     created_at: datetime = Field(description="Creation time")
     updated_at: datetime = Field(description="Last update time")
-    __properties: ClassVar[List[str]] = ["name", "description", "profile_type", "llm_provider", "llm_model", "temperature", "top_p", "top_k", "max_tokens", "presence_penalty", "frequency_penalty", "context_window", "system_prompt", "memory_enabled", "memory_strategy", "enable_retrieval", "retrieval_limit", "retrieval_score_threshold", "enable_tools", "available_tools", "tool_choice", "content_filter_enabled", "safety_level", "response_format", "stream_response", "seed", "stop_sequences", "logit_bias", "embedding_provider", "embedding_model", "is_public", "tags", "extra_metadata", "id", "owner_id", "usage_count", "total_tokens_used", "total_cost", "last_used_at", "created_at", "updated_at"]
+    __properties: ClassVar[list[str]] = ["name", "description", "profile_type", "llm_provider", "llm_model", "temperature", "top_p", "top_k", "max_tokens", "presence_penalty", "frequency_penalty", "context_window", "system_prompt", "memory_enabled", "memory_strategy", "enable_retrieval", "retrieval_limit", "retrieval_score_threshold", "enable_tools", "available_tools", "tool_choice", "content_filter_enabled", "safety_level", "response_format", "stream_response", "seed", "stop_sequences", "logit_bias", "embedding_provider", "embedding_model", "is_public", "tags", "extra_metadata", "id", "owner_id", "usage_count", "total_tokens_used", "total_cost", "last_used_at", "created_at", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -90,11 +88,11 @@ class ProfileResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ProfileResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -104,8 +102,7 @@ class ProfileResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -210,7 +207,7 @@ class ProfileResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ProfileResponse from a dict"""
         if obj is None:
             return None

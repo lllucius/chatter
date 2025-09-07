@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,10 +19,9 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar
 from chatter_sdk.models.backup_type import BackupType
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class BackupResponse(BaseModel):
     """
@@ -31,19 +29,19 @@ class BackupResponse(BaseModel):
     """ # noqa: E501
     id: StrictStr = Field(description="Backup ID")
     name: StrictStr = Field(description="Backup name")
-    description: Optional[StrictStr] = None
+    description: StrictStr | None = None
     backup_type: BackupType
     status: StrictStr = Field(description="Backup status")
-    file_size: Optional[StrictInt] = None
-    compressed_size: Optional[StrictInt] = None
-    record_count: Optional[StrictInt] = None
+    file_size: StrictInt | None = None
+    compressed_size: StrictInt | None = None
+    record_count: StrictInt | None = None
     created_at: datetime = Field(description="Backup creation timestamp")
-    completed_at: Optional[datetime] = None
-    expires_at: Optional[datetime] = None
+    completed_at: datetime | None = None
+    expires_at: datetime | None = None
     encrypted: StrictBool = Field(description="Whether backup is encrypted")
     compressed: StrictBool = Field(description="Whether backup is compressed")
-    metadata: Dict[str, Any] = Field(description="Backup metadata")
-    __properties: ClassVar[List[str]] = ["id", "name", "description", "backup_type", "status", "file_size", "compressed_size", "record_count", "created_at", "completed_at", "expires_at", "encrypted", "compressed", "metadata"]
+    metadata: dict[str, Any] = Field(description="Backup metadata")
+    __properties: ClassVar[list[str]] = ["id", "name", "description", "backup_type", "status", "file_size", "compressed_size", "record_count", "created_at", "completed_at", "expires_at", "encrypted", "compressed", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -62,11 +60,11 @@ class BackupResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of BackupResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -76,8 +74,7 @@ class BackupResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -117,7 +114,7 @@ class BackupResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of BackupResponse from a dict"""
         if obj is None:
             return None

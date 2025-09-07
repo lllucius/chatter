@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,28 +18,27 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Any, ClassVar
 from chatter_sdk.models.distance_metric import DistanceMetric
 from chatter_sdk.models.reduction_strategy import ReductionStrategy
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class EmbeddingSpaceUpdate(BaseModel):
     """
     Schema for updating an embedding space.
     """ # noqa: E501
-    display_name: Optional[StrictStr] = None
-    description: Optional[StrictStr] = None
-    reduction_strategy: Optional[ReductionStrategy] = None
-    reducer_path: Optional[StrictStr] = None
-    reducer_version: Optional[StrictStr] = None
-    normalize_vectors: Optional[StrictBool] = None
-    distance_metric: Optional[DistanceMetric] = None
-    index_type: Optional[StrictStr] = None
-    index_config: Optional[Dict[str, Any]] = None
-    is_active: Optional[StrictBool] = None
-    is_default: Optional[StrictBool] = None
-    __properties: ClassVar[List[str]] = ["display_name", "description", "reduction_strategy", "reducer_path", "reducer_version", "normalize_vectors", "distance_metric", "index_type", "index_config", "is_active", "is_default"]
+    display_name: StrictStr | None = None
+    description: StrictStr | None = None
+    reduction_strategy: ReductionStrategy | None = None
+    reducer_path: StrictStr | None = None
+    reducer_version: StrictStr | None = None
+    normalize_vectors: StrictBool | None = None
+    distance_metric: DistanceMetric | None = None
+    index_type: StrictStr | None = None
+    index_config: dict[str, Any] | None = None
+    is_active: StrictBool | None = None
+    is_default: StrictBool | None = None
+    __properties: ClassVar[list[str]] = ["display_name", "description", "reduction_strategy", "reducer_path", "reducer_version", "normalize_vectors", "distance_metric", "index_type", "index_config", "is_active", "is_default"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -59,11 +57,11 @@ class EmbeddingSpaceUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of EmbeddingSpaceUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -73,8 +71,7 @@ class EmbeddingSpaceUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -139,7 +136,7 @@ class EmbeddingSpaceUpdate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of EmbeddingSpaceUpdate from a dict"""
         if obj is None:
             return None

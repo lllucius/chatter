@@ -2,7 +2,6 @@
 
 import os
 import pytest
-from typing import Dict, List, Set
 
 # Set environment variable for testing
 os.environ['DATABASE_URL'] = 'sqlite:///./test.db'
@@ -18,48 +17,46 @@ from chatter.schemas.auth import UserRegistration, UserUpdate, UserResponse
 from chatter.schemas.chat import ConversationCreate, ConversationUpdate, ConversationResponse
 from chatter.schemas.document import DocumentCreate, DocumentUpdate, DocumentResponse
 from chatter.schemas.profile import ProfileCreate, ProfileUpdate, ProfileResponse
-from chatter.schemas.prompt import PromptCreate, PromptUpdate, PromptResponse
+from chatter.schemas.prompt import PromptCreate, PromptUpdate
 from chatter.schemas.model_registry import (
-    ProviderCreate, Provider as ProviderSchema,
-    ModelDefCreate, ModelDef as ModelDefSchema,
-    EmbeddingSpaceCreate, EmbeddingSpace as EmbeddingSpaceSchema
+    ProviderCreate, ModelDefCreate, EmbeddingSpaceCreate
 )
 
 
 class TestComprehensiveSchemaModelConsistency:
     """Test comprehensive schema-model consistency across all entities."""
 
-    def get_model_fields(self, model_class) -> Set[str]:
+    def get_model_fields(self, model_class) -> set[str]:
         """Get field names from a SQLAlchemy model, excluding auto-generated fields."""
         if not hasattr(model_class, '__table__'):
             return set()
-        
+
         fields = set()
         for column in model_class.__table__.columns:
             fields.add(column.name)
-        
+
         # Remove auto-generated fields that don't need to be in schemas
         fields.discard('id')
-        fields.discard('created_at') 
+        fields.discard('created_at')
         fields.discard('updated_at')
-        
+
         return fields
-    
-    def get_schema_fields(self, schema_class) -> Set[str]:
+
+    def get_schema_fields(self, schema_class) -> set[str]:
         """Get field names from a Pydantic schema."""
         if not hasattr(schema_class, 'model_fields'):
             return set()
-        
+
         return set(schema_class.model_fields.keys())
 
     @pytest.mark.unit
     def test_user_schema_model_consistency(self):
         """Test User model and auth schemas consistency."""
         model_fields = self.get_model_fields(User)
-        
+
         # Test UserRegistration
         registration_fields = self.get_schema_fields(UserRegistration)
-        
+
         # Check for fields in schema but missing in model
         missing_in_model = []
         for field in registration_fields:
@@ -69,24 +66,24 @@ class TestComprehensiveSchemaModelConsistency:
                     missing_in_model.append(field)
             elif field not in model_fields:
                 missing_in_model.append(field)
-        
+
         assert not missing_in_model, f"UserRegistration fields missing in User model: {missing_in_model}"
-        
+
         # Test UserUpdate
         update_fields = self.get_schema_fields(UserUpdate)
         missing_in_model = [f for f in update_fields if f not in model_fields]
         assert not missing_in_model, f"UserUpdate fields missing in User model: {missing_in_model}"
-        
+
         # Test UserResponse - should include all important model fields
         response_fields = self.get_schema_fields(UserResponse)
         # These are the fields that SHOULD be in response (excluding sensitive ones)
         expected_in_response = {
             'email', 'username', 'full_name', 'bio', 'avatar_url', 'phone_number',
-            'is_active', 'is_verified', 'is_superuser', 'default_llm_provider', 
+            'is_active', 'is_verified', 'is_superuser', 'default_llm_provider',
             'default_profile_id', 'daily_message_limit', 'monthly_message_limit',
             'max_file_size_mb', 'api_key_name', 'last_login_at'
         }
-        
+
         missing_important = expected_in_response - response_fields
         assert not missing_important, f"Important fields missing in UserResponse: {missing_important}"
 
@@ -94,29 +91,29 @@ class TestComprehensiveSchemaModelConsistency:
     def test_conversation_schema_model_consistency(self):
         """Test Conversation model and chat schemas consistency."""
         model_fields = self.get_model_fields(Conversation)
-        
+
         # Test ConversationCreate
         create_fields = self.get_schema_fields(ConversationCreate)
         missing_in_model = [f for f in create_fields if f not in model_fields]
         assert not missing_in_model, f"ConversationCreate fields missing in Conversation model: {missing_in_model}"
-        
+
         # Test ConversationUpdate
         update_fields = self.get_schema_fields(ConversationUpdate)
         missing_in_model = [f for f in update_fields if f not in model_fields]
         assert not missing_in_model, f"ConversationUpdate fields missing in Conversation model: {missing_in_model}"
-        
+
         # Test ConversationResponse - should include all relevant model fields
         response_fields = self.get_schema_fields(ConversationResponse)
         # These fields should be in the response
         expected_in_response = {
-            'title', 'description', 'user_id', 'profile_id', 'status', 
+            'title', 'description', 'user_id', 'profile_id', 'status',
             'llm_provider', 'llm_model', 'temperature', 'max_tokens',
             'enable_retrieval', 'message_count', 'total_tokens', 'total_cost',
             'system_prompt', 'context_window', 'memory_enabled', 'memory_strategy',
             'retrieval_limit', 'retrieval_score_threshold', 'tags', 'extra_metadata',
             'workflow_config', 'last_message_at'
         }
-        
+
         missing_important = expected_in_response - response_fields
         assert not missing_important, f"Important fields missing in ConversationResponse: {missing_important}"
 
@@ -124,23 +121,23 @@ class TestComprehensiveSchemaModelConsistency:
     def test_document_schema_model_consistency(self):
         """Test Document model and document schemas consistency."""
         model_fields = self.get_model_fields(Document)
-        
+
         # Test DocumentCreate
         create_fields = self.get_schema_fields(DocumentCreate)
         missing_in_model = [f for f in create_fields if f not in model_fields]
         assert not missing_in_model, f"DocumentCreate fields missing in Document model: {missing_in_model}"
-        
+
         # Test DocumentUpdate
         update_fields = self.get_schema_fields(DocumentUpdate)
         missing_in_model = [f for f in update_fields if f not in model_fields]
         assert not missing_in_model, f"DocumentUpdate fields missing in Document model: {missing_in_model}"
-        
+
         # Test DocumentResponse - should include public fields but exclude sensitive ones
         response_fields = self.get_schema_fields(DocumentResponse)
-        
+
         # file_path, content, extracted_text are intentionally excluded for security
         excluded_sensitive_fields = {'file_path', 'content', 'extracted_text'}
-        
+
         expected_in_response = model_fields - excluded_sensitive_fields
         missing_important = expected_in_response - response_fields
         assert not missing_important, f"Important fields missing in DocumentResponse: {missing_important}"
@@ -149,24 +146,24 @@ class TestComprehensiveSchemaModelConsistency:
     def test_profile_schema_model_consistency(self):
         """Test Profile model and profile schemas consistency."""
         model_fields = self.get_model_fields(Profile)
-        
+
         # Test ProfileCreate
         create_fields = self.get_schema_fields(ProfileCreate)
         missing_in_model = [f for f in create_fields if f not in model_fields]
         assert not missing_in_model, f"ProfileCreate fields missing in Profile model: {missing_in_model}"
-        
+
         # Test ProfileUpdate
         update_fields = self.get_schema_fields(ProfileUpdate)
         missing_in_model = [f for f in update_fields if f not in model_fields]
         assert not missing_in_model, f"ProfileUpdate fields missing in Profile model: {missing_in_model}"
-        
+
         # Test ProfileResponse
         response_fields = self.get_schema_fields(ProfileResponse)
-        
+
         # Most profile fields should be in response (profiles are user-owned configurations)
         expected_in_response = model_fields - {'owner_id'}  # owner_id might be excluded
-        missing_important = expected_in_response - response_fields
-        
+        expected_in_response - response_fields
+
         # For now, just ensure no critical fields are missing - full check might be too strict
         critical_fields = {'name', 'description', 'profile_type', 'llm_provider', 'llm_model'}
         missing_critical = critical_fields - response_fields
@@ -176,12 +173,12 @@ class TestComprehensiveSchemaModelConsistency:
     def test_prompt_schema_model_consistency(self):
         """Test Prompt model and prompt schemas consistency."""
         model_fields = self.get_model_fields(Prompt)
-        
+
         # Test PromptCreate
         create_fields = self.get_schema_fields(PromptCreate)
         missing_in_model = [f for f in create_fields if f not in model_fields]
         assert not missing_in_model, f"PromptCreate fields missing in Prompt model: {missing_in_model}"
-        
+
         # Test PromptUpdate
         update_fields = self.get_schema_fields(PromptUpdate)
         missing_in_model = [f for f in update_fields if f not in model_fields]
@@ -195,13 +192,13 @@ class TestComprehensiveSchemaModelConsistency:
         provider_create_fields = self.get_schema_fields(ProviderCreate)
         missing_in_model = [f for f in provider_create_fields if f not in provider_model_fields]
         assert not missing_in_model, f"ProviderCreate fields missing in Provider model: {missing_in_model}"
-        
+
         # Test ModelDef
         modeldef_model_fields = self.get_model_fields(ModelDef)
         modeldef_create_fields = self.get_schema_fields(ModelDefCreate)
         missing_in_model = [f for f in modeldef_create_fields if f not in modeldef_model_fields]
         assert not missing_in_model, f"ModelDefCreate fields missing in ModelDef model: {missing_in_model}"
-        
+
         # Test EmbeddingSpace
         embedding_model_fields = self.get_model_fields(EmbeddingSpace)
         embedding_create_fields = self.get_schema_fields(EmbeddingSpaceCreate)
@@ -212,9 +209,9 @@ class TestComprehensiveSchemaModelConsistency:
     def test_no_reserved_field_names(self):
         """Test that models don't use SQLAlchemy reserved field names."""
         reserved_names = {'metadata'}  # SQLAlchemy reserved names
-        
+
         models_to_check = [User, Conversation, Document, Profile, Prompt, Provider, ModelDef, EmbeddingSpace]
-        
+
         for model in models_to_check:
             if hasattr(model, '__table__'):
                 model_fields = {column.name for column in model.__table__.columns}
@@ -238,24 +235,24 @@ class TestComprehensiveSchemaModelConsistency:
             (ModelDef, ModelDefCreate, {}),
             (EmbeddingSpace, EmbeddingSpaceCreate, {}),
         ]
-        
+
         for model_class, create_schema_class, field_mappings in test_cases:
             if not hasattr(model_class, '__table__'):
                 continue
-                
+
             # Get required fields (non-nullable, no default)
             required_fields = []
             for column in model_class.__table__.columns:
                 # Skip auto-generated fields
                 if column.name in ['id', 'created_at', 'updated_at']:
                     continue
-                    
+
                 if not column.nullable and column.default is None and column.server_default is None:
                     required_fields.append(column.name)
-            
+
             # Get schema fields
             schema_fields = self.get_schema_fields(create_schema_class)
-            
+
             # Check coverage
             missing_required = []
             for field in required_fields:
@@ -265,5 +262,5 @@ class TestComprehensiveSchemaModelConsistency:
                     continue
                 if mapped_field not in schema_fields:
                     missing_required.append(field)
-            
+
             assert not missing_required, f"{create_schema_class.__name__} missing required fields: {missing_required}"

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,27 +18,26 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+from typing import Annotated
 from chatter_sdk.models.o_auth_config_schema import OAuthConfigSchema
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ToolServerUpdate(BaseModel):
     """
     Schema for updating a remote tool server.
     """ # noqa: E501
-    display_name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=200)]] = None
-    description: Optional[StrictStr] = None
-    base_url: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=2083)]] = None
-    transport_type: Optional[Annotated[str, Field(strict=True)]] = None
-    oauth_config: Optional[OAuthConfigSchema] = None
-    headers: Optional[Dict[str, StrictStr]] = None
-    timeout: Optional[Annotated[int, Field(le=300, strict=True, ge=5)]] = None
-    auto_start: Optional[StrictBool] = None
-    auto_update: Optional[StrictBool] = None
-    max_failures: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = None
-    __properties: ClassVar[List[str]] = ["display_name", "description", "base_url", "transport_type", "oauth_config", "headers", "timeout", "auto_start", "auto_update", "max_failures"]
+    display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] | None = None
+    description: StrictStr | None = None
+    base_url: Annotated[str, Field(min_length=1, strict=True, max_length=2083)] | None = None
+    transport_type: Annotated[str, Field(strict=True)] | None = None
+    oauth_config: OAuthConfigSchema | None = None
+    headers: dict[str, StrictStr] | None = None
+    timeout: Annotated[int, Field(le=300, strict=True, ge=5)] | None = None
+    auto_start: StrictBool | None = None
+    auto_update: StrictBool | None = None
+    max_failures: Annotated[int, Field(le=10, strict=True, ge=1)] | None = None
+    __properties: ClassVar[list[str]] = ["display_name", "description", "base_url", "transport_type", "oauth_config", "headers", "timeout", "auto_start", "auto_update", "max_failures"]
 
     @field_validator('transport_type')
     def transport_type_validate_regular_expression(cls, value):
@@ -68,11 +66,11 @@ class ToolServerUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ToolServerUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -82,8 +80,7 @@ class ToolServerUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -146,7 +143,7 @@ class ToolServerUpdate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ToolServerUpdate from a dict"""
         if obj is None:
             return None

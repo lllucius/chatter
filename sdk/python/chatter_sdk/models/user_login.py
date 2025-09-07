@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,20 +18,19 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar
+from typing import Annotated
+from typing import Self
 
 class UserLogin(BaseModel):
     """
     Schema for user login.
     """ # noqa: E501
-    email: Optional[StrictStr] = None
-    username: Optional[Annotated[str, Field(min_length=3, strict=True, max_length=50)]] = None
+    email: StrictStr | None = None
+    username: Annotated[str, Field(min_length=3, strict=True, max_length=50)] | None = None
     password: StrictStr = Field(description="Password")
-    remember_me: Optional[StrictBool] = Field(default=False, description="Remember login")
-    __properties: ClassVar[List[str]] = ["email", "username", "password", "remember_me"]
+    remember_me: StrictBool | None = Field(default=False, description="Remember login")
+    __properties: ClassVar[list[str]] = ["email", "username", "password", "remember_me"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,11 +49,11 @@ class UserLogin(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of UserLogin from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -65,8 +63,7 @@ class UserLogin(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -86,7 +83,7 @@ class UserLogin(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of UserLogin from a dict"""
         if obj is None:
             return None

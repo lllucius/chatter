@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,13 +19,12 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+from typing import Annotated
 from chatter_sdk.models.distance_metric import DistanceMetric
 from chatter_sdk.models.model_def_with_provider import ModelDefWithProvider
 from chatter_sdk.models.reduction_strategy import ReductionStrategy
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class EmbeddingSpaceWithModel(BaseModel):
     """
@@ -34,25 +32,25 @@ class EmbeddingSpaceWithModel(BaseModel):
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Unique space name")
     display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Human-readable name")
-    description: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
+    description: Annotated[str, Field(strict=True, max_length=1000)] | None = None
     base_dimensions: Annotated[int, Field(le=10000, strict=True)] = Field(description="Original model dimensions")
     effective_dimensions: Annotated[int, Field(le=10000, strict=True)] = Field(description="Effective dimensions after reduction")
-    reduction_strategy: Optional[ReductionStrategy] = None
-    reducer_path: Optional[Annotated[str, Field(strict=True, max_length=500)]] = None
-    reducer_version: Optional[Annotated[str, Field(strict=True, max_length=100)]] = None
-    normalize_vectors: Optional[StrictBool] = Field(default=True, description="Whether to normalize vectors")
-    distance_metric: Optional[DistanceMetric] = None
+    reduction_strategy: ReductionStrategy | None = None
+    reducer_path: Annotated[str, Field(strict=True, max_length=500)] | None = None
+    reducer_version: Annotated[str, Field(strict=True, max_length=100)] | None = None
+    normalize_vectors: StrictBool | None = Field(default=True, description="Whether to normalize vectors")
+    distance_metric: DistanceMetric | None = None
     table_name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Database table name")
-    index_type: Optional[Annotated[str, Field(strict=True, max_length=50)]] = Field(default='hnsw', description="Index type")
-    index_config: Optional[Dict[str, Any]] = Field(default=None, description="Index configuration")
-    is_active: Optional[StrictBool] = Field(default=True, description="Whether space is active")
-    is_default: Optional[StrictBool] = Field(default=False, description="Whether this is the default space")
+    index_type: Annotated[str, Field(strict=True, max_length=50)] | None = Field(default='hnsw', description="Index type")
+    index_config: dict[str, Any] | None = Field(default=None, description="Index configuration")
+    is_active: StrictBool | None = Field(default=True, description="Whether space is active")
+    is_default: StrictBool | None = Field(default=False, description="Whether this is the default space")
     id: StrictStr
     model_id: StrictStr
     created_at: datetime
     updated_at: datetime
     model: ModelDefWithProvider
-    __properties: ClassVar[List[str]] = ["name", "display_name", "description", "base_dimensions", "effective_dimensions", "reduction_strategy", "reducer_path", "reducer_version", "normalize_vectors", "distance_metric", "table_name", "index_type", "index_config", "is_active", "is_default", "id", "model_id", "created_at", "updated_at", "model"]
+    __properties: ClassVar[list[str]] = ["name", "display_name", "description", "base_dimensions", "effective_dimensions", "reduction_strategy", "reducer_path", "reducer_version", "normalize_vectors", "distance_metric", "table_name", "index_type", "index_config", "is_active", "is_default", "id", "model_id", "created_at", "updated_at", "model"]
 
     @field_validator('name')
     def name_validate_regular_expression(cls, value):
@@ -85,11 +83,11 @@ class EmbeddingSpaceWithModel(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of EmbeddingSpaceWithModel from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -99,8 +97,7 @@ class EmbeddingSpaceWithModel(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -128,7 +125,7 @@ class EmbeddingSpaceWithModel(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of EmbeddingSpaceWithModel from a dict"""
         if obj is None:
             return None

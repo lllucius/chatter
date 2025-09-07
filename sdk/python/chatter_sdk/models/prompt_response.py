@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,11 +19,10 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar
 from chatter_sdk.models.prompt_category import PromptCategory
 from chatter_sdk.models.prompt_type import PromptType
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class PromptResponse(BaseModel):
     """
@@ -33,46 +31,46 @@ class PromptResponse(BaseModel):
     id: StrictStr = Field(description="Prompt ID")
     owner_id: StrictStr = Field(description="Owner user ID")
     name: StrictStr = Field(description="Prompt name")
-    description: Optional[StrictStr] = None
+    description: StrictStr | None = None
     prompt_type: PromptType
     category: PromptCategory
     content: StrictStr = Field(description="Prompt content/template")
-    variables: Optional[List[StrictStr]] = None
+    variables: list[StrictStr] | None = None
     template_format: StrictStr = Field(description="Template format")
-    input_schema: Optional[Dict[str, Any]] = None
-    output_schema: Optional[Dict[str, Any]] = None
-    max_length: Optional[StrictInt] = None
-    min_length: Optional[StrictInt] = None
-    required_variables: Optional[List[StrictStr]] = None
-    examples: Optional[List[Dict[str, Any]]] = None
-    test_cases: Optional[List[Dict[str, Any]]] = None
-    suggested_temperature: Optional[Union[StrictFloat, StrictInt]] = None
-    suggested_max_tokens: Optional[StrictInt] = None
-    suggested_providers: Optional[List[StrictStr]] = None
+    input_schema: dict[str, Any] | None = None
+    output_schema: dict[str, Any] | None = None
+    max_length: StrictInt | None = None
+    min_length: StrictInt | None = None
+    required_variables: list[StrictStr] | None = None
+    examples: list[dict[str, Any]] | None = None
+    test_cases: list[dict[str, Any]] | None = None
+    suggested_temperature: StrictFloat | StrictInt | None = None
+    suggested_max_tokens: StrictInt | None = None
+    suggested_providers: list[StrictStr] | None = None
     is_chain: StrictBool = Field(description="Whether this is a chain prompt")
-    chain_steps: Optional[List[Dict[str, Any]]] = None
-    parent_prompt_id: Optional[StrictStr] = None
+    chain_steps: list[dict[str, Any]] | None = None
+    parent_prompt_id: StrictStr | None = None
     version: StrictInt = Field(description="Prompt version")
     is_latest: StrictBool = Field(description="Whether this is the latest version")
-    changelog: Optional[StrictStr] = None
+    changelog: StrictStr | None = None
     is_public: StrictBool = Field(description="Whether prompt is public")
-    rating: Optional[Union[StrictFloat, StrictInt]] = None
+    rating: StrictFloat | StrictInt | None = None
     rating_count: StrictInt = Field(description="Number of ratings")
     usage_count: StrictInt = Field(description="Usage count")
-    success_rate: Optional[Union[StrictFloat, StrictInt]] = None
-    avg_response_time_ms: Optional[StrictInt] = None
-    last_used_at: Optional[datetime] = None
+    success_rate: StrictFloat | StrictInt | None = None
+    avg_response_time_ms: StrictInt | None = None
+    last_used_at: datetime | None = None
     total_tokens_used: StrictInt = Field(description="Total tokens used")
-    total_cost: Union[StrictFloat, StrictInt] = Field(description="Total cost")
-    avg_tokens_per_use: Optional[Union[StrictFloat, StrictInt]] = None
-    tags: Optional[List[StrictStr]] = None
-    extra_metadata: Optional[Dict[str, Any]] = None
+    total_cost: StrictFloat | StrictInt = Field(description="Total cost")
+    avg_tokens_per_use: StrictFloat | StrictInt | None = None
+    tags: list[StrictStr] | None = None
+    extra_metadata: dict[str, Any] | None = None
     content_hash: StrictStr = Field(description="Content hash")
-    estimated_tokens: Optional[StrictInt] = None
-    language: Optional[StrictStr] = None
+    estimated_tokens: StrictInt | None = None
+    language: StrictStr | None = None
     created_at: datetime = Field(description="Creation timestamp")
     updated_at: datetime = Field(description="Last update timestamp")
-    __properties: ClassVar[List[str]] = ["id", "owner_id", "name", "description", "prompt_type", "category", "content", "variables", "template_format", "input_schema", "output_schema", "max_length", "min_length", "required_variables", "examples", "test_cases", "suggested_temperature", "suggested_max_tokens", "suggested_providers", "is_chain", "chain_steps", "parent_prompt_id", "version", "is_latest", "changelog", "is_public", "rating", "rating_count", "usage_count", "success_rate", "avg_response_time_ms", "last_used_at", "total_tokens_used", "total_cost", "avg_tokens_per_use", "tags", "extra_metadata", "content_hash", "estimated_tokens", "language", "created_at", "updated_at"]
+    __properties: ClassVar[list[str]] = ["id", "owner_id", "name", "description", "prompt_type", "category", "content", "variables", "template_format", "input_schema", "output_schema", "max_length", "min_length", "required_variables", "examples", "test_cases", "suggested_temperature", "suggested_max_tokens", "suggested_providers", "is_chain", "chain_steps", "parent_prompt_id", "version", "is_latest", "changelog", "is_public", "rating", "rating_count", "usage_count", "success_rate", "avg_response_time_ms", "last_used_at", "total_tokens_used", "total_cost", "avg_tokens_per_use", "tags", "extra_metadata", "content_hash", "estimated_tokens", "language", "created_at", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,11 +89,11 @@ class PromptResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of PromptResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -105,8 +103,7 @@ class PromptResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -236,7 +233,7 @@ class PromptResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of PromptResponse from a dict"""
         if obj is None:
             return None

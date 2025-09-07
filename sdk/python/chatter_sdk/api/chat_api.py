@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -12,14 +11,11 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
+from typing import Any
+from typing import Annotated
 
-from pydantic import Field, StrictBool, StrictStr
-from typing import List, Optional
-from typing_extensions import Annotated
+from pydantic import StrictBool
 from chatter_sdk.models.available_tools_response import AvailableToolsResponse
 from chatter_sdk.models.chat_request import ChatRequest
 from chatter_sdk.models.chat_response import ChatResponse
@@ -58,22 +54,15 @@ class ChatApi:
     async def chat_api_v1_chat_chat_post(
         self,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ChatResponse1:
         """Chat
 
-        Unified chat endpoint supporting all workflow types with optional streaming. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
+        Unified chat endpoint supporting all workflow types with optional streaming. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools
 
         :param chat_request: (required)
         :type chat_request: ChatRequest
@@ -107,7 +96,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ChatResponse1",
             '422': "HTTPValidationError",
         }
@@ -126,22 +115,15 @@ class ChatApi:
     async def chat_api_v1_chat_chat_post_with_http_info(
         self,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ChatResponse1]:
         """Chat
 
-        Unified chat endpoint supporting all workflow types with optional streaming. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
+        Unified chat endpoint supporting all workflow types with optional streaming. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools
 
         :param chat_request: (required)
         :type chat_request: ChatRequest
@@ -175,7 +157,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ChatResponse1",
             '422': "HTTPValidationError",
         }
@@ -194,22 +176,15 @@ class ChatApi:
     async def chat_api_v1_chat_chat_post_without_preload_content(
         self,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Chat
 
-        Unified chat endpoint supporting all workflow types with optional streaming. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
+        Unified chat endpoint supporting all workflow types with optional streaming. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools
 
         :param chat_request: (required)
         :type chat_request: ChatRequest
@@ -243,7 +218,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ChatResponse1",
             '422': "HTTPValidationError",
         }
@@ -265,17 +240,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -290,7 +265,7 @@ class ChatApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json', 
+                    'application/json',
                     'text/event-stream'
                 ]
             )
@@ -310,7 +285,7 @@ class ChatApi:
                 _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -337,22 +312,15 @@ class ChatApi:
         self,
         template_name: StrictStr,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ChatResponse:
         """Chat With Template
 
-        Chat using a specific workflow template. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
+        Chat using a specific workflow template. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools
 
         :param template_name: (required)
         :type template_name: str
@@ -389,7 +357,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ChatResponse",
             '422': "HTTPValidationError",
         }
@@ -409,22 +377,15 @@ class ChatApi:
         self,
         template_name: StrictStr,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ChatResponse]:
         """Chat With Template
 
-        Chat using a specific workflow template. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
+        Chat using a specific workflow template. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools
 
         :param template_name: (required)
         :type template_name: str
@@ -461,7 +422,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ChatResponse",
             '422': "HTTPValidationError",
         }
@@ -481,22 +442,15 @@ class ChatApi:
         self,
         template_name: StrictStr,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Chat With Template
 
-        Chat using a specific workflow template. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
+        Chat using a specific workflow template. ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools
 
         :param template_name: (required)
         :type template_name: str
@@ -533,7 +487,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ChatResponse",
             '422': "HTTPValidationError",
         }
@@ -556,17 +510,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if template_name is not None:
@@ -602,7 +556,7 @@ class ChatApi:
                 _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -628,22 +582,15 @@ class ChatApi:
     async def create_conversation_api_v1_chat_conversations_post(
         self,
         conversation_create: ConversationCreate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationResponse:
         """Create Conversation
 
-        Create a new conversation.  Create a new conversation with specified configuration ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
+        Create a new conversation.  Create a new conversation with specified configuration ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools
 
         :param conversation_create: (required)
         :type conversation_create: ConversationCreate
@@ -677,7 +624,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '201': "ConversationResponse",
             '422': "HTTPValidationError",
         }
@@ -696,22 +643,15 @@ class ChatApi:
     async def create_conversation_api_v1_chat_conversations_post_with_http_info(
         self,
         conversation_create: ConversationCreate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationResponse]:
         """Create Conversation
 
-        Create a new conversation.  Create a new conversation with specified configuration ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
+        Create a new conversation.  Create a new conversation with specified configuration ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools
 
         :param conversation_create: (required)
         :type conversation_create: ConversationCreate
@@ -745,7 +685,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '201': "ConversationResponse",
             '422': "HTTPValidationError",
         }
@@ -764,22 +704,15 @@ class ChatApi:
     async def create_conversation_api_v1_chat_conversations_post_without_preload_content(
         self,
         conversation_create: ConversationCreate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Create Conversation
 
-        Create a new conversation.  Create a new conversation with specified configuration ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools 
+        Create a new conversation.  Create a new conversation with specified configuration ## Workflow Types  This endpoint supports multiple workflow types through the `workflow` parameter:  ### Plain Chat (`plain`) Basic conversation without tools or retrieval. ```json {     \"message\": \"Hello, how are you?\",     \"workflow\": \"plain\" } ```  ### RAG Workflow (`rag`) Retrieval-Augmented Generation with document search. ```json {     \"message\": \"What are the latest sales figures?\",     \"workflow\": \"rag\",     \"enable_retrieval\": true } ```  ### Tools Workflow (`tools`) Function calling with available tools. ```json {     \"message\": \"Calculate the square root of 144\",     \"workflow\": \"tools\" } ```  ### Full Workflow (`full`) Combination of RAG and tools for complex tasks. ```json {     \"message\": \"Find recent customer feedback and create a summary report\",     \"workflow\": \"full\",     \"enable_retrieval\": true } ```  ## Streaming  Set `stream: true` to receive real-time responses: ```json {     \"message\": \"Tell me a story\",     \"workflow\": \"plain\",     \"stream\": true } ```  Streaming responses use Server-Sent Events (SSE) format with event types: - `token`: Content chunks - `node_start`: Workflow node started - `node_complete`: Workflow node completed - `usage`: Final usage statistics - `error`: Error occurred  ## Templates  Use pre-configured templates for common scenarios: ```json {     \"message\": \"I need help with my order\",     \"workflow_template\": \"customer_support\" } ```  Available templates: - `customer_support`: Customer service with knowledge base - `code_assistant`: Programming help with code tools - `research_assistant`: Document research and analysis - `general_chat`: General conversation - `document_qa`: Document question answering - `data_analyst`: Data analysis with computation tools
 
         :param conversation_create: (required)
         :type conversation_create: ConversationCreate
@@ -813,7 +746,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '201': "ConversationResponse",
             '422': "HTTPValidationError",
         }
@@ -835,17 +768,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -879,7 +812,7 @@ class ChatApi:
                 _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -905,17 +838,10 @@ class ChatApi:
     async def delete_conversation_api_v1_chat_conversations_conversation_id_delete(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationDeleteResponse:
         """Delete Conversation
@@ -954,7 +880,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationDeleteResponse",
             '422': "HTTPValidationError",
         }
@@ -973,17 +899,10 @@ class ChatApi:
     async def delete_conversation_api_v1_chat_conversations_conversation_id_delete_with_http_info(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationDeleteResponse]:
         """Delete Conversation
@@ -1022,7 +941,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationDeleteResponse",
             '422': "HTTPValidationError",
         }
@@ -1041,17 +960,10 @@ class ChatApi:
     async def delete_conversation_api_v1_chat_conversations_conversation_id_delete_without_preload_content(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Delete Conversation
@@ -1090,7 +1002,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationDeleteResponse",
             '422': "HTTPValidationError",
         }
@@ -1112,17 +1024,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
@@ -1143,7 +1055,7 @@ class ChatApi:
 
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -1170,17 +1082,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         message_id: Annotated[str, Field(min_length=1, strict=True, description="Message ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> MessageDeleteResponse:
         """Delete Message
@@ -1222,7 +1127,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "MessageDeleteResponse",
             '422': "HTTPValidationError",
         }
@@ -1242,17 +1147,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         message_id: Annotated[str, Field(min_length=1, strict=True, description="Message ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[MessageDeleteResponse]:
         """Delete Message
@@ -1294,7 +1192,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "MessageDeleteResponse",
             '422': "HTTPValidationError",
         }
@@ -1314,17 +1212,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         message_id: Annotated[str, Field(min_length=1, strict=True, description="Message ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Delete Message
@@ -1366,7 +1257,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "MessageDeleteResponse",
             '422': "HTTPValidationError",
         }
@@ -1389,17 +1280,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
@@ -1422,7 +1313,7 @@ class ChatApi:
 
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -1447,17 +1338,10 @@ class ChatApi:
     @validate_call
     async def get_available_tools_api_v1_chat_tools_available_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> AvailableToolsResponse:
         """Get Available Tools
@@ -1493,7 +1377,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "AvailableToolsResponse",
         }
         response_data = await self.api_client.call_api(
@@ -1510,17 +1394,10 @@ class ChatApi:
     @validate_call
     async def get_available_tools_api_v1_chat_tools_available_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[AvailableToolsResponse]:
         """Get Available Tools
@@ -1556,7 +1433,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "AvailableToolsResponse",
         }
         response_data = await self.api_client.call_api(
@@ -1573,17 +1450,10 @@ class ChatApi:
     @validate_call
     async def get_available_tools_api_v1_chat_tools_available_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Available Tools
@@ -1619,7 +1489,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "AvailableToolsResponse",
         }
         response_data = await self.api_client.call_api(
@@ -1639,17 +1509,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1668,7 +1538,7 @@ class ChatApi:
 
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -1694,18 +1564,11 @@ class ChatApi:
     async def get_conversation_api_v1_chat_conversations_conversation_id_get(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        include_messages: Annotated[Optional[StrictBool], Field(description="Include messages in response")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        include_messages: Annotated[StrictBool | None, Field(description="Include messages in response")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationWithMessages:
         """Get Conversation
@@ -1747,7 +1610,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationWithMessages",
             '422': "HTTPValidationError",
         }
@@ -1766,18 +1629,11 @@ class ChatApi:
     async def get_conversation_api_v1_chat_conversations_conversation_id_get_with_http_info(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        include_messages: Annotated[Optional[StrictBool], Field(description="Include messages in response")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        include_messages: Annotated[StrictBool | None, Field(description="Include messages in response")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationWithMessages]:
         """Get Conversation
@@ -1819,7 +1675,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationWithMessages",
             '422': "HTTPValidationError",
         }
@@ -1838,18 +1694,11 @@ class ChatApi:
     async def get_conversation_api_v1_chat_conversations_conversation_id_get_without_preload_content(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        include_messages: Annotated[Optional[StrictBool], Field(description="Include messages in response")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        include_messages: Annotated[StrictBool | None, Field(description="Include messages in response")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Conversation
@@ -1891,7 +1740,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationWithMessages",
             '422': "HTTPValidationError",
         }
@@ -1914,26 +1763,26 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
             _path_params['conversation_id'] = conversation_id
         # process the query parameters
         if include_messages is not None:
-            
+
             _query_params.append(('include_messages', include_messages))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -1949,7 +1798,7 @@ class ChatApi:
 
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -1975,21 +1824,14 @@ class ChatApi:
     async def get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[MessageResponse]:
+    ) -> list[MessageResponse]:
         """Get Conversation Messages
 
         Get messages from a conversation.
@@ -2032,7 +1874,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "List[MessageResponse]",
             '422': "HTTPValidationError",
         }
@@ -2051,21 +1893,14 @@ class ChatApi:
     async def get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get_with_http_info(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[MessageResponse]]:
+    ) -> ApiResponse[list[MessageResponse]]:
         """Get Conversation Messages
 
         Get messages from a conversation.
@@ -2108,7 +1943,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "List[MessageResponse]",
             '422': "HTTPValidationError",
         }
@@ -2127,19 +1962,12 @@ class ChatApi:
     async def get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get_without_preload_content(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Conversation Messages
@@ -2184,7 +2012,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "List[MessageResponse]",
             '422': "HTTPValidationError",
         }
@@ -2208,30 +2036,30 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
             _path_params['conversation_id'] = conversation_id
         # process the query parameters
         if limit is not None:
-            
+
             _query_params.append(('limit', limit))
-            
+
         if offset is not None:
-            
+
             _query_params.append(('offset', offset))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -2247,7 +2075,7 @@ class ChatApi:
 
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -2272,17 +2100,10 @@ class ChatApi:
     @validate_call
     async def get_mcp_status_api_v1_chat_mcp_status_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> McpStatusResponse:
         """Get Mcp Status
@@ -2318,7 +2139,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "McpStatusResponse",
         }
         response_data = await self.api_client.call_api(
@@ -2335,17 +2156,10 @@ class ChatApi:
     @validate_call
     async def get_mcp_status_api_v1_chat_mcp_status_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[McpStatusResponse]:
         """Get Mcp Status
@@ -2381,7 +2195,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "McpStatusResponse",
         }
         response_data = await self.api_client.call_api(
@@ -2398,17 +2212,10 @@ class ChatApi:
     @validate_call
     async def get_mcp_status_api_v1_chat_mcp_status_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Mcp Status
@@ -2444,7 +2251,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "McpStatusResponse",
         }
         response_data = await self.api_client.call_api(
@@ -2464,17 +2271,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2493,7 +2300,7 @@ class ChatApi:
 
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -2518,17 +2325,10 @@ class ChatApi:
     @validate_call
     async def get_performance_stats_api_v1_chat_performance_stats_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PerformanceStatsResponse:
         """Get Performance Stats
@@ -2564,7 +2364,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "PerformanceStatsResponse",
         }
         response_data = await self.api_client.call_api(
@@ -2581,17 +2381,10 @@ class ChatApi:
     @validate_call
     async def get_performance_stats_api_v1_chat_performance_stats_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PerformanceStatsResponse]:
         """Get Performance Stats
@@ -2627,7 +2420,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "PerformanceStatsResponse",
         }
         response_data = await self.api_client.call_api(
@@ -2644,17 +2437,10 @@ class ChatApi:
     @validate_call
     async def get_performance_stats_api_v1_chat_performance_stats_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Performance Stats
@@ -2690,7 +2476,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "PerformanceStatsResponse",
         }
         response_data = await self.api_client.call_api(
@@ -2710,17 +2496,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2739,7 +2525,7 @@ class ChatApi:
 
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -2764,17 +2550,10 @@ class ChatApi:
     @validate_call
     async def get_workflow_templates_api_v1_chat_templates_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> WorkflowTemplatesResponse:
         """Get Workflow Templates
@@ -2810,7 +2589,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "WorkflowTemplatesResponse",
         }
         response_data = await self.api_client.call_api(
@@ -2827,17 +2606,10 @@ class ChatApi:
     @validate_call
     async def get_workflow_templates_api_v1_chat_templates_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[WorkflowTemplatesResponse]:
         """Get Workflow Templates
@@ -2873,7 +2645,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "WorkflowTemplatesResponse",
         }
         response_data = await self.api_client.call_api(
@@ -2890,17 +2662,10 @@ class ChatApi:
     @validate_call
     async def get_workflow_templates_api_v1_chat_templates_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Workflow Templates
@@ -2936,7 +2701,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "WorkflowTemplatesResponse",
         }
         response_data = await self.api_client.call_api(
@@ -2956,17 +2721,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2985,7 +2750,7 @@ class ChatApi:
 
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -3010,19 +2775,12 @@ class ChatApi:
     @validate_call
     async def list_conversations_api_v1_chat_conversations_get(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationSearchResponse:
         """List Conversations
@@ -3064,7 +2822,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationSearchResponse",
             '422': "HTTPValidationError",
         }
@@ -3082,19 +2840,12 @@ class ChatApi:
     @validate_call
     async def list_conversations_api_v1_chat_conversations_get_with_http_info(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationSearchResponse]:
         """List Conversations
@@ -3136,7 +2887,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationSearchResponse",
             '422': "HTTPValidationError",
         }
@@ -3154,19 +2905,12 @@ class ChatApi:
     @validate_call
     async def list_conversations_api_v1_chat_conversations_get_without_preload_content(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """List Conversations
@@ -3208,7 +2952,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationSearchResponse",
             '422': "HTTPValidationError",
         }
@@ -3231,28 +2975,28 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
         if limit is not None:
-            
+
             _query_params.append(('limit', limit))
-            
+
         if offset is not None:
-            
+
             _query_params.append(('offset', offset))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -3268,7 +3012,7 @@ class ChatApi:
 
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 
@@ -3295,17 +3039,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         conversation_update: ConversationUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationResponse:
         """Update Conversation
@@ -3347,7 +3084,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationResponse",
             '422': "HTTPValidationError",
         }
@@ -3367,17 +3104,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         conversation_update: ConversationUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationResponse]:
         """Update Conversation
@@ -3419,7 +3149,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationResponse",
             '422': "HTTPValidationError",
         }
@@ -3439,17 +3169,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         conversation_update: ConversationUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Update Conversation
@@ -3491,7 +3214,7 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
+        _response_types_map: dict[str, str | None] = {
             '200': "ConversationResponse",
             '422': "HTTPValidationError",
         }
@@ -3514,17 +3237,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
@@ -3560,7 +3283,7 @@ class ChatApi:
                 _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
+        _auth_settings: list[str] = [
             'CustomHTTPBearer'
         ]
 

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -44,9 +43,9 @@ class TestABTestResponse(unittest.TestCase):
                 allocation_strategy = 'equal',
                 variants = [
                     chatter_sdk.models.test_variant.TestVariant(
-                        name = '', 
-                        description = '', 
-                        configuration = { }, 
+                        name = '',
+                        description = '',
+                        configuration = { },
                         weight = 0.0, )
                     ],
                 metrics = [
@@ -78,9 +77,9 @@ class TestABTestResponse(unittest.TestCase):
                 allocation_strategy = 'equal',
                 variants = [
                     chatter_sdk.models.test_variant.TestVariant(
-                        name = '', 
-                        description = '', 
-                        configuration = { }, 
+                        name = '',
+                        description = '',
+                        configuration = { },
                         weight = 0.0, )
                     ],
                 metrics = [

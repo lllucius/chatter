@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,23 +18,22 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar
+from typing import Annotated
+from typing import Self
 
 class UserUpdate(BaseModel):
     """
     Schema for user profile updates.
     """ # noqa: E501
-    email: Optional[StrictStr] = None
-    full_name: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None
-    bio: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
-    avatar_url: Optional[Annotated[str, Field(strict=True, max_length=500)]] = None
-    phone_number: Optional[Annotated[str, Field(strict=True, max_length=20)]] = None
-    default_llm_provider: Optional[StrictStr] = None
-    default_profile_id: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["email", "full_name", "bio", "avatar_url", "phone_number", "default_llm_provider", "default_profile_id"]
+    email: StrictStr | None = None
+    full_name: Annotated[str, Field(strict=True, max_length=255)] | None = None
+    bio: Annotated[str, Field(strict=True, max_length=1000)] | None = None
+    avatar_url: Annotated[str, Field(strict=True, max_length=500)] | None = None
+    phone_number: Annotated[str, Field(strict=True, max_length=20)] | None = None
+    default_llm_provider: StrictStr | None = None
+    default_profile_id: StrictStr | None = None
+    __properties: ClassVar[list[str]] = ["email", "full_name", "bio", "avatar_url", "phone_number", "default_llm_provider", "default_profile_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,11 +52,11 @@ class UserUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of UserUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -68,8 +66,7 @@ class UserUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -114,7 +111,7 @@ class UserUpdate(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of UserUpdate from a dict"""
         if obj is None:
             return None

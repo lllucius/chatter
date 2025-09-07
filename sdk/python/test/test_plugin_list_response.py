@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -38,27 +37,27 @@ class TestPluginListResponse(unittest.TestCase):
             return PluginListResponse(
                 plugins = [
                     chatter_sdk.models.plugin_response.PluginResponse(
-                        id = '', 
-                        name = '', 
-                        version = '', 
-                        description = '', 
-                        author = '', 
-                        plugin_type = 'tool', 
-                        status = 'installed', 
-                        entry_point = '', 
+                        id = '',
+                        name = '',
+                        version = '',
+                        description = '',
+                        author = '',
+                        plugin_type = 'tool',
+                        status = 'installed',
+                        entry_point = '',
                         capabilities = [
                             { }
-                            ], 
+                            ],
                         dependencies = [
                             ''
-                            ], 
+                            ],
                         permissions = [
                             ''
-                            ], 
-                        enabled = True, 
-                        error_message = '', 
-                        installed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                            ],
+                        enabled = True,
+                        error_message = '',
+                        installed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                         metadata = { }, )
                     ],
                 total = 56
@@ -67,27 +66,27 @@ class TestPluginListResponse(unittest.TestCase):
             return PluginListResponse(
                 plugins = [
                     chatter_sdk.models.plugin_response.PluginResponse(
-                        id = '', 
-                        name = '', 
-                        version = '', 
-                        description = '', 
-                        author = '', 
-                        plugin_type = 'tool', 
-                        status = 'installed', 
-                        entry_point = '', 
+                        id = '',
+                        name = '',
+                        version = '',
+                        description = '',
+                        author = '',
+                        plugin_type = 'tool',
+                        status = 'installed',
+                        entry_point = '',
                         capabilities = [
                             { }
-                            ], 
+                            ],
                         dependencies = [
                             ''
-                            ], 
+                            ],
                         permissions = [
                             ''
-                            ], 
-                        enabled = True, 
-                        error_message = '', 
-                        installed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
-                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                            ],
+                        enabled = True,
+                        error_message = '',
+                        installed_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
+                        updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                         metadata = { }, )
                     ],
                 total = 56,

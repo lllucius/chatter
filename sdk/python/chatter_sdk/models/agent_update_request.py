@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,39 +18,38 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+from typing import Annotated
 from chatter_sdk.models.agent_capability import AgentCapability
 from chatter_sdk.models.agent_status import AgentStatus
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class AgentUpdateRequest(BaseModel):
     """
     Request schema for updating an agent.
     """ # noqa: E501
-    name: Optional[StrictStr] = None
-    description: Optional[StrictStr] = None
-    system_prompt: Optional[StrictStr] = None
-    status: Optional[AgentStatus] = None
-    personality_traits: Optional[List[StrictStr]] = None
-    knowledge_domains: Optional[List[StrictStr]] = None
-    response_style: Optional[StrictStr] = None
-    capabilities: Optional[List[AgentCapability]] = None
-    available_tools: Optional[List[StrictStr]] = None
-    primary_llm: Optional[StrictStr] = None
-    fallback_llm: Optional[StrictStr] = None
-    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
-    max_tokens: Optional[Annotated[int, Field(le=32000, strict=True, ge=1)]] = None
-    max_conversation_length: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None
-    context_window_size: Optional[Annotated[int, Field(le=32000, strict=True, ge=100)]] = None
-    response_timeout: Optional[Annotated[int, Field(le=300, strict=True, ge=1)]] = None
-    learning_enabled: Optional[StrictBool] = None
-    feedback_weight: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
-    adaptation_threshold: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
-    tags: Optional[List[StrictStr]] = None
-    metadata: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["name", "description", "system_prompt", "status", "personality_traits", "knowledge_domains", "response_style", "capabilities", "available_tools", "primary_llm", "fallback_llm", "temperature", "max_tokens", "max_conversation_length", "context_window_size", "response_timeout", "learning_enabled", "feedback_weight", "adaptation_threshold", "tags", "metadata"]
+    name: StrictStr | None = None
+    description: StrictStr | None = None
+    system_prompt: StrictStr | None = None
+    status: AgentStatus | None = None
+    personality_traits: list[StrictStr] | None = None
+    knowledge_domains: list[StrictStr] | None = None
+    response_style: StrictStr | None = None
+    capabilities: list[AgentCapability] | None = None
+    available_tools: list[StrictStr] | None = None
+    primary_llm: StrictStr | None = None
+    fallback_llm: StrictStr | None = None
+    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
+    max_tokens: Annotated[int, Field(le=32000, strict=True, ge=1)] | None = None
+    max_conversation_length: Annotated[int, Field(le=1000, strict=True, ge=1)] | None = None
+    context_window_size: Annotated[int, Field(le=32000, strict=True, ge=100)] | None = None
+    response_timeout: Annotated[int, Field(le=300, strict=True, ge=1)] | None = None
+    learning_enabled: StrictBool | None = None
+    feedback_weight: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
+    adaptation_threshold: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
+    tags: list[StrictStr] | None = None
+    metadata: dict[str, Any] | None = None
+    __properties: ClassVar[list[str]] = ["name", "description", "system_prompt", "status", "personality_traits", "knowledge_domains", "response_style", "capabilities", "available_tools", "primary_llm", "fallback_llm", "temperature", "max_tokens", "max_conversation_length", "context_window_size", "response_timeout", "learning_enabled", "feedback_weight", "adaptation_threshold", "tags", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -70,11 +68,11 @@ class AgentUpdateRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of AgentUpdateRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -84,8 +82,7 @@ class AgentUpdateRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -200,7 +197,7 @@ class AgentUpdateRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of AgentUpdateRequest from a dict"""
         if obj is None:
             return None

@@ -200,34 +200,6 @@ class WorkflowAnalyticsResponse(BaseModel):
 
 
 # Execution schemas
-class WorkflowExecutionRequest(BaseModel):
-    """Schema for workflow execution request."""
-
-    input_data: dict[str, Any] = Field(default_factory=dict, description="Input data for execution")
-    context: dict[str, Any] | None = Field(None, description="Execution context")
-    options: dict[str, Any] | None = Field(None, description="Execution options")
-
-
-class WorkflowExecutionStep(BaseModel):
-    """Schema for a single execution step."""
-
-    node_id: str = Field(..., description="Executed node ID")
-    node_type: str = Field(..., description="Node type")
-    status: str = Field(..., description="Execution status")
-    input_data: dict[str, Any] = Field(..., description="Step input data")
-    output_data: dict[str, Any] | None = Field(None, description="Step output data")
-    error: str | None = Field(None, description="Error message if failed")
-    execution_time_ms: int = Field(..., description="Execution time in milliseconds")
-    timestamp: datetime = Field(..., description="Step execution timestamp")
-
-
-class WorkflowExecutionResponse(BaseModel):
-    """Schema for workflow execution response."""
-
-    execution_id: str = Field(..., description="Unique execution ID")
-    status: str = Field(..., description="Overall execution status")
-    result: dict[str, Any] | None = Field(None, description="Execution result")
-    steps: list[WorkflowExecutionStep] = Field(..., description="Execution steps")
     total_execution_time_ms: int = Field(..., description="Total execution time")
     error: str | None = Field(None, description="Error message if failed")
     started_at: datetime = Field(..., description="Execution start time")

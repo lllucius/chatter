@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,14 +19,13 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar
 from chatter_sdk.models.conversation_stats_response import ConversationStatsResponse
 from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse
 from chatter_sdk.models.performance_metrics_response import PerformanceMetricsResponse
 from chatter_sdk.models.system_analytics_response import SystemAnalyticsResponse
 from chatter_sdk.models.usage_metrics_response import UsageMetricsResponse
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class DashboardResponse(BaseModel):
     """
@@ -38,9 +36,9 @@ class DashboardResponse(BaseModel):
     performance_metrics: PerformanceMetricsResponse
     document_analytics: DocumentAnalyticsResponse
     system_health: SystemAnalyticsResponse
-    custom_metrics: List[Dict[str, Any]] = Field(description="Custom metrics")
+    custom_metrics: list[dict[str, Any]] = Field(description="Custom metrics")
     generated_at: datetime = Field(description="Dashboard generation time")
-    __properties: ClassVar[List[str]] = ["conversation_stats", "usage_metrics", "performance_metrics", "document_analytics", "system_health", "custom_metrics", "generated_at"]
+    __properties: ClassVar[list[str]] = ["conversation_stats", "usage_metrics", "performance_metrics", "document_analytics", "system_health", "custom_metrics", "generated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -59,11 +57,11 @@ class DashboardResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of DashboardResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -73,8 +71,7 @@ class DashboardResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -99,7 +96,7 @@ class DashboardResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of DashboardResponse from a dict"""
         if obj is None:
             return None

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -19,9 +18,8 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
-from typing import Any, ClassVar, Dict, List, Union
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar
+from typing import Self
 
 class SystemAnalyticsResponse(BaseModel):
     """
@@ -31,18 +29,18 @@ class SystemAnalyticsResponse(BaseModel):
     active_users_today: StrictInt = Field(description="Active users today")
     active_users_week: StrictInt = Field(description="Active users this week")
     active_users_month: StrictInt = Field(description="Active users this month")
-    system_uptime_seconds: Union[StrictFloat, StrictInt] = Field(description="System uptime in seconds")
-    avg_cpu_usage: Union[StrictFloat, StrictInt] = Field(description="Average CPU usage percentage")
-    avg_memory_usage: Union[StrictFloat, StrictInt] = Field(description="Average memory usage percentage")
+    system_uptime_seconds: StrictFloat | StrictInt = Field(description="System uptime in seconds")
+    avg_cpu_usage: StrictFloat | StrictInt = Field(description="Average CPU usage percentage")
+    avg_memory_usage: StrictFloat | StrictInt = Field(description="Average memory usage percentage")
     database_connections: StrictInt = Field(description="Current database connections")
     total_api_requests: StrictInt = Field(description="Total API requests")
-    requests_per_endpoint: Dict[str, StrictInt] = Field(description="Requests by endpoint")
-    avg_api_response_time: Union[StrictFloat, StrictInt] = Field(description="Average API response time")
-    api_error_rate: Union[StrictFloat, StrictInt] = Field(description="API error rate")
+    requests_per_endpoint: dict[str, StrictInt] = Field(description="Requests by endpoint")
+    avg_api_response_time: StrictFloat | StrictInt = Field(description="Average API response time")
+    api_error_rate: StrictFloat | StrictInt = Field(description="API error rate")
     storage_usage_bytes: StrictInt = Field(description="Total storage usage")
     vector_database_size_bytes: StrictInt = Field(description="Vector database size")
-    cache_hit_rate: Union[StrictFloat, StrictInt] = Field(description="Cache hit rate")
-    __properties: ClassVar[List[str]] = ["total_users", "active_users_today", "active_users_week", "active_users_month", "system_uptime_seconds", "avg_cpu_usage", "avg_memory_usage", "database_connections", "total_api_requests", "requests_per_endpoint", "avg_api_response_time", "api_error_rate", "storage_usage_bytes", "vector_database_size_bytes", "cache_hit_rate"]
+    cache_hit_rate: StrictFloat | StrictInt = Field(description="Cache hit rate")
+    __properties: ClassVar[list[str]] = ["total_users", "active_users_today", "active_users_week", "active_users_month", "system_uptime_seconds", "avg_cpu_usage", "avg_memory_usage", "database_connections", "total_api_requests", "requests_per_endpoint", "avg_api_response_time", "api_error_rate", "storage_usage_bytes", "vector_database_size_bytes", "cache_hit_rate"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -61,11 +59,11 @@ class SystemAnalyticsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of SystemAnalyticsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -75,8 +73,7 @@ class SystemAnalyticsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -86,7 +83,7 @@ class SystemAnalyticsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of SystemAnalyticsResponse from a dict"""
         if obj is None:
             return None

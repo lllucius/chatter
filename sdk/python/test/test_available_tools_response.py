@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -38,9 +37,9 @@ class TestAvailableToolsResponse(unittest.TestCase):
             return AvailableToolsResponse(
                 tools = [
                     chatter_sdk.models.available_tool_response.AvailableToolResponse(
-                        name = '', 
-                        description = '', 
-                        type = '', 
+                        name = '',
+                        description = '',
+                        type = '',
                         args_schema = { }, )
                     ]
             )
@@ -48,9 +47,9 @@ class TestAvailableToolsResponse(unittest.TestCase):
             return AvailableToolsResponse(
                 tools = [
                     chatter_sdk.models.available_tool_response.AvailableToolResponse(
-                        name = '', 
-                        description = '', 
-                        type = '', 
+                        name = '',
+                        description = '',
+                        type = '',
                         args_schema = { }, )
                     ],
         )

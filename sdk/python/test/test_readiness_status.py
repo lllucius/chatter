@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.readiness_status import ReadinessStatus
 
 class TestReadinessStatus(unittest.TestCase):
     """ReadinessStatus unit test stubs"""

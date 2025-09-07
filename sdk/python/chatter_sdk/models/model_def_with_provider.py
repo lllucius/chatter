@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -20,12 +19,11 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+from typing import Annotated
 from chatter_sdk.models.model_type import ModelType
 from chatter_sdk.models.provider import Provider
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
 
 class ModelDefWithProvider(BaseModel):
     """
@@ -34,23 +32,23 @@ class ModelDefWithProvider(BaseModel):
     name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Model name")
     model_type: ModelType
     display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Human-readable name")
-    description: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
+    description: Annotated[str, Field(strict=True, max_length=1000)] | None = None
     model_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Actual model name for API calls")
-    max_tokens: Optional[Annotated[int, Field(le=1000000, strict=True)]] = None
-    context_length: Optional[Annotated[int, Field(le=10000000, strict=True)]] = None
-    dimensions: Optional[Annotated[int, Field(le=10000, strict=True)]] = None
-    chunk_size: Optional[Annotated[int, Field(le=100000, strict=True)]] = None
-    supports_batch: Optional[StrictBool] = Field(default=False, description="Whether model supports batch operations")
-    max_batch_size: Optional[Annotated[int, Field(le=10000, strict=True)]] = None
-    default_config: Optional[Dict[str, Any]] = Field(default=None, description="Default configuration")
-    is_active: Optional[StrictBool] = Field(default=True, description="Whether model is active")
-    is_default: Optional[StrictBool] = Field(default=False, description="Whether this is the default model")
+    max_tokens: Annotated[int, Field(le=1000000, strict=True)] | None = None
+    context_length: Annotated[int, Field(le=10000000, strict=True)] | None = None
+    dimensions: Annotated[int, Field(le=10000, strict=True)] | None = None
+    chunk_size: Annotated[int, Field(le=100000, strict=True)] | None = None
+    supports_batch: StrictBool | None = Field(default=False, description="Whether model supports batch operations")
+    max_batch_size: Annotated[int, Field(le=10000, strict=True)] | None = None
+    default_config: dict[str, Any] | None = Field(default=None, description="Default configuration")
+    is_active: StrictBool | None = Field(default=True, description="Whether model is active")
+    is_default: StrictBool | None = Field(default=False, description="Whether this is the default model")
     id: StrictStr
     provider_id: StrictStr
     created_at: datetime
     updated_at: datetime
     provider: Provider
-    __properties: ClassVar[List[str]] = ["name", "model_type", "display_name", "description", "model_name", "max_tokens", "context_length", "dimensions", "chunk_size", "supports_batch", "max_batch_size", "default_config", "is_active", "is_default", "id", "provider_id", "created_at", "updated_at", "provider"]
+    __properties: ClassVar[list[str]] = ["name", "model_type", "display_name", "description", "model_name", "max_tokens", "context_length", "dimensions", "chunk_size", "supports_batch", "max_batch_size", "default_config", "is_active", "is_default", "id", "provider_id", "created_at", "updated_at", "provider"]
 
     @field_validator('name')
     def name_validate_regular_expression(cls, value):
@@ -76,11 +74,11 @@ class ModelDefWithProvider(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ModelDefWithProvider from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -90,8 +88,7 @@ class ModelDefWithProvider(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
-        ])
+        excluded_fields: set[str] = set()
 
         _dict = self.model_dump(
             by_alias=True,
@@ -134,7 +131,7 @@ class ModelDefWithProvider(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ModelDefWithProvider from a dict"""
         if obj is None:
             return None

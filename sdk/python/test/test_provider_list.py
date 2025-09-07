@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -38,17 +37,17 @@ class TestProviderList(unittest.TestCase):
             return ProviderList(
                 providers = [
                     chatter_sdk.models.provider.Provider(
-                        name = 'z0', 
-                        provider_type = 'openai', 
-                        display_name = '0', 
-                        description = '', 
-                        api_key_required = True, 
-                        base_url = '', 
-                        default_config = { }, 
-                        is_active = True, 
-                        is_default = True, 
-                        id = '', 
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        name = 'z0',
+                        provider_type = 'openai',
+                        display_name = '0',
+                        description = '',
+                        api_key_required = True,
+                        base_url = '',
+                        default_config = { },
+                        is_active = True,
+                        is_default = True,
+                        id = '',
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                         updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 total = 56,
@@ -59,17 +58,17 @@ class TestProviderList(unittest.TestCase):
             return ProviderList(
                 providers = [
                     chatter_sdk.models.provider.Provider(
-                        name = 'z0', 
-                        provider_type = 'openai', 
-                        display_name = '0', 
-                        description = '', 
-                        api_key_required = True, 
-                        base_url = '', 
-                        default_config = { }, 
-                        is_active = True, 
-                        is_default = True, 
-                        id = '', 
-                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), 
+                        name = 'z0',
+                        provider_type = 'openai',
+                        display_name = '0',
+                        description = '',
+                        api_key_required = True,
+                        base_url = '',
+                        default_config = { },
+                        is_active = True,
+                        is_default = True,
+                        id = '',
+                        created_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
                         updated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'), )
                     ],
                 total = 56,

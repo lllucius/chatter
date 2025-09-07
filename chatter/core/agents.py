@@ -495,7 +495,6 @@ class AgentManager:
         self.agents: dict[str, BaseAgent] = {}
         self.registry = AgentRegistry()
         self.cache = get_general_cache(
-            backend=CacheBackend.MULTI_TIER,  # Use multi-tier for fallback to memory
             config=CacheConfig(key_prefix="agents:"),
         )
         self.agent_classes: dict[AgentType, type[BaseAgent]] = {

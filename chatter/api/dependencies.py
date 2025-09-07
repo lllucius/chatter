@@ -60,6 +60,7 @@ ConversationId = Annotated[
 ]
 MessageId = Annotated[ValidatedUUID, Path(description="Message ID")]
 TemplateId = Annotated[str, Path(description="Template identifier")]
+WorkflowId = Annotated[ValidatedUUID, Path(description="Workflow ID")]
 
 # Common query parameters
 PaginationLimit = Annotated[

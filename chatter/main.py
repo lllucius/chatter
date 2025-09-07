@@ -530,6 +530,7 @@ def create_app() -> FastAPI:
         profiles,
         prompts,
         toolserver,
+        workflows,
     )
 
     app.include_router(health.router, tags=["Health"])
@@ -566,6 +567,12 @@ def create_app() -> FastAPI:
         analytics.router,
         prefix=f"{settings.api_prefix}/analytics",
         tags=["Analytics"],
+    )
+
+    app.include_router(
+        workflows.router,
+        prefix=f"{settings.api_prefix}",
+        tags=["Workflows"],
     )
 
     app.include_router(

@@ -416,73 +416,75 @@ const AgentsPage: React.FC = () => {
           {editingAgent ? 'Edit Agent' : 'Create Agent'}
         </DialogTitle>
         <DialogContent>
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid
-              size={{
-                xs: 12,
-                sm: 6
-              }}>
-              <TextField
-                fullWidth
-                label="Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
+          <Box sx={{ pt: 1 }}>
+            <Grid container spacing={3}>
+              {/* Basic Information Section */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <FormControl fullWidth>
+                  <InputLabel>Agent Type</InputLabel>
+                  <Select
+                    value={formData.agent_type}
+                    label="Agent Type"
+                    onChange={(e) => setFormData({ ...formData, agent_type: e.target.value })}
+                  >
+                    {agentTypes.map((type) => (
+                      <MenuItem key={type} value={type}>
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Description Section */}
+              <Grid size={12}>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  multiline
+                  rows={2}
+                />
+              </Grid>
+
+              {/* System Prompt Section */}
+              <Grid size={12}>
+                <TextField
+                  fullWidth
+                  label="System Prompt"
+                  value={formData.system_prompt}
+                  onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
+                  multiline
+                  rows={6}
+                  placeholder="Enter the system prompt that defines the agent's behavior and personality..."
+                />
+              </Grid>
+
+              {/* Status Section */}
+              <Grid size={12}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.status === 'active'}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.checked ? 'active' : 'inactive' })}
+                    />
+                  }
+                  label="Agent is active"
+                  sx={{ mt: 1 }}
+                />
+              </Grid>
             </Grid>
-            <Grid
-              size={{
-                xs: 12,
-                sm: 6
-              }}>
-              <FormControl fullWidth>
-                <InputLabel>Agent Type</InputLabel>
-                <Select
-                  value={formData.agent_type}
-                  label="Agent Type"
-                  onChange={(e) => setFormData({ ...formData, agent_type: e.target.value })}
-                >
-                  {agentTypes.map((type) => (
-                    <MenuItem key={type} value={type}>
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={12}>
-              <TextField
-                fullWidth
-                label="Description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                multiline
-                rows={2}
-              />
-            </Grid>
-            <Grid size={12}>
-              <TextField
-                fullWidth
-                label="System Prompt"
-                value={formData.system_prompt}
-                onChange={(e) => setFormData({ ...formData, system_prompt: e.target.value })}
-                multiline
-                rows={6}
-                placeholder="Enter the system prompt that defines the agent's behavior and personality..."
-              />
-            </Grid>
-            <Grid size={12}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={formData.status === 'active'}
-                    onChange={(e) => setFormData({ ...formData, status: e.target.checked ? 'active' : 'inactive' })}
-                  />
-                }
-                label="Agent is active"
-              />
-            </Grid>
-          </Grid>
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)} disabled={saving}>

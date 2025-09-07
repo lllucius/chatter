@@ -371,9 +371,10 @@ const ABTestingPage: React.FC = () => {
     <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
       <DialogTitle>{editingTest ? 'Edit AB Test' : 'Create AB Test'}</DialogTitle>
       <DialogContent>
-        <Box sx={{ pt: 2 }}>
+        <Box sx={{ pt: 1 }}>
           <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
+            {/* Basic Information Section */}
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Test Name"
@@ -382,7 +383,7 @@ const ABTestingPage: React.FC = () => {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Test Type</InputLabel>
                 <Select
@@ -398,7 +399,9 @@ const ABTestingPage: React.FC = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
+
+            {/* Description Section */}
+            <Grid size={12}>
               <TextField
                 fullWidth
                 multiline
@@ -410,46 +413,66 @@ const ABTestingPage: React.FC = () => {
             </Grid>
             
             {/* Variants Section */}
-            <Grid item xs={12}>
-              <Typography variant="h6" gutterBottom>Test Variants</Typography>
-              {formData.variants.map((variant, index) => (
-                <Box key={index} sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center' }}>
-                  <TextField
-                    label="Variant Name"
-                    value={variant.name}
-                    onChange={(e) => {
-                      const newVariants = [...formData.variants];
-                      newVariants[index].name = e.target.value;
-                      setFormData({ ...formData, variants: newVariants });
-                    }}
-                    sx={{ flex: 1 }}
-                  />
-                  <TextField
-                    label="Traffic %"
-                    type="number"
-                    value={variant.allocation}
-                    onChange={(e) => {
-                      const newVariants = [...formData.variants];
-                      newVariants[index].allocation = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
-                      setFormData({ ...formData, variants: newVariants });
-                    }}
-                    inputProps={{ min: 0, max: 100 }}
-                    sx={{ width: 120 }}
-                  />
-                  {formData.variants.length > 2 && (
-                    <IconButton onClick={() => removeVariant(index)} color="error">
-                      <DeleteIcon />
-                    </IconButton>
-                  )}
-                </Box>
-              ))}
-              <Button onClick={addVariant} startIcon={<AddIcon />} variant="outlined">
+            <Grid size={12}>
+              <Typography variant="h6" gutterBottom sx={{ mt: 2, mb: 2 }}>
+                Test Variants
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {formData.variants.map((variant, index) => (
+                  <Grid container spacing={2} key={index} alignItems="center">
+                    <Grid size={{ xs: 12, sm: 8 }}>
+                      <TextField
+                        fullWidth
+                        label="Variant Name"
+                        value={variant.name}
+                        onChange={(e) => {
+                          const newVariants = [...formData.variants];
+                          newVariants[index].name = e.target.value;
+                          setFormData({ ...formData, variants: newVariants });
+                        }}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 8, sm: 3 }}>
+                      <TextField
+                        fullWidth
+                        label="Traffic %"
+                        type="number"
+                        value={variant.allocation}
+                        onChange={(e) => {
+                          const newVariants = [...formData.variants];
+                          newVariants[index].allocation = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+                          setFormData({ ...formData, variants: newVariants });
+                        }}
+                        inputProps={{ min: 0, max: 100 }}
+                      />
+                    </Grid>
+                    <Grid size={{ xs: 4, sm: 1 }}>
+                      {formData.variants.length > 2 && (
+                        <IconButton onClick={() => removeVariant(index)} color="error">
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                    </Grid>
+                  </Grid>
+                ))}
+              </Box>
+              <Button 
+                onClick={addVariant} 
+                startIcon={<AddIcon />} 
+                variant="outlined" 
+                sx={{ mt: 2 }}
+              >
                 Add Variant
               </Button>
             </Grid>
 
-            {/* Test Configuration */}
-            <Grid item xs={12} sm={6}>
+            {/* Test Configuration Section */}
+            <Grid size={12}>
+              <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 2 }}>
+                Test Configuration
+              </Typography>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Minimum Sample Size"
@@ -459,7 +482,7 @@ const ABTestingPage: React.FC = () => {
                 inputProps={{ min: 100 }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Duration (Days)"
@@ -469,7 +492,7 @@ const ABTestingPage: React.FC = () => {
                 inputProps={{ min: 1 }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Confidence Level"
@@ -479,7 +502,7 @@ const ABTestingPage: React.FC = () => {
                 inputProps={{ min: 0.8, max: 0.99, step: 0.01 }}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
+            <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
                 fullWidth
                 label="Primary Metric"

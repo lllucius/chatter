@@ -375,7 +375,8 @@ const ProfilesPage: React.FC = () => {
               {dialogError}
             </Alert>
           )}
-          <Grid container spacing={3} sx={{ mt: 1 }}>
+          <Box sx={{ pt: 1 }}>
+            <Grid container spacing={3}>
             <Grid
               size={{
                 xs: 12,
@@ -535,6 +536,7 @@ const ProfilesPage: React.FC = () => {
               />
             </Grid>
           </Grid>
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDialogOpen(false)} disabled={saving}>

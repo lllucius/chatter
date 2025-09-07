@@ -474,24 +474,26 @@ const UserSettingsPage: React.FC = () => {
       <Dialog open={apiKeyDialogOpen} onClose={() => setApiKeyDialogOpen(false)} maxWidth="sm" fullWidth>
         <DialogTitle>Create API Key</DialogTitle>
         <DialogContent>
-          <TextField
-            fullWidth
-            label="Key Name"
-            value={apiKeyForm.values.name}
-            onChange={apiKeyForm.handleChange('name')}
-            error={Boolean(apiKeyForm.errors.name)}
-            helperText={apiKeyForm.errors.name}
-            sx={{ mb: 2, mt: 1 }}
-          />
-          <TextField
-            fullWidth
-            label="Expires in Days"
-            type="number"
-            value={apiKeyForm.values.expires_in_days}
-            onChange={apiKeyForm.handleChange('expires_in_days')}
-            error={Boolean(apiKeyForm.errors.expires_in_days)}
-            helperText={apiKeyForm.errors.expires_in_days || 'Set to 0 for no expiration'}
-          />
+          <Box sx={{ pt: 1 }}>
+            <TextField
+              fullWidth
+              label="Key Name"
+              value={apiKeyForm.values.name}
+              onChange={apiKeyForm.handleChange('name')}
+              error={Boolean(apiKeyForm.errors.name)}
+              helperText={apiKeyForm.errors.name}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Expires in Days"
+              type="number"
+              value={apiKeyForm.values.expires_in_days}
+              onChange={apiKeyForm.handleChange('expires_in_days')}
+              error={Boolean(apiKeyForm.errors.expires_in_days)}
+              helperText={apiKeyForm.errors.expires_in_days || 'Set to 0 for no expiration'}
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setApiKeyDialogOpen(false)}>Cancel</Button>

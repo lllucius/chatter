@@ -1243,162 +1243,182 @@ const ModelManagementPage: React.FC = () => {
       </Dialog>
 
       {/* Embedding Space Dialog */}
-      <Dialog open={spaceDialogOpen} onClose={handleSpaceDialogClose} maxWidth="sm" fullWidth>
+      <Dialog open={spaceDialogOpen} onClose={handleSpaceDialogClose} maxWidth="md" fullWidth>
         <DialogTitle>{editingSpace ? 'Edit Embedding Space' : 'Add Embedding Space'}</DialogTitle>
         <DialogContent>
-          <TextField
-            select
-            fullWidth
-            label="Embedding Model"
-            margin="normal"
-            required
-            value={spaceForm.model_id}
-            onChange={(e) => setSpaceForm({ ...spaceForm, model_id: e.target.value })}
-            disabled={!!editingSpace}
-            helperText={editingSpace ? "Model cannot be changed after creation" : ""}
-          >
-            {embeddingModels.map((m) => (
-              <MenuItem key={m.id} value={m.id}>
-                {m.display_name} {m.dimensions ? `(${m.dimensions}d)` : ''}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            fullWidth
-            label="Name"
-            margin="normal"
-            required
-            value={spaceForm.name}
-            onChange={(e) => setSpaceForm({ ...spaceForm, name: e.target.value })}
-            disabled={!!editingSpace}
-            helperText={editingSpace ? "Name cannot be changed after creation" : ""}
-          />
-          <TextField
-            fullWidth
-            label="Display Name"
-            margin="normal"
-            required
-            value={spaceForm.display_name}
-            onChange={(e) => setSpaceForm({ ...spaceForm, display_name: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Table Name"
-            margin="normal"
-            required
-            value={spaceForm.table_name}
-            onChange={(e) => setSpaceForm({ ...spaceForm, table_name: e.target.value })}
-            disabled={!!editingSpace}
-            helperText={editingSpace ? "Table name cannot be changed after creation" : ""}
-          />
-          <Grid container spacing={2} sx={{ mt: 0 }}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Base Dimensions"
-                margin="normal"
-                required
-                value={spaceForm.base_dimensions}
-                onChange={(e) => setSpaceForm({ ...spaceForm, base_dimensions: parseInt(e.target.value) || 0 })}
-                disabled={!!editingSpace}
-                helperText={editingSpace ? "Base dimensions cannot be changed after creation" : ""}
-              />
+          <Box sx={{ pt: 1 }}>
+            <Grid container spacing={3}>
+              {/* Model Selection */}
+              <Grid size={12}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Embedding Model"
+                  value={spaceForm.model_id}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, model_id: e.target.value })}
+                  disabled={!!editingSpace}
+                  helperText={editingSpace ? "Model cannot be changed after creation" : ""}
+                  required
+                >
+                  {embeddingModels.map((m) => (
+                    <MenuItem key={m.id} value={m.id}>
+                      {m.display_name} {m.dimensions ? `(${m.dimensions}d)` : ''}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+
+              {/* Basic Information */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Name"
+                  value={spaceForm.name}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, name: e.target.value })}
+                  disabled={!!editingSpace}
+                  helperText={editingSpace ? "Name cannot be changed after creation" : ""}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  label="Display Name"
+                  value={spaceForm.display_name}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, display_name: e.target.value })}
+                  required
+                />
+              </Grid>
+
+              {/* Database Configuration */}
+              <Grid size={12}>
+                <TextField
+                  fullWidth
+                  label="Table Name"
+                  value={spaceForm.table_name}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, table_name: e.target.value })}
+                  disabled={!!editingSpace}
+                  helperText={editingSpace ? "Table name cannot be changed after creation" : ""}
+                  required
+                />
+              </Grid>
+
+              {/* Dimensions Configuration */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Base Dimensions"
+                  value={spaceForm.base_dimensions}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, base_dimensions: parseInt(e.target.value) || 0 })}
+                  disabled={!!editingSpace}
+                  helperText={editingSpace ? "Base dimensions cannot be changed after creation" : ""}
+                  required
+                />
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Effective Dimensions"
+                  value={spaceForm.effective_dimensions}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, effective_dimensions: parseInt(e.target.value) || 0 })}
+                  required
+                />
+              </Grid>
+
+              {/* Vector Processing Configuration */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Reduction Strategy"
+                  value={spaceForm.reduction_strategy}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, reduction_strategy: e.target.value as any })}
+                >
+                  <MenuItem value="none">None</MenuItem>
+                  <MenuItem value="truncate">Truncate</MenuItem>
+                  <MenuItem value="reducer">Reducer (PCA/SVD)</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Distance Metric"
+                  value={spaceForm.distance_metric}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, distance_metric: e.target.value as any })}
+                >
+                  <MenuItem value="cosine">Cosine</MenuItem>
+                  <MenuItem value="l2">L2 (Euclidean)</MenuItem>
+                  <MenuItem value="ip">Inner Product</MenuItem>
+                </TextField>
+              </Grid>
+
+              {/* Conditional Reducer Path */}
+              {spaceForm.reduction_strategy === 'reducer' && (
+                <Grid size={12}>
+                  <TextField
+                    fullWidth
+                    label="Reducer Path"
+                    placeholder="Path to joblib reducer file"
+                    value={(spaceForm as any).reducer_path || ''}
+                    onChange={(e) => setSpaceForm({ ...spaceForm, ...(spaceForm as any), reducer_path: e.target.value } as any)}
+                  />
+                </Grid>
+              )}
+
+              {/* Index Configuration */}
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField
+                  select
+                  fullWidth
+                  label="Index Type"
+                  value={spaceForm.index_type}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, index_type: e.target.value as any })}
+                >
+                  <MenuItem value="hnsw">HNSW</MenuItem>
+                  <MenuItem value="ivfflat">IVFFlat</MenuItem>
+                </TextField>
+              </Grid>
+
+              {/* Description */}
+              <Grid size={12}>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  multiline
+                  rows={3}
+                  value={spaceForm.description}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, description: e.target.value })}
+                />
+              </Grid>
+
+              {/* Options */}
+              <Grid size={12}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={spaceForm.normalize_vectors}
+                        onChange={(e) => setSpaceForm({ ...spaceForm, normalize_vectors: e.target.checked })}
+                      />
+                    }
+                    label="Normalize Vectors"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={spaceForm.is_active}
+                        onChange={(e) => setSpaceForm({ ...spaceForm, is_active: e.target.checked })}
+                      />
+                    }
+                    label="Active"
+                  />
+                </Box>
+              </Grid>
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
-                fullWidth
-                type="number"
-                label="Effective Dimensions"
-                margin="normal"
-                required
-                value={spaceForm.effective_dimensions}
-                onChange={(e) => setSpaceForm({ ...spaceForm, effective_dimensions: parseInt(e.target.value) || 0 })}
-              />
-            </Grid>
-          </Grid>
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
-                select
-                fullWidth
-                label="Reduction Strategy"
-                margin="normal"
-                value={spaceForm.reduction_strategy}
-                onChange={(e) => setSpaceForm({ ...spaceForm, reduction_strategy: e.target.value as any })}
-              >
-                <MenuItem value="none">None</MenuItem>
-                <MenuItem value="truncate">Truncate</MenuItem>
-                <MenuItem value="reducer">Reducer (PCA/SVD)</MenuItem>
-              </TextField>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
-                select
-                fullWidth
-                label="Distance Metric"
-                margin="normal"
-                value={spaceForm.distance_metric}
-                onChange={(e) => setSpaceForm({ ...spaceForm, distance_metric: e.target.value as any })}
-              >
-                <MenuItem value="cosine">Cosine</MenuItem>
-                <MenuItem value="l2">L2 (Euclidean)</MenuItem>
-                <MenuItem value="ip">Inner Product</MenuItem>
-              </TextField>
-            </Grid>
-          </Grid>
-          {spaceForm.reduction_strategy === 'reducer' && (
-            <TextField
-              fullWidth
-              label="Reducer Path"
-              margin="normal"
-              placeholder="Path to joblib reducer file"
-              value={(spaceForm as any).reducer_path || ''}
-              onChange={(e) => setSpaceForm({ ...spaceForm, ...(spaceForm as any), reducer_path: e.target.value } as any)}
-            />
-          )}
-          <Grid container spacing={2}>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <TextField
-                select
-                fullWidth
-                label="Index Type"
-                margin="normal"
-                value={spaceForm.index_type}
-                onChange={(e) => setSpaceForm({ ...spaceForm, index_type: e.target.value as any })}
-              >
-                <MenuItem value="hnsw">HNSW</MenuItem>
-                <MenuItem value="ivfflat">IVFFlat</MenuItem>
-              </TextField>
-            </Grid>
-          </Grid>
-          <TextField
-            fullWidth
-            label="Description"
-            margin="normal"
-            multiline
-            rows={3}
-            value={spaceForm.description}
-            onChange={(e) => setSpaceForm({ ...spaceForm, description: e.target.value })}
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={spaceForm.normalize_vectors}
-                onChange={(e) => setSpaceForm({ ...spaceForm, normalize_vectors: e.target.checked })}
-              />
-            }
-            label="Normalize Vectors"
-          />
-          <FormControlLabel
-            control={
-              <Switch
-                checked={spaceForm.is_active}
-                onChange={(e) => setSpaceForm({ ...spaceForm, is_active: e.target.checked })}
-              />
-            }
-            label="Active"
-          />
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleSpaceDialogClose}>Cancel</Button>

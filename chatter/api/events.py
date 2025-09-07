@@ -8,10 +8,7 @@ from fastapi.responses import StreamingResponse
 from chatter.api.auth import get_current_admin_user, get_current_user
 from chatter.config import settings
 from chatter.models.user import User
-from chatter.schemas.events import (
-    SSEStatsResponse,
-    TestEventResponse,
-)
+from chatter.schemas.events import SSEStatsResponse, TestEventResponse
 from chatter.services.sse_events import EventType, sse_service
 from chatter.utils.logging import get_logger
 from chatter.utils.unified_rate_limiter import (

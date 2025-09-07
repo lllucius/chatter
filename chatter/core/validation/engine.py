@@ -4,9 +4,7 @@ import asyncio
 from typing import Any
 
 from .context import DEFAULT_CONTEXT, ValidationContext
-from .exceptions import (
-    ValidationError,
-)
+from .exceptions import ValidationError
 from .results import ValidationResult
 from .validators import BaseValidator
 

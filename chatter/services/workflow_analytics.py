@@ -1,11 +1,11 @@
 """Workflow analytics service for complexity analysis and optimization suggestions."""
 
 from collections import defaultdict, deque
-from typing import Any, Dict, List, Set, Tuple, Optional
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 from chatter.schemas.workflows import (
-    ComplexityMetrics,
     BottleneckInfo,
+    ComplexityMetrics,
     OptimizationSuggestion,
 )
 from chatter.utils.logging import get_logger

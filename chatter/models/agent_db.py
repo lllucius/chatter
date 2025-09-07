@@ -3,24 +3,14 @@
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import (
-    Boolean,
-)
+from sqlalchemy import Boolean
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import (
-    Float,
-    Integer,
-    String,
-    Text,
-)
+from sqlalchemy import Float, Integer, String, Text
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from chatter.models.base import Base
-from chatter.schemas.agents import (
-    AgentStatus,
-    AgentType,
-)
+from chatter.schemas.agents import AgentStatus, AgentType
 
 
 class AgentDB(Base):

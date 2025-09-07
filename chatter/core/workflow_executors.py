@@ -22,9 +22,7 @@ from chatter.core.workflow_limits import (
     WorkflowResourceLimitError,
     workflow_limit_manager,
 )
-from chatter.core.workflow_performance import (
-    performance_monitor,
-)
+from chatter.core.workflow_performance import performance_monitor
 from chatter.models.conversation import (
     Conversation,
     Message,

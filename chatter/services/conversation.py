@@ -8,14 +8,8 @@ from typing import Any
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.exceptions import (
-    NotFoundError,
-    ValidationError,
-)
-from chatter.models.conversation import (
-    Conversation,
-    ConversationStatus,
-)
+from chatter.core.exceptions import NotFoundError, ValidationError
+from chatter.models.conversation import Conversation, ConversationStatus
 from chatter.schemas.chat import (
     ConversationCreate as ConversationCreateSchema,
 )
@@ -84,7 +78,7 @@ class ConversationService:
                 metadata = kwargs.get('metadata', {})
                 if kwargs.get('workflow_config') is not None:
                     metadata['workflow_config'] = kwargs.get('workflow_config')
-                
+
                 conversation = Conversation(
                     title=title,
                     user_id=user_id,
@@ -99,7 +93,7 @@ class ConversationService:
                 metadata = conversation_data.metadata or {}
                 if conversation_data.workflow_config is not None:
                     metadata['workflow_config'] = conversation_data.workflow_config
-                
+
                 # Use schema object
                 conversation = Conversation(
                     title=conversation_data.title,

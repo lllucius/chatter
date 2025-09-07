@@ -3,9 +3,7 @@
 import asyncio
 from typing import Any
 
-from chatter.core.audit_adapter import (
-    setup_audit_integration,
-)
+from chatter.core.audit_adapter import setup_audit_integration
 from chatter.core.events import (
     EventCategory,
     EventPriority,
@@ -18,9 +16,7 @@ from chatter.core.events import (
     emit_event,
     event_router,
 )
-from chatter.core.security_adapter import (
-    setup_security_integration,
-)
+from chatter.core.security_adapter import setup_security_integration
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)

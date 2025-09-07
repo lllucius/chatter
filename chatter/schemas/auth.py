@@ -87,7 +87,7 @@ class UserResponse(UserBase):
     default_profile_id: str | None = Field(
         None, description="Default profile ID"
     )
-    
+
     # Usage limits (non-sensitive)
     daily_message_limit: int | None = Field(
         None, description="Daily message limit"
@@ -98,12 +98,12 @@ class UserResponse(UserBase):
     max_file_size_mb: int | None = Field(
         None, description="Max file size in MB"
     )
-    
+
     # API key name (but not the actual key for security)
     api_key_name: str | None = Field(
         None, description="API key name"
     )
-    
+
     created_at: datetime = Field(
         ..., description="Account creation date"
     )

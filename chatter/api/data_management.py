@@ -21,9 +21,7 @@ from chatter.schemas.data_management import (
 )
 from chatter.services.data_management import DataManager, data_manager
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import (
-    InternalServerProblem,
-)
+from chatter.utils.problem import InternalServerProblem
 
 logger = get_logger(__name__)
 router = APIRouter()

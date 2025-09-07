@@ -22,10 +22,7 @@ except ImportError:
     data_manager = None
 
 try:
-    from .streaming import (
-        StreamingService,
-        streaming_service,
-    )
+    from .streaming import StreamingService, streaming_service
 except ImportError:
     StreamingService = None
     streaming_service = None

@@ -142,7 +142,7 @@ class ConversationResponse(ConversationBase):
     message_count: int = Field(..., description="Number of messages")
     total_tokens: int = Field(..., description="Total tokens used")
     total_cost: float = Field(..., description="Total cost")
-    
+
     # Configuration fields that were missing
     system_prompt: str | None = Field(None, description="System prompt")
     context_window: int = Field(..., description="Context window size")
@@ -150,12 +150,12 @@ class ConversationResponse(ConversationBase):
     memory_strategy: str | None = Field(None, description="Memory strategy")
     retrieval_limit: int = Field(..., description="Retrieval limit")
     retrieval_score_threshold: float = Field(..., description="Retrieval score threshold")
-    
+
     # Metadata fields that were missing
     tags: list[str] | None = Field(None, description="Conversation tags")
     extra_metadata: dict[str, Any] | None = Field(None, description="Extra metadata")
     workflow_config: dict[str, Any] | None = Field(None, description="Workflow configuration")
-    
+
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(
         ..., description="Last update timestamp"

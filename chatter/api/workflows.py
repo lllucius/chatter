@@ -1,38 +1,36 @@
 """Comprehensive workflows API supporting advanced workflow editor features."""
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.api.dependencies import WorkflowId
 from chatter.models.user import User
 from chatter.schemas.workflows import (
+    NodeTypeResponse,
+    WorkflowAnalyticsResponse,
     WorkflowDefinitionCreate,
     WorkflowDefinitionResponse,
-    WorkflowDefinitionUpdate,
     WorkflowDefinitionsResponse,
-    WorkflowTemplateCreate,
-    WorkflowTemplateResponse,
-    WorkflowTemplateUpdate,
-    WorkflowTemplatesResponse,
-    WorkflowAnalyticsResponse,
+    WorkflowDefinitionUpdate,
     WorkflowExecutionRequest,
     WorkflowExecutionResponse,
+    WorkflowTemplateCreate,
+    WorkflowTemplateResponse,
+    WorkflowTemplatesResponse,
+    WorkflowTemplateUpdate,
     WorkflowValidationResponse,
-    NodeTypeResponse,
 )
-from chatter.services.workflow_management import WorkflowManagementService
 from chatter.services.workflow_analytics import WorkflowAnalyticsService
 from chatter.services.workflow_execution import WorkflowExecutionService
+from chatter.services.workflow_management import (
+    WorkflowManagementService,
+)
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import (
-    BadRequestProblem,
-    InternalServerProblem,
-    NotFoundProblem,
-)
+from chatter.utils.problem import InternalServerProblem, NotFoundProblem
 
 logger = get_logger(__name__)
 router = APIRouter(prefix="/workflows", tags=["workflows"])
@@ -60,7 +58,7 @@ async def get_workflow_execution_service(
     # Import here to avoid circular dependencies
     from chatter.services.llm import LLMService
     from chatter.services.message import MessageService
-    
+
     llm_service = LLMService()
     message_service = MessageService(session)
     return WorkflowExecutionService(llm_service, message_service, session)
@@ -129,7 +127,7 @@ async def get_workflow_definition(
         )
         if not definition:
             raise NotFoundProblem(detail="Workflow definition not found")
-        
+
         return WorkflowDefinitionResponse.model_validate(definition)
     except HTTPException:
         raise
@@ -156,7 +154,7 @@ async def update_workflow_definition(
         )
         if not definition:
             raise NotFoundProblem(detail="Workflow definition not found")
-        
+
         return WorkflowDefinitionResponse.model_validate(definition)
     except HTTPException:
         raise
@@ -181,7 +179,7 @@ async def delete_workflow_definition(
         )
         if not success:
             raise NotFoundProblem(detail="Workflow definition not found")
-        
+
         return {"message": "Workflow definition deleted successfully"}
     except HTTPException:
         raise
@@ -253,7 +251,7 @@ async def update_workflow_template(
         )
         if not template_obj:
             raise NotFoundProblem(detail="Workflow template not found")
-        
+
         return WorkflowTemplateResponse.model_validate(template_obj)
     except HTTPException:
         raise
@@ -281,7 +279,7 @@ async def get_workflow_analytics(
         )
         if not definition:
             raise NotFoundProblem(detail="Workflow definition not found")
-        
+
         analytics = await analytics_service.analyze_workflow(
             nodes=definition.nodes,
             edges=definition.edges,
@@ -314,7 +312,7 @@ async def execute_workflow(
         )
         if not definition:
             raise NotFoundProblem(detail="Workflow definition not found")
-        
+
         result = await execution_service.execute_workflow(
             workflow_definition=definition,
             input_data=execution_request.input_data,
@@ -352,10 +350,10 @@ async def validate_workflow_definition(
 
 
 # Node Types
-@router.get("/node-types", response_model=List[NodeTypeResponse])
+@router.get("/node-types", response_model=list[NodeTypeResponse])
 async def get_supported_node_types(
     current_user: User = Depends(get_current_user),
-) -> List[NodeTypeResponse]:
+) -> list[NodeTypeResponse]:
     """Get list of supported workflow node types."""
     try:
         node_types = [
@@ -460,7 +458,7 @@ async def get_supported_node_types(
                 ],
             },
         ]
-        
+
         return [NodeTypeResponse(**node_type) for node_type in node_types]
     except Exception as e:
         logger.error(f"Failed to get node types: {e}")
@@ -485,7 +483,7 @@ async def execute_workflow(
             owner_id=current_user.id,
             input_data=execution_request.input_data,
         )
-        
+
         # Start execution (would be handled by background task in real implementation)
         execution = await workflow_service.update_workflow_execution(
             execution_id=execution.id,
@@ -493,9 +491,9 @@ async def execute_workflow(
             status="running",
             started_at=datetime.utcnow(),
         )
-        
+
         return WorkflowExecutionResponse.model_validate(execution)
-        
+
     except Exception as e:
         logger.error(f"Failed to execute workflow {workflow_id}: {e}")
         raise InternalServerProblem(
@@ -503,12 +501,12 @@ async def execute_workflow(
         ) from e
 
 
-@router.get("/definitions/{workflow_id}/executions", response_model=List[WorkflowExecutionResponse])
+@router.get("/definitions/{workflow_id}/executions", response_model=list[WorkflowExecutionResponse])
 async def list_workflow_executions(
     workflow_id: WorkflowId,
     current_user: User = Depends(get_current_user),
     workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
-) -> List[WorkflowExecutionResponse]:
+) -> list[WorkflowExecutionResponse]:
     """List executions for a workflow definition."""
     try:
         executions = await workflow_service.list_workflow_executions(
@@ -516,7 +514,7 @@ async def list_workflow_executions(
             owner_id=current_user.id,
         )
         return [WorkflowExecutionResponse.model_validate(exec) for exec in executions]
-        
+
     except Exception as e:
         logger.error(f"Failed to list executions for workflow {workflow_id}: {e}")
         raise InternalServerProblem(
@@ -536,7 +534,7 @@ async def validate_workflow_definition(
             definition_data.model_dump(),
             current_user.id,
         )
-        
+
         return WorkflowValidationResponse(
             is_valid=validation_result['valid'],
             errors=[
@@ -555,7 +553,7 @@ async def validate_workflow_definition(
             ],
             suggestions=[],
         )
-        
+
     except Exception as e:
         logger.error(f"Failed to validate workflow definition: {e}")
         raise InternalServerProblem(

@@ -7,9 +7,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
-from chatter.schemas.common import (
-    ListRequestBase,
-)
+from chatter.schemas.common import ListRequestBase
 
 
 class PluginType(str, Enum):

@@ -488,9 +488,7 @@ class DataManager:
         self, conversation_ids: list[str], user_id: str
     ) -> dict[str, Any]:
         """Bulk delete conversations using ChatService."""
-        from chatter.services.chat import (
-            ChatService,
-        )
+        from chatter.services.chat import ChatService
         from chatter.services.llm import LLMService
         from chatter.utils.database import get_session_maker
 

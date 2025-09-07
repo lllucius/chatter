@@ -6,12 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import (
-    JSON,
-    Boolean,
-    CheckConstraint,
-    DateTime,
-)
+from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
     Float,
@@ -163,7 +158,7 @@ class Conversation(Base):
     workflow_config: Mapped[dict[str, Any] | None] = mapped_column(
         JSON, nullable=True
     )
-    
+
     # Timing information
     last_message_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True

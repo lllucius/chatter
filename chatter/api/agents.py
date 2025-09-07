@@ -31,10 +31,7 @@ from chatter.schemas.agents import (
     AgentUpdateRequest,
 )
 from chatter.utils.logging import get_logger
-from chatter.utils.problem import (
-    InternalServerProblem,
-    NotFoundProblem,
-)
+from chatter.utils.problem import InternalServerProblem, NotFoundProblem
 from chatter.utils.unified_rate_limiter import (
     RateLimitExceeded,
     get_unified_rate_limiter,

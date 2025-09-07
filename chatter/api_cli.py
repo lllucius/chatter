@@ -9,27 +9,41 @@ import asyncio
 import json
 import os
 import sys
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 import typer
 from rich.console import Console
 from rich.panel import Panel
-from rich.prompt import Confirm, Prompt
+from rich.prompt import Prompt
 from rich.table import Table
-from rich.progress import Progress, SpinnerColumn, TextColumn
 
 # Import the Chatter SDK
 try:
     from chatter_sdk import (
-        ApiClient, Configuration,
-        HealthApi, AuthenticationApi, PromptsApi, ProfilesApi, 
-        DocumentsApi, AnalyticsApi, ChatApi, AgentsApi, PluginsApi,
-        JobsApi, DataManagementApi, EventsApi, ModelRegistryApi,
-        ToolServersApi, ABTestingApi,
-        UserLogin, PromptCreate, PromptUpdate, ProfileCreate, ProfileUpdate,
-        DocumentSearchRequest, ConversationCreate
+        ABTestingApi,
+        AgentsApi,
+        AnalyticsApi,
+        ApiClient,
+        AuthenticationApi,
+        ChatApi,
+        Configuration,
+        ConversationCreate,
+        DataManagementApi,
+        DocumentsApi,
+        DocumentSearchRequest,
+        EventsApi,
+        HealthApi,
+        JobsApi,
+        ModelRegistryApi,
+        PluginsApi,
+        ProfileCreate,
+        ProfilesApi,
+        ProfileUpdate,
+        PromptCreate,
+        PromptsApi,
+        PromptUpdate,
+        ToolServersApi,
+        UserLogin,
     )
     from chatter_sdk.exceptions import ApiException
 except ImportError as e:
@@ -50,23 +64,23 @@ class ChatterSDKClient:
 
     def __init__(
         self,
-        base_url: Optional[str] = None,
-        access_token: Optional[str] = None,
+        base_url: str | None = None,
+        access_token: str | None = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
         self.base_url = base_url or os.getenv("CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL)
         self.access_token = access_token or os.getenv("CHATTER_ACCESS_TOKEN")
         self.timeout = timeout
-        
+
         # Configure the SDK
         self.configuration = Configuration(
             host=self.base_url,
             access_token=self.access_token,
         )
-        
+
         # Initialize API client
         self.api_client = ApiClient(self.configuration)
-        
+
         # Initialize all API endpoints
         self.health_api = HealthApi(self.api_client)
         self.auth_api = AuthenticationApi(self.api_client)
@@ -97,24 +111,24 @@ class ChatterSDKClient:
         config_dir = Path.home() / ".chatter"
         config_dir.mkdir(exist_ok=True)
         config_file = config_dir / "config.json"
-        
+
         config = {}
         if config_file.exists():
             try:
                 config = json.loads(config_file.read_text())
             except (json.JSONDecodeError, FileNotFoundError):
                 pass
-        
+
         config["access_token"] = token
         config_file.write_text(json.dumps(config, indent=2))
         console.print(f"✅ Access token saved to {config_file}")
 
-    def load_token(self) -> Optional[str]:
+    def load_token(self) -> str | None:
         """Load access token from local config."""
         config_file = Path.home() / ".chatter" / "config.json"
         if not config_file.exists():
             return None
-        
+
         try:
             config = json.loads(config_file.read_text())
             return config.get("access_token")
@@ -129,7 +143,7 @@ def get_client() -> ChatterSDKClient:
     if not token:
         temp_client = ChatterSDKClient()
         token = temp_client.load_token()
-    
+
     return ChatterSDKClient(access_token=token)
 
 
@@ -176,16 +190,16 @@ async def health_check():
     """Check API health status."""
     async with get_client() as sdk_client:
         response = await sdk_client.health_api.health_check_healthz_get()
-        
+
         status_color = "green" if response.status == "healthy" else "red"
         console.print(f"[{status_color}]Status: {response.status}[/{status_color}]")
         console.print(f"Timestamp: {response.timestamp}")
-        
+
         if hasattr(response, 'details') and response.details:
             table = Table(title="Health Details")
             table.add_column("Service", style="cyan")
             table.add_column("Status", style="magenta")
-            
+
             for service, status in response.details.items():
                 table.add_row(service, status)
             console.print(table)
@@ -197,7 +211,7 @@ async def readiness_check():
     """Check API readiness status."""
     async with get_client() as sdk_client:
         response = await sdk_client.health_api.readiness_check_readyz_get()
-        
+
         status_color = "green" if response.status == "ready" else "red"
         console.print(f"[{status_color}]Status: {response.status}[/{status_color}]")
         console.print(f"Timestamp: {response.timestamp}")
@@ -209,7 +223,7 @@ async def get_metrics():
     """Get system metrics."""
     async with get_client() as sdk_client:
         response = await sdk_client.health_api.get_metrics_metrics_get()
-        
+
         console.print("[bold]System Metrics[/bold]")
         for metric_name, metric_value in response.metrics.items():
             console.print(f"{metric_name}: {metric_value}")
@@ -229,14 +243,14 @@ async def login(
     """Login to Chatter API."""
     if not password:
         password = Prompt.ask("Password", password=True)
-    
+
     async with get_client() as sdk_client:
         user_login = UserLogin(email=email, password=password)
         response = await sdk_client.auth_api.login_api_v1_auth_login_post(user_login=user_login)
-        
+
         # Save token
         sdk_client.save_token(response.access_token)
-        
+
         console.print("✅ [green]Successfully logged in![/green]")
         console.print(f"Access token expires in: {response.expires_in} seconds")
 
@@ -247,12 +261,12 @@ async def logout():
     """Logout from Chatter API."""
     async with get_client() as sdk_client:
         await sdk_client.auth_api.logout_api_v1_auth_logout_post()
-        
+
         # Clear local token
         config_file = Path.home() / ".chatter" / "config.json"
         if config_file.exists():
             config_file.unlink()
-        
+
         console.print("✅ [green]Successfully logged out![/green]")
 
 
@@ -262,16 +276,16 @@ async def whoami():
     """Get current user information."""
     async with get_client() as sdk_client:
         response = await sdk_client.auth_api.get_current_user_api_v1_auth_me_get()
-        
+
         table = Table(title="Current User")
         table.add_column("Field", style="cyan")
         table.add_column("Value", style="magenta")
-        
+
         table.add_row("ID", str(response.id))
         table.add_row("Email", response.email)
         table.add_row("Role", response.role.value if hasattr(response.role, 'value') else str(response.role))
         table.add_row("Created", str(response.created_at))
-        
+
         console.print(table)
 
 
@@ -294,18 +308,18 @@ async def list_prompts(
             offset=offset,
             prompt_type=prompt_type
         )
-        
+
         if not response.prompts:
             console.print("No prompts found.")
             return
-        
+
         table = Table(title=f"Prompts ({response.total} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Type", style="yellow")
         table.add_column("Category", style="magenta")
         table.add_column("Created", style="blue")
-        
+
         for prompt in response.prompts:
             table.add_row(
                 str(prompt.id),
@@ -314,7 +328,7 @@ async def list_prompts(
                 prompt.category.value if hasattr(prompt.category, 'value') else str(prompt.category),
                 str(prompt.created_at)[:19]
             )
-        
+
         console.print(table)
 
 
@@ -326,7 +340,7 @@ async def show_prompt(prompt_id: int = typer.Argument(..., help="Prompt ID")):
         response = await sdk_client.prompts_api.get_prompt_api_v1_prompts_prompt_id_get(
             prompt_id=prompt_id
         )
-        
+
         console.print(Panel.fit(
             f"[bold]{response.name}[/bold]\n\n"
             f"[dim]ID:[/dim] {response.id}\n"
@@ -338,7 +352,7 @@ async def show_prompt(prompt_id: int = typer.Argument(..., help="Prompt ID")):
         ))
 
 
-# Documents Commands  
+# Documents Commands
 documents_app = typer.Typer(help="Document management commands")
 app.add_typer(documents_app, name="documents")
 
@@ -355,18 +369,18 @@ async def list_documents(
             limit=limit,
             offset=offset
         )
-        
+
         if not response.documents:
             console.print("No documents found.")
             return
-        
+
         table = Table(title=f"Documents ({response.total} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Type", style="yellow")
         table.add_column("Status", style="magenta")
         table.add_column("Size", style="blue")
-        
+
         for doc in response.documents:
             table.add_row(
                 str(doc.id),
@@ -375,7 +389,7 @@ async def list_documents(
                 doc.status.value if hasattr(doc.status, 'value') else str(doc.status),
                 f"{doc.size_bytes:,} bytes" if hasattr(doc, 'size_bytes') else "N/A"
             )
-        
+
         console.print(table)
 
 
@@ -391,13 +405,13 @@ async def search_documents(
         response = await sdk_client.documents_api.search_documents_api_v1_documents_search_post(
             document_search_request=search_request
         )
-        
+
         if not response.results:
             console.print("No results found.")
             return
-        
+
         console.print(f"[bold]Search Results for: {query}[/bold]\n")
-        
+
         for i, result in enumerate(response.results, 1):
             console.print(f"[cyan]{i}. {result.document.name}[/cyan]")
             console.print(f"   Score: {result.similarity_score:.4f}")
@@ -416,11 +430,11 @@ async def dashboard():
     """Get analytics dashboard data."""
     async with get_client() as sdk_client:
         response = await sdk_client.analytics_api.get_dashboard_api_v1_analytics_dashboard_get()
-        
+
         table = Table(title="Analytics Dashboard")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
-        
+
         # Add dashboard metrics
         if hasattr(response, 'total_users'):
             table.add_row("Total Users", str(response.total_users))
@@ -430,7 +444,7 @@ async def dashboard():
             table.add_row("Total Messages", str(response.total_messages))
         if hasattr(response, 'documents_processed'):
             table.add_row("Documents Processed", str(response.documents_processed))
-        
+
         console.print(table)
 
 
@@ -441,15 +455,15 @@ def show_config():
     table = Table(title="Configuration")
     table.add_column("Setting", style="cyan")
     table.add_column("Value", style="green")
-    
+
     table.add_row("API Base URL", os.getenv("CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL))
     table.add_row("Access Token", "Set" if os.getenv("CHATTER_ACCESS_TOKEN") else "Not set")
-    
+
     # Check for local token
     temp_client = ChatterSDKClient()
     local_token = temp_client.load_token()
     table.add_row("Local Token", "Set" if local_token else "Not set")
-    
+
     console.print(table)
 
 

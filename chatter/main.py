@@ -571,7 +571,7 @@ def create_app() -> FastAPI:
 
     app.include_router(
         workflows.router,
-        prefix=f"{settings.api_prefix}",
+        prefix=f"{settings.api_prefix}/workflows",
         tags=["Workflows"],
     )
 

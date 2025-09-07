@@ -4,11 +4,6 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, Union, Literal
 from pydantic import BaseModel, Field, validator
 
-from chatter.schemas.common import (
-    BaseRequestSchema,
-    BaseResponseSchema,
-)
-
 
 # Base workflow node and edge schemas
 class WorkflowNodeData(BaseModel):
@@ -75,9 +70,10 @@ class WorkflowDefinitionUpdate(BaseModel):
     metadata: Optional[Dict[str, Any]] = Field(None, description="Additional metadata")
 
 
-class WorkflowDefinitionResponse(WorkflowDefinitionBase, BaseResponseSchema):
+class WorkflowDefinitionResponse(WorkflowDefinitionBase):
     """Schema for workflow definition response."""
     
+    id: str = Field(..., description="Unique node identifier")
     owner_id: str = Field(..., description="Owner user ID")
     is_public: bool = Field(default=False, description="Whether workflow is public")
     tags: Optional[List[str]] = Field(None, description="Workflow tags")
@@ -129,9 +125,10 @@ class WorkflowTemplateUpdate(BaseModel):
     is_public: Optional[bool] = Field(None, description="Whether template is public")
 
 
-class WorkflowTemplateResponse(WorkflowTemplateBase, BaseResponseSchema):
+class WorkflowTemplateResponse(WorkflowTemplateBase)
     """Schema for workflow template response."""
     
+    id: str = Field(..., description="Unique node identifier")
     owner_id: str = Field(..., description="Owner user ID")
     base_template_id: Optional[str] = Field(None, description="Base template ID")
     is_builtin: bool = Field(default=False, description="Whether template is built-in")

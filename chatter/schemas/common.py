@@ -148,19 +148,3 @@ class FilterParams(BaseModel):
     )
 
 
-class BaseRequestSchema(BaseModel):
-    """Base schema for API requests."""
-    
-    class Config:
-        """Pydantic configuration."""
-        from_attributes = True
-
-
-class BaseResponseSchema(TimestampMixin):
-    """Base schema for API responses with timestamps."""
-    
-    id: str = Field(..., description="Unique identifier")
-    
-    class Config:
-        """Pydantic configuration."""
-        from_attributes = True

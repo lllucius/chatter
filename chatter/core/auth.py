@@ -290,6 +290,10 @@ class AuthService:
         )
         user = result.scalar_one_or_none()
 
+        # Refresh to ensure all database-generated fields are loaded
+        if user:
+            await self.session.refresh(user)
+
         # Cache the result for future lookups
         if user:
             try:
@@ -328,7 +332,11 @@ class AuthService:
         result = await self.session.execute(
             select(User).where(User.email == email)
         )
-        return result.scalar_one_or_none()
+        user = result.scalar_one_or_none()
+        if user:
+            # Refresh to ensure all database-generated fields are loaded
+            await self.session.refresh(user)
+        return user
 
     async def get_user_by_username(self, username: str) -> User | None:
         """Get user by username.
@@ -342,7 +350,11 @@ class AuthService:
         result = await self.session.execute(
             select(User).where(User.username == username)
         )
-        return result.scalar_one_or_none()
+        user = result.scalar_one_or_none()
+        if user:
+            # Refresh to ensure all database-generated fields are loaded
+            await self.session.refresh(user)
+        return user
 
     async def get_user_by_api_key(self, api_key: str) -> User | None:
         """Get user by API key with enhanced security.

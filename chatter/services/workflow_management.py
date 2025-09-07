@@ -7,7 +7,7 @@ from sqlalchemy import select, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType
+from chatter.models.workflow import WorkflowTemplate, TemplateCategory, WorkflowType, WorkflowDefinition, WorkflowExecution
 from chatter.schemas.workflows import (
     WorkflowNode,
     WorkflowEdge,
@@ -15,40 +15,9 @@ from chatter.schemas.workflows import (
 )
 from chatter.utils.database import generate_id
 from chatter.utils.logging import get_logger
+from chatter.core.workflow_validation import workflow_validation_service
 
 logger = get_logger(__name__)
-
-
-class WorkflowDefinition:
-    """Simple workflow definition class for database-free operations."""
-    
-    def __init__(
-        self,
-        id: str,
-        owner_id: str,
-        name: str,
-        description: Optional[str],
-        nodes: List[Dict[str, Any]],
-        edges: List[Dict[str, Any]],
-        metadata: Optional[Dict[str, Any]] = None,
-        created_at: Optional[datetime] = None,
-        updated_at: Optional[datetime] = None,
-        version: int = 1,
-        is_public: bool = False,
-        tags: Optional[List[str]] = None,
-    ):
-        self.id = id
-        self.owner_id = owner_id
-        self.name = name
-        self.description = description
-        self.nodes = nodes
-        self.edges = edges
-        self.metadata = metadata or {}
-        self.created_at = created_at or datetime.utcnow()
-        self.updated_at = updated_at or datetime.utcnow()
-        self.version = version
-        self.is_public = is_public
-        self.tags = tags or []
 
 
 class WorkflowManagementService:
@@ -56,7 +25,6 @@ class WorkflowManagementService:
     
     def __init__(self, session: AsyncSession):
         self.session = session
-        self._in_memory_definitions: Dict[str, WorkflowDefinition] = {}
     
     # Workflow Definition CRUD
     async def create_workflow_definition(
@@ -67,30 +35,53 @@ class WorkflowManagementService:
         nodes: List[Dict[str, Any]],
         edges: List[Dict[str, Any]],
         metadata: Optional[Dict[str, Any]] = None,
+        template_id: Optional[str] = None,
     ) -> WorkflowDefinition:
         """Create a new workflow definition."""
         try:
-            # Generate unique ID
-            workflow_id = generate_id()
+            # Validate the workflow definition
+            definition_data = {
+                'name': name,
+                'description': description,
+                'nodes': nodes,
+                'edges': edges,
+                'metadata': metadata or {},
+            }
+            
+            validation_result = workflow_validation_service.validate_workflow_definition(
+                definition_data, owner_id
+            )
+            
+            if not validation_result.valid:
+                from chatter.utils.problem import BadRequestProblem
+                raise BadRequestProblem(
+                    detail=f"Workflow validation failed: {'; '.join(validation_result.errors)}"
+                )
+            
+            # Log warnings if any
+            if validation_result.warnings:
+                logger.warning(f"Workflow validation warnings: {'; '.join(validation_result.warnings)}")
             
             # Create workflow definition
             definition = WorkflowDefinition(
-                id=workflow_id,
                 owner_id=owner_id,
                 name=name,
                 description=description,
                 nodes=nodes,
                 edges=edges,
-                metadata=metadata,
+                workflow_metadata=metadata or {},
+                template_id=template_id,
             )
             
-            # Store in memory (since we don't have a WorkflowDefinition model yet)
-            self._in_memory_definitions[workflow_id] = definition
+            self.session.add(definition)
+            await self.session.commit()
+            await self.session.refresh(definition)
             
-            logger.info(f"Created workflow definition {workflow_id} for user {owner_id}")
+            logger.info(f"Created workflow definition {definition.id} for user {owner_id}")
             return definition
             
         except Exception as e:
+            await self.session.rollback()
             logger.error(f"Failed to create workflow definition: {e}")
             raise
     
@@ -101,12 +92,20 @@ class WorkflowManagementService:
     ) -> Optional[WorkflowDefinition]:
         """Get a workflow definition by ID."""
         try:
-            # Check in-memory storage
-            definition = self._in_memory_definitions.get(workflow_id)
-            if definition and (definition.owner_id == owner_id or definition.is_public):
-                return definition
-            
-            return None
+            result = await self.session.execute(
+                select(WorkflowDefinition)
+                .where(
+                    and_(
+                        WorkflowDefinition.id == workflow_id,
+                        or_(
+                            WorkflowDefinition.owner_id == owner_id,
+                            WorkflowDefinition.is_public == True
+                        )
+                    )
+                )
+                .options(selectinload(WorkflowDefinition.template))
+            )
+            return result.scalar_one_or_none()
             
         except Exception as e:
             logger.error(f"Failed to get workflow definition {workflow_id}: {e}")
@@ -115,16 +114,21 @@ class WorkflowManagementService:
     async def list_workflow_definitions(
         self,
         owner_id: str,
+        include_public: bool = True,
     ) -> List[WorkflowDefinition]:
         """List workflow definitions for a user."""
         try:
-            # Return definitions owned by user or public ones
-            definitions = [
-                definition for definition in self._in_memory_definitions.values()
-                if definition.owner_id == owner_id or definition.is_public
-            ]
+            conditions = [WorkflowDefinition.owner_id == owner_id]
+            if include_public:
+                conditions.append(WorkflowDefinition.is_public == True)
             
-            return definitions
+            result = await self.session.execute(
+                select(WorkflowDefinition)
+                .where(or_(*conditions))
+                .options(selectinload(WorkflowDefinition.template))
+                .order_by(WorkflowDefinition.updated_at.desc())
+            )
+            return list(result.scalars().all())
             
         except Exception as e:
             logger.error(f"Failed to list workflow definitions for user {owner_id}: {e}")
@@ -138,9 +142,18 @@ class WorkflowManagementService:
     ) -> Optional[WorkflowDefinition]:
         """Update a workflow definition."""
         try:
-            # Check if definition exists and user has access
-            definition = self._in_memory_definitions.get(workflow_id)
-            if not definition or definition.owner_id != owner_id:
+            result = await self.session.execute(
+                select(WorkflowDefinition)
+                .where(
+                    and_(
+                        WorkflowDefinition.id == workflow_id,
+                        WorkflowDefinition.owner_id == owner_id
+                    )
+                )
+            )
+            definition = result.scalar_one_or_none()
+            
+            if not definition:
                 return None
             
             # Update fields
@@ -148,13 +161,16 @@ class WorkflowManagementService:
                 if hasattr(definition, field):
                     setattr(definition, field, value)
             
-            definition.updated_at = datetime.utcnow()
             definition.version += 1
+            
+            await self.session.commit()
+            await self.session.refresh(definition)
             
             logger.info(f"Updated workflow definition {workflow_id}")
             return definition
             
         except Exception as e:
+            await self.session.rollback()
             logger.error(f"Failed to update workflow definition {workflow_id}: {e}")
             raise
     
@@ -165,19 +181,143 @@ class WorkflowManagementService:
     ) -> bool:
         """Delete a workflow definition."""
         try:
-            # Check if definition exists and user has access
-            definition = self._in_memory_definitions.get(workflow_id)
-            if not definition or definition.owner_id != owner_id:
+            result = await self.session.execute(
+                select(WorkflowDefinition)
+                .where(
+                    and_(
+                        WorkflowDefinition.id == workflow_id,
+                        WorkflowDefinition.owner_id == owner_id
+                    )
+                )
+            )
+            definition = result.scalar_one_or_none()
+            
+            if not definition:
                 return False
             
-            # Delete from in-memory storage
-            del self._in_memory_definitions[workflow_id]
+            await self.session.delete(definition)
+            await self.session.commit()
             
             logger.info(f"Deleted workflow definition {workflow_id}")
             return True
             
         except Exception as e:
+            await self.session.rollback()
             logger.error(f"Failed to delete workflow definition {workflow_id}: {e}")
+            raise
+
+    # Workflow Execution CRUD
+    async def create_workflow_execution(
+        self,
+        definition_id: str,
+        owner_id: str,
+        input_data: Optional[Dict[str, Any]] = None,
+    ) -> WorkflowExecution:
+        """Create a new workflow execution."""
+        try:
+            execution = WorkflowExecution(
+                definition_id=definition_id,
+                owner_id=owner_id,
+                input_data=input_data or {},
+                status='pending',
+            )
+            
+            self.session.add(execution)
+            await self.session.commit()
+            await self.session.refresh(execution)
+            
+            logger.info(f"Created workflow execution {execution.id} for definition {definition_id}")
+            return execution
+            
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Failed to create workflow execution: {e}")
+            raise
+    
+    async def update_workflow_execution(
+        self,
+        execution_id: str,
+        owner_id: str,
+        **updates
+    ) -> Optional[WorkflowExecution]:
+        """Update a workflow execution."""
+        try:
+            result = await self.session.execute(
+                select(WorkflowExecution)
+                .where(
+                    and_(
+                        WorkflowExecution.id == execution_id,
+                        WorkflowExecution.owner_id == owner_id
+                    )
+                )
+            )
+            execution = result.scalar_one_or_none()
+            
+            if not execution:
+                return None
+            
+            # Update fields
+            for field, value in updates.items():
+                if hasattr(execution, field):
+                    setattr(execution, field, value)
+            
+            await self.session.commit()
+            await self.session.refresh(execution)
+            
+            logger.info(f"Updated workflow execution {execution_id}")
+            return execution
+            
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Failed to update workflow execution {execution_id}: {e}")
+            raise
+    
+    async def list_workflow_executions(
+        self,
+        definition_id: str,
+        owner_id: str,
+        limit: int = 50,
+    ) -> List[WorkflowExecution]:
+        """List workflow executions for a definition."""
+        try:
+            result = await self.session.execute(
+                select(WorkflowExecution)
+                .where(
+                    and_(
+                        WorkflowExecution.definition_id == definition_id,
+                        WorkflowExecution.owner_id == owner_id
+                    )
+                )
+                .order_by(WorkflowExecution.created_at.desc())
+                .limit(limit)
+            )
+            return list(result.scalars().all())
+            
+        except Exception as e:
+            logger.error(f"Failed to list workflow executions: {e}")
+            raise
+
+    # Validation methods
+    async def validate_workflow_definition(
+        self,
+        definition_data: Dict[str, Any],
+        owner_id: str,
+    ) -> Dict[str, Any]:
+        """Validate a workflow definition and return validation results."""
+        try:
+            validation_result = workflow_validation_service.validate_workflow_definition(
+                definition_data, owner_id
+            )
+            
+            return {
+                'valid': validation_result.valid,
+                'errors': validation_result.errors,
+                'warnings': validation_result.warnings,
+                'requirements_met': validation_result.requirements_met,
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to validate workflow definition: {e}")
             raise
     
     # Template CRUD

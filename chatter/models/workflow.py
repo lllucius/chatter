@@ -216,6 +216,9 @@ class WorkflowTemplate(Base):
     derived_templates: Mapped[list["WorkflowTemplate"]] = relationship(
         "WorkflowTemplate", back_populates="base_template"
     )
+    workflow_definitions: Mapped[list["WorkflowDefinition"]] = relationship(
+        "WorkflowDefinition", back_populates="template"
+    )
 
     @validates("default_params")
     def _set_config_hash(
@@ -378,6 +381,206 @@ class TemplateSpec(Base):
             ),
             "tags": self.tags,
             "extra_metadata": self.extra_metadata,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
+        }
+
+
+class WorkflowDefinition(Base):
+    """Workflow definition model for storing actual workflow configurations."""
+
+    __table_args__ = (
+        CheckConstraint(
+            'version > 0',
+            name='check_workflow_version_positive',
+        ),
+        CheckConstraint(
+            "name != ''",
+            name='check_workflow_name_not_empty',
+        ),
+    )
+
+    # Foreign keys
+    owner_id: Mapped[str] = mapped_column(
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
+    )
+
+    # Basic metadata
+    name: Mapped[str] = mapped_column(
+        String(255), nullable=False, index=True
+    )
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    # Workflow structure
+    nodes: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON, nullable=False
+    )
+    edges: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON, nullable=False
+    )
+    workflow_metadata: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON, nullable=True, default=lambda: {}
+    )
+
+    # Version control
+    version: Mapped[int] = mapped_column(
+        Integer, default=1, nullable=False
+    )
+
+    # Access control
+    is_public: Mapped[bool] = mapped_column(
+        Boolean, default=False, nullable=False, index=True
+    )
+
+    # Tags and categorization
+    tags: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
+
+    # Derived from template
+    template_id: Mapped[str | None] = mapped_column(
+        String(26),
+        ForeignKey("workflow_templates.id"),
+        nullable=True,
+        index=True,
+    )
+
+    # Relationships
+    owner: Mapped["User"] = relationship(
+        "User", back_populates="workflow_definitions"
+    )
+    template: Mapped[Optional["WorkflowTemplate"]] = relationship(
+        "WorkflowTemplate", back_populates="workflow_definitions"
+    )
+    executions: Mapped[list["WorkflowExecution"]] = relationship(
+        "WorkflowExecution", back_populates="definition"
+    )
+
+    def __repr__(self) -> str:
+        """String representation of workflow definition."""
+        return f"<WorkflowDefinition(id={self.id}, name={self.name}, owner_id={self.owner_id})>"
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert workflow definition to dictionary."""
+        return {
+            "id": self.id,
+            "owner_id": self.owner_id,
+            "name": self.name,
+            "description": self.description,
+            "nodes": self.nodes,
+            "edges": self.edges,
+            "metadata": self.workflow_metadata,
+            "version": self.version,
+            "is_public": self.is_public,
+            "tags": self.tags,
+            "template_id": self.template_id,
+            "created_at": (
+                self.created_at.isoformat() if self.created_at else None
+            ),
+            "updated_at": (
+                self.updated_at.isoformat() if self.updated_at else None
+            ),
+        }
+
+
+class WorkflowExecution(Base):
+    """Workflow execution model for tracking workflow runs."""
+
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('pending', 'running', 'completed', 'failed', 'cancelled')",
+            name='check_execution_status_valid',
+        ),
+        CheckConstraint(
+            'execution_time_ms IS NULL OR execution_time_ms > 0',
+            name='check_execution_time_positive',
+        ),
+        CheckConstraint(
+            'tokens_used >= 0',
+            name='check_tokens_used_non_negative',
+        ),
+        CheckConstraint(
+            'cost >= 0.0',
+            name='check_cost_non_negative',
+        ),
+    )
+
+    # Foreign keys
+    definition_id: Mapped[str] = mapped_column(
+        String(26), ForeignKey("workflow_definitions.id"), nullable=False, index=True
+    )
+    owner_id: Mapped[str] = mapped_column(
+        String(26), ForeignKey(Keys.USERS), nullable=False, index=True
+    )
+
+    # Execution metadata
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, index=True, default='pending'
+    )
+    started_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    completed_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    execution_time_ms: Mapped[int | None] = mapped_column(
+        Integer, nullable=True
+    )
+
+    # Execution data
+    input_data: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON, nullable=True
+    )
+    output_data: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON, nullable=True
+    )
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    execution_log: Mapped[list[dict[str, Any]] | None] = mapped_column(
+        JSON, nullable=True
+    )
+
+    # Performance metrics
+    tokens_used: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
+    cost: Mapped[float] = mapped_column(
+        Float, default=0.0, nullable=False
+    )
+
+    # Relationships
+    definition: Mapped["WorkflowDefinition"] = relationship(
+        "WorkflowDefinition", back_populates="executions"
+    )
+    owner: Mapped["User"] = relationship(
+        "User", back_populates="workflow_executions"
+    )
+
+    def __repr__(self) -> str:
+        """String representation of workflow execution."""
+        return f"<WorkflowExecution(id={self.id}, definition_id={self.definition_id}, status={self.status})>"
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert workflow execution to dictionary."""
+        return {
+            "id": self.id,
+            "definition_id": self.definition_id,
+            "owner_id": self.owner_id,
+            "status": self.status,
+            "started_at": (
+                self.started_at.isoformat() if self.started_at else None
+            ),
+            "completed_at": (
+                self.completed_at.isoformat() if self.completed_at else None
+            ),
+            "execution_time_ms": self.execution_time_ms,
+            "input_data": self.input_data,
+            "output_data": self.output_data,
+            "error_message": self.error_message,
+            "execution_log": self.execution_log,
+            "tokens_used": self.tokens_used,
+            "cost": self.cost,
             "created_at": (
                 self.created_at.isoformat() if self.created_at else None
             ),

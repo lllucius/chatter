@@ -17,6 +17,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from chatter.models.workflow import TemplateCategory
+from chatter.core.workflow_validation import workflow_validation_service
+
+
+# Use the centralized validation result from the workflow validation service
+from chatter.core.validation.results import ValidationResult
 
 
 class WorkflowConfigurationError(Exception):
@@ -58,18 +63,6 @@ class TemplateSpec:
     required_tools: list[str] | None = None
     required_retrievers: list[str] | None = None
     base_template: str | None = None
-
-
-@dataclass
-class ValidationResult:
-    """Result of template validation."""
-
-    valid: bool
-    errors: list[str]
-    warnings: list[str]
-    requirements_met: bool = True
-    missing_tools: list[str] | None = None
-    missing_retrievers: list[str] | None = None
 
 
 class UnifiedTemplateManager:
@@ -594,7 +587,7 @@ class UnifiedTemplateManager:
     async def validate_template(
         self, template: WorkflowTemplate
     ) -> ValidationResult:
-        """Validate a workflow template.
+        """Validate a workflow template using centralized validation service.
 
         Args:
             template: Template to validate
@@ -602,51 +595,17 @@ class UnifiedTemplateManager:
         Returns:
             ValidationResult with validation details
         """
-        errors = []
-        warnings = []
-
-        # Check required fields
-        if not template.name:
-            errors.append("Template name is required")
-        if not template.workflow_type:
-            errors.append("Workflow type is required")
-        if not template.description:
-            warnings.append("Template description is empty")
-
-        # Validate workflow type
-        valid_types = ["plain", "tools", "rag", "full"]
-        if template.workflow_type not in valid_types:
-            errors.append(
-                f"Invalid workflow type: {template.workflow_type}. Must be one of: {valid_types}"
+        try:
+            # Use centralized validation service
+            return workflow_validation_service.validate_workflow_template(template)
+        except Exception as e:
+            logger.error(f"Template validation failed: {e}")
+            return ValidationResult(
+                valid=False,
+                errors=[f"Validation failed: {str(e)}"],
+                warnings=[],
+                requirements_met=False,
             )
-
-        # Validate parameters
-        params = template.default_params or {}
-        if "system_message" not in params:
-            warnings.append("No system message specified")
-
-        if "max_tool_calls" in params and params["max_tool_calls"] <= 0:
-            errors.append("max_tool_calls must be positive")
-
-        # Check for naming conflicts - this is now handled by database constraints
-        # Template names must be unique per owner or globally for public templates
-
-        # Use simple validation for now (to avoid circular imports)
-        # In a real implementation, this would use the validation engine
-        validation_errors = []
-        # We don't have workflow_spec available here, so skip this check for now
-        # if not workflow_spec.get('workflow_type'):
-        #     validation_errors.append("workflow_type is required")
-
-        if validation_errors:
-            errors.extend(validation_errors)
-
-        return ValidationResult(
-            valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings,
-            requirements_met=True,  # Will be set by validate_template_requirements
-        )
 
     async def validate_template_requirements(
         self,

@@ -1,5 +1,6 @@
 """Comprehensive workflows API supporting advanced workflow editor features."""
 
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -465,4 +466,98 @@ async def get_supported_node_types(
         logger.error(f"Failed to get node types: {e}")
         raise InternalServerProblem(
             detail=f"Failed to get node types: {str(e)}"
+        ) from e
+
+
+# Workflow Execution endpoints
+@router.post("/definitions/{workflow_id}/execute", response_model=WorkflowExecutionResponse)
+async def execute_workflow(
+    workflow_id: WorkflowId,
+    execution_request: WorkflowExecutionRequest,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+) -> WorkflowExecutionResponse:
+    """Execute a workflow definition."""
+    try:
+        # Create execution record
+        execution = await workflow_service.create_workflow_execution(
+            definition_id=workflow_id,
+            owner_id=current_user.id,
+            input_data=execution_request.input_data,
+        )
+        
+        # Start execution (would be handled by background task in real implementation)
+        execution = await workflow_service.update_workflow_execution(
+            execution_id=execution.id,
+            owner_id=current_user.id,
+            status="running",
+            started_at=datetime.utcnow(),
+        )
+        
+        return WorkflowExecutionResponse.model_validate(execution)
+        
+    except Exception as e:
+        logger.error(f"Failed to execute workflow {workflow_id}: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to execute workflow: {str(e)}"
+        ) from e
+
+
+@router.get("/definitions/{workflow_id}/executions", response_model=List[WorkflowExecutionResponse])
+async def list_workflow_executions(
+    workflow_id: WorkflowId,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+) -> List[WorkflowExecutionResponse]:
+    """List executions for a workflow definition."""
+    try:
+        executions = await workflow_service.list_workflow_executions(
+            definition_id=workflow_id,
+            owner_id=current_user.id,
+        )
+        return [WorkflowExecutionResponse.model_validate(exec) for exec in executions]
+        
+    except Exception as e:
+        logger.error(f"Failed to list executions for workflow {workflow_id}: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to list executions: {str(e)}"
+        ) from e
+
+
+@router.post("/definitions/validate", response_model=WorkflowValidationResponse)
+async def validate_workflow_definition(
+    definition_data: WorkflowDefinitionBase,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+) -> WorkflowValidationResponse:
+    """Validate a workflow definition before creation."""
+    try:
+        validation_result = await workflow_service.validate_workflow_definition(
+            definition_data.model_dump(),
+            current_user.id,
+        )
+        
+        return WorkflowValidationResponse(
+            is_valid=validation_result['valid'],
+            errors=[
+                ValidationError(
+                    type="validation_error",
+                    message=error,
+                    severity="error"
+                ) for error in validation_result['errors']
+            ],
+            warnings=[
+                ValidationError(
+                    type="validation_warning",
+                    message=warning,
+                    severity="warning"
+                ) for warning in validation_result.get('warnings', [])
+            ],
+            suggestions=[],
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to validate workflow definition: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to validate workflow definition: {str(e)}"
         ) from e

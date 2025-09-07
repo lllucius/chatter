@@ -15,6 +15,7 @@ from chatter.schemas.workflows import (
 )
 from chatter.utils.database import generate_id
 from chatter.utils.logging import get_logger
+from chatter.core.workflow_validation import workflow_validation_service
 
 logger = get_logger(__name__)
 
@@ -38,6 +39,29 @@ class WorkflowManagementService:
     ) -> WorkflowDefinition:
         """Create a new workflow definition."""
         try:
+            # Validate the workflow definition
+            definition_data = {
+                'name': name,
+                'description': description,
+                'nodes': nodes,
+                'edges': edges,
+                'metadata': metadata or {},
+            }
+            
+            validation_result = workflow_validation_service.validate_workflow_definition(
+                definition_data, owner_id
+            )
+            
+            if not validation_result.valid:
+                from chatter.utils.problem import BadRequestProblem
+                raise BadRequestProblem(
+                    detail=f"Workflow validation failed: {'; '.join(validation_result.errors)}"
+                )
+            
+            # Log warnings if any
+            if validation_result.warnings:
+                logger.warning(f"Workflow validation warnings: {'; '.join(validation_result.warnings)}")
+            
             # Create workflow definition
             definition = WorkflowDefinition(
                 owner_id=owner_id,
@@ -271,6 +295,29 @@ class WorkflowManagementService:
             
         except Exception as e:
             logger.error(f"Failed to list workflow executions: {e}")
+            raise
+
+    # Validation methods
+    async def validate_workflow_definition(
+        self,
+        definition_data: Dict[str, Any],
+        owner_id: str,
+    ) -> Dict[str, Any]:
+        """Validate a workflow definition and return validation results."""
+        try:
+            validation_result = workflow_validation_service.validate_workflow_definition(
+                definition_data, owner_id
+            )
+            
+            return {
+                'valid': validation_result.valid,
+                'errors': validation_result.errors,
+                'warnings': validation_result.warnings,
+                'requirements_met': validation_result.requirements_met,
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to validate workflow definition: {e}")
             raise
     
     # Template CRUD

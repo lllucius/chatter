@@ -522,3 +522,42 @@ async def list_workflow_executions(
         raise InternalServerProblem(
             detail=f"Failed to list executions: {str(e)}"
         ) from e
+
+
+@router.post("/definitions/validate", response_model=WorkflowValidationResponse)
+async def validate_workflow_definition(
+    definition_data: WorkflowDefinitionBase,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+) -> WorkflowValidationResponse:
+    """Validate a workflow definition before creation."""
+    try:
+        validation_result = await workflow_service.validate_workflow_definition(
+            definition_data.model_dump(),
+            current_user.id,
+        )
+        
+        return WorkflowValidationResponse(
+            is_valid=validation_result['valid'],
+            errors=[
+                ValidationError(
+                    type="validation_error",
+                    message=error,
+                    severity="error"
+                ) for error in validation_result['errors']
+            ],
+            warnings=[
+                ValidationError(
+                    type="validation_warning",
+                    message=warning,
+                    severity="warning"
+                ) for warning in validation_result.get('warnings', [])
+            ],
+            suggestions=[],
+        )
+        
+    except Exception as e:
+        logger.error(f"Failed to validate workflow definition: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to validate workflow definition: {str(e)}"
+        ) from e

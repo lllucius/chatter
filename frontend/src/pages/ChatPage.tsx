@@ -18,6 +18,7 @@ import {
   Avatar,
 } from '@mui/material';
 import CustomScrollbar from '../components/CustomScrollbar';
+import PageLayout from '../components/PageLayout';
 import {
   Send as SendIcon,
   Person as PersonIcon,
@@ -592,81 +593,101 @@ const ChatPage: React.FC = () => {
     }
   }, []);
 
-  return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        overflow: 'hidden',
-      }}
-    >
-      {/* Page Title */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Chat
-        </Typography>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <FormControlLabel
-            control={
-              <Switch
-                checked={streamingEnabled}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStreamingEnabled(e.target.checked)}
-                icon={<SpeedIcon />}
-                checkedIcon={<StreamIcon />}
-              />
-            }
-            label={streamingEnabled ? 'Streaming' : 'Standard'}
+  // Create the toolbar content
+  const toolbar = (
+    <>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={streamingEnabled}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStreamingEnabled(e.target.checked)}
+            icon={<SpeedIcon />}
+            checkedIcon={<StreamIcon />}
           />
-          <Divider orientation="vertical" flexItem />
-          <Button variant="outlined" size="small" onClick={startNewConversation} startIcon={<RefreshIcon />}>
-            New Chat
-          </Button>
-          <Button 
-            variant="outlined" 
-            size="small" 
-            onClick={() => setHistoryDialogOpen(true)} 
-            startIcon={<HistoryIcon />}
-          >
-            History
-          </Button>
-          <Button 
-            variant="outlined" 
-            size="small" 
-            onClick={() => setExportDialogOpen(true)} 
-            startIcon={<DownloadIcon />}
-            disabled={messages.length === 0}
-          >
-            Export
-          </Button>
-          <Button 
-            variant="outlined" 
-            size="small" 
-            onClick={handleClearConversation} 
-            startIcon={<ClearIcon />}
-            disabled={messages.length === 0}
-            color="warning"
-          >
-            Clear
-          </Button>
-          {currentConversation && (
-            <Chip
-              label={`${currentConversation.title} (${messages.length} messages)`}
-              size="small"
-              variant="outlined"
-            />
-          )}
-          {/* Toggle right drawer */}
-          <Tooltip title={open ? 'Hide Settings' : 'Show Settings'}>
-            <IconButton onClick={() => setOpen(!open)} size="small">
-              <TuneIcon />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      </Box>
+        }
+        label={streamingEnabled ? 'Streaming' : 'Standard'}
+      />
+      <Divider orientation="vertical" flexItem />
+      <Button variant="outlined" size="small" onClick={startNewConversation} startIcon={<RefreshIcon />}>
+        New Chat
+      </Button>
+      <Button 
+        variant="outlined" 
+        size="small" 
+        onClick={() => setHistoryDialogOpen(true)} 
+        startIcon={<HistoryIcon />}
+      >
+        History
+      </Button>
+      <Button 
+        variant="outlined" 
+        size="small" 
+        onClick={() => setExportDialogOpen(true)} 
+        startIcon={<DownloadIcon />}
+        disabled={messages.length === 0}
+      >
+        Export
+      </Button>
+      <Button 
+        variant="outlined" 
+        size="small" 
+        onClick={handleClearConversation} 
+        startIcon={<ClearIcon />}
+        disabled={messages.length === 0}
+        color="warning"
+      >
+        Clear
+      </Button>
+      {currentConversation && (
+        <Chip
+          label={`${currentConversation.title} (${messages.length} messages)`}
+          size="small"
+          variant="outlined"
+        />
+      )}
+      {/* Toggle right drawer */}
+      <Tooltip title={open ? 'Hide Settings' : 'Show Settings'}>
+        <IconButton onClick={() => setOpen(!open)} size="small">
+          <TuneIcon />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
 
-      {/* Messages Area - Auto-expand to fill space */}
-      <Card sx={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', mb: 2 }}>
+  // Create the fixed bottom input area
+  const messageInput = (
+    <Box sx={{ p: 1.5 }}>
+      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
+        <TextField
+          fullWidth
+          multiline
+          maxRows={4}
+          placeholder="Type your message here... (Shift+Enter for new line)"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={handleKeyDown}
+          disabled={loading}
+          variant="outlined"
+          size="small"
+          inputRef={inputRef}
+          autoFocus
+          autoComplete="off"
+        />
+        <IconButton color="primary" onClick={sendMessage} disabled={!message.trim() || loading} sx={{ p: 1.5 }}>
+          <SendIcon />
+        </IconButton>
+      </Box>
+    </Box>
+  );
+
+  return (
+    <PageLayout 
+      title="Chat" 
+      toolbar={toolbar}
+      fixedBottom={messageInput}
+    >
+      {/* Messages Area */}
+      <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <CardContent
           sx={{
             flex: 1,
@@ -743,55 +764,20 @@ const ChatPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Message Input - Locked to bottom */}
-      <Paper 
-        sx={{ 
-          p: 1.5, 
-          position: 'sticky',
-          bottom: 0,
-          zIndex: 1,
-          borderTop: 1,
-          borderColor: 'divider',
-        }}
-      >
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-          <TextField
-            fullWidth
-            multiline
-            maxRows={4}
-            placeholder="Type your message here... (Shift+Enter for new line)"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={loading}
-            variant="outlined"
-            size="small"
-            inputRef={inputRef}
-            autoFocus
-            autoComplete="off"
-          />
-          <IconButton color="primary" onClick={sendMessage} disabled={!message.trim() || loading} sx={{ p: 1.5 }}>
-            <SendIcon />
-          </IconButton>
-        </Box>
-      </Paper>
-
-      {/* Conversation History Dialog */}
+      {/* Dialogs */}
       <ConversationHistory
         open={historyDialogOpen}
         onClose={() => setHistoryDialogOpen(false)}
         onSelectConversation={handleSelectConversation}
         currentConversationId={currentConversation?.id}
       />
-
-      {/* Chat Export Dialog */}
       <ChatExport
         open={exportDialogOpen}
         onClose={() => setExportDialogOpen(false)}
         messages={messages}
         conversationTitle={currentConversation?.title || 'Untitled Conversation'}
       />
-    </Box>
+    </PageLayout>
   );
 };
 

@@ -48,6 +48,7 @@ import { chatterSDK } from '../services/chatter-sdk';
 import { DashboardResponse } from '../sdk';
 import { useApi } from '../hooks/useApi';
 import { toastService } from '../services/toast-service';
+import PageLayout from '../components/PageLayout';
 
 interface MetricCardProps {
   title: string;
@@ -270,32 +271,29 @@ const DashboardPage: React.FC = () => {
     return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
   };
 
-  return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Dashboard
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<GetApp />}
-            onClick={() => handleExportAnalytics('json')}
-            size="small"
-          >
-            Export JSON
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<GetApp />}
-            onClick={() => handleExportAnalytics('csv')}
-            size="small"
-          >
-            Export CSV
-          </Button>
-        </Box>
-      </Box>
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<GetApp />}
+        onClick={() => handleExportAnalytics('json')}
+        size="small"
+      >
+        Export JSON
+      </Button>
+      <Button
+        variant="outlined"
+        startIcon={<GetApp />}
+        onClick={() => handleExportAnalytics('csv')}
+        size="small"
+      >
+        Export CSV
+      </Button>
+    </>
+  );
 
+  return (
+    <PageLayout title="Dashboard" toolbar={toolbar}>
       {/* Enhanced Navigation Tabs */}
       <Paper sx={{ mb: 3 }}>
         <Tabs
@@ -646,7 +644,7 @@ const DashboardPage: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
-    </Box>
+    </PageLayout>
   );
 
 };

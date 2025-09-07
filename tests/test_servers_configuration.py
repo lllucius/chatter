@@ -3,7 +3,6 @@
 import os
 from unittest.mock import patch
 
-import pytest
 from fastapi.testclient import TestClient
 
 from chatter.main import create_app
@@ -53,7 +52,6 @@ def test_openapi_servers_custom_configuration():
         # In a real deployment, API_BASE_URL would be set before the app starts
         # so this works correctly. For the test, we'll just verify that the
         # mechanism exists in the code.
-        from chatter.utils.documentation import APIDocumentationEnhancer
         from chatter.config import Settings
         
         # Create a new settings instance with the environment

@@ -654,7 +654,7 @@ const AdministrationPage: React.FC = () => {
   );
 
   return (
-    <PageLayout title="Administration Dashboard" toolbar={toolbar}>
+    <PageLayout title="Administration" toolbar={toolbar}>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>

@@ -84,6 +84,25 @@ chatter serve --reload
 
 The API will be available at `http://localhost:8000` with interactive documentation at `http://localhost:8000/docs`.
 
+### Frontend Setup
+
+To run the React frontend in development mode:
+
+1. Build the TypeScript SDK:
+```bash
+cd sdk-ts/typescript
+npm install
+```
+
+2. Install and run the frontend:
+```bash
+cd ../../frontend
+npm install
+npm start
+```
+
+The frontend will be available at `http://localhost:3000`.
+
 ## Configuration
 
 The application uses environment variables for configuration. See `.env.example` for all available options.

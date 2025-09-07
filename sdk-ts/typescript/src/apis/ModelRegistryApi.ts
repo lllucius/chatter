@@ -710,7 +710,7 @@ export class ModelRegistryApi extends runtime.BaseAPI implements ModelRegistryAp
         }
 
         let urlPath = `/api/v1/models/embedding-spaces/{space_id}`;
-        urlPath = urlPath.replace(`{${"space_id"}}`, encodeURIComponent(String(requestParameters['spaceId'])));
+        urlPath = urlPath.replace('{space_id}', encodeURIComponent(String(requestParameters['spaceId'])));
 
         const response = await this.request({
             path: urlPath,
@@ -984,7 +984,7 @@ export class ModelRegistryApi extends runtime.BaseAPI implements ModelRegistryAp
         }
 
         let urlPath = `/api/v1/models/embedding-spaces/{space_id}`;
-        urlPath = urlPath.replace(`{${"space_id"}}`, encodeURIComponent(String(requestParameters['spaceId'])));
+        urlPath = urlPath.replace('{space_id}', encodeURIComponent(String(requestParameters['spaceId'])));
 
         const response = await this.request({
             path: urlPath,
@@ -1290,7 +1290,7 @@ export class ModelRegistryApi extends runtime.BaseAPI implements ModelRegistryAp
         }
 
         let urlPath = `/api/v1/models/embedding-spaces/{space_id}/set-default`;
-        urlPath = urlPath.replace(`{${"space_id"}}`, encodeURIComponent(String(requestParameters['spaceId'])));
+        urlPath = urlPath.replace('{space_id}', encodeURIComponent(String(requestParameters['spaceId'])));
 
         const response = await this.request({
             path: urlPath,
@@ -1450,7 +1450,7 @@ export class ModelRegistryApi extends runtime.BaseAPI implements ModelRegistryAp
         }
 
         let urlPath = `/api/v1/models/embedding-spaces/{space_id}`;
-        urlPath = urlPath.replace(`{${"space_id"}}`, encodeURIComponent(String(requestParameters['spaceId'])));
+        urlPath = urlPath.replace('{space_id}', encodeURIComponent(String(requestParameters['spaceId'])));
 
         const response = await this.request({
             path: urlPath,

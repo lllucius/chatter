@@ -17,7 +17,6 @@ import {
   Chip,
   Avatar,
   Rating,
-  Tooltip,
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -26,9 +25,6 @@ import {
   Edit as EditIcon,
   Refresh as RefreshIcon,
   ContentCopy as CopyIcon,
-  ThumbUp as ThumbUpIcon,
-  ThumbDown as ThumbDownIcon,
-  Share as ShareIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';

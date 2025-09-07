@@ -185,6 +185,15 @@ class APIDocumentationEnhancer:
             for version in version_manager.get_all_versions()
         ]
 
+        # Add server configuration
+        from chatter.config import settings
+        schema["servers"] = [
+            {
+                "url": settings.api_base_url,
+                "description": "Main server",
+            }
+        ]
+
         # Add standard headers to all responses
         self._add_standard_headers(schema)
 

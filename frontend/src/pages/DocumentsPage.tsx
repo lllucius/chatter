@@ -50,6 +50,7 @@ import { DocumentResponse, DocumentSearchRequest } from '../sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
 import CustomScrollbar from '../components/CustomScrollbar';
+import PageLayout from '../components/PageLayout';
 import {
   DocumentUploadedEvent,
   DocumentProcessingStartedEvent,
@@ -392,37 +393,35 @@ const DocumentsPage: React.FC = () => {
     );
   }
 
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<SearchIcon />}
+        onClick={() => setSearchDialogOpen(true)}
+      >
+        Semantic Search
+      </Button>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={loadDocuments}
+        disabled={loading}
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<UploadIcon />}
+        onClick={() => setUploadDialogOpen(true)}
+      >
+        Upload Document
+      </Button>
+    </>
+  );
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Document Management
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<SearchIcon />}
-            onClick={() => setSearchDialogOpen(true)}
-          >
-            Semantic Search
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadDocuments}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<UploadIcon />}
-            onClick={() => setUploadDialogOpen(true)}
-          >
-            Upload Document
-          </Button>
-        </Box>
-      </Box>
+    <PageLayout title="Document Management" toolbar={toolbar}>
       {/* Statistics Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid
@@ -772,7 +771,7 @@ const DocumentsPage: React.FC = () => {
       >
         <AddIcon />
       </Fab>
-    </Box>
+    </PageLayout>
   );
 };
 

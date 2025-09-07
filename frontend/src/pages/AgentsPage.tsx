@@ -43,6 +43,7 @@ import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { AgentResponse, AgentUpdateRequest, AgentCreateRequest } from '../sdk';
+import PageLayout from '../components/PageLayout';
 
 const AgentsPage: React.FC = () => {
   const [agents, setAgents] = useState<AgentResponse[]>([]);
@@ -175,30 +176,28 @@ const AgentsPage: React.FC = () => {
     );
   }
 
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={loadAgents}
+        disabled={loading}
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => handleOpenDialog()}
+      >
+        Create Agent
+      </Button>
+    </>
+  );
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          AI Agents Management
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadAgents}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-          >
-            Create Agent
-          </Button>
-        </Box>
-      </Box>
+    <PageLayout title="AI Agents Management" toolbar={toolbar}>
       {/* Statistics */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
         <Grid
@@ -499,7 +498,7 @@ const AgentsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageLayout>
   );
 };
 

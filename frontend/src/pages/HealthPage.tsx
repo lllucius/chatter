@@ -36,6 +36,7 @@ import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { ToolServerResponse } from '../sdk';
+import PageLayout from '../components/PageLayout';
 
 const HealthPage: React.FC = () => {
   const [health, setHealth] = useState<any>(null);
@@ -118,21 +119,19 @@ const HealthPage: React.FC = () => {
     );
   }
 
+  const toolbar = (
+    <Button
+      variant="outlined"
+      startIcon={<RefreshIcon />}
+      onClick={loadHealthData}
+      disabled={loading}
+    >
+      Refresh
+    </Button>
+  );
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          System Health Dashboard
-        </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={loadHealthData}
-          disabled={loading}
-        >
-          Refresh
-        </Button>
-      </Box>
+    <PageLayout title="System Health Dashboard" toolbar={toolbar}>
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
@@ -420,7 +419,7 @@ const HealthPage: React.FC = () => {
           </TableContainer>
         </CardContent>
       </Card>
-    </Box>
+    </PageLayout>
   );
 };
 

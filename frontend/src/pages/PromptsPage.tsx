@@ -40,6 +40,7 @@ import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { PromptResponse, PromptCreate, PromptUpdate } from '../sdk';
+import PageLayout from '../components/PageLayout';
 
 const PromptsPage: React.FC = () => {
   const [prompts, setPrompts] = useState<PromptResponse[]>([]);
@@ -165,30 +166,28 @@ const PromptsPage: React.FC = () => {
     );
   }
 
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={loadPrompts}
+        disabled={loading}
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => handleOpenDialog()}
+      >
+        Create Prompt
+      </Button>
+    </>
+  );
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Prompt Management
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadPrompts}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-          >
-            Create Prompt
-          </Button>
-        </Box>
-      </Box>
+    <PageLayout title="Prompt Management" toolbar={toolbar}>
       {/* Action buttons and table will be here */}
       <Card>
         <TableContainer>
@@ -416,7 +415,7 @@ const PromptsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageLayout>
   );
 };
 

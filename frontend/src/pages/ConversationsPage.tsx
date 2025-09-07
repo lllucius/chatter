@@ -43,6 +43,7 @@ import { chatterSDK } from '../services/chatter-sdk';
 import { ConversationResponse, MessageResponse } from '../sdk';
 import { useApi } from '../hooks/useApi';
 import CustomScrollbar from '../components/CustomScrollbar';
+import PageLayout from '../components/PageLayout';
 
 // Memoized conversation table row component
 const ConversationTableRow = memo(({ 
@@ -237,21 +238,19 @@ const ConversationsPage: React.FC = () => {
     );
   }
 
+  const toolbar = (
+    <Button
+      variant="outlined"
+      startIcon={<RefreshIcon />}
+      onClick={conversationsApi.execute}
+      disabled={conversationsApi.loading}
+    >
+      Refresh
+    </Button>
+  );
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Conversation Management
-        </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={conversationsApi.execute}
-          disabled={conversationsApi.loading}
-        >
-          Refresh
-        </Button>
-      </Box>
+    <PageLayout title="Conversation Management" toolbar={toolbar}>
 
       {conversationsApi.error && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -449,7 +448,7 @@ const ConversationsPage: React.FC = () => {
           <Button onClick={() => setViewDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageLayout>
   );
 };
 

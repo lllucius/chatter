@@ -69,6 +69,7 @@ import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { WorkflowTemplateInfo, AvailableToolsResponse, ChatRequest } from '../sdk';
 import WorkflowEditor from '../components/workflow/WorkflowEditor';
+import PageLayout from '../components/PageLayout';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -606,9 +607,9 @@ const WorkflowManagementPage: React.FC = () => {
   );
 
   return (
-    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-      {/* Header */}
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+    <PageLayout title="Workflow Management">
+      {/* Breadcrumbs */}
+      <Box sx={{ mb: 3 }}>
         <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
           <Link underline="hover" color="inherit" href="/dashboard">
             Dashboard
@@ -747,7 +748,7 @@ const WorkflowManagementPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageLayout>
   );
 };
 

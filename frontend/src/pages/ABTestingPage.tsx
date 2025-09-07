@@ -72,6 +72,7 @@ import {
   TestType,
   VariantAllocation,
 } from '../sdk';
+import PageLayout from '../components/PageLayout';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -741,19 +742,19 @@ const ABTestingPage: React.FC = () => {
     );
   }
 
+  const toolbar = (
+    <>
+      <Button onClick={loadTests} startIcon={<RefreshIcon />}>
+        Refresh
+      </Button>
+      <Button variant="contained" onClick={() => handleOpenDialog()} startIcon={<AddIcon />}>
+        Create Test
+      </Button>
+    </>
+  );
+
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h4">A/B Testing</Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button onClick={loadTests} startIcon={<RefreshIcon />}>
-            Refresh
-          </Button>
-          <Button variant="contained" onClick={() => handleOpenDialog()} startIcon={<AddIcon />}>
-            Create Test
-          </Button>
-        </Box>
-      </Box>
+    <PageLayout title="A/B Testing" toolbar={toolbar}>
 
       {tests.length === 0 ? (
         <Alert severity="info">
@@ -845,7 +846,7 @@ const ABTestingPage: React.FC = () => {
       {renderTestDialog()}
       {renderDetailDialog()}
       {renderActionMenu()}
-    </Box>
+    </PageLayout>
   );
 };
 

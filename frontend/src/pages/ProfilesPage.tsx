@@ -40,6 +40,7 @@ import { format } from 'date-fns';
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { ProfileResponse, ProfileCreate, ProfileUpdate } from '../sdk';
+import PageLayout from '../components/PageLayout';
 
 const ProfilesPage: React.FC = () => {
   const [profiles, setProfiles] = useState<ProfileResponse[]>([]);
@@ -212,30 +213,28 @@ const ProfilesPage: React.FC = () => {
     );
   }
 
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={loadProfiles}
+        disabled={loading}
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => handleOpenDialog()}
+      >
+        Create Profile
+      </Button>
+    </>
+  );
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Profile Management
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadProfiles}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => handleOpenDialog()}
-          >
-            Create Profile
-          </Button>
-        </Box>
-      </Box>
+    <PageLayout title="Profile Management" toolbar={toolbar}>
       <Card>
         <TableContainer>
           <Table>
@@ -551,7 +550,7 @@ const ProfilesPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageLayout>
   );
 };
 

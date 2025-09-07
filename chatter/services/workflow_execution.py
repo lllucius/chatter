@@ -10,7 +10,7 @@ import logging
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -237,7 +237,7 @@ class WorkflowExecutionService:
         self,
         workflow_definition: Any,  # WorkflowDefinition object
         input_data: dict[str, Any],
-        context: Optional[dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Execute a node-based workflow definition.
 
@@ -328,7 +328,7 @@ class WorkflowExecutionService:
         context: dict[str, Any],
         variables: dict[str, Any],
         steps: list[dict[str, Any]],
-        visited: Optional[set] = None,
+        visited: set | None = None,
     ) -> dict[str, Any]:
         """Execute a node and its connected nodes."""
         if visited is None:

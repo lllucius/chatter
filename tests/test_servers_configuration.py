@@ -17,18 +17,18 @@ def test_openapi_servers_default_configuration():
     # Remove API_BASE_URL if it exists
     if "API_BASE_URL" in os.environ:
         env_patch["API_BASE_URL"] = None
-    
+
     with patch.dict(os.environ, env_patch, clear=False):
         app = create_app()
-        
+
         # Get the OpenAPI schema
         openapi_schema = app.openapi()
-        
+
         # Check servers configuration
         assert "servers" in openapi_schema
         servers = openapi_schema["servers"]
         assert len(servers) == 1
-        
+
         server = servers[0]
         assert "url" in server
         assert "description" in server
@@ -42,7 +42,7 @@ def test_openapi_servers_custom_configuration():
     # This test demonstrates that the feature works by setting env var before import
     # In real usage, the API_BASE_URL would be set before the app starts
     custom_url = "https://api.mycompany.com"
-    
+
     # Set custom environment
     with patch.dict(os.environ, {
         "DATABASE_URL": "postgresql://test:test@localhost:5432/test_db",
@@ -53,11 +53,11 @@ def test_openapi_servers_custom_configuration():
         # so this works correctly. For the test, we'll just verify that the
         # mechanism exists in the code.
         from chatter.config import Settings
-        
+
         # Create a new settings instance with the environment
         test_settings = Settings()
         assert test_settings.api_base_url == custom_url
-        
+
         # This confirms that the Settings class correctly reads the environment variable
         # and the documentation enhancement code uses this to set servers
 
@@ -71,14 +71,14 @@ def test_openapi_endpoint_returns_servers():
     }
     if "API_BASE_URL" in os.environ:
         env_patch["API_BASE_URL"] = None
-        
+
     with patch.dict(os.environ, env_patch, clear=False):
         app = create_app()
         client = TestClient(app)
-        
+
         response = client.get("/openapi.json")
         assert response.status_code == 200
-        
+
         openapi_data = response.json()
         assert "servers" in openapi_data
         assert len(openapi_data["servers"]) == 1

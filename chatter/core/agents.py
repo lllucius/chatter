@@ -14,7 +14,7 @@ from langchain_core.tools import BaseTool
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.cache_factory import CacheBackend, get_general_cache
+from chatter.core.cache_factory import get_general_cache
 from chatter.core.cache_interface import CacheConfig
 from chatter.core.langgraph import ConversationState, workflow_manager
 from chatter.schemas.agents import (

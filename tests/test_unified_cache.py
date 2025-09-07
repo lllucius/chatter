@@ -5,7 +5,6 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from chatter.core.cache_factory import (
-    CacheBackend,
     CacheFactory,
     CacheType,
 )
@@ -196,40 +195,34 @@ class TestCacheFactory:
         """Test creating different cache types."""
         # Test model registry cache
         model_cache = factory.create_cache(
-            CacheType.MODEL_REGISTRY, CacheBackend.MEMORY
+            CacheType.MODEL_REGISTRY
         )
         assert isinstance(model_cache, CacheInterface)
         assert model_cache.config.key_prefix == "model_registry"
 
         # Test workflow cache
         workflow_cache = factory.create_cache(
-            CacheType.WORKFLOW, CacheBackend.MEMORY
+            CacheType.WORKFLOW
         )
         assert isinstance(workflow_cache, CacheInterface)
         assert workflow_cache.config.key_prefix == "workflow"
 
         # Test tool cache
         tool_cache = factory.create_cache(
-            CacheType.TOOL, CacheBackend.MEMORY
+            CacheType.TOOL
         )
         assert isinstance(tool_cache, CacheInterface)
         assert tool_cache.config.key_prefix == "tool"
 
     def test_convenience_methods(self, factory):
         """Test convenience methods for cache creation."""
-        model_cache = factory.create_model_registry_cache(
-            backend=CacheBackend.MEMORY
-        )
+        model_cache = factory.create_model_registry_cache()
         assert isinstance(model_cache, CacheInterface)
 
-        workflow_cache = factory.create_workflow_cache(
-            backend=CacheBackend.MEMORY
-        )
+        workflow_cache = factory.create_workflow_cache()
         assert isinstance(workflow_cache, CacheInterface)
 
-        tool_cache = factory.create_tool_cache(
-            backend=CacheBackend.MEMORY
-        )
+        tool_cache = factory.create_tool_cache()
         assert isinstance(tool_cache, CacheInterface)
 
     @pytest.mark.asyncio
@@ -237,9 +230,9 @@ class TestCacheFactory:
         """Test health check for all cache instances."""
         # Create some caches
         factory.create_cache(
-            CacheType.MODEL_REGISTRY, CacheBackend.MEMORY
+            CacheType.MODEL_REGISTRY
         )
-        factory.create_cache(CacheType.WORKFLOW, CacheBackend.MEMORY)
+        factory.create_cache(CacheType.WORKFLOW)
 
         health_results = await factory.health_check_all()
         assert health_results["overall_status"] in [
@@ -255,10 +248,10 @@ class TestCacheFactory:
         """Test getting stats for all cache instances."""
         # Create and use some caches
         cache1 = factory.create_cache(
-            CacheType.MODEL_REGISTRY, CacheBackend.MEMORY
+            CacheType.MODEL_REGISTRY
         )
         cache2 = factory.create_cache(
-            CacheType.WORKFLOW, CacheBackend.MEMORY
+            CacheType.WORKFLOW
         )
 
         await cache1.set("test_key", "test_value")

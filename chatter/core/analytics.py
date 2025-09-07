@@ -44,22 +44,15 @@ class AnalyticsService:
         if self._cache_instance is None:
             try:
                 # Try to get a general cache instance
-                from chatter.core.cache_factory import (
-                    CacheBackend,
-                    CacheType,
-                )
+                from chatter.core.cache_factory import CacheType
                 self._cache_instance = self.cache_factory.get_cache(
-                    CacheType.GENERAL, CacheBackend.REDIS
+                    CacheType.GENERAL
                 )
+                # If no existing instance, create one
+                if self._cache_instance is None:
+                    self._cache_instance = self.cache_factory.create_general_cache()
             except Exception as e:
                 logger.debug(f"Could not get cache instance: {e}")
-                # Try in-memory cache as fallback
-                try:
-                    self._cache_instance = self.cache_factory.get_cache(
-                        CacheType.GENERAL, CacheBackend.MEMORY
-                    )
-                except Exception as e2:
-                    logger.debug(f"Could not get fallback cache instance: {e2}")
         return self._cache_instance
 
     async def _get_database_response_time(self) -> float:

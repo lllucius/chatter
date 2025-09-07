@@ -52,6 +52,7 @@ import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatu
 import { useSSE } from '../services/sse-context';
 import { toastService } from '../services/toast-service';
 import CustomScrollbar from '../components/CustomScrollbar';
+import PageLayout from '../components/PageLayout';
 
 const AdministrationPage: React.FC = () => {
   const { isConnected, on } = useSSE();
@@ -636,28 +637,24 @@ const AdministrationPage: React.FC = () => {
     }
   };
 
+  const toolbar = (
+    <Button
+      variant="outlined"
+      startIcon={<RefreshIcon />}
+      onClick={() => {
+        loadBackups();
+        loadPlugins();
+        loadJobs();
+        loadJobStats();
+      }}
+      disabled={loading}
+    >
+      Refresh
+    </Button>
+  );
+
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1" sx={{ fontWeight: 'bold' }}>
-          Administration Dashboard
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={() => {
-              loadBackups();
-              loadPlugins();
-              loadJobs();
-              loadJobStats();
-            }}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-        </Box>
-      </Box>
+    <PageLayout title="Administration Dashboard" toolbar={toolbar}>
 
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
@@ -1358,7 +1355,7 @@ const AdministrationPage: React.FC = () => {
           <Button variant="contained" onClick={handleUserSettingsSave}>Save</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </PageLayout>
   );
 };
 

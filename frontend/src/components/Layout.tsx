@@ -468,9 +468,9 @@ const LayoutFrame: React.FC = () => {
           width: { sm: `calc(100% - ${currentDrawerWidth + effectiveRightWidth}px)` },
           minWidth: 0,
           minHeight: 0,
-          height: '100vh',
           display: 'flex',
           flexDirection: 'column',
+          overflow: 'hidden',
           transition: (theme) =>
             theme.transitions.create(['width'], {
               easing: theme.transitions.easing.sharp,

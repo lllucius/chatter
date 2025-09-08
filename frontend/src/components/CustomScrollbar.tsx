@@ -30,16 +30,16 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, clas
 
     styleElement.textContent = `
       .simplebar-track.simplebar-vertical {
-        width: 6px !important;
+        width: 12px !important;
         background-color: ${trackBg} !important;
-        border-radius: 3px !important;
+        border-radius: 6px !important;
         right: 0px !important;
       }
       
       .simplebar-track.simplebar-horizontal {
-        height: 6px !important;
+        height: 12px !important;
         background-color: ${trackBg} !important;
-        border-radius: 3px !important;
+        border-radius: 6px !important;
         bottom: 0px !important;
       }
       
@@ -50,7 +50,7 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, clas
       }
       
       .simplebar-track.simplebar-vertical .simplebar-scrollbar::before {
-        width: 4px !important;
+        width: 6px !important;
         margin: 1px !important;
       }
       

@@ -45,7 +45,6 @@ import {
   Computer,
 } from '@mui/icons-material';
 import { chatterSDK } from '../services/chatter-sdk';
-import { DashboardResponse } from '../sdk';
 import { useApi } from '../hooks/useApi';
 import { toastService } from '../services/toast-service';
 import PageLayout from '../components/PageLayout';
@@ -178,7 +177,6 @@ const DashboardPage: React.FC = () => {
     
     // Use real performance data if available
     const realPerformanceData = performanceData || data?.performance_metrics || {};
-    const realSystemData = systemData || data?.system_health || {};
 
     // Provide fallback data when APIs fail
     const conversationChartData = [
@@ -218,7 +216,7 @@ const DashboardPage: React.FC = () => {
       performanceChartData,
       systemHealthData,
     };
-  }, [data, performanceData, systemData]);
+  }, [data, performanceData, systemData, usageData]);
 
   // Helper function for exporting analytics
   const handleExportAnalytics = async (format: 'json' | 'csv' | 'xlsx' = 'json') => {
@@ -229,8 +227,7 @@ const DashboardPage: React.FC = () => {
         period: '30d'
       });
       toastService.success(`Analytics exported as ${format.toUpperCase()}`);
-    } catch (error: any) {
-      console.error('Failed to export analytics:', error);
+    } catch {
       toastService.error('Failed to export analytics');
     }
   };
@@ -265,8 +262,6 @@ const DashboardPage: React.FC = () => {
   const documentAnalytics = documentData || data?.document_analytics || {};
   const systemHealth = systemData || data?.system_health || {};
   const performanceMetrics = performanceData || data?.performance_metrics || {};
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
   const formatBytes = (bytes: number | undefined | null) => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];

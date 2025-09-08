@@ -15,7 +15,6 @@ import {
   LinearProgress,
 } from '@mui/material';
 import {
-  CloudUpload as UploadIcon,
   Search as SearchIcon,
   Visibility as ViewIcon,
   GetApp as DownloadIcon,
@@ -35,11 +34,8 @@ import { toastService } from '../services/toast-service';
 import { DocumentResponse, DocumentSearchRequest } from '../sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
-import { formatFileSize, getStatusColor } from '../utils/common';
+import { formatFileSize } from '../utils/common';
 import {
-  DocumentUploadedEvent,
-  DocumentProcessingStartedEvent,
-  DocumentProcessingCompletedEvent,
   DocumentProcessingFailedEvent
 } from '../services/sse-types';
 

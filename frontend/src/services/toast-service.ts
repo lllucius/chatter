@@ -6,6 +6,14 @@ interface ToastOptions {
   type?: ToastType;
   autoClose?: number | false;
   closeButton?: boolean;
+  toastId?: string;
+}
+
+interface ToastUpdateOptions {
+  type?: ToastType;
+  message?: string;
+  autoClose?: number | false;
+  closeButton?: boolean;
 }
 
 // RFC 9457 Problem Detail structure
@@ -42,6 +50,22 @@ class ToastService {
   private onToastClose = () => {
     this.toastCount--;
   };
+
+  /**
+   * Normalize options parameter - handle both object and primitive formats
+   */
+  private normalizeOptions(optionsOrPrimitive?: ToastOptions | number | false, defaults: Partial<ToastOptions> = {}): ToastOptions {
+    if (typeof optionsOrPrimitive === 'object') {
+      return { ...defaults, ...optionsOrPrimitive };
+    }
+    
+    // Handle primitive autoClose value
+    if (typeof optionsOrPrimitive === 'number' || optionsOrPrimitive === false) {
+      return { ...defaults, autoClose: optionsOrPrimitive };
+    }
+    
+    return defaults as ToastOptions;
+  }
 
   /**
    * Extract meaningful error message from problem detail response
@@ -83,7 +107,8 @@ class ToastService {
     const {
       type = 'info',
       autoClose = 6000,
-      closeButton = type === 'error'
+      closeButton = type === 'error',
+      toastId
     } = options;
 
     const toastOptions = {
@@ -96,31 +121,130 @@ class ToastService {
       closeOnClick: true,
       pauseOnHover: true,
       draggable: true,
+      ...(toastId && { toastId })
     };
 
     return toast(message, toastOptions);
   }
 
-  success(message: string, autoClose: number | false = 6000) {
-    return this.showToast(message, { type: 'success', autoClose, closeButton: false });
+  private showSuccessToast(message: string, options: Omit<ToastOptions, 'type'>) {
+    if (!this.canShowToast()) {
+      toast.dismiss();
+    }
+
+    const { autoClose = 6000, closeButton = false, toastId } = options;
+    const toastOptions = {
+      autoClose,
+      closeButton,
+      onOpen: this.onToastOpen,
+      onClose: this.onToastClose,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      ...(toastId && { toastId })
+    };
+
+    return toast.success(message, toastOptions);
   }
 
-  error(messageOrError: string | ErrorResponse, fallback?: string, autoClose: number | false = false) {
+  private showErrorToast(message: string, options: Omit<ToastOptions, 'type'>) {
+    if (!this.canShowToast()) {
+      toast.dismiss();
+    }
+
+    const { autoClose = false, closeButton = true, toastId } = options;
+    const toastOptions = {
+      autoClose,
+      closeButton,
+      onOpen: this.onToastOpen,
+      onClose: this.onToastClose,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      ...(toastId && { toastId })
+    };
+
+    return toast.error(message, toastOptions);
+  }
+
+  private showInfoToast(message: string, options: Omit<ToastOptions, 'type'>) {
+    if (!this.canShowToast()) {
+      toast.dismiss();
+    }
+
+    const { autoClose = 6000, closeButton = false, toastId } = options;
+    const toastOptions = {
+      autoClose,
+      closeButton,
+      onOpen: this.onToastOpen,
+      onClose: this.onToastClose,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      ...(toastId && { toastId })
+    };
+
+    return toast.info(message, toastOptions);
+  }
+
+  private showWarningToast(message: string, options: Omit<ToastOptions, 'type'>) {
+    if (!this.canShowToast()) {
+      toast.dismiss();
+    }
+
+    const { autoClose = 6000, closeButton = false, toastId } = options;
+    const toastOptions = {
+      autoClose,
+      closeButton,
+      onOpen: this.onToastOpen,
+      onClose: this.onToastClose,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      ...(toastId && { toastId })
+    };
+
+    return toast.warning(message, toastOptions);
+  }
+
+  success(message: string, optionsOrAutoClose?: ToastOptions | number | false) {
+    const options = this.normalizeOptions(optionsOrAutoClose, { type: 'success', autoClose: 6000, closeButton: false });
+    return this.showToast(message, options);
+  }
+
+  error(messageOrError: string | ErrorResponse, fallbackOrOptions?: string | ToastOptions, optionsOrAutoClose?: ToastOptions | number | false) {
     const message = typeof messageOrError === 'string' 
       ? messageOrError 
-      : this.extractErrorMessage(messageOrError, fallback || 'An error occurred');
-    return this.showToast(message, { type: 'error', autoClose, closeButton: true });
+      : this.extractErrorMessage(messageOrError, typeof fallbackOrOptions === 'string' ? fallbackOrOptions : 'An error occurred');
+    
+    // Handle overloaded parameters
+    const options = typeof fallbackOrOptions === 'object' 
+      ? fallbackOrOptions 
+      : this.normalizeOptions(optionsOrAutoClose, { type: 'error', autoClose: false, closeButton: true });
+    
+    return this.showToast(message, options);
   }
 
-  info(message: string, autoClose: number | false = 6000) {
-    return this.showToast(message, { type: 'info', autoClose, closeButton: false });
+  info(message: string, optionsOrAutoClose?: ToastOptions | number | false) {
+    const options = this.normalizeOptions(optionsOrAutoClose, { type: 'info', autoClose: 6000, closeButton: false });
+    return this.showToast(message, options);
   }
 
-  warning(messageOrError: string | ErrorResponse, fallback?: string, autoClose: number | false = 6000) {
+  warning(messageOrError: string | ErrorResponse, fallbackOrOptions?: string | ToastOptions, optionsOrAutoClose?: ToastOptions | number | false) {
     const message = typeof messageOrError === 'string' 
       ? messageOrError 
-      : this.extractErrorMessage(messageOrError, fallback || 'Warning');
-    return this.showToast(message, { type: 'warning', autoClose, closeButton: false });
+      : this.extractErrorMessage(messageOrError, typeof fallbackOrOptions === 'string' ? fallbackOrOptions : 'Warning');
+    
+    // Handle overloaded parameters  
+    const options = typeof fallbackOrOptions === 'object' 
+      ? fallbackOrOptions 
+      : this.normalizeOptions(optionsOrAutoClose, { type: 'warning', autoClose: 6000, closeButton: false });
+    
+    return this.showToast(message, options);
   }
 
   loading(message: string) {
@@ -129,6 +253,25 @@ class ToastService {
 
   getToastCount(): number {
     return this.toastCount;
+  }
+
+  update(toastId: string | number, options: ToastUpdateOptions) {
+    const { message, type = 'info', autoClose = 6000, closeButton = type === 'error' } = options;
+    
+    if (message) {
+      return toast.update(toastId, {
+        render: message,
+        type: type as TypeOptions,
+        autoClose,
+        closeButton,
+      });
+    }
+    
+    return toast.update(toastId, {
+      type: type as TypeOptions,
+      autoClose,
+      closeButton,
+    });
   }
 
   dismiss(toastId?: string | number) {

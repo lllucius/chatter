@@ -91,6 +91,20 @@ export class SSEEventManager {
   }
 
   /**
+   * Compatibility method for addEventListener (similar to on())
+   */
+  public addEventListener(eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): void {
+    this.on(eventType, listener);
+  }
+
+  /**
+   * Compatibility method for removeEventListener (similar to off())
+   */
+  public removeEventListener(eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): void {
+    this.off(eventType, listener);
+  }
+
+  /**
    * Check if connected
    */
   public get connected(): boolean {

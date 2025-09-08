@@ -43,7 +43,7 @@ const ProfilesPageRefactored: React.FC = () => {
       id: 'maxTokens',
       label: 'Max Tokens',
       width: '120px',
-      render: (value: number) => (
+      render: (value?: number) => (
         value ? (
           <Typography variant="body2">
             {value.toLocaleString()}
@@ -59,7 +59,7 @@ const ProfilesPageRefactored: React.FC = () => {
       id: 'createdAt',
       label: 'Created',
       width: '140px',
-      render: (value) => value ? format(new Date(value), 'MMM dd, yyyy') : '',
+      render: (value: Date) => value ? format(value, 'MMM dd, yyyy') : '',
     },
   ];
 

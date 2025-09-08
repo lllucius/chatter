@@ -270,6 +270,12 @@ class ChatterSDK {
     });
   }
 
+  public async refreshServerTools(serverId: string) {
+    return this.toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost({
+      serverId,
+    });
+  }
+
   // Convenience methods for conversations (delegated to chat API)
   public async listConversations(params: any = {}) {
     return this.chat.listConversationsApiV1ChatConversationsGet(params);

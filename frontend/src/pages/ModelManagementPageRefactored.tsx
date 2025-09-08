@@ -69,7 +69,7 @@ const ModelManagementPageRefactored: React.FC = () => {
   // Provider columns and config
   const providerColumns: CrudColumn<Provider>[] = [
     {
-      id: 'display_name',
+      id: 'displayName',
       label: 'Name',
       render: (value, item) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -81,7 +81,7 @@ const ModelManagementPageRefactored: React.FC = () => {
               {item.name}
             </Typography>
           </Box>
-          {item.is_default && (
+          {item.isDefault && (
             <Chip size="small" label="Default" color="primary" />
           )}
         </Box>
@@ -119,7 +119,7 @@ const ModelManagementPageRefactored: React.FC = () => {
       icon: <DefaultIcon />,
       label: 'Set as Default',
       onClick: async (provider) => {
-        if (!provider.is_default) {
+        if (!provider.isDefault) {
           try {
             const defaultProviderBody: DefaultProvider = {
               provider_id: provider.id as any,
@@ -192,7 +192,7 @@ const ModelManagementPageRefactored: React.FC = () => {
   // Model columns and config
   const modelColumns: CrudColumn<ModelDefWithProvider>[] = [
     {
-      id: 'display_name',
+      id: 'displayName',
       label: 'Name',
       render: (value, item) => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -204,7 +204,7 @@ const ModelManagementPageRefactored: React.FC = () => {
               {item.name}
             </Typography>
           </Box>
-          {item.is_default && (
+          {item.isDefault && (
             <Chip size="small" label="Default" color="primary" />
           )}
         </Box>
@@ -215,7 +215,7 @@ const ModelManagementPageRefactored: React.FC = () => {
       label: 'Provider',
       render: (value: any) => (
         <Typography variant="body2">
-          {value?.display_name || '—'}
+          {value?.displayName || '—'}
         </Typography>
       ),
     },
@@ -256,7 +256,7 @@ const ModelManagementPageRefactored: React.FC = () => {
       icon: <DefaultIcon />,
       label: 'Set as Default',
       onClick: async (model) => {
-        if (!model.is_default) {
+        if (!model.isDefault) {
           try {
             await chatterSDK.modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost({
               modelId: model.id,

@@ -23,7 +23,7 @@ class AgentType(str, Enum):
     CREATIVE = "creative"
     RESEARCH = "research"
     SUPPORT = "support"
-    SPECIALIST = "specialist"
+    SPECIALIST = "specialized"
 
 
 class AgentStatus(str, Enum):

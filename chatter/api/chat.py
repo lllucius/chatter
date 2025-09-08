@@ -304,23 +304,37 @@ async def get_available_tools(
 
         # Add MCP tools
         for tool in mcp_tools:
+            args_schema = getattr(tool, "args_schema", {})
+            # Convert Pydantic model to dict if needed
+            if hasattr(args_schema, 'model_json_schema'):
+                args_schema = args_schema.model_json_schema()
+            elif hasattr(args_schema, '__dict__') and not isinstance(args_schema, dict):
+                args_schema = {}
+
             all_tools.append(
                 AvailableToolResponse(
                     name=tool.name,
                     description=tool.description,
                     type="mcp",
-                    args_schema=getattr(tool, "args_schema", {}),
+                    args_schema=args_schema,
                 )
             )
 
         # Add built-in tools
         for tool in builtin_tools:
+            args_schema = getattr(tool, "args_schema", {})
+            # Convert Pydantic model to dict if needed
+            if hasattr(args_schema, 'model_json_schema'):
+                args_schema = args_schema.model_json_schema()
+            elif hasattr(args_schema, '__dict__') and not isinstance(args_schema, dict):
+                args_schema = {}
+
             all_tools.append(
                 AvailableToolResponse(
                     name=tool.name,
                     description=tool.description,
                     type="builtin",
-                    args_schema=getattr(tool, "args_schema", {}),
+                    args_schema=args_schema,
                 )
             )
 

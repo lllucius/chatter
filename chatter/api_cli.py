@@ -211,7 +211,6 @@ async def readiness_check():
 
         status_color = "green" if response.status == "ready" else "red"
         console.print(f"[{status_color}]Status: {response.status}[/{status_color}]")
-        console.print(f"Timestamp: {response.timestamp}")
 
 
 @health_app.command("metrics")
@@ -222,8 +221,21 @@ async def get_metrics():
         response = await sdk_client.health_api.get_metrics_metrics_get()
 
         console.print("[bold]System Metrics[/bold]")
-        for metric_name, metric_value in response.metrics.items():
-            console.print(f"{metric_name}: {metric_value}")
+
+        # Display health metrics
+        console.print("[cyan]Health Metrics:[/cyan]")
+        for metric_name, metric_value in response.health.items():
+            console.print(f"  {metric_name}: {metric_value}")
+
+        # Display performance metrics
+        console.print("[cyan]Performance Metrics:[/cyan]")
+        for metric_name, metric_value in response.performance.items():
+            console.print(f"  {metric_name}: {metric_value}")
+
+        # Display endpoint metrics
+        console.print("[cyan]Endpoint Metrics:[/cyan]")
+        for metric_name, metric_value in response.endpoints.items():
+            console.print(f"  {metric_name}: {metric_value}")
 
 
 # Authentication Commands
@@ -272,7 +284,7 @@ async def logout():
 async def whoami():
     """Get current user information."""
     async with get_client() as sdk_client:
-        response = await sdk_client.auth_api.get_current_user_api_v1_auth_me_get()
+        response = await sdk_client.auth_api.get_current_user_info_api_v1_auth_me_get()
 
         table = Table(title="Current User")
         table.add_column("Field", style="cyan")
@@ -310,7 +322,7 @@ async def list_prompts(
             console.print("No prompts found.")
             return
 
-        table = Table(title=f"Prompts ({response.total} total)")
+        table = Table(title=f"Prompts ({response.total_count} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Type", style="yellow")
@@ -360,7 +372,7 @@ async def create_prompt(
 ):
     """Create a new prompt."""
     from chatter_sdk.models.prompt_create import PromptCreate
-    
+
     async with get_client() as sdk_client:
         prompt_data = PromptCreate(
             name=name,
@@ -369,11 +381,11 @@ async def create_prompt(
             type=prompt_type,
             category=category
         )
-        
+
         response = await sdk_client.prompts_api.create_prompt_api_v1_prompts_post(
             prompt_create=prompt_data
         )
-        
+
         console.print(f"✅ [green]Created prompt: {response.name}[/green]")
         console.print(f"[dim]ID: {response.id}[/dim]")
 
@@ -390,12 +402,12 @@ async def delete_prompt(
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
-    
+
     async with get_client() as sdk_client:
         await sdk_client.prompts_api.delete_prompt_api_v1_prompts_prompt_id_delete(
             prompt_id=prompt_id
         )
-        
+
         console.print(f"✅ [green]Deleted prompt {prompt_id}[/green]")
 
 
@@ -410,12 +422,12 @@ async def clone_prompt(
         clone_data = {}
         if new_name:
             clone_data["name"] = new_name
-            
+
         response = await sdk_client.prompts_api.clone_prompt_api_v1_prompts_prompt_id_clone_post(
             prompt_id=prompt_id,
             clone_request=clone_data
         )
-        
+
         console.print(f"✅ [green]Cloned prompt: {response.name}[/green]")
         console.print(f"[dim]New ID: {response.id}[/dim]")
 
@@ -428,7 +440,7 @@ async def test_prompt(
 ):
     """Test a prompt with variables."""
     import json
-    
+
     test_variables = {}
     if variables:
         try:
@@ -436,14 +448,14 @@ async def test_prompt(
         except json.JSONDecodeError as e:
             console.print(f"❌ [red]Invalid JSON variables: {e}[/red]")
             return
-    
+
     async with get_client() as sdk_client:
         response = await sdk_client.prompts_api.test_prompt_api_v1_prompts_prompt_id_test_post(
             prompt_id=prompt_id,
             test_request={"variables": test_variables}
         )
-        
-        console.print(f"✅ [green]Prompt test successful[/green]")
+
+        console.print("✅ [green]Prompt test successful[/green]")
         console.print(f"[bold]Rendered Prompt:[/bold]\n{response.rendered_prompt}")
 
 
@@ -453,11 +465,11 @@ async def prompt_stats():
     """Show prompt usage statistics."""
     async with get_client() as sdk_client:
         response = await sdk_client.prompts_api.get_prompt_stats_api_v1_prompts_stats_overview_get()
-        
+
         table = Table(title="Prompt Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
-        
+
         if hasattr(response, 'total_prompts'):
             table.add_row("Total Prompts", str(response.total_prompts))
         if hasattr(response, 'active_prompts'):
@@ -466,11 +478,11 @@ async def prompt_stats():
             table.add_row("Total Usage", str(response.total_usage))
         if hasattr(response, 'avg_template_length'):
             table.add_row("Avg Template Length", f"{response.avg_template_length:.0f} chars")
-        
+
         console.print(table)
 
 
-# Profiles Commands  
+# Profiles Commands
 profiles_app = typer.Typer(help="Profile management commands")
 app.add_typer(profiles_app, name="profiles")
 
@@ -487,18 +499,18 @@ async def list_profiles(
             limit=limit,
             offset=offset
         )
-        
+
         if not response.profiles:
             console.print("No profiles found.")
             return
-        
-        table = Table(title=f"Profiles ({response.total} total)")
+
+        table = Table(title=f"Profiles ({response.total_count} total)")
         table.add_column("ID", style="cyan")
-        table.add_column("Name", style="green") 
+        table.add_column("Name", style="green")
         table.add_column("Provider", style="yellow")
         table.add_column("Model", style="magenta")
         table.add_column("Created", style="blue")
-        
+
         for profile in response.profiles:
             table.add_row(
                 str(profile.id),
@@ -507,7 +519,7 @@ async def list_profiles(
                 getattr(profile, 'llm_model', 'N/A'),
                 str(profile.created_at)[:19] if hasattr(profile, 'created_at') else 'N/A'
             )
-        
+
         console.print(table)
 
 
@@ -519,7 +531,7 @@ async def show_profile(profile_id: str = typer.Argument(..., help="Profile ID"))
         response = await sdk_client.profiles_api.get_profile_api_v1_profiles_profile_id_get(
             profile_id=profile_id
         )
-        
+
         console.print(Panel.fit(
             f"[bold]{response.name}[/bold]\n\n"
             f"[dim]ID:[/dim] {response.id}\n"
@@ -547,7 +559,7 @@ async def create_profile(
 ):
     """Create a new profile."""
     from chatter_sdk.models.profile_create import ProfileCreate
-    
+
     async with get_client() as sdk_client:
         profile_data = ProfileCreate(
             name=name,
@@ -558,11 +570,11 @@ async def create_profile(
             max_tokens=max_tokens,
             system_prompt=system_prompt
         )
-        
+
         response = await sdk_client.profiles_api.create_profile_api_v1_profiles_post(
             profile_create=profile_data
         )
-        
+
         console.print(f"✅ [green]Created profile: {response.name}[/green]")
         console.print(f"[dim]ID: {response.id}[/dim]")
 
@@ -579,12 +591,12 @@ async def delete_profile(
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
-    
+
     async with get_client() as sdk_client:
         await sdk_client.profiles_api.delete_profile_api_v1_profiles_profile_id_delete(
             profile_id=profile_id
         )
-        
+
         console.print(f"✅ [green]Deleted profile {profile_id}[/green]")
 
 
@@ -600,8 +612,8 @@ async def test_profile(
             profile_id=profile_id,
             test_request={"message": message}
         )
-        
-        console.print(f"✅ [green]Profile test successful[/green]")
+
+        console.print("✅ [green]Profile test successful[/green]")
         console.print(f"[bold]Response:[/bold] {response.content if hasattr(response, 'content') else response}")
 
 
@@ -616,12 +628,12 @@ async def clone_profile(
         clone_data = {}
         if new_name:
             clone_data["name"] = new_name
-            
+
         response = await sdk_client.profiles_api.clone_profile_api_v1_profiles_profile_id_clone_post(
             profile_id=profile_id,
             clone_request=clone_data
         )
-        
+
         console.print(f"✅ [green]Cloned profile: {response.name}[/green]")
         console.print(f"[dim]New ID: {response.id}[/dim]")
 
@@ -632,27 +644,27 @@ async def list_providers():
     """List available LLM providers."""
     async with get_client() as sdk_client:
         response = await sdk_client.profiles_api.get_available_providers_api_v1_profiles_providers_available_get()
-        
+
         if not response.providers:
             console.print("No providers available.")
             return
-        
+
         table = Table(title="Available Providers")
         table.add_column("Name", style="cyan")
         table.add_column("Models", style="green")
         table.add_column("Status", style="yellow")
-        
+
         for provider in response.providers:
             models = ", ".join(provider.models[:3]) if hasattr(provider, 'models') and provider.models else "N/A"
             if hasattr(provider, 'models') and len(provider.models) > 3:
                 models += f" (+{len(provider.models) - 3} more)"
-                
+
             table.add_row(
                 provider.name,
                 models,
                 getattr(provider, 'status', 'active')
             )
-        
+
         console.print(table)
 
 
@@ -662,11 +674,11 @@ async def profile_stats():
     """Show profile usage statistics."""
     async with get_client() as sdk_client:
         response = await sdk_client.profiles_api.get_profile_stats_api_v1_profiles_stats_overview_get()
-        
+
         table = Table(title="Profile Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
-        
+
         if hasattr(response, 'total_profiles'):
             table.add_row("Total Profiles", str(response.total_profiles))
         if hasattr(response, 'active_profiles'):
@@ -675,7 +687,7 @@ async def profile_stats():
             table.add_row("Total Conversations", str(response.total_conversations))
         if hasattr(response, 'avg_tokens_per_conversation'):
             table.add_row("Avg Tokens/Conversation", str(response.avg_tokens_per_conversation))
-        
+
         console.print(table)
 
 
@@ -700,18 +712,18 @@ async def list_jobs(
             status=status,
             job_type=job_type
         )
-        
+
         if not response.jobs:
             console.print("No jobs found.")
             return
-        
+
         table = Table(title=f"Jobs ({response.total} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Type", style="green")
         table.add_column("Status", style="yellow")
         table.add_column("Progress", style="magenta")
         table.add_column("Created", style="blue")
-        
+
         for job in response.jobs:
             progress = f"{getattr(job, 'progress', 0)}%" if hasattr(job, 'progress') else "N/A"
             table.add_row(
@@ -721,7 +733,7 @@ async def list_jobs(
                 progress,
                 str(getattr(job, 'created_at', 'N/A'))[:19] if hasattr(job, 'created_at') else 'N/A'
             )
-        
+
         console.print(table)
 
 
@@ -733,10 +745,10 @@ async def show_job(job_id: str = typer.Argument(..., help="Job ID")):
         response = await sdk_client.jobs_api.get_job_api_v1_jobs_job_id_get(
             job_id=job_id
         )
-        
+
         progress = f"{getattr(response, 'progress', 0)}%" if hasattr(response, 'progress') else "N/A"
         error_msg = getattr(response, 'error_message', 'No errors') if hasattr(response, 'error_message') else 'No errors'
-        
+
         console.print(Panel.fit(
             f"[bold]{getattr(response, 'job_type', 'Job')}[/bold]\n\n"
             f"[dim]ID:[/dim] {response.id}\n"
@@ -760,7 +772,7 @@ async def create_job(
     """Create a new job."""
     from chatter_sdk.models.job_create import JobCreate
     import json
-    
+
     job_data = {}
     if data:
         try:
@@ -768,18 +780,18 @@ async def create_job(
         except json.JSONDecodeError as e:
             console.print(f"❌ [red]Invalid JSON data: {e}[/red]")
             return
-    
+
     async with get_client() as sdk_client:
         job_request = JobCreate(
             job_type=job_type,
             priority=priority,
             data=job_data
         )
-        
+
         response = await sdk_client.jobs_api.create_job_api_v1_jobs_post(
             job_create=job_request
         )
-        
+
         console.print(f"✅ [green]Created job: {response.id}[/green]")
         console.print(f"[dim]Type: {getattr(response, 'job_type', 'unknown')}[/dim]")
         console.print(f"[dim]Status: {getattr(response, 'status', 'unknown')}[/dim]")
@@ -797,7 +809,7 @@ async def cancel_job(
             job_id=job_id,
             force=force
         )
-        
+
         console.print(f"✅ [green]Cancelled job {job_id}[/green]")
         if hasattr(response, 'message'):
             console.print(f"[dim]{response.message}[/dim]")
@@ -813,7 +825,7 @@ async def cleanup_jobs(
         response = await sdk_client.jobs_api.cleanup_jobs_api_v1_jobs_cleanup_post(
             force=force
         )
-        
+
         cleaned_count = getattr(response, 'cleaned_count', 0) if hasattr(response, 'cleaned_count') else 0
         console.print(f"✅ [green]Cleaned up {cleaned_count} jobs[/green]")
 
@@ -824,11 +836,11 @@ async def job_stats():
     """Show job statistics."""
     async with get_client() as sdk_client:
         response = await sdk_client.jobs_api.get_job_stats_api_v1_jobs_stats_overview_get()
-        
+
         table = Table(title="Job Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
-        
+
         if hasattr(response, 'total_jobs'):
             table.add_row("Total Jobs", str(response.total_jobs))
         if hasattr(response, 'running_jobs'):
@@ -839,7 +851,7 @@ async def job_stats():
             table.add_row("Failed Jobs", str(response.failed_jobs))
         if hasattr(response, 'avg_execution_time'):
             table.add_row("Avg Execution Time", f"{response.avg_execution_time:.2f}s")
-        
+
         console.print(table)
 
 
@@ -918,7 +930,7 @@ async def show_document(document_id: str = typer.Argument(..., help="Document ID
         response = await sdk_client.documents_api.get_document_api_v1_documents_document_id_get(
             document_id=document_id
         )
-        
+
         console.print(Panel.fit(
             f"[bold]{response.name}[/bold]\n\n"
             f"[dim]ID:[/dim] {response.id}\n"
@@ -946,12 +958,12 @@ async def delete_document(
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
-    
+
     async with get_client() as sdk_client:
         await sdk_client.documents_api.delete_document_api_v1_documents_document_id_delete(
             document_id=document_id
         )
-        
+
         console.print(f"✅ [green]Deleted document {document_id}[/green]")
 
 
@@ -967,13 +979,13 @@ async def show_document_chunks(
             document_id=document_id,
             limit=limit
         )
-        
+
         if not response.chunks:
             console.print("No chunks found.")
             return
-        
+
         console.print(f"[bold]Document Chunks (showing {len(response.chunks)}/{getattr(response, 'total', len(response.chunks))} total)[/bold]\n")
-        
+
         for i, chunk in enumerate(response.chunks, 1):
             console.print(f"[cyan]Chunk {i}:[/cyan]")
             console.print(f"  Content: {chunk.content[:200]}...")
@@ -994,8 +1006,8 @@ async def process_document(
             document_id=document_id,
             force_reprocess=force_reprocess
         )
-        
-        console.print(f"✅ [green]Document processing started[/green]")
+
+        console.print("✅ [green]Document processing started[/green]")
         if hasattr(response, 'job_id'):
             console.print(f"[dim]Job ID: {response.job_id}[/dim]")
         console.print(f"[dim]Check status with: chatter documents show {document_id}[/dim]")
@@ -1007,11 +1019,11 @@ async def document_stats():
     """Show document statistics."""
     async with get_client() as sdk_client:
         response = await sdk_client.documents_api.get_document_stats_api_v1_documents_stats_overview_get()
-        
+
         table = Table(title="Document Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
-        
+
         if hasattr(response, 'total_documents'):
             table.add_row("Total Documents", str(response.total_documents))
         if hasattr(response, 'processed_documents'):
@@ -1022,7 +1034,7 @@ async def document_stats():
             table.add_row("Total Size", f"{response.total_size_bytes:,} bytes")
         if hasattr(response, 'avg_processing_time'):
             table.add_row("Avg Processing Time", f"{response.avg_processing_time:.2f}s")
-        
+
         console.print(table)
 
 
@@ -1043,7 +1055,7 @@ async def send_message(
 ):
     """Send a chat message."""
     from chatter_sdk.models.chat_request import ChatRequest
-    
+
     async with get_client() as sdk_client:
         chat_request = ChatRequest(
             message=message,
@@ -1053,16 +1065,16 @@ async def send_message(
             stream=stream,
             enable_retrieval=enable_retrieval
         )
-        
+
         if stream:
             console.print("🔄 [yellow]Streaming response...[/yellow]")
             # Note: Streaming would require special handling, for now show message about it
             console.print("📝 [dim]Note: Streaming display not yet implemented in CLI[/dim]")
-        
+
         response = await sdk_client.chat_api.chat_api_v1_chat_chat_post(chat_request=chat_request)
-        
+
         console.print(f"\n[bold green]Assistant:[/bold green] {response.content}")
-        
+
         if hasattr(response, 'conversation_id'):
             console.print(f"[dim]Conversation ID: {response.conversation_id}[/dim]")
         if hasattr(response, 'usage') and response.usage:
@@ -1082,18 +1094,18 @@ async def list_conversations(
             limit=limit,
             offset=offset
         )
-        
+
         if not response.conversations:
             console.print("No conversations found.")
             return
-        
+
         table = Table(title=f"Conversations ({response.total} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Title", style="green")
         table.add_column("Messages", style="yellow")
         table.add_column("Last Active", style="blue")
         table.add_column("Status", style="magenta")
-        
+
         for conv in response.conversations:
             table.add_row(
                 str(conv.id),
@@ -1102,7 +1114,7 @@ async def list_conversations(
                 str(getattr(conv, 'last_message_at', 'N/A'))[:19] if hasattr(conv, 'last_message_at') and conv.last_message_at else 'N/A',
                 str(getattr(conv, 'status', 'active'))
             )
-        
+
         console.print(table)
 
 
@@ -1117,7 +1129,7 @@ async def show_conversation(
         response = await sdk_client.chat_api.get_conversation_api_v1_chat_conversations_conversation_id_get(
             conversation_id=conversation_id
         )
-        
+
         console.print(Panel.fit(
             f"[bold]{response.title or 'Untitled'}[/bold]\n\n"
             f"[dim]ID:[/dim] {response.id}\n"
@@ -1128,13 +1140,13 @@ async def show_conversation(
             f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}",
             title="Conversation Details"
         ))
-        
+
         if include_messages:
             try:
                 messages_response = await sdk_client.chat_api.get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get(
                     conversation_id=conversation_id
                 )
-                
+
                 if messages_response.messages:
                     console.print("\n[bold]Messages:[/bold]")
                     for msg in messages_response.messages:
@@ -1154,18 +1166,18 @@ async def create_conversation(
 ):
     """Create a new conversation."""
     from chatter_sdk.models.conversation_create import ConversationCreate
-    
+
     async with get_client() as sdk_client:
         conversation_data = ConversationCreate(
             title=title,
             description=description,
             workflow_config={"default_workflow": workflow} if workflow else None
         )
-        
+
         response = await sdk_client.chat_api.create_conversation_api_v1_chat_conversations_post(
             conversation_create=conversation_data
         )
-        
+
         console.print(f"✅ [green]Created conversation: {response.title}[/green]")
         console.print(f"[dim]ID: {response.id}[/dim]")
 
@@ -1182,12 +1194,12 @@ async def delete_conversation(
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
-    
+
     async with get_client() as sdk_client:
         await sdk_client.chat_api.delete_conversation_api_v1_chat_conversations_conversation_id_delete(
             conversation_id=conversation_id
         )
-        
+
         console.print(f"✅ [green]Deleted conversation {conversation_id}[/green]")
 
 
@@ -1197,23 +1209,23 @@ async def list_available_tools():
     """List available chat tools."""
     async with get_client() as sdk_client:
         response = await sdk_client.chat_api.get_available_tools_api_v1_chat_tools_available_get()
-        
+
         if not response.tools:
             console.print("No tools available.")
             return
-        
+
         table = Table(title="Available Chat Tools")
         table.add_column("Name", style="cyan")
         table.add_column("Description", style="green")
         table.add_column("Type", style="yellow")
-        
+
         for tool in response.tools:
             table.add_row(
                 tool.name,
                 tool.description or "No description",
                 getattr(tool, 'type', 'unknown')
             )
-        
+
         console.print(table)
 
 
@@ -1223,49 +1235,57 @@ async def list_workflow_templates():
     """List available workflow templates."""
     async with get_client() as sdk_client:
         response = await sdk_client.chat_api.get_workflow_templates_api_v1_chat_templates_get()
-        
+
         if not response.templates:
             console.print("No templates available.")
             return
-        
+
         table = Table(title="Workflow Templates")
         table.add_column("Name", style="cyan")
         table.add_column("Description", style="green")
         table.add_column("Workflow", style="yellow")
-        
+
         for template in response.templates:
-            table.add_row(
-                template.name,
-                template.description or "No description",
-                template.workflow_type or "unknown"
-            )
-        
+            # Handle case where template might be a string or object
+            if isinstance(template, str):
+                table.add_row(
+                    template,
+                    "No description",
+                    "unknown"
+                )
+            else:
+                table.add_row(
+                    getattr(template, 'name', str(template)),
+                    getattr(template, 'description', "No description") or "No description",
+                    getattr(template, 'workflow_type', "unknown") or "unknown"
+                )
+
         console.print(table)
 
 
 # Models Commands
-models_app = typer.Typer(help="Model registry and management commands")  
+models_app = typer.Typer(help="Model registry and management commands")
 app.add_typer(models_app, name="models")
 
 
 @models_app.command("providers")
 @run_async
-async def list_providers():
+async def list_model_providers():
     """List model providers."""
     async with get_client() as sdk_client:
         response = await sdk_client.model_api.list_providers_api_v1_models_providers_get()
-        
+
         if not response.providers:
             console.print("No providers found.")
             return
-        
+
         table = Table(title=f"Model Providers ({len(response.providers)} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Type", style="yellow")
         table.add_column("Status", style="magenta")
         table.add_column("Models", style="blue")
-        
+
         for provider in response.providers:
             model_count = len(getattr(provider, 'models', []))
             table.add_row(
@@ -1275,7 +1295,7 @@ async def list_providers():
                 getattr(provider, 'status', 'active'),
                 str(model_count)
             )
-        
+
         console.print(table)
 
 
@@ -1283,26 +1303,26 @@ async def list_providers():
 @run_async
 async def list_models(
     provider_id: str = typer.Option(None, help="Filter by provider ID"),
-    limit: int = typer.Option(10, help="Number of models to list"),
+    per_page: int = typer.Option(10, help="Number of models to list"),
 ):
     """List available models."""
     async with get_client() as sdk_client:
         response = await sdk_client.model_api.list_models_api_v1_models_models_get(
             provider_id=provider_id,
-            limit=limit
+            per_page=per_page
         )
-        
+
         if not response.models:
             console.print("No models found.")
             return
-        
+
         table = Table(title=f"Models ({len(response.models)} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Provider", style="yellow")
         table.add_column("Type", style="magenta")
         table.add_column("Status", style="blue")
-        
+
         for model in response.models:
             table.add_row(
                 str(model.id),
@@ -1311,7 +1331,7 @@ async def list_models(
                 getattr(model, 'model_type', 'llm'),
                 getattr(model, 'status', 'active')
             )
-        
+
         console.print(table)
 
 
@@ -1321,18 +1341,18 @@ async def list_embedding_spaces():
     """List embedding spaces."""
     async with get_client() as sdk_client:
         response = await sdk_client.model_api.list_embedding_spaces_api_v1_models_embedding_spaces_get()
-        
+
         if not response.embedding_spaces:
             console.print("No embedding spaces found.")
             return
-        
+
         table = Table(title="Embedding Spaces")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Model", style="yellow")
         table.add_column("Dimensions", style="magenta")
         table.add_column("Documents", style="blue")
-        
+
         for space in response.embedding_spaces:
             table.add_row(
                 str(space.id),
@@ -1341,7 +1361,7 @@ async def list_embedding_spaces():
                 str(getattr(space, 'dimensions', 'unknown')),
                 str(getattr(space, 'document_count', 0))
             )
-        
+
         console.print(table)
 
 
@@ -1356,11 +1376,11 @@ async def event_stats():
     """Show event streaming statistics."""
     async with get_client() as sdk_client:
         response = await sdk_client.events_api.get_sse_stats_api_v1_events_stats_get()
-        
+
         table = Table(title="Event Stream Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
-        
+
         if hasattr(response, 'active_connections'):
             table.add_row("Active Connections", str(response.active_connections))
         if hasattr(response, 'total_events_sent'):
@@ -1369,22 +1389,18 @@ async def event_stats():
             table.add_row("Events Per Minute", f"{response.events_per_minute:.2f}")
         if hasattr(response, 'avg_connection_duration'):
             table.add_row("Avg Connection Duration", f"{response.avg_connection_duration:.1f}s")
-        
+
         console.print(table)
 
 
 @events_app.command("test-broadcast")
 @run_async
-async def test_broadcast(
-    message: str = typer.Option("Test broadcast message", help="Test message to broadcast"),
-):
+async def test_broadcast():
     """Trigger a test broadcast event."""
     async with get_client() as sdk_client:
-        response = await sdk_client.events_api.trigger_broadcast_test_api_v1_events_broadcast_test_post(
-            test_message=message
-        )
-        
-        console.print(f"✅ [green]Test broadcast sent[/green]")
+        response = await sdk_client.events_api.trigger_broadcast_test_api_v1_events_broadcast_test_post()
+
+        console.print("✅ [green]Test broadcast sent[/green]")
         if hasattr(response, 'message'):
             console.print(f"[dim]{response.message}[/dim]")
 
@@ -1408,18 +1424,18 @@ async def list_agents(
             offset=offset,
             status=status
         )
-        
+
         if not response.agents:
             console.print("No agents found.")
             return
-        
+
         table = Table(title=f"AI Agents ({response.total} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Type", style="yellow")
         table.add_column("Status", style="magenta")
         table.add_column("Tasks", style="blue")
-        
+
         for agent in response.agents:
             table.add_row(
                 str(agent.id),
@@ -1428,7 +1444,7 @@ async def list_agents(
                 getattr(agent, 'status', 'active'),
                 str(getattr(agent, 'task_count', 0))
             )
-        
+
         console.print(table)
 
 
@@ -1440,7 +1456,7 @@ async def show_agent(agent_id: str = typer.Argument(..., help="Agent ID")):
         response = await sdk_client.agents_api.get_agent_api_v1_agents_agent_id_get(
             agent_id=agent_id
         )
-        
+
         console.print(Panel.fit(
             f"[bold]{response.name}[/bold]\n\n"
             f"[dim]ID:[/dim] {response.id}\n"
@@ -1466,7 +1482,7 @@ async def create_agent(
     """Create a new AI agent."""
     from chatter_sdk.models.agent_create import AgentCreate
     import json
-    
+
     agent_config = {}
     if config:
         try:
@@ -1474,7 +1490,7 @@ async def create_agent(
         except json.JSONDecodeError as e:
             console.print(f"❌ [red]Invalid JSON configuration: {e}[/red]")
             return
-    
+
     async with get_client() as sdk_client:
         agent_data = AgentCreate(
             name=name,
@@ -1482,11 +1498,11 @@ async def create_agent(
             description=description,
             config=agent_config
         )
-        
+
         response = await sdk_client.agents_api.create_agent_api_v1_agents_post(
             agent_create=agent_data
         )
-        
+
         console.print(f"✅ [green]Created agent: {response.name}[/green]")
         console.print(f"[dim]ID: {response.id}[/dim]")
 
@@ -1503,12 +1519,12 @@ async def delete_agent(
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
-    
+
     async with get_client() as sdk_client:
         await sdk_client.agents_api.delete_agent_api_v1_agents_agent_id_delete(
             agent_id=agent_id
         )
-        
+
         console.print(f"✅ [green]Deleted agent {agent_id}[/green]")
 
 
@@ -1527,7 +1543,7 @@ async def create_backup(
 ):
     """Create a data backup."""
     from chatter_sdk.models.backup_request import BackupRequest
-    
+
     async with get_client() as sdk_client:
         backup_request = BackupRequest(
             backup_type=backup_type,
@@ -1535,11 +1551,11 @@ async def create_backup(
             include_conversations=include_conversations,
             description=description
         )
-        
+
         response = await sdk_client.data_api.create_backup_api_v1_data_backup_post(
             backup_request=backup_request
         )
-        
+
         console.print(f"✅ [green]Backup created: {response.backup_id}[/green]")
         if hasattr(response, 'job_id'):
             console.print(f"[dim]Job ID: {response.job_id}[/dim]")
@@ -1555,19 +1571,19 @@ async def export_data(
 ):
     """Export data in specified format."""
     from chatter_sdk.models.export_data_request import ExportDataRequest
-    
+
     async with get_client() as sdk_client:
         export_request = ExportDataRequest(
             format=format,
             data_types=data_types.split(','),
             include_metadata=include_metadata
         )
-        
+
         response = await sdk_client.data_api.export_data_api_v1_data_export_post(
             export_data_request=export_request
         )
-        
-        console.print(f"✅ [green]Data export started[/green]")
+
+        console.print("✅ [green]Data export started[/green]")
         if hasattr(response, 'job_id'):
             console.print(f"[dim]Job ID: {response.job_id}[/dim]")
         console.print(f"[dim]Check status with: chatter jobs show {response.job_id if hasattr(response, 'job_id') else 'JOB_ID'}[/dim]")
@@ -1581,18 +1597,18 @@ async def bulk_delete_conversations(
 ):
     """Bulk delete conversations."""
     ids = [id.strip() for id in conversation_ids.split(',')]
-    
+
     if not force:
         confirm = Prompt.ask(f"Are you sure you want to delete {len(ids)} conversations?", choices=["y", "n"])
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
-    
+
     async with get_client() as sdk_client:
         response = await sdk_client.data_api.bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post(
             conversation_ids=ids
         )
-        
+
         success_count = getattr(response, 'deleted_count', len(ids))
         console.print(f"✅ [green]Deleted {success_count} conversations[/green]")
 
@@ -1605,18 +1621,18 @@ async def bulk_delete_documents(
 ):
     """Bulk delete documents."""
     ids = [id.strip() for id in document_ids.split(',')]
-    
+
     if not force:
         confirm = Prompt.ask(f"Are you sure you want to delete {len(ids)} documents?", choices=["y", "n"])
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
-    
+
     async with get_client() as sdk_client:
         response = await sdk_client.data_api.bulk_delete_documents_api_v1_data_bulk_delete_documents_post(
             document_ids=ids
         )
-        
+
         success_count = getattr(response, 'deleted_count', len(ids))
         console.print(f"✅ [green]Deleted {success_count} documents[/green]")
 
@@ -1627,11 +1643,11 @@ async def storage_stats():
     """Show storage usage statistics."""
     async with get_client() as sdk_client:
         response = await sdk_client.data_api.get_storage_stats_api_v1_data_storage_stats_get()
-        
+
         table = Table(title="Storage Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
-        
+
         if hasattr(response, 'total_size_bytes'):
             table.add_row("Total Storage Used", f"{response.total_size_bytes:,} bytes")
         if hasattr(response, 'documents_size_bytes'):
@@ -1640,7 +1656,7 @@ async def storage_stats():
             table.add_row("Embeddings Storage", f"{response.embeddings_size_bytes:,} bytes")
         if hasattr(response, 'backups_size_bytes'):
             table.add_row("Backups Storage", f"{response.backups_size_bytes:,} bytes")
-        
+
         console.print(table)
 
 

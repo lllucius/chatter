@@ -50,7 +50,7 @@ class ChatterClient {
 
   private initializeConfiguration() {
     this.configuration = new Configuration({
-      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+      basePath: (typeof window !== 'undefined' && (window as any).VITE_API_BASE_URL) || 'http://localhost:8000',
       accessToken: () => this.token || '',
       headers: {
         'Content-Type': 'application/json',
@@ -110,7 +110,7 @@ class ChatterClient {
     
     // Update configuration to remove token
     this.configuration = new Configuration({
-      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+      basePath: (typeof window !== 'undefined' && (window as any).VITE_API_BASE_URL) || 'http://localhost:8000',
       headers: {
         'Content-Type': 'application/json',
       },

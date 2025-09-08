@@ -115,7 +115,7 @@ ConversationTableRow.displayName = 'ConversationTableRow';
 const ConversationsPage: React.FC = () => {
   // Use custom API hook for conversations
   const conversationsApi = useApi(
-    () => chatterClient.conversations.listConversationsApiV1ChatConversationsGet({}),
+    () => chatterClient.chat.listConversationsApiV1ChatConversationsGet({}),
     { immediate: true }
   );
 
@@ -140,7 +140,7 @@ const ConversationsPage: React.FC = () => {
 
     try {
       const response =
-        await chatterClient.conversations.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(
+        await chatterClient.chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(
           { conversationId: conversation.id }
         );
       const messages = response.data;

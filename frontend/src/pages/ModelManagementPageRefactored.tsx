@@ -229,7 +229,13 @@ const ModelManagementPageRefactored: React.FC = () => {
     {
       id: 'is_active',
       label: 'Status',
-      render: createStatusChipRenderer<ModelDefWithProvider>({ active: 'success', inactive: 'default' }),
+      render: (value: boolean) => (
+        <Chip
+          size="small"
+          label={value ? 'Active' : 'Inactive'}
+          color={value ? 'success' : 'default'}
+        />
+      ),
     },
     {
       id: 'model_name',

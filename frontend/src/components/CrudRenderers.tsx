@@ -2,6 +2,7 @@ import React from 'react';
 import { Chip, Typography, Box, Switch } from '@mui/material';
 import { format } from 'date-fns';
 import { CrudColumn } from './CrudDataTable';
+import { getStatusColor } from '../utils/common';
 
 /**
  * Common renderers for CRUD table columns to reduce code duplication
@@ -11,22 +12,12 @@ export const createStatusChipRenderer = <T,>(
   colorMapping?: { [key: string]: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' }
 ): CrudColumn<T>['render'] => {
   return (value: string) => {
-    const defaultColorMapping: { [key: string]: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' } = {
-      enabled: 'success',
-      active: 'success',
-      success: 'success',
-      error: 'error',
-      failed: 'error',
-      disabled: 'default',
-      inactive: 'default',
-      pending: 'warning',
-      ...colorMapping
-    };
+    const color = colorMapping?.[value?.toLowerCase()] || getStatusColor(value);
     
     return (
       <Chip 
         label={value}
-        color={defaultColorMapping[value?.toLowerCase()] || 'default'}
+        color={color}
         size="small"
       />
     );

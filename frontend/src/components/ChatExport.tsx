@@ -257,8 +257,8 @@ const ChatExport: React.FC<ChatExportProps> = ({
       URL.revokeObjectURL(url);
       
       onClose();
-    } catch (error) {
-      console.error('Export failed:', error);
+    } catch {
+      // Export failed - user will notice no file was downloaded
     } finally {
       setExporting(false);
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -26,13 +26,9 @@ import {
   MenuItem,
   Menu,
   ListItemIcon,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   Grid,
   Paper,
   LinearProgress,
-  Tooltip,
   Tabs,
   Tab,
   List,
@@ -49,13 +45,8 @@ import {
   Pause as PauseIcon,
   Stop as StopIcon,
   CheckCircle as CompleteIcon,
-  Analytics as MetricsIcon,
-  Assessment as PerformanceIcon,
-  Lightbulb as RecommendationsIcon,
   MoreVert as MoreVertIcon,
-  ExpandMore as ExpandMoreIcon,
   TrendingUp as TrendingUpIcon,
-  TrendingDown as TrendingDownIcon,
   TrendingFlat as TrendingFlatIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
@@ -65,12 +56,10 @@ import {
   ABTestResponse,
   ABTestCreateRequest,
   ABTestUpdateRequest,
-  ABTestListResponse,
   ABTestMetricsResponse,
   ABTestResultsResponse,
   TestStatus,
   TestType,
-  VariantAllocation,
 } from '../sdk';
 import PageLayout from '../components/PageLayout';
 
@@ -172,8 +161,8 @@ const ABTestingPage: React.FC = () => {
       setTestResults(resultsResponse.status === 'fulfilled' ? resultsResponse.value.data : null);
       setTestRecommendations(recommendationsResponse.status === 'fulfilled' ? recommendationsResponse.value.data : null);
       setTestPerformance(performanceResponse.status === 'fulfilled' ? performanceResponse.value.data : null);
-    } catch (err: any) {
-      console.error('Failed to load test details:', err);
+    } catch {
+      // Error loading test details - will show in UI appropriately
     }
   };
 

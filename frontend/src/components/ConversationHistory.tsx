@@ -62,9 +62,8 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
       setError('');
       const response = await chatterSDK.conversations.listConversationsApiV1ConversationsGet({});
       setConversations(response.data.conversations || []);
-    } catch (err: any) {
+    } catch {
       setError('Failed to load conversation history');
-      console.error('Error loading conversations:', err);
     } finally {
       setLoading(false);
     }
@@ -101,7 +100,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
       });
       setConversations(prev => prev.filter(c => c.id !== actionConversation.id));
       handleActionClose();
-    } catch (_err: any) {
+    } catch {
       setError('Failed to delete conversation');
     }
   };
@@ -123,7 +122,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       handleActionClose();
-    } catch (_err: any) {
+    } catch {
       setError('Failed to export conversation');
     }
   };

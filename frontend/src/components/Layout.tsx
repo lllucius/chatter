@@ -15,7 +15,6 @@ import {
   Menu,
   MenuItem,
   Divider,
-  Badge,
   Tooltip,
   Collapse,
   ListSubheader,

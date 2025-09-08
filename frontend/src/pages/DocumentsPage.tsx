@@ -50,6 +50,7 @@ import { DocumentResponse, DocumentSearchRequest } from '../sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
 import CustomScrollbar from '../components/CustomScrollbar';
+import { formatFileSize, getStatusColor } from '../utils/common';
 import PageLayout from '../components/PageLayout';
 import {
   DocumentUploadedEvent,
@@ -352,26 +353,6 @@ const DocumentsPage: React.FC = () => {
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
-  };
-
-  const formatFileSize = (bytes: number) => {
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    if (bytes === 0) return '0 Bytes';
-    const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'processed':
-        return 'success';
-      case 'processing':
-        return 'warning';
-      case 'failed':
-        return 'error';
-      default:
-        return 'default';
-    }
   };
 
   // More options menu handlers

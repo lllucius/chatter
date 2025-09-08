@@ -427,7 +427,7 @@ class ConversationService:
             )
 
             total_tokens = sum(
-                (msg.input_tokens or 0) + (msg.output_tokens or 0)
+                (msg.prompt_tokens or 0) + (msg.completion_tokens or 0)
                 for msg in conversation.messages
             )
 

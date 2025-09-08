@@ -140,7 +140,7 @@ class BaseWorkflowExecutor(ABC):
             duration_ms=duration_ms,
             success=success,
             error_type=error_type,
-            correlation_id=correlation_id,
+            correlation_type="token",
         )
 
 
@@ -219,6 +219,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                 )
@@ -230,7 +231,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -243,7 +244,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
             raise WorkflowExecutionError(
                 f"Plain workflow execution failed: {str(e)}"
@@ -323,16 +324,18 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                             content_buffer = message.content
 
                             yield StreamingChatChunk(
-                                id=correlation_id,
+                                type="token",
                                 content=new_content,
-                                role="assistant",
+                                message_id=correlation_id,
                                 conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                             )
 
             # Create final message
             if content_buffer:
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                 )
@@ -343,7 +346,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
 
         except Exception as e:
@@ -354,7 +357,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
             raise WorkflowExecutionError(
                 f"Plain workflow streaming failed: {str(e)}"
@@ -451,6 +454,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                 )
@@ -462,7 +466,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -475,7 +479,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
             raise WorkflowExecutionError(
                 f"RAG workflow execution failed: {str(e)}"
@@ -565,16 +569,18 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                             content_buffer = message.content
 
                             yield StreamingChatChunk(
-                                id=correlation_id,
+                                type="token",
                                 content=new_content,
-                                role="assistant",
+                                message_id=correlation_id,
                                 conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                             )
 
             # Create final message
             if content_buffer:
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                 )
@@ -585,7 +591,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
 
         except Exception as e:
@@ -596,7 +602,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
             raise WorkflowExecutionError(
                 f"RAG workflow streaming failed: {str(e)}"
@@ -693,6 +699,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                 )
@@ -704,7 +711,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -717,7 +724,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
             raise WorkflowExecutionError(
                 f"Tools workflow execution failed: {str(e)}"
@@ -807,16 +814,18 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                             content_buffer = message.content
 
                             yield StreamingChatChunk(
-                                id=correlation_id,
+                                type="token",
                                 content=new_content,
-                                role="assistant",
+                                message_id=correlation_id,
                                 conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                             )
 
             # Create final message
             if content_buffer:
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                 )
@@ -827,7 +836,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
 
         except Exception as e:
@@ -838,7 +847,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
             raise WorkflowExecutionError(
                 f"Tools workflow streaming failed: {str(e)}"
@@ -942,6 +951,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                 )
@@ -953,7 +963,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -966,7 +976,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
             raise WorkflowExecutionError(
                 f"Full workflow execution failed: {str(e)}"
@@ -1063,16 +1073,18 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                             content_buffer = message.content
 
                             yield StreamingChatChunk(
-                                id=correlation_id,
+                                type="token",
                                 content=new_content,
-                                role="assistant",
+                                message_id=correlation_id,
                                 conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                             )
 
             # Create final message
             if content_buffer:
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
+                                correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                 )
@@ -1083,7 +1095,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
 
         except Exception as e:
@@ -1094,7 +1106,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                correlation_type="token",
             )
             raise WorkflowExecutionError(
                 f"Full workflow streaming failed: {str(e)}"

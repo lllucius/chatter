@@ -90,7 +90,7 @@ class ConversationService:
                 )
             else:
                 # Prepare metadata with workflow_config
-                metadata = conversation_data.metadata or {}
+                metadata = conversation_data.extra_metadata or {}
                 if conversation_data.workflow_config is not None:
                     metadata['workflow_config'] = conversation_data.workflow_config
 
@@ -279,12 +279,12 @@ class ConversationService:
                     conversation.extra_metadata = {}
                 conversation.extra_metadata['workflow_config'] = update_data.workflow_config
 
-            if update_data.metadata is not None:
+            if update_data.extra_metadata is not None:
                 # Merge metadata
                 if conversation.extra_metadata:
-                    conversation.extra_metadata.update(update_data.metadata)
+                    conversation.extra_metadata.update(update_data.extra_metadata)
                 else:
-                    conversation.extra_metadata = update_data.metadata
+                    conversation.extra_metadata = update_data.extra_metadata
 
             await self.session.flush()
             await self.session.refresh(conversation)

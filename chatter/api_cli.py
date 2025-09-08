@@ -211,7 +211,6 @@ async def readiness_check():
 
         status_color = "green" if response.status == "ready" else "red"
         console.print(f"[{status_color}]Status: {response.status}[/{status_color}]")
-        console.print(f"Timestamp: {response.timestamp}")
 
 
 @health_app.command("metrics")
@@ -222,8 +221,21 @@ async def get_metrics():
         response = await sdk_client.health_api.get_metrics_metrics_get()
 
         console.print("[bold]System Metrics[/bold]")
-        for metric_name, metric_value in response.metrics.items():
-            console.print(f"{metric_name}: {metric_value}")
+        
+        # Display health metrics
+        console.print("[cyan]Health Metrics:[/cyan]")
+        for metric_name, metric_value in response.health.items():
+            console.print(f"  {metric_name}: {metric_value}")
+        
+        # Display performance metrics
+        console.print("[cyan]Performance Metrics:[/cyan]")
+        for metric_name, metric_value in response.performance.items():
+            console.print(f"  {metric_name}: {metric_value}")
+        
+        # Display endpoint metrics
+        console.print("[cyan]Endpoint Metrics:[/cyan]")
+        for metric_name, metric_value in response.endpoints.items():
+            console.print(f"  {metric_name}: {metric_value}")
 
 
 # Authentication Commands
@@ -272,7 +284,7 @@ async def logout():
 async def whoami():
     """Get current user information."""
     async with get_client() as sdk_client:
-        response = await sdk_client.auth_api.get_current_user_api_v1_auth_me_get()
+        response = await sdk_client.auth_api.get_current_user_info_api_v1_auth_me_get()
 
         table = Table(title="Current User")
         table.add_column("Field", style="cyan")
@@ -310,7 +322,7 @@ async def list_prompts(
             console.print("No prompts found.")
             return
 
-        table = Table(title=f"Prompts ({response.total} total)")
+        table = Table(title=f"Prompts ({response.total_count} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Type", style="yellow")
@@ -492,7 +504,7 @@ async def list_profiles(
             console.print("No profiles found.")
             return
         
-        table = Table(title=f"Profiles ({response.total} total)")
+        table = Table(title=f"Profiles ({response.total_count} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green") 
         table.add_column("Provider", style="yellow")
@@ -1234,11 +1246,19 @@ async def list_workflow_templates():
         table.add_column("Workflow", style="yellow")
         
         for template in response.templates:
-            table.add_row(
-                template.name,
-                template.description or "No description",
-                template.workflow_type or "unknown"
-            )
+            # Handle case where template might be a string or object
+            if isinstance(template, str):
+                table.add_row(
+                    template,
+                    "No description",
+                    "unknown"
+                )
+            else:
+                table.add_row(
+                    getattr(template, 'name', str(template)),
+                    getattr(template, 'description', "No description") or "No description",
+                    getattr(template, 'workflow_type', "unknown") or "unknown"
+                )
         
         console.print(table)
 
@@ -1283,13 +1303,13 @@ async def list_providers():
 @run_async
 async def list_models(
     provider_id: str = typer.Option(None, help="Filter by provider ID"),
-    limit: int = typer.Option(10, help="Number of models to list"),
+    per_page: int = typer.Option(10, help="Number of models to list"),
 ):
     """List available models."""
     async with get_client() as sdk_client:
         response = await sdk_client.model_api.list_models_api_v1_models_models_get(
             provider_id=provider_id,
-            limit=limit
+            per_page=per_page
         )
         
         if not response.models:
@@ -1375,14 +1395,10 @@ async def event_stats():
 
 @events_app.command("test-broadcast")
 @run_async
-async def test_broadcast(
-    message: str = typer.Option("Test broadcast message", help="Test message to broadcast"),
-):
+async def test_broadcast():
     """Trigger a test broadcast event."""
     async with get_client() as sdk_client:
-        response = await sdk_client.events_api.trigger_broadcast_test_api_v1_events_broadcast_test_post(
-            test_message=message
-        )
+        response = await sdk_client.events_api.trigger_broadcast_test_api_v1_events_broadcast_test_post()
         
         console.print(f"✅ [green]Test broadcast sent[/green]")
         if hasattr(response, 'message'):

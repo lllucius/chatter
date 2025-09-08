@@ -629,10 +629,10 @@ class ABTestManager:
         if test.traffic_percentage >= 1.0:
             return True
 
-        # Use deterministic hash-based assignment
+        # Use deterministic hash-based assignment (using SHA256 for security)
         hash_input = f"{test.id}:{user_id}"
         hash_value = int(
-            hashlib.md5(hash_input.encode()).hexdigest(), 16
+            hashlib.sha256(hash_input.encode()).hexdigest()[:16], 16
         )
         return (hash_value % 10000) / 10000.0 < test.traffic_percentage
 
@@ -747,10 +747,10 @@ class ABTestManager:
             return None
 
         if test.allocation_strategy == VariantAllocation.EQUAL:
-            # Equal distribution
+            # Equal distribution (using SHA256 for security)
             hash_input = f"{test.id}:{user_id}"
             hash_value = int(
-                hashlib.md5(hash_input.encode()).hexdigest(), 16
+                hashlib.sha256(hash_input.encode()).hexdigest()[:16], 16
             )
             variant_index = hash_value % len(active_variants)
             return active_variants[variant_index].id
@@ -759,17 +759,17 @@ class ABTestManager:
             # Weighted distribution
             total_weight = sum(v.weight for v in active_variants)
             if total_weight <= 0:
-                # If all weights are 0 or negative, fall back to equal distribution
+                # If all weights are 0 or negative, fall back to equal distribution (using SHA256 for security)
                 hash_input = f"{test.id}:{user_id}"
                 hash_value = int(
-                    hashlib.md5(hash_input.encode()).hexdigest(), 16
+                    hashlib.sha256(hash_input.encode()).hexdigest()[:16], 16
                 )
                 variant_index = hash_value % len(active_variants)
                 return active_variants[variant_index].id
 
             hash_input = f"{test.id}:{user_id}"
             hash_value = int(
-                hashlib.md5(hash_input.encode()).hexdigest(), 16
+                hashlib.sha256(hash_input.encode()).hexdigest()[:16], 16
             )
             # Use higher precision for better distribution
             random_value = (

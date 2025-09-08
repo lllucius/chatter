@@ -58,8 +58,8 @@ class UnifiedWorkflowCache:
         config_items = sorted(config.items()) if config else []
         config_str = f"{provider_name}:{workflow_type}:{config_items}"
 
-        # Hash for consistent key length
-        key_hash = hashlib.md5(config_str.encode()).hexdigest()
+        # Hash for consistent key length (using SHA256 for security)
+        key_hash = hashlib.sha256(config_str.encode()).hexdigest()
 
         # Use the cache's key generation for consistency
         return self.cache.make_key("workflow", key_hash)

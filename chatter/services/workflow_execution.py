@@ -609,8 +609,20 @@ class WorkflowExecutionService:
         try:
             condition = config.get("condition", "true")
 
-            # Simple condition evaluation (would be more sophisticated in practice)
-            result = eval(condition) if condition else True
+            # Safe condition evaluation - only allow basic boolean conditions
+            try:
+                # For security, only allow literal boolean values or simple comparisons
+                if condition.lower() in ('true', '1', 'yes'):
+                    result = True
+                elif condition.lower() in ('false', '0', 'no'):
+                    result = False
+                else:
+                    # For complex conditions, would need a proper expression parser
+                    # For now, default to True for security
+                    logger.warning(f"Complex condition not supported for security: {condition}")
+                    result = True
+            except Exception:
+                result = True
 
             return {"condition_result": result, "condition": condition}
 
@@ -637,8 +649,19 @@ class WorkflowExecutionService:
 
             should_continue = current_iteration < max_iterations
             if condition:
-                # Evaluate condition (simplified)
-                should_continue = should_continue and eval(condition)
+                # Safe condition evaluation - only allow basic boolean conditions
+                try:
+                    if condition.lower() in ('true', '1', 'yes'):
+                        condition_result = True
+                    elif condition.lower() in ('false', '0', 'no'):
+                        condition_result = False
+                    else:
+                        # For complex conditions, would need a proper expression parser
+                        logger.warning(f"Complex condition not supported for security: {condition}")
+                        condition_result = True
+                    should_continue = should_continue and condition_result
+                except Exception:
+                    should_continue = should_continue and True
 
             if should_continue:
                 loop_state[loop_id] = current_iteration + 1
@@ -801,8 +824,15 @@ class WorkflowExecutionService:
             return True  # No condition means always follow
 
         try:
-            # Simple condition evaluation (would be more sophisticated in practice)
-            return bool(eval(condition))
+            # Safe condition evaluation - only allow basic boolean conditions
+            if condition.lower() in ('true', '1', 'yes'):
+                return True
+            elif condition.lower() in ('false', '0', 'no'):
+                return False
+            else:
+                # For complex conditions, would need a proper expression parser
+                logger.warning(f"Complex edge condition not supported for security: {condition}")
+                return True  # Default to following the edge
         except Exception as e:
             logger.warning(f"Edge condition evaluation failed: {e}")
             return True  # Default to following edge on error

@@ -7,7 +7,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { sseEventManager } from './sse-manager';
 import { AnySSEEvent, SSEEventListener } from './sse-types';
-import { chatterSDK } from './chatter-sdk';
+import { chatterClient } from '../sdk/client';
 
 interface SSEContextValue {
   isConnected: boolean;
@@ -60,7 +60,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
 
   // Auto-connect when authenticated
   useEffect(() => {
-    if (autoConnect && chatterSDK.isAuthenticated() && !isConnected) {
+    if (autoConnect && chatterClient.isAuthenticated() && !isConnected) {
       sseEventManager.connect();
     }
   }, [autoConnect, isConnected]);

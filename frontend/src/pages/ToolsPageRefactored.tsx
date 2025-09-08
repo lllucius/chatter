@@ -19,7 +19,7 @@ import {
   createUsageStatsRenderer,
   createPerformanceRenderer 
 } from '../components/CrudRenderers';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 import { toastService } from '../services/toast-service';
 
 interface TabPanelProps {
@@ -164,10 +164,10 @@ const ToolsPageRefactored: React.FC = () => {
       onClick: async (server) => {
         try {
           if (server.status === 'enabled') {
-            await chatterSDK.disableToolServer(server.id);
+            await chatterClient.toolServers.disableToolServerApiV1ToolserversServersServerIdDisablePost({ serverId: server.id });
             toastService.success('Server disabled successfully');
           } else {
-            await chatterSDK.enableToolServer(server.id);
+            await chatterClient.toolServers.enableToolServerApiV1ToolserversServersServerIdEnablePost({ serverId: server.id });
             toastService.success('Server enabled successfully');
           }
         } catch {
@@ -180,7 +180,7 @@ const ToolsPageRefactored: React.FC = () => {
       label: 'Refresh Tools',
       onClick: async (server) => {
         try {
-          await chatterSDK.refreshServerTools(server.id);
+          await chatterClient.toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost({ serverId: server.id });
           toastService.success('Server tools refreshed successfully');
         } catch {
           toastService.error('Failed to refresh server tools');
@@ -203,25 +203,32 @@ const ToolsPageRefactored: React.FC = () => {
 
   const serverService: CrudService<RemoteServer, RemoteServerCreate, RemoteServerUpdate> = {
     list: async () => {
-      const response = await chatterSDK.getToolServers();
+      const response = await chatterClient.toolServers.listToolServersApiV1ToolserversServersGet({});
       return {
-        items: response.data || [],
-        total: response.data?.length || 0,
+        items: response || [],
+        total: response?.length || 0,
       };
     },
 
     create: async (data: RemoteServerCreate) => {
-      const response = await chatterSDK.createToolServer(data);
-      return response.data;
+      const response = await chatterClient.toolServers.createToolServerApiV1ToolserversServersPost({
+        toolServerCreate: data,
+      });
+      return response;
     },
 
     update: async (id: string, data: RemoteServerUpdate) => {
-      const response = await chatterSDK.updateToolServer(id, data);
-      return response.data;
+      const response = await chatterClient.toolServers.updateToolServerApiV1ToolserversServersServerIdPut({
+        serverId: id,
+        toolServerUpdate: data,
+      });
+      return response;
     },
 
     delete: async (id: string) => {
-      await chatterSDK.deleteToolServer(id);
+      await chatterClient.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
+        serverId: id,
+      });
     },
   };
 
@@ -267,10 +274,10 @@ const ToolsPageRefactored: React.FC = () => {
       onClick: async (tool) => {
         try {
           if (tool.status === 'enabled') {
-            await chatterSDK.disableTool(tool.id);
+            await chatterClient.toolServers.disableToolApiV1ToolserversToolsToolIdDisablePost({ toolId: tool.id });
             toastService.success('Tool disabled successfully');
           } else {
-            await chatterSDK.enableTool(tool.id);
+            await chatterClient.toolServers.enableToolApiV1ToolserversToolsToolIdEnablePost({ toolId: tool.id });
             toastService.success('Tool enabled successfully');
           }
         } catch {
@@ -294,10 +301,10 @@ const ToolsPageRefactored: React.FC = () => {
 
   const toolService: CrudService<Tool, any, any> = {
     list: async () => {
-      const response = await chatterSDK.getAllTools();
+      const response = await chatterClient.toolServers.listAllToolsApiV1ToolserversToolsAllGet();
       return {
-        items: response.data || [],
-        total: response.data?.length || 0,
+        items: response || [],
+        total: response?.length || 0,
       };
     },
   };

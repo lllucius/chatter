@@ -507,6 +507,34 @@ async def test_cache_integration():
     assert health["status"] == "healthy"
 
 
+@pytest.mark.asyncio
+async def test_cache_factory_singleton_usage():
+    """Test that services use the global cache factory singleton correctly."""
+    from chatter.core.analytics import AnalyticsService
+    from chatter.core.cache_factory import cache_factory
+    from unittest.mock import AsyncMock
+    
+    # Create mock session
+    mock_session = AsyncMock()
+    
+    # Create analytics service instances
+    analytics1 = AnalyticsService(mock_session)
+    analytics2 = AnalyticsService(mock_session)
+    
+    # Verify both instances use the global cache factory singleton
+    assert analytics1.cache_factory is cache_factory
+    assert analytics2.cache_factory is cache_factory
+    assert analytics1.cache_factory is analytics2.cache_factory
+    
+    # Verify they share the same cache instances
+    cache1 = analytics1._get_cache_instance()
+    cache2 = analytics2._get_cache_instance()
+    
+    # Should return the same instance or None for both
+    if cache1 is not None and cache2 is not None:
+        assert cache1 is cache2
+
+
 if __name__ == "__main__":
     # Run basic tests
     pytest.main([__file__, "-v"])

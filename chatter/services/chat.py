@@ -85,7 +85,7 @@ class ChatAnalyticsService:
             # Calculate analytics
             message_count = len(conversation.messages)
             total_tokens = sum(
-                (msg.input_tokens or 0) + (msg.output_tokens or 0)
+                (msg.prompt_tokens or 0) + (msg.completion_tokens or 0)
                 for msg in conversation.messages
             )
             total_cost = sum(
@@ -307,11 +307,11 @@ class ChatService:
                     user_id,
                     response_message.role,
                     response_message.content,
-                    response_message.metadata,
-                    response_message.input_tokens,
-                    response_message.output_tokens,
+                    response_message.extra_metadata,
+                    response_message.prompt_tokens,
+                    response_message.completion_tokens,
                     response_message.cost,
-                    response_message.provider,
+                    response_message.provider_used,
                 )
 
                 # Record metrics
@@ -445,10 +445,10 @@ class ChatService:
         """Apply usage information to a message."""
         if "tokens" in usage:
             total_tokens = usage["tokens"]
-            if not message.input_tokens and not message.output_tokens:
+            if not message.prompt_tokens and not message.completion_tokens:
                 # Rough estimate: input is ~20% of total for responses
-                message.input_tokens = int(total_tokens * 0.2)
-                message.output_tokens = int(total_tokens * 0.8)
+                message.prompt_tokens = int(total_tokens * 0.2)
+                message.completion_tokens = int(total_tokens * 0.8)
 
         if "cost" in usage:
             message.cost = usage["cost"]

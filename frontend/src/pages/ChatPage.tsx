@@ -272,32 +272,97 @@ const ChatPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleStreamingResponse = async (chatRequest: ChatRequest) => {
+  const handleStreamingResponse = async (chatRequest: ChatRequest, assistantMessageId?: string) => {
     try {
-      // Create a placeholder assistant message for streaming content
-      const messageId = `stream-${Date.now()}`;
-      const assistantMessage: ExtendedChatMessage = {
-        id: messageId,
-        role: 'assistant',
-        content: '',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      // Use the SDK's chat method
-      const response = await chatterClient.chat.chatApiV1ChatChatPost({ chatRequest });
+      const messageId = assistantMessageId || `stream-${Date.now()}`;
       
-      // Update the assistant message with the response
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === messageId
-            ? { ...msg, content: response.message.content }
-            : msg
-        )
-      );
+      // If no assistantMessageId provided, create a placeholder message
+      if (!assistantMessageId) {
+        const assistantMessage: ExtendedChatMessage = {
+          id: messageId,
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      }
+
+      // Make streaming request with proper headers
+      const token = localStorage.getItem('token') || '';
+      const response = await fetch('/api/v1/chat/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          ...chatRequest,
+          stream: true, // Ensure streaming is enabled
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      if (!response.body) {
+        throw new Error('No response body for streaming');
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep incomplete line in buffer
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const dataStr = line.slice(6).trim(); // Remove 'data: ' prefix
+              
+              if (dataStr === '[DONE]') {
+                return; // End of stream
+              }
+              
+              if (dataStr) {
+                try {
+                  const chunk = JSON.parse(dataStr);
+                  
+                  // Update message content based on chunk type
+                  if (chunk.type === 'content' || chunk.type === 'partial') {
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === messageId
+                          ? { ...msg, content: msg.content + (chunk.content || '') }
+                          : msg
+                      )
+                    );
+                  } else if (chunk.type === 'error') {
+                    throw new Error(chunk.error || 'Streaming error');
+                  }
+                } catch (parseError) {
+                  console.error('Failed to parse streaming data:', parseError, dataStr);
+                }
+              }
+            }
+          }
+        }
+      } finally {
+        reader.releaseLock();
+      }
 
     } catch (err: any) {
       console.error('Streaming response error:', err);
+      toastService.error(err, 'Streaming failed');
     }
   };
 

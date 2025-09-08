@@ -185,11 +185,11 @@ class MessageService:
                     conversation_id=conversation_id,
                     role=role,
                     content=content,
-                    metadata=metadata or {},
-                    input_tokens=input_tokens,
-                    output_tokens=output_tokens,
+                    extra_metadata=metadata or {},
+                    prompt_tokens=input_tokens,
+                    completion_tokens=output_tokens,
                     cost=cost,
-                    provider=provider,
+                    provider_used=provider,
                     sequence_number=next_sequence,
                 )
 
@@ -482,14 +482,14 @@ class MessageService:
                 messages_by_role[role] += 1
 
                 # Sum tokens and cost
-                if message.input_tokens:
-                    total_tokens += message.input_tokens
-                if message.output_tokens:
-                    total_tokens += message.output_tokens
+                if message.prompt_tokens:
+                    total_tokens += message.prompt_tokens
+                if message.completion_tokens:
+                    total_tokens += message.completion_tokens
                 if message.cost:
                     total_cost += message.cost
-                if message.provider:
-                    providers_used.add(message.provider)
+                if message.provider_used:
+                    providers_used.add(message.provider_used)
 
             stats = {
                 "conversation_id": conversation_id,

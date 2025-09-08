@@ -281,13 +281,21 @@ class SecureTemplateRenderer:
 
             elif template_format == "jinja2":
                 try:
-                    from jinja2 import Environment, meta, select_autoescape
+                    from jinja2 import (
+                        Environment,
+                        meta,
+                        select_autoescape,
+                    )
 
                     # Use secure environment with autoescape enabled
                     env = Environment(
                         autoescape=select_autoescape(
-                            enabled_extensions=('html', 'xml', 'jinja2'),
-                            default_for_string=True
+                            enabled_extensions=(
+                                'html',
+                                'xml',
+                                'jinja2',
+                            ),
+                            default_for_string=True,
                         )
                     )
                     parsed = env.parse(template)

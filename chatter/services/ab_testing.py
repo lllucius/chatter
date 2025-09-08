@@ -762,7 +762,10 @@ class ABTestManager:
                 # If all weights are 0 or negative, fall back to equal distribution (using SHA256 for security)
                 hash_input = f"{test.id}:{user_id}"
                 hash_value = int(
-                    hashlib.sha256(hash_input.encode()).hexdigest()[:16], 16
+                    hashlib.sha256(hash_input.encode()).hexdigest()[
+                        :16
+                    ],
+                    16,
                 )
                 variant_index = hash_value % len(active_variants)
                 return active_variants[variant_index].id

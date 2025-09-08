@@ -619,7 +619,9 @@ class WorkflowExecutionService:
                 else:
                     # For complex conditions, would need a proper expression parser
                     # For now, default to True for security
-                    logger.warning(f"Complex condition not supported for security: {condition}")
+                    logger.warning(
+                        f"Complex condition not supported for security: {condition}"
+                    )
                     result = True
             except Exception:
                 result = True
@@ -657,9 +659,13 @@ class WorkflowExecutionService:
                         condition_result = False
                     else:
                         # For complex conditions, would need a proper expression parser
-                        logger.warning(f"Complex condition not supported for security: {condition}")
+                        logger.warning(
+                            f"Complex condition not supported for security: {condition}"
+                        )
                         condition_result = True
-                    should_continue = should_continue and condition_result
+                    should_continue = (
+                        should_continue and condition_result
+                    )
                 except Exception:
                     should_continue = should_continue and True
 
@@ -831,7 +837,9 @@ class WorkflowExecutionService:
                 return False
             else:
                 # For complex conditions, would need a proper expression parser
-                logger.warning(f"Complex edge condition not supported for security: {condition}")
+                logger.warning(
+                    f"Complex edge condition not supported for security: {condition}"
+                )
                 return True  # Default to following the edge
         except Exception as e:
             logger.warning(f"Edge condition evaluation failed: {e}")

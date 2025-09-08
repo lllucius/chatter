@@ -790,8 +790,7 @@ class BuiltInTools:
             # For now, restrict to only literal values for security
             # A proper implementation would use a math expression parser
             import ast
-            import operator
-            
+
             # Simple operator precedence parser would be safer here
             # For now, just handle basic cases safely
             try:

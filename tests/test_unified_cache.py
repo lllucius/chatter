@@ -535,6 +535,41 @@ async def test_cache_factory_singleton_usage():
         assert cache1 is cache2
 
 
+@pytest.mark.asyncio
+async def test_cache_factory_reuses_default_instances():
+    """Test that cache factory reuses instances for default configurations."""
+    from chatter.core.cache_factory import CacheFactory, CacheType
+    
+    # Create a fresh cache factory instance for testing
+    factory = CacheFactory()
+    
+    # Test that multiple calls for same cache type reuse instances
+    cache1 = factory.create_model_registry_cache()
+    cache2 = factory.create_model_registry_cache()
+    cache3 = factory.get_cache(CacheType.MODEL_REGISTRY)
+    
+    # All should be the same instance
+    assert cache1 is cache2, "Multiple model registry cache creation should reuse instance"
+    assert cache2 is cache3, "get_cache should return same instance as create_cache"
+    
+    # Test different cache types are different instances
+    workflow_cache = factory.create_workflow_cache()
+    assert workflow_cache is not cache1, "Different cache types should be different instances"
+    
+    # But same cache type should reuse
+    workflow_cache2 = factory.create_workflow_cache()
+    assert workflow_cache is workflow_cache2, "Same cache type should reuse instance"
+    
+    # Verify only expected number of cache instances were created
+    # Should be: model_registry_default, workflow_default
+    assert len(factory._cache_instances) == 2, f"Expected 2 instances, got {len(factory._cache_instances)}"
+    
+    # Verify instance keys
+    expected_keys = {"model_registry_default", "workflow_default"}
+    actual_keys = set(factory._cache_instances.keys())
+    assert actual_keys == expected_keys, f"Expected keys {expected_keys}, got {actual_keys}"
+
+
 if __name__ == "__main__":
     # Run basic tests
     pytest.main([__file__, "-v"])

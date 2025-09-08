@@ -96,17 +96,24 @@ class CacheFactory:
             Cache instance
         """
         # Use provided config or default for cache type
+        using_default_config = config is None
         if config is None:
             config = self._get_config_for_type(cache_type)
 
         # Create instance key for reuse
-        instance_key = f"{cache_type.value}_{id(config)}"
+        # For default configs, use cache type only to ensure reuse
+        # For custom configs, include config id to allow multiple instances
+        if using_default_config:
+            instance_key = f"{cache_type.value}_default"
+        else:
+            instance_key = f"{cache_type.value}_{id(config)}"
 
         # Return existing instance if available
         if instance_key in self._cache_instances:
             logger.debug(
                 "Reusing existing cache instance",
                 cache_type=cache_type.value,
+                is_default_config=using_default_config,
             )
             return self._cache_instances[instance_key]
 
@@ -142,7 +149,12 @@ class CacheFactory:
         Returns:
             Cache instance or None if not found
         """
-        # Look for any instance of this cache type
+        # First try to get the default instance for this cache type
+        default_key = f"{cache_type.value}_default"
+        if default_key in self._cache_instances:
+            return self._cache_instances[default_key]
+        
+        # If no default instance, look for any instance of this cache type
         for key, instance in self._cache_instances.items():
             if key.startswith(f"{cache_type.value}_"):
                 return instance

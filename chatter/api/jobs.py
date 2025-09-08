@@ -1,9 +1,9 @@
 """Job management endpoints."""
 
-import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, status
+from ulid import ULID
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
@@ -31,7 +31,7 @@ router = APIRouter()
 
 
 def validate_job_id(job_id: str) -> str:
-    """Validate that job_id is a valid UUID format.
+    """Validate that job_id is a valid ULID format.
 
     Args:
         job_id: The job ID to validate
@@ -40,14 +40,14 @@ def validate_job_id(job_id: str) -> str:
         The validated job ID
 
     Raises:
-        ValidationProblem: If job_id is not a valid UUID
+        ValidationProblem: If job_id is not a valid ULID
     """
     try:
-        uuid.UUID(job_id)
+        ULID.from_str(job_id)
         return job_id
     except ValueError as e:
         raise ValidationProblem(
-            detail=f"Invalid job ID format: {job_id}. Must be a valid UUID."
+            detail=f"Invalid job ID format: {job_id}. Must be a valid ULID."
         ) from e
 
 

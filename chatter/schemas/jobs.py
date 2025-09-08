@@ -1,11 +1,11 @@
 """Job management schemas."""
 
-import uuid
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
+from ulid import ULID
 
 
 class JobStatus(str, Enum):
@@ -31,7 +31,7 @@ class JobPriority(str, Enum):
 class Job(BaseModel):
     """Job definition."""
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=lambda: str(ULID()))
     name: str
     function_name: str
     args: list[Any] = Field(default_factory=list)

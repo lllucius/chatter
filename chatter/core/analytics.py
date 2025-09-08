@@ -9,7 +9,7 @@ import psutil
 from sqlalchemy import and_, desc, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.cache_factory import CacheFactory
+from chatter.core.cache_factory import CacheFactory, cache_factory
 from chatter.core.cache_interface import CacheInterface
 from chatter.models.conversation import (
     Conversation,
@@ -36,7 +36,7 @@ class AnalyticsService:
         """
         self.session = session
         self.performance_monitor = get_performance_monitor()
-        self.cache_factory = CacheFactory()
+        self.cache_factory = cache_factory  # Use global singleton instance
         self._cache_instance: CacheInterface | None = None
 
     def _get_cache_instance(self) -> CacheInterface | None:

@@ -1,10 +1,13 @@
 import React from 'react';
-import { Chip } from '@mui/material';
 import { Code as CodeIcon } from '@mui/icons-material';
-import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
 import PromptForm from '../components/PromptForm';
+import { 
+  createCategoryChipRenderer, 
+  createTypeChipRenderer,
+  createDateRenderer
+} from '../components/CrudRenderers';
 import { chatterSDK } from '../services/chatter-sdk';
 import { PromptResponse, PromptCreate, PromptUpdate } from '../sdk';
 
@@ -25,33 +28,19 @@ const PromptsPageRefactored: React.FC = () => {
       id: 'category',
       label: 'Category',
       width: '120px',
-      render: (value) => (
-        <Chip 
-          label={value} 
-          size="small" 
-          color="primary" 
-          variant="outlined" 
-        />
-      ),
+      render: createCategoryChipRenderer<PromptResponse>('primary', 'outlined'),
     },
     {
       id: 'prompt_type',
       label: 'Type',
       width: '120px',
-      render: (value) => (
-        <Chip 
-          label={value?.replace('_', ' ')} 
-          size="small" 
-          color="secondary" 
-          variant="outlined" 
-        />
-      ),
+      render: createTypeChipRenderer<PromptResponse>('secondary', 'outlined'),
     },
     {
       id: 'variables',
       label: 'Variables',
       width: '150px',
-      render: (variables) => (
+      render: (variables: any[]) => (
         variables?.length > 0 ? `${variables.length} variables` : 'None'
       ),
     },
@@ -59,7 +48,7 @@ const PromptsPageRefactored: React.FC = () => {
       id: 'updated_at',
       label: 'Updated',
       width: '140px',
-      render: (value) => value ? format(new Date(value), 'MMM dd, yyyy') : '',
+      render: createDateRenderer<PromptResponse>(),
     },
   ];
 
@@ -72,9 +61,8 @@ const PromptsPageRefactored: React.FC = () => {
       {
         icon: <CodeIcon />,
         label: 'View Code',
-        onClick: (prompt) => {
-          // Handle view code action
-          console.log('View code for:', prompt.name);
+        onClick: () => {
+          // TODO: Implement view code functionality
         },
       },
     ],

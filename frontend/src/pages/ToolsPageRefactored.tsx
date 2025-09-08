@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Tabs, Tab, Typography, Chip, Button } from '@mui/material';
+import { Box, Tabs, Tab, Chip, Button } from '@mui/material';
 import { 
   Refresh as RefreshIcon, 
   Add as AddIcon,
@@ -10,6 +10,15 @@ import {
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction } from '../components/CrudDataTable';
 import RemoteServerForm from '../components/RemoteServerForm';
+import { 
+  createNameWithDescriptionRenderer, 
+  createTypeChipRenderer,
+  createStatusChipRenderer,
+  createCountRenderer,
+  createConditionalChipRenderer,
+  createUsageStatsRenderer,
+  createPerformanceRenderer 
+} from '../components/CrudRenderers';
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 
@@ -115,71 +124,35 @@ const ToolsPageRefactored: React.FC = () => {
     {
       id: 'display_name',
       label: 'Name',
-      render: (value, item) => (
-        <Box>
-          <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-            {value}
-          </Typography>
-          {item.description && (
-            <Typography variant="body2" color="text.secondary">
-              {item.description}
-            </Typography>
-          )}
-        </Box>
-      ),
+      render: createNameWithDescriptionRenderer<RemoteServer>(),
     },
     {
       id: 'base_url',
       label: 'URL',
-      render: (value) => (
-        <Typography variant="body2">
-          {value}
-        </Typography>
-      ),
     },
     {
       id: 'transport_type',
       label: 'Transport',
-      render: (value) => (
-        <Chip 
-          label={value.toUpperCase()} 
-          variant="outlined"
-          size="small"
-        />
-      ),
+      render: createTypeChipRenderer<RemoteServer>('default', 'outlined'),
     },
     {
       id: 'status',
       label: 'Status',
-      render: (value) => (
-        <Chip 
-          label={value} 
-          color={value === 'enabled' ? 'success' : value === 'error' ? 'error' : 'default'}
-          size="small"
-        />
-      ),
+      render: createStatusChipRenderer<RemoteServer>(),
     },
     {
       id: 'tools_count',
       label: 'Tools',
-      render: (value) => (
-        <Typography variant="body2">
-          {value !== undefined ? `${value} tools` : 'Unknown'}
-        </Typography>
-      ),
+      render: createCountRenderer<RemoteServer>('tool', 'tools', 'Unknown'),
     },
     {
       id: 'oauth_config',
       label: 'Security',
-      render: (value) => (
-        value ? (
-          <Chip 
-            label="OAuth" 
-            color="primary"
-            variant="outlined"
-            size="small"
-          />
-        ) : null
+      render: createConditionalChipRenderer<RemoteServer>(
+        (value) => !!value,
+        'OAuth',
+        'primary',
+        'outlined'
       ),
     },
   ];
@@ -197,7 +170,7 @@ const ToolsPageRefactored: React.FC = () => {
             await chatterSDK.enableToolServer(server.id);
             toastService.success('Server enabled successfully');
           }
-        } catch (error) {
+        } catch {
           toastService.error('Failed to toggle server status');
         }
       },
@@ -209,7 +182,7 @@ const ToolsPageRefactored: React.FC = () => {
         try {
           await chatterSDK.refreshServerTools(server.id);
           toastService.success('Server tools refreshed successfully');
-        } catch (error) {
+        } catch {
           toastService.error('Failed to refresh server tools');
         }
       },
@@ -229,7 +202,7 @@ const ToolsPageRefactored: React.FC = () => {
   };
 
   const serverService: CrudService<RemoteServer, RemoteServerCreate, RemoteServerUpdate> = {
-    list: async (page: number, pageSize: number) => {
+    list: async () => {
       const response = await chatterSDK.getToolServers();
       return {
         items: response.data || [],
@@ -257,38 +230,18 @@ const ToolsPageRefactored: React.FC = () => {
     {
       id: 'display_name',
       label: 'Name',
-      render: (value, item) => (
-        <Box>
-          <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-            {value || item.name}
-          </Typography>
-          {item.description && (
-            <Typography variant="body2" color="text.secondary">
-              {item.description}
-            </Typography>
-          )}
-        </Box>
-      ),
+      render: createNameWithDescriptionRenderer<Tool>(),
     },
     {
       id: 'server_name',
       label: 'Server',
-      render: (value) => (
-        <Typography variant="body2">
-          {value}
-        </Typography>
-      ),
     },
     {
       id: 'status',
       label: 'Status',
       render: (value, item) => (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <Chip 
-            label={value} 
-            color={value === 'enabled' ? 'success' : value === 'error' ? 'error' : 'default'}
-            size="small"
-          />
+          {createStatusChipRenderer<Tool>()(value, item)}
           {!item.is_available && (
             <Chip label="Unavailable" color="warning" size="small" />
           )}
@@ -298,25 +251,12 @@ const ToolsPageRefactored: React.FC = () => {
     {
       id: 'total_calls',
       label: 'Usage',
-      render: (value, item) => (
-        <Box>
-          <Typography variant="body2">
-            Calls: {value}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Errors: {item.total_errors}
-          </Typography>
-        </Box>
-      ),
+      render: createUsageStatsRenderer<Tool>(),
     },
     {
       id: 'avg_response_time_ms',
       label: 'Performance',
-      render: (value) => (
-        <Typography variant="body2">
-          {value ? `${value.toFixed(0)}ms` : 'N/A'}
-        </Typography>
-      ),
+      render: createPerformanceRenderer<Tool>('ms', 0),
     },
   ];
 
@@ -333,7 +273,7 @@ const ToolsPageRefactored: React.FC = () => {
             await chatterSDK.enableTool(tool.id);
             toastService.success('Tool enabled successfully');
           }
-        } catch (error) {
+        } catch {
           toastService.error('Failed to toggle tool status');
         }
       },
@@ -353,7 +293,7 @@ const ToolsPageRefactored: React.FC = () => {
   };
 
   const toolService: CrudService<Tool, any, any> = {
-    list: async (page: number, pageSize: number) => {
+    list: async () => {
       const response = await chatterSDK.getAllTools();
       return {
         items: response.data || [],

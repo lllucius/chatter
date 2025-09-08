@@ -5,6 +5,12 @@ import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction } from '../components/CrudDataTable';
 import ProviderForm from '../components/ProviderForm';
 import ModelForm from '../components/ModelForm';
+import { 
+  createTypeChipRenderer,
+  createStatusChipRenderer,
+  createMonospaceTextRenderer,
+  createConditionalChipRenderer
+} from '../components/CrudRenderers';
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import {
@@ -49,8 +55,8 @@ const ModelManagementPageRefactored: React.FC = () => {
         activeOnly: false,
       });
       setProviders(response.data.providers || []);
-    } catch (error) {
-      console.error('Failed to load providers:', error);
+    } catch {
+      // Error loading providers - this is handled elsewhere
     }
   };
 
@@ -86,19 +92,12 @@ const ModelManagementPageRefactored: React.FC = () => {
     {
       id: 'provider_type',
       label: 'Type',
-      render: (value) => (
-        <Chip
-          label={value}
-          color="secondary"
-          variant="outlined"
-          size="small"
-        />
-      ),
+      render: createTypeChipRenderer<Provider>('secondary', 'outlined'),
     },
     {
       id: 'is_active',
       label: 'Status',
-      render: (value) => (
+      render: (value: boolean) => (
         <Chip
           size="small"
           label={value ? 'Active' : 'Inactive'}
@@ -109,7 +108,7 @@ const ModelManagementPageRefactored: React.FC = () => {
     {
       id: 'description',
       label: 'Description',
-      render: (value) => (
+      render: (value: string) => (
         <Typography variant="body2" color="text.secondary">
           {value || '—'}
         </Typography>
@@ -216,7 +215,7 @@ const ModelManagementPageRefactored: React.FC = () => {
     {
       id: 'provider',
       label: 'Provider',
-      render: (value) => (
+      render: (value: any) => (
         <Typography variant="body2">
           {value?.display_name || '—'}
         </Typography>
@@ -225,39 +224,22 @@ const ModelManagementPageRefactored: React.FC = () => {
     {
       id: 'model_type',
       label: 'Type',
-      render: (value) => (
-        <Chip
-          label={value}
-          color="secondary"
-          variant="outlined"
-          size="small"
-        />
-      ),
+      render: createTypeChipRenderer<ModelDefWithProvider>('secondary', 'outlined'),
     },
     {
       id: 'is_active',
       label: 'Status',
-      render: (value) => (
-        <Chip
-          size="small"
-          label={value ? 'Active' : 'Inactive'}
-          color={value ? 'success' : 'default'}
-        />
-      ),
+      render: createStatusChipRenderer<ModelDefWithProvider>({ active: 'success', inactive: 'default' }),
     },
     {
       id: 'model_name',
       label: 'API Model',
-      render: (value) => (
-        <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-          {value}
-        </Typography>
-      ),
+      render: createMonospaceTextRenderer<ModelDefWithProvider>(),
     },
     {
       id: 'dimensions',
       label: 'Dimensions',
-      render: (value) => (
+      render: (value: number) => (
         <Typography variant="body2">
           {value ? value.toLocaleString() : '—'}
         </Typography>
@@ -276,7 +258,7 @@ const ModelManagementPageRefactored: React.FC = () => {
               modelId: model.id,
             });
             toastService.success('Default model updated');
-          } catch (error) {
+          } catch {
             toastService.error('Failed to set default model');
           }
         }

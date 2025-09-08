@@ -119,7 +119,7 @@ class DocumentProcessingService:
                     {
                         "document_id": document_id,
                         "filename": document.filename,
-                        "started_at": document.processing_started_at.isoformat(),
+                        "status": "processing",
                     },
                     user_id=document.owner_id,
                 )

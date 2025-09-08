@@ -1,0 +1,545 @@
+
+> frontend@0.1.0 test
+> vitest run --passWithNoTests -t displays error message when API call fails
+
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90m/home/runner/work/chatter/chatter/frontend[39m
+
+ [2m[90m↓[39m[22m src/services/__tests__/sse-manager.test.ts [2m([22m[2m16 tests[22m[2m | [22m[33m16 skipped[39m[2m)[22m
+ [2m[90m↓[39m[22m src/hooks/__tests__/useApi.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[33m5 skipped[39m[2m)[22m
+ [2m[90m↓[39m[22m src/components/__tests__/Chat.test.tsx [2m([22m[2m8 tests[22m[2m | [22m[33m8 skipped[39m[2m)[22m
+ [2m[90m↓[39m[22m src/components/__tests__/CustomScrollbar.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[33m4 skipped[39m[2m)[22m
+ [2m[90m↓[39m[22m src/hooks/__tests__/useFormFix.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[33m5 skipped[39m[2m)[22m
+ [2m[90m↓[39m[22m src/App.test.tsx [2m([22m[2m1 test[22m[2m | [22m[33m1 skipped[39m[2m)[22m
+ [2m[90m↓[39m[22m src/services/__tests__/toast-service.test.ts [2m([22m[2m31 tests[22m[2m | [22m[33m31 skipped[39m[2m)[22m
+ [2m[90m↓[39m[22m src/hooks/__tests__/useForm.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+ [2m[90m↓[39m[22m src/pages/__tests__/ABTestingPage.test.tsx [2m([22m[2m4 tests[22m[2m | [22m[33m4 skipped[39m[2m)[22m
+ [2m[90m↓[39m[22m src/services/__tests__/chatter-sdk.test.ts [2m([22m[2m4 tests[22m[2m | [22m[33m4 skipped[39m[2m)[22m
+ [31m❯[39m src/pages/__tests__/DocumentsPage.test.tsx [2m([22m[2m5 tests[22m[2m | [22m[31m1 failed[39m[2m | [22m[33m4 skipped[39m[2m)[22m[33m 1197[2mms[22m[39m
+   [2m[90m↓[39m[22m DocumentsPage[2m > [22mloads and displays documents
+   [2m[90m↓[39m[22m DocumentsPage[2m > [22mcalls API on mount
+[31m   [31m×[31m DocumentsPage[2m > [22mdisplays error message when API call fails[39m[33m 1195[2mms[22m[39m
+[31m     → Unable to find an element with the text: /Failed to load documents/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[31m
+  [36m<div>[31m
+    [36m<div[31m
+      [33mclass[31m=[32m"MuiBox-root css-1jcknez"[31m
+    [36m>[31m
+      [36m<div[31m
+        [33mclass[31m=[32m"MuiBox-root css-1lyuca0"[31m
+      [36m>[31m
+        [36m<div[31m
+          [33mclass[31m=[32m"MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-12h02h5-MuiToolbar-root"[31m
+        [36m>[31m
+          [36m<h1[31m
+            [33mclass[31m=[32m"MuiTypography-root MuiTypography-h4 css-1bi6s7r-MuiTypography-root"[31m
+          [36m>[31m
+            [0mDocument Management[0m
+          [36m</h1>[31m
+          [36m<div[31m
+            [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+          [36m>[31m
+            [36m<button[31m
+              [33mclass[31m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"[31m
+              [33mtabindex[31m=[32m"0"[31m
+              [33mtype[31m=[32m"button"[31m
+            [36m>[31m
+              [36m<span[31m
+                [33mclass[31m=[32m"MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"[31m
+              [36m>[31m
+                [36m<svg[31m
+                  [33maria-hidden[31m=[32m"true"[31m
+                  [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[31m
+                  [33mdata-testid[31m=[32m"SearchIcon"[31m
+                  [33mfocusable[31m=[32m"false"[31m
+                  [33mviewBox[31m=[32m"0 0 24 24"[31m
+                [36m>[31m
+                  [36m<path[31m
+                    [33md[31m=[32m"M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"[31m
+                  [36m/>[31m
+                [36m</svg>[31m
+              [36m</span>[31m
+              [0mSemantic Search[0m
+            [36m</button>[31m
+          [36m</div>[31m
+        [36m</div>[31m
+      [36m</div>[31m
+      [36m<div[31m
+        [33mclass[31m=[32m"MuiBox-root css-yi2smd"[31m
+      [36m>[31m
+        [36m<div[31m
+          [33mdata-simplebar[31m=[32m"init"[31m
+          [33moptions[31m=[32m"[object Object]"[31m
+          [33mstyle[31m=[32m"width: 100%; height: 100%; flex: 1 1 0%;"[31m
+        [36m>[31m
+          [36m<div[31m
+            [33mclass[31m=[32m"simplebar-wrapper"[31m
+            [33mstyle[31m=[32m"margin: 0px 0px 0px 0px;"[31m
+          [36m>[31m
+            [36m<div[31m
+              [33mclass[31m=[32m"simplebar-height-auto-observer-wrapper"[31m
+            [36m>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"simplebar-height-auto-observer"[31m
+              [36m/>[31m
+            [36m</div>[31m
+            [36m<div[31m
+              [33mclass[31m=[32m"simplebar-mask"[31m
+            [36m>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"simplebar-offset"[31m
+                [33mstyle[31m=[32m"right: 0px; bottom: 0px;"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33maria-label[31m=[32m"scrollable content"[31m
+                  [33mclass[31m=[32m"simplebar-content-wrapper"[31m
+                  [33mrole[31m=[32m"region"[31m
+                  [33mstyle[31m=[32m"height: auto; overflow-x: hidden; overflow-y: hidden;"[31m
+                  [33mtabindex[31m=[32m"0"[31m
+                [36m>[31m
+                  [36m<div[31m
+                    [33mclass[31m=[32m"simplebar-content"[31m
+                    [33mstyle[31m=[32m"padding: 0px 0px 0px 0px;"[31m
+                  [36m>[31m
+                    [36m<div[31m
+                      [33mclass[31m=[32m"MuiBox-root css-1qvh2fy"[31m
+                    [36m>[31m
+                      [36m<div[31m
+                        [33mclass[31m=[32m"MuiBox-root css-8atqhb"[31m
+                      [36m>[31m
+                        [36m<div[31m
+                          [33mclass[31m=[32m"MuiBox-root css-nznorp"[31m
+                        [36m>[31m
+                          [36m<h1[31m
+                            [33mclass[31m=[32m"MuiTypography-root MuiTypography-h4 css-f84ov1-MuiTypography-root"[31m
+                          [36m>[31m
+                            [0mDocuments[0m
+                          [36m</h1>[31m
+                          [36m<div[31m
+                            [33mclass[31m=[32m"MuiBox-root css-1i27l4i"[31m
+                          [36m>[31m
+                            [36m<button[31m
+                              [33mclass[31m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"[31m
+                              [33mtabindex[31m=[32m"0"[31m
+                              [33mtype[31m=[32m"button"[31m
+                            [36m>[31m
+                              [36m<span[31m
+                                [33mclass[31m=[32m"MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"[31m
+                              [36m>[31m
+                                [36m<svg[31m
+                                  [33maria-hidden[31m=[32m"true"[31m
+                                  [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[31m
+                                  [33mdata-testid[31m=[32m"RefreshIcon"[31m
+                                  [33mfocusable[31m=[32m"false"[31m
+                                  [33mviewBox[31m=[32m"0 0 24 24"[31m
+                                [36m>[31m
+                                  [36m<path[31m
+                                    [33md[31m=[32m"M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"[31m
+                                  [36m/>[31m
+                                [36m</svg>[31m
+                              [36m</span>[31m
+                              [0mRefresh[0m
+                            [36m</button>[31m
+                            [36m<button[31m
+                              [33mclass[31m=[32m"MuiButtonBase-root MuiButton-root M...
+
+Ignored nodes: comments, script, style
+[36m<html>[31m
+  [36m<head>[31m
+    [36m<meta[31m
+      [33mcontent[31m=[32m""[31m
+      [33mname[31m=[32m"emotion-insertion-point"[31m
+    [36m/>[31m
+  [36m</head>[31m
+  [36m<body>[31m
+    [36m<div>[31m
+      [36m<div[31m
+        [33mclass[31m=[32m"MuiBox-root css-1jcknez"[31m
+      [36m>[31m
+        [36m<div[31m
+          [33mclass[31m=[32m"MuiBox-root css-1lyuca0"[31m
+        [36m>[31m
+          [36m<div[31m
+            [33mclass[31m=[32m"MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-12h02h5-MuiToolbar-root"[31m
+          [36m>[31m
+            [36m<h1[31m
+              [33mclass[31m=[32m"MuiTypography-root MuiTypography-h4 css-1bi6s7r-MuiTypography-root"[31m
+            [36m>[31m
+              [0mDocument Management[0m
+            [36m</h1>[31m
+            [36m<div[31m
+              [33mclass[31m=[32m"MuiBox-root css-axw7ok"[31m
+            [36m>[31m
+              [36m<button[31m
+                [33mclass[31m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"[31m
+                [33mtabindex[31m=[32m"0"[31m
+                [33mtype[31m=[32m"button"[31m
+              [36m>[31m
+                [36m<span[31m
+                  [33mclass[31m=[32m"MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"[31m
+                [36m>[31m
+                  [36m<svg[31m
+                    [33maria-hidden[31m=[32m"true"[31m
+                    [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[31m
+                    [33mdata-testid[31m=[32m"SearchIcon"[31m
+                    [33mfocusable[31m=[32m"false"[31m
+                    [33mviewBox[31m=[32m"0 0 24 24"[31m
+                  [36m>[31m
+                    [36m<path[31m
+                      [33md[31m=[32m"M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"[31m
+                    [36m/>[31m
+                  [36m</svg>[31m
+                [36m</span>[31m
+                [0mSemantic Search[0m
+              [36m</button>[31m
+            [36m</div>[31m
+          [36m</div>[31m
+        [36m</div>[31m
+        [36m<div[31m
+          [33mclass[31m=[32m"MuiBox-root css-yi2smd"[31m
+        [36m>[31m
+          [36m<div[31m
+            [33mdata-simplebar[31m=[32m"init"[31m
+            [33moptions[31m=[32m"[object Object]"[31m
+            [33mstyle[31m=[32m"width: 100%; height: 100%; flex: 1 1 0%;"[31m
+          [36m>[31m
+            [36m<div[31m
+              [33mclass[31m=[32m"simplebar-wrapper"[31m
+              [33mstyle[31m=[32m"margin: 0px 0px 0px 0px;"[31m
+            [36m>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"simplebar-height-auto-observer-wrapper"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"simplebar-height-auto-observer"[31m
+                [36m/>[31m
+              [36m</div>[31m
+              [36m<div[31m
+                [33mclass[31m=[32m"simplebar-mask"[31m
+              [36m>[31m
+                [36m<div[31m
+                  [33mclass[31m=[32m"simplebar-offset"[31m
+                  [33mstyle[31m=[32m"right: 0px; bottom: 0px;"[31m
+                [36m>[31m
+                  [36m<div[31m
+                    [33maria-label[31m=[32m"scrollable content"[31m
+                    [33mclass[31m=[32m"simplebar-content-wrapper"[31m
+                    [33mrole[31m=[32m"region"[31m
+                    [33mstyle[31m=[32m"height: auto; overflow-x: hidden; overflow-y: hidden;"[31m
+                    [33mtabindex[31m=[32m"0"[31m
+                  [36m>[31m
+                    [36m<div[31m
+                      [33mclass[31m=[32m"simplebar-content"[31m
+                      [33mstyle[31m=[32m"padding: 0px 0px 0px 0px;"[31m
+                    [36m>[31m
+                      [36m<div[31m
+                        [33mclass[31m=[32m"MuiBox-root css-1qvh2fy"[31m
+                      [36m>[31m
+                        [36m<div[31m
+                          [33mclass[31m=[32m"MuiBox-root css-8atqhb"[31m
+                        [36m>[31m
+                          [36m<div[31m
+                            [33mclass[31m=[32m"MuiBox-root css-nznorp"[31m
+                          [36m>[31m
+                            [36m<h1[31m
+                              [33mclass[31m=[32m"MuiTypography-root MuiTypography-h4 css-f84ov1-MuiTypography-root"[31m
+                            [36m>[31m
+                              [0mDocuments[0m
+                            [36m</h1>[31m
+                            [36m<div[31m
+                              [33mclass[31m=[32m"MuiBox-root css-1i27l4i"[31m
+                            [36m>[31m
+                              [36m<button[31m
+                                [33mclass[31m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"[31m
+                                [33mtabindex[31m=[32m"0"[31m
+                                [33mtype[31m=[32m"button"[31m
+                              [36m>[31m
+                                [36m<span[31m
+                                  [33mclass[31m=[32m"MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"[31m
+                                [36m>[31m
+                                  [36m<svg[31m
+                                    [33maria-hidden[31m=[32m"true"[31m
+                                    [33mclass[31m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[31m
+                                    [33mdata-testid[31m=[32m"RefreshIcon"[31m
+                                    [33mfocusable[31m=[32m"false"[31m
+                                    [33mviewBox[31m=[32m"0 0 24 24"[31m
+                                  [36m>[31m
+                                    [36m<path[31m
+                                      [33md[31m=[32m"M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 ...[39m
+   [2m[90m↓[39m[22m DocumentsPage[2m > [22mshows document status correctly
+   [2m[90m↓[39m[22m DocumentsPage[2m > [22mrenders page header correctly
+ [2m[90m↓[39m[22m src/__tests__/api.integration.test.ts [2m([22m[2m4 tests[22m[2m | [22m[33m4 skipped[39m[2m)[22m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/pages/__tests__/DocumentsPage.test.tsx[2m > [22mDocumentsPage[2m > [22mdisplays error message when API call fails
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: /Failed to load documents/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"MuiBox-root css-1jcknez"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiBox-root css-1lyuca0"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-12h02h5-MuiToolbar-root"[39m
+        [36m>[39m
+          [36m<h1[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-h4 css-1bi6s7r-MuiTypography-root"[39m
+          [36m>[39m
+            [0mDocument Management[0m
+          [36m</h1>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"MuiBox-root css-axw7ok"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"[39m
+              [33mtabindex[39m=[32m"0"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33maria-hidden[39m=[32m"true"[39m
+                  [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[39m
+                  [33mdata-testid[39m=[32m"SearchIcon"[39m
+                  [33mfocusable[39m=[32m"false"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</span>[39m
+              [0mSemantic Search[0m
+            [36m</button>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiBox-root css-yi2smd"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mdata-simplebar[39m=[32m"init"[39m
+          [33moptions[39m=[32m"[object Object]"[39m
+          [33mstyle[39m=[32m"width: 100%; height: 100%; flex: 1 1 0%;"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"simplebar-wrapper"[39m
+            [33mstyle[39m=[32m"margin: 0px 0px 0px 0px;"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"simplebar-height-auto-observer-wrapper"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"simplebar-height-auto-observer"[39m
+              [36m/>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"simplebar-mask"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"simplebar-offset"[39m
+                [33mstyle[39m=[32m"right: 0px; bottom: 0px;"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33maria-label[39m=[32m"scrollable content"[39m
+                  [33mclass[39m=[32m"simplebar-content-wrapper"[39m
+                  [33mrole[39m=[32m"region"[39m
+                  [33mstyle[39m=[32m"height: auto; overflow-x: hidden; overflow-y: hidden;"[39m
+                  [33mtabindex[39m=[32m"0"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"simplebar-content"[39m
+                    [33mstyle[39m=[32m"padding: 0px 0px 0px 0px;"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"MuiBox-root css-1qvh2fy"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"MuiBox-root css-8atqhb"[39m
+                      [36m>[39m
+                        [36m<div[39m
+                          [33mclass[39m=[32m"MuiBox-root css-nznorp"[39m
+                        [36m>[39m
+                          [36m<h1[39m
+                            [33mclass[39m=[32m"MuiTypography-root MuiTypography-h4 css-f84ov1-MuiTypography-root"[39m
+                          [36m>[39m
+                            [0mDocuments[0m
+                          [36m</h1>[39m
+                          [36m<div[39m
+                            [33mclass[39m=[32m"MuiBox-root css-1i27l4i"[39m
+                          [36m>[39m
+                            [36m<button[39m
+                              [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"[39m
+                              [33mtabindex[39m=[32m"0"[39m
+                              [33mtype[39m=[32m"button"[39m
+                            [36m>[39m
+                              [36m<span[39m
+                                [33mclass[39m=[32m"MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"[39m
+                              [36m>[39m
+                                [36m<svg[39m
+                                  [33maria-hidden[39m=[32m"true"[39m
+                                  [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[39m
+                                  [33mdata-testid[39m=[32m"RefreshIcon"[39m
+                                  [33mfocusable[39m=[32m"false"[39m
+                                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                                [36m>[39m
+                                  [36m<path[39m
+                                    [33md[39m=[32m"M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"[39m
+                                  [36m/>[39m
+                                [36m</svg>[39m
+                              [36m</span>[39m
+                              [0mRefresh[0m
+                            [36m</button>[39m
+                            [36m<button[39m
+                              [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root M...
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head>[39m
+    [36m<meta[39m
+      [33mcontent[39m=[32m""[39m
+      [33mname[39m=[32m"emotion-insertion-point"[39m
+    [36m/>[39m
+  [36m</head>[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiBox-root css-1jcknez"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiBox-root css-1lyuca0"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-12h02h5-MuiToolbar-root"[39m
+          [36m>[39m
+            [36m<h1[39m
+              [33mclass[39m=[32m"MuiTypography-root MuiTypography-h4 css-1bi6s7r-MuiTypography-root"[39m
+            [36m>[39m
+              [0mDocument Management[0m
+            [36m</h1>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"MuiBox-root css-axw7ok"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"[39m
+                [33mtabindex[39m=[32m"0"[39m
+                [33mtype[39m=[32m"button"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33maria-hidden[39m=[32m"true"[39m
+                    [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[39m
+                    [33mdata-testid[39m=[32m"SearchIcon"[39m
+                    [33mfocusable[39m=[32m"false"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                      [33md[39m=[32m"M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"[39m
+                    [36m/>[39m
+                  [36m</svg>[39m
+                [36m</span>[39m
+                [0mSemantic Search[0m
+              [36m</button>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiBox-root css-yi2smd"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mdata-simplebar[39m=[32m"init"[39m
+            [33moptions[39m=[32m"[object Object]"[39m
+            [33mstyle[39m=[32m"width: 100%; height: 100%; flex: 1 1 0%;"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"simplebar-wrapper"[39m
+              [33mstyle[39m=[32m"margin: 0px 0px 0px 0px;"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"simplebar-height-auto-observer-wrapper"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"simplebar-height-auto-observer"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"simplebar-mask"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"simplebar-offset"[39m
+                  [33mstyle[39m=[32m"right: 0px; bottom: 0px;"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33maria-label[39m=[32m"scrollable content"[39m
+                    [33mclass[39m=[32m"simplebar-content-wrapper"[39m
+                    [33mrole[39m=[32m"region"[39m
+                    [33mstyle[39m=[32m"height: auto; overflow-x: hidden; overflow-y: hidden;"[39m
+                    [33mtabindex[39m=[32m"0"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"simplebar-content"[39m
+                      [33mstyle[39m=[32m"padding: 0px 0px 0px 0px;"[39m
+                    [36m>[39m
+                      [36m<div[39m
+                        [33mclass[39m=[32m"MuiBox-root css-1qvh2fy"[39m
+                      [36m>[39m
+                        [36m<div[39m
+                          [33mclass[39m=[32m"MuiBox-root css-8atqhb"[39m
+                        [36m>[39m
+                          [36m<div[39m
+                            [33mclass[39m=[32m"MuiBox-root css-nznorp"[39m
+                          [36m>[39m
+                            [36m<h1[39m
+                              [33mclass[39m=[32m"MuiTypography-root MuiTypography-h4 css-f84ov1-MuiTypography-root"[39m
+                            [36m>[39m
+                              [0mDocuments[0m
+                            [36m</h1>[39m
+                            [36m<div[39m
+                              [33mclass[39m=[32m"MuiBox-root css-1i27l4i"[39m
+                            [36m>[39m
+                              [36m<button[39m
+                                [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"[39m
+                                [33mtabindex[39m=[32m"0"[39m
+                                [33mtype[39m=[32m"button"[39m
+                              [36m>[39m
+                                [36m<span[39m
+                                  [33mclass[39m=[32m"MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"[39m
+                                [36m>[39m
+                                  [36m<svg[39m
+                                    [33maria-hidden[39m=[32m"true"[39m
+                                    [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[39m
+                                    [33mdata-testid[39m=[32m"RefreshIcon"[39m
+                                    [33mfocusable[39m=[32m"false"[39m
+                                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                                  [36m>[39m
+                                    [36m<path[39m
+                                      [33md[39m=[32m"M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 ...
+[90m [2m❯[22m Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:[2m163:27[22m[39m
+[36m [2m❯[22m src/pages/__tests__/DocumentsPage.test.tsx:[2m133:11[22m[39m
+    [90m131| [39m    )[33m;[39m
+    [90m132| [39m
+    [90m133| [39m    [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m   | [39m          [31m^[39m
+    [90m134| [39m      expect(screen.getByText(/Failed to load documents/)).toBeInTheDo…
+    [90m135| [39m    })[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[2m | [22m[33m11 skipped[39m[90m (12)[39m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[33m89 skipped[39m[90m (90)[39m
+[2m   Start at [22m 03:27:13
+[2m   Duration [22m 8.54s[2m (transform 532ms, setup 852ms, collect 13.47s, tests 1.20s, environment 6.42s, prepare 1.15s)[22m
+
+
+::error file=/home/runner/work/chatter/chatter/frontend/src/pages/__tests__/DocumentsPage.test.tsx,title=src/pages/__tests__/DocumentsPage.test.tsx > DocumentsPage > displays error message when API call fails,line=133,column=11::TestingLibraryElementError: Unable to find an element with the text: /Failed to load documents/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.%0A%0AIgnored nodes: comments, script, style%0A<body>%0A  <div>%0A    <div%0A      class="MuiBox-root css-1jcknez"%0A    >%0A      <div%0A        class="MuiBox-root css-1lyuca0"%0A      >%0A        <div%0A          class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-12h02h5-MuiToolbar-root"%0A        >%0A          <h1%0A            class="MuiTypography-root MuiTypography-h4 css-1bi6s7r-MuiTypography-root"%0A          >%0A            Document Management%0A          </h1>%0A          <div%0A            class="MuiBox-root css-axw7ok"%0A          >%0A            <button%0A              class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"%0A              tabindex="0"%0A              type="button"%0A            >%0A              <span%0A                class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"%0A              >%0A                <svg%0A                  aria-hidden="true"%0A                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"%0A                  data-testid="SearchIcon"%0A                  focusable="false"%0A                  viewBox="0 0 24 24"%0A                >%0A                  <path%0A                    d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"%0A                  />%0A                </svg>%0A              </span>%0A              Semantic Search%0A            </button>%0A          </div>%0A        </div>%0A      </div>%0A      <div%0A        class="MuiBox-root css-yi2smd"%0A      >%0A        <div%0A          data-simplebar="init"%0A          options="[object Object]"%0A          style="width: 100%25; height: 100%25; flex: 1 1 0%25;"%0A        >%0A          <div%0A            class="simplebar-wrapper"%0A            style="margin: 0px 0px 0px 0px;"%0A          >%0A            <div%0A              class="simplebar-height-auto-observer-wrapper"%0A            >%0A              <div%0A                class="simplebar-height-auto-observer"%0A              />%0A            </div>%0A            <div%0A              class="simplebar-mask"%0A            >%0A              <div%0A                class="simplebar-offset"%0A                style="right: 0px; bottom: 0px;"%0A              >%0A                <div%0A                  aria-label="scrollable content"%0A                  class="simplebar-content-wrapper"%0A                  role="region"%0A                  style="height: auto; overflow-x: hidden; overflow-y: hidden;"%0A                  tabindex="0"%0A                >%0A                  <div%0A                    class="simplebar-content"%0A                    style="padding: 0px 0px 0px 0px;"%0A                  >%0A                    <div%0A                      class="MuiBox-root css-1qvh2fy"%0A                    >%0A                      <div%0A                        class="MuiBox-root css-8atqhb"%0A                      >%0A                        <div%0A                          class="MuiBox-root css-nznorp"%0A                        >%0A                          <h1%0A                            class="MuiTypography-root MuiTypography-h4 css-f84ov1-MuiTypography-root"%0A                          >%0A                            Documents%0A                          </h1>%0A                          <div%0A                            class="MuiBox-root css-1i27l4i"%0A                          >%0A                            <button%0A                              class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"%0A                              tabindex="0"%0A                              type="button"%0A                            >%0A                              <span%0A                                class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"%0A                              >%0A                                <svg%0A                                  aria-hidden="true"%0A                                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"%0A                                  data-testid="RefreshIcon"%0A                                  focusable="false"%0A                                  viewBox="0 0 24 24"%0A                                >%0A                                  <path%0A                                    d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4z"%0A                                  />%0A                                </svg>%0A                              </span>%0A                              Refresh%0A                            </button>%0A                            <button%0A                              class="MuiButtonBase-root MuiButton-root M...%0A%0AIgnored nodes: comments, script, style%0A<html>%0A  <head>%0A    <meta%0A      content=""%0A      name="emotion-insertion-point"%0A    />%0A  </head>%0A  <body>%0A    <div>%0A      <div%0A        class="MuiBox-root css-1jcknez"%0A      >%0A        <div%0A          class="MuiBox-root css-1lyuca0"%0A        >%0A          <div%0A            class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-12h02h5-MuiToolbar-root"%0A          >%0A            <h1%0A              class="MuiTypography-root MuiTypography-h4 css-1bi6s7r-MuiTypography-root"%0A            >%0A              Document Management%0A            </h1>%0A            <div%0A              class="MuiBox-root css-axw7ok"%0A            >%0A              <button%0A                class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"%0A                tabindex="0"%0A                type="button"%0A              >%0A                <span%0A                  class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"%0A                >%0A                  <svg%0A                    aria-hidden="true"%0A                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"%0A                    data-testid="SearchIcon"%0A                    focusable="false"%0A                    viewBox="0 0 24 24"%0A                  >%0A                    <path%0A                      d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"%0A                    />%0A                  </svg>%0A                </span>%0A                Semantic Search%0A              </button>%0A            </div>%0A          </div>%0A        </div>%0A        <div%0A          class="MuiBox-root css-yi2smd"%0A        >%0A          <div%0A            data-simplebar="init"%0A            options="[object Object]"%0A            style="width: 100%25; height: 100%25; flex: 1 1 0%25;"%0A          >%0A            <div%0A              class="simplebar-wrapper"%0A              style="margin: 0px 0px 0px 0px;"%0A            >%0A              <div%0A                class="simplebar-height-auto-observer-wrapper"%0A              >%0A                <div%0A                  class="simplebar-height-auto-observer"%0A                />%0A              </div>%0A              <div%0A                class="simplebar-mask"%0A              >%0A                <div%0A                  class="simplebar-offset"%0A                  style="right: 0px; bottom: 0px;"%0A                >%0A                  <div%0A                    aria-label="scrollable content"%0A                    class="simplebar-content-wrapper"%0A                    role="region"%0A                    style="height: auto; overflow-x: hidden; overflow-y: hidden;"%0A                    tabindex="0"%0A                  >%0A                    <div%0A                      class="simplebar-content"%0A                      style="padding: 0px 0px 0px 0px;"%0A                    >%0A                      <div%0A                        class="MuiBox-root css-1qvh2fy"%0A                      >%0A                        <div%0A                          class="MuiBox-root css-8atqhb"%0A                        >%0A                          <div%0A                            class="MuiBox-root css-nznorp"%0A                          >%0A                            <h1%0A                              class="MuiTypography-root MuiTypography-h4 css-f84ov1-MuiTypography-root"%0A                            >%0A                              Documents%0A                            </h1>%0A                            <div%0A                              class="MuiBox-root css-1i27l4i"%0A                            >%0A                              <button%0A                                class="MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeMedium MuiButton-outlinedSizeMedium MuiButton-colorPrimary css-1blvszr-MuiButtonBase-root-MuiButton-root"%0A                                tabindex="0"%0A                                type="button"%0A                              >%0A                                <span%0A                                  class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeMedium css-1sh91j5-MuiButton-startIcon"%0A                                >%0A                                  <svg%0A                                    aria-hidden="true"%0A                                    class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"%0A                                    data-testid="RefreshIcon"%0A                                    focusable="false"%0A                                    viewBox="0 0 24 24"%0A                                  >%0A                                    <path%0A                                      d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 ...%0A ❯ Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:163:27%0A ❯ src/pages/__tests__/DocumentsPage.test.tsx:133:11%0A%0A

@@ -34,7 +34,7 @@ export class SSEEventManager {
       return;
     }
 
-    if (this.eventSource && this.eventSource.readyState !== EventSource.CLOSED) {
+    if (this.isConnected || this.connectionStartTime) {
       console.log('SSE: Already connected or connecting');
       return;
     }
@@ -88,6 +88,20 @@ export class SSEEventManager {
     if (this.listeners[eventType]) {
       this.listeners[eventType] = this.listeners[eventType]!.filter(l => l !== listener);
     }
+  }
+
+  /**
+   * Compatibility method for addEventListener (similar to on())
+   */
+  public addEventListener(eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): void {
+    this.on(eventType, listener);
+  }
+
+  /**
+   * Compatibility method for removeEventListener (similar to off())
+   */
+  public removeEventListener(eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): void {
+    this.off(eventType, listener);
   }
 
   /**

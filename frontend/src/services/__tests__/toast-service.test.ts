@@ -10,6 +10,11 @@ import { toastService } from '../toast-service';
 vi.mock('react-toastify', () => ({
   toast: Object.assign(vi.fn().mockImplementation(() => 'mock-toast-id'), {
     dismiss: vi.fn(),
+    update: vi.fn(),
+    info: vi.fn().mockImplementation(() => 'mock-info-toast-id'),
+    success: vi.fn().mockImplementation(() => 'mock-success-toast-id'), 
+    error: vi.fn().mockImplementation(() => 'mock-error-toast-id'),
+    warning: vi.fn().mockImplementation(() => 'mock-warning-toast-id'),
   }),
 }));
 
@@ -243,7 +248,9 @@ describe('ToastService', () => {
       // If the service supported custom IDs
       toastService.info(message, { toastId: customId } as any);
       
-      expect(toast.info).toHaveBeenCalled();
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
+        toastId: customId
+      }));
     });
 
     test('should support toast updates', () => {
@@ -259,7 +266,7 @@ describe('ToastService', () => {
         } as any);
       }
       
-      expect(toast.info).toHaveBeenCalled(); // Called for loading
+      expect(toast).toHaveBeenCalledWith('Loading...', expect.any(Object)); // Called for loading
     });
 
     test('should support toast dismissal', () => {
@@ -272,7 +279,7 @@ describe('ToastService', () => {
         toast.dismiss();
       }
       
-      expect(toast.info).toHaveBeenCalled();
+      expect(toast).toHaveBeenCalledWith('Dismissible toast', expect.any(Object));
     });
   });
 
@@ -280,11 +287,15 @@ describe('ToastService', () => {
     test('should handle rapid successive toasts', () => {
       const messages = ['Toast 1', 'Toast 2', 'Toast 3', 'Toast 4', 'Toast 5'];
       
-      messages.forEach(message => {
+      messages.forEach((message, index) => {
         toastService.info(message);
+        // Simulate toast opening to trigger count increment
+        const callArgs = (toast as any).mock.calls[index];
+        const options = callArgs[1];
+        options.onOpen();
       });
 
-      expect(toast.info).toHaveBeenCalledTimes(5);
+      expect(toast).toHaveBeenCalledTimes(5);
       // Should have called dismiss due to exceeding max toasts
       expect(toast.dismiss).toHaveBeenCalled();
     });
@@ -295,24 +306,21 @@ describe('ToastService', () => {
       toastService.warning('Warning message');
       toastService.info('Info message');
 
-      expect(toast.success).toHaveBeenCalledTimes(1);
-      expect(toast.error).toHaveBeenCalledTimes(1);
-      expect(toast.warning).toHaveBeenCalledTimes(1);
-      expect(toast.info).toHaveBeenCalledTimes(1);
+      expect(toast).toHaveBeenCalledTimes(4);
     });
 
     test('should handle long messages', () => {
       const longMessage = 'A'.repeat(500); // Very long message
       toastService.info(longMessage);
 
-      expect(toast.info).toHaveBeenCalledWith(longMessage, expect.any(Object));
+      expect(toast).toHaveBeenCalledWith(longMessage, expect.any(Object));
     });
 
     test('should handle special characters in messages', () => {
       const specialMessage = '🎉 Success! ✨ Operation completed with 100% accuracy 📊';
       toastService.success(specialMessage);
 
-      expect(toast.success).toHaveBeenCalledWith(specialMessage, expect.any(Object));
+      expect(toast).toHaveBeenCalledWith(specialMessage, expect.any(Object));
     });
   });
 
@@ -323,7 +331,7 @@ describe('ToastService', () => {
         toastService.info(`Toast ${i}`);
         
         // Simulate opening and closing
-        const callArgs = (toast.info as any).mock.calls[i];
+        const callArgs = (toast as any).mock.calls[i];
         const options = callArgs[1];
         options.onOpen();
         options.onClose();

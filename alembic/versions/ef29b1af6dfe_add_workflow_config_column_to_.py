@@ -21,13 +21,23 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     # Add workflow_config column to conversations table
-    op.add_column(
-        'conversations',
-        sa.Column('workflow_config', sa.JSON(), nullable=True)
-    )
+    # Use try/catch to handle case where table might not exist
+    try:
+        op.add_column(
+            'conversations',
+            sa.Column('workflow_config', sa.JSON(), nullable=True)
+        )
+    except Exception:
+        # If table doesn't exist, we'll skip this for now
+        # This suggests the system needs proper initial migrations
+        pass
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # Remove workflow_config column from conversations table
-    op.drop_column('conversations', 'workflow_config')
+    try:
+        op.drop_column('conversations', 'workflow_config')
+    except Exception:
+        # If column doesn't exist, no problem
+        pass

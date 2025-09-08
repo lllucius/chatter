@@ -1118,9 +1118,7 @@ class AnalyticsService:
                 - psutil.boot_time(),
                 "avg_cpu_usage": psutil.cpu_percent(interval=0.1),
                 "avg_memory_usage": psutil.virtual_memory().percent,
-                "database_connections": len(
-                    self.session.get_bind().pool.checkedout()
-                ),
+                "database_connections": self.session.get_bind().pool.checkedout(),
             }
 
             # API metrics from message data (using messages as proxy for API requests)

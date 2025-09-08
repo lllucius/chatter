@@ -333,7 +333,7 @@ async def list_prompts(
             table.add_row(
                 str(prompt.id),
                 prompt.name,
-                prompt.type.value if hasattr(prompt.type, 'value') else str(prompt.type),
+                prompt.prompt_type.value if hasattr(prompt.prompt_type, 'value') else str(prompt.prompt_type),
                 prompt.category.value if hasattr(prompt.category, 'value') else str(prompt.category),
                 str(prompt.created_at)[:19]
             )
@@ -353,10 +353,10 @@ async def show_prompt(prompt_id: int = typer.Argument(..., help="Prompt ID")):
         console.print(Panel.fit(
             f"[bold]{response.name}[/bold]\n\n"
             f"[dim]ID:[/dim] {response.id}\n"
-            f"[dim]Type:[/dim] {response.type}\n"
+            f"[dim]Type:[/dim] {response.prompt_type}\n"
             f"[dim]Category:[/dim] {response.category}\n"
             f"[dim]Created:[/dim] {response.created_at}\n\n"
-            f"[dim]Template:[/dim]\n{response.template}",
+            f"[dim]Template:[/dim]\n{response.content}",
             title="Prompt Details"
         ))
 
@@ -376,9 +376,9 @@ async def create_prompt(
     async with get_client() as sdk_client:
         prompt_data = PromptCreate(
             name=name,
-            template=template,
+            content=template,
             description=description,
-            type=prompt_type,
+            prompt_type=prompt_type,
             category=category
         )
 
@@ -607,10 +607,13 @@ async def test_profile(
     message: str = typer.Option("Hello, this is a test message", help="Test message"),
 ):
     """Test a profile configuration."""
+    from chatter_sdk.models.profile_test_request import ProfileTestRequest
+    
     async with get_client() as sdk_client:
+        test_request = ProfileTestRequest(test_message=message)
         response = await sdk_client.profiles_api.test_profile_api_v1_profiles_profile_id_test_post(
             profile_id=profile_id,
-            test_request={"message": message}
+            profile_test_request=test_request
         )
 
         console.print("✅ [green]Profile test successful[/green]")
@@ -710,7 +713,7 @@ async def list_jobs(
             limit=limit,
             offset=offset,
             status=status,
-            job_type=job_type
+            function_name=job_type
         )
 
         if not response.jobs:
@@ -770,7 +773,7 @@ async def create_job(
     data: str = typer.Option(None, help="Job data as JSON string"),
 ):
     """Create a new job."""
-    from chatter_sdk.models.job_create import JobCreate
+    from chatter_sdk.models.job_create_request import JobCreateRequest
     import json
 
     job_data = {}
@@ -782,7 +785,7 @@ async def create_job(
             return
 
     async with get_client() as sdk_client:
-        job_request = JobCreate(
+        job_request = JobCreateRequest(
             job_type=job_type,
             priority=priority,
             data=job_data
@@ -806,8 +809,7 @@ async def cancel_job(
     """Cancel a job."""
     async with get_client() as sdk_client:
         response = await sdk_client.jobs_api.cancel_job_api_v1_jobs_job_id_cancel_post(
-            job_id=job_id,
-            force=force
+            job_id=job_id
         )
 
         console.print(f"✅ [green]Cancelled job {job_id}[/green]")
@@ -1342,7 +1344,7 @@ async def list_embedding_spaces():
     async with get_client() as sdk_client:
         response = await sdk_client.model_api.list_embedding_spaces_api_v1_models_embedding_spaces_get()
 
-        if not response.embedding_spaces:
+        if not response.spaces:
             console.print("No embedding spaces found.")
             return
 
@@ -1353,7 +1355,7 @@ async def list_embedding_spaces():
         table.add_column("Dimensions", style="magenta")
         table.add_column("Documents", style="blue")
 
-        for space in response.embedding_spaces:
+        for space in response.spaces:
             table.add_row(
                 str(space.id),
                 space.name,
@@ -1420,8 +1422,6 @@ async def list_agents(
     """List AI agents."""
     async with get_client() as sdk_client:
         response = await sdk_client.agents_api.list_agents_api_v1_agents_get(
-            limit=limit,
-            offset=offset,
             status=status
         )
 
@@ -1556,7 +1556,7 @@ async def create_backup(
             backup_request=backup_request
         )
 
-        console.print(f"✅ [green]Backup created: {response.backup_id}[/green]")
+        console.print(f"✅ [green]Backup created: {response.id}[/green]")
         if hasattr(response, 'job_id'):
             console.print(f"[dim]Job ID: {response.job_id}[/dim]")
         console.print(f"[dim]Check status with: chatter jobs show {response.job_id if hasattr(response, 'job_id') else 'JOB_ID'}[/dim]")
@@ -1566,16 +1566,18 @@ async def create_backup(
 @run_async
 async def export_data(
     format: str = typer.Option("json", help="Export format: json, csv"),
-    data_types: str = typer.Option("all", help="Data types: all, conversations, documents, prompts"),
+    scope: str = typer.Option("full", help="Data scope: user, conversation, document, analytics, full, custom"),
     include_metadata: bool = typer.Option(True, help="Include metadata"),
 ):
     """Export data in specified format."""
     from chatter_sdk.models.export_data_request import ExportDataRequest
+    from chatter_sdk.models.export_scope import ExportScope
+    from chatter_sdk.models.data_format import DataFormat
 
     async with get_client() as sdk_client:
         export_request = ExportDataRequest(
-            format=format,
-            data_types=data_types.split(','),
+            scope=ExportScope(scope),
+            format=DataFormat(format),
             include_metadata=include_metadata
         )
 
@@ -1642,7 +1644,7 @@ async def bulk_delete_documents(
 async def storage_stats():
     """Show storage usage statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.data_api.get_storage_stats_api_v1_data_storage_stats_get()
+        response = await sdk_client.data_api.get_storage_stats_api_v1_data_stats_get()
 
         table = Table(title="Storage Statistics")
         table.add_column("Metric", style="cyan")

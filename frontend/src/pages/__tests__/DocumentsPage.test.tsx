@@ -136,9 +136,11 @@ describe('DocumentsPage', () => {
       );
     });
 
+    // Wait for the error to be displayed in the Alert component
     await waitFor(() => {
-      expect(screen.getByText(/API Error/)).toBeInTheDocument();
-    });
+      expect(screen.getByRole('alert')).toBeInTheDocument();
+      expect(screen.getByText('API Error')).toBeInTheDocument();
+    }, { timeout: 5000 });
   });
 
   it('shows document status correctly', async () => {

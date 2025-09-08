@@ -30,15 +30,15 @@ const ModelForm: React.FC<ModelFormProps> = ({
   providers,
 }) => {
   const [formData, setFormData] = useState<ModelDefCreate>({
-    provider_id: '',
+    providerId: '',
     name: '',
-    model_type: 'embedding',
-    display_name: '',
+    modelType: 'embedding' as any,
+    displayName: '',
     description: '',
-    model_name: '',
+    modelName: '',
     dimensions: 1536,
-    supports_batch: true,
-    is_active: true,
+    supportsBatch: true,
+    isActive: true,
   });
 
   const [saving, setSaving] = useState(false);
@@ -47,27 +47,27 @@ const ModelForm: React.FC<ModelFormProps> = ({
     if (open) {
       if (mode === 'edit' && initialData) {
         setFormData({
-          provider_id: initialData.provider_id || '',
-          name: initialData.name || '',
-          model_type: initialData.model_type || 'embedding',
-          display_name: initialData.display_name || '',
+          providerId: (initialData as any).providerId || '',
+          name: (initialData as any).name || '',
+          modelType: (initialData as any).modelType || 'embedding',
+          displayName: initialData.displayName || '',
           description: initialData.description || '',
-          model_name: initialData.model_name || '',
+          modelName: (initialData as any).modelName || '',
           dimensions: initialData.dimensions,
-          supports_batch: initialData.supports_batch ?? true,
-          is_active: initialData.is_active ?? true,
+          supportsBatch: initialData.supportsBatch ?? true,
+          isActive: initialData.isActive ?? true,
         });
       } else {
         setFormData({
-          provider_id: providers[0]?.id || '',
+          providerId: providers[0]?.id || '',
           name: '',
-          model_type: 'embedding',
-          display_name: '',
+          modelType: 'embedding' as any,
+          displayName: '',
           description: '',
-          model_name: '',
+          modelName: '',
           dimensions: 1536,
-          supports_batch: true,
-          is_active: true,
+          supportsBatch: true,
+          isActive: true,
         });
       }
     }
@@ -90,15 +90,15 @@ const ModelForm: React.FC<ModelFormProps> = ({
           <FormControl fullWidth required>
             <InputLabel>Provider</InputLabel>
             <Select
-              value={formData.provider_id}
-              onChange={(e) => setFormData({ ...formData, provider_id: e.target.value })}
+              value={formData.providerId}
+              onChange={(e) => setFormData({ ...formData, providerId: e.target.value })}
               disabled={mode === 'edit'}
               label="Provider"
               helperText={mode === 'edit' ? "Provider cannot be changed after creation" : ""}
             >
               {providers.map((p) => (
                 <MenuItem key={p.id} value={p.id}>
-                  {p.display_name}
+                  {p.displayName}
                 </MenuItem>
               ))}
             </Select>
@@ -117,13 +117,13 @@ const ModelForm: React.FC<ModelFormProps> = ({
           <FormControl fullWidth>
             <InputLabel>Model Type</InputLabel>
             <Select
-              value={formData.model_type}
+              value={formData.modelType}
               onChange={(e) => {
-                const model_type = e.target.value as ModelDefCreate['model_type'];
+                const modelType = e.target.value as ModelDefCreate['modelType'];
                 setFormData((f) => ({
                   ...f,
-                  model_type,
-                  dimensions: model_type === 'embedding' ? (f.dimensions ?? 1536) : undefined,
+                  modelType,
+                  dimensions: modelType === 'embedding' ? (f.dimensions ?? 1536) : undefined,
                 }));
               }}
               disabled={mode === 'edit'}
@@ -139,19 +139,19 @@ const ModelForm: React.FC<ModelFormProps> = ({
             fullWidth
             label="Display Name"
             required
-            value={formData.display_name}
-            onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+            value={formData.displayName}
+            onChange={(e) => setFormData({ ...formData, displayName: e.target.value })}
           />
           
           <TextField
             fullWidth
             label="Model Name (API)"
             required
-            value={formData.model_name}
-            onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
+            value={formData.modelName}
+            onChange={(e) => setFormData({ ...formData, modelName: e.target.value })}
           />
           
-          {formData.model_type === 'embedding' && (
+          {formData.modelType === 'embedding' && (
             <TextField
               fullWidth
               type="number"
@@ -173,8 +173,8 @@ const ModelForm: React.FC<ModelFormProps> = ({
           <FormControlLabel
             control={
               <Switch
-                checked={formData.supports_batch}
-                onChange={(e) => setFormData({ ...formData, supports_batch: e.target.checked })}
+                checked={formData.supportsBatch}
+                onChange={(e) => setFormData({ ...formData, supportsBatch: e.target.checked })}
               />
             }
             label="Supports Batch"
@@ -183,8 +183,8 @@ const ModelForm: React.FC<ModelFormProps> = ({
           <FormControlLabel
             control={
               <Switch
-                checked={formData.is_active}
-                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
               />
             }
             label="Active"
@@ -196,7 +196,7 @@ const ModelForm: React.FC<ModelFormProps> = ({
         <Button 
           variant="contained" 
           onClick={handleSubmit}
-          disabled={!formData.name || !formData.display_name || !formData.model_name || saving}
+          disabled={!formData.name || !formData.displayName || !formData.modelName || saving}
         >
           {saving ? 'Saving...' : (mode === 'edit' ? 'Update Model' : 'Create Model')}
         </Button>

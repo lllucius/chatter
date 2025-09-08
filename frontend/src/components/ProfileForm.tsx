@@ -30,8 +30,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    llm_model: '',
-    llm_provider: '',
+    llmModel: '',
+    llmProvider: '',
     temperature: 0.7,
     max_tokens: 1000,
     top_p: 1.0,
@@ -55,8 +55,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         setFormData({
           name: initialData.name || '',
           description: initialData.description || '',
-          llm_model: initialData.llm_model || '',
-          llm_provider: initialData.llm_provider || '',
+          llmModel: initialData.llmModel || '',
+          llmProvider: initialData.llmProvider || '',
           temperature: initialData.temperature ?? 0.7,
           max_tokens: initialData.max_tokens || 1000,
           top_p: initialData.top_p || 1.0,
@@ -67,8 +67,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         setFormData({
           name: '',
           description: '',
-          llm_model: '',
-          llm_provider: '',
+          llmModel: '',
+          llmProvider: '',
           temperature: 0.7,
           max_tokens: 1000,
           top_p: 1.0,
@@ -139,12 +139,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               <FormControl fullWidth required>
                 <InputLabel>Model</InputLabel>
                 <Select
-                  value={formData.llm_model}
+                  value={formData.llmModel}
                   label="Model"
-                  onChange={(e) => setFormData({ ...formData, llm_model: e.target.value })}
-                  disabled={!formData.llm_provider}
+                  onChange={(e) => setFormData({ ...formData, llmModel: e.target.value })}
+                  disabled={!formData.llmProvider}
                 >
-                  {formData.llm_provider && models[formData.llm_provider as keyof typeof models]?.map((model) => (
+                  {formData.llmProvider && models[formData.llmProvider as keyof typeof models]?.map((model) => (
                     <MenuItem key={model} value={model}>
                       {model}
                     </MenuItem>
@@ -232,7 +232,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         <Button
           onClick={handleSubmit}
           variant="contained"
-          disabled={!formData.name || !formData.llm_provider || !formData.llm_model || saving}
+          disabled={!formData.name || !formData.llmProvider || !formData.llmModel || saving}
         >
           {saving ? 'Saving...' : (mode === 'create' ? 'Create' : 'Update')}
         </Button>

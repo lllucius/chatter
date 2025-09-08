@@ -190,7 +190,7 @@ const ChatPage: React.FC = () => {
         id: msg.id,
         role: msg.role as 'user' | 'assistant' | 'system',
         content: msg.content,
-        timestamp: new Date(msg.created_at)
+        timestamp: new Date(msg.createdAt)
       }));
       
       setMessages(chatMessages);
@@ -342,11 +342,11 @@ const ChatPage: React.FC = () => {
             } else if (chunk.type === 'usage' || chunk.usage) {
               const usage = chunk.usage || {};
               const parts: string[] = [];
-              if (typeof usage.total_tokens === 'number') parts.push(`Tokens: ${usage.total_tokens}`);
-              if (typeof usage.response_time_ms === 'number') parts.push(`Response time: ${usage.response_time_ms}ms`);
+              if (typeof usage.totalTokens === 'number') parts.push(`Tokens: ${usage.totalTokens}`);
+              if (typeof usage.responseTimeMs === 'number') parts.push(`Response time: ${usage.responseTimeMs}ms`);
               if (parts.length) {
                 const tokenMessage: ExtendedChatMessage = {
-                  id: `token-${chunk.message_id || messageId}`,
+                  id: `token-${chunk.conversationId || messageId}`,
                   role: 'system',
                   content: `📊 ${parts.join(' | ')}`,
                   timestamp: new Date(),
@@ -416,9 +416,9 @@ const ChatPage: React.FC = () => {
         type ApiChatMessage = {
           id: string | number;
           content: string;
-          created_at: string | number | Date;
-          total_tokens?: number;
-          response_time_ms?: number;
+          createdAt: string | number | Date;
+          totalTokens?: number;
+          responseTimeMs?: number;
         };
         const apiMessage = response.message as ApiChatMessage;
 
@@ -426,16 +426,16 @@ const ChatPage: React.FC = () => {
           id: String(apiMessage.id),
           role: 'assistant',
           content: apiMessage.content,
-          timestamp: new Date(apiMessage.created_at),
+          timestamp: new Date(apiMessage.createdAt),
         };
         setMessages((prev) => [...prev, assistantMessage]);
 
-        const hasTokens = typeof apiMessage.total_tokens === 'number';
-        const hasTime = typeof apiMessage.response_time_ms === 'number';
+        const hasTokens = typeof apiMessage.totalTokens === 'number';
+        const hasTime = typeof apiMessage.responseTimeMs === 'number';
         if (hasTokens || hasTime) {
           const parts: string[] = [];
-          if (hasTokens) parts.push(`Tokens: ${apiMessage.total_tokens}`);
-          if (hasTime) parts.push(`Response time: ${apiMessage.response_time_ms}ms`);
+          if (hasTokens) parts.push(`Tokens: ${apiMessage.totalTokens}`);
+          if (hasTime) parts.push(`Response time: ${apiMessage.responseTimeMs}ms`);
           const tokenMessage: ChatMessage = {
             id: `token-${String(apiMessage.id)}`,
             role: 'system',

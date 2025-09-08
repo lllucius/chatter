@@ -150,14 +150,15 @@ const WorkflowManagementPage: React.FC = () => {
       setAvailableTools(response.data);
     } catch (error: any) {
       console.error('Failed to load available tools:', error);
-      toastService.error('Failed to load available tools');
+      // Don't show error toast for tools as it's not critical
     }
   }, []);
 
   useEffect(() => {
     loadWorkflowTemplates();
     loadAvailableTools();
-  }, [loadWorkflowTemplates, loadAvailableTools]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally empty deps to run only once on mount
 
   const executeWorkflow = async (templateName: string, input: string) => {
     const executionId = `exec_${Date.now()}`;
@@ -694,7 +695,7 @@ const WorkflowManagementPage: React.FC = () => {
         </DialogTitle>
         <DialogContent sx={{ p: 0, display: 'flex', flexDirection: 'column', height: '100%' }}>
           <WorkflowEditor 
-            onSave={(workflow) => {
+            onSave={useCallback((workflow) => {
               try {
                 // Save workflow to localStorage for persistence
                 const savedWorkflows = JSON.parse(localStorage.getItem('customWorkflows') || '[]');
@@ -709,37 +710,46 @@ const WorkflowManagementPage: React.FC = () => {
                 localStorage.setItem('customWorkflows', JSON.stringify(savedWorkflows));
                 
                 // Update local state to reflect the saved workflow  
-                setCustomWorkflow({
+                const newWorkflow = {
                   name: workflow.metadata.name,
                   description: workflow.metadata.description,
-                  type: 'sequential', // Map from workflow structure
+                  type: 'sequential' as const, // Map from workflow structure
                   steps: workflow.nodes.filter(node => node.type !== 'start').map(node => ({
                     id: node.id,
                     type: node.type,
                     config: node.data.config || {},
                   }))
-                });
+                };
                 
+                setCustomWorkflow(newWorkflow);
                 toastService.success('Workflow saved successfully');
                 setBuilderDialogOpen(false);
               } catch (error) {
                 console.error('Error saving workflow:', error);
                 toastService.error('Failed to save workflow');
               }
-            }}
-            onWorkflowChange={(workflow) => {
+            }, [])}
+            onWorkflowChange={useCallback((workflow) => {
               // Update the current workflow state as user makes changes
-              setCustomWorkflow({
+              const newWorkflow = {
                 name: workflow.metadata.name,
                 description: workflow.metadata.description,
-                type: 'sequential',
+                type: 'sequential' as const,
                 steps: workflow.nodes.filter(node => node.type !== 'start').map(node => ({
                   id: node.id,
                   type: node.type,
                   config: node.data.config || {},
                 }))
+              };
+              
+              // Only update if the workflow has actually changed
+              setCustomWorkflow(prev => {
+                if (JSON.stringify(prev) !== JSON.stringify(newWorkflow)) {
+                  return newWorkflow;
+                }
+                return prev;
               });
-            }}
+            }, [])}
           />
         </DialogContent>
         <DialogActions>

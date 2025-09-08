@@ -514,14 +514,58 @@ class Settings(BaseSettings):
     )
 
     # =============================================================================
+    # ENCRYPTION SETTINGS
+    # =============================================================================
+
+    chatter_encryption_key: str | None = Field(
+        default=None, description="Primary encryption key (base64 encoded)"
+    )
+    chatter_secret_password: str = Field(
+        default="default-dev-password", 
+        description="Fallback password for key derivation (dev only)"
+    )
+    chatter_secret_salt: str = Field(
+        default="default-dev-salt", 
+        description="Fallback salt for key derivation (dev only)"
+    )
+
+    # =============================================================================
+    # CLI SETTINGS
+    # =============================================================================
+
+    chatter_api_base_url: str = Field(
+        default="http://localhost:8000", 
+        description="CLI API base URL"
+    )
+    chatter_access_token: str | None = Field(
+        default=None, description="CLI access token"
+    )
+
+    # =============================================================================
+    # LLM PROVIDER API KEYS
+    # =============================================================================
+
+    openai_api_key: str | None = Field(
+        default=None, description="OpenAI API key"
+    )
+    anthropic_api_key: str | None = Field(
+        default=None, description="Anthropic API key"
+    )
+
+    # =============================================================================
+    # MCP TOOL API KEYS
+    # =============================================================================
+
+    brave_api_key: str | None = Field(
+        default=None, description="Brave Search API key for MCP tools"
+    )
+
+    # =============================================================================
     # TESTING SETTINGS
     # =============================================================================
 
     skip_slow_tests: bool = Field(
         default=False, description="Skip slow tests"
-    )
-    chatter_access_token: str | None = Field(
-        default=None, description="CLI access token"
     )
 
     # -----------------------------------------------------------------------------

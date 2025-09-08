@@ -217,8 +217,8 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
                       secondary={
                         <Box>
                           <Typography variant="caption" color="text.secondary">
-                            {conversation.created_at
-                              ? format(new Date(conversation.created_at), 'MMM dd, yyyy HH:mm')
+                            {conversation.createdAt
+                              ? format(new Date(conversation.createdAt), 'MMM dd, yyyy HH:mm')
                               : 'Unknown date'}
                           </Typography>
                           <br />

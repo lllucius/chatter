@@ -155,11 +155,11 @@ describe('SSEEventManager', () => {
 
     test('should not create multiple connections', async () => {
       sseManager.connect();
+      
+      // Wait longer for the first connection to establish state
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
       const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
-      
-      // Wait a bit for the first connection to start
-      await new Promise(resolve => setTimeout(resolve, 10));
-      
       sseManager.connect(); // Second call
       
       expect(consoleSpy).toHaveBeenCalledWith('SSE: Already connected or connecting');

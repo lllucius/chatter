@@ -270,6 +270,34 @@ class ChatterSDK {
     });
   }
 
+  public async refreshServerTools(serverId: string) {
+    return this.toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost({
+      serverId,
+    });
+  }
+
+  public async deleteToolServer(serverId: string) {
+    return this.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
+      serverId,
+    });
+  }
+
+  public async enableTool(toolId: string) {
+    return this.toolServers.enableToolApiV1ToolserversToolsToolIdEnablePost({
+      toolId,
+    });
+  }
+
+  public async disableTool(toolId: string) {
+    return this.toolServers.disableToolApiV1ToolserversToolsToolIdDisablePost({
+      toolId,
+    });
+  }
+
+  public async getAllTools() {
+    return this.toolServers.listAllToolsApiV1ToolserversToolsAllGet();
+  }
+
   // Convenience methods for conversations (delegated to chat API)
   public async listConversations(params: any = {}) {
     return this.chat.listConversationsApiV1ChatConversationsGet(params);

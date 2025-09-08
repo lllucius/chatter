@@ -1388,8 +1388,9 @@ class ConversationQueryService:
             # Reverse to get chronological order
             messages.reverse()
 
-            # Manually assign messages to avoid additional query
-            conversation.messages = messages
+            # Manually assign messages to avoid additional query and lazy loading
+            from sqlalchemy.orm.attributes import set_committed_value
+            set_committed_value(conversation, 'messages', messages)
 
             return conversation
 
@@ -1429,10 +1430,10 @@ class ConversationQueryService:
 
             # Optimize based on what we need
             if include_recent_message:
-                # Load conversations with a single recent message each
+                # Load conversations without messages, we'll populate manually
                 query = QueryOptimizer.optimize_conversation_query(
                     query,
-                    include_messages=False,  # We'll handle this specially
+                    include_messages=False,
                     include_user=False,  # User is known
                     include_profile=True,
                 )
@@ -1470,12 +1471,15 @@ class ConversationQueryService:
                     for msg in recent_messages_result.scalars().all()
                 }
 
-                # Assign recent messages to conversations
+                # Assign recent messages to conversations without triggering lazy loading
+                from sqlalchemy.orm.attributes import set_committed_value
                 for conv in conversations:
                     if conv.id in recent_messages:
-                        conv.messages = [recent_messages[conv.id]]
+                        # Set messages without triggering lazy loading
+                        set_committed_value(conv, 'messages', [recent_messages[conv.id]])
                     else:
-                        conv.messages = []
+                        # Set empty messages without triggering lazy loading
+                        set_committed_value(conv, 'messages', [])
 
             return conversations
 

@@ -44,10 +44,14 @@ def test_openapi_servers_custom_configuration():
     custom_url = "https://api.mycompany.com"
 
     # Set custom environment
-    with patch.dict(os.environ, {
-        "DATABASE_URL": "postgresql://test:test@localhost:5432/test_db",
-        "API_BASE_URL": custom_url
-    }, clear=False):
+    with patch.dict(
+        os.environ,
+        {
+            "DATABASE_URL": "postgresql://test:test@localhost:5432/test_db",
+            "API_BASE_URL": custom_url,
+        },
+        clear=False,
+    ):
         # Note: This test shows the limitation that settings are cached at import time
         # In a real deployment, API_BASE_URL would be set before the app starts
         # so this works correctly. For the test, we'll just verify that the
@@ -67,7 +71,7 @@ def test_openapi_endpoint_returns_servers():
     # Clean environment for development test
     env_patch = {
         "DATABASE_URL": "postgresql://test:test@localhost:5432/test_db",
-        "ENVIRONMENT": "development"  # Ensure OpenAPI endpoint is enabled
+        "ENVIRONMENT": "development",  # Ensure OpenAPI endpoint is enabled
     }
     if "API_BASE_URL" in os.environ:
         env_patch["API_BASE_URL"] = None
@@ -82,4 +86,6 @@ def test_openapi_endpoint_returns_servers():
         openapi_data = response.json()
         assert "servers" in openapi_data
         assert len(openapi_data["servers"]) == 1
-        assert openapi_data["servers"][0]["url"] == "http://localhost:8000"
+        assert (
+            openapi_data["servers"][0]["url"] == "http://localhost:8000"
+        )

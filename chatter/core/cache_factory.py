@@ -5,8 +5,6 @@ from typing import Any
 
 from chatter.config import settings
 from chatter.core.cache_interface import CacheConfig, CacheInterface
-from chatter.core.enhanced_memory_cache import EnhancedInMemoryCache
-from chatter.core.enhanced_redis_cache import EnhancedRedisCache
 from chatter.core.multi_tier_cache import MultiTierCache
 from chatter.utils.logging import get_logger
 
@@ -31,7 +29,9 @@ class CacheFactory:
         self._cache_instances: dict[str, CacheInterface] = {}
         logger.debug("Cache factory initialized")
 
-    def _get_config_for_type(self, cache_type: CacheType) -> CacheConfig:
+    def _get_config_for_type(
+        self, cache_type: CacheType
+    ) -> CacheConfig:
         """Get configuration for cache type.
 
         Args:
@@ -153,7 +153,7 @@ class CacheFactory:
         default_key = f"{cache_type.value}_default"
         if default_key in self._cache_instances:
             return self._cache_instances[default_key]
-        
+
         # If no default instance, look for any instance of this cache type
         for key, instance in self._cache_instances.items():
             if key.startswith(f"{cache_type.value}_"):

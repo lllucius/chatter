@@ -194,23 +194,17 @@ class TestCacheFactory:
     def test_create_different_cache_types(self, factory):
         """Test creating different cache types."""
         # Test model registry cache
-        model_cache = factory.create_cache(
-            CacheType.MODEL_REGISTRY
-        )
+        model_cache = factory.create_cache(CacheType.MODEL_REGISTRY)
         assert isinstance(model_cache, CacheInterface)
         assert model_cache.config.key_prefix == "model_registry"
 
         # Test workflow cache
-        workflow_cache = factory.create_cache(
-            CacheType.WORKFLOW
-        )
+        workflow_cache = factory.create_cache(CacheType.WORKFLOW)
         assert isinstance(workflow_cache, CacheInterface)
         assert workflow_cache.config.key_prefix == "workflow"
 
         # Test tool cache
-        tool_cache = factory.create_cache(
-            CacheType.TOOL
-        )
+        tool_cache = factory.create_cache(CacheType.TOOL)
         assert isinstance(tool_cache, CacheInterface)
         assert tool_cache.config.key_prefix == "tool"
 
@@ -229,9 +223,7 @@ class TestCacheFactory:
     async def test_health_check_all(self, factory):
         """Test health check for all cache instances."""
         # Create some caches
-        factory.create_cache(
-            CacheType.MODEL_REGISTRY
-        )
+        factory.create_cache(CacheType.MODEL_REGISTRY)
         factory.create_cache(CacheType.WORKFLOW)
 
         health_results = await factory.health_check_all()
@@ -247,12 +239,8 @@ class TestCacheFactory:
     async def test_get_stats_all(self, factory):
         """Test getting stats for all cache instances."""
         # Create and use some caches
-        cache1 = factory.create_cache(
-            CacheType.MODEL_REGISTRY
-        )
-        cache2 = factory.create_cache(
-            CacheType.WORKFLOW
-        )
+        cache1 = factory.create_cache(CacheType.MODEL_REGISTRY)
+        cache2 = factory.create_cache(CacheType.WORKFLOW)
 
         await cache1.set("test_key", "test_value")
         await cache2.set("test_key", "test_value")
@@ -510,26 +498,27 @@ async def test_cache_integration():
 @pytest.mark.asyncio
 async def test_cache_factory_singleton_usage():
     """Test that services use the global cache factory singleton correctly."""
+    from unittest.mock import AsyncMock
+
     from chatter.core.analytics import AnalyticsService
     from chatter.core.cache_factory import cache_factory
-    from unittest.mock import AsyncMock
-    
+
     # Create mock session
     mock_session = AsyncMock()
-    
+
     # Create analytics service instances
     analytics1 = AnalyticsService(mock_session)
     analytics2 = AnalyticsService(mock_session)
-    
+
     # Verify both instances use the global cache factory singleton
     assert analytics1.cache_factory is cache_factory
     assert analytics2.cache_factory is cache_factory
     assert analytics1.cache_factory is analytics2.cache_factory
-    
+
     # Verify they share the same cache instances
     cache1 = analytics1._get_cache_instance()
     cache2 = analytics2._get_cache_instance()
-    
+
     # Should return the same instance or None for both
     if cache1 is not None and cache2 is not None:
         assert cache1 is cache2
@@ -539,35 +528,47 @@ async def test_cache_factory_singleton_usage():
 async def test_cache_factory_reuses_default_instances():
     """Test that cache factory reuses instances for default configurations."""
     from chatter.core.cache_factory import CacheFactory, CacheType
-    
+
     # Create a fresh cache factory instance for testing
     factory = CacheFactory()
-    
+
     # Test that multiple calls for same cache type reuse instances
     cache1 = factory.create_model_registry_cache()
     cache2 = factory.create_model_registry_cache()
     cache3 = factory.get_cache(CacheType.MODEL_REGISTRY)
-    
+
     # All should be the same instance
-    assert cache1 is cache2, "Multiple model registry cache creation should reuse instance"
-    assert cache2 is cache3, "get_cache should return same instance as create_cache"
-    
+    assert (
+        cache1 is cache2
+    ), "Multiple model registry cache creation should reuse instance"
+    assert (
+        cache2 is cache3
+    ), "get_cache should return same instance as create_cache"
+
     # Test different cache types are different instances
     workflow_cache = factory.create_workflow_cache()
-    assert workflow_cache is not cache1, "Different cache types should be different instances"
-    
+    assert (
+        workflow_cache is not cache1
+    ), "Different cache types should be different instances"
+
     # But same cache type should reuse
     workflow_cache2 = factory.create_workflow_cache()
-    assert workflow_cache is workflow_cache2, "Same cache type should reuse instance"
-    
+    assert (
+        workflow_cache is workflow_cache2
+    ), "Same cache type should reuse instance"
+
     # Verify only expected number of cache instances were created
     # Should be: model_registry_default, workflow_default
-    assert len(factory._cache_instances) == 2, f"Expected 2 instances, got {len(factory._cache_instances)}"
-    
+    assert (
+        len(factory._cache_instances) == 2
+    ), f"Expected 2 instances, got {len(factory._cache_instances)}"
+
     # Verify instance keys
     expected_keys = {"model_registry_default", "workflow_default"}
     actual_keys = set(factory._cache_instances.keys())
-    assert actual_keys == expected_keys, f"Expected keys {expected_keys}, got {actual_keys}"
+    assert (
+        actual_keys == expected_keys
+    ), f"Expected keys {expected_keys}, got {actual_keys}"
 
 
 if __name__ == "__main__":

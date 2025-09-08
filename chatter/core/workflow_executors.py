@@ -219,7 +219,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                    correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                 )
@@ -335,7 +335,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
             if content_buffer:
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                    correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                 )
@@ -454,7 +454,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                    correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                 )
@@ -580,7 +580,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
             if content_buffer:
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                    correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                 )
@@ -699,7 +699,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                    correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                 )
@@ -825,7 +825,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
             if content_buffer:
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                    correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                 )
@@ -951,7 +951,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                    correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                 )
@@ -1084,7 +1084,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
             if content_buffer:
                 await self.message_service.create_message(
                     conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                    correlation_id=correlation_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                 )

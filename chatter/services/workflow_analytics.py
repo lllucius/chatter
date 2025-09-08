@@ -31,22 +31,32 @@ class WorkflowAnalyticsService:
             graph = self._build_graph(nodes, edges)
 
             # Calculate complexity metrics
-            complexity = self._calculate_complexity_metrics(nodes, edges, graph)
+            complexity = self._calculate_complexity_metrics(
+                nodes, edges, graph
+            )
 
             # Identify bottlenecks
-            bottlenecks = self._identify_bottlenecks(nodes, edges, graph)
+            bottlenecks = self._identify_bottlenecks(
+                nodes, edges, graph
+            )
 
             # Generate optimization suggestions
-            suggestions = self._generate_optimization_suggestions(nodes, edges, graph, complexity)
+            suggestions = self._generate_optimization_suggestions(
+                nodes, edges, graph, complexity
+            )
 
             # Count execution paths
-            execution_paths = self._count_execution_paths(nodes, edges, graph)
+            execution_paths = self._count_execution_paths(
+                nodes, edges, graph
+            )
 
             # Estimate execution time
             estimated_time = self._estimate_execution_time(nodes)
 
             # Identify risk factors
-            risk_factors = self._identify_risk_factors(nodes, edges, graph)
+            risk_factors = self._identify_risk_factors(
+                nodes, edges, graph
+            )
 
             return {
                 "complexity": complexity,
@@ -101,17 +111,20 @@ class WorkflowAnalyticsService:
         branching_factor = self._calculate_branching_factor(graph)
 
         # Count special node types efficiently
-        node_types = [node.get("data", {}).get("nodeType", "") for node in nodes]
+        node_types = [
+            node.get("data", {}).get("nodeType", "") for node in nodes
+        ]
         loop_complexity = node_types.count("loop")
         conditional_complexity = node_types.count("conditional")
 
         # Simplified complexity scoring
         complexity_score = (
-            node_count + edge_count +                    # Base complexity
-            depth * 2 +                                  # Depth penalty
-            int(branching_factor * 10) +                 # Branching penalty
-            loop_complexity * 5 +                        # Loop penalty
-            conditional_complexity * 3                   # Conditional penalty
+            node_count
+            + edge_count  # Base complexity
+            + depth * 2  # Depth penalty
+            + int(branching_factor * 10)  # Branching penalty
+            + loop_complexity * 5  # Loop penalty
+            + conditional_complexity * 3  # Conditional penalty
         )
 
         return ComplexityMetrics(
@@ -128,7 +141,8 @@ class WorkflowAnalyticsService:
         """Calculate maximum workflow depth."""
         # Find start node
         start_nodes = [
-            node_id for node_id, node in graph["nodes"].items()
+            node_id
+            for node_id, node in graph["nodes"].items()
             if node.get("data", {}).get("nodeType") == "start"
         ]
 
@@ -137,7 +151,9 @@ class WorkflowAnalyticsService:
 
         max_depth = 0
         for start_node in start_nodes:
-            depth = self._dfs_depth(start_node, graph["outgoing"], set())
+            depth = self._dfs_depth(
+                start_node, graph["outgoing"], set()
+            )
             max_depth = max(max_depth, depth)
 
         return max_depth
@@ -161,7 +177,9 @@ class WorkflowAnalyticsService:
 
         return max_depth + 1
 
-    def _calculate_branching_factor(self, graph: dict[str, Any]) -> float:
+    def _calculate_branching_factor(
+        self, graph: dict[str, Any]
+    ) -> float:
         """Calculate average branching factor."""
         total_branches = 0
         nodes_with_branches = 0
@@ -192,51 +210,62 @@ class WorkflowAnalyticsService:
             total_degree = in_degree + out_degree
 
             if total_degree > 5:  # Threshold for high connectivity
-                bottlenecks.append(BottleneckInfo(
-                    node_id=node_id,
-                    node_type=node.get("data", {}).get("nodeType", "unknown"),
-                    reason="High connectivity node",
-                    severity="medium" if total_degree <= 10 else "high",
-                    suggestions=[
-                        "Consider splitting this node into multiple smaller nodes",
-                        "Review if all connections are necessary",
-                        "Add parallel processing if applicable",
-                    ],
-                ))
+                bottlenecks.append(
+                    BottleneckInfo(
+                        node_id=node_id,
+                        node_type=node.get("data", {}).get(
+                            "nodeType", "unknown"
+                        ),
+                        reason="High connectivity node",
+                        severity=(
+                            "medium" if total_degree <= 10 else "high"
+                        ),
+                        suggestions=[
+                            "Consider splitting this node into multiple smaller nodes",
+                            "Review if all connections are necessary",
+                            "Add parallel processing if applicable",
+                        ],
+                    )
+                )
 
         # Sequential tool chains
         tool_chains = self._find_sequential_tool_chains(nodes, graph)
         for chain in tool_chains:
             if len(chain) >= 3:
-                bottlenecks.append(BottleneckInfo(
-                    node_id=chain[0],
-                    node_type="tool",
-                    reason="Sequential tool chain",
-                    severity="medium",
-                    suggestions=[
-                        "Consider parallelizing independent tool calls",
-                        "Batch similar operations",
-                        "Cache intermediate results",
-                    ],
-                ))
+                bottlenecks.append(
+                    BottleneckInfo(
+                        node_id=chain[0],
+                        node_type="tool",
+                        reason="Sequential tool chain",
+                        severity="medium",
+                        suggestions=[
+                            "Consider parallelizing independent tool calls",
+                            "Batch similar operations",
+                            "Cache intermediate results",
+                        ],
+                    )
+                )
 
         # Memory nodes with high usage
         memory_nodes = [
-            node for node in nodes
+            node
+            for node in nodes
             if node.get("data", {}).get("nodeType") == "memory"
         ]
         if len(memory_nodes) > 10:
-            bottlenecks.append(BottleneckInfo(
-                node_id="memory_system",
-                node_type="memory",
-                reason="High memory usage",
-                severity="medium",
-                suggestions=[
-                    "Review memory usage patterns",
-                    "Consider memory cleanup operations",
-                    "Optimize data structures",
-                ],
-            ))
+            bottlenecks.append(
+                BottleneckInfo(
+                    node_id="memory_system",
+                    node_type="memory",
+                    reason="High memory usage",
+                    severity="medium",
+                    suggestions=[
+                        "Review memory usage patterns",
+                        "Consider memory cleanup operations",
+                        "Optimize data structures",
+                    ],
+                )
+            )
 
         return bottlenecks
 
@@ -247,7 +276,8 @@ class WorkflowAnalyticsService:
     ) -> list[list[str]]:
         """Find sequences of tool nodes."""
         tool_nodes = {
-            node["id"]: node for node in nodes
+            node["id"]: node
+            for node in nodes
             if node.get("data", {}).get("nodeType") == "tool"
         }
 
@@ -258,7 +288,9 @@ class WorkflowAnalyticsService:
             if tool_id in visited:
                 continue
 
-            chain = self._trace_tool_chain(tool_id, tool_nodes, graph, visited)
+            chain = self._trace_tool_chain(
+                tool_id, tool_nodes, graph, visited
+            )
             if len(chain) > 1:
                 chains.append(chain)
 
@@ -278,7 +310,11 @@ class WorkflowAnalyticsService:
 
         while True:
             neighbors = graph["outgoing"].get(current, [])
-            tool_neighbors = [n for n in neighbors if n in tool_nodes and n not in visited]
+            tool_neighbors = [
+                n
+                for n in neighbors
+                if n in tool_nodes and n not in visited
+            ]
 
             if len(tool_neighbors) == 1:
                 next_tool = tool_neighbors[0]
@@ -302,44 +338,73 @@ class WorkflowAnalyticsService:
 
         # Define optimization rules more concisely
         optimization_rules = [
-            (complexity.score > 100, "complexity",
-             "Consider breaking this workflow into smaller, reusable components", "high"),
-            (complexity.depth > 15, "depth",
-             "Workflow is very deep - consider parallel processing where possible", "medium"),
-            (complexity.branching_factor > 3, "branching",
-             "High branching factor - consider consolidating similar branches", "medium"),
-            (complexity.loop_complexity > 5, "loops",
-             "Multiple loops detected - ensure proper exit conditions and consider batch processing", "high"),
+            (
+                complexity.score > 100,
+                "complexity",
+                "Consider breaking this workflow into smaller, reusable components",
+                "high",
+            ),
+            (
+                complexity.depth > 15,
+                "depth",
+                "Workflow is very deep - consider parallel processing where possible",
+                "medium",
+            ),
+            (
+                complexity.branching_factor > 3,
+                "branching",
+                "High branching factor - consider consolidating similar branches",
+                "medium",
+            ),
+            (
+                complexity.loop_complexity > 5,
+                "loops",
+                "Multiple loops detected - ensure proper exit conditions and consider batch processing",
+                "high",
+            ),
         ]
 
         # Apply rules
-        for condition, opt_type, description, impact in optimization_rules:
+        for (
+            condition,
+            opt_type,
+            description,
+            impact,
+        ) in optimization_rules:
             if condition:
-                suggestions.append(OptimizationSuggestion(
-                    type=opt_type,
-                    description=description,
-                    impact=impact,
-                ))
+                suggestions.append(
+                    OptimizationSuggestion(
+                        type=opt_type,
+                        description=description,
+                        impact=impact,
+                    )
+                )
 
         # Check for specific optimization opportunities
-        parallel_nodes = self._find_parallelization_opportunities(nodes, graph)
+        parallel_nodes = self._find_parallelization_opportunities(
+            nodes, graph
+        )
         cache_nodes = self._find_caching_opportunities(nodes)
 
         if parallel_nodes:
-            suggestions.append(OptimizationSuggestion(
-                type="parallelization",
-                description="Potential for parallel execution detected",
-                impact="high",
-                node_ids=parallel_nodes,
-            ))
+            suggestions.append(
+                OptimizationSuggestion(
+                    type="parallelization",
+                    description="Potential for parallel execution detected",
+                    impact="high",
+                    node_ids=parallel_nodes,
+                )
+            )
 
         if cache_nodes:
-            suggestions.append(OptimizationSuggestion(
-                type="caching",
-                description="Consider caching results from expensive operations",
-                impact="medium",
-                node_ids=cache_nodes,
-            ))
+            suggestions.append(
+                OptimizationSuggestion(
+                    type="caching",
+                    description="Consider caching results from expensive operations",
+                    impact="medium",
+                    node_ids=cache_nodes,
+                )
+            )
 
         return suggestions
 
@@ -367,7 +432,9 @@ class WorkflowAnalyticsService:
 
         return list(set(opportunities))
 
-    def _find_caching_opportunities(self, nodes: list[dict[str, Any]]) -> list[str]:
+    def _find_caching_opportunities(
+        self, nodes: list[dict[str, Any]]
+    ) -> list[str]:
         """Find nodes that would benefit from caching."""
         opportunities = []
 
@@ -390,7 +457,8 @@ class WorkflowAnalyticsService:
         """Count possible execution paths through the workflow."""
         # Find start nodes
         start_nodes = [
-            node_id for node_id, node in graph["nodes"].items()
+            node_id
+            for node_id, node in graph["nodes"].items()
             if node.get("data", {}).get("nodeType") == "start"
         ]
 
@@ -399,7 +467,9 @@ class WorkflowAnalyticsService:
 
         total_paths = 0
         for start_node in start_nodes:
-            paths = self._count_paths_from_node(start_node, graph["outgoing"], set())
+            paths = self._count_paths_from_node(
+                start_node, graph["outgoing"], set()
+            )
             total_paths += paths
 
         # Cap at reasonable number to prevent overflow
@@ -423,25 +493,29 @@ class WorkflowAnalyticsService:
         total_paths = 0
 
         for neighbor in neighbors:
-            paths = self._count_paths_from_node(neighbor, outgoing, visited.copy())
+            paths = self._count_paths_from_node(
+                neighbor, outgoing, visited.copy()
+            )
             total_paths += paths
 
         return total_paths
 
-    def _estimate_execution_time(self, nodes: list[dict[str, Any]]) -> int | None:
+    def _estimate_execution_time(
+        self, nodes: list[dict[str, Any]]
+    ) -> int | None:
         """Estimate workflow execution time in milliseconds."""
         # Base time estimates for different node types (in ms)
         time_estimates = {
             "start": 10,
-            "model": 2000,      # LLM calls are expensive
-            "tool": 500,        # Tool execution varies
-            "memory": 50,       # Memory operations are fast
-            "retrieval": 300,   # Database/vector search
+            "model": 2000,  # LLM calls are expensive
+            "tool": 500,  # Tool execution varies
+            "memory": 50,  # Memory operations are fast
+            "retrieval": 300,  # Database/vector search
             "conditional": 20,  # Logic evaluation
-            "loop": 100,        # Base loop overhead
-            "variable": 10,     # Variable operations
-            "error_handler": 50, # Error handling
-            "delay": 1000,      # Configurable delays
+            "loop": 100,  # Base loop overhead
+            "variable": 10,  # Variable operations
+            "error_handler": 50,  # Error handling
+            "delay": 1000,  # Configurable delays
         }
 
         total_time = 0
@@ -475,18 +549,24 @@ class WorkflowAnalyticsService:
 
         # Check for potential infinite loops
         loop_nodes = [
-            node for node in nodes
+            node
+            for node in nodes
             if node.get("data", {}).get("nodeType") == "loop"
         ]
 
         for loop_node in loop_nodes:
             config = loop_node.get("data", {}).get("config", {})
-            if not config.get("maxIterations") and not config.get("condition"):
-                risks.append("Potential infinite loop without proper exit conditions")
+            if not config.get("maxIterations") and not config.get(
+                "condition"
+            ):
+                risks.append(
+                    "Potential infinite loop without proper exit conditions"
+                )
 
         # Check for error handling coverage
         error_handler_nodes = [
-            node for node in nodes
+            node
+            for node in nodes
             if node.get("data", {}).get("nodeType") == "error_handler"
         ]
 
@@ -495,21 +575,28 @@ class WorkflowAnalyticsService:
 
         # Check for memory leaks potential
         memory_nodes = [
-            node for node in nodes
+            node
+            for node in nodes
             if node.get("data", {}).get("nodeType") == "memory"
         ]
 
         memory_sets = sum(
-            1 for node in memory_nodes
-            if node.get("data", {}).get("config", {}).get("operation") == "store"
+            1
+            for node in memory_nodes
+            if node.get("data", {}).get("config", {}).get("operation")
+            == "store"
         )
         memory_gets = sum(
-            1 for node in memory_nodes
-            if node.get("data", {}).get("config", {}).get("operation") == "retrieve"
+            1
+            for node in memory_nodes
+            if node.get("data", {}).get("config", {}).get("operation")
+            == "retrieve"
         )
 
         if memory_sets > memory_gets + 2:  # Allow some buffer
-            risks.append("Potential memory accumulation - more stores than retrievals")
+            risks.append(
+                "Potential memory accumulation - more stores than retrievals"
+            )
 
         # Check for single points of failure
         critical_nodes = []
@@ -520,12 +607,16 @@ class WorkflowAnalyticsService:
                 critical_nodes.append(node_id)
 
         if critical_nodes:
-            risks.append("Workflow has high-degree nodes that could be single points of failure")
+            risks.append(
+                "Workflow has high-degree nodes that could be single points of failure"
+            )
 
         # Check for long execution chains
         max_chain_length = self._find_longest_chain_length(graph)
         if max_chain_length > 20:
-            risks.append("Very long execution chains may cause timeout issues")
+            risks.append(
+                "Very long execution chains may cause timeout issues"
+            )
 
         return risks
 
@@ -534,7 +625,9 @@ class WorkflowAnalyticsService:
         max_length = 0
 
         for node_id in graph["nodes"]:
-            length = self._dfs_chain_length(node_id, graph["outgoing"], set())
+            length = self._dfs_chain_length(
+                node_id, graph["outgoing"], set()
+            )
             max_length = max(max_length, length)
 
         return max_length
@@ -554,7 +647,9 @@ class WorkflowAnalyticsService:
 
         neighbors = outgoing.get(node_id, [])
         if len(neighbors) == 1:  # Single path continues chain
-            length = self._dfs_chain_length(neighbors[0], outgoing, visited)
+            length = self._dfs_chain_length(
+                neighbors[0], outgoing, visited
+            )
             max_length = max(max_length, length)
 
         return max_length + 1

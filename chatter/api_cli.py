@@ -64,8 +64,12 @@ class ChatterSDKClient:
         access_token: str | None = None,
         timeout: float = DEFAULT_TIMEOUT,
     ):
-        self.base_url = base_url or os.getenv("CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL)
-        self.access_token = access_token or os.getenv("CHATTER_ACCESS_TOKEN")
+        self.base_url = base_url or os.getenv(
+            "CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL
+        )
+        self.access_token = access_token or os.getenv(
+            "CHATTER_ACCESS_TOKEN"
+        )
         self.timeout = timeout
 
         # Configure the SDK
@@ -145,26 +149,38 @@ def get_client() -> ChatterSDKClient:
 
 def run_async(async_func):
     """Helper decorator to run async functions in typer commands."""
+
     @functools.wraps(async_func)
     def wrapper(*args, **kwargs):
         try:
             return asyncio.run(async_func(*args, **kwargs))
         except ApiException as e:
             if e.status == 401:
-                console.print("❌ [red]Authentication failed. Please login first.[/red]")
-                console.print("Run: [yellow]chatter auth login[/yellow]")
+                console.print(
+                    "❌ [red]Authentication failed. Please login first.[/red]"
+                )
+                console.print(
+                    "Run: [yellow]chatter auth login[/yellow]"
+                )
             elif e.status == 403:
-                console.print("❌ [red]Access forbidden. Check your permissions.[/red]")
+                console.print(
+                    "❌ [red]Access forbidden. Check your permissions.[/red]"
+                )
             elif e.status == 404:
                 console.print("❌ [red]Resource not found.[/red]")
             elif e.status == 500:
-                console.print("❌ [red]Server error. Please try again later.[/red]")
+                console.print(
+                    "❌ [red]Server error. Please try again later.[/red]"
+                )
             else:
-                console.print(f"❌ [red]API Error ({e.status}): {e.reason}[/red]")
+                console.print(
+                    f"❌ [red]API Error ({e.status}): {e.reason}[/red]"
+                )
             sys.exit(1)
         except Exception as e:
             console.print(f"❌ [red]Unexpected error: {str(e)}[/red]")
             sys.exit(1)
+
     return wrapper
 
 
@@ -186,10 +202,16 @@ app.add_typer(health_app, name="health")
 async def health_check():
     """Check API health status."""
     async with get_client() as sdk_client:
-        response = await sdk_client.health_api.health_check_healthz_get()
+        response = (
+            await sdk_client.health_api.health_check_healthz_get()
+        )
 
-        status_color = "green" if response.status == "healthy" else "red"
-        console.print(f"[{status_color}]Status: {response.status}[/{status_color}]")
+        status_color = (
+            "green" if response.status == "healthy" else "red"
+        )
+        console.print(
+            f"[{status_color}]Status: {response.status}[/{status_color}]"
+        )
         console.print(f"Timestamp: {response.timestamp}")
 
         if hasattr(response, 'details') and response.details:
@@ -207,10 +229,14 @@ async def health_check():
 async def readiness_check():
     """Check API readiness status."""
     async with get_client() as sdk_client:
-        response = await sdk_client.health_api.readiness_check_readyz_get()
+        response = (
+            await sdk_client.health_api.readiness_check_readyz_get()
+        )
 
         status_color = "green" if response.status == "ready" else "red"
-        console.print(f"[{status_color}]Status: {response.status}[/{status_color}]")
+        console.print(
+            f"[{status_color}]Status: {response.status}[/{status_color}]"
+        )
 
 
 @health_app.command("metrics")
@@ -247,7 +273,9 @@ app.add_typer(auth_app, name="auth")
 @run_async
 async def login(
     email: str = typer.Option(..., help="User email"),
-    password: str = typer.Option(None, help="User password (will prompt if not provided)"),
+    password: str = typer.Option(
+        None, help="User password (will prompt if not provided)"
+    ),
 ):
     """Login to Chatter API."""
     if not password:
@@ -255,13 +283,19 @@ async def login(
 
     async with get_client() as sdk_client:
         user_login = UserLogin(email=email, password=password)
-        response = await sdk_client.auth_api.login_api_v1_auth_login_post(user_login=user_login)
+        response = (
+            await sdk_client.auth_api.login_api_v1_auth_login_post(
+                user_login=user_login
+            )
+        )
 
         # Save token
         sdk_client.save_token(response.access_token)
 
         console.print("✅ [green]Successfully logged in![/green]")
-        console.print(f"Access token expires in: {response.expires_in} seconds")
+        console.print(
+            f"Access token expires in: {response.expires_in} seconds"
+        )
 
 
 @auth_app.command("logout")
@@ -284,7 +318,9 @@ async def logout():
 async def whoami():
     """Get current user information."""
     async with get_client() as sdk_client:
-        response = await sdk_client.auth_api.get_current_user_info_api_v1_auth_me_get()
+        response = (
+            await sdk_client.auth_api.get_current_user_info_api_v1_auth_me_get()
+        )
 
         table = Table(title="Current User")
         table.add_column("Field", style="cyan")
@@ -292,7 +328,14 @@ async def whoami():
 
         table.add_row("ID", str(response.id))
         table.add_row("Email", response.email)
-        table.add_row("Role", response.role.value if hasattr(response.role, 'value') else str(response.role))
+        table.add_row(
+            "Role",
+            (
+                response.role.value
+                if hasattr(response.role, 'value')
+                else str(response.role)
+            ),
+        )
         table.add_row("Created", str(response.created_at))
 
         console.print(table)
@@ -313,9 +356,7 @@ async def list_prompts(
     """List available prompts."""
     async with get_client() as sdk_client:
         response = await sdk_client.prompts_api.list_prompts_api_v1_prompts_get(
-            limit=limit,
-            offset=offset,
-            prompt_type=prompt_type
+            limit=limit, offset=offset, prompt_type=prompt_type
         )
 
         if not response.prompts:
@@ -333,9 +374,17 @@ async def list_prompts(
             table.add_row(
                 str(prompt.id),
                 prompt.name,
-                prompt.prompt_type.value if hasattr(prompt.prompt_type, 'value') else str(prompt.prompt_type),
-                prompt.category.value if hasattr(prompt.category, 'value') else str(prompt.category),
-                str(prompt.created_at)[:19]
+                (
+                    prompt.prompt_type.value
+                    if hasattr(prompt.prompt_type, 'value')
+                    else str(prompt.prompt_type)
+                ),
+                (
+                    prompt.category.value
+                    if hasattr(prompt.category, 'value')
+                    else str(prompt.category)
+                ),
+                str(prompt.created_at)[:19],
             )
 
         console.print(table)
@@ -343,22 +392,26 @@ async def list_prompts(
 
 @prompts_app.command("show")
 @run_async
-async def show_prompt(prompt_id: int = typer.Argument(..., help="Prompt ID")):
+async def show_prompt(
+    prompt_id: int = typer.Argument(..., help="Prompt ID")
+):
     """Show detailed prompt information."""
     async with get_client() as sdk_client:
         response = await sdk_client.prompts_api.get_prompt_api_v1_prompts_prompt_id_get(
             prompt_id=prompt_id
         )
 
-        console.print(Panel.fit(
-            f"[bold]{response.name}[/bold]\n\n"
-            f"[dim]ID:[/dim] {response.id}\n"
-            f"[dim]Type:[/dim] {response.prompt_type}\n"
-            f"[dim]Category:[/dim] {response.category}\n"
-            f"[dim]Created:[/dim] {response.created_at}\n\n"
-            f"[dim]Template:[/dim]\n{response.content}",
-            title="Prompt Details"
-        ))
+        console.print(
+            Panel.fit(
+                f"[bold]{response.name}[/bold]\n\n"
+                f"[dim]ID:[/dim] {response.id}\n"
+                f"[dim]Type:[/dim] {response.prompt_type}\n"
+                f"[dim]Category:[/dim] {response.category}\n"
+                f"[dim]Created:[/dim] {response.created_at}\n\n"
+                f"[dim]Template:[/dim]\n{response.content}",
+                title="Prompt Details",
+            )
+        )
 
 
 @prompts_app.command("create")
@@ -379,14 +432,16 @@ async def create_prompt(
             content=template,
             description=description,
             prompt_type=prompt_type,
-            category=category
+            category=category,
         )
 
         response = await sdk_client.prompts_api.create_prompt_api_v1_prompts_post(
             prompt_create=prompt_data
         )
 
-        console.print(f"✅ [green]Created prompt: {response.name}[/green]")
+        console.print(
+            f"✅ [green]Created prompt: {response.name}[/green]"
+        )
         console.print(f"[dim]ID: {response.id}[/dim]")
 
 
@@ -398,7 +453,10 @@ async def delete_prompt(
 ):
     """Delete a prompt."""
     if not force:
-        confirm = Prompt.ask(f"Are you sure you want to delete prompt {prompt_id}?", choices=["y", "n"])
+        confirm = Prompt.ask(
+            f"Are you sure you want to delete prompt {prompt_id}?",
+            choices=["y", "n"],
+        )
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
@@ -424,11 +482,12 @@ async def clone_prompt(
             clone_data["name"] = new_name
 
         response = await sdk_client.prompts_api.clone_prompt_api_v1_prompts_prompt_id_clone_post(
-            prompt_id=prompt_id,
-            clone_request=clone_data
+            prompt_id=prompt_id, clone_request=clone_data
         )
 
-        console.print(f"✅ [green]Cloned prompt: {response.name}[/green]")
+        console.print(
+            f"✅ [green]Cloned prompt: {response.name}[/green]"
+        )
         console.print(f"[dim]New ID: {response.id}[/dim]")
 
 
@@ -436,7 +495,9 @@ async def clone_prompt(
 @run_async
 async def test_prompt(
     prompt_id: int = typer.Argument(..., help="Prompt ID to test"),
-    variables: str = typer.Option(None, help="Template variables as JSON"),
+    variables: str = typer.Option(
+        None, help="Template variables as JSON"
+    ),
 ):
     """Test a prompt with variables."""
     import json
@@ -452,11 +513,13 @@ async def test_prompt(
     async with get_client() as sdk_client:
         response = await sdk_client.prompts_api.test_prompt_api_v1_prompts_prompt_id_test_post(
             prompt_id=prompt_id,
-            test_request={"variables": test_variables}
+            test_request={"variables": test_variables},
         )
 
         console.print("✅ [green]Prompt test successful[/green]")
-        console.print(f"[bold]Rendered Prompt:[/bold]\n{response.rendered_prompt}")
+        console.print(
+            f"[bold]Rendered Prompt:[/bold]\n{response.rendered_prompt}"
+        )
 
 
 @prompts_app.command("stats")
@@ -464,7 +527,9 @@ async def test_prompt(
 async def prompt_stats():
     """Show prompt usage statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.prompts_api.get_prompt_stats_api_v1_prompts_stats_overview_get()
+        response = (
+            await sdk_client.prompts_api.get_prompt_stats_api_v1_prompts_stats_overview_get()
+        )
 
         table = Table(title="Prompt Statistics")
         table.add_column("Metric", style="cyan")
@@ -473,11 +538,16 @@ async def prompt_stats():
         if hasattr(response, 'total_prompts'):
             table.add_row("Total Prompts", str(response.total_prompts))
         if hasattr(response, 'active_prompts'):
-            table.add_row("Active Prompts", str(response.active_prompts))
+            table.add_row(
+                "Active Prompts", str(response.active_prompts)
+            )
         if hasattr(response, 'total_usage'):
             table.add_row("Total Usage", str(response.total_usage))
         if hasattr(response, 'avg_template_length'):
-            table.add_row("Avg Template Length", f"{response.avg_template_length:.0f} chars")
+            table.add_row(
+                "Avg Template Length",
+                f"{response.avg_template_length:.0f} chars",
+            )
 
         console.print(table)
 
@@ -496,8 +566,7 @@ async def list_profiles(
     """List user profiles."""
     async with get_client() as sdk_client:
         response = await sdk_client.profiles_api.list_profiles_api_v1_profiles_get(
-            limit=limit,
-            offset=offset
+            limit=limit, offset=offset
         )
 
         if not response.profiles:
@@ -517,7 +586,11 @@ async def list_profiles(
                 profile.name,
                 getattr(profile, 'llm_provider', 'N/A'),
                 getattr(profile, 'llm_model', 'N/A'),
-                str(profile.created_at)[:19] if hasattr(profile, 'created_at') else 'N/A'
+                (
+                    str(profile.created_at)[:19]
+                    if hasattr(profile, 'created_at')
+                    else 'N/A'
+                ),
             )
 
         console.print(table)
@@ -525,25 +598,29 @@ async def list_profiles(
 
 @profiles_app.command("show")
 @run_async
-async def show_profile(profile_id: str = typer.Argument(..., help="Profile ID")):
+async def show_profile(
+    profile_id: str = typer.Argument(..., help="Profile ID")
+):
     """Show detailed profile information."""
     async with get_client() as sdk_client:
         response = await sdk_client.profiles_api.get_profile_api_v1_profiles_profile_id_get(
             profile_id=profile_id
         )
 
-        console.print(Panel.fit(
-            f"[bold]{response.name}[/bold]\n\n"
-            f"[dim]ID:[/dim] {response.id}\n"
-            f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}\n"
-            f"[dim]Provider:[/dim] {getattr(response, 'llm_provider', 'N/A')}\n"
-            f"[dim]Model:[/dim] {getattr(response, 'llm_model', 'N/A')}\n"
-            f"[dim]Temperature:[/dim] {getattr(response, 'temperature', 'N/A')}\n"
-            f"[dim]Max Tokens:[/dim] {getattr(response, 'max_tokens', 'N/A')}\n"
-            f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n\n"
-            f"[dim]System Prompt:[/dim]\n{getattr(response, 'system_prompt', 'No system prompt')}",
-            title="Profile Details"
-        ))
+        console.print(
+            Panel.fit(
+                f"[bold]{response.name}[/bold]\n\n"
+                f"[dim]ID:[/dim] {response.id}\n"
+                f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}\n"
+                f"[dim]Provider:[/dim] {getattr(response, 'llm_provider', 'N/A')}\n"
+                f"[dim]Model:[/dim] {getattr(response, 'llm_model', 'N/A')}\n"
+                f"[dim]Temperature:[/dim] {getattr(response, 'temperature', 'N/A')}\n"
+                f"[dim]Max Tokens:[/dim] {getattr(response, 'max_tokens', 'N/A')}\n"
+                f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n\n"
+                f"[dim]System Prompt:[/dim]\n{getattr(response, 'system_prompt', 'No system prompt')}",
+                title="Profile Details",
+            )
+        )
 
 
 @profiles_app.command("create")
@@ -553,7 +630,9 @@ async def create_profile(
     description: str = typer.Option(None, help="Profile description"),
     provider: str = typer.Option("openai", help="LLM provider"),
     model: str = typer.Option("gpt-3.5-turbo", help="LLM model"),
-    temperature: float = typer.Option(0.7, help="Temperature (0.0-1.0)"),
+    temperature: float = typer.Option(
+        0.7, help="Temperature (0.0-1.0)"
+    ),
     max_tokens: int = typer.Option(1000, help="Maximum tokens"),
     system_prompt: str = typer.Option(None, help="System prompt"),
 ):
@@ -568,14 +647,16 @@ async def create_profile(
             llm_model=model,
             temperature=temperature,
             max_tokens=max_tokens,
-            system_prompt=system_prompt
+            system_prompt=system_prompt,
         )
 
         response = await sdk_client.profiles_api.create_profile_api_v1_profiles_post(
             profile_create=profile_data
         )
 
-        console.print(f"✅ [green]Created profile: {response.name}[/green]")
+        console.print(
+            f"✅ [green]Created profile: {response.name}[/green]"
+        )
         console.print(f"[dim]ID: {response.id}[/dim]")
 
 
@@ -587,7 +668,10 @@ async def delete_profile(
 ):
     """Delete a profile."""
     if not force:
-        confirm = Prompt.ask(f"Are you sure you want to delete profile {profile_id}?", choices=["y", "n"])
+        confirm = Prompt.ask(
+            f"Are you sure you want to delete profile {profile_id}?",
+            choices=["y", "n"],
+        )
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
@@ -604,20 +688,25 @@ async def delete_profile(
 @run_async
 async def test_profile(
     profile_id: str = typer.Argument(..., help="Profile ID to test"),
-    message: str = typer.Option("Hello, this is a test message", help="Test message"),
+    message: str = typer.Option(
+        "Hello, this is a test message", help="Test message"
+    ),
 ):
     """Test a profile configuration."""
-    from chatter_sdk.models.profile_test_request import ProfileTestRequest
-    
+    from chatter_sdk.models.profile_test_request import (
+        ProfileTestRequest,
+    )
+
     async with get_client() as sdk_client:
         test_request = ProfileTestRequest(test_message=message)
         response = await sdk_client.profiles_api.test_profile_api_v1_profiles_profile_id_test_post(
-            profile_id=profile_id,
-            profile_test_request=test_request
+            profile_id=profile_id, profile_test_request=test_request
         )
 
         console.print("✅ [green]Profile test successful[/green]")
-        console.print(f"[bold]Response:[/bold] {response.content if hasattr(response, 'content') else response}")
+        console.print(
+            f"[bold]Response:[/bold] {response.content if hasattr(response, 'content') else response}"
+        )
 
 
 @profiles_app.command("clone")
@@ -633,11 +722,12 @@ async def clone_profile(
             clone_data["name"] = new_name
 
         response = await sdk_client.profiles_api.clone_profile_api_v1_profiles_profile_id_clone_post(
-            profile_id=profile_id,
-            clone_request=clone_data
+            profile_id=profile_id, clone_request=clone_data
         )
 
-        console.print(f"✅ [green]Cloned profile: {response.name}[/green]")
+        console.print(
+            f"✅ [green]Cloned profile: {response.name}[/green]"
+        )
         console.print(f"[dim]New ID: {response.id}[/dim]")
 
 
@@ -646,7 +736,9 @@ async def clone_profile(
 async def list_providers():
     """List available LLM providers."""
     async with get_client() as sdk_client:
-        response = await sdk_client.profiles_api.get_available_providers_api_v1_profiles_providers_available_get()
+        response = (
+            await sdk_client.profiles_api.get_available_providers_api_v1_profiles_providers_available_get()
+        )
 
         if not response.providers:
             console.print("No providers available.")
@@ -658,14 +750,18 @@ async def list_providers():
         table.add_column("Status", style="yellow")
 
         for provider in response.providers:
-            models = ", ".join(provider.models[:3]) if hasattr(provider, 'models') and provider.models else "N/A"
+            models = (
+                ", ".join(provider.models[:3])
+                if hasattr(provider, 'models') and provider.models
+                else "N/A"
+            )
             if hasattr(provider, 'models') and len(provider.models) > 3:
                 models += f" (+{len(provider.models) - 3} more)"
 
             table.add_row(
                 provider.name,
                 models,
-                getattr(provider, 'status', 'active')
+                getattr(provider, 'status', 'active'),
             )
 
         console.print(table)
@@ -676,20 +772,31 @@ async def list_providers():
 async def profile_stats():
     """Show profile usage statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.profiles_api.get_profile_stats_api_v1_profiles_stats_overview_get()
+        response = (
+            await sdk_client.profiles_api.get_profile_stats_api_v1_profiles_stats_overview_get()
+        )
 
         table = Table(title="Profile Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
         if hasattr(response, 'total_profiles'):
-            table.add_row("Total Profiles", str(response.total_profiles))
+            table.add_row(
+                "Total Profiles", str(response.total_profiles)
+            )
         if hasattr(response, 'active_profiles'):
-            table.add_row("Active Profiles", str(response.active_profiles))
+            table.add_row(
+                "Active Profiles", str(response.active_profiles)
+            )
         if hasattr(response, 'total_conversations'):
-            table.add_row("Total Conversations", str(response.total_conversations))
+            table.add_row(
+                "Total Conversations", str(response.total_conversations)
+            )
         if hasattr(response, 'avg_tokens_per_conversation'):
-            table.add_row("Avg Tokens/Conversation", str(response.avg_tokens_per_conversation))
+            table.add_row(
+                "Avg Tokens/Conversation",
+                str(response.avg_tokens_per_conversation),
+            )
 
         console.print(table)
 
@@ -713,7 +820,7 @@ async def list_jobs(
             limit=limit,
             offset=offset,
             status=status,
-            function_name=job_type
+            function_name=job_type,
         )
 
         if not response.jobs:
@@ -728,13 +835,21 @@ async def list_jobs(
         table.add_column("Created", style="blue")
 
         for job in response.jobs:
-            progress = f"{getattr(job, 'progress', 0)}%" if hasattr(job, 'progress') else "N/A"
+            progress = (
+                f"{getattr(job, 'progress', 0)}%"
+                if hasattr(job, 'progress')
+                else "N/A"
+            )
             table.add_row(
                 str(job.id),
                 getattr(job, 'job_type', 'unknown'),
                 getattr(job, 'status', 'unknown'),
                 progress,
-                str(getattr(job, 'created_at', 'N/A'))[:19] if hasattr(job, 'created_at') else 'N/A'
+                (
+                    str(getattr(job, 'created_at', 'N/A'))[:19]
+                    if hasattr(job, 'created_at')
+                    else 'N/A'
+                ),
             )
 
         console.print(table)
@@ -745,36 +860,54 @@ async def list_jobs(
 async def show_job(job_id: str = typer.Argument(..., help="Job ID")):
     """Show detailed job information."""
     async with get_client() as sdk_client:
-        response = await sdk_client.jobs_api.get_job_api_v1_jobs_job_id_get(
-            job_id=job_id
+        response = (
+            await sdk_client.jobs_api.get_job_api_v1_jobs_job_id_get(
+                job_id=job_id
+            )
         )
 
-        progress = f"{getattr(response, 'progress', 0)}%" if hasattr(response, 'progress') else "N/A"
-        error_msg = getattr(response, 'error_message', 'No errors') if hasattr(response, 'error_message') else 'No errors'
+        progress = (
+            f"{getattr(response, 'progress', 0)}%"
+            if hasattr(response, 'progress')
+            else "N/A"
+        )
+        error_msg = (
+            getattr(response, 'error_message', 'No errors')
+            if hasattr(response, 'error_message')
+            else 'No errors'
+        )
 
-        console.print(Panel.fit(
-            f"[bold]{getattr(response, 'job_type', 'Job')}[/bold]\n\n"
-            f"[dim]ID:[/dim] {response.id}\n"
-            f"[dim]Status:[/dim] {getattr(response, 'status', 'unknown')}\n"
-            f"[dim]Progress:[/dim] {progress}\n"
-            f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n"
-            f"[dim]Started:[/dim] {getattr(response, 'started_at', 'N/A')}\n"
-            f"[dim]Completed:[/dim] {getattr(response, 'completed_at', 'N/A')}\n\n"
-            f"[dim]Error Message:[/dim] {error_msg}",
-            title="Job Details"
-        ))
+        console.print(
+            Panel.fit(
+                f"[bold]{getattr(response, 'job_type', 'Job')}[/bold]\n\n"
+                f"[dim]ID:[/dim] {response.id}\n"
+                f"[dim]Status:[/dim] {getattr(response, 'status', 'unknown')}\n"
+                f"[dim]Progress:[/dim] {progress}\n"
+                f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n"
+                f"[dim]Started:[/dim] {getattr(response, 'started_at', 'N/A')}\n"
+                f"[dim]Completed:[/dim] {getattr(response, 'completed_at', 'N/A')}\n\n"
+                f"[dim]Error Message:[/dim] {error_msg}",
+                title="Job Details",
+            )
+        )
 
 
 @jobs_app.command("create")
 @run_async
 async def create_job(
-    job_type: str = typer.Option(..., help="Job type (e.g., 'document_processing', 'data_export')"),
-    priority: str = typer.Option("normal", help="Job priority: low, normal, high"),
+    job_type: str = typer.Option(
+        ...,
+        help="Job type (e.g., 'document_processing', 'data_export')",
+    ),
+    priority: str = typer.Option(
+        "normal", help="Job priority: low, normal, high"
+    ),
     data: str = typer.Option(None, help="Job data as JSON string"),
 ):
     """Create a new job."""
-    from chatter_sdk.models.job_create_request import JobCreateRequest
     import json
+
+    from chatter_sdk.models.job_create_request import JobCreateRequest
 
     job_data = {}
     if data:
@@ -789,16 +922,22 @@ async def create_job(
             name=f"{job_type}_job",
             function_name=job_type,
             priority=priority,
-            kwargs=job_data
+            kwargs=job_data,
         )
 
-        response = await sdk_client.jobs_api.create_job_api_v1_jobs_post(
-            job_create=job_request
+        response = (
+            await sdk_client.jobs_api.create_job_api_v1_jobs_post(
+                job_create=job_request
+            )
         )
 
         console.print(f"✅ [green]Created job: {response.id}[/green]")
-        console.print(f"[dim]Type: {getattr(response, 'job_type', 'unknown')}[/dim]")
-        console.print(f"[dim]Status: {getattr(response, 'status', 'unknown')}[/dim]")
+        console.print(
+            f"[dim]Type: {getattr(response, 'job_type', 'unknown')}[/dim]"
+        )
+        console.print(
+            f"[dim]Status: {getattr(response, 'status', 'unknown')}[/dim]"
+        )
 
 
 @jobs_app.command("cancel")
@@ -821,7 +960,9 @@ async def cancel_job(
 @jobs_app.command("cleanup")
 @run_async
 async def cleanup_jobs(
-    force: bool = typer.Option(False, help="Force cleanup of all completed jobs"),
+    force: bool = typer.Option(
+        False, help="Force cleanup of all completed jobs"
+    ),
 ):
     """Clean up completed jobs."""
     async with get_client() as sdk_client:
@@ -829,8 +970,14 @@ async def cleanup_jobs(
             force=force
         )
 
-        cleaned_count = getattr(response, 'cleaned_count', 0) if hasattr(response, 'cleaned_count') else 0
-        console.print(f"✅ [green]Cleaned up {cleaned_count} jobs[/green]")
+        cleaned_count = (
+            getattr(response, 'cleaned_count', 0)
+            if hasattr(response, 'cleaned_count')
+            else 0
+        )
+        console.print(
+            f"✅ [green]Cleaned up {cleaned_count} jobs[/green]"
+        )
 
 
 @jobs_app.command("stats")
@@ -838,7 +985,9 @@ async def cleanup_jobs(
 async def job_stats():
     """Show job statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.jobs_api.get_job_stats_api_v1_jobs_stats_overview_get()
+        response = (
+            await sdk_client.jobs_api.get_job_stats_api_v1_jobs_stats_overview_get()
+        )
 
         table = Table(title="Job Statistics")
         table.add_column("Metric", style="cyan")
@@ -849,11 +998,16 @@ async def job_stats():
         if hasattr(response, 'running_jobs'):
             table.add_row("Running Jobs", str(response.running_jobs))
         if hasattr(response, 'completed_jobs'):
-            table.add_row("Completed Jobs", str(response.completed_jobs))
+            table.add_row(
+                "Completed Jobs", str(response.completed_jobs)
+            )
         if hasattr(response, 'failed_jobs'):
             table.add_row("Failed Jobs", str(response.failed_jobs))
         if hasattr(response, 'avg_execution_time'):
-            table.add_row("Avg Execution Time", f"{response.avg_execution_time:.2f}s")
+            table.add_row(
+                "Avg Execution Time",
+                f"{response.avg_execution_time:.2f}s",
+            )
 
         console.print(table)
 
@@ -872,8 +1026,7 @@ async def list_documents(
     """List documents."""
     async with get_client() as sdk_client:
         response = await sdk_client.documents_api.list_documents_api_v1_documents_get(
-            limit=limit,
-            offset=offset
+            limit=limit, offset=offset
         )
 
         if not response.documents:
@@ -891,9 +1044,21 @@ async def list_documents(
             table.add_row(
                 str(doc.id),
                 doc.name,
-                doc.document_type.value if hasattr(doc.document_type, 'value') else str(doc.document_type),
-                doc.status.value if hasattr(doc.status, 'value') else str(doc.status),
-                f"{doc.size_bytes:,} bytes" if hasattr(doc, 'size_bytes') else "N/A"
+                (
+                    doc.document_type.value
+                    if hasattr(doc.document_type, 'value')
+                    else str(doc.document_type)
+                ),
+                (
+                    doc.status.value
+                    if hasattr(doc.status, 'value')
+                    else str(doc.status)
+                ),
+                (
+                    f"{doc.size_bytes:,} bytes"
+                    if hasattr(doc, 'size_bytes')
+                    else "N/A"
+                ),
             )
 
         console.print(table)
@@ -927,37 +1092,46 @@ async def search_documents(
 
 @documents_app.command("show")
 @run_async
-async def show_document(document_id: str = typer.Argument(..., help="Document ID")):
+async def show_document(
+    document_id: str = typer.Argument(..., help="Document ID")
+):
     """Show detailed document information."""
     async with get_client() as sdk_client:
         response = await sdk_client.documents_api.get_document_api_v1_documents_document_id_get(
             document_id=document_id
         )
 
-        console.print(Panel.fit(
-            f"[bold]{response.name}[/bold]\n\n"
-            f"[dim]ID:[/dim] {response.id}\n"
-            f"[dim]Type:[/dim] {response.document_type.value if hasattr(response.document_type, 'value') else str(response.document_type)}\n"
-            f"[dim]Status:[/dim] {response.status.value if hasattr(response.status, 'value') else str(response.status)}\n"
-            f"[dim]Size:[/dim] {getattr(response, 'size_bytes', 0):,} bytes\n"
-            f"[dim]Pages:[/dim] {getattr(response, 'page_count', 'N/A')}\n"
-            f"[dim]Chunks:[/dim] {getattr(response, 'chunk_count', 'N/A')}\n"
-            f"[dim]Created:[/dim] {response.created_at}\n"
-            f"[dim]Updated:[/dim] {getattr(response, 'updated_at', 'N/A')}\n\n"
-            f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}",
-            title="Document Details"
-        ))
+        console.print(
+            Panel.fit(
+                f"[bold]{response.name}[/bold]\n\n"
+                f"[dim]ID:[/dim] {response.id}\n"
+                f"[dim]Type:[/dim] {response.document_type.value if hasattr(response.document_type, 'value') else str(response.document_type)}\n"
+                f"[dim]Status:[/dim] {response.status.value if hasattr(response.status, 'value') else str(response.status)}\n"
+                f"[dim]Size:[/dim] {getattr(response, 'size_bytes', 0):,} bytes\n"
+                f"[dim]Pages:[/dim] {getattr(response, 'page_count', 'N/A')}\n"
+                f"[dim]Chunks:[/dim] {getattr(response, 'chunk_count', 'N/A')}\n"
+                f"[dim]Created:[/dim] {response.created_at}\n"
+                f"[dim]Updated:[/dim] {getattr(response, 'updated_at', 'N/A')}\n\n"
+                f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}",
+                title="Document Details",
+            )
+        )
 
 
 @documents_app.command("delete")
 @run_async
 async def delete_document(
-    document_id: str = typer.Argument(..., help="Document ID to delete"),
+    document_id: str = typer.Argument(
+        ..., help="Document ID to delete"
+    ),
     force: bool = typer.Option(False, help="Skip confirmation prompt"),
 ):
     """Delete a document."""
     if not force:
-        confirm = Prompt.ask(f"Are you sure you want to delete document {document_id}?", choices=["y", "n"])
+        confirm = Prompt.ask(
+            f"Are you sure you want to delete document {document_id}?",
+            choices=["y", "n"],
+        )
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
@@ -967,7 +1141,9 @@ async def delete_document(
             document_id=document_id
         )
 
-        console.print(f"✅ [green]Deleted document {document_id}[/green]")
+        console.print(
+            f"✅ [green]Deleted document {document_id}[/green]"
+        )
 
 
 @documents_app.command("chunks")
@@ -979,15 +1155,16 @@ async def show_document_chunks(
     """Show document chunks."""
     async with get_client() as sdk_client:
         response = await sdk_client.documents_api.get_document_chunks_api_v1_documents_document_id_chunks_get(
-            document_id=document_id,
-            limit=limit
+            document_id=document_id, limit=limit
         )
 
         if not response.chunks:
             console.print("No chunks found.")
             return
 
-        console.print(f"[bold]Document Chunks (showing {len(response.chunks)}/{getattr(response, 'total', len(response.chunks))} total)[/bold]\n")
+        console.print(
+            f"[bold]Document Chunks (showing {len(response.chunks)}/{getattr(response, 'total', len(response.chunks))} total)[/bold]\n"
+        )
 
         for i, chunk in enumerate(response.chunks, 1):
             console.print(f"[cyan]Chunk {i}:[/cyan]")
@@ -1000,20 +1177,25 @@ async def show_document_chunks(
 @documents_app.command("process")
 @run_async
 async def process_document(
-    document_id: str = typer.Argument(..., help="Document ID to process"),
-    force_reprocess: bool = typer.Option(False, help="Force reprocessing"),
+    document_id: str = typer.Argument(
+        ..., help="Document ID to process"
+    ),
+    force_reprocess: bool = typer.Option(
+        False, help="Force reprocessing"
+    ),
 ):
     """Process a document (extract text, create embeddings)."""
     async with get_client() as sdk_client:
         response = await sdk_client.documents_api.process_document_api_v1_documents_document_id_process_post(
-            document_id=document_id,
-            force_reprocess=force_reprocess
+            document_id=document_id, force_reprocess=force_reprocess
         )
 
         console.print("✅ [green]Document processing started[/green]")
         if hasattr(response, 'job_id'):
             console.print(f"[dim]Job ID: {response.job_id}[/dim]")
-        console.print(f"[dim]Check status with: chatter documents show {document_id}[/dim]")
+        console.print(
+            f"[dim]Check status with: chatter documents show {document_id}[/dim]"
+        )
 
 
 @documents_app.command("stats")
@@ -1021,22 +1203,33 @@ async def process_document(
 async def document_stats():
     """Show document statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.documents_api.get_document_stats_api_v1_documents_stats_overview_get()
+        response = (
+            await sdk_client.documents_api.get_document_stats_api_v1_documents_stats_overview_get()
+        )
 
         table = Table(title="Document Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
         if hasattr(response, 'total_documents'):
-            table.add_row("Total Documents", str(response.total_documents))
+            table.add_row(
+                "Total Documents", str(response.total_documents)
+            )
         if hasattr(response, 'processed_documents'):
-            table.add_row("Processed Documents", str(response.processed_documents))
+            table.add_row(
+                "Processed Documents", str(response.processed_documents)
+            )
         if hasattr(response, 'total_chunks'):
             table.add_row("Total Chunks", str(response.total_chunks))
         if hasattr(response, 'total_size_bytes'):
-            table.add_row("Total Size", f"{response.total_size_bytes:,} bytes")
+            table.add_row(
+                "Total Size", f"{response.total_size_bytes:,} bytes"
+            )
         if hasattr(response, 'avg_processing_time'):
-            table.add_row("Avg Processing Time", f"{response.avg_processing_time:.2f}s")
+            table.add_row(
+                "Avg Processing Time",
+                f"{response.avg_processing_time:.2f}s",
+            )
 
         console.print(table)
 
@@ -1050,11 +1243,19 @@ app.add_typer(chat_app, name="chat")
 @run_async
 async def send_message(
     message: str = typer.Argument(..., help="Message to send"),
-    conversation_id: str = typer.Option(None, help="Conversation ID (creates new if not provided)"),
-    workflow: str = typer.Option("plain", help="Workflow type: plain, rag, tools, full"),
+    conversation_id: str = typer.Option(
+        None, help="Conversation ID (creates new if not provided)"
+    ),
+    workflow: str = typer.Option(
+        "plain", help="Workflow type: plain, rag, tools, full"
+    ),
     template: str = typer.Option(None, help="Use workflow template"),
-    stream: bool = typer.Option(False, help="Enable streaming response"),
-    enable_retrieval: bool = typer.Option(False, help="Enable document retrieval for RAG"),
+    stream: bool = typer.Option(
+        False, help="Enable streaming response"
+    ),
+    enable_retrieval: bool = typer.Option(
+        False, help="Enable document retrieval for RAG"
+    ),
 ):
     """Send a chat message."""
     from chatter_sdk.models.chat_request import ChatRequest
@@ -1066,36 +1267,49 @@ async def send_message(
             workflow=workflow,
             workflow_template=template,
             stream=stream,
-            enable_retrieval=enable_retrieval
+            enable_retrieval=enable_retrieval,
         )
 
         if stream:
             console.print("🔄 [yellow]Streaming response...[/yellow]")
             # Note: Streaming would require special handling, for now show message about it
-            console.print("📝 [dim]Note: Streaming display not yet implemented in CLI[/dim]")
+            console.print(
+                "📝 [dim]Note: Streaming display not yet implemented in CLI[/dim]"
+            )
 
-        response = await sdk_client.chat_api.chat_api_v1_chat_chat_post(chat_request=chat_request)
+        response = await sdk_client.chat_api.chat_api_v1_chat_chat_post(
+            chat_request=chat_request
+        )
 
-        console.print(f"\n[bold green]Assistant:[/bold green] {response.content}")
+        console.print(
+            f"\n[bold green]Assistant:[/bold green] {response.content}"
+        )
 
         if hasattr(response, 'conversation_id'):
-            console.print(f"[dim]Conversation ID: {response.conversation_id}[/dim]")
+            console.print(
+                f"[dim]Conversation ID: {response.conversation_id}[/dim]"
+            )
         if hasattr(response, 'usage') and response.usage:
             usage = response.usage
-            console.print(f"[dim]Tokens used: {usage.total_tokens} (prompt: {usage.prompt_tokens}, completion: {usage.completion_tokens})[/dim]")
+            console.print(
+                f"[dim]Tokens used: {usage.total_tokens} (prompt: {usage.prompt_tokens}, completion: {usage.completion_tokens})[/dim]"
+            )
 
 
 @chat_app.command("conversations")
 @run_async
 async def list_conversations(
-    limit: int = typer.Option(10, help="Number of conversations to list"),
-    offset: int = typer.Option(0, help="Number of conversations to skip"),
+    limit: int = typer.Option(
+        10, help="Number of conversations to list"
+    ),
+    offset: int = typer.Option(
+        0, help="Number of conversations to skip"
+    ),
 ):
     """List conversations."""
     async with get_client() as sdk_client:
         response = await sdk_client.chat_api.list_conversations_api_v1_chat_conversations_get(
-            limit=limit,
-            offset=offset
+            limit=limit, offset=offset
         )
 
         if not response.conversations:
@@ -1114,8 +1328,13 @@ async def list_conversations(
                 str(conv.id),
                 conv.title or "Untitled",
                 str(getattr(conv, 'message_count', 0)),
-                str(getattr(conv, 'last_message_at', 'N/A'))[:19] if hasattr(conv, 'last_message_at') and conv.last_message_at else 'N/A',
-                str(getattr(conv, 'status', 'active'))
+                (
+                    str(getattr(conv, 'last_message_at', 'N/A'))[:19]
+                    if hasattr(conv, 'last_message_at')
+                    and conv.last_message_at
+                    else 'N/A'
+                ),
+                str(getattr(conv, 'status', 'active')),
             )
 
         console.print(table)
@@ -1125,7 +1344,9 @@ async def list_conversations(
 @run_async
 async def show_conversation(
     conversation_id: str = typer.Argument(..., help="Conversation ID"),
-    include_messages: bool = typer.Option(True, help="Include messages in output"),
+    include_messages: bool = typer.Option(
+        True, help="Include messages in output"
+    ),
 ):
     """Show conversation details."""
     async with get_client() as sdk_client:
@@ -1133,16 +1354,18 @@ async def show_conversation(
             conversation_id=conversation_id
         )
 
-        console.print(Panel.fit(
-            f"[bold]{response.title or 'Untitled'}[/bold]\n\n"
-            f"[dim]ID:[/dim] {response.id}\n"
-            f"[dim]Status:[/dim] {getattr(response, 'status', 'active')}\n"
-            f"[dim]Messages:[/dim] {getattr(response, 'message_count', 0)}\n"
-            f"[dim]Created:[/dim] {response.created_at}\n"
-            f"[dim]Last Active:[/dim] {getattr(response, 'last_message_at', 'N/A')}\n\n"
-            f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}",
-            title="Conversation Details"
-        ))
+        console.print(
+            Panel.fit(
+                f"[bold]{response.title or 'Untitled'}[/bold]\n\n"
+                f"[dim]ID:[/dim] {response.id}\n"
+                f"[dim]Status:[/dim] {getattr(response, 'status', 'active')}\n"
+                f"[dim]Messages:[/dim] {getattr(response, 'message_count', 0)}\n"
+                f"[dim]Created:[/dim] {response.created_at}\n"
+                f"[dim]Last Active:[/dim] {getattr(response, 'last_message_at', 'N/A')}\n\n"
+                f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}",
+                title="Conversation Details",
+            )
+        )
 
         if include_messages:
             try:
@@ -1153,47 +1376,66 @@ async def show_conversation(
                 if messages_response.messages:
                     console.print("\n[bold]Messages:[/bold]")
                     for msg in messages_response.messages:
-                        role_color = "blue" if msg.role == "user" else "green"
-                        console.print(f"[{role_color}]{msg.role}:[/{role_color}] {msg.content}")
+                        role_color = (
+                            "blue" if msg.role == "user" else "green"
+                        )
+                        console.print(
+                            f"[{role_color}]{msg.role}:[/{role_color}] {msg.content}"
+                        )
                         console.print()
             except Exception as e:
-                console.print(f"[yellow]Could not load messages: {e}[/yellow]")
+                console.print(
+                    f"[yellow]Could not load messages: {e}[/yellow]"
+                )
 
 
 @chat_app.command("create")
 @run_async
 async def create_conversation(
     title: str = typer.Option(..., help="Conversation title"),
-    description: str = typer.Option(None, help="Conversation description"),
+    description: str = typer.Option(
+        None, help="Conversation description"
+    ),
     workflow: str = typer.Option("plain", help="Default workflow type"),
 ):
     """Create a new conversation."""
-    from chatter_sdk.models.conversation_create import ConversationCreate
+    from chatter_sdk.models.conversation_create import (
+        ConversationCreate,
+    )
 
     async with get_client() as sdk_client:
         conversation_data = ConversationCreate(
             title=title,
             description=description,
-            workflow_config={"default_workflow": workflow} if workflow else None
+            workflow_config=(
+                {"default_workflow": workflow} if workflow else None
+            ),
         )
 
         response = await sdk_client.chat_api.create_conversation_api_v1_chat_conversations_post(
             conversation_create=conversation_data
         )
 
-        console.print(f"✅ [green]Created conversation: {response.title}[/green]")
+        console.print(
+            f"✅ [green]Created conversation: {response.title}[/green]"
+        )
         console.print(f"[dim]ID: {response.id}[/dim]")
 
 
 @chat_app.command("delete")
 @run_async
 async def delete_conversation(
-    conversation_id: str = typer.Argument(..., help="Conversation ID to delete"),
+    conversation_id: str = typer.Argument(
+        ..., help="Conversation ID to delete"
+    ),
     force: bool = typer.Option(False, help="Skip confirmation prompt"),
 ):
     """Delete a conversation."""
     if not force:
-        confirm = Prompt.ask(f"Are you sure you want to delete conversation {conversation_id}?", choices=["y", "n"])
+        confirm = Prompt.ask(
+            f"Are you sure you want to delete conversation {conversation_id}?",
+            choices=["y", "n"],
+        )
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
@@ -1203,7 +1445,9 @@ async def delete_conversation(
             conversation_id=conversation_id
         )
 
-        console.print(f"✅ [green]Deleted conversation {conversation_id}[/green]")
+        console.print(
+            f"✅ [green]Deleted conversation {conversation_id}[/green]"
+        )
 
 
 @chat_app.command("tools")
@@ -1211,7 +1455,9 @@ async def delete_conversation(
 async def list_available_tools():
     """List available chat tools."""
     async with get_client() as sdk_client:
-        response = await sdk_client.chat_api.get_available_tools_api_v1_chat_tools_available_get()
+        response = (
+            await sdk_client.chat_api.get_available_tools_api_v1_chat_tools_available_get()
+        )
 
         if not response.tools:
             console.print("No tools available.")
@@ -1226,7 +1472,7 @@ async def list_available_tools():
             table.add_row(
                 tool.name,
                 tool.description or "No description",
-                getattr(tool, 'type', 'unknown')
+                getattr(tool, 'type', 'unknown'),
             )
 
         console.print(table)
@@ -1237,7 +1483,9 @@ async def list_available_tools():
 async def list_workflow_templates():
     """List available workflow templates."""
     async with get_client() as sdk_client:
-        response = await sdk_client.chat_api.get_workflow_templates_api_v1_chat_templates_get()
+        response = (
+            await sdk_client.chat_api.get_workflow_templates_api_v1_chat_templates_get()
+        )
 
         if not response.templates:
             console.print("No templates available.")
@@ -1251,16 +1499,14 @@ async def list_workflow_templates():
         for template in response.templates:
             # Handle case where template might be a string or object
             if isinstance(template, str):
-                table.add_row(
-                    template,
-                    "No description",
-                    "unknown"
-                )
+                table.add_row(template, "No description", "unknown")
             else:
                 table.add_row(
                     getattr(template, 'name', str(template)),
-                    getattr(template, 'description', "No description") or "No description",
-                    getattr(template, 'workflow_type', "unknown") or "unknown"
+                    getattr(template, 'description', "No description")
+                    or "No description",
+                    getattr(template, 'workflow_type', "unknown")
+                    or "unknown",
                 )
 
         console.print(table)
@@ -1276,13 +1522,17 @@ app.add_typer(models_app, name="models")
 async def list_model_providers():
     """List model providers."""
     async with get_client() as sdk_client:
-        response = await sdk_client.model_api.list_providers_api_v1_models_providers_get()
+        response = (
+            await sdk_client.model_api.list_providers_api_v1_models_providers_get()
+        )
 
         if not response.providers:
             console.print("No providers found.")
             return
 
-        table = Table(title=f"Model Providers ({len(response.providers)} total)")
+        table = Table(
+            title=f"Model Providers ({len(response.providers)} total)"
+        )
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Type", style="yellow")
@@ -1296,7 +1546,7 @@ async def list_model_providers():
                 provider.name,
                 getattr(provider, 'provider_type', 'unknown'),
                 getattr(provider, 'status', 'active'),
-                str(model_count)
+                str(model_count),
             )
 
         console.print(table)
@@ -1311,8 +1561,7 @@ async def list_models(
     """List available models."""
     async with get_client() as sdk_client:
         response = await sdk_client.model_api.list_models_api_v1_models_models_get(
-            provider_id=provider_id,
-            per_page=per_page
+            provider_id=provider_id, per_page=per_page
         )
 
         if not response.models:
@@ -1332,7 +1581,7 @@ async def list_models(
                 model.name,
                 getattr(model, 'provider_name', 'unknown'),
                 getattr(model, 'model_type', 'llm'),
-                getattr(model, 'status', 'active')
+                getattr(model, 'status', 'active'),
             )
 
         console.print(table)
@@ -1343,7 +1592,9 @@ async def list_models(
 async def list_embedding_spaces():
     """List embedding spaces."""
     async with get_client() as sdk_client:
-        response = await sdk_client.model_api.list_embedding_spaces_api_v1_models_embedding_spaces_get()
+        response = (
+            await sdk_client.model_api.list_embedding_spaces_api_v1_models_embedding_spaces_get()
+        )
 
         if not response.spaces:
             console.print("No embedding spaces found.")
@@ -1362,7 +1613,7 @@ async def list_embedding_spaces():
                 space.name,
                 getattr(space, 'model_name', 'unknown'),
                 str(getattr(space, 'dimensions', 'unknown')),
-                str(getattr(space, 'document_count', 0))
+                str(getattr(space, 'document_count', 0)),
             )
 
         console.print(table)
@@ -1378,20 +1629,31 @@ app.add_typer(events_app, name="events")
 async def event_stats():
     """Show event streaming statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.events_api.get_sse_stats_api_v1_events_stats_get()
+        response = (
+            await sdk_client.events_api.get_sse_stats_api_v1_events_stats_get()
+        )
 
         table = Table(title="Event Stream Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
         if hasattr(response, 'active_connections'):
-            table.add_row("Active Connections", str(response.active_connections))
+            table.add_row(
+                "Active Connections", str(response.active_connections)
+            )
         if hasattr(response, 'total_events_sent'):
-            table.add_row("Total Events Sent", str(response.total_events_sent))
+            table.add_row(
+                "Total Events Sent", str(response.total_events_sent)
+            )
         if hasattr(response, 'events_per_minute'):
-            table.add_row("Events Per Minute", f"{response.events_per_minute:.2f}")
+            table.add_row(
+                "Events Per Minute", f"{response.events_per_minute:.2f}"
+            )
         if hasattr(response, 'avg_connection_duration'):
-            table.add_row("Avg Connection Duration", f"{response.avg_connection_duration:.1f}s")
+            table.add_row(
+                "Avg Connection Duration",
+                f"{response.avg_connection_duration:.1f}s",
+            )
 
         console.print(table)
 
@@ -1401,7 +1663,9 @@ async def event_stats():
 async def test_broadcast():
     """Trigger a test broadcast event."""
     async with get_client() as sdk_client:
-        response = await sdk_client.events_api.trigger_broadcast_test_api_v1_events_broadcast_test_post()
+        response = (
+            await sdk_client.events_api.trigger_broadcast_test_api_v1_events_broadcast_test_post()
+        )
 
         console.print("✅ [green]Test broadcast sent[/green]")
         if hasattr(response, 'message'):
@@ -1422,8 +1686,10 @@ async def list_agents(
 ):
     """List AI agents."""
     async with get_client() as sdk_client:
-        response = await sdk_client.agents_api.list_agents_api_v1_agents_get(
-            status=status
+        response = (
+            await sdk_client.agents_api.list_agents_api_v1_agents_get(
+                status=status
+            )
         )
 
         if not response.agents:
@@ -1443,7 +1709,7 @@ async def list_agents(
                 agent.name,
                 getattr(agent, 'agent_type', 'unknown'),
                 getattr(agent, 'status', 'active'),
-                str(getattr(agent, 'task_count', 0))
+                str(getattr(agent, 'task_count', 0)),
             )
 
         console.print(table)
@@ -1451,25 +1717,29 @@ async def list_agents(
 
 @agents_app.command("show")
 @run_async
-async def show_agent(agent_id: str = typer.Argument(..., help="Agent ID")):
+async def show_agent(
+    agent_id: str = typer.Argument(..., help="Agent ID")
+):
     """Show detailed agent information."""
     async with get_client() as sdk_client:
         response = await sdk_client.agents_api.get_agent_api_v1_agents_agent_id_get(
             agent_id=agent_id
         )
 
-        console.print(Panel.fit(
-            f"[bold]{response.name}[/bold]\n\n"
-            f"[dim]ID:[/dim] {response.id}\n"
-            f"[dim]Type:[/dim] {getattr(response, 'agent_type', 'unknown')}\n"
-            f"[dim]Status:[/dim] {getattr(response, 'status', 'active')}\n"
-            f"[dim]Tasks Completed:[/dim] {getattr(response, 'tasks_completed', 0)}\n"
-            f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n"
-            f"[dim]Last Active:[/dim] {getattr(response, 'last_active_at', 'N/A')}\n\n"
-            f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}\n\n"
-            f"[dim]Configuration:[/dim]\n{getattr(response, 'config', 'No configuration')}",
-            title="Agent Details"
-        ))
+        console.print(
+            Panel.fit(
+                f"[bold]{response.name}[/bold]\n\n"
+                f"[dim]ID:[/dim] {response.id}\n"
+                f"[dim]Type:[/dim] {getattr(response, 'agent_type', 'unknown')}\n"
+                f"[dim]Status:[/dim] {getattr(response, 'status', 'active')}\n"
+                f"[dim]Tasks Completed:[/dim] {getattr(response, 'tasks_completed', 0)}\n"
+                f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n"
+                f"[dim]Last Active:[/dim] {getattr(response, 'last_active_at', 'N/A')}\n\n"
+                f"[dim]Description:[/dim] {getattr(response, 'description', 'No description')}\n\n"
+                f"[dim]Configuration:[/dim]\n{getattr(response, 'config', 'No configuration')}",
+                title="Agent Details",
+            )
+        )
 
 
 @agents_app.command("create")
@@ -1478,18 +1748,23 @@ async def create_agent(
     name: str = typer.Option(..., help="Agent name"),
     agent_type: str = typer.Option("general", help="Agent type"),
     description: str = typer.Option(None, help="Agent description"),
-    config: str = typer.Option(None, help="Agent configuration as JSON"),
+    config: str = typer.Option(
+        None, help="Agent configuration as JSON"
+    ),
 ):
     """Create a new AI agent."""
-    from chatter_sdk.models.agent_create import AgentCreate
     import json
+
+    from chatter_sdk.models.agent_create import AgentCreate
 
     agent_config = {}
     if config:
         try:
             agent_config = json.loads(config)
         except json.JSONDecodeError as e:
-            console.print(f"❌ [red]Invalid JSON configuration: {e}[/red]")
+            console.print(
+                f"❌ [red]Invalid JSON configuration: {e}[/red]"
+            )
             return
 
     async with get_client() as sdk_client:
@@ -1497,14 +1772,18 @@ async def create_agent(
             name=name,
             agent_type=agent_type,
             description=description,
-            config=agent_config
+            config=agent_config,
         )
 
-        response = await sdk_client.agents_api.create_agent_api_v1_agents_post(
-            agent_create=agent_data
+        response = (
+            await sdk_client.agents_api.create_agent_api_v1_agents_post(
+                agent_create=agent_data
+            )
         )
 
-        console.print(f"✅ [green]Created agent: {response.name}[/green]")
+        console.print(
+            f"✅ [green]Created agent: {response.name}[/green]"
+        )
         console.print(f"[dim]ID: {response.id}[/dim]")
 
 
@@ -1516,7 +1795,10 @@ async def delete_agent(
 ):
     """Delete an AI agent."""
     if not force:
-        confirm = Prompt.ask(f"Are you sure you want to delete agent {agent_id}?", choices=["y", "n"])
+        confirm = Prompt.ask(
+            f"Are you sure you want to delete agent {agent_id}?",
+            choices=["y", "n"],
+        )
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
@@ -1537,9 +1819,15 @@ app.add_typer(data_app, name="data")
 @data_app.command("backup")
 @run_async
 async def create_backup(
-    backup_type: str = typer.Option("full", help="Backup type: full, incremental"),
-    include_documents: bool = typer.Option(True, help="Include documents in backup"),
-    include_conversations: bool = typer.Option(True, help="Include conversations"),
+    backup_type: str = typer.Option(
+        "full", help="Backup type: full, incremental"
+    ),
+    include_documents: bool = typer.Option(
+        True, help="Include documents in backup"
+    ),
+    include_conversations: bool = typer.Option(
+        True, help="Include conversations"
+    ),
     description: str = typer.Option(None, help="Backup description"),
 ):
     """Create a data backup."""
@@ -1550,36 +1838,45 @@ async def create_backup(
             backup_type=backup_type,
             include_documents=include_documents,
             include_conversations=include_conversations,
-            description=description
+            description=description,
         )
 
         response = await sdk_client.data_api.create_backup_api_v1_data_backup_post(
             backup_request=backup_request
         )
 
-        console.print(f"✅ [green]Backup created: {response.id}[/green]")
+        console.print(
+            f"✅ [green]Backup created: {response.id}[/green]"
+        )
         if hasattr(response, 'job_id'):
             console.print(f"[dim]Job ID: {response.job_id}[/dim]")
-        console.print(f"[dim]Check status with: chatter jobs show {response.job_id if hasattr(response, 'job_id') else 'JOB_ID'}[/dim]")
+        console.print(
+            f"[dim]Check status with: chatter jobs show {response.job_id if hasattr(response, 'job_id') else 'JOB_ID'}[/dim]"
+        )
 
 
 @data_app.command("export")
 @run_async
 async def export_data(
     format: str = typer.Option("json", help="Export format: json, csv"),
-    scope: str = typer.Option("full", help="Data scope: user, conversation, document, analytics, full, custom"),
-    include_metadata: bool = typer.Option(True, help="Include metadata"),
+    scope: str = typer.Option(
+        "full",
+        help="Data scope: user, conversation, document, analytics, full, custom",
+    ),
+    include_metadata: bool = typer.Option(
+        True, help="Include metadata"
+    ),
 ):
     """Export data in specified format."""
+    from chatter_sdk.models.data_format import DataFormat
     from chatter_sdk.models.export_data_request import ExportDataRequest
     from chatter_sdk.models.export_scope import ExportScope
-    from chatter_sdk.models.data_format import DataFormat
 
     async with get_client() as sdk_client:
         export_request = ExportDataRequest(
             scope=ExportScope(scope),
             format=DataFormat(format),
-            include_metadata=include_metadata
+            include_metadata=include_metadata,
         )
 
         response = await sdk_client.data_api.export_data_api_v1_data_export_post(
@@ -1589,20 +1886,27 @@ async def export_data(
         console.print("✅ [green]Data export started[/green]")
         if hasattr(response, 'job_id'):
             console.print(f"[dim]Job ID: {response.job_id}[/dim]")
-        console.print(f"[dim]Check status with: chatter jobs show {response.job_id if hasattr(response, 'job_id') else 'JOB_ID'}[/dim]")
+        console.print(
+            f"[dim]Check status with: chatter jobs show {response.job_id if hasattr(response, 'job_id') else 'JOB_ID'}[/dim]"
+        )
 
 
 @data_app.command("bulk-delete-conversations")
 @run_async
 async def bulk_delete_conversations(
-    conversation_ids: str = typer.Argument(..., help="Comma-separated conversation IDs"),
+    conversation_ids: str = typer.Argument(
+        ..., help="Comma-separated conversation IDs"
+    ),
     force: bool = typer.Option(False, help="Skip confirmation prompt"),
 ):
     """Bulk delete conversations."""
     ids = [id.strip() for id in conversation_ids.split(',')]
 
     if not force:
-        confirm = Prompt.ask(f"Are you sure you want to delete {len(ids)} conversations?", choices=["y", "n"])
+        confirm = Prompt.ask(
+            f"Are you sure you want to delete {len(ids)} conversations?",
+            choices=["y", "n"],
+        )
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
@@ -1613,20 +1917,27 @@ async def bulk_delete_conversations(
         )
 
         success_count = getattr(response, 'deleted_count', len(ids))
-        console.print(f"✅ [green]Deleted {success_count} conversations[/green]")
+        console.print(
+            f"✅ [green]Deleted {success_count} conversations[/green]"
+        )
 
 
 @data_app.command("bulk-delete-documents")
 @run_async
 async def bulk_delete_documents(
-    document_ids: str = typer.Argument(..., help="Comma-separated document IDs"),
+    document_ids: str = typer.Argument(
+        ..., help="Comma-separated document IDs"
+    ),
     force: bool = typer.Option(False, help="Skip confirmation prompt"),
 ):
     """Bulk delete documents."""
     ids = [id.strip() for id in document_ids.split(',')]
 
     if not force:
-        confirm = Prompt.ask(f"Are you sure you want to delete {len(ids)} documents?", choices=["y", "n"])
+        confirm = Prompt.ask(
+            f"Are you sure you want to delete {len(ids)} documents?",
+            choices=["y", "n"],
+        )
         if confirm.lower() != "y":
             console.print("Operation cancelled.")
             return
@@ -1637,7 +1948,9 @@ async def bulk_delete_documents(
         )
 
         success_count = getattr(response, 'deleted_count', len(ids))
-        console.print(f"✅ [green]Deleted {success_count} documents[/green]")
+        console.print(
+            f"✅ [green]Deleted {success_count} documents[/green]"
+        )
 
 
 @data_app.command("storage-stats")
@@ -1645,20 +1958,34 @@ async def bulk_delete_documents(
 async def storage_stats():
     """Show storage usage statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.data_api.get_storage_stats_api_v1_data_stats_get()
+        response = (
+            await sdk_client.data_api.get_storage_stats_api_v1_data_stats_get()
+        )
 
         table = Table(title="Storage Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
         if hasattr(response, 'total_size_bytes'):
-            table.add_row("Total Storage Used", f"{response.total_size_bytes:,} bytes")
+            table.add_row(
+                "Total Storage Used",
+                f"{response.total_size_bytes:,} bytes",
+            )
         if hasattr(response, 'documents_size_bytes'):
-            table.add_row("Documents Storage", f"{response.documents_size_bytes:,} bytes")
+            table.add_row(
+                "Documents Storage",
+                f"{response.documents_size_bytes:,} bytes",
+            )
         if hasattr(response, 'embeddings_size_bytes'):
-            table.add_row("Embeddings Storage", f"{response.embeddings_size_bytes:,} bytes")
+            table.add_row(
+                "Embeddings Storage",
+                f"{response.embeddings_size_bytes:,} bytes",
+            )
         if hasattr(response, 'backups_size_bytes'):
-            table.add_row("Backups Storage", f"{response.backups_size_bytes:,} bytes")
+            table.add_row(
+                "Backups Storage",
+                f"{response.backups_size_bytes:,} bytes",
+            )
 
         console.print(table)
 
@@ -1673,7 +2000,9 @@ app.add_typer(analytics_app, name="analytics")
 async def dashboard():
     """Get analytics dashboard data."""
     async with get_client() as sdk_client:
-        response = await sdk_client.analytics_api.get_dashboard_api_v1_analytics_dashboard_get()
+        response = (
+            await sdk_client.analytics_api.get_dashboard_api_v1_analytics_dashboard_get()
+        )
 
         table = Table(title="Analytics Dashboard")
         table.add_column("Metric", style="cyan")
@@ -1683,11 +2012,18 @@ async def dashboard():
         if hasattr(response, 'total_users'):
             table.add_row("Total Users", str(response.total_users))
         if hasattr(response, 'active_conversations'):
-            table.add_row("Active Conversations", str(response.active_conversations))
+            table.add_row(
+                "Active Conversations",
+                str(response.active_conversations),
+            )
         if hasattr(response, 'total_messages'):
-            table.add_row("Total Messages", str(response.total_messages))
+            table.add_row(
+                "Total Messages", str(response.total_messages)
+            )
         if hasattr(response, 'documents_processed'):
-            table.add_row("Documents Processed", str(response.documents_processed))
+            table.add_row(
+                "Documents Processed", str(response.documents_processed)
+            )
 
         console.print(table)
 
@@ -1700,8 +2036,14 @@ def show_config():
     table.add_column("Setting", style="cyan")
     table.add_column("Value", style="green")
 
-    table.add_row("API Base URL", os.getenv("CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL))
-    table.add_row("Access Token", "Set" if os.getenv("CHATTER_ACCESS_TOKEN") else "Not set")
+    table.add_row(
+        "API Base URL",
+        os.getenv("CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL),
+    )
+    table.add_row(
+        "Access Token",
+        "Set" if os.getenv("CHATTER_ACCESS_TOKEN") else "Not set",
+    )
 
     # Check for local token
     temp_client = ChatterSDKClient()

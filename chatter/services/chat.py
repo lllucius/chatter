@@ -14,14 +14,18 @@ from chatter.models.conversation import (
     Message,
     MessageRole,
 )
-from chatter.schemas.chat import ChatRequest
+from chatter.schemas.chat import (
+    ChatRequest,
+)
 from chatter.schemas.chat import (
     ConversationCreate as ConversationCreateSchema,
 )
 from chatter.schemas.chat import (
     ConversationUpdate as ConversationUpdateSchema,
 )
-from chatter.schemas.chat import StreamingChatChunk
+from chatter.schemas.chat import (
+    StreamingChatChunk,
+)
 from chatter.services.conversation import ConversationService
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
@@ -453,7 +457,10 @@ class ChatService:
         """Apply usage information to a message."""
         if "tokens" in usage:
             total_tokens = usage["tokens"]
-            if not message.prompt_tokens and not message.completion_tokens:
+            if (
+                not message.prompt_tokens
+                and not message.completion_tokens
+            ):
                 # Rough estimate: input is ~20% of total for responses
                 message.prompt_tokens = int(total_tokens * 0.2)
                 message.completion_tokens = int(total_tokens * 0.8)

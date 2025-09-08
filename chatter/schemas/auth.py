@@ -100,9 +100,7 @@ class UserResponse(UserBase):
     )
 
     # API key name (but not the actual key for security)
-    api_key_name: str | None = Field(
-        None, description="API key name"
-    )
+    api_key_name: str | None = Field(None, description="API key name")
 
     created_at: datetime = Field(
         ..., description="Account creation date"

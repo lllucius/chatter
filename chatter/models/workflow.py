@@ -205,8 +205,8 @@ class WorkflowTemplate(Base):
     derived_templates: Mapped[list["WorkflowTemplate"]] = relationship(
         "WorkflowTemplate", back_populates="base_template"
     )
-    workflow_definitions: Mapped[list["WorkflowDefinition"]] = relationship(
-        "WorkflowDefinition", back_populates="template"
+    workflow_definitions: Mapped[list["WorkflowDefinition"]] = (
+        relationship("WorkflowDefinition", back_populates="template")
     )
 
     @validates("default_params")
@@ -498,7 +498,10 @@ class WorkflowExecution(Base):
 
     # Foreign keys
     definition_id: Mapped[str] = mapped_column(
-        String(26), ForeignKey("workflow_definitions.id"), nullable=False, index=True
+        String(26),
+        ForeignKey("workflow_definitions.id"),
+        nullable=False,
+        index=True,
     )
     owner_id: Mapped[str] = mapped_column(
         String(26), ForeignKey(Keys.USERS), nullable=False, index=True
@@ -525,7 +528,9 @@ class WorkflowExecution(Base):
     output_data: Mapped[dict[str, Any] | None] = mapped_column(
         JSON, nullable=True
     )
-    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(
+        Text, nullable=True
+    )
     execution_log: Mapped[list[dict[str, Any]] | None] = mapped_column(
         JSON, nullable=True
     )
@@ -561,7 +566,9 @@ class WorkflowExecution(Base):
                 self.started_at.isoformat() if self.started_at else None
             ),
             "completed_at": (
-                self.completed_at.isoformat() if self.completed_at else None
+                self.completed_at.isoformat()
+                if self.completed_at
+                else None
             ),
             "execution_time_ms": self.execution_time_ms,
             "input_data": self.input_data,

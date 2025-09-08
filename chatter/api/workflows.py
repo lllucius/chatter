@@ -1,6 +1,5 @@
 """Comprehensive workflows API supporting advanced workflow editor features."""
 
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -60,7 +59,9 @@ async def get_workflow_execution_service(
 
     llm_service = LLMService()
     message_service = MessageService(session)
-    return WorkflowExecutionService(llm_service, message_service, session)
+    return WorkflowExecutionService(
+        llm_service, message_service, session
+    )
 
 
 # Workflow Definitions CRUD
@@ -68,7 +69,9 @@ async def get_workflow_execution_service(
 async def create_workflow_definition(
     workflow_definition: WorkflowDefinitionCreate,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> WorkflowDefinitionResponse:
     """Create a new workflow definition."""
     try:
@@ -91,7 +94,9 @@ async def create_workflow_definition(
 @router.get("/definitions", response_model=WorkflowDefinitionsResponse)
 async def list_workflow_definitions(
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> WorkflowDefinitionsResponse:
     """List all workflow definitions for the current user."""
     try:
@@ -112,11 +117,16 @@ async def list_workflow_definitions(
         ) from e
 
 
-@router.get("/definitions/{workflow_id}", response_model=WorkflowDefinitionResponse)
+@router.get(
+    "/definitions/{workflow_id}",
+    response_model=WorkflowDefinitionResponse,
+)
 async def get_workflow_definition(
     workflow_id: WorkflowId,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> WorkflowDefinitionResponse:
     """Get a specific workflow definition."""
     try:
@@ -125,7 +135,9 @@ async def get_workflow_definition(
             owner_id=current_user.id,
         )
         if not definition:
-            raise NotFoundProblem(detail="Workflow definition not found")
+            raise NotFoundProblem(
+                detail="Workflow definition not found"
+            )
 
         return WorkflowDefinitionResponse.model_validate(definition)
     except HTTPException:
@@ -137,12 +149,17 @@ async def get_workflow_definition(
         ) from e
 
 
-@router.put("/definitions/{workflow_id}", response_model=WorkflowDefinitionResponse)
+@router.put(
+    "/definitions/{workflow_id}",
+    response_model=WorkflowDefinitionResponse,
+)
 async def update_workflow_definition(
     workflow_id: WorkflowId,
     workflow_definition: WorkflowDefinitionUpdate,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> WorkflowDefinitionResponse:
     """Update a workflow definition."""
     try:
@@ -152,7 +169,9 @@ async def update_workflow_definition(
             **workflow_definition.model_dump(exclude_unset=True),
         )
         if not definition:
-            raise NotFoundProblem(detail="Workflow definition not found")
+            raise NotFoundProblem(
+                detail="Workflow definition not found"
+            )
 
         return WorkflowDefinitionResponse.model_validate(definition)
     except HTTPException:
@@ -168,7 +187,9 @@ async def update_workflow_definition(
 async def delete_workflow_definition(
     workflow_id: WorkflowId,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> dict[str, str]:
     """Delete a workflow definition."""
     try:
@@ -177,7 +198,9 @@ async def delete_workflow_definition(
             owner_id=current_user.id,
         )
         if not success:
-            raise NotFoundProblem(detail="Workflow definition not found")
+            raise NotFoundProblem(
+                detail="Workflow definition not found"
+            )
 
         return {"message": "Workflow definition deleted successfully"}
     except HTTPException:
@@ -194,7 +217,9 @@ async def delete_workflow_definition(
 async def create_workflow_template(
     template: WorkflowTemplateCreate,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> WorkflowTemplateResponse:
     """Create a new workflow template."""
     try:
@@ -213,7 +238,9 @@ async def create_workflow_template(
 @router.get("/templates", response_model=WorkflowTemplatesResponse)
 async def list_workflow_templates(
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> WorkflowTemplatesResponse:
     """List all workflow templates accessible to the current user."""
     try:
@@ -234,12 +261,16 @@ async def list_workflow_templates(
         ) from e
 
 
-@router.put("/templates/{template_id}", response_model=WorkflowTemplateResponse)
+@router.put(
+    "/templates/{template_id}", response_model=WorkflowTemplateResponse
+)
 async def update_workflow_template(
     template_id: str,
     template: WorkflowTemplateUpdate,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> WorkflowTemplateResponse:
     """Update a workflow template."""
     try:
@@ -262,12 +293,19 @@ async def update_workflow_template(
 
 
 # Analytics
-@router.get("/definitions/{workflow_id}/analytics", response_model=WorkflowAnalyticsResponse)
+@router.get(
+    "/definitions/{workflow_id}/analytics",
+    response_model=WorkflowAnalyticsResponse,
+)
 async def get_workflow_analytics(
     workflow_id: WorkflowId,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
-    analytics_service: WorkflowAnalyticsService = Depends(get_workflow_analytics_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+    analytics_service: WorkflowAnalyticsService = Depends(
+        get_workflow_analytics_service
+    ),
 ) -> WorkflowAnalyticsResponse:
     """Get analytics for a specific workflow definition."""
     try:
@@ -277,7 +315,9 @@ async def get_workflow_analytics(
             owner_id=current_user.id,
         )
         if not definition:
-            raise NotFoundProblem(detail="Workflow definition not found")
+            raise NotFoundProblem(
+                detail="Workflow definition not found"
+            )
 
         analytics = await analytics_service.analyze_workflow(
             nodes=definition.nodes,
@@ -294,13 +334,20 @@ async def get_workflow_analytics(
 
 
 # Execution
-@router.post("/definitions/{workflow_id}/execute", response_model=WorkflowExecutionResponse)
+@router.post(
+    "/definitions/{workflow_id}/execute",
+    response_model=WorkflowExecutionResponse,
+)
 async def execute_workflow(
     workflow_id: WorkflowId,
     execution_request: WorkflowExecutionRequest,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
-    execution_service: WorkflowExecutionService = Depends(get_workflow_execution_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+    execution_service: WorkflowExecutionService = Depends(
+        get_workflow_execution_service
+    ),
 ) -> WorkflowExecutionResponse:
     """Execute a workflow definition."""
     try:
@@ -310,7 +357,9 @@ async def execute_workflow(
             owner_id=current_user.id,
         )
         if not definition:
-            raise NotFoundProblem(detail="Workflow definition not found")
+            raise NotFoundProblem(
+                detail="Workflow definition not found"
+            )
 
         result = await execution_service.execute_workflow(
             workflow_definition=definition,
@@ -328,17 +377,23 @@ async def execute_workflow(
 
 
 # Validation
-@router.post("/definitions/validate", response_model=WorkflowValidationResponse)
+@router.post(
+    "/definitions/validate", response_model=WorkflowValidationResponse
+)
 async def validate_workflow_definition(
     workflow_definition: WorkflowDefinitionCreate,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> WorkflowValidationResponse:
     """Validate a workflow definition."""
     try:
-        validation_result = await workflow_service.validate_workflow_definition(
-            nodes=workflow_definition.nodes,
-            edges=workflow_definition.edges,
+        validation_result = (
+            await workflow_service.validate_workflow_definition(
+                nodes=workflow_definition.nodes,
+                edges=workflow_definition.edges,
+            )
         )
         return WorkflowValidationResponse(**validation_result)
     except Exception as e:
@@ -369,10 +424,30 @@ async def get_supported_node_types(
                 "description": "Language model processing node",
                 "category": "processing",
                 "properties": [
-                    {"name": "model", "type": "string", "required": True, "description": "Model name"},
-                    {"name": "system_message", "type": "text", "required": False, "description": "System prompt"},
-                    {"name": "temperature", "type": "number", "required": False, "description": "Temperature (0-2)"},
-                    {"name": "max_tokens", "type": "number", "required": False, "description": "Maximum tokens"},
+                    {
+                        "name": "model",
+                        "type": "string",
+                        "required": True,
+                        "description": "Model name",
+                    },
+                    {
+                        "name": "system_message",
+                        "type": "text",
+                        "required": False,
+                        "description": "System prompt",
+                    },
+                    {
+                        "name": "temperature",
+                        "type": "number",
+                        "required": False,
+                        "description": "Temperature (0-2)",
+                    },
+                    {
+                        "name": "max_tokens",
+                        "type": "number",
+                        "required": False,
+                        "description": "Maximum tokens",
+                    },
                 ],
             },
             {
@@ -381,8 +456,18 @@ async def get_supported_node_types(
                 "description": "Tool execution node",
                 "category": "processing",
                 "properties": [
-                    {"name": "tool_name", "type": "string", "required": True, "description": "Tool name"},
-                    {"name": "parameters", "type": "object", "required": False, "description": "Tool parameters"},
+                    {
+                        "name": "tool_name",
+                        "type": "string",
+                        "required": True,
+                        "description": "Tool name",
+                    },
+                    {
+                        "name": "parameters",
+                        "type": "object",
+                        "required": False,
+                        "description": "Tool parameters",
+                    },
                 ],
             },
             {
@@ -391,8 +476,18 @@ async def get_supported_node_types(
                 "description": "Memory storage and retrieval node",
                 "category": "storage",
                 "properties": [
-                    {"name": "operation", "type": "select", "options": ["store", "retrieve"], "required": True},
-                    {"name": "key", "type": "string", "required": True, "description": "Memory key"},
+                    {
+                        "name": "operation",
+                        "type": "select",
+                        "options": ["store", "retrieve"],
+                        "required": True,
+                    },
+                    {
+                        "name": "key",
+                        "type": "string",
+                        "required": True,
+                        "description": "Memory key",
+                    },
                 ],
             },
             {
@@ -401,8 +496,18 @@ async def get_supported_node_types(
                 "description": "Document retrieval node",
                 "category": "data",
                 "properties": [
-                    {"name": "query", "type": "string", "required": True, "description": "Search query"},
-                    {"name": "limit", "type": "number", "required": False, "description": "Result limit"},
+                    {
+                        "name": "query",
+                        "type": "string",
+                        "required": True,
+                        "description": "Search query",
+                    },
+                    {
+                        "name": "limit",
+                        "type": "number",
+                        "required": False,
+                        "description": "Result limit",
+                    },
                 ],
             },
             {
@@ -411,7 +516,12 @@ async def get_supported_node_types(
                 "description": "Conditional logic node",
                 "category": "control",
                 "properties": [
-                    {"name": "condition", "type": "string", "required": True, "description": "Condition expression"},
+                    {
+                        "name": "condition",
+                        "type": "string",
+                        "required": True,
+                        "description": "Condition expression",
+                    },
                 ],
             },
             {
@@ -420,8 +530,18 @@ async def get_supported_node_types(
                 "description": "Loop iteration node",
                 "category": "control",
                 "properties": [
-                    {"name": "max_iterations", "type": "number", "required": False, "description": "Maximum iterations"},
-                    {"name": "condition", "type": "string", "required": False, "description": "Loop condition"},
+                    {
+                        "name": "max_iterations",
+                        "type": "number",
+                        "required": False,
+                        "description": "Maximum iterations",
+                    },
+                    {
+                        "name": "condition",
+                        "type": "string",
+                        "required": False,
+                        "description": "Loop condition",
+                    },
                 ],
             },
             {
@@ -430,9 +550,30 @@ async def get_supported_node_types(
                 "description": "Variable manipulation node",
                 "category": "data",
                 "properties": [
-                    {"name": "operation", "type": "select", "options": ["set", "get", "append", "increment", "decrement"], "required": True},
-                    {"name": "variable_name", "type": "string", "required": True, "description": "Variable name"},
-                    {"name": "value", "type": "any", "required": False, "description": "Variable value"},
+                    {
+                        "name": "operation",
+                        "type": "select",
+                        "options": [
+                            "set",
+                            "get",
+                            "append",
+                            "increment",
+                            "decrement",
+                        ],
+                        "required": True,
+                    },
+                    {
+                        "name": "variable_name",
+                        "type": "string",
+                        "required": True,
+                        "description": "Variable name",
+                    },
+                    {
+                        "name": "value",
+                        "type": "any",
+                        "required": False,
+                        "description": "Variable value",
+                    },
                 ],
             },
             {
@@ -441,8 +582,18 @@ async def get_supported_node_types(
                 "description": "Error handling and recovery node",
                 "category": "control",
                 "properties": [
-                    {"name": "retry_count", "type": "number", "required": False, "description": "Number of retries"},
-                    {"name": "fallback_action", "type": "string", "required": False, "description": "Fallback action"},
+                    {
+                        "name": "retry_count",
+                        "type": "number",
+                        "required": False,
+                        "description": "Number of retries",
+                    },
+                    {
+                        "name": "fallback_action",
+                        "type": "string",
+                        "required": False,
+                        "description": "Fallback action",
+                    },
                 ],
             },
             {
@@ -451,14 +602,36 @@ async def get_supported_node_types(
                 "description": "Time delay node",
                 "category": "utility",
                 "properties": [
-                    {"name": "delay_type", "type": "select", "options": ["fixed", "random", "exponential", "dynamic"], "required": True},
-                    {"name": "duration", "type": "number", "required": True, "description": "Delay duration (ms)"},
-                    {"name": "max_duration", "type": "number", "required": False, "description": "Maximum duration for random/dynamic"},
+                    {
+                        "name": "delay_type",
+                        "type": "select",
+                        "options": [
+                            "fixed",
+                            "random",
+                            "exponential",
+                            "dynamic",
+                        ],
+                        "required": True,
+                    },
+                    {
+                        "name": "duration",
+                        "type": "number",
+                        "required": True,
+                        "description": "Delay duration (ms)",
+                    },
+                    {
+                        "name": "max_duration",
+                        "type": "number",
+                        "required": False,
+                        "description": "Maximum duration for random/dynamic",
+                    },
                 ],
             },
         ]
 
-        return [NodeTypeResponse(**node_type) for node_type in node_types]
+        return [
+            NodeTypeResponse(**node_type) for node_type in node_types
+        ]
     except Exception as e:
         logger.error(f"Failed to get node types: {e}")
         raise InternalServerProblem(
@@ -466,12 +639,16 @@ async def get_supported_node_types(
         ) from e
 
 
-
-@router.get("/definitions/{workflow_id}/executions", response_model=list[WorkflowExecutionResponse])
+@router.get(
+    "/definitions/{workflow_id}/executions",
+    response_model=list[WorkflowExecutionResponse],
+)
 async def list_workflow_executions(
     workflow_id: WorkflowId,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowManagementService = Depends(get_workflow_management_service),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
 ) -> list[WorkflowExecutionResponse]:
     """List executions for a workflow definition."""
     try:
@@ -479,12 +656,15 @@ async def list_workflow_executions(
             definition_id=workflow_id,
             owner_id=current_user.id,
         )
-        return [WorkflowExecutionResponse.model_validate(exec) for exec in executions]
+        return [
+            WorkflowExecutionResponse.model_validate(exec)
+            for exec in executions
+        ]
 
     except Exception as e:
-        logger.error(f"Failed to list executions for workflow {workflow_id}: {e}")
+        logger.error(
+            f"Failed to list executions for workflow {workflow_id}: {e}"
+        )
         raise InternalServerProblem(
             detail=f"Failed to list executions: {str(e)}"
         ) from e
-
-

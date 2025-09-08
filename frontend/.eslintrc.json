@@ -34,7 +34,8 @@
     "it": "readonly",
     "beforeEach": "readonly",
     "afterEach": "readonly",
-    "vi": "readonly"
+    "vi": "readonly",
+    "NodeJS": "readonly"
   },
   "ignorePatterns": ["node_modules/", "dist/", "build/", "*.d.ts"]
 }

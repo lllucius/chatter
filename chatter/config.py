@@ -518,15 +518,16 @@ class Settings(BaseSettings):
     # =============================================================================
 
     chatter_encryption_key: str | None = Field(
-        default=None, description="Primary encryption key (base64 encoded)"
+        default=None,
+        description="Primary encryption key (base64 encoded)",
     )
     chatter_secret_password: str = Field(
-        default="default-dev-password", 
-        description="Fallback password for key derivation (dev only)"
+        default="default-dev-password",
+        description="Fallback password for key derivation (dev only)",
     )
     chatter_secret_salt: str = Field(
-        default="default-dev-salt", 
-        description="Fallback salt for key derivation (dev only)"
+        default="default-dev-salt",
+        description="Fallback salt for key derivation (dev only)",
     )
 
     # =============================================================================
@@ -534,8 +535,7 @@ class Settings(BaseSettings):
     # =============================================================================
 
     chatter_api_base_url: str = Field(
-        default="http://localhost:8000", 
-        description="CLI API base URL"
+        default="http://localhost:8000", description="CLI API base URL"
     )
     chatter_access_token: str | None = Field(
         default=None, description="CLI access token"

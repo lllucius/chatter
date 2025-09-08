@@ -17,6 +17,10 @@ import {
   PromptsApi,
   ToolServersApi,
   UserLogin,
+  ToolServerCreate,
+  ToolServerUpdate,
+  ConversationCreate,
+  ConversationUpdate,
 } from 'chatter-sdk';
 
 class ChatterSDK {
@@ -41,10 +45,24 @@ class ChatterSDK {
   public prompts: PromptsApi;
   public toolServers: ToolServersApi;
 
+  // Convenience objects for compatibility
+  public conversations: {
+    listConversationsApiV1ChatConversationsGet: (params?: any) => Promise<any>;
+    listConversationsApiV1ConversationsGet: (params?: any) => Promise<any>;
+    createConversationApiV1ChatConversationsPost: (params: any) => Promise<any>;
+    deleteConversationApiV1ConversationsConversationIdDelete: (params: any) => Promise<any>;
+    deleteConversationApiV1ChatConversationsConversationIdDelete: (params: any) => Promise<any>;
+    getConversationApiV1ChatConversationsConversationIdGet: (params: any) => Promise<any>;
+    getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: (params: any) => Promise<any>;
+    updateConversationApiV1ChatConversationsConversationIdPut: (params: any) => Promise<any>;
+    chatApiV1ChatChatPost: (params: any) => Promise<any>;
+  };
+
   constructor() {
     this.initializeConfiguration();
     this.initializeAPIs();
     this.loadTokenFromStorage();
+    this.initializeConvenienceObjects();
   }
 
   private initializeConfiguration() {
@@ -76,6 +94,21 @@ class ChatterSDK {
     this.toolServers = new ToolServersApi(this.configuration);
   }
 
+  private initializeConvenienceObjects() {
+    // Create conversations object that delegates to chat API for compatibility
+    this.conversations = {
+      listConversationsApiV1ChatConversationsGet: (params = {}) => this.chat.listConversationsApiV1ChatConversationsGet(params),
+      listConversationsApiV1ConversationsGet: (params = {}) => this.chat.listConversationsApiV1ChatConversationsGet(params),
+      createConversationApiV1ChatConversationsPost: (params) => this.chat.createConversationApiV1ChatConversationsPost(params),
+      deleteConversationApiV1ConversationsConversationIdDelete: (params) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
+      deleteConversationApiV1ChatConversationsConversationIdDelete: (params) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
+      getConversationApiV1ChatConversationsConversationIdGet: (params) => this.chat.getConversationApiV1ChatConversationsConversationIdGet(params),
+      getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: (params) => this.chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(params),
+      updateConversationApiV1ChatConversationsConversationIdPut: (params) => this.chat.updateConversationApiV1ChatConversationsConversationIdPut(params),
+      chatApiV1ChatChatPost: (params) => this.chat.chatApiV1ChatChatPost(params),
+    };
+  }
+
   private loadTokenFromStorage() {
     const storedToken = localStorage.getItem('chatter_access_token');
     if (storedToken) {
@@ -99,6 +132,7 @@ class ChatterSDK {
     
     // Reinitialize all APIs with new configuration
     this.initializeAPIs();
+    this.initializeConvenienceObjects();
   }
 
   public getToken(): string | null {
@@ -120,6 +154,7 @@ class ChatterSDK {
     
     // Reinitialize all APIs with new configuration
     this.initializeAPIs();
+    this.initializeConvenienceObjects();
   }
 
   public isAuthenticated(): boolean {
@@ -210,13 +245,13 @@ class ChatterSDK {
     return this.toolServers.listToolServersApiV1ToolServersGet({});
   }
 
-  public async createToolServer(serverData: any) {
+  public async createToolServer(serverData: ToolServerCreate) {
     return this.toolServers.createToolServerApiV1ToolServersPost({
       toolServerCreateRequest: serverData,
     });
   }
 
-  public async updateToolServer(serverId: string, updateData: any) {
+  public async updateToolServer(serverId: string, updateData: ToolServerUpdate) {
     return this.toolServers.updateToolServerApiV1ToolServersServerIdPut({
       serverId,
       toolServerUpdateRequest: updateData,
@@ -232,6 +267,36 @@ class ChatterSDK {
   public async disableToolServer(serverId: string) {
     return this.toolServers.disableToolServerApiV1ToolServersServerIdDisablePost({
       serverId,
+    });
+  }
+
+  // Convenience methods for conversations (delegated to chat API)
+  public async listConversations(params: any = {}) {
+    return this.chat.listConversationsApiV1ChatConversationsGet(params);
+  }
+
+  public async createConversation(conversationData: ConversationCreate) {
+    return this.chat.createConversationApiV1ChatConversationsPost({
+      conversationCreate: conversationData,
+    });
+  }
+
+  public async deleteConversation(conversationId: string) {
+    return this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete({
+      conversationId,
+    });
+  }
+
+  public async getConversation(conversationId: string) {
+    return this.chat.getConversationApiV1ChatConversationsConversationIdGet({
+      conversationId,
+    });
+  }
+
+  public async updateConversation(conversationId: string, updateData: ConversationUpdate) {
+    return this.chat.updateConversationApiV1ChatConversationsConversationIdPut({
+      conversationId,
+      conversationUpdate: updateData,
     });
   }
 }

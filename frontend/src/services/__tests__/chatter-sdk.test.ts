@@ -14,6 +14,7 @@ describe('ChatterSDK', () => {
     expect(chatterSDK.agents).toBeDefined();
     expect(chatterSDK.modelRegistry).toBeDefined();
     expect(chatterSDK.toolServers).toBeDefined();
+    expect(chatterSDK.conversations).toBeDefined();
   });
 
   it('should handle authentication state correctly', () => {
@@ -46,5 +47,21 @@ describe('ChatterSDK', () => {
     expect(typeof chatterSDK.updateToolServer).toBe('function');
     expect(typeof chatterSDK.enableToolServer).toBe('function');
     expect(typeof chatterSDK.disableToolServer).toBe('function');
+  });
+
+  it('should have convenience methods for conversations', () => {
+    expect(typeof chatterSDK.listConversations).toBe('function');
+    expect(typeof chatterSDK.createConversation).toBe('function');
+    expect(typeof chatterSDK.deleteConversation).toBe('function');
+    expect(typeof chatterSDK.getConversation).toBe('function');
+    expect(typeof chatterSDK.updateConversation).toBe('function');
+  });
+
+  it('should have conversations object with API methods', () => {
+    expect(chatterSDK.conversations).toBeDefined();
+    expect(typeof chatterSDK.conversations.listConversationsApiV1ChatConversationsGet).toBe('function');
+    expect(typeof chatterSDK.conversations.createConversationApiV1ChatConversationsPost).toBe('function');
+    expect(typeof chatterSDK.conversations.deleteConversationApiV1ChatConversationsConversationIdDelete).toBe('function');
+    expect(typeof chatterSDK.conversations.getConversationApiV1ChatConversationsConversationIdGet).toBe('function');
   });
 });

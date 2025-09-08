@@ -4,7 +4,9 @@ This document explains how to regenerate the Python and TypeScript SDKs for the 
 
 ## Overview
 
-The Chatter API provides automatically generated SDKs in both Python and TypeScript. These SDKs are generated from the OpenAPI specification using the [OpenAPI Generator CLI](https://openapi-generator.tech/).
+The Chatter API provides automatically generated SDKs in both Python and TypeScript. These SDKs are generated from the OpenAPI specification using specialized generators:
+- **Python SDK**: [OpenAPI Generator CLI](https://openapi-generator.tech/)
+- **TypeScript SDK**: [swagger-typescript-api](https://github.com/acacode/swagger-typescript-api)
 
 ## Quick Start
 
@@ -86,7 +88,11 @@ These configurations specify:
 ## Troubleshooting
 
 ### OpenAPI Generator CLI Not Found
-If you see an error about the OpenAPI Generator CLI not being found, make sure Node.js and npm are installed. The script will automatically download the generator on first use.
+If you see an error about the OpenAPI Generator CLI not being found, make sure Node.js and npm are installed. 
+
+For the Python SDK, the script will automatically download the OpenAPI Generator on first use.
+
+For the TypeScript SDK, the script uses swagger-typescript-api which will be downloaded automatically via npx.
 
 ### Permission Errors
 Make sure you have write permissions to the output directories:

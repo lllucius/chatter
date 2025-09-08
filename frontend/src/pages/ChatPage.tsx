@@ -338,16 +338,23 @@ const ChatPage: React.FC = () => {
                   const chunk = JSON.parse(dataStr);
                   
                   // Update message content based on chunk type
-                  if (chunk.type === 'content' || chunk.type === 'partial') {
+                  if (chunk.type === 'token' && chunk.content) {
                     setMessages((prev) =>
                       prev.map((msg) =>
                         msg.id === messageId
-                          ? { ...msg, content: msg.content + (chunk.content || '') }
+                          ? { ...msg, content: msg.content + chunk.content }
                           : msg
                       )
                     );
+                  } else if (chunk.type === 'start') {
+                    // Stream started - no action needed
+                    console.log('Streaming started');
+                  } else if (chunk.type === 'end') {
+                    // Stream ended - no action needed
+                    console.log('Streaming ended');
+                    return; // End the streaming loop
                   } else if (chunk.type === 'error') {
-                    throw new Error(chunk.error || 'Streaming error');
+                    throw new Error(chunk.content || chunk.error || 'Streaming error');
                   }
                 } catch (parseError) {
                   console.error('Failed to parse streaming data:', parseError, dataStr);

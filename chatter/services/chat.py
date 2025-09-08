@@ -380,6 +380,14 @@ class ChatService:
             ):
                 yield chunk
 
+            # Yield end chunk
+            yield StreamingChatChunk(
+                type="end",
+                content="",
+                correlation_id=correlation_id,
+                metadata={"conversation_id": conversation.id},
+            )
+
             # Record success metrics
             self._record_request_metrics(
                 start_time, correlation_id, user_id, 200

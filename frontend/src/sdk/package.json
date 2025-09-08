@@ -1,0 +1,10 @@
+{
+  "name": "chatter-sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for Chatter AI API",
+  "main": "index.ts",
+  "types": "index.ts",
+  "dependencies": {
+    "axios": "^1.11.0"
+  }
+}

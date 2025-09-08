@@ -1,49 +1,33 @@
-import {
-  Configuration,
-  AuthenticationApi,
-  ABTestingApi,
-  AgentsApi,
-  AnalyticsApi,
-  ChatApi,
-  DataManagementApi,
-  DefaultApi,
-  DocumentsApi,
-  EventsApi,
-  HealthApi,
-  JobsApi,
-  ModelRegistryApi,
-  PluginsApi,
-  ProfilesApi,
-  PromptsApi,
-  ToolServersApi,
+import { HttpClient } from '../sdk/http-client';
+import type { 
   UserLogin,
   ToolServerCreate,
   ToolServerUpdate,
   ConversationCreate,
   ConversationUpdate,
-} from 'chatter-sdk';
+} from '../sdk/data-contracts';
 
-class ChatterSDK {
-  private configuration: Configuration;
+class ChatterSDK extends HttpClient {
   private token: string | null = null;
   
-  // API instances
-  public auth: AuthenticationApi;
-  public abTesting: ABTestingApi;
-  public agents: AgentsApi;
-  public analytics: AnalyticsApi;
-  public chat: ChatApi;
-  public dataManagement: DataManagementApi;
-  public default: DefaultApi;
-  public documents: DocumentsApi;
-  public events: EventsApi;
-  public health: HealthApi;
-  public jobs: JobsApi;
-  public modelRegistry: ModelRegistryApi;
-  public plugins: PluginsApi;
-  public profiles: ProfilesApi;
-  public prompts: PromptsApi;
-  public toolServers: ToolServersApi;
+  // API instances - for backwards compatibility, we'll create these as properties
+  // API instances - for backwards compatibility, we'll create these as properties
+  public auth: ChatterSDK;
+  public abTesting: ChatterSDK;
+  public agents: ChatterSDK;
+  public analytics: ChatterSDK;
+  public chat: ChatterSDK;
+  public dataManagement: ChatterSDK;
+  public default: ChatterSDK;
+  public documents: ChatterSDK;
+  public events: ChatterSDK;
+  public health: ChatterSDK;
+  public jobs: ChatterSDK;
+  public modelRegistry: ChatterSDK;
+  public plugins: ChatterSDK;
+  public profiles: ChatterSDK;
+  public prompts: ChatterSDK;
+  public toolServers: ChatterSDK;
 
   // Convenience objects for compatibility
   public conversations: {
@@ -59,53 +43,59 @@ class ChatterSDK {
   };
 
   constructor() {
-    this.initializeConfiguration();
-    this.initializeAPIs();
+    // Initialize the HTTP client with default configuration
+    super({
+      baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+      securityWorker: (securityData) => {
+        const token = this.getToken();
+        if (token) {
+          return {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          };
+        }
+        return {};
+      },
+    });
+
     this.loadTokenFromStorage();
+    this.initializeAPIs();
     this.initializeConvenienceObjects();
   }
 
-  private initializeConfiguration() {
-    this.configuration = new Configuration({
-      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-      accessToken: () => this.token || '',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  }
-
   private initializeAPIs() {
-    this.auth = new AuthenticationApi(this.configuration);
-    this.abTesting = new ABTestingApi(this.configuration);
-    this.agents = new AgentsApi(this.configuration);
-    this.analytics = new AnalyticsApi(this.configuration);
-    this.chat = new ChatApi(this.configuration);
-    this.dataManagement = new DataManagementApi(this.configuration);
-    this.default = new DefaultApi(this.configuration);
-    this.documents = new DocumentsApi(this.configuration);
-    this.events = new EventsApi(this.configuration);
-    this.health = new HealthApi(this.configuration);
-    this.jobs = new JobsApi(this.configuration);
-    this.modelRegistry = new ModelRegistryApi(this.configuration);
-    this.plugins = new PluginsApi(this.configuration);
-    this.profiles = new ProfilesApi(this.configuration);
-    this.prompts = new PromptsApi(this.configuration);
-    this.toolServers = new ToolServersApi(this.configuration);
+    // For backwards compatibility, all API instances point to this same instance
+    this.auth = this;
+    this.abTesting = this;
+    this.agents = this;
+    this.analytics = this;
+    this.chat = this;
+    this.dataManagement = this;
+    this.default = this;
+    this.documents = this;
+    this.events = this;
+    this.health = this;
+    this.jobs = this;
+    this.modelRegistry = this;
+    this.plugins = this;
+    this.profiles = this;
+    this.prompts = this;
+    this.toolServers = this;
   }
 
   private initializeConvenienceObjects() {
     // Create conversations object that delegates to chat API for compatibility
     this.conversations = {
-      listConversationsApiV1ChatConversationsGet: (params = {}) => this.chat.listConversationsApiV1ChatConversationsGet(params),
-      listConversationsApiV1ConversationsGet: (params = {}) => this.chat.listConversationsApiV1ChatConversationsGet(params),
-      createConversationApiV1ChatConversationsPost: (params) => this.chat.createConversationApiV1ChatConversationsPost(params),
-      deleteConversationApiV1ConversationsConversationIdDelete: (params) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
-      deleteConversationApiV1ChatConversationsConversationIdDelete: (params) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
-      getConversationApiV1ChatConversationsConversationIdGet: (params) => this.chat.getConversationApiV1ChatConversationsConversationIdGet(params),
-      getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: (params) => this.chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(params),
-      updateConversationApiV1ChatConversationsConversationIdPut: (params) => this.chat.updateConversationApiV1ChatConversationsConversationIdPut(params),
-      chatApiV1ChatChatPost: (params) => this.chat.chatApiV1ChatChatPost(params),
+      listConversationsApiV1ChatConversationsGet: (params = {}) => this.listConversationsApiV1ChatConversationsGet(params),
+      listConversationsApiV1ConversationsGet: (params = {}) => this.listConversationsApiV1ChatConversationsGet(params),
+      createConversationApiV1ChatConversationsPost: (params) => this.createConversationApiV1ChatConversationsPost(params),
+      deleteConversationApiV1ConversationsConversationIdDelete: (params) => this.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
+      deleteConversationApiV1ChatConversationsConversationIdDelete: (params) => this.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
+      getConversationApiV1ChatConversationsConversationIdGet: (params) => this.getConversationApiV1ChatConversationsConversationIdGet(params),
+      getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: (params) => this.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(params),
+      updateConversationApiV1ChatConversationsConversationIdPut: (params) => this.updateConversationApiV1ChatConversationsConversationIdPut(params),
+      chatApiV1ChatChatPost: (params) => this.chatApiV1ChatChatPost(params),
     };
   }
 
@@ -117,22 +107,12 @@ class ChatterSDK {
   }
 
   public getURL(): string | null {
-    return this.configuration.basePath;
+    return this.baseURL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
   }
 
   public setToken(token: string) {
     this.token = token;
     localStorage.setItem('chatter_access_token', token);
-    
-    // Update configuration with new token
-    this.configuration = new Configuration({
-      ...this.configuration,
-      accessToken: () => this.token || '',
-    });
-    
-    // Reinitialize all APIs with new configuration
-    this.initializeAPIs();
-    this.initializeConvenienceObjects();
   }
 
   public getToken(): string | null {
@@ -168,7 +148,7 @@ class ChatterSDK {
         password,
       };
 
-      const response = await this.auth.loginApiV1AuthLoginPost({
+      const response = await this.loginApiV1AuthLoginPost({
         userLogin: loginData,
       });
 
@@ -200,7 +180,7 @@ class ChatterSDK {
   public async logout(): Promise<void> {
     try {
       if (this.isAuthenticated()) {
-        await this.auth.logoutApiV1AuthLogoutPost();
+        await this.logoutApiV1AuthLogoutPost();
       }
     } catch (error) {
       console.error('Logout API call failed:', error);
@@ -217,7 +197,7 @@ class ChatterSDK {
         return false;
       }
 
-      const response = await this.auth.refreshTokenApiV1AuthRefreshPost({
+      const response = await this.refreshTokenApiV1AuthRefreshPost({
         tokenRefresh: { refreshToken },
       });
 
@@ -242,61 +222,342 @@ class ChatterSDK {
 
   // Convenience methods that match the old API interface
   public async getToolServers() {
-    return this.toolServers.listToolServersApiV1ToolServersGet({});
+    return this.request({
+      path: '/api/v1/toolservers/servers',
+      method: 'GET',
+      secure: true,
+      format: 'json',
+    });
   }
 
   public async createToolServer(serverData: ToolServerCreate) {
-    return this.toolServers.createToolServerApiV1ToolServersPost({
-      toolServerCreateRequest: serverData,
+    return this.request({
+      path: '/api/v1/toolservers/servers',
+      method: 'POST',
+      body: serverData,
+      secure: true,
+      type: 'application/json',
+      format: 'json',
     });
   }
 
   public async updateToolServer(serverId: string, updateData: ToolServerUpdate) {
-    return this.toolServers.updateToolServerApiV1ToolServersServerIdPut({
-      serverId,
-      toolServerUpdateRequest: updateData,
+    return this.request({
+      path: `/api/v1/toolservers/servers/${serverId}`,
+      method: 'PUT',
+      body: updateData,
+      secure: true,
+      type: 'application/json',
+      format: 'json',
+    });
+  }
+
+  public async deleteToolServer(serverId: string) {
+    return this.request({
+      path: `/api/v1/toolservers/servers/${serverId}`,
+      method: 'DELETE',
+      secure: true,
+      format: 'json',
     });
   }
 
   public async enableToolServer(serverId: string) {
-    return this.toolServers.enableToolServerApiV1ToolServersServerIdEnablePost({
-      serverId,
+    return this.request({
+      path: `/api/v1/toolservers/servers/${serverId}/enable`,
+      method: 'POST',
+      secure: true,
+      format: 'json',
     });
   }
 
   public async disableToolServer(serverId: string) {
-    return this.toolServers.disableToolServerApiV1ToolServersServerIdDisablePost({
-      serverId,
+    return this.request({
+      path: `/api/v1/toolservers/servers/${serverId}/disable`,
+      method: 'POST',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async refreshServerTools(serverId: string) {
+    return this.request({
+      path: `/api/v1/toolservers/servers/${serverId}/refresh-tools`,
+      method: 'POST',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async getAllTools() {
+    return this.request({
+      path: '/api/v1/toolservers/tools/all',
+      method: 'GET',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async enableTool(toolId: string) {
+    return this.request({
+      path: `/api/v1/toolservers/tools/${toolId}/enable`,
+      method: 'POST',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async disableTool(toolId: string) {
+    return this.request({
+      path: `/api/v1/toolservers/tools/${toolId}/disable`,
+      method: 'POST',
+      secure: true,
+      format: 'json',
     });
   }
 
   // Convenience methods for conversations (delegated to chat API)
   public async listConversations(params: any = {}) {
-    return this.chat.listConversationsApiV1ChatConversationsGet(params);
+    return this.request({
+      path: '/api/v1/chat/conversations',
+      method: 'GET',
+      query: params,
+      secure: true,
+      format: 'json',
+    });
   }
 
   public async createConversation(conversationData: ConversationCreate) {
-    return this.chat.createConversationApiV1ChatConversationsPost({
-      conversationCreate: conversationData,
+    return this.request({
+      path: '/api/v1/chat/conversations',
+      method: 'POST',
+      body: conversationData,
+      secure: true,
+      type: 'application/json',
+      format: 'json',
     });
   }
 
   public async deleteConversation(conversationId: string) {
-    return this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete({
-      conversationId,
+    return this.request({
+      path: `/api/v1/chat/conversations/${conversationId}`,
+      method: 'DELETE',
+      secure: true,
+      format: 'json',
     });
   }
 
   public async getConversation(conversationId: string) {
-    return this.chat.getConversationApiV1ChatConversationsConversationIdGet({
-      conversationId,
+    return this.request({
+      path: `/api/v1/chat/conversations/${conversationId}`,
+      method: 'GET',
+      secure: true,
+      format: 'json',
     });
   }
 
   public async updateConversation(conversationId: string, updateData: ConversationUpdate) {
-    return this.chat.updateConversationApiV1ChatConversationsConversationIdPut({
-      conversationId,
-      conversationUpdate: updateData,
+    return this.request({
+      path: `/api/v1/chat/conversations/${conversationId}`,
+      method: 'PUT',
+      body: updateData,
+      secure: true,
+      type: 'application/json',
+      format: 'json',
+    });
+  }
+
+  // API method implementations to replace the old structure calls
+  public async loginApiV1AuthLoginPost(data: { userLogin: UserLogin }) {
+    return this.request({
+      path: '/api/v1/auth/login',
+      method: 'POST',
+      body: data.userLogin,
+      type: 'application/json',
+      format: 'json',
+    });
+  }
+
+  public async logoutApiV1AuthLogoutPost() {
+    return this.request({
+      path: '/api/v1/auth/logout',
+      method: 'POST',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async refreshTokenApiV1AuthRefreshPost(data: { tokenRefresh: any }) {
+    return this.request({
+      path: '/api/v1/auth/refresh',
+      method: 'POST',
+      body: data.tokenRefresh,
+      type: 'application/json',
+      format: 'json',
+    });
+  }
+
+  // Add commonly used API methods
+  public async listConversationsApiV1ChatConversationsGet(params: any = {}) {
+    return this.listConversations(params);
+  }
+
+  public async createConversationApiV1ChatConversationsPost(data: any) {
+    return this.createConversation(data.conversationCreate || data);
+  }
+
+  public async deleteConversationApiV1ChatConversationsConversationIdDelete(params: any) {
+    return this.deleteConversation(params.conversationId);
+  }
+
+  public async getConversationApiV1ChatConversationsConversationIdGet(params: any) {
+    return this.getConversation(params.conversationId);
+  }
+
+  public async getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(params: any) {
+    return this.request({
+      path: `/api/v1/chat/conversations/${params.conversationId}/messages`,
+      method: 'GET',
+      query: params,
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async updateConversationApiV1ChatConversationsConversationIdPut(params: any) {
+    return this.updateConversation(params.conversationId, params.conversationUpdate);
+  }
+
+  public async chatApiV1ChatChatPost(data: any) {
+    return this.request({
+      path: '/api/v1/chat/chat',
+      method: 'POST',
+      body: data,
+      secure: true,
+      type: 'application/json',
+      format: 'json',
+    });
+  }
+
+  // Provider/Model Registry methods
+  public async listProvidersApiV1ModelsProvidersGet(params: any = {}) {
+    return this.request({
+      path: '/api/v1/models/providers',
+      method: 'GET',
+      query: params,
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async createProviderApiV1ModelsProvidersPost(data: any) {
+    return this.request({
+      path: '/api/v1/models/providers',
+      method: 'POST',
+      body: data,
+      secure: true,
+      type: 'application/json',
+      format: 'json',
+    });
+  }
+
+  public async updateProviderApiV1ModelsProvidersProviderIdPut(params: any) {
+    return this.request({
+      path: `/api/v1/models/providers/${params.providerId}`,
+      method: 'PUT',
+      body: params.providerUpdate,
+      secure: true,
+      type: 'application/json',
+      format: 'json',
+    });
+  }
+
+  public async deleteProviderApiV1ModelsProvidersProviderIdDelete(params: any) {
+    return this.request({
+      path: `/api/v1/models/providers/${params.providerId}`,
+      method: 'DELETE',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost(params: any) {
+    return this.request({
+      path: `/api/v1/models/providers/${params.providerId}/set-default`,
+      method: 'POST',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async listModelsApiV1ModelsModelsGet(params: any = {}) {
+    return this.request({
+      path: '/api/v1/models/models',
+      method: 'GET',
+      query: params,
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async createModelApiV1ModelsModelsPost(data: any) {
+    return this.request({
+      path: '/api/v1/models/models',
+      method: 'POST',
+      body: data,
+      secure: true,
+      type: 'application/json',
+      format: 'json',
+    });
+  }
+
+  public async updateModelApiV1ModelsModelsModelIdPut(params: any) {
+    return this.request({
+      path: `/api/v1/models/models/${params.modelId}`,
+      method: 'PUT',
+      body: params.modelDefUpdate,
+      secure: true,
+      type: 'application/json',
+      format: 'json',
+    });
+  }
+
+  public async deleteModelApiV1ModelsModelsModelIdDelete(params: any) {
+    return this.request({
+      path: `/api/v1/models/models/${params.modelId}`,
+      method: 'DELETE',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost(params: any) {
+    return this.request({
+      path: `/api/v1/models/models/${params.modelId}/set-default`,
+      method: 'POST',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async listToolServersApiV1ToolserversServersGet(params: any = {}) {
+    return this.getToolServers();
+  }
+
+  public async getAvailableToolsApiV1ChatToolsAvailableGet() {
+    return this.request({
+      path: '/api/v1/chat/tools/available',
+      method: 'GET',
+      secure: true,
+      format: 'json',
+    });
+  }
+
+  public async getToolServerAnalyticsApiV1AnalyticsToolserversGet() {
+    return this.request({
+      path: '/api/v1/analytics/toolservers',
+      method: 'GET',
+      secure: true,
+      format: 'json',
     });
   }
 }

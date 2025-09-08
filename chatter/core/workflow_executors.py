@@ -140,7 +140,7 @@ class BaseWorkflowExecutor(ABC):
             duration_ms=duration_ms,
             success=success,
             error_type=error_type,
-            correlation_type="token",
+            correlation_id=correlation_id or "",
         )
 
 
@@ -231,7 +231,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -244,7 +244,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
                 f"Plain workflow execution failed: {str(e)}"
@@ -346,7 +346,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
 
         except Exception as e:
@@ -357,7 +357,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
                 f"Plain workflow streaming failed: {str(e)}"
@@ -466,7 +466,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -479,7 +479,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
                 f"RAG workflow execution failed: {str(e)}"
@@ -591,7 +591,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
 
         except Exception as e:
@@ -602,7 +602,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
                 f"RAG workflow streaming failed: {str(e)}"
@@ -711,7 +711,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -724,7 +724,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
                 f"Tools workflow execution failed: {str(e)}"
@@ -836,7 +836,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
 
         except Exception as e:
@@ -847,7 +847,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
                 f"Tools workflow streaming failed: {str(e)}"
@@ -963,7 +963,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -976,7 +976,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
                 f"Full workflow execution failed: {str(e)}"
@@ -1095,7 +1095,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
 
         except Exception as e:
@@ -1106,7 +1106,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_type="token",
+                correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
                 f"Full workflow streaming failed: {str(e)}"

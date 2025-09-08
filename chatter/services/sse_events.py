@@ -448,7 +448,7 @@ async def trigger_job_started(
         {
             "job_id": job_id,
             "job_name": job_name,
-            "started_at": datetime.now(UTC).isoformat(),
+            "status": "started",
         },
         user_id=user_id,
     )
@@ -466,8 +466,8 @@ async def trigger_job_completed(
         {
             "job_id": job_id,
             "job_name": job_name,
+            "status": "completed",
             "result": result,
-            "completed_at": datetime.now(UTC).isoformat(),
         },
         user_id=user_id,
     )
@@ -482,8 +482,8 @@ async def trigger_job_failed(
         {
             "job_id": job_id,
             "job_name": job_name,
+            "status": "failed",
             "error": error,
-            "failed_at": datetime.now(UTC).isoformat(),
         },
         user_id=user_id,
     )
@@ -545,7 +545,7 @@ async def trigger_document_uploaded(
         {
             "document_id": document_id,
             "filename": filename,
-            "uploaded_at": datetime.now(UTC).isoformat(),
+            "status": "uploaded",
         },
         user_id=user_id,
     )
@@ -559,8 +559,8 @@ async def trigger_document_processing_completed(
         EventType.DOCUMENT_PROCESSING_COMPLETED,
         {
             "document_id": document_id,
+            "status": "completed",
             "result": result,
-            "completed_at": datetime.now(UTC).isoformat(),
         },
         user_id=user_id,
     )
@@ -574,8 +574,8 @@ async def trigger_document_processing_failed(
         EventType.DOCUMENT_PROCESSING_FAILED,
         {
             "document_id": document_id,
+            "status": "failed",
             "error": error,
-            "failed_at": datetime.now(UTC).isoformat(),
         },
         user_id=user_id,
     )

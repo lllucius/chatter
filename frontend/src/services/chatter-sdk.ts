@@ -83,6 +83,10 @@ class ChatterSDK {
     }
   }
 
+  public getURL(): string | null {
+    return this.configuration.basePath;
+  }
+
   public setToken(token: string) {
     this.token = token;
     localStorage.setItem('chatter_access_token', token);

@@ -123,7 +123,7 @@ export class SSEEventManager {
 
       // For now, we'll use the standard EventSource and rely on the server
       // to authenticate via cookies or we'll need to implement a custom solution
-      const baseURL = (chatterSDK as any).baseURL || window.location.origin;
+      const baseURL = (chatterSDK as any).getURL() || window.location.origin;
       const url = `${baseURL}/api/v1/events/stream`;
       console.log('SSE: Connecting to', url);
 

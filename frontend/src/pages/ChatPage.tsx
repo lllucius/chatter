@@ -118,12 +118,12 @@ const ChatPage: React.FC = () => {
         chatterSDK.prompts.listPromptsApiV1PromptsGet({}),
         chatterSDK.documents.listDocumentsApiV1DocumentsGet({}),
       ]);
-      setProfiles(profilesResponse.data.profiles);
-      setPrompts(promptsResponse.data.prompts);
-      setDocuments(documentsResponse.data.documents);
+      setProfiles(profilesResponse.profiles);
+      setPrompts(promptsResponse.prompts);
+      setDocuments(documentsResponse.documents);
 
-      if (profilesResponse.data.profiles.length > 0) {
-        setSelectedProfile(profilesResponse.data.profiles[0].id);
+      if (profilesResponse.profiles.length > 0) {
+        setSelectedProfile(profilesResponse.profiles[0].id);
       }
     } catch (err: any) {
       toastService.error(err, 'Failed to load chat data');
@@ -186,7 +186,7 @@ const ChatPage: React.FC = () => {
       });
       
       // Convert messages to ExtendedChatMessage format
-      const chatMessages: ExtendedChatMessage[] = response.data.map(msg => ({
+      const chatMessages: ExtendedChatMessage[] = response.map(msg => ({
         id: msg.id,
         role: msg.role as 'user' | 'assistant' | 'system',
         content: msg.content,
@@ -420,7 +420,7 @@ const ChatPage: React.FC = () => {
           total_tokens?: number;
           response_time_ms?: number;
         };
-        const apiMessage = (response.data as { message: ApiChatMessage }).message;
+        const apiMessage = response.message as ApiChatMessage;
 
         const assistantMessage: ChatMessage = {
           id: String(apiMessage.id),
@@ -549,11 +549,11 @@ const ChatPage: React.FC = () => {
         setMessages(prev => [...prev, assistantMessage]);
         await handleStreamingResponse(sendRequest, assistantMessageId);
       } else {
-        const response = await chatterSDK.chat.chatApiV1ChatPost({ chatRequest: sendRequest });
+        const response = await chatterSDK.conversations.chatApiV1ChatChatPost({ chatRequest: sendRequest });
         const assistantMessage: ExtendedChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: response.data.content,
+          content: response.message.content,
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, assistantMessage]);

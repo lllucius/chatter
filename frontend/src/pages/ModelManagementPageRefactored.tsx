@@ -52,7 +52,7 @@ const ModelManagementPageRefactored: React.FC = () => {
       const response = await chatterSDK.modelRegistry.listProvidersApiV1ModelsProvidersGet({
         activeOnly: false,
       });
-      setProviders(response.data.providers || []);
+      setProviders(response.providers || []);
     } catch {
       // Error loading providers - this is handled elsewhere
     }
@@ -159,8 +159,8 @@ const ModelManagementPageRefactored: React.FC = () => {
         perPage: pageSize,
       });
       return {
-        items: response.data.providers || [],
-        total: response.data.total || 0,
+        items: response.providers || [],
+        total: response.total || 0,
       };
     },
 
@@ -169,7 +169,7 @@ const ModelManagementPageRefactored: React.FC = () => {
         providerCreate: data,
       });
       await loadProviders(); // Refresh providers for model form
-      return response.data;
+      return response;
     },
 
     update: async (id: string, data: ProviderUpdate) => {
@@ -178,7 +178,7 @@ const ModelManagementPageRefactored: React.FC = () => {
         providerUpdate: data,
       });
       await loadProviders(); // Refresh providers for model form
-      return response.data;
+      return response;
     },
 
     delete: async (id: string) => {
@@ -290,8 +290,8 @@ const ModelManagementPageRefactored: React.FC = () => {
         perPage: pageSize,
       });
       return {
-        items: response.data.models || [],
-        total: response.data.total || 0,
+        items: response.models || [],
+        total: response.total || 0,
       };
     },
 
@@ -299,7 +299,7 @@ const ModelManagementPageRefactored: React.FC = () => {
       const response = await chatterSDK.modelRegistry.createModelApiV1ModelsModelsPost({
         modelDefCreate: data,
       });
-      return response.data;
+      return response;
     },
 
     update: async (id: string, data: ModelDefUpdate) => {
@@ -307,7 +307,7 @@ const ModelManagementPageRefactored: React.FC = () => {
         modelId: id,
         modelDefUpdate: data,
       });
-      return response.data;
+      return response;
     },
 
     delete: async (id: string) => {

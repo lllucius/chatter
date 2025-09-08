@@ -297,7 +297,7 @@ const ABTestingPage: React.FC = () => {
           response = await chatterSDK.abTesting.completeAbTestApiV1AbTestsTestIdCompletePost({ testId: test.id });
           break;
       }
-      toastService.success(response.data.message);
+      toastService.success(response.message);
       await loadTests();
       handleCloseActionMenu();
     } catch (err: any) {

@@ -133,8 +133,8 @@ const WorkflowManagementPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await chatterSDK.chat.getWorkflowTemplatesApiV1ChatTemplatesGet();
-      if (response.data.templates) {
-        setTemplates(response.data.templates);
+      if (response.templates) {
+        setTemplates(response.templates);
       }
     } catch (error: any) {
       console.error('Failed to load workflow templates:', error);

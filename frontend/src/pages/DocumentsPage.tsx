@@ -311,7 +311,7 @@ const DocumentsPage: React.FC = () => {
       const response = await chatterSDK.documents.searchDocumentsApiV1DocumentsSearchPost({ 
         documentSearchRequest: searchRequest 
       });
-      setSearchResults(response.data.results);
+      setSearchResults(response.results);
     } catch (err: any) {
       toastService.error(err, 'Failed to search documents');
     } finally {
@@ -347,7 +347,7 @@ const DocumentsPage: React.FC = () => {
   const service: CrudService<DocumentResponse, DocumentCreateData, DocumentUpdateData> = {
     list: async (page: number, pageSize: number) => {
       const response = await chatterSDK.documents.listDocumentsApiV1DocumentsGet({});
-      const documents = response.data.documents || [];
+      const documents = response.documents || [];
       
       // Implement client-side pagination for now
       const startIndex = page * pageSize;

@@ -157,7 +157,7 @@ const AdministrationPage: React.FC = () => {
     try {
       setDataLoading(true);
       const response = await chatterSDK.jobs.listJobsApiV1JobsGet({});
-      const newJobs = response.data.jobs || [];
+      const newJobs = response.jobs || [];
       newJobs.forEach(job => {
         const previousState = lastJobStates.get(job.id);
         if (previousState && previousState !== job.status) {
@@ -197,7 +197,7 @@ const AdministrationPage: React.FC = () => {
     try {
       setDataLoading(true);
       const response = await chatterSDK.dataManagement.listBackupsApiV1DataBackupsGet({});
-      const items = response.data.backups || [];
+      const items = response.backups || [];
       setBackups(items);
     } catch (error: any) {
       console.error('Failed to load backups:', error);
@@ -210,7 +210,7 @@ const AdministrationPage: React.FC = () => {
   const loadPlugins = useCallback(async () => {
     try {
       const response = await chatterSDK.plugins.listPluginsApiV1PluginsGet({});
-      setPlugins(response.data.plugins || []);
+      setPlugins(response.plugins || []);
     } catch (error: any) {
       console.error('Failed to load plugins:', error);
     }

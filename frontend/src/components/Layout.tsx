@@ -46,7 +46,7 @@ import {
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 import { ThemeContext } from '../App';
 import { RightSidebarProvider, useRightSidebar } from './RightSidebarContext';
 
@@ -192,7 +192,7 @@ const LayoutFrame: React.FC = () => {
   };
 
   const handleLogout = () => {
-    chatterSDK.logout();
+    chatterClient.logout();
     navigate('/login');
     handleProfileMenuClose();
   };

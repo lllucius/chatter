@@ -8,7 +8,7 @@ import {
   createTypeChipRenderer,
   createDateRenderer
 } from '../components/CrudRenderers';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 import { PromptResponse, PromptCreate, PromptUpdate } from '../sdk';
 
 const PromptsPageRefactored: React.FC = () => {
@@ -76,7 +76,7 @@ const PromptsPageRefactored: React.FC = () => {
   // Define service methods
   const service: CrudService<PromptResponse, PromptCreate, PromptUpdate> = {
     list: async (page: number, pageSize: number) => {
-      const response = await chatterSDK.prompts.listPromptsApiV1PromptsGet({
+      const response = await chatterClient.prompts.listPromptsApiV1PromptsGet({
         page: page + 1, // API is 1-based, component is 0-based
         per_page: pageSize,
       });
@@ -87,14 +87,14 @@ const PromptsPageRefactored: React.FC = () => {
     },
 
     create: async (data: PromptCreate) => {
-      const response = await chatterSDK.prompts.createPromptApiV1PromptsPost({
+      const response = await chatterClient.prompts.createPromptApiV1PromptsPost({
         promptCreate: data,
       });
       return response;
     },
 
     update: async (id: string, data: PromptUpdate) => {
-      const response = await chatterSDK.prompts.updatePromptApiV1PromptsPromptIdPut({
+      const response = await chatterClient.prompts.updatePromptApiV1PromptsPromptIdPut({
         promptId: id,
         promptUpdate: data,
       });
@@ -102,7 +102,7 @@ const PromptsPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await chatterSDK.prompts.deletePromptApiV1PromptsPromptIdDelete({
+      await chatterClient.prompts.deletePromptApiV1PromptsPromptIdDelete({
         promptId: id,
       });
     },

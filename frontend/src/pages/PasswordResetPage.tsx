@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Email, VpnKey, CheckCircle } from '@mui/icons-material';
 import { useForm } from '../hooks/useForm';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 import { toastService } from '../services/toast-service';
 
 interface RequestResetFormValues {
@@ -48,7 +48,7 @@ const PasswordResetPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        await chatterSDK.requestPasswordReset(values.email);
+        await chatterClient.requestPasswordReset(values.email);
         setEmail(values.email);
         setStep('confirm');
         toastService.success('Password reset instructions sent to your email');
@@ -82,7 +82,7 @@ const PasswordResetPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        await chatterSDK.confirmPasswordReset({
+        await chatterClient.confirmPasswordReset({
           token: values.token,
           new_password: values.newPassword,
         });

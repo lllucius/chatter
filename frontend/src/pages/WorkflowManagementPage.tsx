@@ -65,7 +65,7 @@ import {
   ContentCopy as CopyIcon,
   Tune as TuneIcon,
 } from '@mui/icons-material';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 import { toastService } from '../services/toast-service';
 import { WorkflowTemplateInfo, AvailableToolsResponse, ChatRequest } from '../sdk';
 import WorkflowEditor from '../components/workflow/WorkflowEditor';
@@ -132,7 +132,7 @@ const WorkflowManagementPage: React.FC = () => {
   const loadWorkflowTemplates = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await chatterSDK.chat.getWorkflowTemplatesApiV1ChatTemplatesGet();
+      const response = await chatterClient.chat.getWorkflowTemplatesApiV1ChatTemplatesGet();
       if (response.templates) {
         setTemplates(response.templates);
       }
@@ -146,7 +146,7 @@ const WorkflowManagementPage: React.FC = () => {
 
   const loadAvailableTools = useCallback(async () => {
     try {
-      const response = await chatterSDK.chat.getAvailableToolsApiV1ChatToolsAvailableGet();
+      const response = await chatterClient.chat.getAvailableToolsApiV1ChatToolsAvailableGet();
       setAvailableTools(response.data);
     } catch (error: any) {
       console.error('Failed to load available tools:', error);
@@ -179,7 +179,7 @@ const WorkflowManagementPage: React.FC = () => {
         workflow: 'full' as any,
       };
 
-      const response = await chatterSDK.chat.chatWithTemplateApiV1ChatTemplateTemplateNamePost(
+      const response = await chatterClient.chat.chatWithTemplateApiV1ChatTemplateTemplateNamePost(
         templateName,
         { chatRequest }
       );

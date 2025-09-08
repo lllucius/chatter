@@ -5,9 +5,9 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import ABTestingPage from '../ABTestingPage';
 
-// Mock the chatterSDK
+// Mock the chatterClient
 vi.mock('../../services/chatter-sdk', () => ({
-  chatterSDK: {
+  chatterClient: {
     abTesting: {
       listAbTestsApiV1AbTestsGet: vi.fn().mockResolvedValue({
         data: {

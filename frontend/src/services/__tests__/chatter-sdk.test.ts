@@ -1,67 +1,67 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { chatterSDK } from '../chatter-sdk';
+import { chatterClient } from '../chatter-sdk';
 
 describe('ChatterSDK', () => {
   beforeEach(() => {
     // Clear any stored tokens before each test
     localStorage.clear();
-    chatterSDK.clearToken();
+    chatterClient.clearToken();
   });
 
   it('should be properly initialized', () => {
-    expect(chatterSDK).toBeDefined();
-    expect(chatterSDK.auth).toBeDefined();
-    expect(chatterSDK.agents).toBeDefined();
-    expect(chatterSDK.modelRegistry).toBeDefined();
-    expect(chatterSDK.toolServers).toBeDefined();
-    expect(chatterSDK.conversations).toBeDefined();
+    expect(chatterClient).toBeDefined();
+    expect(chatterClient.auth).toBeDefined();
+    expect(chatterClient.agents).toBeDefined();
+    expect(chatterClient.modelRegistry).toBeDefined();
+    expect(chatterClient.toolServers).toBeDefined();
+    expect(chatterClient.conversations).toBeDefined();
   });
 
   it('should handle authentication state correctly', () => {
-    expect(chatterSDK.isAuthenticated()).toBe(false);
-    expect(chatterSDK.getToken()).toBeNull();
+    expect(chatterClient.isAuthenticated()).toBe(false);
+    expect(chatterClient.getToken()).toBeNull();
 
     const testToken = 'test-token-123';
-    chatterSDK.setToken(testToken);
+    chatterClient.setToken(testToken);
     
-    expect(chatterSDK.isAuthenticated()).toBe(true);
-    expect(chatterSDK.getToken()).toBe(testToken);
+    expect(chatterClient.isAuthenticated()).toBe(true);
+    expect(chatterClient.getToken()).toBe(testToken);
     expect(localStorage.getItem('chatter_access_token')).toBe(testToken);
   });
 
   it('should clear authentication correctly', () => {
     const testToken = 'test-token-123';
-    chatterSDK.setToken(testToken);
-    expect(chatterSDK.isAuthenticated()).toBe(true);
+    chatterClient.setToken(testToken);
+    expect(chatterClient.isAuthenticated()).toBe(true);
 
-    chatterSDK.clearToken();
+    chatterClient.clearToken();
     
-    expect(chatterSDK.isAuthenticated()).toBe(false);
-    expect(chatterSDK.getToken()).toBeNull();
+    expect(chatterClient.isAuthenticated()).toBe(false);
+    expect(chatterClient.getToken()).toBeNull();
     expect(localStorage.getItem('chatter_access_token')).toBeNull();
   });
 
   it('should have convenience methods for tool servers', () => {
-    expect(typeof chatterSDK.getToolServers).toBe('function');
-    expect(typeof chatterSDK.createToolServer).toBe('function');
-    expect(typeof chatterSDK.updateToolServer).toBe('function');
-    expect(typeof chatterSDK.enableToolServer).toBe('function');
-    expect(typeof chatterSDK.disableToolServer).toBe('function');
+    expect(typeof chatterClient.getToolServers).toBe('function');
+    expect(typeof chatterClient.createToolServer).toBe('function');
+    expect(typeof chatterClient.updateToolServer).toBe('function');
+    expect(typeof chatterClient.enableToolServer).toBe('function');
+    expect(typeof chatterClient.disableToolServer).toBe('function');
   });
 
   it('should have convenience methods for conversations', () => {
-    expect(typeof chatterSDK.listConversations).toBe('function');
-    expect(typeof chatterSDK.createConversation).toBe('function');
-    expect(typeof chatterSDK.deleteConversation).toBe('function');
-    expect(typeof chatterSDK.getConversation).toBe('function');
-    expect(typeof chatterSDK.updateConversation).toBe('function');
+    expect(typeof chatterClient.listConversations).toBe('function');
+    expect(typeof chatterClient.createConversation).toBe('function');
+    expect(typeof chatterClient.deleteConversation).toBe('function');
+    expect(typeof chatterClient.getConversation).toBe('function');
+    expect(typeof chatterClient.updateConversation).toBe('function');
   });
 
   it('should have conversations object with API methods', () => {
-    expect(chatterSDK.conversations).toBeDefined();
-    expect(typeof chatterSDK.conversations.listConversationsApiV1ChatConversationsGet).toBe('function');
-    expect(typeof chatterSDK.conversations.createConversationApiV1ChatConversationsPost).toBe('function');
-    expect(typeof chatterSDK.conversations.deleteConversationApiV1ChatConversationsConversationIdDelete).toBe('function');
-    expect(typeof chatterSDK.conversations.getConversationApiV1ChatConversationsConversationIdGet).toBe('function');
+    expect(chatterClient.conversations).toBeDefined();
+    expect(typeof chatterClient.conversations.listConversationsApiV1ChatConversationsGet).toBe('function');
+    expect(typeof chatterClient.conversations.createConversationApiV1ChatConversationsPost).toBe('function');
+    expect(typeof chatterClient.conversations.deleteConversationApiV1ChatConversationsConversationIdDelete).toBe('function');
+    expect(typeof chatterClient.conversations.getConversationApiV1ChatConversationsConversationIdGet).toBe('function');
   });
 });

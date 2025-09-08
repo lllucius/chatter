@@ -26,7 +26,7 @@ export class SSEEventManager {
   private reconnectTimeouts: Set<NodeJS.Timeout> = new Set();
 
   /**
-   * Connect to the SSE stream using the current authentication from chatterSDK
+   * Connect to the SSE stream using the current authentication from chatterClient
    */
   public connect(): void {
     if (!chatterClient.isAuthenticated()) {

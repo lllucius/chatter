@@ -34,7 +34,7 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 import { toastService } from '../services/toast-service';
 import { useForm } from '../hooks/useForm';
 import PageLayout from '../components/PageLayout';
@@ -88,7 +88,7 @@ const UserSettingsPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        const updatedProfile = await chatterSDK.updateProfile(values);
+        const updatedProfile = await chatterClient.updateProfile(values);
         setUserProfile({ ...userProfile!, ...updatedProfile });
         toastService.success('Profile updated successfully');
       } catch (error: any) {
@@ -125,7 +125,7 @@ const UserSettingsPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        await chatterSDK.changePassword({
+        await chatterClient.changePassword({
           current_password: values.current_password,
           new_password: values.new_password,
         });
@@ -145,7 +145,7 @@ const UserSettingsPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        const newKey = await chatterSDK.createApiKey(values);
+        const newKey = await chatterClient.createApiKey(values);
         setApiKeys([...apiKeys, newKey]);
         toastService.success('API key created successfully');
         setApiKeyDialogOpen(false);
@@ -159,7 +159,7 @@ const UserSettingsPage: React.FC = () => {
 
   const loadUserProfile = async () => {
     try {
-      const profile = await chatterSDK.getCurrentUser();
+      const profile = await chatterClient.getCurrentUser();
       setUserProfile(profile);
       profileForm.setValues({
         full_name: profile.full_name || '',
@@ -173,7 +173,7 @@ const UserSettingsPage: React.FC = () => {
   const loadApiKeys = async () => {
     try {
       setApiKeysLoading(true);
-      const keys = await chatterSDK.listApiKeys();
+      const keys = await chatterClient.listApiKeys();
       setApiKeys(keys);
     } catch (error: any) {
       toastService.error('Failed to load API keys: ' + error.message);
@@ -184,7 +184,7 @@ const UserSettingsPage: React.FC = () => {
 
   const handleRevokeApiKey = async (keyId: string) => {
     try {
-      await chatterSDK.revokeApiKey(keyId);
+      await chatterClient.revokeApiKey(keyId);
       setApiKeys(apiKeys.filter(key => key.id !== keyId));
       toastService.success('API key revoked successfully');
     } catch (error: any) {
@@ -194,7 +194,7 @@ const UserSettingsPage: React.FC = () => {
 
   const handleDeactivateAccount = async () => {
     try {
-      await chatterSDK.deactivateAccount();
+      await chatterClient.deactivateAccount();
       toastService.success('Account deactivated successfully');
       // The SDK will handle logout and redirect
     } catch (error: any) {

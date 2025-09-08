@@ -330,4 +330,4 @@ class ChatterSDK {
 }
 
 // Create and export a singleton instance
-export const chatterSDK = new ChatterSDK();
+export const chatterClient = new ChatterSDK();

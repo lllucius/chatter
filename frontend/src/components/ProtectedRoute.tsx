@@ -1,13 +1,13 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const isAuthenticated = chatterSDK.isAuthenticated();
+  const isAuthenticated = chatterClient.isAuthenticated();
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;

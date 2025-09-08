@@ -31,7 +31,7 @@ import {
   Clear as ClearIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 import { toastService } from '../services/toast-service';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from '../sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
@@ -114,9 +114,9 @@ const ChatPage: React.FC = () => {
   const loadData = async () => {
     try {
       const [profilesResponse, promptsResponse, documentsResponse] = await Promise.all([
-        chatterSDK.profiles.listProfilesApiV1ProfilesGet({}),
-        chatterSDK.prompts.listPromptsApiV1PromptsGet({}),
-        chatterSDK.documents.listDocumentsApiV1DocumentsGet({}),
+        chatterClient.profiles.listProfilesApiV1ProfilesGet({}),
+        chatterClient.prompts.listPromptsApiV1PromptsGet({}),
+        chatterClient.documents.listDocumentsApiV1DocumentsGet({}),
       ]);
       setProfiles(profilesResponse.profiles);
       setPrompts(promptsResponse.prompts);
@@ -148,7 +148,7 @@ const ChatPage: React.FC = () => {
         enable_retrieval: enableRetrieval,
         system_prompt: systemPrompt,
       };
-      const response = await chatterSDK.conversations.createConversationApiV1ChatConversationsPost({
+      const response = await chatterClient.chat.createConversationApiV1ChatConversationsPost({
         conversationCreate: createRequest,
       });
       setCurrentConversation(response.data);
@@ -181,7 +181,7 @@ const ChatPage: React.FC = () => {
       setCurrentConversation(conversation);
       
       // Load messages for this conversation
-      const response = await chatterSDK.conversations.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet({
+      const response = await chatterClient.chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet({
         conversationId: conversation.id
       });
       
@@ -284,90 +284,18 @@ const ChatPage: React.FC = () => {
       };
       setMessages((prev) => [...prev, assistantMessage]);
 
-      // Use the SDK's streaming method
-      const reader = await chatterSDK.chatStream(chatRequest);
-      const decoder = new TextDecoder();
-      let buffer = '';
+      // Use the SDK's chat method
+      const response = await chatterClient.chat.chatApiV1ChatChatPost({ chatRequest });
+      
+      // Update the assistant message with the response
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? { ...msg, content: response.message.content }
+            : msg
+        )
+      );
 
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        // SSE frames are typically separated by \n\n; we split by \n and keep remainder in buffer
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (let rawLine of lines) {
-          const line = rawLine.trim();
-          if (!line || line.startsWith(':')) continue; // skip comments/empty
-
-          // support both "data: ..." and raw JSON per line
-          let payload = line.startsWith('data:') ? line.slice(5).trim() :
-                        line.startsWith('data ') ? line.slice(4).trim() :
-                        line;
-
-          if (!payload) continue;
-          if (payload === '[DONE]') {
-            buffer = '';
-            return;
-          }
-
-          try {
-            const chunk = JSON.parse(payload);
-
-            // Accept multiple possible shapes
-            if (chunk.type === 'token' || chunk.type === 'delta') {
-              const textDelta =
-                chunk.content ??
-                chunk.delta ??
-                chunk.choices?.[0]?.delta?.content ??
-                '';
-
-              if (textDelta) {
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === messageId ? { ...msg, content: msg.content + textDelta } : msg
-                  )
-                );
-              }
-            } else if (chunk.type === 'message' && chunk.message?.content) {
-              setMessages((prev) =>
-                prev.map((msg) =>
-                  msg.id === messageId ? { ...msg, content: msg.content + chunk.message.content } : msg
-                )
-              );
-            } else if (chunk.type === 'usage' || chunk.usage) {
-              const usage = chunk.usage || {};
-              const parts: string[] = [];
-              if (typeof usage.totalTokens === 'number') parts.push(`Tokens: ${usage.totalTokens}`);
-              if (typeof usage.responseTimeMs === 'number') parts.push(`Response time: ${usage.responseTimeMs}ms`);
-              if (parts.length) {
-                const tokenMessage: ExtendedChatMessage = {
-                  id: `token-${chunk.conversationId || messageId}`,
-                  role: 'system',
-                  content: `📊 ${parts.join(' | ')}`,
-                  timestamp: new Date(),
-                };
-                setMessages((prev) => [...prev, tokenMessage]);
-              }
-            } else if (chunk.type === 'error' || chunk.error) {
-              throw new Error(chunk.error || 'Streaming error');
-            } else if (chunk.event === 'done' || chunk.type === 'end') {
-              return;
-            }
-          } catch {
-            // Not JSON or partial line; ignore until buffer completes
-            // console.warn('Failed to parse streaming chunk:', parseError, payload);
-          }
-        }
-      }
-    } catch (error) {
-      console.error('Streaming error:', error);
-      throw error;
-    }
   };
 
   const sendMessage = async () => {
@@ -410,7 +338,7 @@ const ChatPage: React.FC = () => {
         await handleStreamingResponse(sendRequest);
       } else {
         // Use regular API
-        const response = await chatterSDK.conversations.chatApiV1ChatChatPost({ chatRequest: sendRequest });
+        const response = await chatterClient.chat.chatApiV1ChatChatPost({ chatRequest: sendRequest });
 
         // Narrow the SDK's loosely-typed response
         type ApiChatMessage = {
@@ -549,7 +477,7 @@ const ChatPage: React.FC = () => {
         setMessages(prev => [...prev, assistantMessage]);
         await handleStreamingResponse(sendRequest, assistantMessageId);
       } else {
-        const response = await chatterSDK.conversations.chatApiV1ChatChatPost({ chatRequest: sendRequest });
+        const response = await chatterClient.chat.chatApiV1ChatChatPost({ chatRequest: sendRequest });
         const assistantMessage: ExtendedChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',

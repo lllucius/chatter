@@ -39,7 +39,7 @@ import {
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 import { ConversationResponse, MessageResponse } from '../sdk';
 import { useApi } from '../hooks/useApi';
 import CustomScrollbar from '../components/CustomScrollbar';
@@ -115,7 +115,7 @@ ConversationTableRow.displayName = 'ConversationTableRow';
 const ConversationsPage: React.FC = () => {
   // Use custom API hook for conversations
   const conversationsApi = useApi(
-    () => chatterSDK.conversations.listConversationsApiV1ChatConversationsGet({}),
+    () => chatterClient.conversations.listConversationsApiV1ChatConversationsGet({}),
     { immediate: true }
   );
 
@@ -140,7 +140,7 @@ const ConversationsPage: React.FC = () => {
 
     try {
       const response =
-        await chatterSDK.conversations.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(
+        await chatterClient.conversations.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(
           { conversationId: conversation.id }
         );
       const messages = response.data;
@@ -160,7 +160,7 @@ const ConversationsPage: React.FC = () => {
 
     try {
       // Use the available delete conversation API
-      await chatterSDK.chat.deleteConversationApiV1ChatConversationsConversationIdDelete({
+      await chatterClient.chat.deleteConversationApiV1ChatConversationsConversationIdDelete({
         conversationId: conversationId
       });
       

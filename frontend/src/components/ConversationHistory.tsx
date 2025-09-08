@@ -33,7 +33,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 import { ConversationResponse } from '../sdk';
 
 interface ConversationHistoryProps {
@@ -60,7 +60,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
     try {
       setLoading(true);
       setError('');
-      const response = await chatterSDK.conversations.listConversationsApiV1ConversationsGet({});
+      const response = await chatterClient.conversations.listConversationsApiV1ConversationsGet({});
       setConversations(response.data.conversations || []);
     } catch {
       setError('Failed to load conversation history');
@@ -95,7 +95,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
     if (!actionConversation) return;
     
     try {
-      await chatterSDK.conversations.deleteConversationApiV1ConversationsConversationIdDelete({
+      await chatterClient.conversations.deleteConversationApiV1ConversationsConversationIdDelete({
         conversationId: actionConversation.id
       });
       setConversations(prev => prev.filter(c => c.id !== actionConversation.id));

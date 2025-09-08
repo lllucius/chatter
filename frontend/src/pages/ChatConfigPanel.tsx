@@ -30,7 +30,7 @@ import {
 } from '@mui/icons-material';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse } from '../sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
-import { chatterSDK } from '../services/chatter-sdk';
+import { chatterClient } from '../sdk/client';
 
 interface Props {
   profiles: ProfileResponse[];
@@ -96,7 +96,7 @@ const ChatConfigPanel: React.FC<Props> = ({
   const loadConversations = useCallback(async () => {
     setLoadingConversations(true);
     try {
-      const response = await chatterSDK.conversations.listConversationsApiV1ChatConversationsGet({
+      const response = await chatterClient.conversations.listConversationsApiV1ChatConversationsGet({
         limit: 20,
         sortBy: 'updated_at',
         sortOrder: 'desc'

@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, renderHook, waitFor } from '@testing-library/react';
+import { render, renderHook, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useApi } from '../useApi';
 
@@ -71,8 +71,10 @@ describe('useApi hook', () => {
       useApi(mockApiCall, { immediate: false })
     );
 
-    // Manually execute
-    await result.current.execute();
+    // Manually execute wrapped in act
+    await act(async () => {
+      await result.current.execute();
+    });
 
     // Wait for the async operation to complete
     await waitFor(() => {
@@ -98,10 +100,14 @@ describe('useApi hook', () => {
       return <div>{api.data?.data || 'loading'}</div>;
     };
 
-    render(<TestComponent />);
+    await act(async () => {
+      render(<TestComponent />);
+    });
 
     // Wait for initial call and any potential loop
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    });
 
     // Should only make 1 call, not loop infinitely
     expect(callCount).toBe(1);
@@ -146,7 +152,9 @@ describe('useApi hook', () => {
       );
     };
 
-    render(<MockDashboardPage />);
+    await act(async () => {
+      render(<MockDashboardPage />);
+    });
 
     // Wait for the component to settle
     await waitFor(() => {
@@ -154,7 +162,9 @@ describe('useApi hook', () => {
     }, { timeout: 1000 });
 
     // Wait additional time to ensure no more calls are made
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    });
 
     // Should still only be 1 call
     expect(callCount).toBe(1);

@@ -81,8 +81,8 @@ const PromptsPageRefactored: React.FC = () => {
         per_page: pageSize,
       });
       return {
-        items: response.data.prompts || [],
-        total: response.data.total || 0,
+        items: response.prompts || [],
+        total: response.totalCount || 0,
       };
     },
 
@@ -90,7 +90,7 @@ const PromptsPageRefactored: React.FC = () => {
       const response = await chatterSDK.prompts.createPromptApiV1PromptsPost({
         promptCreate: data,
       });
-      return response.data;
+      return response;
     },
 
     update: async (id: string, data: PromptUpdate) => {
@@ -98,7 +98,7 @@ const PromptsPageRefactored: React.FC = () => {
         promptId: id,
         promptUpdate: data,
       });
-      return response.data;
+      return response;
     },
 
     delete: async (id: string) => {

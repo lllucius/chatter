@@ -101,7 +101,7 @@ const ChatConfigPanel: React.FC<Props> = ({
         sortBy: 'updated_at',
         sortOrder: 'desc'
       });
-      setConversations(response.data.conversations || []);
+      setConversations(response.conversations || []);
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console

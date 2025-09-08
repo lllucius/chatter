@@ -22,13 +22,13 @@ const ProfilesPageRefactored: React.FC = () => {
       render: createNameWithDescriptionRenderer<ProfileResponse>(),
     },
     {
-      id: 'llm_provider',
+      id: 'llmProvider',
       label: 'Provider',
       width: '120px',
       render: createCategoryChipRenderer<ProfileResponse>('primary', 'outlined'),
     },
     {
-      id: 'llm_model',
+      id: 'llmModel',
       label: 'Model',
       width: '180px',
       render: createMonospaceTextRenderer<ProfileResponse>(),
@@ -40,10 +40,10 @@ const ProfilesPageRefactored: React.FC = () => {
       render: createCategoryChipRenderer<ProfileResponse>('secondary', 'outlined'),
     },
     {
-      id: 'max_tokens',
+      id: 'maxTokens',
       label: 'Max Tokens',
       width: '120px',
-      render: (value: number) => (
+      render: (value?: number) => (
         value ? (
           <Typography variant="body2">
             {value.toLocaleString()}
@@ -56,10 +56,10 @@ const ProfilesPageRefactored: React.FC = () => {
       ),
     },
     {
-      id: 'created_at',
+      id: 'createdAt',
       label: 'Created',
       width: '140px',
-      render: (value) => value ? format(new Date(value), 'MMM dd, yyyy') : '',
+      render: (value: Date) => value ? format(value, 'MMM dd, yyyy') : '',
     },
   ];
 
@@ -80,8 +80,8 @@ const ProfilesPageRefactored: React.FC = () => {
     list: async () => {
       const response = await chatterSDK.profiles.listProfilesApiV1ProfilesGet({});
       return {
-        items: response.data.profiles || [],
-        total: response.data.profiles?.length || 0,
+        items: response.profiles || [],
+        total: response.totalCount || 0,
       };
     },
 
@@ -89,7 +89,7 @@ const ProfilesPageRefactored: React.FC = () => {
       const response = await chatterSDK.profiles.createProfileApiV1ProfilesPost({
         profileCreate: data,
       });
-      return response.data;
+      return response;
     },
 
     update: async (id: string, data: ProfileUpdate) => {
@@ -97,7 +97,7 @@ const ProfilesPageRefactored: React.FC = () => {
         profileId: id,
         profileUpdate: data,
       });
-      return response.data;
+      return response;
     },
 
     delete: async (id: string) => {

@@ -1,6 +1,6 @@
 # chatter_sdk.ModelRegistryApi
 
-All URIs are relative to *http://localhost*
+All URIs are relative to *http://localhost:8000*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
@@ -45,10 +45,10 @@ from chatter_sdk.models.embedding_space_with_model import EmbeddingSpaceWithMode
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -125,10 +125,10 @@ from chatter_sdk.models.model_def_with_provider import ModelDefWithProvider
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -205,10 +205,10 @@ from chatter_sdk.models.provider_create import ProviderCreate
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -284,10 +284,10 @@ from chatter_sdk.models.embedding_space_delete_response import EmbeddingSpaceDel
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -363,10 +363,10 @@ from chatter_sdk.models.model_delete_response import ModelDeleteResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -442,10 +442,10 @@ from chatter_sdk.models.provider_delete_response import ProviderDeleteResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -521,10 +521,10 @@ from chatter_sdk.models.embedding_space_with_model import EmbeddingSpaceWithMode
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -596,10 +596,10 @@ from chatter_sdk.models.model_type import ModelType
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -676,10 +676,10 @@ from chatter_sdk.models.provider import Provider
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -755,10 +755,10 @@ from chatter_sdk.models.embedding_space_with_model import EmbeddingSpaceWithMode
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -834,10 +834,10 @@ from chatter_sdk.models.model_def_with_provider import ModelDefWithProvider
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -913,10 +913,10 @@ from chatter_sdk.models.provider import Provider
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -992,10 +992,10 @@ from chatter_sdk.models.embedding_space_list import EmbeddingSpaceList
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -1078,10 +1078,10 @@ from chatter_sdk.models.model_type import ModelType
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -1165,10 +1165,10 @@ from chatter_sdk.models.provider_list import ProviderList
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -1248,10 +1248,10 @@ from chatter_sdk.models.embedding_space_default_response import EmbeddingSpaceDe
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -1327,10 +1327,10 @@ from chatter_sdk.models.model_default_response import ModelDefaultResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -1407,10 +1407,10 @@ from chatter_sdk.models.provider_default_response import ProviderDefaultResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -1489,10 +1489,10 @@ from chatter_sdk.models.embedding_space_with_model import EmbeddingSpaceWithMode
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -1571,10 +1571,10 @@ from chatter_sdk.models.model_def_with_provider import ModelDefWithProvider
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -1653,10 +1653,10 @@ from chatter_sdk.models.provider_update import ProviderUpdate
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
